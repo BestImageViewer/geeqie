@@ -2007,7 +2007,7 @@ static void file_util_warn_op_in_progress(const gchar *title)
 
 static void file_util_details_dialog_close_cb(GtkWidget *, gpointer data)
 {
-	gq_gtk_widget_destroy(static_cast<GtkWidget *>(data));
+	gtk_window_destroy(GTK_WINDOW(data));
 }
 
 static void file_util_details_dialog_destroy_cb(GtkWidget *widget, gpointer data)

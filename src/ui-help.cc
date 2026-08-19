@@ -141,14 +141,14 @@ void help_window_load_text(GtkWidget *text, const gchar *path)
 
 gboolean help_window_delete_cb(GtkWidget *widget, gpointer)
 {
-	gq_gtk_widget_destroy(widget);
+	gtk_window_destroy(GTK_WINDOW(widget));
 	return TRUE;
 }
 
 void help_window_close(GtkWidget *, gpointer data)
 {
 	auto window = static_cast<GtkWidget *>(data);
-	gq_gtk_widget_destroy(window);
+	gtk_window_destroy(GTK_WINDOW(window));
 }
 
 } // namespace

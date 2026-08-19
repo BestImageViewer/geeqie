@@ -249,7 +249,7 @@ static void advanced_exif_close_cb(GSimpleAction *, GVariant *, gpointer data)
 	advanced_exif_window_get_geometry(ew);
 	file_data_unref(ew->fd);
 
-	gq_gtk_widget_destroy(ew->window);
+	gtk_window_destroy(GTK_WINDOW(ew->window));
 
 	g_free(ew);
 }
@@ -330,7 +330,7 @@ static void exif_window_help_cb(GtkWidget *, gpointer)
 
 static void exif_window_close(ExifWin *ew)
 {
-	gq_gtk_widget_destroy(ew->window);
+	gtk_window_destroy(GTK_WINDOW(ew->window));
 }
 
 static void exif_window_close_cb(GtkWidget *, gpointer data)

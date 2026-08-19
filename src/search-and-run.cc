@@ -168,7 +168,7 @@ void search_and_run_destroy(SarData *sar)
 
 	GtkWidget *window = sar->window;
 	delete sar;
-	gq_gtk_widget_destroy(window);
+	gtk_window_destroy(GTK_WINDOW(window));
 }
 
 GAction *lookup_action_for_detailed_name(SarData *sar, const gchar *detailed_action_name, GVariant **target)

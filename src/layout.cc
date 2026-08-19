@@ -2357,7 +2357,7 @@ static void layout_config_close_cb(GtkWidget *, gpointer data)
 {
 	auto lc = static_cast<LayoutConfig *>(data);
 
-	gq_gtk_widget_destroy(lc->configwindow);
+	gtk_window_destroy(GTK_WINDOW(lc->configwindow));
 	free_layout_options_content(lc->options);
 	g_free(lc);
 }
@@ -2601,7 +2601,7 @@ void layout_free(LayoutWindow *lw)
 		}
 
 	g_object_set_data(G_OBJECT(lw->window), "layout-window", nullptr);
-	gq_gtk_widget_destroy(lw->window);
+	gtk_window_destroy(GTK_WINDOW(lw->window));
 
 	if (lw->split_image_sizegroup) g_object_unref(lw->split_image_sizegroup);
 

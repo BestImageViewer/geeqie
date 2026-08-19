@@ -2859,7 +2859,7 @@ static void search_window_close_cb(GSimpleAction *, GVariant *, gpointer data)
 
 	search_window_get_geometry(sd);
 
-	gq_gtk_widget_destroy(sd->ui.window);
+	gtk_window_destroy(GTK_WINDOW(sd->ui.window));
 }
 
 static void search_window_close_button_cb(GtkWidget *, gpointer data)
@@ -2868,7 +2868,7 @@ static void search_window_close_button_cb(GtkWidget *, gpointer data)
 
 	search_window_get_geometry(sd);
 
-	gq_gtk_widget_destroy(sd->ui.window);
+	gtk_window_destroy(GTK_WINDOW(sd->ui.window));
 }
 
 static void search_window_help_button_cb(GtkWidget *, gpointer)
@@ -2887,7 +2887,7 @@ static gboolean search_window_delete_cb(GtkWidget *, gpointer data)
 
 	search_window_get_geometry(sd);
 
-	gq_gtk_widget_destroy(sd->ui.window);
+	gtk_window_destroy(GTK_WINDOW(sd->ui.window));
 
 	return TRUE;
 }

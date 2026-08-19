@@ -253,14 +253,14 @@ static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint
 {
 	if ((keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter || keyval == GDK_KEY_Escape))
 		{
-		gq_gtk_widget_destroy(static_cast<GtkWidget *>(data));
+		gtk_window_destroy(GTK_WINDOW(data));
 		}
 }
 
 static gboolean expander_height_cb(GtkEventControllerKey *controller, guint, guint, GdkModifierType, gpointer)
 {
 	GtkWidget *window = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
-	gq_gtk_widget_destroy(window);
+	gtk_window_destroy(GTK_WINDOW(window));
 
 	return TRUE;
 }

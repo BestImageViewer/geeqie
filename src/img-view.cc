@@ -721,7 +721,7 @@ static void view_window_close(ViewWindow *vw)
 {
 	view_slideshow_stop(vw);
 	view_fullscreen_toggle(vw, TRUE);
-	gq_gtk_widget_destroy(vw->window);
+	gtk_window_destroy(GTK_WINDOW(vw->window));
 }
 
 static gboolean view_window_delete_cb(GtkWidget *, gpointer data)

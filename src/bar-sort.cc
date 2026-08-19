@@ -451,7 +451,7 @@ static void bar_sort_set_selection_cb(GtkWidget *button, gpointer data)
 
 static void new_collection_file_save_failed_cb(GtkDialog *dialog, gint, gpointer)
 {
-	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
+	gtk_window_destroy(GTK_WINDOW(dialog));
 }
 
 static gboolean save_new_collection(GFile *file, gpointer data)

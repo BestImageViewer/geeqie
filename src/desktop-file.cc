@@ -119,7 +119,7 @@ void editor_window_close_cb(GtkWidget *, gpointer data)
 	auto ew = static_cast<EditorWindow *>(data);
 
 	g_free(ew->desktop_name);
-	gq_gtk_widget_destroy(ew->window);
+	gtk_window_destroy(GTK_WINDOW(ew->window));
 	g_free(ew);
 }
 
@@ -266,7 +266,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 void editor_list_window_close_cb(GtkWidget *, gpointer)
 {
-	gq_gtk_widget_destroy(editor_list_window->window);
+	gtk_window_destroy(GTK_WINDOW(editor_list_window->window));
 	g_free(editor_list_window);
 	editor_list_window = nullptr;
 }

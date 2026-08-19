@@ -3864,7 +3864,7 @@ void dupe_window_close(DupeWindow *dw)
 
 	dupe_window_list = g_list_remove(dupe_window_list, dw);
 	g_object_set_data(G_OBJECT(dw->window), DUPE_WINDOW_DATA_KEY, nullptr);
-	gq_gtk_widget_destroy(dw->window);
+	gtk_window_destroy(GTK_WINDOW(dw->window));
 
 	g_list_free(dw->dupes);
 	g_list_free_full(dw->list, reinterpret_cast<GDestroyNotify>(dupe_item_free));

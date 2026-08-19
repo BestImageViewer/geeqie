@@ -587,7 +587,7 @@ static void config_window_apply(const ConfOptions *c_options)
 
 static void config_window_close_cb(GtkWidget *, gpointer)
 {
-	gq_gtk_widget_destroy(configwindow);
+	gtk_window_destroy(GTK_WINDOW(configwindow));
 	configwindow = nullptr;
 	filter_store = nullptr;
 }

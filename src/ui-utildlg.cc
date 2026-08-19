@@ -106,7 +106,7 @@ void generic_dialog_close(GenericDialog *gd)
 	auto *role = static_cast<const gchar *>(g_object_get_data(G_OBJECT(gd->dialog), GENERIC_DIALOG_ROLE_DATA_KEY));
 	generic_dialog_save_window(actual_title, role, rect);
 
-	gq_gtk_widget_destroy(gd->dialog);
+	gtk_window_destroy(GTK_WINDOW(gd->dialog));
 	g_free(gd);
 }
 

@@ -70,7 +70,7 @@ static void tree_edit_close(TreeEditData *ted)
 		}
 	else
 		{
-		gq_gtk_widget_destroy(ted->window);
+		gtk_window_destroy(GTK_WINDOW(ted->window));
 		}
 
 	g_free(ted->old_name);

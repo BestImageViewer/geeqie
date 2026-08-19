@@ -832,7 +832,7 @@ static void open_with_data_free(OpenWithData *open_with_data)
 	g_object_unref(open_with_data->application);
 	g_object_unref(g_list_first(open_with_data->g_file_list)->data);
 	g_list_free(open_with_data->g_file_list);
-	gq_gtk_widget_destroy(open_with_data->app_chooser_dialog);
+	gtk_window_destroy(GTK_WINDOW(open_with_data->app_chooser_dialog));
 	g_free(open_with_data);
 }
 

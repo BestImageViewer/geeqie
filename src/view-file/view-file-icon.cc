@@ -367,7 +367,7 @@ static void tip_show(ViewFile *vf)
 
 static void tip_hide(ViewFile *vf)
 {
-	if (VFICON(vf)->tip_window) gq_gtk_widget_destroy(VFICON(vf)->tip_window);
+	if (VFICON(vf)->tip_window) gtk_window_destroy(GTK_WINDOW(VFICON(vf)->tip_window));
 	VFICON(vf)->tip_window = nullptr;
 }
 

@@ -1502,7 +1502,7 @@ static void pan_window_close(PanWindow *pw)
 	pan_search_ui_destroy(g_steal_pointer(&pw->search_ui));
 	pan_filter_ui_destroy(g_steal_pointer(&pw->filter_ui));
 	g_object_set_data(G_OBJECT(pw->window), PAN_WINDOW_DATA_KEY, nullptr);
-	gq_gtk_widget_destroy(pw->window);
+	gtk_window_destroy(GTK_WINDOW(pw->window));
 
 	pan_window_items_free(pw);
 	pan_cache_free(pw);
