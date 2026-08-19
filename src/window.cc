@@ -186,7 +186,7 @@ void help_window_show(const gchar *key)
 
 static void help_search_window_show_icon_press(GtkEntry *edit_widget, GtkEntryIconPosition, gpointer)
 {
-	gq_gtk_entry_set_text(edit_widget, "");
+	entry_set_text(edit_widget, "");
 }
 
 static void help_search_window_ok_cb(GenericDialog *, gpointer data)

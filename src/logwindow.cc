@@ -233,7 +233,7 @@ static void search_keypress_event_cb(GtkButton *, LogWindow *logwin)
 			{
 			selected = gtk_text_buffer_get_text(buffer, &start_sel, &end_sel, FALSE);
 			text = selected;
-			gq_gtk_entry_set_text(GTK_ENTRY(logwin->search_entry_box), text);
+			entry_set_text(GTK_ENTRY(logwin->search_entry_box), text);
 			}
 		}
 
@@ -288,7 +288,7 @@ static void search_entry_icon_cb(GtkEntry *search_entry_box, GtkEntryIconPositio
 {
 	if (pos != GTK_ENTRY_ICON_SECONDARY) return;
 
-	gq_gtk_entry_set_text(search_entry_box, "");
+	entry_set_text(search_entry_box, "");
 
 	auto *logwin = static_cast<LogWindow *>(user_data);
 	GtkTextIter start_find;
@@ -304,7 +304,7 @@ static void search_entry_icon_cb(GtkEntry *search_entry_box, GtkEntryIconPositio
 static void filter_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition, GdkEvent *, gpointer)
 {
 	const gchar *blank = "";
-	gq_gtk_entry_set_text(entry, blank);
+	entry_set_text(entry, blank);
 	set_regexp(blank);
 }
 #endif
@@ -459,7 +459,7 @@ static void log_window_show(LogWindow *logwin)
 	g_autofree gchar *regexp = get_regexp();
 	if (regexp != nullptr)
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(logwin->regexp_box), regexp);
+		entry_set_text(GTK_ENTRY(logwin->regexp_box), regexp);
 		}
 #endif
 }

@@ -1268,7 +1268,7 @@ static void vf_marks_tooltip_ok_cb(GenericDialog *gd, gpointer data)
 
 static void vf_marks_filter_on_icon_press(GtkEntry *edit_widget, GtkEntryIconPosition, GdkEvent *, gpointer)
 {
-	gq_gtk_entry_set_text(edit_widget, "");
+	entry_set_text(edit_widget, "");
 }
 
 static void vf_marks_tooltip_help_cb(GenericDialog *, gpointer)
@@ -1300,7 +1300,7 @@ static void vf_marks_tooltip_open_dialog(GtkWidget *widget, gint mark_no)
 	gtk_widget_set_size_request(mte->edit_widget, 300, -1);
 	if (options->marks_tooltips[mte->mark_no])
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(mte->edit_widget), options->marks_tooltips[mte->mark_no]);
+		entry_set_text(GTK_ENTRY(mte->edit_widget), options->marks_tooltips[mte->mark_no]);
 		}
 	gtk_grid_attach(GTK_GRID(table), mte->edit_widget, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, mte->edit_widget);
@@ -1343,7 +1343,7 @@ static void vf_file_filter_history_item_cb(GtkWidget *button, gpointer data)
 	const auto *text = static_cast<const gchar *>(g_object_get_data(G_OBJECT(button), "file-filter-text"));
 	if (!text) return;
 
-	gq_gtk_entry_set_text(GTK_ENTRY(vf->file_filter.entry), text);
+	entry_set_text(GTK_ENTRY(vf->file_filter.entry), text);
 	gtk_editable_set_position(GTK_EDITABLE(vf->file_filter.entry), -1);
 	vf->file_filter.selected = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(button), "file-filter-index"));
 	vf->file_filter.last_selected = vf->file_filter.selected;
@@ -1737,7 +1737,7 @@ static void file_filter_clear_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkE
 {
 	if (pos != GTK_ENTRY_ICON_SECONDARY) return;
 
-	gq_gtk_entry_set_text(entry, "");
+	entry_set_text(entry, "");
 	gtk_widget_grab_focus(GTK_WIDGET(entry));
 }
 
@@ -1768,7 +1768,7 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	const HistoryList *history_list = history_list_find_by_key("file_filter");
 	if (history_list && !history_list->empty())
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(vf->file_filter.entry), history_list->front().c_str());
+		entry_set_text(GTK_ENTRY(vf->file_filter.entry), history_list->front().c_str());
 		vf->file_filter.selected = 0;
 		}
 

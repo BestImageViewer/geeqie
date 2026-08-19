@@ -280,7 +280,7 @@ void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean up
 		if (ee->editable)
 			{
 			g_signal_handlers_block_by_func(ee->value_widget, (gpointer *)bar_pane_exif_entry_changed, ee);
-			gq_gtk_entry_set_text(GTK_ENTRY(ee->value_widget), text ? text : "");
+			entry_set_text(GTK_ENTRY(ee->value_widget), text ? text : "");
 			g_signal_handlers_unblock_by_func(ee->value_widget, (gpointer)bar_pane_exif_entry_changed, ee);
 			gtk_widget_set_tooltip_text(ee->box, nullptr);
 			}
@@ -560,7 +560,7 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 
 	cdd->key_entry = gtk_entry_new();
 	gtk_widget_set_size_request(cdd->key_entry, 300, -1);
-	if (ee) gq_gtk_entry_set_text(GTK_ENTRY(cdd->key_entry), ee->key);
+	if (ee) entry_set_text(GTK_ENTRY(cdd->key_entry), ee->key);
 	gtk_grid_attach(GTK_GRID(table), cdd->key_entry, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, cdd->key_entry);
 
@@ -568,7 +568,7 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 
 	cdd->title_entry = gtk_entry_new();
 	gtk_widget_set_size_request(cdd->title_entry, 300, -1);
-	if (ee) gq_gtk_entry_set_text(GTK_ENTRY(cdd->title_entry), ee->title);
+	if (ee) entry_set_text(GTK_ENTRY(cdd->title_entry), ee->title);
 	gtk_grid_attach(GTK_GRID(table), cdd->title_entry, 1, 1, 1, 1);
 	generic_dialog_attach_default(gd, cdd->title_entry);
 

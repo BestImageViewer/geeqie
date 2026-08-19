@@ -1516,7 +1516,7 @@ static void search_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 				break;
 			}
 
-		gq_gtk_entry_set_text(GTK_ENTRY(drop_data->entry), text);
+		entry_set_text(GTK_ENTRY(drop_data->entry), text);
 		gtk_widget_set_tooltip_text(drop_data->entry, text);
 		action = GDK_ACTION_COPY;
 		}
@@ -2940,7 +2940,7 @@ static void select_collection_response_cb(GFile *file, gpointer data)
 		g_autofree gchar *path_noext = remove_extension_from_path(filename);
 		g_autofree gchar *collection = g_path_get_basename(path_noext);
 
-		gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_collection), collection);
+		entry_set_text(GTK_ENTRY(sd->ui.entry_collection), collection);
 
 		g_autoptr(GFile) parent = g_file_get_parent(file);
 
@@ -3069,7 +3069,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	sd->ui.box_collection = pref_box_new(hbox, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	sd->ui.entry_collection = gtk_entry_new();
-	gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_collection), "");
+	entry_set_text(GTK_ENTRY(sd->ui.entry_collection), "");
 	gtk_widget_set_hexpand(sd->ui.entry_collection, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->ui.box_collection))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(sd->ui.entry_collection, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->ui.box_collection))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(sd->ui.box_collection), sd->ui.entry_collection);

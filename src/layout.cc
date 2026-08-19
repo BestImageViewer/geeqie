@@ -1374,7 +1374,7 @@ static void layout_sync_path(LayoutWindow *lw)
 {
 	if (!lw->dir_fd) return;
 
-	if (lw->path_entry) gq_gtk_entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
+	if (lw->path_entry) entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
 
 	if (lw->vd) vd_set_fd(lw->vd, lw->dir_fd);
 	if (lw->vf) vf_set_fd(lw->vf, lw->dir_fd);
@@ -2395,7 +2395,7 @@ static void layout_config_ok_cb(GtkWidget *widget, gpointer data)
 static void home_path_set_current_cb(GtkWidget *, gpointer data)
 {
 	auto lc = static_cast<LayoutConfig *>(data);
-	gq_gtk_entry_set_text(GTK_ENTRY(lc->home_path_entry), layout_get_path(lc->lw));
+	entry_set_text(GTK_ENTRY(lc->home_path_entry), layout_get_path(lc->lw));
 }
 
 template<StartUpPath startup_path>

@@ -107,7 +107,7 @@ static void tab_completion_history_item_cb(GtkWidget *button, gpointer data)
 	const auto *text = static_cast<const gchar *>(g_object_get_data(G_OBJECT(button), "history-text"));
 	if (!text) return;
 
-	gq_gtk_entry_set_text(GTK_ENTRY(td->entry), text);
+	entry_set_text(GTK_ENTRY(td->entry), text);
 	gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 	gtk_menu_button_set_active(GTK_MENU_BUTTON(td->history_button), FALSE);
 
@@ -401,7 +401,7 @@ static void tab_completion_popup_cb(GtkWidget *widget, gpointer data)
 
 	auto *name = static_cast<gchar *>(data);
 	g_autofree gchar *buf = g_build_filename(td->dir_path, name, NULL);
-	gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
+	entry_set_text(GTK_ENTRY(td->entry), buf);
 	gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 	tab_completion_emit_tab_signal(td);
@@ -471,7 +471,7 @@ static gboolean tab_completion_do(TabCompData *td)
 	if (entry_text[0] == '\0')
 		{
 		g_autofree gchar *entry_dir = g_strdup(G_DIR_SEPARATOR_S); /** @FIXME root directory win32 */
-		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
+		entry_set_text(GTK_ENTRY(td->entry), entry_dir);
 		gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 		return FALSE;
 		}
@@ -493,7 +493,7 @@ static gboolean tab_completion_do(TabCompData *td)
 		{
 		if (home_exp)
 			{
-			gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
+			entry_set_text(GTK_ENTRY(td->entry), entry_dir);
 			gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 			}
 		return home_exp;
@@ -508,7 +508,7 @@ static gboolean tab_completion_do(TabCompData *td)
 			{
 			g_autofree gchar *tmp = entry_dir;
 			entry_dir = g_strconcat(entry_dir, G_DIR_SEPARATOR_S, NULL);
-			gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
+			entry_set_text(GTK_ENTRY(td->entry), entry_dir);
 			gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 			}
 
@@ -523,7 +523,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				g_autofree gchar *tmp = buf;
 				buf = g_strconcat(buf, G_DIR_SEPARATOR_S, NULL);
 				}
-			gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
+			entry_set_text(GTK_ENTRY(td->entry), buf);
 			gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 			}
 		else
@@ -573,7 +573,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				auto file = static_cast<gchar *>(poss->data);
 
 				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
-				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
+				entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 				return TRUE;
 				}
@@ -596,7 +596,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				g_autofree gchar *file = g_strdup(tp.prefix); // @FIXME: Use g_strndup?
 				file[l] = '\0';
 				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
-				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
+				entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 				poss = g_list_sort(poss, reinterpret_cast<GCompareFunc>(CASE_SORT));
@@ -755,11 +755,11 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 	const HistoryList *history_list = history_list_find_by_key(history_key);
 	if (text)
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(entry), text);
+		entry_set_text(GTK_ENTRY(entry), text);
 		}
 	else if (history_list && !history_list->empty())
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(entry), history_list->front().c_str());
+		entry_set_text(GTK_ENTRY(entry), history_list->front().c_str());
 		}
 
 	if (parent_box)
@@ -797,7 +797,7 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
 	GtkWidget *entry = gtk_entry_new();
-	if (text) gq_gtk_entry_set_text(GTK_ENTRY(entry), text);
+	if (text) entry_set_text(GTK_ENTRY(entry), text);
 	gtk_widget_set_hexpand(entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(hbox), entry);
@@ -880,7 +880,7 @@ static void tab_completion_response_cb(GFile *file, gpointer data)
 	if (file)
 		{
 		g_autofree gchar *filename = g_file_get_path(file);
-		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), filename);
+		entry_set_text(GTK_ENTRY(td->entry), filename);
 		}
 
 	tab_completion_emit_enter_signal(td);

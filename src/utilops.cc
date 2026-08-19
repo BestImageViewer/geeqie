@@ -1596,7 +1596,7 @@ static gboolean file_util_preview_cb(GtkTreeSelection *, GtkTreeModel *store,
 		gtk_widget_grab_focus(ud->rename_entry);
 		gtk_label_set_text(GTK_LABEL(ud->rename_label), fd->name);
 		g_signal_handlers_block_by_func(ud->rename_entry, (gpointer)(file_util_rename_preview_entry_cb), ud);
-		gq_gtk_entry_set_text(GTK_ENTRY(ud->rename_entry), name);
+		entry_set_text(GTK_ENTRY(ud->rename_entry), name);
 		gtk_editable_select_region(GTK_EDITABLE(ud->rename_entry), 0, filename_base_length(name));
 		g_signal_handlers_unblock_by_func(ud->rename_entry, (gpointer)file_util_rename_preview_entry_cb, ud);
 		}

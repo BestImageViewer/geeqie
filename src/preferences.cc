@@ -1390,7 +1390,7 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 	GtkWidget *entry = gtk_entry_new();
 	gtk_widget_set_can_focus(entry, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
-	if (options->file_ops.safe_delete_path) gq_gtk_entry_set_text(GTK_ENTRY(entry), options->file_ops.safe_delete_path);
+	if (options->file_ops.safe_delete_path) entry_set_text(GTK_ENTRY(entry), options->file_ops.safe_delete_path);
 	gtk_box_append(GTK_BOX(gd->vbox), entry);
 
 	gtk_window_present(GTK_WINDOW(gd->dialog));
@@ -1674,11 +1674,11 @@ static void help_search_engine_entry_icon_cb(GtkEntry *entry, GtkEntryIconPositi
 {
 	if (pos == GTK_ENTRY_ICON_PRIMARY)
 		{
-		gq_gtk_entry_set_text(entry, HELP_SEARCH_ENGINE);
+		entry_set_text(entry, HELP_SEARCH_ENGINE);
 		}
 	else
 		{
-		gq_gtk_entry_set_text(entry, "");
+		entry_set_text(entry, "");
 		}
 }
 
@@ -1688,11 +1688,11 @@ static void star_rating_icon_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkEv
 	if (pos == GTK_ENTRY_ICON_PRIMARY)
 		{
 		g_autofree gchar *rating_symbol = g_strdup_printf("U+%X", star_rating);
-		gq_gtk_entry_set_text(entry, rating_symbol);
+		entry_set_text(entry, rating_symbol);
 		}
 	else
 		{
-		gq_gtk_entry_set_text(entry, "U+");
+		entry_set_text(entry, "U+");
 		gtk_widget_grab_focus(GTK_WIDGET(entry));
 		gtk_editable_select_region(GTK_EDITABLE(entry), 2, 2);
 		}
@@ -1738,7 +1738,7 @@ static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_
 
 	GtkWidget *star_rating_entry = gtk_entry_new();
 	g_autofree gchar *rating_symbol = g_strdup_printf("U+%X", star_rating);
-	gq_gtk_entry_set_text(GTK_ENTRY(star_rating_entry), rating_symbol);
+	entry_set_text(GTK_ENTRY(star_rating_entry), rating_symbol);
 	gtk_editable_set_width_chars(GTK_EDITABLE(star_rating_entry), 15);
 	gtk_widget_set_tooltip_text(star_rating_entry, _("Hexadecimal representation of a Unicode character. A list of all Unicode characters may be found on the Internet."));
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
@@ -1974,7 +1974,7 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	group = pref_group_new(vbox, FALSE, _("On-line help search engine"), GTK_ORIENTATION_VERTICAL);
 
 	help_search_engine_entry = gtk_entry_new();
-	gq_gtk_entry_set_text(GTK_ENTRY(help_search_engine_entry), options->help_search_engine);
+	entry_set_text(GTK_ENTRY(help_search_engine_entry), options->help_search_engine);
 	gtk_box_append(GTK_BOX(group), help_search_engine_entry);
 
 	gtk_widget_set_tooltip_text(help_search_engine_entry, _("The format varies between search engines, e.g the format may be:\nhttps://www.search_engine.com/search?q=site:geeqie.org/help\nhttps://www.search_engine.com/?q=site:geeqie.org/help"));
@@ -2451,7 +2451,7 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	group = pref_group_new(vbox, FALSE, _("Grouping sidecar extensions"), GTK_ORIENTATION_VERTICAL);
 
 	sidecar_ext_entry = gtk_entry_new();
-	gq_gtk_entry_set_text(GTK_ENTRY(sidecar_ext_entry), options->sidecar.ext);
+	entry_set_text(GTK_ENTRY(sidecar_ext_entry), options->sidecar.ext);
 	gtk_box_append(GTK_BOX(group), sidecar_ext_entry);
 
 	group = pref_group_new(vbox, TRUE, _("File types"), GTK_ORIENTATION_VERTICAL);
@@ -2805,7 +2805,7 @@ static void keywords_find_finish(KeywordFindData *kfd)
 {
 	keywords_find_reset(kfd);
 
-	gq_gtk_entry_set_text(GTK_ENTRY(kfd->progress), _("done"));
+	entry_set_text(GTK_ENTRY(kfd->progress), _("done"));
 	gtk_spinner_stop(GTK_SPINNER(kfd->spinner));
 
 	gtk_widget_set_sensitive(kfd->group, TRUE);
@@ -2845,7 +2845,7 @@ static gboolean keywords_find_file(gpointer data)
 			gtk_text_buffer_insert(buffer, &iter, tmp, -1);
 			}
 
-		gq_gtk_entry_set_text(GTK_ENTRY(kfd->progress), fd->path);
+		entry_set_text(GTK_ENTRY(kfd->progress), fd->path);
 		file_data_unref(fd);
 		g_list_free_full(keywords, g_free);
 
@@ -2944,7 +2944,7 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	kfd->progress = gtk_entry_new();
 	gtk_widget_set_can_focus(kfd->progress, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(kfd->progress), FALSE);
-	gq_gtk_entry_set_text(GTK_ENTRY(kfd->progress), _("click start to begin"));
+	entry_set_text(GTK_ENTRY(kfd->progress), _("click start to begin"));
 	gtk_widget_set_hexpand(kfd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(kfd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(hbox), kfd->progress);
@@ -3131,7 +3131,7 @@ static void config_tab_color(GtkWidget *notebook, ConfOptions *c_options)
 		gtk_entry_set_max_length(GTK_ENTRY(entry), EDITOR_NAME_MAX_LENGTH);
 		if (options->color_profile.input_name[i])
 			{
-			gq_gtk_entry_set_text(GTK_ENTRY(entry), options->color_profile.input_name[i]);
+			entry_set_text(GTK_ENTRY(entry), options->color_profile.input_name[i]);
 			}
 		gtk_grid_attach(GTK_GRID(table), entry, 1, i + 1, 1, 1);
 		color_profile_input_name_entry[i] = entry;
@@ -3356,7 +3356,7 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Log Window F1 command: "));
 	log_window_f1_entry = gtk_entry_new();
-	gq_gtk_entry_set_text(GTK_ENTRY(log_window_f1_entry), options->log_window.action);
+	entry_set_text(GTK_ENTRY(log_window_f1_entry), options->log_window.action);
 	gtk_box_append(GTK_BOX(hbox), log_window_f1_entry);
 	gtk_editable_set_width_chars(GTK_EDITABLE(log_window_f1_entry), 15);
 #endif
@@ -3512,7 +3512,7 @@ Double-click on the Key column and add or replace the text.\n");
 	gtk_label_set_mnemonic_widget(GTK_LABEL(key_label), key_value);
 	gtk_box_append(GTK_BOX(hbox), key_label);
 
-	gq_gtk_entry_set_text(GTK_ENTRY(key_value), "");
+	entry_set_text(GTK_ENTRY(key_value), "");
 	gtk_box_append(GTK_BOX(hbox), key_value);
 
 	GtkEventController *controller = gtk_event_controller_key_new();

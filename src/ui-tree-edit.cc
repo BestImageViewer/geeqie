@@ -223,7 +223,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 	/* create the window */
 
 	ted->entry = gtk_entry_new();
-	gq_gtk_entry_set_text(GTK_ENTRY(ted->entry), ted->old_name);
+	entry_set_text(GTK_ENTRY(ted->entry), ted->old_name);
 	gtk_editable_select_region(GTK_EDITABLE(ted->entry), 0, strlen(ted->old_name));
 
 	ted->window = gtk_popover_new();

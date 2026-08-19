@@ -298,7 +298,7 @@ static void bookmark_edit(const std::string &key, const BookButtonData *bb, GtkW
 
 	p->name_entry = gtk_entry_new();
 	gtk_widget_set_size_request(p->name_entry, 300, -1);
-	gq_gtk_entry_set_text(GTK_ENTRY(p->name_entry), bb->name.c_str());
+	entry_set_text(GTK_ENTRY(p->name_entry), bb->name.c_str());
 	gtk_grid_attach(GTK_GRID(table), p->name_entry, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, p->name_entry);
 
@@ -925,7 +925,7 @@ static void history_combo_item_cb(GtkWidget *button, gpointer data)
 	const auto *text = static_cast<const gchar *>(g_object_get_data(G_OBJECT(button), "history-text"));
 	if (!text) return;
 
-	gq_gtk_entry_set_text(GTK_ENTRY(hc->entry), text);
+	entry_set_text(GTK_ENTRY(hc->entry), text);
 	gtk_editable_set_position(GTK_EDITABLE(hc->entry), -1);
 	gtk_menu_button_set_active(GTK_MENU_BUTTON(hc->history_button), FALSE);
 }
@@ -986,11 +986,11 @@ GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 	const HistoryList *history_list = history_list_find_by_key(hc->history_key.c_str());
 	if (text)
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(hc->entry), text);
+		entry_set_text(GTK_ENTRY(hc->entry), text);
 		}
 	else if (history_list && !history_list->empty())
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(hc->entry), history_list->front().c_str());
+		entry_set_text(GTK_ENTRY(hc->entry), history_list->front().c_str());
 		}
 
 	if (entry) *entry = hc->entry;

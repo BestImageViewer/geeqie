@@ -40,7 +40,7 @@ gdouble get_zoom_increment();
 gint get_cpu_cores();
 gint utf8_compare(const gchar *s1, const gchar *s2, gboolean case_sensitive);
 int runcmd(const gchar *cmd);
-void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text);
+void entry_set_text(GtkEntry *entry, const gchar *text);
 
 void shift_color(GdkRGBA &src, gshort val = -1, gint direction = 0);
 

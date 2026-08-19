@@ -212,7 +212,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	ew->desktop_name = nullptr;
 	if (desktop_name)
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(ew->entry), desktop_name);
+		entry_set_text(GTK_ENTRY(ew->entry), desktop_name);
 		ew->desktop_name = g_strdup(desktop_name);
 		}
 	g_signal_connect(G_OBJECT(ew->entry), "changed", G_CALLBACK(editor_window_entry_changed_cb), ew);

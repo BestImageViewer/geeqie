@@ -331,7 +331,7 @@ void shift_color(GdkRGBA &src, gshort val, gint direction)
 		}
 }
 
-void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text)
+void entry_set_text(GtkEntry *entry, const gchar *text)
 {
 	GtkEntryBuffer *buffer;
 

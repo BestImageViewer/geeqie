@@ -778,7 +778,7 @@ void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 	pref_table_label(table, 0, 0, _("Keyword:"), GTK_ALIGN_END);
 	cdd->edit_widget = gtk_entry_new();
 	gtk_widget_set_size_request(cdd->edit_widget, 300, -1);
-	if (name) gq_gtk_entry_set_text(GTK_ENTRY(cdd->edit_widget), name);
+	if (name) entry_set_text(GTK_ENTRY(cdd->edit_widget), name);
 	gtk_grid_attach(GTK_GRID(table), cdd->edit_widget, 1, 0, 1, 1);
 	/* here could eventually be a text view instead of entry */
 	generic_dialog_attach_default(gd, cdd->edit_widget);
@@ -1265,7 +1265,7 @@ void autocomplete_selected_cb(GtkListBox *, GtkListBoxRow *row, gpointer data)
 	if (!keyword) return;
 
 	pkd->autocomplete_changing = TRUE;
-	gq_gtk_entry_set_text(GTK_ENTRY(pkd->autocomplete), keyword);
+	entry_set_text(GTK_ENTRY(pkd->autocomplete), keyword);
 	gtk_editable_set_position(GTK_EDITABLE(pkd->autocomplete), -1);
 	pkd->autocomplete_changing = FALSE;
 	if (pkd->autocomplete_popover) gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
@@ -1603,7 +1603,7 @@ gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 	g_free(entry_text);
 	entry_text = g_strdup(gtk_editable_get_text(GTK_EDITABLE(pkd->autocomplete)));
 
-	gq_gtk_entry_set_text(GTK_ENTRY(pkd->autocomplete), "");
+	entry_set_text(GTK_ENTRY(pkd->autocomplete), "");
 
 	if (entry_text[0] != '\0' &&
 	    std::find(keyword_store.begin(), keyword_store.end(), entry_text) == keyword_store.end())

@@ -97,7 +97,7 @@ void pan_filter_activate_cb(PanWindow *pw, const gchar *text)
 	if (!item) return;
 
 	// Get all relevant state and reset UI.
-	gq_gtk_entry_set_text(GTK_ENTRY(ui->filter_entry), "");
+	entry_set_text(GTK_ENTRY(ui->filter_entry), "");
 	tab_completion_append_to_history(ui->filter_entry, text);
 
 	// Add new filter element.

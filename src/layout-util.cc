@@ -208,7 +208,7 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 		{
 		if (keyval == GDK_KEY_Escape && lw->dir_fd)
 			{
-			gq_gtk_entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
+			entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
 			return TRUE;
 			}
 
@@ -2624,7 +2624,7 @@ static void layout_menu_window_rename_cb(GSimpleAction *, GVariant *, gpointer  
 	rw->window_name_entry = gtk_entry_new();
 	gtk_widget_set_can_focus(rw->window_name_entry, TRUE);
 	gtk_editable_set_editable(GTK_EDITABLE(rw->window_name_entry), TRUE);
-	gq_gtk_entry_set_text(GTK_ENTRY(rw->window_name_entry), lw->options.id);
+	entry_set_text(GTK_ENTRY(rw->window_name_entry), lw->options.id);
 	gtk_widget_set_hexpand(rw->window_name_entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(rw->window_name_entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(hbox), rw->window_name_entry);
