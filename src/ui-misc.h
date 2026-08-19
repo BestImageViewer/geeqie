@@ -193,7 +193,7 @@ gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_cha
 gchar *text_widget_text_pull_selected(GtkWidget *text_widget);
 
 // Load a themed icon through the GTK4 icon theme API and return a copy as a pixbuf
-GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);
+GdkPixbuf *icon_theme_load_pixbuf_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);
 
 gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos);
 GdkRectangle widget_get_position_geometry(GtkWidget *widget);

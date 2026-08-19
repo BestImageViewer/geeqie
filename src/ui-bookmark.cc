@@ -545,7 +545,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 			{
 			constexpr gint size = 16;
 
-			pixbuf = gq_gtk_icon_theme_load_icon_copy(gtk_icon_theme_get_for_display(gdk_display_get_default()), b->icon.c_str(), size, GTK_ICON_LOOKUP_NONE);
+			pixbuf = icon_theme_load_pixbuf_copy(gtk_icon_theme_get_for_display(gdk_display_get_default()), b->icon.c_str(), size, GTK_ICON_LOOKUP_NONE);
 			}
 
 		if (pixbuf)

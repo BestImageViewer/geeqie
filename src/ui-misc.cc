@@ -1033,7 +1033,7 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 	
 }
 
-GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags)
+GdkPixbuf *icon_theme_load_pixbuf_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags)
 {
 	g_autoptr(GtkIconPaintable) icon = nullptr;
 	g_autoptr(GFile) file = nullptr;
