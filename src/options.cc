@@ -136,7 +136,7 @@ ConfOptions *conf_options_new()
 	options->image.max_enlargement_size = 900;
 	options->image.max_window_size = 90;
 	options->image.scroll_reset_method = ScrollReset::NOCHANGE;
-	options->image.tile_cache_max = 10;
+	options->image.tile_cache_max = 64;
 	options->image.image_cache_max = 128; /* 4 x 10MPix */
 	options->image.use_custom_border_color = FALSE;
 	options->image.use_custom_border_color_in_fullscreen = TRUE;

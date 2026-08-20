@@ -286,7 +286,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 							  "Display cache size MiB",
 							  nullptr,
 							  0,
-							  128,
+							  1024,
 							  PR_CACHE_SIZE_DEFAULT,
 							  static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -453,6 +453,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 	pr->zoom = 1.0;
 	pr->scale = 1.0;
 	pr->aspect_ratio = 1.0;
+	pr->tile_cache_max = PR_CACHE_SIZE_DEFAULT;
 
 	pr->scroll_reset = ScrollReset::TOPLEFT;
 
@@ -547,6 +548,7 @@ static void pixbuf_renderer_set_property(GObject *object, guint prop_id,
 			pr->complete = g_value_get_boolean(value);
 			break;
 		case PROP_CACHE_SIZE_DISPLAY:
+			pr->tile_cache_max = g_value_get_uint(value);
 			break;
 		case PROP_CACHE_SIZE_TILES:
 			pr->source_tiles_cache_size = g_value_get_uint(value);
@@ -612,6 +614,7 @@ static void pixbuf_renderer_get_property(GObject *object, guint prop_id,
 			g_value_set_boolean(value, pr->complete);
 			break;
 		case PROP_CACHE_SIZE_DISPLAY:
+			g_value_set_uint(value, pr->tile_cache_max);
 			break;
 		case PROP_CACHE_SIZE_TILES:
 			g_value_set_uint(value, pr->source_tiles_cache_size);

@@ -1771,6 +1771,7 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *subgroup;
 	GtkWidget *button;
 	GtkWidget *ct_button;
+	GtkWidget *display_cache;
 	GtkWidget *table;
 	GtkWidget *spin;
 	gint hours;
@@ -1887,6 +1888,10 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 
 	pref_spin_new_int(group, _("Decoded image cache size (MiB):"), nullptr,
 			  0, 99999, 1, options->image.image_cache_max, &c_options->image.image_cache_max);
+	display_cache = pref_spin_new_int(group, _("Display tile cache per image (MiB):"), nullptr,
+	                                  0, 1024, 1, options->image.tile_cache_max, &c_options->image.tile_cache_max);
+	gtk_widget_set_tooltip_text(display_cache,
+	                            _("Maximum memory used to cache rendered image tiles for each image view. Larger values may improve panning and repaint performance, particularly on high-resolution displays. A value of 64 MiB is recommended."));
 	pref_checkbox_new_int(group, _("Preload next image"),
 			      options->image.enable_read_ahead, &c_options->image.enable_read_ahead);
 

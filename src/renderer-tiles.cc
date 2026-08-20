@@ -128,8 +128,6 @@ struct RendererTiles
 	RendererFuncs f;
 	PixbufRenderer *pr;
 
-	gint tile_cache_max;		/* max MiB to use for offscreen buffer */
-
 	gint tile_width;
 	gint tile_height;
 	GList *tiles;		/* list of buffer tiles */
@@ -350,6 +348,11 @@ void rt_tile_remove(RendererTiles *rt, ImageTile *it)
 	rt_tile_free(it);
 }
 
+gint surface_calc_size(gint width, gint height)
+{
+	return cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width) * height;
+}
+
 void rt_tile_free_space(RendererTiles *rt, guint space, ImageTile *it)
 {
 	PixbufRenderer *pr = rt->pr;
@@ -363,12 +366,14 @@ void rt_tile_free_space(RendererTiles *rt, guint space, ImageTile *it)
 		gint tiles;
 
 		tiles = (pr->vis_width / rt->tile_width + 1) * (pr->vis_height / rt->tile_height + 1);
-		tile_max = std::max<gint>(tiles * rt->tile_width * rt->tile_height * 3,
-		                          rt->tile_cache_max * 1048576.0 * pr->scale);
+		const gint tile_memory = surface_calc_size(rt->tile_width, rt->tile_height) +
+		                         (rt->tile_width * rt->tile_height * COLOR_BYTES);
+		tile_max = std::max<gint>(tiles * tile_memory,
+		                          pr->tile_cache_max * 1048576.0 * pr->scale);
 		}
 	else
 		{
-		tile_max = rt->tile_cache_max * 1048576;
+		tile_max = pr->tile_cache_max * 1048576;
 		}
 
 	while (work && rt->tile_cache_size + space > tile_max)
@@ -429,16 +434,11 @@ ImageTile *rt_tile_get(RendererTiles *rt, gint x, gint y, gboolean only_existing
 	return rt_tile_add(rt, x, y);
 }
 
-gint pixmap_calc_size()
-{
-	return options->image.tile_size * options->image.tile_size * 4 / 8;
-}
-
 void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 {
 	if (!it->surface)
 		{
-		const guint size = pixmap_calc_size();
+		const guint size = surface_calc_size(rt->tile_width, rt->tile_height);
 
 		rt_tile_free_space(rt, size, it);
 
@@ -1982,8 +1982,6 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 
 	rt->tiles = nullptr;
 	rt->tile_cache_size = 0;
-
-	rt->tile_cache_max = PR_CACHE_SIZE_DEFAULT;
 
 	rt->draw_idle_id = 0;
 

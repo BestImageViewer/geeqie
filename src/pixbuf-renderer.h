@@ -185,6 +185,7 @@ struct PixbufRenderer
 
 	gdouble norm_center_x;	/**< coordinates of viewport center in the image, in range 0.0 - 1.0 */
 	gdouble norm_center_y;  /**< these coordinates are used for ScrollReset::NOCHANGE and should be preserved over periods with NULL pixbuf */
+	gint tile_cache_max;    /**< maximum MiB used for rendered image tiles */
 
 	gdouble subpixel_x_scroll; /**< subpixel scroll alignment, used to prevent accumulation of rounding errors */
 	gdouble subpixel_y_scroll;
