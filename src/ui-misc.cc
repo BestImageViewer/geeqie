@@ -33,7 +33,6 @@
 
 #include <config.h>
 
-#include "compat.h"
 #include "geometry.h"
 #include "history-list.h"
 #include "main-defines.h"
@@ -1297,31 +1296,6 @@ gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int 
 	if (mask) *mask = local_mask;
 
 	return TRUE;
-}
-
-void get_device_position(GdkDevice *device, int &x, int &y)
-{
-	double dx = 0.0;
-	double dy = 0.0;
-	GdkSurface *surface = nullptr;
-
-	if (!device)
-		{
-		x = y = -1;
-		return;
-		}
-
-	surface = gdk_device_get_surface_at_position(device, &dx, &dy);
-
-	if (!surface)
-		{
-		/* Pointer not over any surface */
-		x = y = -1;
-		return;
-		}
-
-	x = (int)dx;
-	y = (int)dy;
 }
 
 PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)
