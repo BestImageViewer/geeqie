@@ -28,7 +28,6 @@
 
 #include <config.h>
 
-#include "compat.h"
 #include "exif.h"
 #include "filedata.h"
 #include "intl.h"
@@ -267,23 +266,7 @@ static gboolean expander_height_cb(GtkEventControllerKey *controller, guint, gui
 
 static void bar_expander_height_cb(GtkWidget *, gpointer data)
 {
-	auto expander = static_cast<GtkWidget *>(data);
-	GtkWidget *window;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
-	GdkDisplay *display;
-	GdkSeat *seat;
-	GdkDevice *device;
-
-	display = gdk_display_get_default();
-	seat = gdk_display_get_default_seat(display);
-	device = gdk_seat_get_pointer(seat);
-	get_device_position(device, x, y);
-
-	window = gtk_window_new();
-
+	GtkWidget *window = gtk_window_new();
 	gtk_window_set_modal(GTK_WINDOW(window), TRUE);
 	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 	gtk_window_set_default_size(GTK_WINDOW(window), 50, 30); //** @FIXME set these values in a more sensible way */
@@ -293,7 +276,9 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 
 	gtk_window_present(GTK_WINDOW(window));
 
-	GtkWidget *data_box = gtk_expander_get_child(GTK_EXPANDER(expander));
+	GtkWidget *data_box = gtk_expander_get_child(GTK_EXPANDER(data));
+	gint w;
+	gint h;
 	gtk_widget_get_size_request(data_box, &w, &h);
 
 	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);

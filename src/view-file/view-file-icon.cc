@@ -29,7 +29,6 @@
 
 #include "cellrenderericon.h"
 #include "collect.h"
-#include "compat.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"
@@ -326,18 +325,12 @@ static gint vficon_mark_at_coord(ViewFile *vf, gint x, gint y)
 
 static void tip_show(ViewFile *vf)
 {
-	GtkWidget *label;
-	gint x;
-	gint y;
-	GdkDisplay *display;
-	GdkSeat *seat;
-	GdkDevice *device;
-
 	if (VFICON(vf)->tip_window) return;
 
-	seat = gdk_display_get_default_seat(gtk_widget_get_display(GTK_WIDGET(vf->listview)));
-
-	device = gdk_seat_get_pointer(seat);
+	GdkSeat *seat = gdk_display_get_default_seat(gtk_widget_get_display(GTK_WIDGET(vf->listview)));
+	GdkDevice *device = gdk_seat_get_pointer(seat);
+	gint x;
+	gint y;
 	get_pointer_position(vf->listview, device, &x, &y, nullptr);
 
 	VFICON(vf)->tip_fd = vficon_find_data_by_coord(vf, x, y, nullptr);
@@ -351,15 +344,9 @@ static void tip_show(ViewFile *vf)
 	gtk_widget_set_margin_start(VFICON(vf)->tip_window, 2);
 	gtk_widget_set_margin_end(VFICON(vf)->tip_window, 2);
 
-	label = gtk_label_new(VFICON(vf)->tip_fd->name);
-
+	GtkWidget *label = gtk_label_new(VFICON(vf)->tip_fd->name);
 	g_object_set_data(G_OBJECT(VFICON(vf)->tip_window), "tip_label", label);
 	gtk_window_set_child(GTK_WINDOW(VFICON(vf)->tip_window), label);
-
-	display = gdk_display_get_default();
-	seat = gdk_display_get_default_seat(display);
-	device = gdk_seat_get_pointer(seat);
-	get_device_position(device, x, y);
 
 	if (!gtk_widget_get_realized(VFICON(vf)->tip_window)) gtk_widget_realize(VFICON(vf)->tip_window);
 	gtk_window_present(GTK_WINDOW(VFICON(vf)->tip_window));
@@ -414,39 +401,25 @@ static void tip_schedule(ViewFile *vf)
 
 static void tip_update(ViewFile *vf, FileData *fd)
 {
-	GdkDisplay *display = gdk_display_get_default();
-	GdkSeat *seat = gdk_display_get_default_seat(display);
-	GdkDevice *device = gdk_seat_get_pointer(seat);
-
-	if (VFICON(vf)->tip_window)
-		{
-		gint x;
-		gint y;
-
-		get_device_position(device, x, y);
-
-
-		if (fd != VFICON(vf)->tip_fd)
-			{
-			GtkWidget *label;
-
-			VFICON(vf)->tip_fd = fd;
-
-			if (!VFICON(vf)->tip_fd)
-				{
-				tip_hide(vf);
-				tip_schedule(vf);
-				return;
-				}
-
-			label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(VFICON(vf)->tip_window), "tip_label"));
-			gtk_label_set_text(GTK_LABEL(label), VFICON(vf)->tip_fd->name);
-			}
-		}
-	else
+	if (!VFICON(vf)->tip_window)
 		{
 		tip_schedule(vf);
+		return;
 		}
+
+	if (VFICON(vf)->tip_fd == fd) return;
+
+	VFICON(vf)->tip_fd = fd;
+
+	if (!VFICON(vf)->tip_fd)
+		{
+		tip_hide(vf);
+		tip_schedule(vf);
+		return;
+		}
+
+	auto *label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(VFICON(vf)->tip_window), "tip_label"));
+	gtk_label_set_text(GTK_LABEL(label), VFICON(vf)->tip_fd->name);
 }
 
 /*
