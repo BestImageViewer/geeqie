@@ -31,7 +31,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
 #include "editors.h"
 #include "intl.h"
 #include "layout-util.h"
@@ -392,7 +391,7 @@ void editor_list_window_selection_changed_cb(GtkTreeSelection *sel, gpointer use
 	gtk_widget_set_sensitive(ewl->edit_button, TRUE);
 }
 
-static gint editor_list_window_utf8_collate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gint sort_column_id)
+gint editor_list_window_utf8_collate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gint sort_column_id)
 {
 	g_autofree gchar *str_a = nullptr;
 	gtk_tree_model_get(model, a,
