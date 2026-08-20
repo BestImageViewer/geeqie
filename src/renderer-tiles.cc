@@ -132,8 +132,8 @@ struct RendererTiles
 	gint tile_height;
 	GList *tiles;		/* list of buffer tiles */
 	gint tile_cache_size;	/* allocated size of pixmaps/pixbufs */
-	GList *draw_queue;	/* list of areas to redraw */
-	GList *draw_queue_2pass;/* list when 2 pass is enabled */
+	GQueue draw_queue;	/* queue of areas to redraw */
+	GQueue draw_queue_2pass;/* queue when 2 pass is enabled */
 
 	GList *overlay_list;
 	cairo_surface_t *overlay_buffer;
@@ -329,7 +329,7 @@ void rt_tile_remove(RendererTiles *rt, ImageTile *it)
 		QueueData *qd = it->qd;
 
 		it->qd = nullptr;
-		rt->draw_queue = g_list_remove(rt->draw_queue, qd);
+		g_queue_remove(&rt->draw_queue, qd);
 		g_free(qd);
 		}
 
@@ -338,7 +338,7 @@ void rt_tile_remove(RendererTiles *rt, ImageTile *it)
 		QueueData *qd = it->qd2;
 
 		it->qd2 = nullptr;
-		rt->draw_queue_2pass = g_list_remove(rt->draw_queue_2pass, qd);
+		g_queue_remove(&rt->draw_queue_2pass, qd);
 		g_free(qd);
 		}
 
@@ -1093,8 +1093,8 @@ void rt_tile_get_region_wide(gboolean ignore_alpha,
 		for (gint x = pb_rect.x; x < pb_rect.x + pb_rect.width; x++)
 			{
 			const gint src_x = std::clamp(static_cast<gint>(floor((x - offset_x) / scale_x)), 0, src_width - 1);
-			const guchar *src_pixel = src_pixels + src_y * src_rowstride + src_x * src_channels;
-			guchar *dest_pixel = dest_pixels + y * dest_rowstride + x * dest_channels;
+			const guchar *src_pixel = src_pixels + (src_y * src_rowstride) + (src_x * src_channels);
+			guchar *dest_pixel = dest_pixels + (y * dest_rowstride) + (x * dest_channels);
 
 			if (src_channels == 4 && !ignore_alpha)
 				{
@@ -1386,7 +1386,7 @@ gint rt_get_queued_area(const RendererTiles *rt)
 {
 	gint area = 0;
 
-	for (GList *work = rt->draw_queue; work; work = work->next)
+	for (GList *work = rt->draw_queue.head; work; work = work->next)
 		{
 		auto *qd = static_cast<QueueData *>(work->data);
 		area += qd->w * qd->h;
@@ -1464,9 +1464,10 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 	PixbufRenderer *pr = rt->pr;
 	QueueData *qd;
 	gboolean fast;
+	const gboolean first_pass = !g_queue_is_empty(&rt->draw_queue);
 
 	if ((!pr->pixbuf && !pr->source_tiles_enabled) ||
-	    (!rt->draw_queue && !rt->draw_queue_2pass) ||
+	    (g_queue_is_empty(&rt->draw_queue) && g_queue_is_empty(&rt->draw_queue_2pass)) ||
 	    !rt->draw_idle_id)
 		{
 		rt_present_pending(rt);
@@ -1476,9 +1477,9 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 		return G_SOURCE_REMOVE;
 		}
 
-	if (rt->draw_queue)
+	if (first_pass)
 		{
-		qd = static_cast<QueueData *>(rt->draw_queue->data);
+		qd = static_cast<QueueData *>(g_queue_peek_head(&rt->draw_queue));
 		fast = (pr->zoom_2pass && ((pr->zoom_quality != GDK_INTERP_NEAREST && pr->scale != 1.0) || pr->post_process_slow));
 		}
 	else
@@ -1491,7 +1492,7 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 			return rt_queue_schedule_next_draw(rt, FALSE);
 			}
 
-		qd = static_cast<QueueData *>(rt->draw_queue_2pass->data);
+		qd = static_cast<QueueData *>(g_queue_peek_head(&rt->draw_queue_2pass));
 		fast = FALSE;
 		}
 
@@ -1512,10 +1513,10 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 			}
 		}
 
-	if (rt->draw_queue)
+	if (first_pass)
 		{
 		qd->it->qd = nullptr;
-		rt->draw_queue = g_list_remove(rt->draw_queue, qd);
+		g_queue_pop_head(&rt->draw_queue);
 		if (fast)
 			{
 			if (qd->it->qd2)
@@ -1526,7 +1527,7 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 			else
 				{
 				qd->it->qd2 = qd;
-				rt->draw_queue_2pass = g_list_append(rt->draw_queue_2pass, qd);
+				g_queue_push_tail(&rt->draw_queue_2pass, qd);
 				}
 			}
 		else
@@ -1537,11 +1538,11 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 	else
 		{
 		qd->it->qd2 = nullptr;
-		rt->draw_queue_2pass = g_list_remove(rt->draw_queue_2pass, qd);
+		g_queue_pop_head(&rt->draw_queue_2pass);
 		g_free(qd);
 		}
 
-	if (!rt->draw_queue && !rt->draw_queue_2pass)
+	if (g_queue_is_empty(&rt->draw_queue) && g_queue_is_empty(&rt->draw_queue_2pass))
 		{
 		/* Present all tiles updated by this render batch in one frame. */
 		rt_present_pending(rt);
@@ -1565,11 +1566,8 @@ void rt_queue_data_free(gpointer data)
 
 void rt_queue_clear(RendererTiles *rt)
 {
-	g_list_free_full(rt->draw_queue, rt_queue_data_free);
-	rt->draw_queue = nullptr;
-
-	g_list_free_full(rt->draw_queue_2pass, rt_queue_data_free);
-	rt->draw_queue_2pass = nullptr;
+	g_queue_clear_full(&rt->draw_queue, rt_queue_data_free);
+	g_queue_clear_full(&rt->draw_queue_2pass, rt_queue_data_free);
 
 	g_clear_handle_id(&rt->draw_idle_id, g_source_remove);
 
@@ -1655,7 +1653,7 @@ void rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
 				else
 					{
 					it->qd = qd;
-					rt->draw_queue = g_list_append(rt->draw_queue, qd);
+					g_queue_push_tail(&rt->draw_queue, qd);
 					}
 				}
 			}
@@ -1683,7 +1681,7 @@ void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 	rt_queue_to_tiles(rt, nx, ny, w, h, render, new_data, only_existing);
 
-	if ((rt->draw_queue || rt->draw_queue_2pass) && rt->draw_idle_id) return;
+	if ((!g_queue_is_empty(&rt->draw_queue) || !g_queue_is_empty(&rt->draw_queue_2pass)) && rt->draw_idle_id) return;
 
 	g_clear_handle_id(&rt->draw_idle_id, g_source_remove);
 	rt_queue_schedule_next_draw(rt, TRUE);
@@ -2015,6 +2013,8 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 
 	rt->tiles = nullptr;
 	rt->tile_cache_size = 0;
+	g_queue_init(&rt->draw_queue);
+	g_queue_init(&rt->draw_queue_2pass);
 
 	rt->draw_idle_id = 0;
 
