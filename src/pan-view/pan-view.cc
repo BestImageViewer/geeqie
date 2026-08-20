@@ -1401,30 +1401,28 @@ static void pan_window_image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
 	pixbuf_renderer_get_visible_rect(pr, rect);
 	pixbuf_renderer_get_image_size(pr, width, height);
 
-	adj = gtk_range_get_adjustment(GTK_RANGE(pw->scrollbar_h));
+	adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(pw->scrollbar_h));
+	g_signal_handlers_block_matched(adj, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, pw);
 	gtk_adjustment_set_page_size(adj, rect.width);
 	gtk_adjustment_set_page_increment(adj, gtk_adjustment_get_page_size(adj) / 2.0);
 	gtk_adjustment_set_step_increment(adj, 48.0 / pr->scale);
 	gtk_adjustment_set_lower(adj, 0.0);
 	gtk_adjustment_set_upper(adj, std::max<gdouble>(width, 1.0));
 	gtk_adjustment_set_value(adj, static_cast<gdouble>(rect.x));
+	g_signal_handlers_unblock_matched(adj, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, pw);
 
-	pref_signal_block_data(pw->scrollbar_h, pw);
-	pref_signal_unblock_data(pw->scrollbar_h, pw);
-
-	adj = gtk_range_get_adjustment(GTK_RANGE(pw->scrollbar_v));
+	adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(pw->scrollbar_v));
+	g_signal_handlers_block_matched(adj, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, pw);
 	gtk_adjustment_set_page_size(adj, rect.height);
 	gtk_adjustment_set_page_increment(adj, gtk_adjustment_get_page_size(adj) / 2.0);
 	gtk_adjustment_set_step_increment(adj, 48.0 / pr->scale);
 	gtk_adjustment_set_lower(adj, 0.0);
 	gtk_adjustment_set_upper(adj, std::max<gdouble>(height, 1.0));
 	gtk_adjustment_set_value(adj, static_cast<gdouble>(rect.y));
-
-	pref_signal_block_data(pw->scrollbar_v, pw);
-	pref_signal_unblock_data(pw->scrollbar_v, pw);
+	g_signal_handlers_unblock_matched(adj, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, pw);
 }
 
-static void pan_window_scrollbar_h_value_cb(GtkRange *range, gpointer data)
+static void pan_window_scrollbar_h_value_cb(GtkAdjustment *adjustment, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
 	PixbufRenderer *pr;
@@ -1434,12 +1432,12 @@ static void pan_window_scrollbar_h_value_cb(GtkRange *range, gpointer data)
 
 	if (!pr->scale) return;
 
-	x = static_cast<gint>(gtk_range_get_value(range));
+	x = static_cast<gint>(gtk_adjustment_get_value(adjustment));
 
 	pixbuf_renderer_scroll_to_point(pr, x, static_cast<gint>(static_cast<gdouble>(pr->y_scroll) / pr->scale), 0.0, 0.0);
 }
 
-static void pan_window_scrollbar_v_value_cb(GtkRange *range, gpointer data)
+static void pan_window_scrollbar_v_value_cb(GtkAdjustment *adjustment, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
 	PixbufRenderer *pr;
@@ -1449,7 +1447,7 @@ static void pan_window_scrollbar_v_value_cb(GtkRange *range, gpointer data)
 
 	if (!pr->scale) return;
 
-	y = static_cast<gint>(gtk_range_get_value(range));
+	y = static_cast<gint>(gtk_adjustment_get_value(adjustment));
 
 	pixbuf_renderer_scroll_to_point(pr, static_cast<gint>(static_cast<gdouble>(pr->x_scroll) / pr->scale), y, 0.0, 0.0);
 }
@@ -1986,7 +1984,8 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_box_append(GTK_BOX(vbox_imd_widget), pw->imd->widget);
 
 	pw->scrollbar_h = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, nullptr);
-	g_signal_connect(G_OBJECT(pw->scrollbar_h), "value_changed",  G_CALLBACK(pan_window_scrollbar_h_value_cb), pw);
+	GtkAdjustment *adjustment_h = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(pw->scrollbar_h));
+	g_signal_connect(adjustment_h, "value-changed", G_CALLBACK(pan_window_scrollbar_h_value_cb), pw);
 	gtk_box_append(GTK_BOX(vbox_imd_widget), pw->scrollbar_h);
 
 	gtk_widget_set_hexpand(vbox_imd_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox_imd_widget))) == GTK_ORIENTATION_HORIZONTAL ? true : FALSE);
@@ -1994,7 +1993,8 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_box_append(GTK_BOX(hbox_imd_widget), vbox_imd_widget);
 
 	pw->scrollbar_v = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, nullptr);
-	g_signal_connect(G_OBJECT(pw->scrollbar_v), "value_changed", G_CALLBACK(pan_window_scrollbar_v_value_cb), pw);
+	GtkAdjustment *adjustment_v = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(pw->scrollbar_v));
+	g_signal_connect(adjustment_v, "value-changed", G_CALLBACK(pan_window_scrollbar_v_value_cb), pw);
 	gtk_box_append(GTK_BOX(hbox_imd_widget), pw->scrollbar_v);
 
 	gtk_widget_set_hexpand(hbox_imd_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? true : FALSE);
