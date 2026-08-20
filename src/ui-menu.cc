@@ -528,9 +528,6 @@ void color_profiles_menu_populate(LayoutWindow *lw, const gchar *action)
 	GMenu *color_profiles_menu = G_MENU(gtk_builder_get_object(lw->builder, "color-profiles-menu"));
 	g_menu_remove_all(color_profiles_menu);
 
-	GAction *image_profile_action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-use-image-profile");
-	gboolean use_image_profile = g_variant_get_boolean(g_action_get_state(G_ACTION(image_profile_action)));
-
 	for (const auto &profile : builtin_profiles)
 		{
 		g_autoptr(GMenuItem) item = g_menu_item_new(profile.label, nullptr);
@@ -564,9 +561,6 @@ void color_profiles_menu_populate(LayoutWindow *lw, const gchar *action)
 		g_autoptr(GMenuItem) item = g_menu_item_new(label, nullptr);
 
 		g_menu_item_set_action_and_target_value(item, action, g_variant_new_int32(i + 2));
-
-		GAction *menu_action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), action + 4);
-		g_simple_action_set_enabled(G_SIMPLE_ACTION(menu_action), !use_image_profile);
 
 		g_menu_append_item(color_profiles_menu, item);
 		}

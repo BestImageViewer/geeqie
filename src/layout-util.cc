@@ -538,11 +538,13 @@ static void layout_menu_rating_cb(GSimpleAction *, GVariant *, gpointer  )
 	layout_image_rating(lw, std::to_string(rating).c_str());
 }
 
-static void layout_menu_alter_desaturate_cb(GSimpleAction *action, GVariant  *, gpointer  )
+static void layout_menu_alter_desaturate_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
+	const gboolean desaturate = g_variant_get_boolean(state);
 
-	layout_image_set_desaturate(lw, g_variant_get_boolean(g_action_get_state(G_ACTION(action))));
+	layout_image_set_desaturate(lw, desaturate);
+	g_simple_action_set_state(action, state);
 }
 
 static void layout_menu_alter_ignore_alpha_cb(GSimpleAction *action, GVariant   *, gpointer)
@@ -2273,37 +2275,38 @@ static void layout_menu_keyword_autocomplete_cb(GSimpleAction *, GVariant *, gpo
  *-----------------------------------------------------------------------------
  */
 #if HAVE_LCMS
-static void layout_color_menu_enable_cb(GSimpleAction *action, GVariant *state, gpointer)
+static void layout_color_menu_enable_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
+	const gboolean enable = g_variant_get_boolean(state);
 
-
-	layout_util_sync_color(lw);
-	layout_image_refresh(lw);
-
+	layout_image_color_profile_set_use(lw, enable);
 	g_simple_action_set_state(action, state);
+	layout_image_refresh(lw);
+	layout_util_sync_color(lw);
 }
 
-static void layout_color_menu_use_image_cb(GSimpleAction *action, GVariant *parameter, gpointer)
+static void layout_color_menu_use_image_cb(GSimpleAction *action, GVariant *parameter, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
 	gint input;
 	gboolean use_image;
 
-	gboolean active = g_variant_get_boolean(parameter);
+	const gboolean active = g_variant_get_boolean(parameter);
 
 	if (!layout_image_color_profile_get(lw, input, use_image)) return;
 
-	if (use_image == active) return;
+	if (use_image != active)
+		{
+		layout_image_color_profile_set(lw, input, active);
+		layout_image_refresh(lw);
+		}
 
-	layout_image_color_profile_set(lw, input, active);
+	g_simple_action_set_state(action, parameter);
 	layout_util_sync_color(lw);
-	layout_image_refresh(lw);
-
-	g_simple_action_set_state(action, g_variant_new_boolean(active));
 }
 
-static void layout_color_menu_input_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+static void layout_color_menu_input_cb(GSimpleAction *action, GVariant *parameter, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint input;
@@ -2314,10 +2317,13 @@ static void layout_color_menu_input_cb(GSimpleAction *, GVariant *parameter, gpo
 	if (type < 0 || type >= COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS) return;
 
 	if (!layout_image_color_profile_get(lw, input, use_image)) return;
-	if (type == input) return;
+	if (type != input)
+		{
+		layout_image_color_profile_set(lw, type, use_image);
+		layout_image_refresh(lw);
+		}
 
-	layout_image_color_profile_set(lw, type, use_image);
-	layout_image_refresh(lw);
+	g_simple_action_set_state(action, parameter);
 }
 #else
 static void layout_color_menu_enable_cb(GSimpleAction *action, GVariant *parameter, gpointer)
@@ -3139,6 +3145,10 @@ void layout_util_sync_color(LayoutWindow *lw)
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-use-image-profile");
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(use_image));
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), use_color);
+
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-color-profile");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_int32(input));
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), use_color && !use_image);
 
 	color_profiles_menu_populate(lw, "win.main-win-color-profile");
 

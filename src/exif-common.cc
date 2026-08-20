@@ -969,7 +969,7 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 	   NN = segment number for data
 	   TT = total number of ICC segments (TT in each ICC segment should match)
 	 */
-	constexpr std::string_view magic{ "ICC_PROFILE\x00" };
+	constexpr std::string_view magic{ "ICC_PROFILE\x00", 12 };
 	constexpr guint magic_len = magic.size();
 	JpegSegment seg;
 	while (jpeg_segment_find(data + (seg.offset + seg.length),
@@ -1000,6 +1000,7 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 	                                        [](guint len, const JpegSegment &chunk){ return len + chunk.length; });
 	g_autofree auto *cp_data = static_cast<guchar *>(g_malloc(cp_length));
 
+	guint cp_offset = 0;
 	for (const JpegSegment &chunk : chunks)
 		{
 		if (chunk.offset == 0)
@@ -1008,8 +1009,8 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 			return false;
 			}
 
-		// @fixme Each chunk overwrites cp_data from start. Is it intended?
-		memcpy(cp_data, data + chunk.offset, chunk.length);
+		memcpy(cp_data + cp_offset, data + chunk.offset, chunk.length);
+		cp_offset += chunk.length;
 		}
 
 	DEBUG_1("Found embedded icc profile in jpeg");
