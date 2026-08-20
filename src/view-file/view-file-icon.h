@@ -40,6 +40,7 @@ struct ViewFileInfoIcon
 	FileData *prev_selection;
 
 	GtkWidget *tip_window;
+	GtkWidget *tip_label;
 	guint tip_delay_id; /**< event source id */
 	FileData *tip_fd;
 
