@@ -1062,10 +1062,58 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
  * @param interp_type
  * @param check_x
  * @param check_y
- * @param wide_image Used as a work-around for a GdkPixbuf problem. Set when image width is > 32767.
- *        Problem exhibited with gdk_pixbuf_copy_area() and GDK_INTERP_NEAREST.
+ * @param wide_image Use the bounds-checked scaler when image width is > 32767.
  *        See https://github.com/BestImageViewer/geeqie/issues/772
  */
+void rt_tile_get_region_wide(gboolean ignore_alpha,
+                             const GdkPixbuf *src, GdkPixbuf *dest,
+                             GdkRectangle pb_rect,
+                             double offset_x, double offset_y, double scale_x, double scale_y,
+                             int check_x, int check_y)
+{
+	const gint src_width = gdk_pixbuf_get_width(src);
+	const gint src_height = gdk_pixbuf_get_height(src);
+	const gint src_channels = gdk_pixbuf_get_n_channels(src);
+	const gint src_rowstride = gdk_pixbuf_get_rowstride(src);
+	const guchar *src_pixels = gdk_pixbuf_get_pixels(src);
+
+	const gint dest_channels = gdk_pixbuf_get_n_channels(dest);
+	const gint dest_rowstride = gdk_pixbuf_get_rowstride(dest);
+	guchar *dest_pixels = gdk_pixbuf_get_pixels(dest);
+
+	const auto color_component = [](gdouble value) { return static_cast<guchar>(std::clamp(value * 255.0, 0.0, 255.0)); };
+	const guchar checker[][COLOR_BYTES] = {
+		{color_component(options->image.alpha_color_1.red), color_component(options->image.alpha_color_1.green), color_component(options->image.alpha_color_1.blue)},
+		{color_component(options->image.alpha_color_2.red), color_component(options->image.alpha_color_2.green), color_component(options->image.alpha_color_2.blue)}
+	};
+
+	for (gint y = pb_rect.y; y < pb_rect.y + pb_rect.height; y++)
+		{
+		const gint src_y = std::clamp(static_cast<gint>(floor((y - offset_y) / scale_y)), 0, src_height - 1);
+		for (gint x = pb_rect.x; x < pb_rect.x + pb_rect.width; x++)
+			{
+			const gint src_x = std::clamp(static_cast<gint>(floor((x - offset_x) / scale_x)), 0, src_width - 1);
+			const guchar *src_pixel = src_pixels + src_y * src_rowstride + src_x * src_channels;
+			guchar *dest_pixel = dest_pixels + y * dest_rowstride + x * dest_channels;
+
+			if (src_channels == 4 && !ignore_alpha)
+				{
+				const gint checker_index = (((check_x + x - pb_rect.x) / PR_ALPHA_CHECK_SIZE) +
+				                            ((check_y + y - pb_rect.y) / PR_ALPHA_CHECK_SIZE)) & 1;
+				const guint alpha = src_pixel[3];
+				for (std::size_t channel = 0; channel < COLOR_BYTES; channel++)
+					{
+					dest_pixel[channel] = (src_pixel[channel] * alpha + checker[checker_index][channel] * (255 - alpha) + 127) / 255;
+					}
+				}
+			else
+				{
+				memcpy(dest_pixel, src_pixel, COLOR_BYTES);
+				}
+			}
+		}
+}
+
 void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
                         const GdkPixbuf *src, GdkPixbuf *dest,
                         GdkRectangle pb_rect,
@@ -1073,38 +1121,22 @@ void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
                         GdkInterpType interp_type,
                         int check_x, int check_y, gboolean wide_image)
 {
+	if (wide_image)
+		{
+		rt_tile_get_region_wide(ignore_alpha, src, dest, pb_rect,
+		                        offset_x, offset_y, scale_x, scale_y, check_x, check_y);
+		return;
+		}
+
 	if (!has_alpha)
 		{
 		if (scale_x == 1.0 && scale_y == 1.0)
 			{
-			if (wide_image)
-				{
-				const gint srs = gdk_pixbuf_get_rowstride(src);
-				const gint drs = gdk_pixbuf_get_rowstride(dest);
-				const guchar *s_pix = gdk_pixbuf_get_pixels(src);
-				guchar *d_pix = gdk_pixbuf_get_pixels(dest);
-
-				for (gint y = 0; y < pb_rect.height; y++)
-					{
-					const gint sy = -static_cast<int>(offset_y) + pb_rect.y + y;
-					for (gint x = 0; x < pb_rect.width; x++)
-						{
-						const gint sx = -static_cast<int>(offset_x) + pb_rect.x + x;
-						const guchar *sp = s_pix + (sy * srs) + (sx * COLOR_BYTES);
-						guchar *dp = d_pix + (y * drs) + (x * COLOR_BYTES);
-
-						memcpy(dp, sp, COLOR_BYTES);
-						}
-					}
-				}
-			else
-				{
-				gdk_pixbuf_copy_area(src,
-				                     -offset_x + pb_rect.x, -offset_y + pb_rect.y,
-				                     pb_rect.width, pb_rect.height,
-				                     dest,
-				                     pb_rect.x, pb_rect.y);
-				}
+			gdk_pixbuf_copy_area(src,
+			                     -offset_x + pb_rect.x, -offset_y + pb_rect.y,
+			                     pb_rect.width, pb_rect.height,
+			                     dest,
+			                     pb_rect.x, pb_rect.y);
 			}
 		else
 			{
@@ -1112,7 +1144,7 @@ void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
 			                 pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
 			                 offset_x, offset_y,
 			                 scale_x, scale_y,
-			                 (wide_image && interp_type == GDK_INTERP_NEAREST) ? GDK_INTERP_TILES : interp_type);
+			                 interp_type);
 			}
 		}
 	else
@@ -1141,7 +1173,7 @@ void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
 		                           pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
 		                           offset_x, offset_y,
 		                           scale_x, scale_y,
-		                           (wide_image && interp_type == GDK_INTERP_NEAREST) ? GDK_INTERP_TILES : interp_type,
+		                           interp_type,
 		                           255, check_x, check_y,
 		                           PR_ALPHA_CHECK_SIZE,
 		                           convert_alpha_color(options->image.alpha_color_1),
@@ -1253,7 +1285,8 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		 * small sizes for anything but GDK_INTERP_NEAREST
 		 */
 		if (pr->width < PR_MIN_SCALE_SIZE || pr->height < PR_MIN_SCALE_SIZE) fast = TRUE;
-		if (pr->image_width > 32767) wide_image = TRUE;
+		if (gdk_pixbuf_get_width(pr->pixbuf) > 32767 ||
+		    gdk_pixbuf_get_height(pr->pixbuf) > 32767) wide_image = TRUE;
 
 		rt_tile_get_region(has_alpha, pr->ignore_alpha,
 		                   pr->pixbuf, it->pixbuf, pb_rect,
