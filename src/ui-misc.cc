@@ -1268,34 +1268,35 @@ void widget_remove_from_parent_cb(GSimpleAction *, GVariant *, gpointer data)
 	widget_remove_from_parent(static_cast<GtkWidget *>(data));
 }
 
-gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask)
+bool get_pointer_position(GtkWidget *widget, int &x, int &y, GdkModifierType *mask)
 {
 	GtkNative *native = widget_get_native_safe(widget);
 	if (!native)
 		{
-		return FALSE;
+		return false;
 		}
 
 	GdkSurface *surface = gtk_native_get_surface(native);
-	double dx;
-	double dy;
-
 	if (!surface)
 		{
-		return FALSE;
+		return false;
 		}
 
+	GdkSeat *seat = gdk_display_get_default_seat(gtk_widget_get_display(widget));
+	GdkDevice *device = gdk_seat_get_pointer(seat);
+	double dx;
+	double dy;
 	GdkModifierType local_mask = GDK_NO_MODIFIER_MASK;
 	if (!gdk_surface_get_device_position(surface, device, &dx, &dy, &local_mask))
 		{
-		return FALSE;
+		return false;
 		}
 
-	*x = (int)dx;
-	*y = (int)dy;
+	x = (int)dx;
+	y = (int)dy;
 	if (mask) *mask = local_mask;
 
-	return TRUE;
+	return true;
 }
 
 PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)

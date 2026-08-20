@@ -1192,16 +1192,12 @@ static CollectInfo *collection_table_insert_find(CollectTable *ct, CollectInfo *
 	GtkTreeModel *store;
 	GtkTreeIter iter;
 	GtkTreeViewColumn *column;
-	GdkSeat *seat;
-	GdkDevice *device;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
 
 	if (!use_coord)
 		{
-		seat = gdk_display_get_default_seat(gtk_widget_get_display(ct->listview));
-		device = gdk_seat_get_pointer(seat);
-		get_pointer_position(ct->listview, device, &x, &y, nullptr);
+		get_pointer_position(ct->listview, x, y);
 		}
 
 	if (source)

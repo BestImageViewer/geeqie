@@ -203,7 +203,7 @@ gboolean widget_received_event(GtkWidget *widget, GqPoint event);
 void widget_remove_from_parent(GtkWidget *widget);
 void widget_remove_from_parent_cb(GSimpleAction *action, GVariant *parameter, gpointer data);
 
-gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask);
+bool get_pointer_position(GtkWidget *widget, int &x, int &y, GdkModifierType *mask = nullptr);
 
 PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale);
 
