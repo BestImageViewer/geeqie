@@ -344,9 +344,8 @@ static void tip_show(ViewFile *vf)
 	gtk_widget_set_margin_start(VFICON(vf)->tip_window, 2);
 	gtk_widget_set_margin_end(VFICON(vf)->tip_window, 2);
 
-	GtkWidget *label = gtk_label_new(VFICON(vf)->tip_fd->name);
-	g_object_set_data(G_OBJECT(VFICON(vf)->tip_window), "tip_label", label);
-	gtk_window_set_child(GTK_WINDOW(VFICON(vf)->tip_window), label);
+	VFICON(vf)->tip_label = gtk_label_new(VFICON(vf)->tip_fd->name);
+	gtk_window_set_child(GTK_WINDOW(VFICON(vf)->tip_window), VFICON(vf)->tip_label);
 
 	if (!gtk_widget_get_realized(VFICON(vf)->tip_window)) gtk_widget_realize(VFICON(vf)->tip_window);
 	gtk_window_present(GTK_WINDOW(VFICON(vf)->tip_window));
@@ -418,8 +417,7 @@ static void tip_update(ViewFile *vf, FileData *fd)
 		return;
 		}
 
-	auto *label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(VFICON(vf)->tip_window), "tip_label"));
-	gtk_label_set_text(GTK_LABEL(label), VFICON(vf)->tip_fd->name);
+	gtk_label_set_text(GTK_LABEL(VFICON(vf)->tip_label), VFICON(vf)->tip_fd->name);
 }
 
 /*
