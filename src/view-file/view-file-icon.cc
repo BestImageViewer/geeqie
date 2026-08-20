@@ -322,11 +322,9 @@ static void tip_show(ViewFile *vf)
 {
 	if (VFICON(vf)->tip_window) return;
 
-	GdkSeat *seat = gdk_display_get_default_seat(gtk_widget_get_display(GTK_WIDGET(vf->listview)));
-	GdkDevice *device = gdk_seat_get_pointer(seat);
 	gint x;
 	gint y;
-	get_pointer_position(vf->listview, device, &x, &y, nullptr);
+	get_pointer_position(vf->listview, x, y);
 
 	VFICON(vf)->tip_fd = vficon_find_data_by_coord(vf, x, y, nullptr);
 	if (!VFICON(vf)->tip_fd) return;
