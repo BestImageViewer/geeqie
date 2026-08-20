@@ -1334,6 +1334,7 @@ void layout_image_set_overunderexposed(LayoutWindow *lw, gboolean overunderexpos
 {
 	if (!layout_valid(&lw)) return;
 
+	options->overunderexposed = overunderexposed;
 	image_set_overunderexposed(lw->image, overunderexposed);
 }
 

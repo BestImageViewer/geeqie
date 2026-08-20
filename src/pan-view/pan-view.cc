@@ -1713,7 +1713,7 @@ static void pan_exif_date_toggle_cb(GSimpleAction *action, GVariant *value, gpoi
 	gboolean active = g_variant_get_boolean(value);
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
 
-	pw->exif_date_enable = !active;
+	pw->exif_date_enable = active;
 	pan_layout_update(pw);
 }
 

@@ -547,13 +547,17 @@ static void layout_menu_alter_desaturate_cb(GSimpleAction *action, GVariant *sta
 	g_simple_action_set_state(action, state);
 }
 
-static void layout_menu_alter_ignore_alpha_cb(GSimpleAction *action, GVariant   *, gpointer)
+static void layout_menu_alter_ignore_alpha_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-   auto lw = get_current_layout();
+	auto lw = get_current_layout();
+	const gboolean ignore_alpha = g_variant_get_boolean(state);
 
-	if (lw->options.ignore_alpha == g_variant_get_boolean(g_action_get_state(G_ACTION(action)))) return;
+	if (lw->options.ignore_alpha != ignore_alpha)
+		{
+		layout_image_set_ignore_alpha(lw, ignore_alpha);
+		}
 
-   layout_image_set_ignore_alpha(lw, g_variant_get_boolean(g_action_get_state(G_ACTION(action))));
+	g_simple_action_set_state(action, g_variant_new_boolean(lw->options.ignore_alpha));
 }
 
 static void layout_menu_exif_rotate_cb(GSimpleAction *action, GVariant *value, gpointer)
@@ -563,7 +567,7 @@ static void layout_menu_exif_rotate_cb(GSimpleAction *action, GVariant *value, g
 	gboolean active = g_variant_get_boolean(value);
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
 
-	options->image.exif_rotate_enable = !active;
+	options->image.exif_rotate_enable = active;
 	layout_image_reset_orientation(lw);
 }
 
@@ -588,11 +592,13 @@ static void layout_menu_split_pane_sync_cb(GSimpleAction *action, GVariant *, gp
 	lw->options.split_pane_sync = active;
 }
 
-static void layout_menu_select_overunderexposed_cb(GSimpleAction *action, GVariant *, gpointer)
+static void layout_menu_select_overunderexposed_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
 	auto lw = get_current_layout();
+	const gboolean enabled = g_variant_get_boolean(state);
 
-	layout_image_set_overunderexposed(lw, g_variant_get_boolean(g_action_get_state(G_ACTION(action))));
+	layout_image_set_overunderexposed(lw, enabled);
+	g_simple_action_set_state(action, g_variant_new_boolean(options->overunderexposed));
 }
 
 template<bool keep_date>
@@ -1263,10 +1269,9 @@ static void layout_menu_histogram_cb(GSimpleAction *action, GVariant *value , gp
 	gboolean active = g_variant_get_boolean(value);
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
 
-	if (!active)
+	if (active)
 		{
 		image_osd_set(lw->image, static_cast<OsdShowFlags>(OSD_SHOW_INFO | OSD_SHOW_STATUS | OSD_SHOW_HISTOGRAM));
-		layout_util_sync_views(lw); /* show the overlay state, default channel and mode in the menu */
 		}
 	else
 		{
@@ -1274,6 +1279,8 @@ static void layout_menu_histogram_cb(GSimpleAction *action, GVariant *value , gp
 		if (flags & OSD_SHOW_HISTOGRAM)
 			image_osd_set(lw->image, static_cast<OsdShowFlags>(flags & ~OSD_SHOW_HISTOGRAM));
 		}
+
+	layout_util_sync_views(lw); /* show the overlay state, default channel and mode in the menu */
 }
 
 static void layout_menu_animate_cb(GSimpleAction *action, GVariant *value, gpointer data)
@@ -3312,7 +3319,9 @@ static void layout_util_sync_views(LayoutWindow *lw)
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(osd_flags != OSD_SHOW_NOTHING));
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-image-histogram");
-	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(osd_flags != OSD_SHOW_HISTOGRAM));
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(osd_flags & OSD_SHOW_HISTOGRAM));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-show-histogram");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(osd_flags & OSD_SHOW_HISTOGRAM));
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-exif-rotate");
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->image.exif_rotate_enable));
