@@ -251,6 +251,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	gtk_box_append(GTK_BOX(ui->filter_box), hbox);
 
 	ui->filter_entry = tab_completion_new_with_history(hbox, "", "pan_view_filter", -1);
+	gtk_editable_set_width_chars(GTK_EDITABLE(ui->filter_entry), 20);
 	tab_completion_set_enter_func(ui->filter_entry,
 	                              [pw](const gchar *text){ pan_filter_activate_cb(pw, text); });
 
