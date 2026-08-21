@@ -2296,8 +2296,10 @@ static void layout_color_menu_enable_cb(GSimpleAction *action, GVariant *state, 
 static void layout_color_menu_use_image_cb(GSimpleAction *action, GVariant *parameter, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint input;
-	gboolean use_image;
+	gint input = 0;
+	gboolean use_image = FALSE;
+
+	if (!layout_valid(&lw)) return;
 
 	const gboolean active = g_variant_get_boolean(parameter);
 
@@ -2316,8 +2318,10 @@ static void layout_color_menu_use_image_cb(GSimpleAction *action, GVariant *para
 static void layout_color_menu_input_cb(GSimpleAction *action, GVariant *parameter, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint input;
-	gboolean use_image;
+	gint input = 0;
+	gboolean use_image = FALSE;
+
+	if (!layout_valid(&lw)) return;
 
 	gint32 type = g_variant_get_int32(parameter);
 
