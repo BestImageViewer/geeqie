@@ -35,6 +35,7 @@ jobs:
             yes | sudo apt-get install libgtk-4-dev
             yes | sudo apt-get install libheif-dev
             yes | sudo apt-get install libimath-dev
+            yes | sudo apt-get install liblcms2-dev
             yes | sudo apt-get install liblua5.3-dev
             yes | sudo apt-get install libomp-dev
             yes | sudo apt-get install libopenexr-dev
@@ -56,6 +57,7 @@ jobs:
             mkdir -p $GITHUB_WORKSPACE/AppDir
             mkdir -p $GITHUB_WORKSPACE/AppDir/usr
             meson setup \
+              -Dcms=enabled \
               -Ddoxygen=disabled \
               -Dunit_tests=disabled \
               -Dyelp-build=disabled \

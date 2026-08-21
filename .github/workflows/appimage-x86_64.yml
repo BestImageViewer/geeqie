@@ -40,6 +40,7 @@ jobs:
             libheif-dev \
             libimath-dev \
             libjxl-dev \
+            liblcms2-dev \
             liblua5.3-dev \
             libomp-dev \
             libopenexr-dev \
@@ -74,7 +75,7 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Meson setup
-        run: meson setup build --prefix=/usr --datadir=share
+        run: meson setup build --prefix=/usr --datadir=share -Dcms=enabled
 
       - name: Ninja compile
         run: DESTDIR="${{ github.workspace }}/AppDir" ninja -C build install
