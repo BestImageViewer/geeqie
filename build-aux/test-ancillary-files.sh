@@ -87,7 +87,7 @@ then
 	do
 		if [ -n "$line" ]
 		then
-			res=$(grep "\-D$line=disabled" "./.github/workflows/check-build-actions.yml")
+			res=$(grep "\-D$line=\(disabled\|false\)" "./.github/workflows/check-build-actions.yml")
 			if [ -z "$res" ]
 			then
 				printf "ERROR; Option no disabled check in .github/workflows/check-build-actions.yml: %s\n" "$line"

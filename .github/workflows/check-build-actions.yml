@@ -41,6 +41,7 @@ jobs:
         setup-options: >
           -Darchive=disabled
           -Dcms=disabled
+          -Ddeprecated_warnings=false
           -Ddjvu=disabled
           -Ddoxygen=disabled
           -Dexecinfo=disabled
@@ -100,6 +101,7 @@ jobs:
           -Ddebug=false
           -Darchive=disabled
           -Dcms=disabled
+          -Ddeprecated_warnings=false
           -Ddjvu=disabled
           -Ddoxygen=disabled
           -Dexecinfo=disabled
@@ -184,6 +186,7 @@ jobs:
         action: test
         directory: build
         setup-options: >
+          -Ddeprecated_warnings=true
           -Dunit_tests=enabled
         options: --verbose
         meson-version: 1.3.2
@@ -246,6 +249,7 @@ jobs:
         directory: build
         setup-options: >
           -Ddebug=false
+          -Ddeprecated_warnings=true
           -Dunit_tests=enabled
         options: --verbose
         meson-version: 1.3.2
