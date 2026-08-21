@@ -41,6 +41,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "menu.h"
+#include "pixbuf-util.h"
 #include "preferences.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -97,7 +98,8 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 			constexpr gint h = 16;
 
 			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
-			image = gtk_image_new_from_pixbuf(scaled);
+			g_autoptr(GdkTexture) texture = pixbuf_to_texture(scaled);
+			image = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
 
 			g_object_unref(pixbuf);
 			}

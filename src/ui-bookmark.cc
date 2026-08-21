@@ -554,7 +554,8 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 			constexpr gint h = 16;
 
 			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
-			image = gtk_image_new_from_pixbuf(scaled);
+			g_autoptr(GdkTexture) texture = pixbuf_to_texture(scaled);
+			image = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
 			}
 		else
 			{

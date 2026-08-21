@@ -182,6 +182,20 @@ gboolean pixbuf_to_file_as_png(GdkPixbuf *pixbuf, const gchar *filename)
 	return ret;
 }
 
+GdkTexture *pixbuf_to_texture(GdkPixbuf *pixbuf)
+{
+	if (!pixbuf) return nullptr;
+
+	const GdkMemoryFormat format = gdk_pixbuf_get_has_alpha(pixbuf) ? GDK_MEMORY_R8G8B8A8 : GDK_MEMORY_R8G8B8;
+	g_autoptr(GBytes) bytes = gdk_pixbuf_read_pixel_bytes(pixbuf);
+
+	return gdk_memory_texture_new(gdk_pixbuf_get_width(pixbuf),
+	                              gdk_pixbuf_get_height(pixbuf),
+	                              format,
+	                              bytes,
+	                              gdk_pixbuf_get_rowstride(pixbuf));
+}
+
 /*
  *-----------------------------------------------------------------------------
  * pixbuf from inline

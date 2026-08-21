@@ -2871,7 +2871,8 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 		{
 		g_autoptr(GdkPixbuf) pixbuf = di->simd->to_pixbuf();
 
-		GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf);
+		g_autoptr(GdkTexture) texture = pixbuf_to_texture(pixbuf);
+		GtkWidget *image = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
 		gtk_box_append(GTK_BOX(gd->vbox), image);
 		}
 
