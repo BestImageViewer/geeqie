@@ -51,6 +51,20 @@ private:
 	gint page_total;
 };
 
+void fits_log_error(gint status)
+{
+	gchar status_text[FLEN_STATUS] = "";
+	gchar error_text[FLEN_ERRMSG] = "";
+
+	fits_get_errstatus(status, status_text);
+	log_printf("error: fits reader: %s", status_text);
+
+	while (fits_read_errmsg(error_text))
+		{
+		log_printf("error: fits reader: %s", error_text);
+		}
+}
+
 gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	fitsfile *fptr;           // FITS file pointer
@@ -64,14 +78,14 @@ gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize coun
 	/* Open FITS file from memory buffer */
 	if (fits_open_memfile(&fptr, "mem://", READONLY, (void **)&buf, &count, 0, nullptr, &status))
 		{
-		fits_report_error(stderr, status);
+		fits_log_error(status);
 		return FALSE;
 		}
 
 	/* Check that the file is an image and get its dimensions */
 	if (fits_get_img_param(fptr, 2, &bitpix, &naxis, naxes, &status))
 		{
-		fits_report_error(stderr, status);
+		fits_log_error(status);
 		fits_close_file(fptr, &status);
 		return FALSE;
 		}
@@ -98,7 +112,7 @@ gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize coun
 	/* Read the image data */
 	if (fits_read_img(fptr, TFLOAT, fpixel, width * height, nullptr, image_data, &anynul, &status))
 		{
-		fits_report_error(stderr, status);
+		fits_log_error(status);
 		free(image_data);
 		fits_close_file(fptr, &status);
 		return FALSE;

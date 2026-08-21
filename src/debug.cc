@@ -99,7 +99,10 @@ static void log_domain_print_message(const gchar *domain, const gchar *buf)
 		return;
 		}
 
-	print_term(false, buf_nl);
+	if (strcmp(domain, DOMAIN_DEBUG) == 0 || (command_line && command_line->log_file))
+		{
+		print_term(false, buf_nl);
+		}
 
 	if (strcmp(domain, DOMAIN_INFO) == 0)
 		g_idle_add(log_normal_cb, buf_nl);

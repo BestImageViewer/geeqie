@@ -36,6 +36,7 @@
 #  include <libintl.h>
 #endif
 
+#include "debug.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "metadata.h"
@@ -102,6 +103,28 @@ static void debug_exception_impl(const char* file, int line, const char* func, E
 #else
 #  define debug_exception(e)
 #endif
+
+static void exiv2_log_handler(int level, const char *message)
+{
+	const gchar *prefix = "info";
+
+	if (level >= Exiv2::LogMsg::error)
+		{
+		prefix = "error";
+		}
+	else if (level >= Exiv2::LogMsg::warn)
+		{
+		prefix = "warning";
+		}
+	else if (level <= Exiv2::LogMsg::debug)
+		{
+		prefix = "debug";
+		}
+
+	g_autofree gchar *str = g_strdup(message ? message : "");
+	g_strchomp(str);
+	log_printf("%s: exiv2: %s", prefix, str);
+}
 
 struct ExifData
 {
@@ -395,6 +418,8 @@ public:
 
 void exif_init()
 {
+	Exiv2::LogMsg::setHandler(exiv2_log_handler);
+
 #ifdef EXV_ENABLE_NLS
 	bind_textdomain_codeset (EXV_PACKAGE, "UTF-8");
 #endif

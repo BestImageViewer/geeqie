@@ -29,6 +29,7 @@
 #include <glib.h>
 #include <openjpeg.h>
 
+#include "debug.h"
 #include "image-load.h"
 #include "intl.h"
 #include "misc.h"
@@ -39,6 +40,27 @@ namespace
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(opj_stream_t, opj_stream_destroy)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(opj_codec_t, opj_destroy_codec)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(opj_image_t, opj_image_destroy)
+
+void opj_error_callback(const char *msg, void *)
+{
+	g_autofree gchar *str = g_strdup(msg ? msg : "");
+	g_strchomp(str);
+	log_printf("error: jpeg2000 reader: %s", str);
+}
+
+void opj_warning_callback(const char *msg, void *)
+{
+	g_autofree gchar *str = g_strdup(msg ? msg : "");
+	g_strchomp(str);
+	log_printf("warning: jpeg2000 reader: %s", str);
+}
+
+void opj_info_callback(const char *msg, void *)
+{
+	g_autofree gchar *str = g_strdup(msg ? msg : "");
+	g_strchomp(str);
+	DEBUG_1("jpeg2000 reader: %s", str);
+}
 
 struct ImageLoaderJ2K : public ImageLoaderBackend
 {
@@ -147,6 +169,10 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 	opj_set_default_decoder_parameters(&parameters);
 
 	g_autoptr(opj_codec_t) codec = opj_create_decompress(OPJ_CODEC_JP2);
+	opj_set_error_handler(codec, opj_error_callback, nullptr);
+	opj_set_warning_handler(codec, opj_warning_callback, nullptr);
+	opj_set_info_handler(codec, opj_info_callback, nullptr);
+
 	if (opj_setup_decoder (codec, &parameters) != OPJ_TRUE)
 		{
 		log_printf("%s", _("Couldn't set parameters on decoder for file."));

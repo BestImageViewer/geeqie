@@ -37,6 +37,7 @@
 #include <tiff.h>
 #include <tiffio.h>
 
+#include "debug.h"
 #include "image-load.h"
 
 namespace
@@ -149,6 +150,43 @@ void tiff_load_unmap_file (thandle_t, tdata_t, toff_t)
 {
 }
 
+void tiff_load_log(const gchar *prefix, const char *module, const char *format, va_list ap)
+{
+	g_autofree gchar *message = g_strdup_vprintf(format, ap);
+
+	log_printf("%s: tiff reader: %s: %s\n", prefix, module ? module : "libtiff", message);
+}
+
+void tiff_load_warning_handler(const char *module, const char *format, va_list ap)
+{
+	tiff_load_log("warning", module, format, ap);
+}
+
+void tiff_load_error_handler(const char *module, const char *format, va_list ap)
+{
+	tiff_load_log("error", module, format, ap);
+}
+
+class TiffLoadLogHandlers
+{
+public:
+	TiffLoadLogHandlers()
+	{
+		warning_handler = TIFFSetWarningHandler(tiff_load_warning_handler);
+		error_handler = TIFFSetErrorHandler(tiff_load_error_handler);
+	}
+
+	~TiffLoadLogHandlers()
+	{
+		TIFFSetWarningHandler(warning_handler);
+		TIFFSetErrorHandler(error_handler);
+	}
+
+private:
+	TIFFErrorHandler warning_handler;
+	TIFFErrorHandler error_handler;
+};
+
 gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	TIFF *tiff;
@@ -160,7 +198,7 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 	guint32 rowsperstrip;
 	gint dircount = 0;
 
-	TIFFSetWarningHandler(nullptr);
+	TiffLoadLogHandlers log_handlers;
 
 	GqTiffContext context{buf, count, 0};
 	tiff = TIFFClientOpen (	"libtiff-geeqie", "r", &context,
