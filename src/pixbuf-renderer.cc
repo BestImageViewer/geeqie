@@ -713,9 +713,6 @@ static void pr_get_monitor_size(PixbufRenderer *pr, gint *width, gint *height)
 
 static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 {
-	GtkAllocation widget_allocation;
-	GtkAllocation parent_allocation;
-
 	if (!pr_parent_window_sizable(pr)) return FALSE;
 
 	if (pr->window_limit)
@@ -733,13 +730,15 @@ static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 
 	auto *widget = GTK_WIDGET(pr);
 
-	gtk_widget_get_allocation(widget, &widget_allocation);
-	gtk_widget_get_allocation(pr->parent_window, &parent_allocation);
+	const gint widget_width = gtk_widget_get_width(widget);
+	const gint widget_height = gtk_widget_get_height(widget);
+	const gint parent_width = gtk_widget_get_width(pr->parent_window);
+	const gint parent_height = gtk_widget_get_height(pr->parent_window);
 
-	w += parent_allocation.width - widget_allocation.width;
-	h += parent_allocation.height - widget_allocation.height;
+	w += parent_width - widget_width;
+	h += parent_height - widget_height;
 
-	if (w == parent_allocation.width && h == parent_allocation.height)
+	if (w == parent_width && h == parent_height)
 		{
 		return FALSE;
 		}

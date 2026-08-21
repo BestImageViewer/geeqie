@@ -241,42 +241,34 @@ static void collection_table_update_extras(CollectTable *ct, gboolean loading, g
 
 static void collection_table_toggle_filenames(CollectTable *ct)
 {
-	GtkAllocation allocation;
 	ct->show_text = !ct->show_text;
 	options->show_icon_names = ct->show_text;
 
-	gtk_widget_get_allocation(ct->listview, &allocation);
-	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
+	collection_table_populate_at_new_size(ct, gtk_widget_get_width(ct->listview), gtk_widget_get_height(ct->listview), TRUE);
 }
 
 static void collection_table_toggle_stars(CollectTable *ct)
 {
-	GtkAllocation allocation;
 	ct->show_stars = !ct->show_stars;
 	options->show_star_rating = ct->show_stars;
 
-	gtk_widget_get_allocation(ct->listview, &allocation);
-	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
+	collection_table_populate_at_new_size(ct, gtk_widget_get_width(ct->listview), gtk_widget_get_height(ct->listview), TRUE);
 }
 
 static void collection_table_toggle_info(CollectTable *ct)
 {
-	GtkAllocation allocation;
 	ct->show_infotext = !ct->show_infotext;
 	options->show_collection_infotext = ct->show_infotext;
 
-	gtk_widget_get_allocation(ct->listview, &allocation);
-	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
+	collection_table_populate_at_new_size(ct, gtk_widget_get_width(ct->listview), gtk_widget_get_height(ct->listview), TRUE);
 }
 
 static void collection_table_toggle_marks(CollectTable *ct)
 {
-	GtkAllocation allocation;
 	ct->show_marks = !ct->show_marks;
 	options->show_collection_marks = ct->show_marks;
 
-	gtk_widget_get_allocation(ct->listview, &allocation);
-	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
+	collection_table_populate_at_new_size(ct, gtk_widget_get_width(ct->listview), gtk_widget_get_height(ct->listview), TRUE);
 }
 
 static gint collection_table_get_icon_width(CollectTable *ct)

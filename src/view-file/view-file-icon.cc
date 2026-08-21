@@ -111,10 +111,7 @@ void vficon_pop_menu_add_items(ViewFile *vf, GtkWidget *menu)
 
 void vficon_pop_menu_show_star_rating_cb(ViewFile *vf)
 {
-	GtkAllocation allocation;
-
-	gtk_widget_get_allocation(vf->listview, &allocation);
-	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
+	vficon_populate_at_new_size(vf, gtk_widget_get_width(vf->listview), gtk_widget_get_height(vf->listview), TRUE);
 }
 
 void vficon_pop_menu_refresh_cb(ViewFile *vf)
@@ -167,12 +164,10 @@ static void vficon_send_layout_select(ViewFile *vf, FileData *fd)
 
 static void vficon_toggle_filenames(ViewFile *vf)
 {
-	GtkAllocation allocation;
 	VFICON(vf)->show_text = !VFICON(vf)->show_text;
 	options->show_icon_names = VFICON(vf)->show_text;
 
-	gtk_widget_get_allocation(vf->listview, &allocation);
-	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
+	vficon_populate_at_new_size(vf, gtk_widget_get_width(vf->listview), gtk_widget_get_height(vf->listview), TRUE);
 }
 
 static gint vficon_get_icon_width(ViewFile *vf)
@@ -476,9 +471,7 @@ static void vficon_selection_remove(ViewFile *vf, FileData *fd, SelectionType ma
 
 void vficon_marks_set(ViewFile *vf, gint)
 {
-	GtkAllocation allocation;
-	gtk_widget_get_allocation(vf->listview, &allocation);
-	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
+	vficon_populate_at_new_size(vf, gtk_widget_get_width(vf->listview), gtk_widget_get_height(vf->listview), TRUE);
 }
 
 /*

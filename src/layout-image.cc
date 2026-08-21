@@ -2299,10 +2299,7 @@ static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 		}
 	else
 		{
-		GtkAllocation allocation;
-		gtk_widget_get_allocation(lw->utility_paned, &allocation);
-
-		pane_pos = allocation.width / 3;
+		pane_pos = gtk_widget_get_width(lw->utility_paned) / 3;
 		}
 
 	gtk_paned_set_position(GTK_PANED(hpaned1), pane_pos);

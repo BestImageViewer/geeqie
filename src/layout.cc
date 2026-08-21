@@ -1585,8 +1585,8 @@ static gboolean layout_geometry_get(LayoutWindow *lw, GdkRectangle &rect)
 
 gboolean layout_geometry_get_dividers(LayoutWindow *lw, gint *h, gint *v)
 {
-	GtkAllocation h_allocation;
-	GtkAllocation v_allocation;
+	gint h_size = -1;
+	gint v_size = -1;
 
 	if (!layout_valid(&lw)) return FALSE;
 
@@ -1594,27 +1594,27 @@ gboolean layout_geometry_get_dividers(LayoutWindow *lw, gint *h, gint *v)
 		{
 		GtkWidget *child = gtk_paned_get_start_child(GTK_PANED(lw->h_pane));
 
-		gtk_widget_get_allocation(child, &h_allocation);
+		h_size = gtk_widget_get_width(child);
 		}
 
 	if (lw->v_pane)
 		{
 		GtkWidget *child = gtk_paned_get_start_child(GTK_PANED(lw->v_pane));
-		gtk_widget_get_allocation(child, &v_allocation);
+		v_size = gtk_widget_get_height(child);
 		}
 
-	if (lw->h_pane && h_allocation.x >= 0)
+	if (h_size >= 0)
 		{
-		*h = h_allocation.width;
+		*h = h_size;
 		}
 	else if (h != &lw->options.main_window.hdivider_pos)
 		{
 		*h = lw->options.main_window.hdivider_pos;
 		}
 
-	if (lw->v_pane && v_allocation.x >= 0)
+	if (v_size >= 0)
 		{
-		*v = v_allocation.height;
+		*v = v_size;
 		}
 	else if (v != &lw->options.main_window.vdivider_pos)
 		{
@@ -1713,7 +1713,6 @@ static void layout_location_compute(LayoutLocation l1, LayoutLocation l2,
 
 static gboolean layout_geometry_get_tools(LayoutWindow *lw, GdkRectangle &rect, gint &divider_pos)
 {
-	GtkAllocation allocation;
 	if (!layout_valid(&lw)) return FALSE;
 
 	if (!lw->tools || !gtk_widget_get_visible(lw->tools))
@@ -1726,15 +1725,15 @@ static gboolean layout_geometry_get_tools(LayoutWindow *lw, GdkRectangle &rect, 
 		}
 
 	rect = widget_get_root_origin_geometry(lw->tools);
-	gtk_widget_get_allocation(gtk_paned_get_start_child(GTK_PANED(lw->tools_pane)), &allocation);
+	GtkWidget *child = gtk_paned_get_start_child(GTK_PANED(lw->tools_pane));
 
 	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(lw->tools_pane)) == GTK_ORIENTATION_VERTICAL)
 		{
-		divider_pos = allocation.height;
+		divider_pos = gtk_widget_get_height(child);
 		}
 	else
 		{
-		divider_pos = allocation.width;
+		divider_pos = gtk_widget_get_width(child);
 		}
 
 	return TRUE;
