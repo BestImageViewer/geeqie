@@ -290,30 +290,23 @@ static gint collection_table_get_icon_width(CollectTable *ct)
 
 static void collection_table_selection_set(CollectTable *ct, CollectInfo *info, SelectionType value, GtkTreeIter *iter)
 {
-	GtkTreeModel *store;
-	GList *list;
-
 	if (!info) return;
 
 	if (info->flag_mask == value) return;
 	info->flag_mask = value;
 
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
-	if (iter)
+	GtkTreeIter row;
+	if (!iter)
 		{
-		gtk_tree_model_get(store, iter, CTABLE_COLUMN_POINTER, &list, -1);
-		if (list) gtk_list_store_set(GTK_LIST_STORE(store), iter, CTABLE_COLUMN_POINTER, list, -1);
-		}
-	else
-		{
-		GtkTreeIter row;
+		if (!collection_table_find_iter(ct, info, &row, nullptr)) return;
 
-		if (collection_table_find_iter(ct, info, &row, nullptr))
-			{
-			gtk_tree_model_get(store, &row, CTABLE_COLUMN_POINTER, &list, -1);
-			if (list) gtk_list_store_set(GTK_LIST_STORE(store), &row, CTABLE_COLUMN_POINTER, list, -1);
-			}
+		iter = &row;
 		}
+
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
+	GList *list;
+	gtk_tree_model_get(store, iter, CTABLE_COLUMN_POINTER, &list, -1);
+	if (list) gtk_list_store_set(GTK_LIST_STORE(store), iter, CTABLE_COLUMN_POINTER, list, -1);
 }
 
 static void collection_table_selection_add(CollectTable *ct, CollectInfo *info, SelectionType mask, GtkTreeIter *iter)
