@@ -45,7 +45,9 @@ add_global_arguments('-Wno-overlength-strings', language : 'c')
 add_global_arguments('-include', 'debug.h', language : 'cpp')
 
 # To inhibit warnings for deprecated GTK stuff
-add_global_arguments('-Wno-deprecated-declarations', language : 'cpp')
+if not get_option('deprecated_warnings')
+    add_global_arguments('-Wno-deprecated-declarations', language : 'cpp')
+endif
 
 # Project requirements
 # code_sources is all human-written geeqie C/C++ code
