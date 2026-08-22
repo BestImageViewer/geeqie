@@ -12,6 +12,7 @@ option('gq_helpdir', type : 'string', value : '', description : 'Location of doc
 option('gq_htmldir', type : 'string', value : '', description : 'Location of html documentation')
 option('gq_localedir', type : 'string', value : '', description : 'Location where the catalogs will be installed')
 
+option('all_deprecated_warnings', type : 'boolean', value : false, description : 'show all deprecated declaration warnings, including intentionally retained APIs')
 option('archive', type : 'feature', value : 'auto', description : 'archive files e.g. zip, gz')
 option('cms', type : 'feature', value : 'auto', description : 'color management system')
 option('doxygen', type : 'feature', value : 'auto', description : 'lua api help file')

@@ -920,11 +920,17 @@ static void layout_menu_open_with_cb(GSimpleAction *, GVariant *, gpointer)
 
 			open_with_data->g_file_list = g_list_append(nullptr, g_file_new_for_path(fd->path));
 
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 			open_with_data->app_chooser_dialog = gtk_app_chooser_dialog_new(nullptr, GTK_DIALOG_MODAL, G_FILE(g_list_first(open_with_data->g_file_list)->data));
 
 			widget = gtk_app_chooser_dialog_get_widget(GTK_APP_CHOOSER_DIALOG(open_with_data->app_chooser_dialog));
 
 			open_with_data->application = gtk_app_chooser_get_app_info(GTK_APP_CHOOSER(open_with_data->app_chooser_dialog));
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+			G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 			g_signal_connect(G_OBJECT(widget), "application-selected", G_CALLBACK(open_with_application_selected_cb), open_with_data);
 			g_signal_connect(G_OBJECT(widget), "application-activated", G_CALLBACK(open_with_application_activated_cb), open_with_data);

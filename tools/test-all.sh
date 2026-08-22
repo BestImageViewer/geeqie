@@ -27,6 +27,7 @@ tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
 # Check with all options disabled except for developer
 meson setup \
 -Darchive=disabled \
+-Dall_deprecated_warnings=false \
 -Dcms=disabled \
 -Ddeprecated_warnings=false \
 -Ddoxygen=disabled \
@@ -68,7 +69,7 @@ cp ./build/meson-logs/meson-log.txt "$tmpdir/testlog-options-disabled.txt"
 cat ./build/meson-logs/testlog.txt >> "$tmpdir/testlog-options-disabled.txt"
 
 rm --recursive --force build
-meson setup --buildtype=debug -Ddeprecated_warnings=true -Dunit_tests=enabled build
+meson setup --buildtype=debug -Dall_deprecated_warnings=true -Ddeprecated_warnings=true -Dunit_tests=enabled build
 if ninja test -C build
 then
 	options_enabled="PASS"

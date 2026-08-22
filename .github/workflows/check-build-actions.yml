@@ -40,6 +40,7 @@ jobs:
         directory: build
         setup-options: >
           -Darchive=disabled
+          -Dall_deprecated_warnings=false
           -Dcms=disabled
           -Ddeprecated_warnings=false
           -Ddjvu=disabled
@@ -100,6 +101,7 @@ jobs:
         setup-options: >
           -Ddebug=false
           -Darchive=disabled
+          -Dall_deprecated_warnings=false
           -Dcms=disabled
           -Ddeprecated_warnings=false
           -Ddjvu=disabled
@@ -186,6 +188,7 @@ jobs:
         action: test
         directory: build
         setup-options: >
+          -Dall_deprecated_warnings=true
           -Ddeprecated_warnings=true
           -Dunit_tests=enabled
         options: --verbose
@@ -249,6 +252,7 @@ jobs:
         directory: build
         setup-options: >
           -Ddebug=false
+          -Dall_deprecated_warnings=true
           -Ddeprecated_warnings=true
           -Dunit_tests=enabled
         options: --verbose

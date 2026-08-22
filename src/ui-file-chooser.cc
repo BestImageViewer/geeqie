@@ -476,7 +476,13 @@ GtkWidget *create_preview_for_file(const gchar *file_name)
 
 void update_preview(PendingFileDialog *pending)
 {
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	g_autoptr(GFile) file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(pending->chooser));
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 	g_autofree gchar *file_name = file ? g_file_get_path(file) : nullptr;
 
 	if (g_strcmp0(file_name, pending->preview_path) == 0)
@@ -526,6 +532,9 @@ GtkFileChooserAction to_gtk_file_chooser_action(FileDialogAction action)
 
 GFile *get_selected_file(PendingFileDialog *pending)
 {
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	GFile *file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(pending->chooser));
 	if (file)
 		{
@@ -534,6 +543,9 @@ GFile *get_selected_file(PendingFileDialog *pending)
 
 	g_autoptr(GFile) folder = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(pending->chooser));
 	g_autofree gchar *name = gtk_file_chooser_get_current_name(GTK_FILE_CHOOSER(pending->chooser));
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	if (!name || name[0] == '\0')
 		{
@@ -556,6 +568,9 @@ GFile *get_selected_file(PendingFileDialog *pending)
 gboolean set_chooser_folder(PendingFileDialog *pending, GFile *folder)
 {
 	g_autoptr(GError) error = nullptr;
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	if (!gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(pending->chooser), folder, &error))
 		{
 		if (error)
@@ -564,6 +579,9 @@ gboolean set_chooser_folder(PendingFileDialog *pending, GFile *folder)
 			}
 		return FALSE;
 		}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	update_preview(pending);
 
@@ -670,6 +688,9 @@ void file_dialog_destroy_cb(GtkWidget *, gpointer data)
 
 void add_filters(GtkFileChooser *chooser, const FileDialogData &fdd)
 {
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	GtkFileFilter *all_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(all_filter, _("All files"));
 	gtk_file_filter_add_pattern(all_filter, "*");
@@ -693,10 +714,16 @@ void add_filters(GtkFileChooser *chooser, const FileDialogData &fdd)
 
 	gtk_file_chooser_add_filter(chooser, sub_filter);
 	gtk_file_chooser_set_filter(chooser, sub_filter);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 }
 
 void set_initial_location(GtkFileChooser *chooser, const FileDialogData &fdd)
 {
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	const gchar *initial_folder = nullptr;
 	if (fdd.history_key)
 		{
@@ -728,6 +755,9 @@ void set_initial_location(GtkFileChooser *chooser, const FileDialogData &fdd)
 		{
 		gtk_file_chooser_set_current_name(chooser, fdd.suggested_name);
 		}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 }
 
 void add_shortcut_folder(GtkFileChooser *chooser, const gchar *path)
@@ -738,7 +768,13 @@ void add_shortcut_folder(GtkFileChooser *chooser, const gchar *path)
 		}
 
 	g_autoptr(GFile) folder = g_file_new_for_path(path);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	gtk_file_chooser_add_shortcut_folder(chooser, folder, nullptr);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 }
 
 GtkWidget *create_dialog_content(PendingFileDialog *pending)
@@ -787,7 +823,13 @@ void file_dialog_show(const FileDialogData &fdd)
 	pending->callback = fdd.callback;
 	pending->data = fdd.data;
 
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	pending->dialog = gtk_dialog_new_with_buttons(title, parent, GTK_DIALOG_MODAL, _("_Cancel"), GTK_RESPONSE_CANCEL, accept_text, GTK_RESPONSE_ACCEPT, nullptr);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 	gtk_window_set_default_size(GTK_WINDOW(pending->dialog), 1040, 640);
 
 	GtkEventController *key_controller = gtk_event_controller_key_new();
@@ -795,6 +837,9 @@ void file_dialog_show(const FileDialogData &fdd)
 	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(file_dialog_key_pressed_cb), nullptr);
 	gtk_widget_add_controller(pending->dialog, key_controller);
 
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	pending->chooser = gtk_file_chooser_widget_new(to_gtk_file_chooser_action(fdd.action));
 	gtk_widget_set_size_request(pending->chooser, 720, 520);
 	gtk_widget_set_hexpand(pending->chooser, TRUE);
@@ -806,8 +851,17 @@ void file_dialog_show(const FileDialogData &fdd)
 	add_shortcut_folder(chooser, layout_get_path(get_current_layout()));
 
 	set_initial_location(chooser, fdd);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(pending->dialog));
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 	gtk_widget_set_margin_top(content, 6);
 	gtk_widget_set_margin_bottom(content, 6);
 	gtk_widget_set_margin_start(content, 6);
