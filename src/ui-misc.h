@@ -207,7 +207,6 @@ bool get_pointer_position(GtkWidget *widget, int &x, int &y, GdkModifierType *ma
 
 PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale);
 
-bool focus_is_text_editable(GtkWindow *window);
 bool focus_is_editable(GtkWindow *window);
 
 #endif

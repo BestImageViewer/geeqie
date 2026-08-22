@@ -1372,7 +1372,7 @@ bool focus_widget_is_editable_text(GtkWidget *focus)
 
 } // namespace
 
-bool focus_is_text_editable(GtkWindow *window)
+bool focus_is_editable(GtkWindow *window)
 {
 	if (!window)
 		{
@@ -1385,11 +1385,6 @@ bool focus_is_text_editable(GtkWindow *window)
 		}
 
 	return focus_widget_is_editable_text(gtk_root_get_focus(GTK_ROOT(window)));
-}
-
-bool focus_is_editable(GtkWindow *window)
-{
-	return focus_is_text_editable(window);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
