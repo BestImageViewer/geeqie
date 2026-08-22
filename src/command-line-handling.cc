@@ -22,14 +22,12 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <vector>
 
 #include "actions.h"
 #include "cache-maint.h"
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
-#include "compat.h"
 #include "dupe.h"
 #include "exif.h"
 #include "filedata.h"
@@ -53,7 +51,6 @@
 #include "rcfile.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
-#include "ui-misc.h"
 #include "utilops.h"
 
 namespace

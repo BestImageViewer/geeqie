@@ -27,12 +27,10 @@
 
 #include <glib-object.h>
 
-#include "compat.h"
 #include "filedata.h"
 #include "image.h"
 #include "intl.h"
 #include "main-defines.h"
-#include "misc.h"
 #include "pan-calendar.h"
 #include "pan-item.h"
 #include "pan-types.h"

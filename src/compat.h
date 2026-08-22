@@ -21,7 +21,6 @@
 #ifndef COMPAT_H
 #define COMPAT_H
 
-#include <glib.h>
 #include <gtk/gtk.h>
 
 #include <config.h>
@@ -33,7 +32,7 @@
 #define	MAP_ANON	MAP_ANONYMOUS
 #endif
 
-#ifndef GDK_ACTION_NONE
+#if !GTK_CHECK_VERSION(4, 20, 0)
 #define GDK_ACTION_NONE static_cast<GdkDragAction>(0)
 #endif
 

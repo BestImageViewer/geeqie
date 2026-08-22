@@ -35,7 +35,6 @@
 
 #include <config.h>
 
-#include "compat.h"
 #include "dnd.h"
 #include "exif.h"
 #if HAVE_LUA

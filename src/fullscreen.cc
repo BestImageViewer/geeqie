@@ -23,14 +23,12 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
 #include <string>
 #include <vector>
 
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
-#include "compat.h"
 #include "image-load.h"
 #include "image.h"
 #include "intl.h"

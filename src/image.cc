@@ -30,7 +30,6 @@
 #include "collect-table.h"
 #include "collect.h"
 #include "color-man.h"
-#include "compat.h"
 #include "exif.h"
 #include "filecache.h"
 #include "filedata.h"

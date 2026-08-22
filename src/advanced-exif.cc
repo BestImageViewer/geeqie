@@ -22,8 +22,6 @@
 #include "advanced-exif.h"
 
 #include <algorithm>
-#include <array>
-#include <cstring>
 #include <string>
 
 #include <gdk/gdk.h>
@@ -35,7 +33,6 @@
 
 #include "accelerators.h"
 #include "actions.h"
-#include "compat.h"
 #include "dnd.h"
 #include "exif.h"
 #include "filedata.h"

@@ -29,7 +29,6 @@
 
 #include <config.h>
 
-#include "compat.h"
 #include "intl.h"
 #include "layout.h"
 #include "misc.h"

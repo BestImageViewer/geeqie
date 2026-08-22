@@ -31,7 +31,6 @@
 #include <glib-object.h>
 
 #include "actions.h"
-#include "compat.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "intl.h"

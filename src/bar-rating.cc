@@ -28,7 +28,6 @@
 #include <config.h>
 
 #include "bar.h"
-#include "compat.h"
 #include "filedata.h"
 #include "intl.h"
 #include "metadata.h"

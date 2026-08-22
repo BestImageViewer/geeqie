@@ -25,7 +25,6 @@
 #include <pango/pango.h>
 
 #include "actions.h"
-#include "compat.h"
 #include "editors.h"
 #include "layout-util.h"
 #include "layout.h"

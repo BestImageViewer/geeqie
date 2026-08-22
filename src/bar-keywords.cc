@@ -22,7 +22,6 @@
 #include "bar-keywords.h"
 
 #include <algorithm>
-#include <array>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -32,7 +31,6 @@
 #include <glib-object.h>
 
 #include "bar.h"
-#include "compat.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"

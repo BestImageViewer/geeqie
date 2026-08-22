@@ -32,7 +32,6 @@
 
 #include <config.h>
 
-#include "compat.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "misc.h"

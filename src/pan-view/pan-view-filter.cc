@@ -21,11 +21,8 @@
 
 #include "pan-view-filter.h"
 
-#include <cstddef>
-
 #include <glib-object.h>
 
-#include "compat.h"
 #include "filedata.h"
 #include "intl.h"
 #include "main-defines.h"

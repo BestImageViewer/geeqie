@@ -25,7 +25,6 @@
 #include <glib.h>
 
 #include "collect.h"
-#include "compat.h"
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"

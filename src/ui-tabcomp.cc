@@ -26,7 +26,6 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
-#include "compat.h"
 #include "history-list.h"
 #include "intl.h"
 #include "main-defines.h"

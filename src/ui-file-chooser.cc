@@ -18,7 +18,6 @@
 #endif
 
 #include "cache.h"
-#include "compat.h"
 #include "history-list.h"
 #include "intl.h"
 #include "layout.h"
