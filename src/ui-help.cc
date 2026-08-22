@@ -27,7 +27,6 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
-#include "compat.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "ui-fileops.h"

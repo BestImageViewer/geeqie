@@ -30,7 +30,6 @@
 #include <glib-object.h>
 
 #include "bar.h"
-#include "compat.h"
 #include "filedata.h"
 #include "intl.h"
 #include "layout.h"
@@ -41,7 +40,6 @@
 #if HAVE_SPELL
 #  include "spell.h"
 #endif
-#include "ui-menu.h"
 #include "ui-misc.h"
 
 static void bar_pane_comment_changed(GtkTextBuffer *buffer, gpointer data);

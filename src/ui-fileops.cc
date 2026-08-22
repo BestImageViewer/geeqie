@@ -36,7 +36,6 @@
 
 #include <config.h>
 
-#include "compat.h"
 #include "filefilter.h"
 #include "intl.h"
 #include "layout.h"

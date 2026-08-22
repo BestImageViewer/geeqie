@@ -23,7 +23,6 @@
 
 #include "bar.h"
 #include "collect-io.h"
-#include "compat.h"
 #include "main-defines.h"
 #include "ui-menu.h"
 #include "ui-misc.h"

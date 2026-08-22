@@ -30,22 +30,18 @@
 
 #include <glib-object.h>
 
-#include "actions.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect-table.h"
-#include "compat.h"
 #include "filedata.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
-#include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "options.h"
 #include "pixbuf-util.h"
-#include "print.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"

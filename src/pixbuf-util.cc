@@ -39,7 +39,6 @@
 
 #include <config.h>
 
-#include "compat.h"
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"

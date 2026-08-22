@@ -34,7 +34,6 @@
 
 #include "accelerators.h"
 #include "actions.h"
-#include "compat.h"
 #include "editors.h"
 #include "intl.h"
 #include "layout-util.h"

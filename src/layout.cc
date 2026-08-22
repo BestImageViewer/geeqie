@@ -37,7 +37,6 @@
 
 #include "bar-sort.h"
 #include "bar.h"
-#include "compat.h"
 #include "filedata.h"
 #include "histogram.h"
 #include "history-list.h"

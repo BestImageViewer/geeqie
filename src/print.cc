@@ -31,7 +31,6 @@
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
 
-#include "compat.h"
 #include "exif.h"
 #include "filedata.h"
 #include "image-load.h"

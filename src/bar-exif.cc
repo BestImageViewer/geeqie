@@ -30,7 +30,6 @@
 #include <config.h>
 
 #include "bar.h"
-#include "compat.h"
 #include "exif.h"
 #include "filedata.h"
 #include "intl.h"

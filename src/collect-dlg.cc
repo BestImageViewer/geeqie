@@ -27,7 +27,6 @@
 
 #include "collect-io.h"
 #include "collect.h"
-#include "compat.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "ui-file-chooser.h"

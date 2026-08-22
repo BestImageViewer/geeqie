@@ -49,13 +49,11 @@
 #endif
 
 #include "accelerators.h"
-#include "actions.h"
 #include "cache-maint.h"
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "command-line-handling.h"
-#include "compat.h"
 #include "convert-configuration.h"
 #include "exif.h"
 #include "filedata.h"
@@ -74,7 +72,6 @@
 #include "logwindow.h"
 #include "main-defines.h"
 #include "metadata.h"
-#include "misc.h"
 #include "options.h"
 #include "pixbuf-util.h"
 #include "third-party/whereami.h"

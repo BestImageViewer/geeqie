@@ -23,7 +23,6 @@
 #include <config.h>
 
 #include <algorithm>
-#include <cstring>
 #include <vector>
 
 #include <gdk/gdk.h>
@@ -33,11 +32,9 @@
 #include <pango/pango.h>
 
 #include "actions.h"
-#include "compat.h"
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "misc.h"
 
 namespace
 {

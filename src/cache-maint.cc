@@ -29,7 +29,6 @@
 
 #include "cache-loader.h"
 #include "cache.h"
-#include "compat.h"
 #include "filedata.h"
 #include "intl.h"
 #include "layout.h"

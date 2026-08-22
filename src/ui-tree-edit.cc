@@ -26,9 +26,7 @@
 
 #include <glib-object.h>
 
-#include "compat.h"
 #include "geometry.h"
-#include "layout.h"
 #include "misc.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
