@@ -449,11 +449,6 @@ static void bar_sort_set_selection_cb(GtkWidget *button, gpointer data)
 	sd->selection = selection;
 }
 
-static void new_collection_file_save_failed_cb(GtkDialog *dialog, gint, gpointer)
-{
-	gtk_window_destroy(GTK_WINDOW(dialog));
-}
-
 static gboolean save_new_collection(GFile *file, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
@@ -470,11 +465,11 @@ static gboolean save_new_collection(GFile *file, gpointer data)
 		}
 	else
 		{
-		GtkWidget *new_collection_file_save_failed = gtk_message_dialog_new_with_markup(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, _("<b>File save failed.</b>\n\nFile \"%s\" was not saved."), path);
-		gtk_window_set_modal(GTK_WINDOW(new_collection_file_save_failed), TRUE);
-
-		g_signal_connect(new_collection_file_save_failed, "response", G_CALLBACK(new_collection_file_save_failed_cb), nullptr);
-
+		g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", _("File save failed."));
+		g_autofree gchar *detail = g_strdup_printf(_("File \"%s\" was not saved."), path);
+		gtk_alert_dialog_set_detail(dialog, detail);
+		gtk_alert_dialog_set_modal(dialog, TRUE);
+		gtk_alert_dialog_show(dialog, GTK_WINDOW(sd->lw->window));
 
 		ret = FALSE;
 		}

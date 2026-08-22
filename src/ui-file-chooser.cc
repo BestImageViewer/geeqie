@@ -594,31 +594,28 @@ void finish_file_dialog(PendingFileDialog *pending, gint response_id)
 	gtk_window_destroy(GTK_WINDOW(pending->dialog));
 }
 
-void overwrite_confirm_response_cb(GtkDialog *dialog, gint response_id, gpointer data)
+void overwrite_confirm_response_cb(GObject *source_object, GAsyncResult *result, gpointer data)
 {
 	auto *pending = static_cast<PendingFileDialog *>(data);
+	g_autoptr(GError) error = nullptr;
+	const gint response_id = gtk_alert_dialog_choose_finish(GTK_ALERT_DIALOG(source_object), result, &error);
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (response_id == 1)
 		{
 		finish_file_dialog(pending, GTK_RESPONSE_ACCEPT);
 		}
-
-	gtk_window_destroy(GTK_WINDOW(dialog));
 }
 
 void show_overwrite_confirmation(PendingFileDialog *pending, const gchar *path)
 {
-	GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(pending->dialog),
-	                                           GTK_DIALOG_MODAL,
-	                                           GTK_MESSAGE_QUESTION,
-	                                           GTK_BUTTONS_NONE,
-	                                           _("A file named \"%s\" already exists. Do you want to replace it?"),
-	                                           path);
+	g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new(_("A file named \"%s\" already exists. Do you want to replace it?"), path);
+	const char *buttons[] = {_("_Cancel"), _("_Replace"), nullptr};
 
-	gtk_dialog_add_buttons(GTK_DIALOG(dialog), _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Replace"), GTK_RESPONSE_ACCEPT, nullptr);
-	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
-	g_signal_connect(dialog, "response", G_CALLBACK(overwrite_confirm_response_cb), pending);
-	gtk_window_present(GTK_WINDOW(dialog));
+	gtk_alert_dialog_set_buttons(dialog, buttons);
+	gtk_alert_dialog_set_cancel_button(dialog, 0);
+	gtk_alert_dialog_set_default_button(dialog, 1);
+	gtk_alert_dialog_set_modal(dialog, TRUE);
+	gtk_alert_dialog_choose(dialog, GTK_WINDOW(pending->dialog), nullptr, overwrite_confirm_response_cb, pending);
 }
 
 void file_dialog_response_cb(GtkDialog *, gint response_id, gpointer data)
