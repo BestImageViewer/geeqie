@@ -301,14 +301,14 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 
 	if (gtk_icon_theme_has_icon(icon_theme, key)) return FALSE;
 
-	pixbuf = icon_theme_load_pixbuf_copy(icon_theme, icon, 64, static_cast<GtkIconLookupFlags>(0));
+	pixbuf = icon_theme_load_pixbuf_copy(icon_theme, icon, 64, GTK_ICON_LOOKUP_NONE);
 	if (!pixbuf)
 		{
 		if (strchr(icon, '.'))
 			{
 			/* try again without extension */
 			g_autofree gchar *icon2 = remove_extension_from_path(icon);
-			pixbuf = icon_theme_load_pixbuf_copy(icon_theme, icon2, 64, static_cast<GtkIconLookupFlags>(0));
+			pixbuf = icon_theme_load_pixbuf_copy(icon_theme, icon2, 64, GTK_ICON_LOOKUP_NONE);
 			if (!pixbuf)
 				{
 				/* try as an absolute path */

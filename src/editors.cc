@@ -262,7 +262,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 	if (is_valid_editor_command(key)) return FALSE; /* the file found earlier wins */
 
 	key_file = g_key_file_new();
-	if (!g_key_file_load_from_file(key_file, path, static_cast<GKeyFileFlags>(0), nullptr))
+	if (!g_key_file_load_from_file(key_file, path, G_KEY_FILE_NONE, nullptr))
 		{
 		g_key_file_free(key_file);
 		return FALSE;
