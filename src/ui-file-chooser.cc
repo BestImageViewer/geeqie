@@ -323,7 +323,7 @@ GtkWidget *create_pdf_preview(const gchar *filename)
 
 	cairo_destroy(cr);
 
-	g_autoptr(GdkPixbuf) pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, target_width, target_height);
+	g_autoptr(GdkPixbuf) pixbuf = pixbuf_from_cairo_surface(surface);
 	cairo_surface_destroy(surface);
 	g_object_unref(page);
 	g_object_unref(doc);

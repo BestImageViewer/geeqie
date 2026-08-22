@@ -28,6 +28,25 @@
 
 namespace {
 
+TEST(PixbufFromCairoSurface, ConvertsPremultipliedArgbToRgba)
+{
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+	cairo_t *cr = cairo_create(surface);
+	cairo_set_source_rgba(cr, 0.25, 0.5, 0.75, 0.5);
+	cairo_paint(cr);
+	cairo_destroy(cr);
+
+	g_autoptr(GdkPixbuf) pixbuf = pixbuf_from_cairo_surface(surface);
+	cairo_surface_destroy(surface);
+
+	ASSERT_NE(pixbuf, nullptr);
+	const guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
+	EXPECT_NEAR(pixels[0], 64, 1);
+	EXPECT_NEAR(pixels[1], 128, 1);
+	EXPECT_NEAR(pixels[2], 191, 1);
+	EXPECT_NEAR(pixels[3], 128, 1);
+}
+
 }  // anonymous namespace
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

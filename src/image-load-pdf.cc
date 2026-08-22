@@ -28,6 +28,7 @@
 #include <poppler.h>
 
 #include "image-load.h"
+#include "pixbuf-util.h"
 
 namespace
 {
@@ -96,7 +97,7 @@ gboolean ImageLoaderPDF::write(const guchar *buf, gsize &chunk_size, gsize count
 		cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 		cairo_paint(cr);
 
-		pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+		pixbuf = pixbuf_from_cairo_surface(surface);
 		area_updated_cb(nullptr, 0, 0, width, height, data);
 
 		cairo_destroy (cr);

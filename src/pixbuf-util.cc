@@ -195,6 +195,56 @@ GdkTexture *pixbuf_to_texture(GdkPixbuf *pixbuf)
 	                              gdk_pixbuf_get_rowstride(pixbuf));
 }
 
+GdkPixbuf *pixbuf_from_cairo_surface(cairo_surface_t *surface)
+{
+	if (!surface || cairo_surface_get_type(surface) != CAIRO_SURFACE_TYPE_IMAGE ||
+	    cairo_image_surface_get_format(surface) != CAIRO_FORMAT_ARGB32)
+		{
+		return nullptr;
+		}
+
+	const gint width = cairo_image_surface_get_width(surface);
+	const gint height = cairo_image_surface_get_height(surface);
+	g_autoptr(GdkPixbuf) pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width, height);
+	if (!pixbuf) return nullptr;
+
+	cairo_surface_flush(surface);
+	const guchar *source = cairo_image_surface_get_data(surface);
+	const gint source_stride = cairo_image_surface_get_stride(surface);
+	guchar *destination = gdk_pixbuf_get_pixels(pixbuf);
+	const gint destination_stride = gdk_pixbuf_get_rowstride(pixbuf);
+
+	for (gint y = 0; y < height; y++)
+		{
+		const auto *source_pixel = reinterpret_cast<const guint32 *>(source + (y * source_stride));
+		guchar *destination_pixel = destination + (y * destination_stride);
+
+		for (gint x = 0; x < width; x++)
+			{
+			const guint32 pixel = source_pixel[x];
+			const guint alpha = pixel >> 24;
+
+			destination_pixel[3] = alpha;
+			if (alpha == 0)
+				{
+				destination_pixel[0] = 0;
+				destination_pixel[1] = 0;
+				destination_pixel[2] = 0;
+				}
+			else
+				{
+				destination_pixel[0] = std::min(255U, (((pixel >> 16) & 0xff) * 255 + alpha / 2) / alpha);
+				destination_pixel[1] = std::min(255U, (((pixel >> 8) & 0xff) * 255 + alpha / 2) / alpha);
+				destination_pixel[2] = std::min(255U, ((pixel & 0xff) * 255 + alpha / 2) / alpha);
+				}
+
+			destination_pixel += 4;
+			}
+		}
+
+	return static_cast<GdkPixbuf *>(g_steal_pointer(&pixbuf));
+}
+
 /*
  *-----------------------------------------------------------------------------
  * pixbuf from inline
