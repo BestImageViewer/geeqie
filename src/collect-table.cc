@@ -2093,14 +2093,15 @@ static void collection_table_dnd_init(CollectTable *ct)
  *-----------------------------------------------------------------------------
  */
 
-static gboolean collection_table_get_theme_bg(GtkStyleContext *style_context, const gchar *color_name, GdkRGBA &color)
+static gboolean collection_table_get_theme_bg(GtkWidget *widget, GtkStyleContext *style_context,
+                                               const gchar *color_name, GdkRGBA &color)
 {
 	if (gtk_style_context_lookup_color(style_context, color_name, &color))
 		{
 		return TRUE;
 		}
 
-	gtk_style_context_get_color(style_context, &color);
+	gtk_widget_get_color(widget, &color);
 	color.alpha = 0.35;
 
 	return FALSE;
@@ -2116,14 +2117,14 @@ static void collection_table_cell_colors(GtkWidget *widget, gboolean selected, g
 	gtk_style_context_save(style_context);
 	gtk_style_context_set_state(style_context, state);
 
-	gtk_style_context_get_color(style_context, &color_fg);
+	gtk_widget_get_color(widget, &color_fg);
 
 	foreground_set = selected;
 	background_set = selected || prelight;
 
 	if (background_set)
 		{
-		collection_table_get_theme_bg(style_context,
+		collection_table_get_theme_bg(widget, style_context,
 		                              selected ? "theme_selected_bg_color" : "theme_base_color",
 		                              color_bg);
 		}

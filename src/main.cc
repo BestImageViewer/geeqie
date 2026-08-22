@@ -572,11 +572,10 @@ void set_theme_bg_color()
 		if (lw && lw->window)
 			{
 			GdkRGBA theme_color {};
-			GtkStyleContext *style_context = gtk_widget_get_style_context(lw->window);
 
 /** @FIXME This sets the foreground color. CSS should be used.
  */
-			gtk_style_context_get_color(style_context, &theme_color);
+			gtk_widget_get_color(lw->window, &theme_color);
 
 			layout_window_foreach([&theme_color](LayoutWindow *lw)
 				{
