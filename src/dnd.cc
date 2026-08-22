@@ -147,7 +147,7 @@ void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items, Fi
 		pixbuf_draw_layout(icon, layout, x, y, {255, 255, 255, 255});
 		}
 
-	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(icon);
+	g_autoptr(GdkTexture) texture = pixbuf_to_texture(icon);
 	gtk_drag_source_set_icon(source, GDK_PAINTABLE(texture), -8, -6);
 }
 

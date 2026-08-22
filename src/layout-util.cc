@@ -460,7 +460,7 @@ static void layout_menu_copy_image_cb(GSimpleAction *, GVariant *, gpointer)
 		return;
 		}
 
-	GdkTexture *texture = gdk_texture_new_for_pixbuf(pixbuf);
+	GdkTexture *texture = pixbuf_to_texture(pixbuf);
 	gdk_clipboard_set_texture(clipboard, texture);
 	g_object_unref(texture);
 }

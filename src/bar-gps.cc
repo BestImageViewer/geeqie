@@ -50,6 +50,7 @@ extern "C" {
 #include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
+#include "pixbuf-util.h"
 #include "rcfile.h"
 #include "thumb.h"
 #include "ui-menu.h"
@@ -313,7 +314,7 @@ void gps_marker_set_pixbuf(GPSMarkerData *marker_data, GdkPixbuf *pixbuf)
 {
 	if (!pixbuf) return;
 
-	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+	g_autoptr(GdkTexture) texture = pixbuf_to_texture(pixbuf);
 	gtk_picture_set_paintable(GTK_PICTURE(marker_data->picture), GDK_PAINTABLE(texture));
 }
 

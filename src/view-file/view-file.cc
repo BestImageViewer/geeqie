@@ -43,6 +43,7 @@
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
+#include "pixbuf-util.h"
 #include "sort-type.h"
 #include "thumb.h"
 #include "trash.h"
@@ -546,7 +547,7 @@ static void vf_pop_menu_copy_image_done_cb(ImageLoader *loader, gpointer data)
 
 	if (pixbuf)
 		{
-		g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+		g_autoptr(GdkTexture) texture = pixbuf_to_texture(pixbuf);
 		gdk_clipboard_set_texture(copy_data->clipboard, texture);
 		}
 

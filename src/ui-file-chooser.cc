@@ -24,6 +24,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "options.h"
+#include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-tabcomp.h"
 
@@ -333,7 +334,7 @@ GtkWidget *create_pdf_preview(const gchar *filename)
 		return nullptr;
 		}
 
-	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+	g_autoptr(GdkTexture) texture = pixbuf_to_texture(pixbuf);
 	GtkWidget *picture = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
 	gtk_picture_set_content_fit(GTK_PICTURE(picture), GTK_CONTENT_FIT_CONTAIN);
 	gtk_picture_set_can_shrink(GTK_PICTURE(picture), TRUE);
@@ -420,7 +421,7 @@ GtkWidget *create_image_preview(const gchar *file_path)
 		return nullptr;
 		}
 
-	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+	g_autoptr(GdkTexture) texture = pixbuf_to_texture(pixbuf);
 	GtkWidget *picture = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
 	gtk_picture_set_content_fit(GTK_PICTURE(picture), GTK_CONTENT_FIT_CONTAIN);
 	gtk_picture_set_can_shrink(GTK_PICTURE(picture), TRUE);

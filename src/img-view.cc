@@ -811,7 +811,7 @@ static void view_copy_image_cb(GSimpleAction *, GVariant *, gpointer data)
 	GdkClipboard *clipboard = gdk_display_get_clipboard(gtk_widget_get_display(imd->widget));
 	if (!clipboard) return;
 
-	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+	g_autoptr(GdkTexture) texture = pixbuf_to_texture(pixbuf);
 	gdk_clipboard_set_texture(clipboard, texture);
 }
 

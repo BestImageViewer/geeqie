@@ -58,6 +58,7 @@
 #include "misc.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
+#include "pixbuf-util.h"
 #include "rcfile.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
@@ -691,7 +692,7 @@ static void layout_image_pop_menu_copy_image_cb(GSimpleAction *, GVariant *, gpo
 		return;
 		}
 
-	GdkTexture *texture = gdk_texture_new_for_pixbuf(pixbuf);
+	GdkTexture *texture = pixbuf_to_texture(pixbuf);
 
 	gdk_clipboard_set_texture(clipboard, texture);
 	g_object_unref(texture);
