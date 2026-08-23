@@ -26,8 +26,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-gpointer submenu_item_get_data(GtkWidget *submenu_item);
-
 void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb, gpointer data);
 void submenu_add_collections_new(GMenu *menu, gboolean sensitive,
                                    const gchar *func, gpointer data);
