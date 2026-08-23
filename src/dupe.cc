@@ -141,8 +141,8 @@ static gint dupe_check_cb(gpointer data);
 static void dupe_second_add(DupeWindow *dw, DupeItem *di);
 static void dupe_second_remove(DupeWindow *dw, DupeItem *di);
 static void dupe_second_clear(DupeWindow *dw);
-static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di);
-static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *di);
+static GtkWidget *dupe_menu_popup_main(DupeWindow *dw);
+static GtkWidget *dupe_menu_popup_second(DupeWindow *dw);
 
 static void dupe_dnd_init(DupeWindow *dw);
 
@@ -3208,16 +3208,14 @@ static void dupe_menu_append_file_list_cb(GSimpleAction *, GVariant *, gpointer 
 static void dupe_menu_popup_focused_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
-	GtkWidget *listview = gtk_widget_has_focus(dw->second_listview) ? dw->second_listview : dw->listview;
-	DupeItem *di = dupe_listview_get_last_selected_item(listview);
 
 	if (gtk_widget_has_focus(dw->second_listview))
 		{
-		dupe_menu_popup_second(dw, di);
+		dupe_menu_popup_second(dw);
 		}
 	else
 		{
-		dupe_menu_popup_main(dw, di);
+		dupe_menu_popup_main(dw);
 		}
 }
 
@@ -3282,29 +3280,22 @@ static void dupe_popup_menu_centered(GMenu *menu_model, DupeWindow *dw, GtkWidge
 	popup_menu(menu_model, dw->window);
 }
 
-static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
+static GtkWidget *dupe_menu_popup_main(DupeWindow *dw)
 {
-	GList *editmenu_fd_list;
-	gboolean on_row = (di != nullptr);
-
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dupe-main.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-dupe-main"));
 
-
-	editmenu_fd_list = dupe_window_get_fd_list(dw);
-
+	GList *editmenu_fd_list = dupe_window_get_fd_list(dw);
 
 	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(builder, "plugins-submenu"));
 	plugins_menu_populate(plugins_menu, "win.dupe-win-plugin-run", editmenu_fd_list);
 
-
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
-	submenu_add_collections_new(collections_menu, on_row, "win.dupe-win-collections", dw);
+	submenu_add_collections_new(collections_menu, "win.dupe-win-collections");
 
 	dupe_popup_menu_centered(menu_model, dw, dw->listview);
 
 	return nullptr;
-
 }
 
 static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
@@ -3353,9 +3344,9 @@ static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 		if (button == GDK_BUTTON_SECONDARY)
 			{
 			if (widget == dw->listview)
-				dupe_menu_popup_main(dw, nullptr);
+				dupe_menu_popup_main(dw);
 			else
-				dupe_menu_popup_second(dw, nullptr);
+				dupe_menu_popup_second(dw);
 			}
 		return;
 		}
@@ -3387,9 +3378,9 @@ static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 			}
 
 		if (widget == dw->listview)
-			dupe_menu_popup_main(dw, di);
+			dupe_menu_popup_main(dw);
 		else
-			dupe_menu_popup_second(dw, di);
+			dupe_menu_popup_second(dw);
 
 		return;
 		}
@@ -3579,7 +3570,7 @@ static void dupe_second_menu_clear_cb(GSimpleAction *, GVariant *, gpointer data
 	dupe_window_recompare(dw);
 }
 
-static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *)
+static GtkWidget *dupe_menu_popup_second(DupeWindow *dw)
 {
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dupe-second.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-dupe-second"));

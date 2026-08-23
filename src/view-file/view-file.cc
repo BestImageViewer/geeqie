@@ -1047,7 +1047,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	plugins_menu_populate(plugins_menu, "win.view-file-plugin-run", vf->editmenu_fd_list);
 
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
-	submenu_add_collections_new(collections_menu, active, "win.view-file-collections", vf);
+	submenu_add_collections_new(collections_menu, "win.view-file-collections");
 
 	GMenu *sort_menu = G_MENU(gtk_builder_get_object(builder, "sort-submenu"));
 	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
