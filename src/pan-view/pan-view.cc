@@ -2106,7 +2106,7 @@ static void pan_popup_menu(PanWindow *pw, GtkWidget *parent, gdouble x, gdouble 
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
 
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
-	submenu_add_collections_new(collections_menu, active, "win.pan-win-collections", pw);
+	submenu_add_collections_new(collections_menu, "win.pan-win-collections");
 	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-collections");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
 

@@ -57,17 +57,15 @@ const gchar *action_name_key = "action_name";
 
 GtkWidget *toolbarlist[TOOLBAR_COUNT];
 
-} // namespace
-
-static gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer data)
+gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer data)
 {
-	popup_menu_bar(static_cast<GtkWidget *>(data), nullptr, nullptr);
+	popup_menu_bar(static_cast<GtkWidget *>(data), false);
 
 	return TRUE;
 }
 
-static void toolbarlist_add_button(const gchar *name, const gchar *label,
-									const gchar *stock_id, GtkBox *box)
+void toolbarlist_add_button(const gchar *name, const gchar *label,
+                            const gchar *stock_id, GtkBox *box)
 {
 	GtkWidget *hbox;
 	GtkGesture *gesture;
@@ -117,7 +115,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	gtk_box_append(GTK_BOX(hbox), button_label);
 }
 
-static void toolbarlist_add_button_main_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+void toolbarlist_add_button_main_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	const gchar *action_name = g_variant_get_string(parameter, nullptr);
 
@@ -129,7 +127,7 @@ static void toolbarlist_add_button_main_cb(GSimpleAction *, GVariant *parameter,
 
 }
 
-static void toolbarlist_add_button_status_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+void toolbarlist_add_button_status_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	const gchar *action_name = g_variant_get_string(parameter, nullptr);
 
@@ -141,7 +139,7 @@ static void toolbarlist_add_button_status_cb(GSimpleAction *, GVariant *paramete
 
 }
 
-static void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType bar)
+void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType bar)
 {
 	for (guint i = 0; actions[i].action_name != nullptr; i++)
 		{
@@ -189,7 +187,7 @@ static void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, Tool
 		}
 }
 
-static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
+gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 {
 	auto bar = static_cast<ToolbarType>(GPOINTER_TO_INT(data));
 	GMenu *menu_model;
@@ -215,6 +213,8 @@ static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 
 	return TRUE;
 }
+
+} // namespace
 
 /**
  * @brief For each layoutwindow, clear toolbar and reload with current selection

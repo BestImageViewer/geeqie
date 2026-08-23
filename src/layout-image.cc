@@ -850,7 +850,7 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw, GtkWidget *parent, gdo
 	layout_image_pop_menu_populate_orientation(orientation_menu);
 
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
-	submenu_add_collections_new(collections_menu, has_path, "win.layout-image-collections", lw);
+	submenu_add_collections_new(collections_menu, "win.layout-image-collections");
 
 	layout_image_pop_menu_set_enabled(lw, "layout-image-plugin-run", has_path);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-alter", has_path);

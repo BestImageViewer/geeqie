@@ -1395,7 +1395,7 @@ static void search_result_menu(SearchData *sd, bool on_row, GtkWidget *parent, g
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), on_row);
 
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
-	submenu_add_collections_new(collections_menu, on_row, "win.search-win-collections", sd);
+	submenu_add_collections_new(collections_menu, "win.search-win-collections");
 	action = g_action_map_lookup_action(G_ACTION_MAP(sd->ui.window), "search-win-collections");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), on_row);
 

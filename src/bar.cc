@@ -243,60 +243,6 @@ static const gchar *bar_pane_get_default_config(const gchar *id)
 	return pane->config;
 }
 
-static void height_spin_changed_cb(GtkSpinButton *spin, gpointer data)
-{
-	gtk_widget_set_size_request(static_cast<GtkWidget *>(data), -1, gtk_spin_button_get_value_as_int(spin));
-}
-
-static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint, GdkModifierType, gpointer data)
-{
-	if ((keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter || keyval == GDK_KEY_Escape))
-		{
-		gtk_window_destroy(GTK_WINDOW(data));
-		}
-}
-
-static gboolean expander_height_cb(GtkEventControllerKey *controller, guint, guint, GdkModifierType, gpointer)
-{
-	GtkWidget *window = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
-	gtk_window_destroy(GTK_WINDOW(window));
-
-	return TRUE;
-}
-
-static void bar_expander_height_cb(GtkWidget *, gpointer data)
-{
-	GtkWidget *window = gtk_window_new();
-	gtk_window_set_modal(GTK_WINDOW(window), TRUE);
-	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
-	gtk_window_set_default_size(GTK_WINDOW(window), 50, 30); //** @FIXME set these values in a more sensible way */
-	GtkEventController *controller = gtk_event_controller_key_new();
-	g_signal_connect(controller, "key-pressed", G_CALLBACK(expander_height_cb), nullptr);
-	gtk_widget_add_controller(window, controller);
-
-	gtk_window_present(GTK_WINDOW(window));
-
-	GtkWidget *data_box = gtk_expander_get_child(GTK_EXPANDER(data));
-	gint w;
-	gint h;
-	gtk_widget_get_size_request(data_box, &w, &h);
-
-	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);
-	g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(height_spin_changed_cb), data_box);
-	controller = gtk_event_controller_key_new();
-	g_signal_connect(controller, "key-pressed", G_CALLBACK(height_spin_key_press_cb), window);
-	gtk_widget_add_controller(spin, controller);
-
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), h);
-	gtk_window_set_child(GTK_WINDOW(window), spin);
-	gtk_widget_grab_focus(spin);
-}
-
-void menu_expander_height_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	bar_expander_height_cb(nullptr, data);
-}
-
 static void bar_expander_add_action_cb(GSimpleAction *, GVariant *parameter, gpointer)
 {
 	if (!parameter) return;
@@ -392,7 +338,7 @@ static void bar_menu_popup(GtkWidget *widget)
 		expander = widget;
 		}
 
-	gboolean display_height_option = FALSE;
+	bool display_height_option = false;
 	if (expander)
 		{
 		GtkWidget *pane = gtk_expander_get_child(GTK_EXPANDER(expander));
@@ -404,7 +350,7 @@ static void bar_menu_popup(GtkWidget *widget)
 		                                pd->type == PANE_RATING);
 		}
 
-	popup_menu_bar(expander, display_height_option ? G_CALLBACK(bar_expander_height_cb) : nullptr, widget);
+	popup_menu_bar(expander, display_height_option);
 }
 
 

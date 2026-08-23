@@ -26,9 +26,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb, gpointer data);
-void submenu_add_collections_new(GMenu *menu, gboolean sensitive,
-                                   const gchar *func, gpointer data);
+void popup_menu_bar(GtkWidget *widget, bool display_height_option);
+void submenu_add_collections_new(GMenu *menu, const gchar *action_name);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

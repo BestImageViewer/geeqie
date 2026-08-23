@@ -1235,7 +1235,7 @@ static void view_popup_menu(ViewWindow *vw, GtkWidget *parent, gdouble x, gdoubl
 	plugins_menu_populate(plugins_menu, "win.image-win-plugin-run", editmenu_fd_list);
 
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
-	submenu_add_collections_new(collections_menu, TRUE, "win.image-win-collections", vw);
+	submenu_add_collections_new(collections_menu, "win.image-win-collections");
 
 	if (options->file_ops.confirm_move_to_trash)
 		{
