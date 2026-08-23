@@ -401,11 +401,11 @@ gboolean bar_pane_exif_dnd_drop(GtkDropTarget *, const GValue *value, gdouble x,
 		auto *entry = static_cast<GtkWidget *>(work->data);
 		if (entry == new_entry) continue;
 
-		double nx;
-		double ny;
+		graphene_point_t pane_point{static_cast<float>(x), static_cast<float>(y)};
+		graphene_point_t entry_point{};
 		if (gtk_widget_is_drawable(entry) &&
-		        gtk_widget_translate_coordinates(pane, entry, x, y, &nx, &ny) &&
-		        ny < gtk_widget_get_height(entry) / 2.F)
+		        gtk_widget_compute_point(pane, entry, &pane_point, &entry_point) &&
+		        entry_point.y < gtk_widget_get_height(entry) / 2.F)
 			{
 			break;
 			}

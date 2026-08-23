@@ -1916,15 +1916,15 @@ static gboolean collection_table_dnd_get_listview_coords(GtkDropTargetAsync *tar
 		return TRUE;
 		}
 
-	double translated_x;
-	double translated_y;
-	if (!gtk_widget_translate_coordinates(widget, ct->listview, x, y, &translated_x, &translated_y))
+	graphene_point_t widget_point{static_cast<float>(x), static_cast<float>(y)};
+	graphene_point_t listview_point{};
+	if (!gtk_widget_compute_point(widget, ct->listview, &widget_point, &listview_point))
 		{
 		return FALSE;
 		}
 
-	listview_x = static_cast<gint>(translated_x);
-	listview_y = static_cast<gint>(translated_y);
+	listview_x = static_cast<gint>(listview_point.x);
+	listview_y = static_cast<gint>(listview_point.y);
 	return TRUE;
 }
 
