@@ -21,7 +21,6 @@
 
 #include "advanced-exif.h"
 
-#include <algorithm>
 #include <string>
 
 #include <gdk/gdk.h>
@@ -36,7 +35,6 @@
 #include "dnd.h"
 #include "exif.h"
 #include "filedata.h"
-#include "history-list.h"
 #include "intl.h"
 #include "layout-util.h"
 #include "layout.h"
@@ -58,8 +56,7 @@ namespace
  */
 
 enum {
-	EXIF_ADVCOL_ENABLED = 0,
-	EXIF_ADVCOL_TAG,
+	EXIF_ADVCOL_TAG = 0,
 	EXIF_ADVCOL_NAME,
 	EXIF_ADVCOL_VALUE,
 	EXIF_ADVCOL_FORMAT,
@@ -72,7 +69,6 @@ struct AdvancedExifRow
 {
 	GObject parent_instance;
 	gchar *values[EXIF_ADVCOL_COUNT];
-	gboolean enabled;
 };
 
 struct AdvancedExifRowClass
@@ -122,13 +118,11 @@ void advanced_exif_row_init(AdvancedExifRow *)
 {
 }
 
-AdvancedExifRow *advanced_exif_row_new(gboolean enabled, const gchar *tag, const gchar *name,
-                                       const gchar *value, const gchar *format, const gchar *elements,
-                                       const gchar *description)
+AdvancedExifRow *advanced_exif_row_new(const gchar *tag, const gchar *name, const gchar *value,
+                                       const gchar *format, const gchar *elements, const gchar *description)
 {
 	auto *row = reinterpret_cast<AdvancedExifRow *>(g_object_new(advanced_exif_row_get_type(), nullptr));
 
-	row->enabled = enabled;
 	row->values[EXIF_ADVCOL_TAG] = g_strdup(tag);
 	row->values[EXIF_ADVCOL_NAME] = g_strdup(name);
 	row->values[EXIF_ADVCOL_VALUE] = g_strdup(value);
@@ -140,16 +134,6 @@ AdvancedExifRow *advanced_exif_row_new(gboolean enabled, const gchar *tag, const
 }
 
 } // namespace
-
-static gboolean advanced_exif_row_enabled(const gchar *name)
-{
-	if (!name) return FALSE;
-
-	const HistoryList *history_list = history_list_find_by_key("exif_extras");
-	if (!history_list) return FALSE;
-
-	return (std::find(history_list->cbegin(), history_list->cend(), name) != history_list->cend()) ? TRUE : FALSE;
-}
 
 static void advanced_exif_update(ExifWin *ew)
 {
@@ -185,8 +169,7 @@ static void advanced_exif_update(ExifWin *ew)
 			}
 
 		const std::string elements_text = std::to_string(elements);
-		AdvancedExifRow *row = advanced_exif_row_new(advanced_exif_row_enabled(tag_name), tag,
-		                                                tag_name, utf8_text, format,
+		AdvancedExifRow *row = advanced_exif_row_new(tag, tag_name, utf8_text, format,
 		                                                elements_text.c_str(), description);
 		g_list_store_append(ew->store, row);
 		g_object_unref(row);
