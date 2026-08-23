@@ -1106,7 +1106,7 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(pkd->keyword_treeview), x, y, &pkd->click_tpath, &pos);
 
 	GtkWidget *popover_parent = widget;
-#if HAVE_GTK4_22
+#if GTK_CHECK_VERSION(4, 22, 0)
 	if (GtkWidget *ancestor = gtk_widget_get_ancestor(widget, GTK_TYPE_POPOVER_BIN))
 		{
 		popover_parent = ancestor;

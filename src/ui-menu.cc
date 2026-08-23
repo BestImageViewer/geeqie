@@ -280,7 +280,7 @@ void popover_box_popup(GtkWidget *menu)
 
 GtkWidget *popover_parent_new(GtkWidget *child)
 {
-#if HAVE_GTK4_22
+#if GTK_CHECK_VERSION(4, 22, 0)
 	GtkWidget *popover_parent = gtk_popover_bin_new();
 	gtk_popover_bin_set_child(GTK_POPOVER_BIN(popover_parent), child);
 
@@ -296,7 +296,7 @@ static gboolean popover_detach_cb(gpointer data)
 	GtkWidget *parent = gtk_widget_get_parent(popover);
 	if (!parent) return G_SOURCE_REMOVE;
 
-#if HAVE_GTK4_22
+#if GTK_CHECK_VERSION(4, 22, 0)
 	if (GTK_IS_POPOVER_BIN(parent))
 		{
 		gtk_popover_bin_set_popover(GTK_POPOVER_BIN(parent), nullptr);
@@ -318,7 +318,7 @@ void popover_set_parent(GtkWidget *popover, GtkWidget *parent)
 {
 	g_signal_connect(popover, "closed", G_CALLBACK(popover_closed_cb), nullptr);
 
-#if HAVE_GTK4_22
+#if GTK_CHECK_VERSION(4, 22, 0)
 	if (GTK_IS_POPOVER_BIN(parent))
 		{
 		gtk_popover_bin_set_popover(GTK_POPOVER_BIN(parent), popover);
@@ -331,7 +331,7 @@ void popover_set_parent(GtkWidget *popover, GtkWidget *parent)
 
 void popover_popup(GtkWidget *popover)
 {
-#if HAVE_GTK4_22
+#if GTK_CHECK_VERSION(4, 22, 0)
 	GtkWidget *parent = gtk_widget_get_parent(popover);
 	if (parent && GTK_IS_POPOVER_BIN(parent))
 		{
