@@ -82,8 +82,12 @@ struct ExifWin
 	GtkWidget *scrolled;
 	GtkWidget *column_view;
 	GtkWidget *label_file_name;
+	GtkWidget *search_bar;
+	GtkWidget *search_entry;
+	GtkColumnViewColumn *columns[EXIF_ADVCOL_COUNT];
 	GListStore *store;
 	GtkSingleSelection *selection;
+	gint search_column;
 
 	FileData *fd;
 };
@@ -227,6 +231,7 @@ static void advanced_exif_cell_clicked(GtkGestureClick *gesture, gint, gdouble, 
 	gtk_single_selection_set_selected(ew->selection, gtk_list_item_get_position(list_item));
 
 	const gint column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), ADVANCED_EXIF_COLUMN_DATA));
+	ew->search_column = column;
 	const gchar *value = row->values[column];
 	if (!value) return;
 
@@ -307,9 +312,95 @@ static GtkColumnViewColumn *advanced_exif_add_column(ExifWin *ew, const gchar *t
 	gtk_column_view_column_set_sorter(column, sorter);
 	g_object_unref(sorter);
 	gtk_column_view_append_column(GTK_COLUMN_VIEW(ew->column_view), column);
+	ew->columns[column_id] = column;
 	g_object_unref(column);
 
 	return column;
+}
+
+static gboolean advanced_exif_search_match(const AdvancedExifRow *row, gint column, const gchar *key)
+{
+	if (!row->values[column]) return FALSE;
+
+	g_autofree gchar *value_folded = g_utf8_casefold(row->values[column], -1);
+	g_autofree gchar *key_folded = g_utf8_casefold(key, -1);
+
+	return g_strstr_len(value_folded, -1, key_folded) != nullptr;
+}
+
+static gboolean advanced_exif_search(ExifWin *ew, gint direction)
+{
+	const gchar *key = gtk_editable_get_text(GTK_EDITABLE(ew->search_entry));
+	if (!key || *key == '\0') return FALSE;
+
+	GListModel *model = gtk_single_selection_get_model(ew->selection);
+	const guint count = g_list_model_get_n_items(model);
+	if (count == 0) return FALSE;
+
+	guint selected = gtk_single_selection_get_selected(ew->selection);
+	guint start;
+	if (selected == GTK_INVALID_LIST_POSITION)
+		{
+		start = direction > 0 ? 0 : count - 1;
+		}
+	else if (direction > 0)
+		{
+		start = (selected + 1) % count;
+		}
+	else
+		{
+		start = selected == 0 ? count - 1 : selected - 1;
+		}
+
+	for (guint offset = 0; offset < count; offset++)
+		{
+		const guint position = direction > 0 ? (start + offset) % count : (start + count - offset) % count;
+		g_autoptr(GObject) item = static_cast<GObject *>(g_list_model_get_item(model, position));
+		auto *row = reinterpret_cast<AdvancedExifRow *>(item);
+
+		if (advanced_exif_search_match(row, ew->search_column, key))
+			{
+			gtk_single_selection_set_selected(ew->selection, position);
+			gtk_column_view_scroll_to(GTK_COLUMN_VIEW(ew->column_view), position,
+			                          ew->columns[ew->search_column], GTK_LIST_SCROLL_FOCUS, nullptr);
+			return TRUE;
+			}
+		}
+
+	return FALSE;
+}
+
+static void advanced_exif_search_changed(GtkSearchEntry *, gpointer data)
+{
+	auto *ew = static_cast<ExifWin *>(data);
+	gtk_single_selection_set_selected(ew->selection, GTK_INVALID_LIST_POSITION);
+	advanced_exif_search(ew, 1);
+}
+
+static void advanced_exif_search_next(GtkSearchEntry *, gpointer data)
+{
+	advanced_exif_search(static_cast<ExifWin *>(data), 1);
+}
+
+static void advanced_exif_search_previous(GtkSearchEntry *, gpointer data)
+{
+	advanced_exif_search(static_cast<ExifWin *>(data), -1);
+}
+
+static void advanced_exif_search_stop(GtkSearchEntry *, gpointer data)
+{
+	auto *ew = static_cast<ExifWin *>(data);
+	gtk_editable_set_text(GTK_EDITABLE(ew->search_entry), "");
+	gtk_search_bar_set_search_mode(GTK_SEARCH_BAR(ew->search_bar), FALSE);
+	gtk_widget_grab_focus(ew->column_view);
+}
+
+static void advanced_exif_search_mode_changed(GtkSearchBar *search_bar, GParamSpec *, gpointer data)
+{
+	if (gtk_search_bar_get_search_mode(search_bar)) return;
+
+	auto *ew = static_cast<ExifWin *>(data);
+	gtk_editable_set_text(GTK_EDITABLE(ew->search_entry), "");
 }
 
 static void advanced_exif_window_get_geometry(ExifWin *ew)
@@ -425,9 +516,26 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	gtk_box_append(GTK_BOX(vbox), box);
 
+	ew->search_bar = gtk_search_bar_new();
+	ew->search_entry = gtk_search_entry_new();
+	gtk_search_entry_set_placeholder_text(GTK_SEARCH_ENTRY(ew->search_entry), _("Search"));
+	gtk_search_bar_set_child(GTK_SEARCH_BAR(ew->search_bar), ew->search_entry);
+	gtk_search_bar_connect_entry(GTK_SEARCH_BAR(ew->search_bar), GTK_EDITABLE(ew->search_entry));
+	gtk_search_bar_set_show_close_button(GTK_SEARCH_BAR(ew->search_bar), TRUE);
+	gtk_box_append(GTK_BOX(vbox), ew->search_bar);
+
+	g_signal_connect(ew->search_entry, "search-changed", G_CALLBACK(advanced_exif_search_changed), ew);
+	g_signal_connect(ew->search_entry, "activate", G_CALLBACK(advanced_exif_search_next), ew);
+	g_signal_connect(ew->search_entry, "next-match", G_CALLBACK(advanced_exif_search_next), ew);
+	g_signal_connect(ew->search_entry, "previous-match", G_CALLBACK(advanced_exif_search_previous), ew);
+	g_signal_connect(ew->search_entry, "stop-search", G_CALLBACK(advanced_exif_search_stop), ew);
+	g_signal_connect(ew->search_bar, "notify::search-mode-enabled",
+	                 G_CALLBACK(advanced_exif_search_mode_changed), ew);
 
 	ew->store = g_list_store_new(advanced_exif_row_get_type());
 	ew->column_view = gtk_column_view_new(nullptr);
+	ew->search_column = EXIF_ADVCOL_DESCRIPTION;
+	gtk_search_bar_set_key_capture_widget(GTK_SEARCH_BAR(ew->search_bar), ew->column_view);
 
 	GtkSorter *view_sorter = gtk_column_view_get_sorter(GTK_COLUMN_VIEW(ew->column_view));
 	GtkSortListModel *sort_model = gtk_sort_list_model_new(G_LIST_MODEL(g_object_ref(ew->store)),
