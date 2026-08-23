@@ -29,20 +29,6 @@
 
 /*
  *-----------------------------------------------------------------------------
- * menu utils
- *-----------------------------------------------------------------------------
- */
-
-gpointer submenu_item_get_data(GtkWidget *submenu_item)
-{
-	GtkWidget *submenu = gtk_widget_get_parent(submenu_item);
-	if (!submenu) return nullptr;
-
-	return g_object_get_data(G_OBJECT(submenu), "submenu_data");
-}
-
-/*
- *-----------------------------------------------------------------------------
  * collections
  *-----------------------------------------------------------------------------
  */
