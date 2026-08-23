@@ -147,7 +147,43 @@ static EditorFlags editor_command_done(EditorData *ed);
  *-----------------------------------------------------------------------------
  */
 
-GtkListStore *desktop_file_list;
+G_DEFINE_TYPE(DesktopFileListItem, desktop_file_list_item, G_TYPE_OBJECT)
+
+static void desktop_file_list_item_finalize(GObject *object)
+{
+	auto *item = reinterpret_cast<DesktopFileListItem *>(object);
+	g_free(item->key);
+	g_free(item->name);
+	g_free(item->hidden);
+	g_free(item->path);
+
+	G_OBJECT_CLASS(desktop_file_list_item_parent_class)->finalize(object);
+}
+
+static void desktop_file_list_item_class_init(DesktopFileListItemClass *item_class)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS(item_class);
+	object_class->finalize = desktop_file_list_item_finalize;
+}
+
+static void desktop_file_list_item_init(DesktopFileListItem *)
+{
+}
+
+static DesktopFileListItem *desktop_file_list_item_new(const gchar *key, gboolean disabled,
+							const gchar *name, const gchar *hidden, const gchar *path)
+{
+	auto *item = reinterpret_cast<DesktopFileListItem *>(g_object_new(desktop_file_list_item_get_type(), nullptr));
+	item->key = g_strdup(key);
+	item->disabled = disabled;
+	item->name = g_strdup(name);
+	item->hidden = g_strdup(hidden);
+	item->path = g_strdup(path);
+
+	return item;
+}
+
+GListStore *desktop_file_list;
 static gboolean editors_finished = FALSE;
 
 #ifdef G_KEY_FILE_DESKTOP_GROUP
@@ -255,7 +291,6 @@ gboolean editor_read_desktop_file(const gchar *path)
 {
 	GKeyFile *key_file;
 	EditorDescription *editor;
-	GtkTreeIter iter;
 	gboolean category_geeqie = FALSE;
 
 	const gchar *key = filename_from_path(path);
@@ -405,13 +440,10 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	editor_plugin_accel_register(editor);
 
-	gtk_list_store_append(desktop_file_list, &iter);
-	gtk_list_store_set(desktop_file_list, &iter,
-			   DESKTOP_FILE_COLUMN_KEY, key,
-			   DESKTOP_FILE_COLUMN_DISABLED, editor->disabled,
-			   DESKTOP_FILE_COLUMN_NAME, editor->name,
-			   DESKTOP_FILE_COLUMN_HIDDEN, editor->hidden ? _("yes") : _("no"),
-			   DESKTOP_FILE_COLUMN_PATH, path, -1);
+	DesktopFileListItem *item = desktop_file_list_item_new(key, editor->disabled, editor->name,
+								 editor->hidden ? _("yes") : _("no"), path);
+	g_list_store_append(desktop_file_list, item);
+	g_object_unref(item);
 
 	return TRUE;
 }
@@ -434,11 +466,11 @@ void editor_table_clear()
 
 	if (desktop_file_list)
 		{
-		gtk_list_store_clear(desktop_file_list);
+		g_list_store_remove_all(desktop_file_list);
 		}
 	else
 		{
-		desktop_file_list = gtk_list_store_new(DESKTOP_FILE_COLUMN_COUNT, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+		desktop_file_list = g_list_store_new(desktop_file_list_item_get_type());
 		}
 	if (editors)
 		{
@@ -499,25 +531,17 @@ std::vector<std::string> editor_get_disabled_plugins()
 {
 	if (!desktop_file_list) return {};
 
-	static const auto get_disabled_plugins = [](GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
-	{
-		gboolean disabled;
-		gtk_tree_model_get(model, iter, DESKTOP_FILE_COLUMN_DISABLED, &disabled, -1);
-
-		if (disabled)
-			{
-			g_autofree gchar *desktop_path = nullptr;
-			gtk_tree_model_get(model, iter, DESKTOP_FILE_COLUMN_PATH, &desktop_path, -1);
-
-			auto *list = static_cast<std::vector<std::string> *>(data);
-			list->emplace_back(desktop_path);
-			}
-
-		return FALSE;
-	};
-
 	std::vector<std::string> result;
-	gtk_tree_model_foreach(GTK_TREE_MODEL(desktop_file_list), get_disabled_plugins, &result);
+	const guint count = g_list_model_get_n_items(G_LIST_MODEL(desktop_file_list));
+	for (guint position = 0; position < count; position++)
+	{
+		g_autoptr(GObject) object = static_cast<GObject *>(g_list_model_get_item(G_LIST_MODEL(desktop_file_list), position));
+		auto *item = reinterpret_cast<DesktopFileListItem *>(object);
+		if (item->disabled)
+			{
+			result.emplace_back(item->path);
+			}
+		}
 
 	return result;
 }

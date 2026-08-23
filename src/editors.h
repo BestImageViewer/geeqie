@@ -83,16 +83,24 @@ enum {
 				   must be called later */
 };
 
-enum {
-	DESKTOP_FILE_COLUMN_KEY,
-	DESKTOP_FILE_COLUMN_DISABLED,
-	DESKTOP_FILE_COLUMN_NAME,
-	DESKTOP_FILE_COLUMN_HIDDEN,
-	DESKTOP_FILE_COLUMN_PATH,
-	DESKTOP_FILE_COLUMN_COUNT
+struct DesktopFileListItem
+{
+	GObject parent_instance;
+	gchar *key;
+	gboolean disabled;
+	gchar *name;
+	gchar *hidden;
+	gchar *path;
 };
 
-extern GtkListStore *desktop_file_list;
+struct DesktopFileListItemClass
+{
+	GObjectClass parent_class;
+};
+
+GType desktop_file_list_item_get_type();
+
+extern GListStore *desktop_file_list;
 
 
 void editor_table_finish();
