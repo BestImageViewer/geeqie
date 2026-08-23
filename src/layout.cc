@@ -2411,8 +2411,9 @@ void layout_show_config_window(LayoutWindow *lw)
 	GtkWidget *win_vbox;
 	GtkWidget *vbox;
 	GtkWidget *button;
+	GtkWidget *button_box;
 	GtkWidget *group;
-	GtkWidget *frame;
+	GtkWidget *hbox;
 
 	lc = g_new0(LayoutConfig, 1);
 	lc->lw = lw;
@@ -2437,34 +2438,29 @@ void layout_show_config_window(LayoutWindow *lw)
 	DEBUG_NAME(win_vbox);
 	gtk_window_set_child(GTK_WINDOW(lc->configwindow), win_vbox);
 
-	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
-	gtk_widget_set_valign(hbox, GTK_ALIGN_START);
-	gtk_box_append(GTK_BOX(win_vbox), hbox);
+	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_halign(button_box, GTK_ALIGN_END);
+	gtk_widget_set_valign(button_box, GTK_ALIGN_END);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(layout_config_help_cb), lc);
-	gtk_box_append(GTK_BOX(hbox), button);
+	gtk_box_append(GTK_BOX(button_box), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_APPLY, _("Apply"),
 				 G_CALLBACK(layout_config_apply_cb), lc);
-	gtk_box_append(GTK_BOX(hbox), button);
+	gtk_box_append(GTK_BOX(button_box), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
 				 G_CALLBACK(layout_config_close_cb), lc);
-	gtk_box_append(GTK_BOX(hbox), button);
+	gtk_box_append(GTK_BOX(button_box), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
 	                         G_CALLBACK(layout_config_ok_cb), lc);
-	gtk_box_append(GTK_BOX(hbox), button);
+	gtk_box_append(GTK_BOX(button_box), button);
 	gtk_window_set_default_widget(GTK_WINDOW(lc->configwindow), button);
 
-	frame = pref_frame_new(win_vbox, TRUE, nullptr, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	DEBUG_NAME(frame);
-
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	vbox = pref_frame_new(win_vbox, TRUE, nullptr, GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	DEBUG_NAME(vbox);
-	gtk_frame_set_child(GTK_FRAME(frame), vbox);
 
 
 	group = pref_group_new(vbox, FALSE, _("General options"), GTK_ORIENTATION_VERTICAL);
@@ -2500,6 +2496,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	gtk_widget_set_hexpand(lc->layout_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(lc->layout_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(group), lc->layout_widget);
+	gtk_box_append(GTK_BOX(win_vbox), button_box);
 
 	gtk_window_present(GTK_WINDOW(lc->configwindow));
 }

@@ -37,23 +37,36 @@
 namespace
 {
 
-enum {
-	COLUMN_TEXT = 0,
-	COLUMN_KEY
-};
-
 struct LayoutStyle
 {
 	LayoutLocation a, b, c;
+};
+
+struct LayoutConfigItem
+{
+	GObject parent_instance;
+	gchar *title;
+	gint key;
+};
+
+struct LayoutConfigItemClass
+{
+	GObjectClass parent_class;
 };
 
 struct LayoutConfig
 {
 	std::vector<GtkWidget *> style_widgets;
 
-	GtkWidget *listview;
+	GtkWidget *list_view{};
+	GListStore *store{};
 
-	gint style;
+	gint style{};
+
+	~LayoutConfig()
+	{
+		g_clear_object(&store);
+	}
 };
 
 constexpr gint LAYOUT_STYLE_SIZE = 48;
@@ -68,31 +81,45 @@ constexpr std::array<LayoutStyle, 4> layout_config_styles{{
 
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
+constexpr gchar LAYOUT_CONFIG_LIST_ITEM_DATA[] = "layout-config-list-item-data";
+constexpr gchar LAYOUT_CONFIG_NUMBER_LABEL_DATA[] = "layout-config-number-label-data";
+constexpr gchar LAYOUT_CONFIG_TITLE_LABEL_DATA[] = "layout-config-title-label-data";
 
-gboolean tree_model_get_row_iter(GtkTreeModel *model, int row, GtkTreeIter *iter)
+G_DEFINE_TYPE(LayoutConfigItem, layout_config_item, G_TYPE_OBJECT)
+
+void layout_config_item_finalize(GObject *object)
 {
-	int cur = 0;
+	auto *item = reinterpret_cast<LayoutConfigItem *>(object);
+	g_free(item->title);
 
-	gboolean valid = gtk_tree_model_get_iter_first(model, iter);
-	while (valid && cur != row)
-		{
-		cur++;
-		valid = gtk_tree_model_iter_next(model, iter);
-		}
+	G_OBJECT_CLASS(layout_config_item_parent_class)->finalize(object);
+}
 
-	return valid;
+void layout_config_item_class_init(LayoutConfigItemClass *item_class)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS(item_class);
+	object_class->finalize = layout_config_item_finalize;
+}
+
+void layout_config_item_init(LayoutConfigItem *)
+{
+}
+
+LayoutConfigItem *layout_config_item_new(gint key)
+{
+	auto *item = reinterpret_cast<LayoutConfigItem *>(g_object_new(layout_config_item_get_type(), nullptr));
+	item->title = g_strdup(_(layout_titles[key]));
+	item->key = key;
+
+	return item;
 }
 
 gint layout_config_list_order_get(LayoutConfig *lc, gint n)
 {
-	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(lc->listview));
+	g_autoptr(GObject) object = static_cast<GObject *>(g_list_model_get_item(G_LIST_MODEL(lc->store), n));
+	if (!object) return 0;
 
-	GtkTreeIter iter;
-	if (!tree_model_get_row_iter(model, n, &iter)) return 0;
-
-	gint val;
-	gtk_tree_model_get(model, &iter, COLUMN_KEY, &val, -1);
-	return val;
+	return reinterpret_cast<LayoutConfigItem *>(object)->key;
 }
 
 void layout_config_widget_click_cb(GtkWidget *widget, gpointer data)
@@ -168,15 +195,105 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 	return group;
 }
 
-void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
-                    GtkTreeModel *store, GtkTreeIter *iter, gpointer)
+void layout_config_number_update(GtkListItem *list_item, GParamSpec *, gpointer data)
 {
-	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
+	GtkWidget *label = GTK_WIDGET(data);
+	const guint position = gtk_list_item_get_position(list_item);
 
-	gint *indices = gtk_tree_path_get_indices(tpath);
-	g_object_set(cell,
-	             "text", std::to_string(indices[0] + 1).c_str(),
-	             NULL);
+	if (position == GTK_INVALID_LIST_POSITION)
+		{
+		gtk_label_set_text(GTK_LABEL(label), "");
+		return;
+		}
+
+	gtk_label_set_text(GTK_LABEL(label), std::to_string(position + 1).c_str());
+}
+
+GdkContentProvider *layout_config_drag_prepare(GtkDragSource *source, gdouble, gdouble, gpointer)
+{
+	GtkWidget *row_widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(source));
+	auto *list_item = static_cast<GtkListItem *>(g_object_get_data(G_OBJECT(row_widget), LAYOUT_CONFIG_LIST_ITEM_DATA));
+	auto *item = static_cast<LayoutConfigItem *>(gtk_list_item_get_item(list_item));
+
+	return item ? gdk_content_provider_new_typed(layout_config_item_get_type(), item) : nullptr;
+}
+
+gboolean layout_config_drop(GtkDropTarget *target, const GValue *value, gdouble, gdouble y, gpointer data)
+{
+	auto *lc = static_cast<LayoutConfig *>(data);
+	auto *source_item = static_cast<LayoutConfigItem *>(g_value_get_object(value));
+	if (!source_item) return FALSE;
+
+	GtkWidget *row_widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
+	auto *target_list_item = static_cast<GtkListItem *>(g_object_get_data(G_OBJECT(row_widget), LAYOUT_CONFIG_LIST_ITEM_DATA));
+	const guint target_position = gtk_list_item_get_position(target_list_item);
+	if (target_position == GTK_INVALID_LIST_POSITION) return FALSE;
+
+	const guint count = g_list_model_get_n_items(G_LIST_MODEL(lc->store));
+	guint source_position = GTK_INVALID_LIST_POSITION;
+	for (guint position = 0; position < count; position++)
+		{
+		g_autoptr(GObject) object = static_cast<GObject *>(g_list_model_get_item(G_LIST_MODEL(lc->store), position));
+		if (object == G_OBJECT(source_item))
+			{
+			source_position = position;
+			break;
+			}
+		}
+	if (source_position == GTK_INVALID_LIST_POSITION) return FALSE;
+
+	guint insert_position = target_position;
+	if (y >= gtk_widget_get_height(row_widget) / 2.0) insert_position++;
+	if (source_position < insert_position) insert_position--;
+	if (source_position == insert_position) return TRUE;
+
+	g_object_ref(source_item);
+	g_list_store_remove(lc->store, source_position);
+	g_list_store_insert(lc->store, insert_position, source_item);
+	g_object_unref(source_item);
+
+	return TRUE;
+}
+
+void layout_config_factory_setup(GtkSignalListItemFactory *, GtkListItem *list_item, gpointer data)
+{
+	auto *lc = static_cast<LayoutConfig *>(data);
+	GtkWidget *row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	GtkWidget *number_label = gtk_label_new(nullptr);
+	GtkWidget *title_label = gtk_label_new(nullptr);
+
+	gtk_widget_set_size_request(number_label, 16, -1);
+	gtk_label_set_xalign(GTK_LABEL(number_label), 1.0);
+	gtk_label_set_xalign(GTK_LABEL(title_label), 0.0);
+	gtk_widget_set_hexpand(title_label, TRUE);
+	gtk_box_append(GTK_BOX(row), number_label);
+	gtk_box_append(GTK_BOX(row), title_label);
+	g_object_set_data(G_OBJECT(row), LAYOUT_CONFIG_LIST_ITEM_DATA, list_item);
+	g_object_set_data(G_OBJECT(row), LAYOUT_CONFIG_NUMBER_LABEL_DATA, number_label);
+	g_object_set_data(G_OBJECT(row), LAYOUT_CONFIG_TITLE_LABEL_DATA, title_label);
+	g_signal_connect(list_item, "notify::position", G_CALLBACK(layout_config_number_update), number_label);
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, GDK_ACTION_MOVE);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(layout_config_drag_prepare), nullptr);
+	gtk_widget_add_controller(row, GTK_EVENT_CONTROLLER(drag_source));
+
+	GtkDropTarget *drop_target = gtk_drop_target_new(layout_config_item_get_type(), GDK_ACTION_MOVE);
+	g_signal_connect(drop_target, "drop", G_CALLBACK(layout_config_drop), lc);
+	gtk_widget_add_controller(row, GTK_EVENT_CONTROLLER(drop_target));
+
+	gtk_list_item_set_child(list_item, row);
+}
+
+void layout_config_factory_bind(GtkSignalListItemFactory *, GtkListItem *list_item, gpointer)
+{
+	GtkWidget *row = gtk_list_item_get_child(list_item);
+	auto *number_label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(row), LAYOUT_CONFIG_NUMBER_LABEL_DATA));
+	auto *title_label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(row), LAYOUT_CONFIG_TITLE_LABEL_DATA));
+	auto *item = static_cast<LayoutConfigItem *>(gtk_list_item_get_item(list_item));
+
+	layout_config_number_update(list_item, nullptr, number_label);
+	gtk_label_set_text(GTK_LABEL(title_label), item->title);
 }
 
 gint text_char_to_num(gchar c)
@@ -197,12 +314,11 @@ std::tuple<int, int, int> layout_config_order_from_text(const gchar *text)
 	return { a, b, c };
 }
 
-void layout_config_list_append(GtkListStore *store, gint n)
+void layout_config_list_append(GListStore *store, gint n)
 {
-	GtkTreeIter iter;
-	gtk_list_store_append(store, &iter);
-
-	gtk_list_store_set(store, &iter, COLUMN_TEXT, _(layout_titles[n]), COLUMN_KEY, n, -1);
+	LayoutConfigItem *item = layout_config_item_new(n);
+	g_list_store_append(store, item);
+	g_object_unref(item);
 }
 
 } // namespace
@@ -244,9 +360,6 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 	GtkWidget *hbox;
 	GtkWidget *group = nullptr;
 	GtkWidget *scrolled;
-	GtkListStore *store;
-	GtkTreeViewColumn *column;
-	GtkCellRenderer *renderer;
 
 	auto *lc = new LayoutConfig();
 
@@ -269,33 +382,19 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 				       GTK_POLICY_NEVER, GTK_POLICY_NEVER);
 	gtk_box_append(GTK_BOX(box), scrolled);
 
-	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-	lc->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	g_object_unref(store);
-
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(lc->listview), FALSE);
-	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(lc->listview), FALSE);
-	gtk_tree_view_set_reorderable(GTK_TREE_VIEW(lc->listview), TRUE);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, layout_config_number_cb, lc, nullptr);
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_add_attribute(column, renderer, "text", COLUMN_TEXT);
-
-	gtk_tree_view_append_column(GTK_TREE_VIEW(lc->listview), column);
+	lc->store = g_list_store_new(layout_config_item_get_type());
+	GtkSelectionModel *selection = GTK_SELECTION_MODEL(gtk_no_selection_new(G_LIST_MODEL(g_object_ref(lc->store))));
+	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
+	g_signal_connect(factory, "setup", G_CALLBACK(layout_config_factory_setup), lc);
+	g_signal_connect(factory, "bind", G_CALLBACK(layout_config_factory_bind), nullptr);
+	lc->list_view = gtk_list_view_new(selection, factory);
 
 	const auto [a, b, c] = layout_config_order_from_text(order);
-	layout_config_list_append(store, a);
-	layout_config_list_append(store, b);
-	layout_config_list_append(store, c);
+	layout_config_list_append(lc->store, a);
+	layout_config_list_append(lc->store, b);
+	layout_config_list_append(lc->store, c);
 
-	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), lc->listview);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), lc->list_view);
 
 	pref_label_new(box, _("(drag to change order)"));
 
