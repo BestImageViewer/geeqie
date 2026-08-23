@@ -1067,12 +1067,8 @@ void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_
 	gtk_tree_model_get(tree_model, iter, DIR_COLUMN_COLOR, &set, -1);
 
 	GdkRGBA color_bg;
-	GtkStyleContext *style_context = gtk_widget_get_style_context(vd->view);
-	if (!gtk_style_context_lookup_color(style_context, "theme_base_color", &color_bg))
-		{
-		gtk_widget_get_color(vd->view, &color_bg);
-		color_bg.alpha = 0.35;
-		}
+	gtk_widget_get_color(vd->view, &color_bg);
+	color_bg.alpha = 0.35;
 	shift_color(color_bg);
 
 	g_object_set(cell,
