@@ -509,6 +509,7 @@ void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 	    !(event.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
 	    vflist_is_selected(vf, fd))
 		{
+		vf->preserve_selection = TRUE;
 		gtk_widget_grab_focus(event.widget);
 		return;
 		}
@@ -530,6 +531,7 @@ void vflist_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
+	vf->preserve_selection = FALSE;
 
 	if (layout_handle_user_defined_mouse_buttons(vf->layout, event.button))
 		{
@@ -542,6 +544,11 @@ void vflist_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 		}
 
 	if (event.button != GDK_BUTTON_PRIMARY && event.button != GDK_BUTTON_MIDDLE)
+		{
+		return;
+		}
+
+	if (event.button == GDK_BUTTON_PRIMARY && vf->drag_started)
 		{
 		return;
 		}
@@ -643,6 +650,8 @@ static gboolean vflist_select_cb(GtkTreeSelection *, GtkTreeModel *store, GtkTre
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
+
+	if (vf->preserve_selection && path_currently_selected) return FALSE;
 
 	if (!path_currently_selected && gtk_tree_model_get_iter(store, &iter, tpath))
 		{

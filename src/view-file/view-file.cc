@@ -176,14 +176,40 @@ static gboolean vf_press_key_cb(GtkEventControllerKey *, guint keyval, guint, Gd
  *-------------------------------------------------------------------
  */
 
+static bool vf_is_selected(const ViewFile *vf, const FileData *fd);
+
 static void vf_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
+	const gint64 press_time = g_get_monotonic_time();
+	/* GtkDragSource immediately starts a second press sequence when it takes
+	 * over from GtkGestureClick. Preserve the selection across that handoff. */
+	const gboolean drag_takeover = press_time - vf->last_press_time <= 50 * G_TIME_SPAN_MILLISECOND;
+	if (!drag_takeover)
+		{
+		file_data_list_free(vf->drag_selection);
+		vf->drag_selection = nullptr;
+		}
+	else if (vf->drag_selection)
+		{
+		vf_select_none(vf);
+		vf_select_list(vf, vf->drag_selection);
+		}
+	vf->last_press_time = press_time;
+	vf->drag_started = FALSE;
+	vf->preserve_selection = FALSE;
+
 	switch (vf->type)
 	{
 	case FILEVIEW_LIST: vflist_press_cb(vf, event); break;
 	case FILEVIEW_ICON: vficon_press_cb(vf, event); break;
 	default: break;
 	}
+
+	if (!vf->drag_selection && vf->click_fd && vf_is_selected(vf, vf->click_fd) &&
+	    vf_selection_count(vf, nullptr) > 1)
+		{
+		vf->drag_selection = vf_selection_get_list(vf);
+		}
 }
 
 static void vf_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
@@ -371,6 +397,11 @@ static GdkContentProvider *vf_dnd_prepare(GtkDragSource *source, gdouble x, gdou
 		}
 
 	if (!vf->click_fd) return nullptr;
+	if (vf->drag_selection && g_list_find(vf->drag_selection, vf->click_fd))
+		{
+		vf_select_none(vf);
+		vf_select_list(vf, vf->drag_selection);
+		}
 
 	g_autoptr(FileDataList) list = nullptr;
 
@@ -385,8 +416,16 @@ static GdkContentProvider *vf_dnd_prepare(GtkDragSource *source, gdouble x, gdou
 
 	if (!list) return nullptr;
 
+	vf->drag_started = TRUE;
 	dnd_set_drag_icon(source, vf->click_fd->thumb_pixbuf, g_list_length(list), vf->click_fd);
 	return dnd_file_list_content_provider(list);
+}
+
+static void vf_dnd_end(GtkDragSource *, GdkDrag *, gboolean, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+	file_data_list_free(vf->drag_selection);
+	vf->drag_selection = nullptr;
 }
 
 struct VfDndTextDropData
@@ -451,6 +490,7 @@ static void vf_dnd_init(ViewFile *vf)
 	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
 	g_signal_connect(drag_source, "prepare", G_CALLBACK(vf_dnd_prepare), vf);
+	g_signal_connect(drag_source, "drag-end", G_CALLBACK(vf_dnd_end), vf);
 	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(drag_source));
 
 	static const char *mime_types[] = {"text/plain"};
@@ -1141,6 +1181,8 @@ gboolean vf_set_fd(ViewFile *vf, FileData *dir_fd)
 static void vf_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
+	file_data_list_free(vf->drag_selection);
+
 	if (vf->marks_filter_controller && vf->layout && vf->layout->window)
 		{
 		gtk_widget_remove_controller(vf->layout->window, vf->marks_filter_controller);

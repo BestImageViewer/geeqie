@@ -66,6 +66,10 @@ struct ViewFile
 	GList *list;
 
 	FileData *click_fd;
+	gboolean drag_started;
+	gboolean preserve_selection;
+	FileDataList *drag_selection;
+	gint64 last_press_time;
 
 	FileData::FileList::SortSettings sort;
 

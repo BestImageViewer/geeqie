@@ -1187,6 +1187,8 @@ void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 		vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
 		}
 
+	if (event.button == GDK_BUTTON_PRIMARY && vf->drag_started) return;
+
 	if (!fd || vf->click_fd != fd) return;
 
 	was_selected = !!(fd->selected & SELECTION_SELECTED);
