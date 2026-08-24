@@ -494,15 +494,14 @@ GtkColumnViewColumn *editor_list_column_new(const gchar *title, DesktopFileField
 	return column;
 }
 
-void editor_list_window_create()
+EditorListWindow *editor_list_window_new()
 {
 	GtkWidget *win_vbox;
 	GtkWidget *hbox;
 	GtkWidget *button;
 	GtkWidget *scrolled;
-	EditorListWindow *ewl;
 
-	editor_list_window = ewl = g_new0(EditorListWindow, 1);
+	auto *ewl = g_new0(EditorListWindow, 1);
 
 	ewl->window = window_new("editors", PIXBUF_INLINE_ICON_CONFIG, _("Plugins"));
 	DEBUG_NAME(ewl->window);
@@ -597,7 +596,7 @@ void editor_list_window_create()
 
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), ewl->view);
 
-	gtk_window_present(GTK_WINDOW(ewl->window));
+	return ewl;
 }
 
 } // namespace
@@ -610,12 +609,11 @@ void editor_list_window_create()
 
 void show_editor_list_window()
 {
-	if (editor_list_window)
+	if (!editor_list_window)
 		{
-		gtk_window_present(GTK_WINDOW(editor_list_window));
-		return;
+		editor_list_window = editor_list_window_new();
 		}
 
-	editor_list_window_create();
+	gtk_window_present(GTK_WINDOW(editor_list_window->window));
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
