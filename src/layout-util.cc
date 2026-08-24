@@ -1939,25 +1939,28 @@ static void layout_menu_log_window_cb(GSimpleAction *, GVariant *, gpointer)
  *-----------------------------------------------------------------------------
  */
 
-static void layout_menu_select_all_cb(GSimpleAction *, GVariant *, gpointer)
+static void layout_menu_select_all_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto *lw = static_cast<LayoutWindow *>(data);
 
 	layout_select_all(lw);
+	gtk_widget_grab_focus(lw->vf->listview);
 }
 
-static void layout_menu_unselect_all_cb(GSimpleAction *, GVariant *, gpointer)
+static void layout_menu_unselect_all_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto *lw = static_cast<LayoutWindow *>(data);
 
 	layout_select_none(lw);
+	gtk_widget_grab_focus(lw->vf->listview);
 }
 
-static void layout_menu_invert_selection_cb(GSimpleAction *, GVariant *, gpointer)
+static void layout_menu_invert_selection_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto *lw = static_cast<LayoutWindow *>(data);
 
 	layout_select_invert(lw);
+	gtk_widget_grab_focus(lw->vf->listview);
 }
 
 static void layout_menu_file_filter_cb(GSimpleAction *action, GVariant *state, gpointer)
