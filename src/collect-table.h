@@ -33,6 +33,7 @@ struct CollectTable
 {
 	GtkWidget *scrolled;
 	GtkWidget *listview;
+	GListStore *store;
 	gint columns;
 	gint rows;
 
@@ -59,6 +60,7 @@ struct CollectTable
 	GtkWidget *popup;
 	CollectInfo *drop_info;
 	GList *drop_list;
+	GList *drag_info_list;
 	gint drop_index;
 
 	guint sync_idle_id; /**< event source id */
