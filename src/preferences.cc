@@ -240,16 +240,6 @@ enum {
 	AE_ICON
 };
 
-enum {
-	FILETYPES_COLUMN_ENABLED = 0,
-	FILETYPES_COLUMN_FILTER,
-	FILETYPES_COLUMN_DESCRIPTION,
-	FILETYPES_COLUMN_CLASS,
-	FILETYPES_COLUMN_WRITABLE,
-	FILETYPES_COLUMN_SIDECAR,
-	FILETYPES_COLUMN_COUNT
-};
-
 /* config memory values */
 static ConfOptions *c_options = nullptr;
 
@@ -259,10 +249,38 @@ static gint debug_c;
 #endif
 
 static GtkWidget *configwindow = nullptr;
-static GtkListStore *filter_store = nullptr;
+static GListStore *filter_store = nullptr;
 
 namespace
 {
+
+struct FilterRow
+{
+	GObject parent;
+	FilterEntry *entry;
+};
+
+struct FilterRowClass
+{
+	GObjectClass parent_class;
+};
+
+G_DEFINE_TYPE(FilterRow, filter_row, G_TYPE_OBJECT)
+
+void filter_row_class_init(FilterRowClass *)
+{
+}
+
+void filter_row_init(FilterRow *)
+{
+}
+
+FilterRow *filter_row_new(FilterEntry *entry)
+{
+	auto *row = static_cast<FilterRow *>(g_object_new(filter_row_get_type(), nullptr));
+	row->entry = entry;
+	return row;
+}
 
 struct AccelRow
 {
@@ -639,7 +657,7 @@ static void config_window_close_cb(GtkWidget *, gpointer)
 {
 	gtk_window_destroy(GTK_WINDOW(configwindow));
 	configwindow = nullptr;
-	filter_store = nullptr;
+	g_clear_object(&filter_store);
 	g_clear_object(&accel_store);
 }
 
@@ -1148,244 +1166,67 @@ static void add_video_menu(GtkWidget *table, gint column, gint row, const gchar 
 
 static void filter_store_populate()
 {
-	GList *work;
-
 	if (!filter_store) return;
-
-	gtk_list_store_clear(filter_store);
-
-	work = filter_get_list();
-	while (work)
+	g_list_store_remove_all(filter_store);
+	for (GList *work = filter_get_list(); work; work = work->next)
 		{
-		FilterEntry *fe;
-		GtkTreeIter iter;
-
-		fe = static_cast<FilterEntry *>(work->data);
-		work = work->next;
-
-		gtk_list_store_append(filter_store, &iter);
-		gtk_list_store_set(filter_store, &iter, 0, fe, -1);
+		auto *row = filter_row_new(static_cast<FilterEntry *>(work->data));
+		g_list_store_append(filter_store, row);
+		g_object_unref(row);
 		}
 }
 
-static void filter_store_ext_edit_cb(GtkCellRendererText *, gchar *path_str, gchar *new_text, gpointer data)
+static void filter_text_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer data)
 {
-	auto model = static_cast<GtkWidget *>(data);
-	auto fe = static_cast<FilterEntry *>(data);
-	GtkTreeIter iter;
-
-	if (!new_text || *new_text == '\0') return;
-
-	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
-
-	g_free(fe->extensions);
-	fe->extensions = g_strdup(new_text);
-
-	filter_rebuild();
-}
-
-static void filter_store_class_edit_cb(GtkCellRendererText *, gchar *path_str, gchar *new_text, gpointer data)
-{
-	auto model = static_cast<GtkWidget *>(data);
-	auto fe = static_cast<FilterEntry *>(data);
-	GtkTreeIter iter;
-	gint i;
-
-	if (!new_text || !new_text[0]) return;
-
-	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
-
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
+	if (gtk_editable_label_get_editing(label)) return;
+	auto *row = static_cast<FilterRow *>(g_object_get_data(G_OBJECT(label), "filter-row"));
+	if (!row) return;
+	const gchar *text = gtk_editable_get_text(GTK_EDITABLE(label));
+	if (!text || text[0] == '\0') return;
+	auto *fe = row->entry;
+	if (GPOINTER_TO_INT(data) == FE_EXTENSION)
 		{
-		if (strcmp(new_text, _(format_class_list[i])) == 0)
-			{
-			fe->file_class = static_cast<FileFormatClass>(i);
-			break;
-			}
+		if (g_strcmp0(fe->extensions, text) == 0) return;
+		g_free(fe->extensions);
+		fe->extensions = g_strdup(text);
+		filter_rebuild();
 		}
-
-	filter_rebuild();
-}
-
-static void filter_store_desc_edit_cb(GtkCellRendererText *, gchar *path_str, gchar *new_text, gpointer data)
-{
-	auto model = static_cast<GtkWidget *>(data);
-	FilterEntry *fe;
-	GtkTreeIter iter;
-
-	if (!new_text || !new_text[0]) return;
-
-	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
-
-	g_free(fe->description);
-	fe->description = g_strdup(new_text);
-}
-
-static void filter_store_enable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
-{
-	auto model = static_cast<GtkWidget *>(data);
-	FilterEntry *fe;
-	GtkTreeIter iter;
-
-	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
-
-	fe->enabled = !fe->enabled;
-
-	filter_rebuild();
-}
-
-static void filter_store_writable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
-{
-	auto model = static_cast<GtkWidget *>(data);
-	FilterEntry *fe;
-	GtkTreeIter iter;
-
-	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
-
-	fe->writable = !fe->writable;
-	if (fe->writable) fe->allow_sidecar = FALSE;
-
-	filter_rebuild();
-}
-
-static void filter_store_sidecar_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
-{
-	auto model = static_cast<GtkWidget *>(data);
-	FilterEntry *fe;
-	GtkTreeIter iter;
-
-	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
-
-	fe->allow_sidecar = !fe->allow_sidecar;
-	if (fe->allow_sidecar) fe->writable = FALSE;
-
-	filter_rebuild();
-}
-
-static void filter_set_func(GtkTreeViewColumn *, GtkCellRenderer *cell,
-			    GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
-{
-	FilterEntry *fe;
-
-	gtk_tree_model_get(tree_model, iter, 0, &fe, -1);
-
-	switch (GPOINTER_TO_INT(data))
+	else
 		{
-		case FE_ENABLE:
-			g_object_set(cell, "active", fe->enabled, NULL);
-			break;
-		case FE_EXTENSION:
-			g_object_set(cell, "text", fe->extensions, NULL);
-			break;
-		case FE_DESCRIPTION:
-			g_object_set(cell, "text", fe->description, NULL);
-			break;
-		case FE_CLASS:
-			g_object_set(cell, "text", _(format_class_list[fe->file_class]), NULL);
-			break;
-		case FE_WRITABLE:
-			g_object_set(cell, "active", fe->writable, NULL);
-			break;
-		case FE_ALLOW_SIDECAR:
-			g_object_set(cell, "active", fe->allow_sidecar, NULL);
-			break;
-		default:
-			break;
+		if (g_strcmp0(fe->description, text) == 0) return;
+		g_free(fe->description);
+		fe->description = g_strdup(text);
 		}
-}
-
-static gboolean filter_add_scroll(gpointer data)
-{
-	auto *filter_view = GTK_TREE_VIEW(data);
-
-	g_autoptr(GtkTreePath) path = nullptr;
-
-	GtkTreeModel *model = gtk_tree_view_get_model(filter_view);
-	GtkTreeIter iter;
-	gboolean valid = gtk_tree_model_get_iter_first(model, &iter);
-	while (valid)
-		{
-		FilterEntry *filter;
-		gtk_tree_model_get(model, &iter, 0, &filter, -1);
-
-		if (g_strcmp0(filter->extensions, ".new") == 0)
-			{
-			path = gtk_tree_model_get_path(model, &iter);
-			break;
-			}
-
-		valid = gtk_tree_model_iter_next(model, &iter);
-		}
-
-	if (!path)
-		{
-		const gint rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(filter_store), nullptr);
-		path = gtk_tree_path_new_from_indices(rows - 1, -1);
-		}
-
-	GtkTreeViewColumn *column = gtk_tree_view_get_column(filter_view, 0);
-
-	g_autoptr(GList) list_cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
-	auto *cell = static_cast<GtkCellRenderer *>(g_list_last(list_cells)->data);
-
-	gtk_tree_view_scroll_to_cell(filter_view, path, column, FALSE, 0.0, 0.0);
-	gtk_tree_view_set_cursor_on_cell(filter_view, path, column, cell, TRUE);
-
-	return G_SOURCE_REMOVE;
 }
 
 static void filter_add_cb(GtkWidget *, gpointer data)
 {
 	filter_add_unique("description", ".new", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
 	filter_store_populate();
-
-	g_idle_add(filter_add_scroll, data);
+	auto *selection = GTK_SINGLE_SELECTION(data);
+	for (guint position = 0; position < g_list_model_get_n_items(G_LIST_MODEL(selection)); position++)
+		{
+		auto *row = static_cast<FilterRow *>(g_list_model_get_item(G_LIST_MODEL(selection), position));
+		const gboolean is_new = g_strcmp0(row->entry->extensions, ".new") == 0;
+		g_object_unref(row);
+		if (is_new)
+			{
+			gtk_single_selection_set_selected(selection, position);
+			break;
+			}
+		}
 }
 
 static void filter_remove_cb(GtkWidget *, gpointer data)
 {
-	auto filter_view = static_cast<GtkWidget *>(data);
-	GtkTreeSelection *selection;
-	GtkTreeIter iter;
-	FilterEntry *fe;
-
 	if (!filter_store) return;
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(filter_view));
-	if (!gtk_tree_selection_get_selected(selection, nullptr, &iter)) return;
-	gtk_tree_model_get(GTK_TREE_MODEL(filter_store), &iter, 0, &fe, -1);
-	if (!fe) return;
+	auto *selection = GTK_SINGLE_SELECTION(data);
+	auto *row = static_cast<FilterRow *>(gtk_single_selection_get_selected_item(selection));
+	if (!row) return;
 
-	filter_remove_entry(fe);
+	filter_remove_entry(row->entry);
 	filter_rebuild();
 	filter_store_populate();
-}
-
-static gboolean filter_default_ok_scroll(gpointer data)
-{
-	GtkTreeIter iter;
-	GtkTreeViewColumn *column;
-
-	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(filter_store), &iter);
-	g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(GTK_TREE_MODEL(filter_store), &iter);
-	column = gtk_tree_view_get_column(GTK_TREE_VIEW(data),0);
-
-	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(data),
-				     path, column,
-				     FALSE, 0.0, 0.0);
-
-	return G_SOURCE_REMOVE;
 }
 
 static void filter_default_ok_cb(GenericDialog *gd, gpointer)
@@ -1394,8 +1235,7 @@ static void filter_default_ok_cb(GenericDialog *gd, gpointer)
 	filter_add_defaults();
 	filter_rebuild();
 	filter_store_populate();
-
-	g_idle_add(filter_default_ok_scroll, gd->data);
+	gtk_single_selection_set_selected(GTK_SINGLE_SELECTION(gd->data), 0);
 }
 
 static void filter_default_cb(GtkWidget *widget, gpointer data)
@@ -2373,86 +2213,128 @@ static void config_tab_osd(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_box_append(GTK_BOX(hbox), label);
 }
 
-static GtkTreeModel *create_class_model()
+static void filter_toggle_cb(GtkCheckButton *button, gpointer data)
 {
-	GtkListStore *model;
-	GtkTreeIter iter;
-	gint i;
-
-	/* create list store */
-	model = gtk_list_store_new(1, G_TYPE_STRING);
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
+	if (g_object_get_data(G_OBJECT(button), "filter-binding")) return;
+	auto *row = static_cast<FilterRow *>(g_object_get_data(G_OBJECT(button), "filter-row"));
+	if (!row) return;
+	auto *fe = row->entry;
+	const gboolean active = gtk_check_button_get_active(button);
+	switch (GPOINTER_TO_INT(data))
 		{
-		gtk_list_store_append(model, &iter);
-		gtk_list_store_set(model, &iter, 0, _(format_class_list[i]), -1);
+		case FE_ENABLE: fe->enabled = active; break;
+		case FE_WRITABLE:
+			fe->writable = active;
+			if (active) fe->allow_sidecar = FALSE;
+			break;
+		case FE_ALLOW_SIDECAR:
+			fe->allow_sidecar = active;
+			if (active) fe->writable = FALSE;
+			break;
+		default: g_assert_not_reached();
 		}
-	return GTK_TREE_MODEL (model);
+	filter_rebuild();
+	filter_store_populate();
 }
 
-
-/* filtering tab */
-static gint filter_table_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
+static void filter_class_changed(GtkDropDown *drop_down, GParamSpec *, gpointer)
 {
-	gint n = GPOINTER_TO_INT(data);
-	gint ret = 0;
-	FilterEntry *filter_a;
-	FilterEntry *filter_b;
-
-	gtk_tree_model_get(model, a, 0, &filter_a, -1);
-	gtk_tree_model_get(model, b, 0, &filter_b, -1);
-
-	switch (n)
-		{
-		case FILETYPES_COLUMN_ENABLED:
-			{
-			ret = filter_a->enabled - filter_b->enabled;
-			break;
-			}
-		case FILETYPES_COLUMN_FILTER:
-			{
-			ret = g_utf8_collate(filter_a->extensions, filter_b->extensions);
-			break;
-			}
-		case FILETYPES_COLUMN_DESCRIPTION:
-			{
-			ret = g_utf8_collate(filter_a->description, filter_b->description);
-			break;
-			}
-		case FILETYPES_COLUMN_CLASS:
-			{
-			ret = g_strcmp0(format_class_list[filter_a->file_class], format_class_list[filter_b->file_class]);
-			break;
-			}
-		case FILETYPES_COLUMN_WRITABLE:
-			{
-			ret = filter_a->writable - filter_b->writable;
-			break;
-			}
-		case FILETYPES_COLUMN_SIDECAR:
-			{
-			ret = filter_a->allow_sidecar - filter_b->allow_sidecar;
-			break;
-			}
-		default:
-			g_return_val_if_reached(0);
-		}
-
-	return ret;
+	if (g_object_get_data(G_OBJECT(drop_down), "filter-binding")) return;
+	auto *row = static_cast<FilterRow *>(g_object_get_data(G_OBJECT(drop_down), "filter-row"));
+	if (!row) return;
+	row->entry->file_class = static_cast<FileFormatClass>(gtk_drop_down_get_selected(drop_down));
+	filter_rebuild();
 }
 
-static gboolean search_function_cb(GtkTreeModel *model, gint, const gchar *key, GtkTreeIter *iter, gpointer)
+static void filter_factory_setup(GtkSignalListItemFactory *factory, GtkListItem *list_item, gpointer)
+
 {
-	FilterEntry *fe;
-	gboolean ret = TRUE;
-
-	gtk_tree_model_get(model, iter, 0, &fe, -1);
-
-	if (g_strstr_len(fe->extensions, -1, key))
+	const gint column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(factory), "filter-column"));
+	GtkWidget *widget;
+	if (column == FE_ENABLE || column == FE_WRITABLE || column == FE_ALLOW_SIDECAR)
 		{
-		ret = FALSE;
+		widget = gtk_check_button_new();
+		if (column == FE_WRITABLE) gtk_widget_set_margin_start(widget, PREF_PAD_BUTTON_GAP);
+		g_signal_connect(widget, "toggled", G_CALLBACK(filter_toggle_cb), GINT_TO_POINTER(column));
 		}
+	else if (column == FE_CLASS)
+		{
+		GtkStringList *classes = gtk_string_list_new(nullptr);
+		for (gint i = 0; i < FILE_FORMAT_CLASSES; i++) gtk_string_list_append(classes, _(format_class_list[i]));
+		widget = gtk_drop_down_new(G_LIST_MODEL(classes), nullptr);
+		g_signal_connect(widget, "notify::selected", G_CALLBACK(filter_class_changed), nullptr);
+		}
+	else
+		{
+		widget = gtk_editable_label_new("");
+		g_signal_connect(widget, "notify::editing", G_CALLBACK(filter_text_editing_changed), GINT_TO_POINTER(column));
+		}
+	gtk_list_item_set_child(list_item, widget);
+}
 
-	return ret;
+static void filter_factory_bind(GtkSignalListItemFactory *factory, GtkListItem *list_item, gpointer)
+{
+	auto *row = static_cast<FilterRow *>(gtk_list_item_get_item(list_item));
+	GtkWidget *widget = gtk_list_item_get_child(list_item);
+	const gint column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(factory), "filter-column"));
+	g_object_set_data(G_OBJECT(widget), "filter-row", row);
+	g_object_set_data(G_OBJECT(widget), "filter-binding", GINT_TO_POINTER(TRUE));
+	switch (column)
+		{
+		case FE_ENABLE: gtk_check_button_set_active(GTK_CHECK_BUTTON(widget), row->entry->enabled); break;
+		case FE_EXTENSION: gtk_editable_set_text(GTK_EDITABLE(widget), row->entry->extensions); break;
+		case FE_DESCRIPTION: gtk_editable_set_text(GTK_EDITABLE(widget), row->entry->description); break;
+		case FE_CLASS: gtk_drop_down_set_selected(GTK_DROP_DOWN(widget), row->entry->file_class); break;
+		case FE_WRITABLE: gtk_check_button_set_active(GTK_CHECK_BUTTON(widget), row->entry->writable); break;
+		case FE_ALLOW_SIDECAR: gtk_check_button_set_active(GTK_CHECK_BUTTON(widget), row->entry->allow_sidecar); break;
+		default: g_assert_not_reached();
+		}
+	g_object_set_data(G_OBJECT(widget), "filter-binding", nullptr);
+	}
+
+static gint filter_sort_cb(gconstpointer item1, gconstpointer item2, gpointer data)
+{
+	auto *a = reinterpret_cast<const FilterRow *>(item1)->entry;
+	auto *b = reinterpret_cast<const FilterRow *>(item2)->entry;
+	switch (GPOINTER_TO_INT(data))
+		{
+		case FE_ENABLE: return a->enabled - b->enabled;
+		case FE_EXTENSION: return g_utf8_collate(a->extensions, b->extensions);
+		case FE_DESCRIPTION: return g_utf8_collate(a->description, b->description);
+		case FE_CLASS: return g_strcmp0(format_class_list[a->file_class], format_class_list[b->file_class]);
+		case FE_WRITABLE: return a->writable - b->writable;
+		case FE_ALLOW_SIDECAR: return a->allow_sidecar - b->allow_sidecar;
+		default: return 0;
+		}
+}
+
+static GtkColumnViewColumn *filter_column_new(const gchar *title, gint column)
+{
+	auto *factory = gtk_signal_list_item_factory_new();
+	g_object_set_data(G_OBJECT(factory), "filter-column", GINT_TO_POINTER(column));
+	g_signal_connect(factory, "setup", G_CALLBACK(filter_factory_setup), nullptr);
+	g_signal_connect(factory, "bind", G_CALLBACK(filter_factory_bind), nullptr);
+	auto *view_column = gtk_column_view_column_new(title, GTK_LIST_ITEM_FACTORY(factory));
+	gtk_column_view_column_set_resizable(view_column, TRUE);
+	auto *sorter = gtk_custom_sorter_new(filter_sort_cb, GINT_TO_POINTER(column), nullptr);
+	gtk_column_view_column_set_sorter(view_column, GTK_SORTER(sorter));
+	g_object_unref(sorter);
+	return view_column;
+}
+
+static gboolean filter_search_cb(gpointer item, gpointer data)
+{
+	auto *fe = static_cast<FilterRow *>(item)->entry;
+	const gchar *query = gtk_editable_get_text(GTK_EDITABLE(data));
+	if (!query || query[0] == '\0') return TRUE;
+	g_autofree gchar *text = g_utf8_casefold(fe->extensions, -1);
+	g_autofree gchar *query_folded = g_utf8_casefold(query, -1);
+	return g_strstr_len(text, -1, query_folded) != nullptr;
+}
+
+static void filter_search_changed(GtkSearchEntry *, gpointer data)
+{
+	gtk_filter_changed(GTK_FILTER(data), GTK_FILTER_CHANGE_DIFFERENT);
 }
 
 static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
@@ -2465,8 +2347,6 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *ct_button;
 	GtkWidget *scrolled;
 	GtkWidget *filter_view;
-	GtkCellRenderer *renderer;
-	GtkTreeViewColumn *column;
 
 	vbox = scrolled_notebook_page(notebook, _("File Filters"));
 
@@ -2493,6 +2373,9 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_box_append(GTK_BOX(group), sidecar_ext_entry);
 
 	group = pref_group_new(vbox, TRUE, _("File types"), GTK_ORIENTATION_VERTICAL);
+	GtkWidget *search_entry = gtk_search_entry_new();
+	gtk_search_entry_set_placeholder_text(GTK_SEARCH_ENTRY(search_entry), _("Search file extensions"));
+	gtk_box_append(GTK_BOX(group), search_entry);
 
 	frame = pref_group_parent(group);
 	g_signal_connect(G_OBJECT(ct_button), "toggled",
@@ -2506,110 +2389,21 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(group), scrolled);
 
-	filter_store = gtk_list_store_new(1, G_TYPE_POINTER);
-	filter_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(filter_store));
-	g_object_unref(filter_store);
+	filter_store = g_list_store_new(filter_row_get_type());
+	auto *filter = gtk_custom_filter_new(filter_search_cb, search_entry, nullptr);
+	g_signal_connect(search_entry, "search-changed", G_CALLBACK(filter_search_changed), filter);
+	auto *filter_model = gtk_filter_list_model_new(G_LIST_MODEL(g_object_ref(filter_store)), GTK_FILTER(filter));
+	auto *sort_model = gtk_sort_list_model_new(G_LIST_MODEL(filter_model), nullptr);
+	auto *selection = gtk_single_selection_new(G_LIST_MODEL(sort_model));
+	filter_view = gtk_column_view_new(GTK_SELECTION_MODEL(selection));
+	gtk_sort_list_model_set_sorter(sort_model, gtk_column_view_get_sorter(GTK_COLUMN_VIEW(filter_view)));
 
-	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(filter_view));
-	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
-
-	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(filter_view), FALSE);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_title(column, _("Enabled"));
-	gtk_tree_view_column_set_resizable(column, TRUE);
-
-	renderer = gtk_cell_renderer_toggle_new();
-	g_signal_connect(G_OBJECT(renderer), "toggled",
-			 G_CALLBACK(filter_store_enable_cb), filter_store);
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_ENABLE), nullptr);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_ENABLED, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_ENABLED), nullptr);
-	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_ENABLED);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_title(column, _("Filter"));
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_FILTER, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_FILTER), nullptr);
-	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_FILTER);
-
-	renderer = gtk_cell_renderer_text_new();
-	g_signal_connect(G_OBJECT(renderer), "edited",
-			 G_CALLBACK(filter_store_ext_edit_cb), filter_store);
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	g_object_set(renderer, "editable", TRUE, NULL);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_EXTENSION), nullptr);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-
-	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(filter_view), TRUE);
-	gtk_tree_view_set_search_column(GTK_TREE_VIEW(filter_view), FILETYPES_COLUMN_FILTER);
-	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(filter_view), search_function_cb, nullptr, nullptr);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_title(column, _("Description"));
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_fixed_width(column, 200);
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-
-	renderer = gtk_cell_renderer_text_new();
-	g_signal_connect(G_OBJECT(renderer), "edited",
-			 G_CALLBACK(filter_store_desc_edit_cb), filter_store);
-	g_object_set(renderer, "editable", TRUE, NULL);
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_DESCRIPTION), nullptr);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_DESCRIPTION, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_DESCRIPTION), nullptr);
-	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_DESCRIPTION);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_title(column, _("Class"));
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	renderer = gtk_cell_renderer_combo_new();
-	g_object_set(renderer,
-	             "editable", TRUE,
-	             "model", create_class_model(),
-	             "text-column", 0,
-	             "has-entry", FALSE,
-	             NULL);
-
-	g_signal_connect(G_OBJECT(renderer), "edited",
-			 G_CALLBACK(filter_store_class_edit_cb), filter_store);
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_CLASS), nullptr);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_CLASS, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_CLASS), nullptr);
-	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_CLASS);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_title(column, _("Writable"));
-	gtk_tree_view_column_set_resizable(column, FALSE);
-	renderer = gtk_cell_renderer_toggle_new();
-	g_signal_connect(G_OBJECT(renderer), "toggled",
-			 G_CALLBACK(filter_store_writable_cb), filter_store);
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_WRITABLE), nullptr);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_WRITABLE, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_WRITABLE), nullptr);
-	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_WRITABLE);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_title(column, _("Sidecar is allowed"));
-	gtk_tree_view_column_set_resizable(column, FALSE);
-	renderer = gtk_cell_renderer_toggle_new();
-	g_signal_connect(G_OBJECT(renderer), "toggled",
-			 G_CALLBACK(filter_store_sidecar_cb), filter_store);
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_ALLOW_SIDECAR), nullptr);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_SIDECAR, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_SIDECAR), nullptr);
-	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_SIDECAR);
+	gtk_column_view_append_column(GTK_COLUMN_VIEW(filter_view), filter_column_new(_("Enabled"), FE_ENABLE));
+	gtk_column_view_append_column(GTK_COLUMN_VIEW(filter_view), filter_column_new(_("Filter"), FE_EXTENSION));
+	gtk_column_view_append_column(GTK_COLUMN_VIEW(filter_view), filter_column_new(_("Description"), FE_DESCRIPTION));
+	gtk_column_view_append_column(GTK_COLUMN_VIEW(filter_view), filter_column_new(_("Class"), FE_CLASS));
+	gtk_column_view_append_column(GTK_COLUMN_VIEW(filter_view), filter_column_new(_("Writable"), FE_WRITABLE));
+	gtk_column_view_append_column(GTK_COLUMN_VIEW(filter_view), filter_column_new(_("Sidecar is allowed"), FE_ALLOW_SIDECAR));
 
 	filter_store_populate();
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), filter_view);
@@ -2622,15 +2416,15 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_box_append(GTK_BOX(hbox), end_box);
 
 	button = pref_button_new(nullptr, GQ_ICON_ADD, _("Add"),
-				 G_CALLBACK(filter_add_cb), filter_view);
+				 G_CALLBACK(filter_add_cb), selection);
 	gtk_box_append(GTK_BOX(end_box), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_REMOVE, _("Remove"),
-				 G_CALLBACK(filter_remove_cb), filter_view);
+				 G_CALLBACK(filter_remove_cb), selection);
 	gtk_box_append(GTK_BOX(end_box), button);
 
 	button = pref_button_new(nullptr, nullptr, _("Defaults"),
-				 G_CALLBACK(filter_default_cb), filter_view);
+				 G_CALLBACK(filter_default_cb), selection);
 	gtk_box_append(GTK_BOX(end_box), button);
 }
 
