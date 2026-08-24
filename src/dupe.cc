@@ -4435,18 +4435,15 @@ DupeWindow *dupe_window_new()
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_box_append(GTK_BOX(button_box), hbox);
 
-	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
+	button = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
 	g_autofree gchar *help_accel = action_accelerator_label("win.dupe-win-help");
 	gtk_widget_set_tooltip_text(button, help_accel);
-	gtk_box_append(GTK_BOX(hbox), button);
 
-	button = pref_button_new(nullptr, GQ_ICON_STOP, _("Stop"), G_CALLBACK(dupe_check_stop_cb), dw);
-	gtk_box_append(GTK_BOX(hbox), button);
+	pref_button_new(hbox, GQ_ICON_STOP, _("Stop"), G_CALLBACK(dupe_check_stop_cb), dw);
 
-	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close_button_cb), dw);
+	button = pref_button_new(hbox, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close_button_cb), dw);
 	g_autofree gchar *close_accel = action_accelerator_label("win.dupe-win-window-close");
 	gtk_widget_set_tooltip_text(button, close_accel);
-	gtk_box_append(GTK_BOX(hbox), button);
 	gtk_window_set_default_widget(GTK_WINDOW(dw->window), button);
 	dupe_dnd_init(dw);
 

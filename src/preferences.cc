@@ -1626,10 +1626,9 @@ static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_
 	                 G_CALLBACK(star_rating_icon_cb<star_rating_default>), nullptr);
 	gtk_box_append(GTK_BOX(hbox), star_rating_entry);
 
-	GtkWidget *button = pref_button_new(nullptr, nullptr, _("Set"),
+	GtkWidget *button = pref_button_new(hbox, nullptr, _("Set"),
 	                                    G_CALLBACK(star_rating_symbol_test_cb), data);
 	gtk_widget_set_tooltip_text(button, _("Display selected character"));
-	gtk_box_append(GTK_BOX(hbox), button);
 }
 
 /* general options tab */
@@ -2073,7 +2072,6 @@ static void config_tab_windows(GtkWidget *notebook, ConfOptions *c_options)
 
 static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 {
-	GtkWidget *button;
 	GtkWidget *group;
 	GtkWidget *hbox;
 	GtkWidget *page;
@@ -2118,16 +2116,12 @@ static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"), G_CALLBACK(image_overlay_set_font_cb), GINT_TO_POINTER(i));
+	pref_button_new(hbox, GQ_ICON_SELECT_FONT, _("Font"), G_CALLBACK(image_overlay_set_font_cb), GINT_TO_POINTER(i));
 
-	gtk_box_append(GTK_BOX(hbox), button);
-
-	button = pref_button_new(nullptr, GQ_ICON_SELECT_COLOR, _("Text"), G_CALLBACK(image_overlay_set_text_color_cb), GINT_TO_POINTER(i));
-	gtk_box_append(GTK_BOX(hbox), button);
+	pref_button_new(hbox, GQ_ICON_SELECT_COLOR, _("Text"), G_CALLBACK(image_overlay_set_text_color_cb), GINT_TO_POINTER(i));
 	c_options->image_overlay_n[i].text_color = options->image_overlay_n[i].text_color;
 
-	button = pref_button_new(nullptr, GQ_ICON_SELECT_COLOR, _("Background"), G_CALLBACK(image_overlay_set_background_color_cb), GINT_TO_POINTER(i));
-	gtk_box_append(GTK_BOX(hbox), button);
+	pref_button_new(hbox, GQ_ICON_SELECT_COLOR, _("Background"), G_CALLBACK(image_overlay_set_background_color_cb), GINT_TO_POINTER(i));
 	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
 
 	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
@@ -2135,11 +2129,8 @@ static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
 	gtk_box_append(GTK_BOX(hbox), end_box);
 
-	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(image_overlay_help_cb), nullptr);
-	gtk_box_append(GTK_BOX(end_box), button);
-
-	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(image_overlay_default_template_cb), image_overlay_template_view);
-	gtk_box_append(GTK_BOX(end_box), button);
+	pref_button_new(end_box, GQ_ICON_HELP, _("Help"), G_CALLBACK(image_overlay_help_cb), nullptr);
+	pref_button_new(end_box, nullptr, _("Defaults"), G_CALLBACK(image_overlay_default_template_cb), image_overlay_template_view);
 
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(image_overlay_template_view));
 	if (options->image_overlay_n[i].template_string) gtk_text_buffer_set_text(buffer, options->image_overlay_n[i].template_string, -1);
@@ -2343,7 +2334,6 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *frame;
 	GtkWidget *vbox;
 	GtkWidget *group;
-	GtkWidget *button;
 	GtkWidget *ct_button;
 	GtkWidget *scrolled;
 	GtkWidget *filter_view;
@@ -2415,17 +2405,9 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
 	gtk_box_append(GTK_BOX(hbox), end_box);
 
-	button = pref_button_new(nullptr, GQ_ICON_ADD, _("Add"),
-				 G_CALLBACK(filter_add_cb), selection);
-	gtk_box_append(GTK_BOX(end_box), button);
-
-	button = pref_button_new(nullptr, GQ_ICON_REMOVE, _("Remove"),
-				 G_CALLBACK(filter_remove_cb), selection);
-	gtk_box_append(GTK_BOX(end_box), button);
-
-	button = pref_button_new(nullptr, nullptr, _("Defaults"),
-				 G_CALLBACK(filter_default_cb), selection);
-	gtk_box_append(GTK_BOX(end_box), button);
+	pref_button_new(end_box, GQ_ICON_ADD, _("Add"), G_CALLBACK(filter_add_cb), selection);
+	pref_button_new(end_box, GQ_ICON_REMOVE, _("Remove"), G_CALLBACK(filter_remove_cb), selection);
+	pref_button_new(end_box, nullptr, _("Defaults"), G_CALLBACK(filter_default_cb), selection);
 }
 
 static void pref_checkbox_add_markup(GtkWidget *checkbox, const char *format, ...)
@@ -3019,7 +3001,6 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *hbox;
 	GtkWidget *vbox;
 	GtkWidget *group;
-	GtkWidget *button;
 	GtkWidget *ct_button;
 	GtkWidget *spin;
 	GtkWidget *table;
@@ -3072,13 +3053,8 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
 	gtk_box_append(GTK_BOX(hbox), end_box);
 
-	button = pref_button_new(nullptr, GQ_ICON_CLEAR, nullptr,
-				 G_CALLBACK(safe_delete_clear_cb), nullptr);
-	gtk_box_append(GTK_BOX(end_box), button);
-
-	button = pref_button_new(nullptr, nullptr, _("View"),
-				 G_CALLBACK(safe_delete_view_cb), nullptr);
-	gtk_box_append(GTK_BOX(end_box), button);
+	pref_button_new(end_box, GQ_ICON_CLEAR, nullptr, G_CALLBACK(safe_delete_clear_cb), nullptr);
+	pref_button_new(end_box, nullptr, _("View"), G_CALLBACK(safe_delete_view_cb), nullptr);
 
 	c_options->file_ops.no_trash = options->file_ops.no_trash;
 	c_options->file_ops.use_system_trash = options->file_ops.use_system_trash;
@@ -3325,7 +3301,6 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	GtkWidget *hbox;
 	GtkWidget *vbox;
 	GtkWidget *group;
-	GtkWidget *button;
 	GtkWidget *scrolled;
 	GtkWidget *accel_view;
 
@@ -3387,11 +3362,8 @@ Double-click on the Key column and add or replace the text.\n");
 	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
 	gtk_box_append(GTK_BOX(hbox), end_box);
 
-	button = pref_button_new(nullptr, nullptr, _("Reset selected"), G_CALLBACK(accel_reset_cb), selection);
-	gtk_box_append(GTK_BOX(end_box), button);
-
-	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(accel_default_cb), accel_view);
-	gtk_box_append(GTK_BOX(end_box), button);
+	pref_button_new(end_box, nullptr, _("Reset selected"), G_CALLBACK(accel_reset_cb), selection);
+	pref_button_new(end_box, nullptr, _("Defaults"), G_CALLBACK(accel_default_cb), accel_view);
 }
 
 /* toolbar tab */
@@ -3514,8 +3486,6 @@ static void config_tab_stereo(GtkWidget *notebook, ConfOptions *c_options)
 /* Main preferences window */
 static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 {
-	GtkWidget *button;
-
 	GtkWidget *configwindow = window_new("preferences", PIXBUF_INLINE_ICON_CONFIG, _("Preferences"));
 	DEBUG_NAME(configwindow);
 	if (lw && lw->window) gtk_window_set_transient_for(GTK_WINDOW(configwindow), GTK_WINDOW(lw->window));
@@ -3566,17 +3536,14 @@ static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
 	gtk_box_append(GTK_BOX(win_vbox), hbox);
 
-	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
-				 G_CALLBACK(config_window_help_cb), notebook);
-	gtk_box_append(GTK_BOX(hbox), button);
+	pref_button_new(hbox, GQ_ICON_HELP, _("Help"),
+	                G_CALLBACK(config_window_help_cb), notebook);
 
-	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
-				 G_CALLBACK(config_window_close_cb), nullptr);
-	gtk_box_append(GTK_BOX(hbox), button);
+	pref_button_new(hbox, GQ_ICON_CANCEL, _("Cancel"),
+	                G_CALLBACK(config_window_close_cb), nullptr);
 
-	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
-	                         G_CALLBACK(config_window_ok_cb), notebook);
-	gtk_box_append(GTK_BOX(hbox), button);
+	GtkWidget *button = pref_button_new(hbox, GQ_ICON_OK, "OK",
+	                                    G_CALLBACK(config_window_ok_cb), notebook);
 	gtk_window_set_default_widget(GTK_WINDOW(configwindow), button);
 
 	return configwindow;

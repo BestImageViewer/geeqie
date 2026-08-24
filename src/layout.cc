@@ -2442,21 +2442,17 @@ void layout_show_config_window(LayoutWindow *lw)
 	gtk_widget_set_halign(button_box, GTK_ALIGN_END);
 	gtk_widget_set_valign(button_box, GTK_ALIGN_END);
 
-	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
-				 G_CALLBACK(layout_config_help_cb), lc);
-	gtk_box_append(GTK_BOX(button_box), button);
+	pref_button_new(button_box, GQ_ICON_HELP, _("Help"),
+	                G_CALLBACK(layout_config_help_cb), lc);
 
-	button = pref_button_new(nullptr, GQ_ICON_APPLY, _("Apply"),
-				 G_CALLBACK(layout_config_apply_cb), lc);
-	gtk_box_append(GTK_BOX(button_box), button);
+	pref_button_new(button_box, GQ_ICON_APPLY, _("Apply"),
+	                G_CALLBACK(layout_config_apply_cb), lc);
 
-	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
-				 G_CALLBACK(layout_config_close_cb), lc);
-	gtk_box_append(GTK_BOX(button_box), button);
+	pref_button_new(button_box, GQ_ICON_CANCEL, _("Cancel"),
+	                G_CALLBACK(layout_config_close_cb), lc);
 
-	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
+	button = pref_button_new(button_box, GQ_ICON_OK, "OK",
 	                         G_CALLBACK(layout_config_ok_cb), lc);
-	gtk_box_append(GTK_BOX(button_box), button);
 	gtk_window_set_default_widget(GTK_WINDOW(lc->configwindow), button);
 
 	vbox = pref_frame_new(win_vbox, TRUE, nullptr, GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
