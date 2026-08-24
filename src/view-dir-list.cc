@@ -26,49 +26,68 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
 
 #include "filedata.h"
 #include "layout.h"
 #include "options.h"
 #include "ui-fileops.h"
+#include "ui-misc.h"
 #include "ui-tree-edit.h"
+#include "utilops.h"
 #include "view-dir.h"
 
 struct ViewDirInfoList
 {
 	GList *list;
+	GtkWidget *box;
+	GHashTable *labels;
+	GHashTable *buttons;
+	FileData *selected_fd;
+	FileData *last_press_fd;
+	gint64 last_press_time;
 };
 
 #define VDLIST(_vd_) ((ViewDirInfoList *)((_vd_)->info))
 
+namespace
+{
+
+constexpr gchar VDLIST_FD_DATA[] = "vdlist-fd";
+
+} // namespace
+
+static void vdlist_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer data);
+static void vdlist_button_state_changed(GtkWidget *button, GtkStateFlags previous_flags, gpointer data);
+
+static GtkWidget *vdlist_icon_widget_new(const gchar *icon_name, const gchar *emblem_name)
+{
+	GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
+	gtk_image_set_pixel_size(GTK_IMAGE(image), 16);
+	GtkWidget *content = image;
+	if (emblem_name)
+		{
+		GtkWidget *overlay = gtk_overlay_new();
+		GtkWidget *emblem = gtk_image_new_from_icon_name(emblem_name);
+		gtk_image_set_pixel_size(GTK_IMAGE(emblem), 10);
+		gtk_widget_set_halign(emblem, GTK_ALIGN_END);
+		gtk_widget_set_valign(emblem, GTK_ALIGN_END);
+		gtk_overlay_set_child(GTK_OVERLAY(overlay), image);
+		gtk_overlay_add_overlay(GTK_OVERLAY(overlay), emblem);
+		content = overlay;
+		}
+
+	GtkWidget *hit_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_size_request(hit_box, 16, 16);
+	gtk_box_append(GTK_BOX(hit_box), content);
+	return hit_box;
+}
 
 /*
  *-----------------------------------------------------------------------------
  * misc
  *-----------------------------------------------------------------------------
  */
-
-gboolean vdlist_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter)
-{
-	GtkTreeModel *store;
-	gboolean valid;
-
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
-	valid = gtk_tree_model_get_iter_first(store, iter);
-	while (valid)
-		{
-		FileData *fd_n;
-		gtk_tree_model_get(GTK_TREE_MODEL(store), iter, DIR_COLUMN_POINTER, &fd_n, -1);
-		if (fd_n == fd) return TRUE;
-
-		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), iter);
-		}
-
-	return FALSE;
-}
-
 
 FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row)
 {
@@ -105,19 +124,14 @@ FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row)
  *-----------------------------------------------------------------------------
  */
 
-static void vdlist_scroll_to_row(ViewDir *vd, FileData *fd, gfloat y_align)
+void vdlist_scroll_to_fd(ViewDir *vd, FileData *fd, gfloat)
 {
 	if (!gtk_widget_get_realized(vd->view)) return;
 
-	GtkTreeIter iter;
-	if (!vd_find_row(vd, fd, &iter)) return;
+	vdlist_color_set(vd, fd, TRUE);
 
-	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
-	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
-	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(vd->view), tpath, nullptr, TRUE, y_align, 0.0);
-	gtk_tree_view_set_cursor(GTK_TREE_VIEW(vd->view), tpath, nullptr, FALSE);
-
-	if (!gtk_widget_has_focus(vd->view)) gtk_widget_grab_focus(vd->view);
+	auto *button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, fd));
+	if (button && !gtk_widget_has_focus(button)) gtk_widget_grab_focus(button);
 }
 
 /*
@@ -128,10 +142,8 @@ static void vdlist_scroll_to_row(ViewDir *vd, FileData *fd, gfloat y_align)
 
 static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 {
-	GtkListStore *store;
+	(void)clear;
 	GList *work;
-	GtkTreeIter iter;
-	gboolean valid;
 	GList *old_list;
 	gboolean ret;
 	FileData *fd;
@@ -158,18 +170,20 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		VDLIST(vd)->list = g_list_prepend(VDLIST(vd)->list, fd);
 		}
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view)));
-	if (clear) gtk_list_store_clear(store);
+	while (GtkWidget *child = gtk_widget_get_first_child(VDLIST(vd)->box))
+		{
+		gtk_box_remove(GTK_BOX(VDLIST(vd)->box), child);
+		}
 
-	valid = gtk_tree_model_iter_children(GTK_TREE_MODEL(store), &iter, nullptr);
+	g_hash_table_remove_all(VDLIST(vd)->labels);
+	g_hash_table_remove_all(VDLIST(vd)->buttons);
 
 	work = VDLIST(vd)->list;
 	while (work)
 		{
-		gint match;
-		GIcon *icon;
+		const gchar *icon_name;
+		const gchar *emblem_name = nullptr;
 		const gchar *date = "";
-		gboolean done = FALSE;
 
 		fd = static_cast<FileData *>(work->data);
 
@@ -177,120 +191,77 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 			{
 			if (islink(fd->path))
 				{
-				icon = vd->pf->link;
+				icon_name = GQ_ICON_DIRECTORY;
+				emblem_name = GQ_ICON_LINK;
 				}
 			else if (fd->name[0] == '.' && fd->name[1] == '\0')
 				{
-				icon = vd->pf->open;
+				icon_name = GQ_ICON_OPEN;
 				}
 			else if (fd->name[0] == '.' && fd->name[1] == '.' && fd->name[2] == '\0')
 				{
-				icon = vd->pf->parent;
+				icon_name = GQ_ICON_GO_UP;
 				}
 			else if (!access_file(fd->path, W_OK) )
 				{
-				icon = vd->pf->read_only;
+				icon_name = GQ_ICON_DIRECTORY;
+				emblem_name = GQ_ICON_READONLY;
 				}
 			else
 				{
-				icon = vd->pf->close;
+				icon_name = GQ_ICON_DIRECTORY;
 				if (vd->layout && vd->layout->options.show_directory_date)
 					date = text_from_time(fd->date);
 				}
 			}
 		else
 			{
-			icon = vd->pf->deny;
+			icon_name = GQ_ICON_DIRECTORY;
+			emblem_name = GQ_ICON_UNREADABLE;
 			}
 
-		while (!done)
-			{
-			FileData *old_fd = nullptr;
+		g_autofree gchar *link = islink(fd->path) ? realpath(fd->path, nullptr) : nullptr;
+		GtkWidget *button = gtk_button_new();
+		GtkWidget *row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+		GtkWidget *icon_widget = vdlist_icon_widget_new(icon_name, emblem_name);
+		GtkWidget *name = gtk_editable_label_new(fd->name);
+		GtkWidget *date_label = gtk_label_new(date);
 
-			if (valid)
-				{
-				gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-						   DIR_COLUMN_POINTER, &old_fd,
-						   -1);
+		gtk_widget_set_hexpand(button, TRUE);
+		gtk_widget_add_css_class(button, "flat");
+		gtk_widget_add_css_class(button, "vdlist-row-button");
+		gtk_widget_set_focusable(button, TRUE);
+		gtk_widget_set_hexpand(name, TRUE);
+		gtk_widget_set_can_target(name, FALSE);
+		gtk_label_set_xalign(GTK_LABEL(date_label), 0.0);
+		gtk_widget_set_tooltip_text(button, link);
 
-				if (fd == old_fd)
-					{
-					match = 0;
-					}
-				else
-					{
-					match = filelist_sort_compare_filedata_full(fd, old_fd, settings.method, settings.ascending);
+		gtk_box_append(GTK_BOX(row), icon_widget);
+		gtk_box_append(GTK_BOX(row), name);
+		gtk_box_append(GTK_BOX(row), date_label);
+		gtk_button_set_child(GTK_BUTTON(button), row);
 
-					if (match == 0) g_warning("multiple fd for the same path");
-					}
+		g_object_set_data(G_OBJECT(button), VDLIST_FD_DATA, fd);
+		g_object_set_data(G_OBJECT(row), VDLIST_FD_DATA, fd);
+		g_object_set_data(G_OBJECT(icon_widget), VDLIST_FD_DATA, fd);
+		g_object_set_data(G_OBJECT(name), VDLIST_FD_DATA, fd);
+		g_object_set_data(G_OBJECT(date_label), VDLIST_FD_DATA, fd);
 
-				}
-			else
-				{
-				match = -1;
-				}
+		g_hash_table_insert(VDLIST(vd)->buttons, fd, button);
+		g_hash_table_insert(VDLIST(vd)->labels, fd, name);
 
-			g_autofree gchar *link = nullptr;
-			if (islink(fd->path))
-				{
-				link = realpath(fd->path, nullptr);
-				}
-
-			if (match < 0)
-				{
-				GtkTreeIter new_iter;
-
-				if (valid)
-					{
-					gtk_list_store_insert_before(store, &new_iter, &iter);
-					}
-				else
-					{
-					gtk_list_store_append(store, &new_iter);
-					}
-
-				gtk_list_store_set(store, &new_iter,
-						   DIR_COLUMN_POINTER, fd,
-						   DIR_COLUMN_ICON, icon,
-						   DIR_COLUMN_NAME, fd->name,
-						   DIR_COLUMN_LINK, link,
-						   DIR_COLUMN_DATE, date,
-						   -1);
-
-				done = TRUE;
-				}
-			else if (match > 0)
-				{
-				valid = gtk_list_store_remove(store, &iter);
-				}
-			else
-				{
-				gtk_list_store_set(store, &iter,
-						   DIR_COLUMN_ICON, icon,
-						   DIR_COLUMN_NAME, fd->name,
-						   DIR_COLUMN_LINK, link,
-						   DIR_COLUMN_DATE, date,
-						   -1);
-
-				if (valid) valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
-
-				done = TRUE;
-				}
-			}
+		g_signal_connect(button, "state-flags-changed", G_CALLBACK(vdlist_button_state_changed), vd);
+		g_signal_connect(name, "notify::editing", G_CALLBACK(vdlist_editing_changed), vd);
+		gtk_box_append(GTK_BOX(VDLIST(vd)->box), button);
 		work = work->next;
-		}
-
-	while (valid)
-		{
-		FileData *old_fd;
-		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, DIR_COLUMN_POINTER, &old_fd, -1);
-
-		valid = gtk_list_store_remove(store, &iter);
 		}
 
 
 	vd->click_fd = nullptr;
 	vd->drop_fd = nullptr;
+	VDLIST(vd)->selected_fd = nullptr;
+	VDLIST(vd)->last_press_fd = nullptr;
+	VDLIST(vd)->last_press_time = 0;
 
 	file_data_list_free(old_list);
 	return ret;
@@ -329,7 +300,7 @@ gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 		work = work->next;
 		}
 
-	if (found) vdlist_scroll_to_row(vd, found, 0.5);
+	if (found) vdlist_scroll_to_fd(vd, found, 0.5);
 
 	return ret;
 }
@@ -345,21 +316,8 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 
 	if (keyval != GDK_KEY_Menu) return FALSE;
 
-	g_autoptr(GtkTreePath) tpath = nullptr;
-	gtk_tree_view_get_cursor(GTK_TREE_VIEW(vd->view), &tpath, nullptr);
-	if (tpath)
-		{
-		GtkTreeModel *store;
-		GtkTreeIter iter;
-
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
-		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &vd->click_fd, -1);
-		}
-	else
-		{
-		vd->click_fd = nullptr;
-		}
+	(void)widget;
+	vd->click_fd = VDLIST(vd)->selected_fd;
 
 	vd_color_set(vd, vd->click_fd, TRUE);
 
@@ -368,28 +326,9 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 	return TRUE;
 }
 
-bool vdlist_press_cb(ViewDir *vd, GtkWidget *widget, guint, gdouble x, gdouble y)
+void vdlist_press_cb(ViewDir *vd, gdouble x, gdouble y)
 {
-	FileData *fd = nullptr;
-
-	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
-	                                  &tpath, nullptr, nullptr, nullptr))
-		{
-		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
-		GtkTreeIter iter;
-
-		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &fd, -1);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
-		}
-
-	vd->click_fd = fd;
-
-	if (options->view_dir_list_single_click_enter)
-		vd_color_set(vd, vd->click_fd, TRUE);
-
-	return options->view_dir_list_single_click_enter;
+	vd->click_fd = vdlist_fd_at_point(vd, x, y);
 }
 
 void vdlist_destroy_cb(GtkWidget *widget, gpointer data)
@@ -399,51 +338,110 @@ void vdlist_destroy_cb(GtkWidget *widget, gpointer data)
 	vd_dnd_drop_scroll_cancel(vd);
 	widget_auto_scroll_stop(widget);
 
+	g_clear_pointer(&VDLIST(vd)->labels, g_hash_table_unref);
+	g_clear_pointer(&VDLIST(vd)->buttons, g_hash_table_unref);
 	file_data_list_free(VDLIST(vd)->list);
+}
+
+FileData *vdlist_fd_at_point(ViewDir *vd, gdouble x, gdouble y)
+{
+	GtkWidget *picked = gtk_widget_pick(vd->view, x, y, GTK_PICK_NON_TARGETABLE);
+	while (picked && picked != vd->view)
+		{
+		auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(picked), VDLIST_FD_DATA));
+		if (fd) return fd;
+		picked = gtk_widget_get_parent(picked);
+		}
+	return nullptr;
+}
+
+void vdlist_color_set(ViewDir *vd, FileData *fd, gboolean set)
+{
+	auto *button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, fd));
+	if (!button) return;
+
+	if (set)
+		{
+		if (VDLIST(vd)->selected_fd && VDLIST(vd)->selected_fd != fd)
+			{
+			auto *old_button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, VDLIST(vd)->selected_fd));
+			if (old_button) gtk_widget_remove_css_class(old_button, "vdlist-selected");
+			}
+
+		gtk_widget_add_css_class(button, "vdlist-selected");
+		VDLIST(vd)->selected_fd = fd;
+		}
+	else
+		{
+		gtk_widget_remove_css_class(button, "vdlist-selected");
+		if (VDLIST(vd)->selected_fd == fd) VDLIST(vd)->selected_fd = nullptr;
+		}
+}
+
+static void vdlist_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer data)
+{
+	if (gtk_editable_label_get_editing(label)) return;
+	gtk_widget_set_can_target(GTK_WIDGET(label), FALSE);
+	auto *vd = static_cast<ViewDir *>(data);
+	auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(label), VDLIST_FD_DATA));
+	if (!fd) return;
+
+	const gchar *new_name = gtk_editable_get_text(GTK_EDITABLE(label));
+	if (g_strcmp0(new_name, fd->name) == 0) return;
+	g_autofree gchar *base = remove_level_from_path(fd->path);
+	g_autofree gchar *new_path = g_build_filename(base, new_name, NULL);
+	file_util_rename_dir(fd, new_path, vd->view, [vd](gboolean success, const gchar *path)
+	{
+		if (!success) return;
+		vd_refresh(vd);
+		FileData *fd = vdlist_row_by_path(vd, path, nullptr);
+		if (fd) vdlist_scroll_to_fd(vd, fd, 0.5);
+	});
+}
+
+static void vdlist_button_state_changed(GtkWidget *button, GtkStateFlags previous_flags, gpointer data)
+{
+	const GtkStateFlags flags = gtk_widget_get_state_flags(button);
+	if ((previous_flags & GTK_STATE_FLAG_ACTIVE) || !(flags & GTK_STATE_FLAG_ACTIVE)) return;
+
+	auto *vd = static_cast<ViewDir *>(data);
+	auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(button), VDLIST_FD_DATA));
+	if (!fd) return;
+
+	vdlist_color_set(vd, fd, TRUE);
+
+	gint double_click_time = 400;
+	g_object_get(gtk_settings_get_default(), "gtk-double-click-time", &double_click_time, nullptr);
+	const gint64 press_time = g_get_monotonic_time();
+	const gboolean double_click = VDLIST(vd)->last_press_fd == fd &&
+	                              press_time - VDLIST(vd)->last_press_time <= double_click_time * 1000;
+	VDLIST(vd)->last_press_fd = fd;
+	VDLIST(vd)->last_press_time = press_time;
+
+	if ((options->view_dir_list_single_click_enter || double_click) && vd->select_func)
+		{
+		vd->select_func(vd, fd, vd->select_data);
+		}
+}
+
+void vdlist_rename_by_data(ViewDir *vd, FileData *fd)
+{
+	auto *label = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->labels, fd));
+	if (!label) return;
+	gtk_widget_set_can_target(label, TRUE);
+	gtk_editable_label_start_editing(GTK_EDITABLE_LABEL(label));
 }
 
 ViewDir *vdlist_new(ViewDir *vd)
 {
-	GtkListStore *store;
-	GtkTreeSelection *selection;
-	GtkTreeViewColumn *column;
-	GtkCellRenderer *renderer;
-
 	vd->info = g_new0(ViewDirInfoList, 1);
 
 	vd->type = DIRVIEW_LIST;
-
-	store = gtk_list_store_new(6, G_TYPE_POINTER, G_TYPE_ICON, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING);
-	vd->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
-	g_object_unref(store);
-
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(vd->view), FALSE);
-	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(vd->view), FALSE);
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vd->view));
-	gtk_tree_selection_set_mode(selection, GTK_SELECTION_NONE);
-
-	column = gtk_tree_view_column_new();
-	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
-
-	renderer = gtk_cell_renderer_pixbuf_new();
-	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute(column, renderer, "gicon", DIR_COLUMN_ICON);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_add_attribute(column, renderer, "text", DIR_COLUMN_NAME);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_add_attribute(column, renderer, "text", DIR_COLUMN_DATE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
-
-	gtk_tree_view_append_column(GTK_TREE_VIEW(vd->view), column);
-
-	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(vd->view), DIR_COLUMN_LINK);
+	VDLIST(vd)->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	VDLIST(vd)->labels = g_hash_table_new(g_direct_hash, g_direct_equal);
+	VDLIST(vd)->buttons = g_hash_table_new(g_direct_hash, g_direct_equal);
+	vd->view = VDLIST(vd)->box;
+	gtk_widget_add_css_class(vd->view, "view-dir-list");
 
 	return vd;
 }

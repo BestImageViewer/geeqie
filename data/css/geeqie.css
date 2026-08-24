@@ -40,3 +40,14 @@ button.tab-completion-selected {
 	margin: 0;
 	padding: 0;
 }
+
+.view-dir-list button.vdlist-row-button {
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.view-dir-list button.vdlist-row-button.vdlist-selected {
+	background-color: @theme_selected_bg_color;
+	color: @theme_selected_fg_color;
+}
