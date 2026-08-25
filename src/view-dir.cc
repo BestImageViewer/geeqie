@@ -1088,7 +1088,7 @@ void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *,
 	vd_select_row(vd, fd);
 }
 
-static void vd_gesture_release_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
+static void vd_gesture_release_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 {
 	auto *vd = static_cast<ViewDir *>(data);
 	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
@@ -1100,7 +1100,10 @@ static void vd_gesture_release_cb(GtkGestureClick *gesture, gint, gdouble x, gdo
 		}
 
 	if (vd->type == DIRVIEW_LIST)
+		{
+		vdlist_release_cb(vd, n_press, button, x, y);
 		return;
+		}
 
 	if (!vd->click_fd) return;
 
@@ -1180,7 +1183,7 @@ static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdoub
 
 	switch (vd->type)
 	{
-	case DIRVIEW_LIST: vdlist_press_cb(vd, x, y); break;
+	case DIRVIEW_LIST: vdlist_press_cb(vd, button, x, y); break;
 	case DIRVIEW_TREE: ret = vdtree_press_cb(vd, widget, button, x, y); break;
 	}
 
@@ -1268,6 +1271,10 @@ ViewDir *vd_new(LayoutWindow *lw)
 	g_signal_connect(G_OBJECT(vd->view), "destroy",
 			 G_CALLBACK(vd_destroy_cb), vd);
 	GtkEventController *key_controller = gtk_event_controller_key_new();
+	if (vd->type == DIRVIEW_LIST)
+		{
+		gtk_event_controller_set_propagation_phase(key_controller, GTK_PHASE_CAPTURE);
+		}
 	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(vd_key_pressed_cb), vd);
 	gtk_widget_add_controller(vd->view, key_controller);
 

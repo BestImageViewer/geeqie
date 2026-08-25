@@ -42,7 +42,8 @@ void vdlist_rename_by_data(ViewDir *vd, FileData *fd);
 FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row);
 
 gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data);
-void vdlist_press_cb(ViewDir *vd, gdouble x, gdouble y);
+void vdlist_press_cb(ViewDir *vd, guint button, gdouble x, gdouble y);
+void vdlist_release_cb(ViewDir *vd, gint n_press, guint button, gdouble x, gdouble y);
 
 void vdlist_destroy_cb(GtkWidget *widget, gpointer data);
 
