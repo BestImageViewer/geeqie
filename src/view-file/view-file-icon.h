@@ -33,6 +33,7 @@ class FileData;
 struct ViewFileInfoIcon
 {
 	/* table stuff */
+	GListStore *store;
 	gint columns;
 	gint rows;
 

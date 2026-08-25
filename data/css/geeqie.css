@@ -64,3 +64,16 @@ button.tab-completion-selected {
 .collection-grid-item.collection-grid-focus {
 	outline: 1px solid @theme_selected_bg_color;
 }
+
+.view-file-grid-item.view-file-grid-selected {
+	background-color: @theme_selected_bg_color;
+	color: @theme_selected_fg_color;
+}
+
+.view-file-grid-item.view-file-grid-prelight {
+	background-color: alpha(@theme_selected_bg_color, 0.35);
+}
+
+.view-file-grid-item.view-file-grid-focus {
+	outline: 1px solid @theme_selected_bg_color;
+}
