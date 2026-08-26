@@ -6928,7 +6928,7 @@ msgid "Allow enlargement of image (max. size in %)"
 msgstr "Povoliť zväčšenie obrázka (max. veľkosť v %)"
 
 #: ../src/preferences.cc:2112
-#, c-format
+#, no-c-format
 msgid ""
 "Enable this to allow Geeqie to increase the image size for images that are "
 "smaller than the current view area when the zoom is set to 'Fit image to "
@@ -6938,7 +6938,7 @@ msgstr ""
 "Zapnite túto voľbu, ak chcete, aby Geeqie zväčšoval obrázky, ktoré sú menšie "
 "ako aktuálna veľkosť okna pri aktívnej voľbe „Prispôsobiť obrázok oknu“. "
 "Táto voľba nastavuje maximálne povolené zväčšenie v percentách, to znamená, "
-"že 100 %% je plná veľkosť."
+"že 100% je plná veľkosť."
 
 #: ../src/preferences.cc:2115
 #, c-format

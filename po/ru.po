@@ -5782,7 +5782,7 @@ msgstr "Разрешить увеличение изображения (макс
 
 # c-format
 #: src/preferences.cc:2330
-#, c-format
+#, no-c-format
 msgid ""
 "Enable this to allow Geeqie to increase the image size for images that are "
 "smaller than the current view area when the zoom is set to 'Fit image to "
@@ -9610,4 +9610,3 @@ msgstr "Предупреждение: не удалось выполнить к�
 
 #~ msgid "New folder - Geeqie"
 #~ msgstr "Новый каталог - Geeqie"
-

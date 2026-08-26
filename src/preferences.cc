@@ -1909,6 +1909,7 @@ static void config_tab_image(GtkWidget *notebook, ConfOptions *c_options)
 				 options->image.max_enlargement_size, &c_options->image.max_enlargement_size);
 	pref_checkbox_link_sensitivity(enlargement_button, spin);
 	gtk_widget_set_tooltip_text(hbox,
+	                            /* xgettext:no-c-format */
 	                            _("Enable this to allow Geeqie to increase the image size for images that are smaller than the current view area when the zoom is set to 'Fit image to window'. This value sets the maximum expansion permitted in percent i.e. 100% is full-size."));
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);

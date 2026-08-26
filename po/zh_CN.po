@@ -8498,7 +8498,7 @@ msgstr ""
 #: src/utilops.cc:2746 src/utilops.cc:2801
 #, c-format
 msgid "Unable to list contents of folder %s"
-msgstr "不能列出文件夹的内容"
+msgstr "不能列出文件夹 %s 的内容"
 
 #: src/utilops.cc:2760 src/utilops.cc:2767
 msgid "Folder contains subfolders"

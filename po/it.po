@@ -6119,7 +6119,7 @@ msgid "Allow enlargement of image (max. size in %)"
 msgstr "Permetti l’ingrandimento dell’immagine (dimensione massima in %)"
 
 #: src/preferences.cc:2282
-#, c-format
+#, no-c-format
 msgid ""
 "Enable this to allow Geeqie to increase the image size for images that are "
 "smaller than the current view area when the zoom is set to 'Fit image to "
