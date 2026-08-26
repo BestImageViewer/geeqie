@@ -30,7 +30,7 @@ The program `poedit` is one of the programs suitable for making translations.
 
 ## Other files
 
-The script `./tools/gen_translations_stats.sh` generates statistics about translations.
+The script `./tools/gen-translations-stats.sh` generates statistics about translations.
 
 ## Creating a GitHub Pull Request
 

@@ -53,6 +53,14 @@ Carry out the above actions to ensure the master branch is up to date, and then 
 * Edit `org.geeqie.Geeqie.metainfo.xml.in` - Change date and version
 * Edit `NEWS` - The usual information. Ensure the first line is of the form `Geeqie <n.m[.p]>`
 
+* Update all translation files and review the translation statistics
+
+```sh
+ninja -C build update-translations
+./tools/gen-translations-stats.sh
+ninja -C build geeqie-gmo
+```
+
 ```sh
 ./packaging/new-release.sh <-h for list of options>
 ```

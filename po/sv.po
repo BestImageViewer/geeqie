@@ -22,15 +22,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: org.geeqie.Geeqie.appdata.xml.in:7 org.geeqie.Geeqie.desktop.in:3
+#: org.geeqie.Geeqie.metainfo.xml.in:7 org.geeqie.Geeqie.desktop.in:3
 msgid "Geeqie"
 msgstr "Geeqie"
 
-#: org.geeqie.Geeqie.appdata.xml.in:8
+#: org.geeqie.Geeqie.metainfo.xml.in:8
 msgid "A lightweight image viewer"
 msgstr "En lättviktig bildvisare"
 
-#: org.geeqie.Geeqie.appdata.xml.in:10
+#: org.geeqie.Geeqie.metainfo.xml.in:10
 msgid ""
 "Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It can "
 "be used as a simple, fast, database-free image viewer, but equally it can be "
@@ -40,7 +40,7 @@ msgstr ""
 "Den kan användas som en enkel, snabb databas-fri bildvisare, men likaväl kan "
 "den användas för att hantera stora samlingar av bilder."
 
-#: org.geeqie.Geeqie.appdata.xml.in:11
+#: org.geeqie.Geeqie.metainfo.xml.in:11
 msgid ""
 "Geeqie is an image viewer that makes navigation of images easy. Images can "
 "be viewed as thumbnails, in multiple windows or in full screen mode. Geeqie "
@@ -56,7 +56,7 @@ msgstr ""
 "bildsamlingar kan enkelt hanteras med hjälp av en kombination av Geeqie's "
 "flexibla nyckelordsfunktioner och kraftfulla bildsökning."
 
-#: org.geeqie.Geeqie.appdata.xml.in:12
+#: org.geeqie.Geeqie.metainfo.xml.in:12
 msgid ""
 "Image collections can be refined with a duplicate image finder. Geeqie is "
 "ideal for making presentations. A slide-show feature is built in, and Geeqie "
@@ -73,24 +73,24 @@ msgstr ""
 "helt enkelt Geeqie till en mapp som innehåller bilder, så kommer din data "
 "att visas."
 
-#: org.geeqie.Geeqie.appdata.xml.in:15
+#: org.geeqie.Geeqie.metainfo.xml.in:15
 #, fuzzy
 msgid "Geeqie developers"
 msgstr "Geeqie Verktyg"
 
-#: org.geeqie.Geeqie.appdata.xml.in:32
+#: org.geeqie.Geeqie.metainfo.xml.in:32
 msgid "image"
 msgstr "bild"
 
-#: org.geeqie.Geeqie.appdata.xml.in:33
+#: org.geeqie.Geeqie.metainfo.xml.in:33
 msgid "photography"
 msgstr "fotografi"
 
-#: org.geeqie.Geeqie.appdata.xml.in:34
+#: org.geeqie.Geeqie.metainfo.xml.in:34
 msgid "fast"
 msgstr "snabb"
 
-#: org.geeqie.Geeqie.appdata.xml.in:35
+#: org.geeqie.Geeqie.metainfo.xml.in:35
 msgid "graphics"
 msgstr "grafik"
 

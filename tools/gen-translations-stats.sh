@@ -21,7 +21,8 @@ echo
 
 echo "Note: completion % in the chart below may not be quite correct"
 echo "      when fuzzy translations exist but do not appear in the source."
-echo "      For exact results, run make update-po with up to date POTFILES."
+echo "      For exact results, first update all translation files with:"
+echo "      ./tools/update-translation.sh --all"
 echo "      comp % = trans / (trans + fuzzy + untrans)"
 echo
 
@@ -41,4 +42,3 @@ for i in *.po; do
 done | sort -t '|' -b -k1,1nr -k2,2 | sed 's/^ *[0-9]*//' | tr ' |' '| '
 ) | column -t -c 80 | tr '|' ' '
 echo
-

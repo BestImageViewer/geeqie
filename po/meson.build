@@ -2,7 +2,21 @@
 
 add_project_arguments('-DGETTEXT_PACKAGE="geeqie"', language:'c')
 
+generate_potfiles_sh = find_program(
+  join_paths(meson.project_source_root(), 'tools', 'generate-potfiles.sh'),
+  required : true)
+
+run_command(generate_potfiles_sh, check : true)
+
 i18n.gettext(meson.project_name(), args : ['--keyword=N_', '--from-code=UTF-8'])
+
+update_translation_sh = find_program(
+  join_paths(meson.project_source_root(), 'tools', 'update-translation.sh'),
+  required : true)
+
+run_target(
+  'update-translations',
+  command : [update_translation_sh, '--all'])
 
 # Create the list of translators for the About - Credits dialog
 po_sources = files([

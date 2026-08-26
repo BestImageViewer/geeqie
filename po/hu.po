@@ -20,23 +20,23 @@ msgstr ""
 "X-Generator: Geany / PoHelper 1.38\n"
 
 # src/main.cc:129
-#: org.geeqie.Geeqie.appdata.xml.in:7 org.geeqie.Geeqie.desktop.in:3
+#: org.geeqie.Geeqie.metainfo.xml.in:7 org.geeqie.Geeqie.desktop.in:3
 #, fuzzy
 msgid "Geeqie"
 msgstr "Névjegy - Geeqie"
 
-#: org.geeqie.Geeqie.appdata.xml.in:8
+#: org.geeqie.Geeqie.metainfo.xml.in:8
 msgid "A lightweight image viewer"
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:10
+#: org.geeqie.Geeqie.metainfo.xml.in:10
 msgid ""
 "Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It can "
 "be used as a simple, fast, database-free image viewer, but equally it can be "
 "used to manage large collections of images."
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:11
+#: org.geeqie.Geeqie.metainfo.xml.in:11
 msgid ""
 "Geeqie is an image viewer that makes navigation of images easy. Images can "
 "be viewed as thumbnails, in multiple windows or in full screen mode. Geeqie "
@@ -46,7 +46,7 @@ msgid ""
 "powerful Image searches."
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:12
+#: org.geeqie.Geeqie.metainfo.xml.in:12
 msgid ""
 "Image collections can be refined with a duplicate image finder. Geeqie is "
 "ideal for making presentations. A slide-show feature is built in, and Geeqie "
@@ -57,26 +57,26 @@ msgid ""
 msgstr ""
 
 # src/window.cc:234
-#: org.geeqie.Geeqie.appdata.xml.in:15
+#: org.geeqie.Geeqie.metainfo.xml.in:15
 #, fuzzy
 msgid "Geeqie developers"
 msgstr "Geeqie Eszközök"
 
 # src/preferences.cc:676
-#: org.geeqie.Geeqie.appdata.xml.in:32
+#: org.geeqie.Geeqie.metainfo.xml.in:32
 #, fuzzy
 msgid "image"
 msgstr "A kép megjelenítése"
 
-#: org.geeqie.Geeqie.appdata.xml.in:33
+#: org.geeqie.Geeqie.metainfo.xml.in:33
 msgid "photography"
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:34
+#: org.geeqie.Geeqie.metainfo.xml.in:34
 msgid "fast"
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:35
+#: org.geeqie.Geeqie.metainfo.xml.in:35
 msgid "graphics"
 msgstr ""
 

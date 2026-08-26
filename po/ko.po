@@ -20,15 +20,15 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Geany / PoHelper 1.38\n"
 
-#: org.geeqie.Geeqie.appdata.xml.in:7 org.geeqie.Geeqie.desktop.in:3
+#: org.geeqie.Geeqie.metainfo.xml.in:7 org.geeqie.Geeqie.desktop.in:3
 msgid "Geeqie"
 msgstr "Geeqie"
 
-#: org.geeqie.Geeqie.appdata.xml.in:8
+#: org.geeqie.Geeqie.metainfo.xml.in:8
 msgid "A lightweight image viewer"
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:10
+#: org.geeqie.Geeqie.metainfo.xml.in:10
 #, fuzzy
 msgid ""
 "Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It can "
@@ -38,7 +38,7 @@ msgstr ""
 "단순하고, 빠르며, 데이터베이스가 필요없는 이미지 뷰어로 사용할 수 있지만, 동"
 "시에 대규모 이미지 컬렉션을 관리하는 데에도 사용할 수 있습니다."
 
-#: org.geeqie.Geeqie.appdata.xml.in:11
+#: org.geeqie.Geeqie.metainfo.xml.in:11
 msgid ""
 "Geeqie is an image viewer that makes navigation of images easy. Images can "
 "be viewed as thumbnails, in multiple windows or in full screen mode. Geeqie "
@@ -48,7 +48,7 @@ msgid ""
 "powerful Image searches."
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:12
+#: org.geeqie.Geeqie.metainfo.xml.in:12
 msgid ""
 "Image collections can be refined with a duplicate image finder. Geeqie is "
 "ideal for making presentations. A slide-show feature is built in, and Geeqie "
@@ -58,25 +58,25 @@ msgid ""
 "to a folder containing images, and your data will be displayed."
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:15
+#: org.geeqie.Geeqie.metainfo.xml.in:15
 msgid "Geeqie developers"
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:32
+#: org.geeqie.Geeqie.metainfo.xml.in:32
 #, fuzzy
 msgid "image"
 msgstr "이미지"
 
-#: org.geeqie.Geeqie.appdata.xml.in:33
+#: org.geeqie.Geeqie.metainfo.xml.in:33
 #, fuzzy
 msgid "photography"
 msgstr "테더드 포토그래피"
 
-#: org.geeqie.Geeqie.appdata.xml.in:34
+#: org.geeqie.Geeqie.metainfo.xml.in:34
 msgid "fast"
 msgstr ""
 
-#: org.geeqie.Geeqie.appdata.xml.in:35
+#: org.geeqie.Geeqie.metainfo.xml.in:35
 msgid "graphics"
 msgstr ""
 

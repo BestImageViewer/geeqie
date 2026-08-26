@@ -37,15 +37,15 @@ msgstr "Visualizza e gestisci immagini"
 msgid "Picture;Slideshow;Graphics;"
 msgstr "Picture;Slideshow;Graphics;"
 
-#: org.geeqie.Geeqie.appdata.xml.in:7 org.geeqie.Geeqie.desktop.in:2
+#: org.geeqie.Geeqie.metainfo.xml.in:7 org.geeqie.Geeqie.desktop.in:2
 msgid "Geeqie"
 msgstr "Geeqie"
 
-#: org.geeqie.Geeqie.appdata.xml.in:8
+#: org.geeqie.Geeqie.metainfo.xml.in:8
 msgid "A lightweight image viewer"
 msgstr "Un visualizzatore di immagini leggero"
 
-#: org.geeqie.Geeqie.appdata.xml.in:10
+#: org.geeqie.Geeqie.metainfo.xml.in:10
 msgid ""
 "Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It can "
 "be used as a simple, fast, database-free image viewer, but equally it can be "
@@ -56,7 +56,7 @@ msgstr ""
 "semplice, veloce, senza database, ma anche per gestire grandi collezioni di "
 "immagini."
 
-#: org.geeqie.Geeqie.appdata.xml.in:11
+#: org.geeqie.Geeqie.metainfo.xml.in:11
 msgid ""
 "Geeqie is an image viewer that makes navigation of images easy. Images can "
 "be viewed as thumbnails, in multiple windows or in full screen mode. Geeqie "
@@ -73,7 +73,7 @@ msgstr ""
 "facilmente combinando la flessibile gestione delle parole chiave e la "
 "potente funzione di ricerca di Geeqie."
 
-#: org.geeqie.Geeqie.appdata.xml.in:12
+#: org.geeqie.Geeqie.metainfo.xml.in:12
 msgid ""
 "Image collections can be refined with a duplicate image finder. Geeqie is "
 "ideal for making presentations. A slide-show feature is built in, and Geeqie "
@@ -90,23 +90,23 @@ msgstr ""
 "all’immagine. Geeqie non richiede alcuna importazione delle immagini: basta "
 "aprire una cartella che ne contiene, e Geeqie le mostrerà."
 
-#: org.geeqie.Geeqie.appdata.xml.in:15
+#: org.geeqie.Geeqie.metainfo.xml.in:15
 msgid "Geeqie developers"
 msgstr "Sviluppatori e sviluppatrici di Geeqie"
 
-#: org.geeqie.Geeqie.appdata.xml.in:32
+#: org.geeqie.Geeqie.metainfo.xml.in:32
 msgid "image"
 msgstr "immagine"
 
-#: org.geeqie.Geeqie.appdata.xml.in:33
+#: org.geeqie.Geeqie.metainfo.xml.in:33
 msgid "photography"
 msgstr "fotografia"
 
-#: org.geeqie.Geeqie.appdata.xml.in:34
+#: org.geeqie.Geeqie.metainfo.xml.in:34
 msgid "fast"
 msgstr "veloce"
 
-#: org.geeqie.Geeqie.appdata.xml.in:35
+#: org.geeqie.Geeqie.metainfo.xml.in:35
 msgid "graphics"
 msgstr "grafica"
 
