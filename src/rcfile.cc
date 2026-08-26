@@ -407,6 +407,7 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_BOOL(*options, tree_descend_subdirs);
 	WRITE_NL(); WRITE_BOOL(*options, view_dir_list_single_click_enter);
 	WRITE_NL(); WRITE_BOOL(*options, circular_selection_lists);
+	WRITE_NL(); WRITE_BOOL(*options, auto_next_folder);
 	WRITE_NL(); WRITE_BOOL(*options, lazy_image_sync);
 	WRITE_NL(); WRITE_BOOL(*options, update_on_time_change);
 	WRITE_SEPARATOR();
@@ -884,6 +885,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, tree_descend_subdirs)) continue;
 		if (READ_BOOL(*options, view_dir_list_single_click_enter)) continue;
 		if (READ_BOOL(*options, circular_selection_lists)) continue;
+		if (READ_BOOL(*options, auto_next_folder)) continue;
 		if (READ_BOOL(*options, lazy_image_sync)) continue;
 		if (READ_BOOL(*options, update_on_time_change)) continue;
 

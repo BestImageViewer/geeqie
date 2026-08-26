@@ -30,6 +30,10 @@ fi
 # Automatically clean up the temporary home directory on exit.
 teardown() {
     # echo "Cleaning up temporary homedir $TEST_HOME" >&2
+    if [ -d "$XDG_RUNTIME_DIR/gvfs" ] && command -v fusermount3 >/dev/null 2>&1; then
+        fusermount3 -uz "$XDG_RUNTIME_DIR/gvfs" 2>/dev/null || true
+    fi
+
     if ! rm -rf "$TEST_HOME"; then
         # Could be a race condition; try sleeping and repeating.
         echo >&2
@@ -45,6 +49,7 @@ trap teardown EXIT
 export HOME="$TEST_HOME"
 export XDG_CONFIG_HOME="${HOME}/.config"
 export XDG_RUNTIME_DIR="${HOME}/.runtime"
+export GIO_USE_VFS="local"
 mkdir -p "$XDG_RUNTIME_DIR"
 # Mode setting required by the spec.
 # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
@@ -73,7 +78,7 @@ fi
 export PATH="$SANDBOX_PATH:/usr/bin:/bin"
 
 echo "Variables in isolated environment:" >&2
-env -i PATH="$PATH" G_DEBUG="$G_DEBUG" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- env >&2
+env -i PATH="$PATH" G_DEBUG="$G_DEBUG" GIO_USE_VFS="$GIO_USE_VFS" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- env >&2
 echo >&2
 
-env -i PATH="$PATH" G_DEBUG="$G_DEBUG" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- "$@"
+env -i PATH="$PATH" G_DEBUG="$G_DEBUG" GIO_USE_VFS="$GIO_USE_VFS" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- "$@"

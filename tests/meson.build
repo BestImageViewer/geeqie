@@ -6,6 +6,7 @@ unit_test_sources = files(
 'filedata/filelist.cc',
 'filedata/ref.cc',
 'keyboard-shortcuts.cc',
+'layout-image-navigation.cc',
 'pixbuf-util.cc')
 
 code_sources += unit_test_sources

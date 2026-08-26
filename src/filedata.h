@@ -461,6 +461,7 @@ class FileData::FileList
 
 	static gboolean read_list(FileData *dir_fd, GList **files, GList **dirs);
 	static gboolean read_list_lstat(FileData *dir_fd, GList **files, GList **dirs);
+	static gboolean read_list_lstat_all(FileData *dir_fd, GList **files, GList **dirs);
 	static void free_list(GList *list);
 	static GList *copy(GList *list);
 	static GList *from_path_list(GList *list);
@@ -477,6 +478,7 @@ class FileData::FileList
 	static GList *filter_out_sidecars(GList *flist);
 	static gboolean is_hidden_file(const gchar *filepath);
 	static gboolean read_list_real(const gchar *dir_path, GList **files, GList **dirs, gboolean follow_symlinks);
+	static gboolean read_list_real_all(const gchar *dir_path, GList **files, GList **dirs, gboolean follow_symlinks);
 	static gint sort_file_cb(gconstpointer a, gconstpointer b, gpointer data);
 	static gint sort_path_cb(gconstpointer a, gconstpointer b);
 	static void recursive_append(GList **list, GList *dirs);

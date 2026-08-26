@@ -344,6 +344,40 @@
           <menuchoice>
             <shortcut>
               <keycombo>
+                <keycap>Ctrl</keycap>
+                <keycap>Shift</keycap>
+                <keycap>Right</keycap>
+              </keycombo>
+            </shortcut>
+            <guimenu>Next folder</guimenu>
+          </menuchoice>
+        </term>
+        <listitem>
+          <para>Goes to the first image in the next sibling folder.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <menuchoice>
+            <shortcut>
+              <keycombo>
+                <keycap>Ctrl</keycap>
+                <keycap>Shift</keycap>
+                <keycap>Left</keycap>
+              </keycombo>
+            </shortcut>
+            <guimenu>Previous folder</guimenu>
+          </menuchoice>
+        </term>
+        <listitem>
+          <para>Goes to the last image in the previous sibling folder.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <menuchoice>
+            <shortcut>
+              <keycombo>
                 <keycap>Home</keycap>
               </keycombo>
             </shortcut>

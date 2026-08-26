@@ -1780,6 +1780,32 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-next-folder",
+		nullptr,
+		N_("Next folder"),
+		layout_menu_image_next_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.main-win-previous-folder",
+		nullptr,
+		N_("Previous folder"),
+		layout_menu_image_prev_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-previous-page",
 		GQ_ICON_BACK_PAGE,
 		N_("Previous Page of multi-page image"),
