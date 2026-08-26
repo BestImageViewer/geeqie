@@ -132,7 +132,6 @@ completionsdir = join_paths(datadir, 'bash-completion', 'completions')
 podir = join_paths(meson.project_source_root(), 'po')
 buildauxdir = join_paths(meson.project_source_root(), 'build-aux')
 packagingdir = join_paths(meson.project_source_root(), 'packaging')
-testsdir = join_paths(meson.project_source_root(), 'teste')
 
 summary({'gq_appdir': gq_appdir,
         'gq_bindir': gq_helpdir,
