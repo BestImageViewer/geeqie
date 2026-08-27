@@ -22,7 +22,6 @@
 #include "layout-image.h"
 
 #include <algorithm>
-#include <array>
 #include <cstring>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -64,7 +63,6 @@
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "view-file.h"
 
@@ -1560,166 +1558,63 @@ std::optional<ColorManStatus> layout_image_color_profile_get_status(LayoutWindow
 }
 
 /**
- * @brief Get the next sibling directory in the same parent directory
+ * @brief Get the next or previous sibling directory in the same parent directory
  * @param lw Layout window
- * @returns FileData for the next directory, or nullptr if none
+ * @param ascending Sort order
+ * @returns FileData for the next/prev directory, or nullptr if none
  *
- * Finds the next directory alphabetically after the current directory
- * in the same parent directory. Only returns directories that contain
- * at least one image file.
+ * Finds the next/prev (depending on sort order) directory alphabetically
+ * after the current directory in the same parent directory.
+ * Only returns directories that contain at least one image file.
  */
-static FileData *layout_get_next_sibling_dir(LayoutWindow *lw)
+static FileData *layout_get_next_sibling_dir(LayoutWindow *lw, gboolean ascending)
 {
 	if (!lw || !lw->dir_fd || !lw->dir_fd->path) return nullptr;
 
-	g_autofree gchar *parent_dir = g_path_get_dirname(lw->dir_fd->path);
-	g_autofree gchar *current_name = g_path_get_basename(lw->dir_fd->path);
-
-	GList *dirs = nullptr;
-	GList *files = nullptr;
-
 	// Read the parent directory to get all subdirectories (don't follow symlinks)
-	FileData *parent_fd = file_data_new_dir(parent_dir);
+	g_autofree gchar *parent_dir = g_path_get_dirname(lw->dir_fd->path);
+	FileDataRef parent_fd = FileData::new_dir(parent_dir);
 	if (!parent_fd) return nullptr;
 
-	FileData::FileList::read_list_lstat_all(parent_fd, &files, &dirs);
-	file_data_unref(parent_fd);
-
+	g_autoptr(FileDataList) dirs = nullptr;
+	FileData::FileList::read_list_lstat_all(*parent_fd, nullptr, &dirs);
 	if (!dirs) return nullptr;
 
 	// Sort directories by name
 	FileData::FileList::SortSettings sort_settings;
 	sort_settings.method = SORT_NAME;
-	sort_settings.ascending = TRUE;
+	sort_settings.ascending = ascending;
 	sort_settings.case_sensitive = FALSE;
 
 	dirs = FileData::FileList::sort(dirs, sort_settings);
 
 	// Find current directory in the list
-	GList *work = dirs;
-	FileData *next_dir = nullptr;
-	gboolean found_current = FALSE;
-
-	while (work)
-	{
-		auto *fd = static_cast<FileData *>(work->data);
-		g_autofree gchar *name = g_path_get_basename(fd->path);
-
-		if (found_current)
-		{
-			// Check if this directory has any image files
-			GList *sub_files = nullptr;
-			GList *sub_dirs = nullptr;
-			FileData::FileList::read_list_lstat_all(fd, &sub_files, &sub_dirs);
-
-			if (sub_files)
-			{
-				// Free the sub_files list and its FileData elements
-				g_list_free_full(sub_files, reinterpret_cast<GDestroyNotify>(file_data_unref));
-				if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
-
-				next_dir = fd;
-				break;
-			}
-
-			if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
-		}
-
-		if (g_strcmp0(name, current_name) == 0)
-		{
-			found_current = TRUE;
-		}
-
-		work = work->next;
-	}
-
-	// Free the directory list (but not the FileData we're returning)
-	// Actually we need to ref the one we're returning
-	if (next_dir)
-	{
-		file_data_ref(next_dir);
-	}
-
-	// Free all dirs
-	g_list_free_full(dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
-	if (files) g_list_free_full(files, reinterpret_cast<GDestroyNotify>(file_data_unref));
-
-	return next_dir;
-}
-
-/**
- * @brief Get the previous sibling directory in the same parent directory
- * @param lw Layout window
- * @returns FileData for the previous directory, or nullptr if none
- */
-static FileData *layout_get_prev_sibling_dir(LayoutWindow *lw)
-{
-	if (!lw || !lw->dir_fd || !lw->dir_fd->path) return nullptr;
-
-	g_autofree gchar *parent_dir = g_path_get_dirname(lw->dir_fd->path);
 	g_autofree gchar *current_name = g_path_get_basename(lw->dir_fd->path);
-
-	GList *dirs = nullptr;
-	GList *files = nullptr;
-
-	FileData *parent_fd = file_data_new_dir(parent_dir);
-	if (!parent_fd) return nullptr;
-
-	FileData::FileList::read_list_lstat_all(parent_fd, &files, &dirs);
-	file_data_unref(parent_fd);
-
-	if (!dirs) return nullptr;
-
-	FileData::FileList::SortSettings sort_settings;
-	sort_settings.method = SORT_NAME;
-	sort_settings.ascending = TRUE;
-	sort_settings.case_sensitive = FALSE;
-
-	dirs = FileData::FileList::sort(dirs, sort_settings);
-
-	GList *work = dirs;
-	FileData *prev_dir = nullptr;
-	FileData *last_valid_dir = nullptr;
-
-	while (work)
+	static const auto is_current_dir = [](gconstpointer data, gconstpointer user_data)
 	{
-		auto *fd = static_cast<FileData *>(work->data);
-		g_autofree gchar *name = g_path_get_basename(fd->path);
+		const auto *fd = static_cast<const FileData *>(data);
 
-		if (g_strcmp0(name, current_name) == 0)
+		g_autofree gchar *name = g_path_get_basename(fd->path);
+		return g_strcmp0(name, static_cast<const gchar *>(user_data));
+	};
+	GList *current = g_list_find_custom(dirs, current_name, is_current_dir);
+	if (!current) return nullptr;
+
+	FileData *next_dir = nullptr;
+	for (GList *work = current->next; !next_dir && work; work = work->next)
 		{
-			prev_dir = last_valid_dir;
-			break;
-		}
+		auto *fd = static_cast<FileData *>(work->data);
 
 		// Check if this directory has any image files
-		GList *sub_files = nullptr;
-		GList *sub_dirs = nullptr;
-		FileData::FileList::read_list_lstat_all(fd, &sub_files, &sub_dirs);
-
+		g_autoptr(FileDataList) sub_files = nullptr;
+		FileData::FileList::read_list_lstat_all(fd, &sub_files, nullptr);
 		if (sub_files)
-		{
-			g_list_free_full(sub_files, reinterpret_cast<GDestroyNotify>(file_data_unref));
-			if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
-			last_valid_dir = fd;
-		}
-		else
-		{
-			if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
+			{
+			next_dir = fd;
+			}
 		}
 
-		work = work->next;
-	}
-
-	if (prev_dir)
-	{
-		file_data_ref(prev_dir);
-	}
-
-	g_list_free_full(dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
-	if (files) g_list_free_full(files, reinterpret_cast<GDestroyNotify>(file_data_unref));
-
-	return prev_dir;
+	return file_data_ref(next_dir);
 }
 
 /*
@@ -1787,7 +1682,7 @@ void layout_image_next(LayoutWindow *lw)
 			}
 		else if (options->auto_next_folder)
 			{
-			FileData *next_dir = layout_get_next_sibling_dir(lw);
+			FileData *next_dir = layout_get_next_sibling_dir(lw, TRUE);
 			if (next_dir)
 				{
 				layout_set_path(lw, next_dir->path);
@@ -1877,7 +1772,7 @@ void layout_image_prev(LayoutWindow *lw)
 			}
 		else if (options->auto_next_folder)
 			{
-			FileData *prev_dir = layout_get_prev_sibling_dir(lw);
+			FileData *prev_dir = layout_get_next_sibling_dir(lw, FALSE);
 			if (prev_dir)
 				{
 				layout_set_path(lw, prev_dir->path);
