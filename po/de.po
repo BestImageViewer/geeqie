@@ -12,31 +12,31 @@ msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-08-26 14:49+0100\n"
-"PO-Revision-Date: 2023-10-25 17:13+0100\n"
+"PO-Revision-Date: 2026-08-25 17:18+0200\n"
 "Last-Translator: Colin Clark <cclark@TallTrees>\n"
 "Language-Team: \n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Geany / PoHelper 1.38\n"
+"X-Generator: Poedit 3.9\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
 #. (itstool) path: component/id
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:3
 msgid "org.geeqie.Geeqie"
-msgstr ""
+msgstr "org.geeqie.Geeqie"
 
 #. (itstool) path: component/metadata_license
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:4
 msgid "CC-BY-SA-4.0"
-msgstr ""
+msgstr "CC-BY-SA-4.0"
 
 #. (itstool) path: component/project_license
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:6
 msgid "GPL-3.0+"
-msgstr ""
+msgstr "GPL-3.0+"
 
 #. (itstool) path: component/name
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:7
@@ -51,13 +51,12 @@ msgstr "Ein leichtgewichtiger Bildbetrachter"
 
 #. (itstool) path: description/p
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:10
-#, fuzzy
 msgid ""
 "Geeqie is a lightweight image viewer and image manager for Linux and other "
 "Unix-like systems."
 msgstr ""
-"Geeqie ist ein leichtgewichtiger Bildbetrachter für Linux, BSDs und "
-"kompatible Geräte."
+"Geeqie ist ein leichtgewichtiger Bildbetrachter für Linux, BSDs und andere "
+"Unix-Artige Systeme."
 
 #. (itstool) path: description/p
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:11
@@ -66,6 +65,9 @@ msgid ""
 "screen viewing. Images can be copied, moved, renamed, and deleted directly "
 "from the interface."
 msgstr ""
+"Es unterstützt schnelle Navigation mit Vorschaubildern, mehrere Fenster und "
+"Vollbildansicht. Bilder können direkt aus dem Interface kopiert, verschoben,"
+" umbenannt und gelöscht werden."
 
 #. (itstool) path: description/p
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:12
@@ -74,6 +76,10 @@ msgid ""
 "keyword tagging, powerful search features, and a duplicate image finder. "
 "Metadata such as EXIF information can be displayed as overlays on images."
 msgstr ""
+"Geeqie bietet Werkzeuge für die Verwaltung großer Bildsammlungen, darunter "
+"Verschlagwortung, umfangreiche Suchoptionen und einen Dublettenfinder. "
+"Metadaten wie etwa EXIF-Informationen können als Overlay in Bildern "
+"angezeigt werden."
 
 #. (itstool) path: description/p
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:13
@@ -82,147 +88,142 @@ msgid ""
 "command-line scripts. Images are accessed directly from the filesystem "
 "without the need for import."
 msgstr ""
+"Weitere Funktionen beinhalten Diashow-Präsentationen und Fernsteuerung durch"
+" Kommandozeilen-Skripte. Der Zugriff auf Bilder erfolgt direkt aus dem "
+"Dateisystem, ohne Import."
 
 #. (itstool) path: developer/name
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:16
 msgid "Geeqie developers"
-msgstr ""
+msgstr "Geeqie-Entwickler"
 
 #. (itstool) path: component/launchable
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:18
 msgid "org.geeqie.Geeqie.desktop"
-msgstr ""
+msgstr "org.geeqie.Geeqie.desktop"
 
 #. (itstool) path: screenshot/caption
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:21
 msgid "Folders, files, image and GPS map panes"
-msgstr ""
+msgstr "Ordner-, Dateien-, Bild- und GPS-Karten-Reiter"
 
 #. (itstool) path: screenshot/image
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:22
 msgid ""
-"https://raw.githubusercontent.com/BestImageViewer/geeqie-test-images/main/"
-"screenshots/Screenshot_2017-08-13_12-02-32_rescaled.png"
+"https://raw.githubusercontent.com/BestImageViewer/geeqie-test-"
+"images/main/screenshots/Screenshot_2017-08-13_12-02-32_rescaled.png"
 msgstr ""
+"https://raw.githubusercontent.com/BestImageViewer/geeqie-test-"
+"images/main/screenshots/Screenshot_2017-08-13_12-02-32_rescaled.png"
 
 #. (itstool) path: screenshot/caption
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:25
-#, fuzzy
 msgid "Image search window"
-msgstr "Bilder suchen"
+msgstr "Bildersuche-Fenster"
 
 #. (itstool) path: screenshot/image
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:26
 msgid ""
-"https://raw.githubusercontent.com/BestImageViewer/geeqie-test-images/main/"
-"screenshots/Screenshot_2017-08-13_12-29-44_rescaled.png"
+"https://raw.githubusercontent.com/BestImageViewer/geeqie-test-"
+"images/main/screenshots/Screenshot_2017-08-13_12-29-44_rescaled.png"
 msgstr ""
+"https://raw.githubusercontent.com/BestImageViewer/geeqie-test-"
+"images/main/screenshots/Screenshot_2017-08-13_12-29-44_rescaled.png"
 
 #. (itstool) path: categories/category
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:33
 msgid "Graphics"
-msgstr ""
+msgstr "Grafik"
 
 #. (itstool) path: categories/category
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:34
-#, fuzzy
 msgid "Photography"
-msgstr "Photo"
+msgstr "Fotografie"
 
 #. (itstool) path: categories/category
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:35
-#, fuzzy
 msgid "Viewer"
-msgstr "Ansicht"
+msgstr "Bildbetrachter"
 
 #. (itstool) path: keywords/keyword
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:38
-#, fuzzy
 msgid "image"
 msgstr "Bild"
 
 #. (itstool) path: keywords/keyword
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:39
-#, fuzzy
 msgid "photo"
-msgstr "Photo"
+msgstr "Foto"
 
 #. (itstool) path: keywords/keyword
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:40
 msgid "photography"
-msgstr ""
+msgstr "Fotografie"
 
 #. (itstool) path: keywords/keyword
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:41
-#, fuzzy
 msgid "viewer"
-msgstr "Vorschau"
+msgstr "Bildbetrachter"
 
 #. (itstool) path: keywords/keyword
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:42
-#, fuzzy
 msgid "manager"
 msgstr "Sortiermanager"
 
 #. (itstool) path: keywords/keyword
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:43
 msgid "gallery"
-msgstr ""
+msgstr "Gallerie"
 
 #. (itstool) path: keywords/keyword
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:44
 msgid "EXIF"
-msgstr ""
+msgstr "EXIF"
 
 #. (itstool) path: provides/mime-type
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:47
-#, fuzzy
 msgid "image/jpeg"
-msgstr "Bild"
+msgstr "image/jpeg"
 
 #. (itstool) path: provides/mime-type
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:48
-#, fuzzy
 msgid "image/png"
-msgstr "Bild"
+msgstr "image/png"
 
 #. (itstool) path: provides/mime-type
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:49
-#, fuzzy
 msgid "image/gif"
-msgstr "Bild"
+msgstr "image/gif"
 
 #. (itstool) path: provides/mime-type
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:50
-#, fuzzy
 msgid "image/tiff"
-msgstr "Bild"
+msgstr "image/tiff"
 
 #. (itstool) path: component/url
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:52
 msgid "https://www.geeqie.org"
-msgstr ""
+msgstr "https://www.geeqie.org"
 
 #. (itstool) path: component/url
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:53
 msgid "https://github.com/BestImageViewer/geeqie/issues"
-msgstr ""
+msgstr "https://github.com/BestImageViewer/geeqie/issues"
 
 #. (itstool) path: component/url
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:54
 msgid "https://github.com/BestImageViewer/geeqie"
-msgstr ""
+msgstr "https://github.com/BestImageViewer/geeqie"
 
 #. (itstool) path: component/update_contact
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:55
 msgid "geeqie@freelists.org"
-msgstr ""
+msgstr "geeqie@freelists.org"
 
 #. (itstool) path: component/translation
 #: ../data/org.geeqie.Geeqie.metainfo.xml.in:56
-#, fuzzy
 msgid "geeqie"
-msgstr "Geeqie"
+msgstr "geeqie"
 
 #: ../data/org.geeqie.Geeqie.desktop.in:3
 msgid "Image Viewer"
@@ -234,7 +235,7 @@ msgstr "Betrachte und manage Bilder"
 
 #: ../data/org.geeqie.Geeqie.desktop.in:15
 msgid "Picture;Slideshow;Graphics;"
-msgstr ""
+msgstr "Bild; Diashow; Grafik;"
 
 #: ../data/plugins/camera-import/org.geeqie.camera-import.desktop.in:4
 msgid "Camera import"
@@ -245,22 +246,20 @@ msgid "Import all images from camera"
 msgstr "Importieren Sie alle Bilder von der Kamera"
 
 #: ../data/plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in:4
-#, fuzzy
 msgid "Exif datetime to file"
-msgstr "In Datei schreiben"
+msgstr "EXIF-Datum In Datei schreiben"
 
 #: ../data/plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in:5
 msgid "Sets file mtime to the Exif.Image.DateTimeOriginal of the file"
-msgstr ""
+msgstr "Setzt die Datei mtime auf das Exif.Image.DateTimeOriginal der Datei"
 
 #: ../data/plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:4
 msgid "Export jpeg"
 msgstr "Exportiere jpeg"
 
 #: ../data/plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:5
-#, fuzzy
 msgid "Extract embedded jpegs from a raw file"
-msgstr "Extrahieren Sie eingebettete JPEGs aus einer raw Datei"
+msgstr "Eingebettete JPEGs aus einer raw Datei extrahieren"
 
 #: ../data/plugins/image-crop/org.geeqie.image-crop.desktop.in:4
 msgid "Image crop"
@@ -272,11 +271,11 @@ msgstr "Bild auf markiertes Rechteck zuschneiden"
 
 #: ../data/plugins/open-with/org.geeqie.open-with.desktop.in:4
 msgid "Open With"
-msgstr ""
+msgstr "Öffnen mit"
 
 #: ../data/plugins/open-with/org.geeqie.open-with.desktop.in:5
 msgid "Call the gtk application chooser dialog"
-msgstr ""
+msgstr "Rufe den GTK Programmauswahldialog auf"
 
 #: ../data/plugins/org.geeqie.template.desktop.in:9
 msgid "Template"
@@ -291,13 +290,12 @@ msgid "Display random image from Collections and current folder"
 msgstr "Zeigt zufällige Bilder aus Sammlungen und dem aktuellen Ordner an"
 
 #: ../data/plugins/resize-image/org.geeqie.resize-image.desktop.in:4
-#, fuzzy
 msgid "Resize image"
-msgstr "Einzelnes Bild"
+msgstr "Bild skalieren"
 
 #: ../data/plugins/resize-image/org.geeqie.resize-image.desktop.in:5
 msgid "Downsize an image"
-msgstr ""
+msgstr "Ein Bild verkleinern"
 
 #: ../data/plugins/rotate/org.geeqie.rotate.desktop.in:4
 msgid "Apply the orientation to image content"
@@ -305,19 +303,19 @@ msgstr "Wende die Drehung auf den Bildinhalt an"
 
 #: ../data/plugins/symlink/org.geeqie.symlink.desktop.in:4
 msgid "Symlink grouped files"
-msgstr ""
+msgstr "Symlink für gruppierte Dateien setzen"
 
 #: ../data/plugins/tethered-photography/org.geeqie.tethered-photography.desktop.in:4
 msgid "Tethered photography"
-msgstr ""
+msgstr "Tethered photography"
 
 #: ../data/plugins/video-player/org.geeqie.video-player.desktop.in:4
 msgid "Video player"
-msgstr ""
+msgstr "Video-Player"
 
 #: ../data/plugins/video-player/org.geeqie.video-player.desktop.in:5
 msgid "Display videos in Geeqie"
-msgstr ""
+msgstr "Zeige Videos in Geeqie an"
 
 #: ../data/ui/menu-bar-exif.ui:7
 #, fuzzy
@@ -334,7 +332,8 @@ msgstr "Entfernen"
 msgid "Copy "
 msgstr "Kopieren"
 
-#: ../data/ui/menu-bar-exif.ui:21 ../src/bar-exif.cc:539 ../src/bar-exif.cc:549
+#: ../data/ui/menu-bar-exif.ui:21 ../src/bar-exif.cc:539
+#: ../src/bar-exif.cc:549
 msgid "Add entry"
 msgstr "Eintrag hinzufügen"
 
@@ -362,8 +361,9 @@ msgid "Rem_ove"
 msgstr "Ent_fernen"
 
 #: ../data/ui/menu-collection.ui:25
+#, fuzzy
 msgid "Append from file selection"
-msgstr ""
+msgstr "Sammlung hinzufügen..."
 
 #: ../data/ui/menu-collection.ui:29
 #, fuzzy
@@ -491,9 +491,8 @@ msgid "Randomize"
 msgstr "Mischen"
 
 #: ../data/ui/menu-collection.ui:157 ../src/view-file/view-file.cc:1107
-#, fuzzy
 msgid "Show filename text"
-msgstr "_Dateinamen anzeigen"
+msgstr "Dateinamen-Text anzeigen"
 
 #: ../data/ui/menu-collection.ui:161 ../data/ui/menu-view-file.ui:124
 msgid "Show star rating"
@@ -548,7 +547,7 @@ msgstr "Duplikate suchen"
 #: ../data/ui/menu-dir-popup.ui:26
 #, fuzzy
 msgid "Find duplicates recursive…"
-msgstr "Du_plikate rekursiv suchen..."
+msgstr "Du_plikate rekursiv suchen"
 
 #: ../data/ui/menu-dir-popup.ui:32 ../data/ui/menu-main.ui:48
 #, fuzzy
@@ -600,7 +599,7 @@ msgstr "Aufsteigend"
 #: ../data/ui/menu-dir-popup.ui:92 ../data/ui/menu-view-file.ui:100
 #: ../src/layout.cc:701 ../src/view-file/view-file.cc:1832
 msgid "Case"
-msgstr ""
+msgstr "Groß-/Kleinschreibung"
 
 #: ../data/ui/menu-dir-popup.ui:100
 msgid "Show _hidden files"
@@ -732,14 +731,13 @@ msgstr "Diashow anhalten"
 
 #: ../data/ui/menu-img-view.ui:131 ../data/ui/menu-layout-image.ui:110
 #: ../src/preferences.cc:2062
-#, fuzzy
 msgid "Fullscreen"
 msgstr "Vollbildmodus"
 
 #: ../data/ui/menu-layout-image.ui:25 ../data/ui/menu-pan-view.ui:29
 #: ../data/ui/menu-view-file.ui:8 ../src/desktop-file.cc:503
 msgid "Plugins"
-msgstr ""
+msgstr "Plugins"
 
 #: ../data/ui/menu-layout-image.ui:29 ../src/exif.cc:336
 msgid "Orientation"
@@ -781,7 +779,6 @@ msgstr "Dateiliste verbergen"
 
 #: ../data/ui/menu-layout-image.ui:124 ../data/ui/menu-main.ui:1104
 #: ../src/preferences.cc:1792
-#, fuzzy
 msgid "Hide Selectable Bars"
 msgstr "Bars ausblenden"
 
@@ -796,7 +793,7 @@ msgstr ""
 #: ../data/ui/menu-main.ui:16
 #, fuzzy
 msgid "Open recent…"
-msgstr "_Letzte Sammlung öffnen"
+msgstr "Zuletzt verwendete Datei öffnen"
 
 #: ../data/ui/menu-main.ui:22
 msgid "_New collection"
@@ -810,7 +807,7 @@ msgstr "_Sammlung öffnen..."
 #: ../data/ui/menu-main.ui:32
 #, fuzzy
 msgid "_Search…"
-msgstr "Suche"
+msgstr "Suche…"
 
 #: ../data/ui/menu-main.ui:36
 #, fuzzy
@@ -834,7 +831,7 @@ msgstr "_Verschieben"
 #: ../data/ui/menu-main.ui:64
 #, fuzzy
 msgid "Open with…"
-msgstr "Sammlung öffnen ..."
+msgstr "Öffnen mit"
 
 #: ../data/ui/menu-main.ui:70
 #, fuzzy
@@ -988,7 +985,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:219
 #, fuzzy
 msgid "Clear mark 1"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:224
 #, fuzzy
@@ -1013,7 +1010,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:242
 #, fuzzy
 msgid "Filter mark 1"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:248
 #, fuzzy
@@ -1033,7 +1030,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:258
 #, fuzzy
 msgid "Clear mark 2"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:263
 #, fuzzy
@@ -1058,7 +1055,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:281
 #, fuzzy
 msgid "Filter mark 2"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:287
 #, fuzzy
@@ -1078,7 +1075,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:297
 #, fuzzy
 msgid "Clear mark 3"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:302
 #, fuzzy
@@ -1103,7 +1100,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:320
 #, fuzzy
 msgid "Filter mark 3"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:326
 #, fuzzy
@@ -1123,7 +1120,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:336
 #, fuzzy
 msgid "Clear mark 4"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:341
 #, fuzzy
@@ -1148,7 +1145,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:359
 #, fuzzy
 msgid "Filter mark 4"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:365
 #, fuzzy
@@ -1168,7 +1165,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:375
 #, fuzzy
 msgid "Clear mark 5"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:380
 #, fuzzy
@@ -1193,7 +1190,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:398
 #, fuzzy
 msgid "Filter mark 5"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:404
 #, fuzzy
@@ -1213,7 +1210,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:414
 #, fuzzy
 msgid "Clear mark 6"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:419
 #, fuzzy
@@ -1238,7 +1235,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:437
 #, fuzzy
 msgid "Filter mark 6"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:443
 #, fuzzy
@@ -1258,7 +1255,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:453
 #, fuzzy
 msgid "Clear mark 7"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:458
 #, fuzzy
@@ -1283,7 +1280,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:476
 #, fuzzy
 msgid "Filter mark 7"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:482
 #, fuzzy
@@ -1303,7 +1300,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:492
 #, fuzzy
 msgid "Clear mark 8"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:497
 #, fuzzy
@@ -1328,7 +1325,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:515
 #, fuzzy
 msgid "Filter mark 8"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:521
 #, fuzzy
@@ -1348,7 +1345,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:531
 #, fuzzy
 msgid "Clear mark 9"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:536
 #, fuzzy
@@ -1373,7 +1370,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:554
 #, fuzzy
 msgid "Filter mark 9"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:560
 #, fuzzy
@@ -1393,7 +1390,7 @@ msgstr "Setze Markierung %d"
 #: ../data/ui/menu-main.ui:570
 #, fuzzy
 msgid "Clear mark 0"
-msgstr "Makierungen löschen"
+msgstr "Entferne Markierung %d"
 
 #: ../data/ui/menu-main.ui:575
 #, fuzzy
@@ -1418,7 +1415,7 @@ msgstr "Markierung %d abwählen"
 #: ../data/ui/menu-main.ui:593
 #, fuzzy
 msgid "Filter mark 0"
-msgstr "Nach Markierung %d filtern"
+msgstr "Nach Markierung %d _filtern"
 
 #: ../data/ui/menu-main.ui:604
 msgid "_Edit"
@@ -1500,11 +1497,12 @@ msgstr "Dieses Fenster einrichten"
 #: ../data/ui/menu-main.ui:707
 #, fuzzy
 msgid "_Cache maintenance…"
-msgstr "Cachewartung"
+msgstr "_Cachewartung..."
 
 #: ../data/ui/menu-main.ui:715
+#, fuzzy
 msgid "_Plugins"
-msgstr ""
+msgstr "Plugins"
 
 #: ../data/ui/menu-main.ui:721
 msgid "_View"
@@ -1902,7 +1900,7 @@ msgstr "manuell"
 #: ../data/ui/menu-main.ui:1191
 #, fuzzy
 msgid "_Search and Run command"
-msgstr "Suchen und Ausführen Befehl"
+msgstr "Suche und Befehlsausführung"
 
 #: ../data/ui/menu-main.ui:1195
 #, fuzzy
@@ -2043,15 +2041,13 @@ msgid "Refresh"
 msgstr "Aktualisieren"
 
 #: ../data/ui/search-and-run.ui:30 ../src/search-and-run.cc:396
-#, fuzzy
 msgid "Search and Run command - Geeqie"
-msgstr "Suchen und Ausführen Befehl"
+msgstr "Suche und Befehlsausführung"
 
 #: ../data/ui/search-and-run.ui:38 ../data/ui/search-and-run.ui:40
 #: ../src/search-and-run.cc:404
-#, fuzzy
 msgid "Search for commands and run them"
-msgstr "Suchen Sie Befehle nach Schlüsselwörtern und führen Sie sie aus"
+msgstr "Suchen Sie Befehle und führen Sie sie aus"
 
 #: ../src/advanced-exif.cc:486 ../src/cache-maint.cc:1624
 #: ../src/filefilter.cc:91 ../src/preferences.cc:2437 ../src/search.cc:2421
@@ -2107,28 +2103,28 @@ msgstr "Hilfe"
 #: ../src/editors.cc:636 ../src/preferences.cc:2734 ../src/search.cc:3435
 #: ../src/ui-fileops.cc:97 ../src/utilops.cc:900 ../src/utilops.cc:2273
 #: ../src/utilops.cc:2316 ../src/utilops.cc:2919 ../src/utilops.cc:3293
-#, fuzzy
 msgid "Close"
-msgstr "nah"
+msgstr "Schließen"
 
 #: ../src/archives.cc:180
-#, fuzzy
 msgid "Open Archive - Cannot create directory: "
-msgstr "Verzeichnisses kann nicht erstellt werden"
+msgstr "Archiv öffnen - Verzeichnisses kann nicht erstellt werden: "
 
 #: ../src/archives.cc:188 ../src/archives.cc:198
 msgid "Open Archive - Cannot change directory to: "
-msgstr ""
+msgstr "Archiv öffnen - kann nicht in Verzeichnis wechseln: "
 
 #: ../src/archives.cc:188 ../src/archives.cc:198
 msgid ""
 "\n"
 "  Error code: "
 msgstr ""
+"\n"
+"  Fehlercode: "
 
 #: ../src/archives.cc:212
 msgid "Warning: libarchive not installed"
-msgstr ""
+msgstr "Warnung: libarchive nicht installiert"
 
 #: ../src/bar-comment.cc:230
 msgid "Add text to selected files"
@@ -2206,7 +2202,6 @@ msgstr ""
 "%i Bilder sind schon geocodiert!"
 
 #: ../src/bar-gps.cc:224
-#, fuzzy
 msgid ""
 "\n"
 "\n"
@@ -2214,7 +2209,8 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Position: %s \n"
+"Position: %lf %lf \n"
+"\n"
 
 #: ../src/bar-gps.cc:226
 msgid "Geocode images"
@@ -2227,12 +2223,12 @@ msgstr "Lat/Long in Metadaten schreiben?"
 #: ../src/bar-gps.cc:228 ../src/bar-sort.cc:513 ../src/collect-dlg.cc:81
 #: ../src/collect.cc:1033 ../src/desktop-file.cc:235 ../src/dupe.cc:4143
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 #: ../src/bar-gps.cc:421
-#, fuzzy, c-format
+#, c-format
 msgid "Image direction: %.1f°"
-msgstr "Bildbeschreibung"
+msgstr "Bildbeschreibung: %.1f°"
 
 #: ../src/bar-gps.cc:837
 msgid "Enable markers"
@@ -2279,9 +2275,8 @@ msgid "Add selected keywords to selected files"
 msgstr "Schlüsselwörter zu den ausgewählten Dateien hinzufügen"
 
 #: ../src/bar-keywords.cc:507
-#, fuzzy
 msgid "Remove selected keywords from selected files"
-msgstr "Schlüsselwörter zu den ausgewählten Dateien hinzufügen"
+msgstr "Schlüsselwörter von den ausgewählten Dateien entfernen"
 
 #: ../src/bar-keywords.cc:511
 msgid "Replace existing keywords in selected files with selected keywords"
@@ -2321,13 +2316,12 @@ msgid "Marks Keywords"
 msgstr "Markierte Schlüsselwörter"
 
 #: ../src/bar-keywords.cc:832
-#, fuzzy
 msgid "Disconnect all Marks Keywords connections?"
-msgstr "Makierte Schlüsselwörter Verbindungen trennen"
+msgstr "Alle Makierung-Schlüsselwort-Verbindungen trennen?"
 
 #: ../src/bar-keywords.cc:832
 msgid "This will disconnect all Marks Keywords connections"
-msgstr "Dadurch werden alle makierten Schlüsselwörter Verbindungen getrennt"
+msgstr "Dadurch werden alle Markierung-Schlüsselwort-Verbindungen getrennt"
 
 #: ../src/bar-keywords.cc:1141
 #, c-format
@@ -2335,9 +2329,9 @@ msgid "Add \"%s\" to all selected images"
 msgstr "\"%s\" zu allen ausgewählten Dateien hinzufügen"
 
 #: ../src/bar-keywords.cc:1144
-#, fuzzy, c-format
+#, c-format
 msgid "Remove \"%s\" from all selected images"
-msgstr "\"%s\" zu allen ausgewählten Dateien hinzufügen"
+msgstr "\"%s\" von allen ausgewählten Dateien entfernen"
 
 #: ../src/bar-keywords.cc:1149
 #, c-format
@@ -2411,26 +2405,23 @@ msgstr "Schlüsselwort Automatisch Vervollständigen"
 
 #: ../src/bar-keywords.cc:1822
 msgid "The Info Sidebar has not yet been opened"
-msgstr ""
+msgstr "Die Info-Sidebar wurde noch nicht geöffnet"
 
 #: ../src/bar-rating.cc:168 ../src/filefilter.cc:99
-#, fuzzy
 msgid "Rejected"
-msgstr "Auswahl zurücksetzen"
+msgstr "Zurückgewiesen"
 
 #: ../src/bar-rating.cc:173 ../src/filefilter.cc:100
-#, fuzzy
 msgid "Unrated"
-msgstr "Unkalibriert"
+msgstr "Unbewertet"
 
 #: ../src/bar-sort.cc:147 ../src/bar-sort.cc:671 ../src/ui-bookmark.cc:866
 msgid "Add Bookmark"
 msgstr "Lesezeichen/Sammlung hinzufügen"
 
 #: ../src/bar-sort.cc:152
-#, fuzzy
 msgid "Create new Collection file"
-msgstr "Datei mit Sammlung kann nicht geöffnet werden"
+msgstr "Erstelle neue Sammlungsdatei"
 
 #: ../src/bar-sort.cc:413 ../src/bar-sort.cc:416
 msgid "Sort Manager Operations"
@@ -2445,37 +2436,38 @@ msgid ""
 "\n"
 "in the plugin file."
 msgstr ""
+"Zusätzliche Operationen mit Plugins\n"
+"können durch Setzen von:\n"
+"\n"
+"X-Geeqie-Filter=true\n"
+"\n"
+"in der Plugin-Datei inkludiert werden."
 
 #: ../src/bar-sort.cc:467
-#, fuzzy
 msgid "File save failed."
-msgstr "Fehler beim Löschen der Datei"
+msgstr "Fehler beim Speichern der Datei."
 
 #: ../src/bar-sort.cc:468
-#, fuzzy, c-format
+#, c-format
 msgid "File \"%s\" was not saved."
-msgstr "Datei wurde übersprungen."
+msgstr "Datei %s wurde nicht gespeichert."
 
 #: ../src/bar-sort.cc:506
-#, fuzzy
 msgid "Add Bookmark - Geeqie"
-msgstr "Lesezeichen/Sammlung hinzufügen"
+msgstr "Lesezeichen hinzufügen - Geeqie"
 
 #: ../src/bar-sort.cc:518 ../src/collect-dlg.cc:86 ../src/layout-util.cc:1219
 #: ../src/search.cc:2987
-#, fuzzy
 msgid "Collection files"
 msgstr "Sammlungsdateien"
 
 #: ../src/bar-sort.cc:520 ../src/collect-dlg.cc:88 ../src/layout-util.cc:1100
-#, fuzzy
 msgid "Untitled.gqv"
-msgstr "Unbenannt"
+msgstr "Unbenannt.gqv"
 
 #: ../src/bar-sort.cc:521
-#, fuzzy
 msgid "Create empty Collection file"
-msgstr "Datei mit Sammlung kann nicht geöffnet werden"
+msgstr "Erstelle leere Sammlungsdatei"
 
 #: ../src/bar-sort.cc:579
 msgid "Sort Manager"
@@ -2491,7 +2483,7 @@ msgstr "Sammlungen"
 
 #: ../src/bar-sort.cc:592
 msgid "See the Help file for additional functions"
-msgstr ""
+msgstr "Vergleiche die Hilfe-Datei für weitere Funktionen"
 
 #: ../src/bar-sort.cc:594 ../src/preferences.cc:806 ../src/utilops.cc:1886
 #: ../src/utilops.cc:2592
@@ -2514,11 +2506,11 @@ msgstr "Auswahl hinzufügen"
 #: ../src/bar-sort.cc:670 ../src/bar.cc:419 ../src/preferences.cc:2409
 #: ../src/shortcuts.cc:73 ../src/toolbar.cc:337
 msgid "Add"
-msgstr ""
+msgstr "Hinzufügen"
 
 #: ../src/bar-sort.cc:673
 msgid "Undo"
-msgstr ""
+msgstr "Rückgängig"
 
 #: ../src/bar-sort.cc:674
 msgid "Undo last image"
@@ -2526,7 +2518,7 @@ msgstr "Letzten Vorgang rückgängig machen"
 
 #: ../src/bar-sort.cc:677
 msgid "Functions additional to Copy and Move"
-msgstr ""
+msgstr "Funktionen ergänzend zu Kopieren und Verschieben"
 
 #: ../src/bar.cc:205
 msgid "Histogram"
@@ -2570,71 +2562,63 @@ msgid "Copyright"
 msgstr "Urheberangaben"
 
 #: ../src/bar.cc:262 ../src/bar.cc:269
-#, fuzzy
 msgid "Add metadata pane"
-msgstr "Metadaten speichern"
+msgstr "Metadaten-Reiter hinzufügen"
 
 #: ../src/bar.cc:270
 msgid "Enter any XMP, EXIF, or IPTC metadata key."
-msgstr ""
+msgstr "Eingabe eines beliebigen XMP-, EXIF- oder IPTC-Metadaten-Schlüssels."
 
 #: ../src/bar.cc:311
-#, fuzzy
 msgid "Pane title:"
-msgstr "Unbenannt"
+msgstr "Reitertitel:"
 
 #: ../src/bar.cc:313
 msgid "Automatic"
-msgstr ""
+msgstr "Automatisch"
 
 #: ../src/bar.cc:403
 msgid "Expand or collapse pane"
-msgstr ""
+msgstr "Expandiere oder verberge Reiter"
 
 #: ../src/bar.cc:429
-#, fuzzy
 msgid "Metadata key…"
-msgstr "Schlüsselwörter und Kommentare"
+msgstr "Metadaten-Schlüssel…"
 
 #: ../src/bar.cc:444
 msgid "Add Pane"
 msgstr "Feld hinzufügen"
 
 #: ../src/cache-maint.cc:176
-#, fuzzy
 msgid "Creating sim data…"
-msgstr "Lese Bilddaten ..."
+msgstr "Erstelle Ähnlichkeitsdaten…"
 
 #: ../src/cache-maint.cc:188
-#, fuzzy
 msgid "Creating thumbs…"
-msgstr "Vorschaubilder erzeugen"
+msgstr "Vorschaubilder erzeugen…"
 
 #: ../src/cache-maint.cc:196
-#, fuzzy
 msgid "Cleaning thumbs and sims…"
-msgstr "Lösche Vorschaubilder..."
+msgstr "Lösche Vorschaubilder…"
 
 #: ../src/cache-maint.cc:223 ../src/cache-maint.cc:583
 #: ../src/cache-maint.cc:691 ../src/cache-maint.cc:881
-#: ../src/cache-maint.cc:1320 ../src/editors.cc:1265 ../src/preferences.cc:2623
+#: ../src/cache-maint.cc:1320 ../src/editors.cc:1265
+#: ../src/preferences.cc:2623
 msgid "done"
 msgstr "fertig"
 
 #: ../src/cache-maint.cc:385
-#, fuzzy
 msgid "Removing old metadata…"
-msgstr "Entferne alte Metadaten..."
+msgstr "Entferne alte Metadaten…"
 
 #: ../src/cache-maint.cc:389
-#, fuzzy
 msgid "Clearing cached thumbnails…"
-msgstr "Lösche gespeicherte Vorschaubilder..."
+msgstr "Lösche gespeicherte Vorschaubilder…"
 
 #: ../src/cache-maint.cc:393 ../src/cache-maint.cc:1044
-#, fuzzy
 msgid "Removing old thumbnails…"
-msgstr "Entferne alte Vorschaubilder..."
+msgstr "Entferne alte Vorschaubilder…"
 
 #: ../src/cache-maint.cc:396 ../src/cache-maint.cc:1047
 msgid "Maintenance"
@@ -2644,7 +2628,7 @@ msgstr "Bereinigung"
 #: ../src/cache-maint.cc:1056 ../src/cache-maint.cc:1400 ../src/dupe.cc:4442
 #: ../src/preferences.cc:2738 ../src/search.cc:3430 ../src/utilops.cc:896
 msgid "Stop"
-msgstr ""
+msgstr "Stop"
 
 #: ../src/cache-maint.cc:597 ../src/cache-maint.cc:1201
 msgid "stopped"
@@ -2697,14 +2681,12 @@ msgid "click start to begin"
 msgstr "Klicke Start zum Beginnen"
 
 #: ../src/cache-maint.cc:985 ../src/editors.cc:1192
-#, fuzzy
 msgid "running…"
-msgstr "läuft..."
+msgstr "läuft…"
 
 #: ../src/cache-maint.cc:1039
-#, fuzzy
 msgid "Clearing thumbnails…"
-msgstr "Lösche Vorschaubilder..."
+msgstr "Lösche Vorschaubilder…"
 
 #: ../src/cache-maint.cc:1102 ../src/cache-maint.cc:1105
 #: ../src/cache-maint.cc:1581 ../src/cache-maint.cc:1599
@@ -2734,9 +2716,8 @@ msgid "Create sim. files recursively"
 msgstr "Erstellen Sie Ähnlichkeitsdateien rekursiv"
 
 #: ../src/cache-maint.cc:1505 ../src/cache-maint.cc:1635
-#, fuzzy
 msgid "Background cache maintenance"
-msgstr "Cachewartung"
+msgstr "Cachewartung im Hintergrund"
 
 #: ../src/cache-maint.cc:1513
 msgid ""
@@ -2744,6 +2725,9 @@ msgid ""
 "and .sim files, and create new\n"
 "thumbnails and .sim files"
 msgstr ""
+"Rekursives Löschen verwaister Thumbs\n"
+"und .sim-Dateien und Erstellen neuer\n"
+"Thumbs und .sim-Dateien"
 
 #: ../src/cache-maint.cc:1554 ../src/cache-maint.cc:1662
 msgid "Cache Maintenance"
@@ -2809,13 +2793,12 @@ msgstr ""
 "Speicher."
 
 #: ../src/cache-maint.cc:1639
-#, fuzzy
 msgid "Select"
-msgstr "_Auswahl"
+msgstr "Auswahl"
 
 #: ../src/cache-maint.cc:1642
 msgid "Run cache maintenance as a background job."
-msgstr ""
+msgstr "Füre Cachewartung als Hintergrunddienst aus."
 
 #: ../src/cache-maint.cc:1647
 msgid ""
@@ -2823,6 +2806,9 @@ msgid ""
 "Use command line:\n"
 "GQ_CACHE_MAINTENANCE=  geeqie --cache-maintenance=<FOLDER>"
 msgstr ""
+"Funktion in dieser Version deaktiviert.\n"
+"Aufruf über Kommandozeile:\n"
+"GQ_CACHE_MAINTENANCE=  geeqie --cache-maintenance=<ORDNER>"
 
 #: ../src/cache-maint.cc:1666 ../src/main.cc:510
 msgid "Quit"
@@ -2842,24 +2828,25 @@ msgid "Save Failed"
 msgstr "Fehler beim Speichern"
 
 #: ../src/collect-dlg.cc:96
-#, fuzzy
 msgid "Save Collection As - Geeqie"
-msgstr "Sammlung speichern"
+msgstr "Sammlung speichern als"
 
 #: ../src/collect-dlg.cc:101
-#, fuzzy
 msgid "Append Collection - Geeqie"
-msgstr "Füge Sammlung hinzu"
+msgstr "Füge zu Sammlung hinzu"
 
 #: ../src/collect-io.cc:369
 #, c-format
 msgid ""
-"This Collection cannot be opened because it contains a link to a file on a "
-"drive which is not yet mounted.\n"
+"This Collection cannot be opened because it contains a link to a file on a drive which is not yet mounted.\n"
 "\n"
 "Collection: %s\n"
 "File: %s\n"
 msgstr ""
+"Diese Sammlung kann nicht geöffnet werden, weil die einen Link zu einer Datei auf einem nicht gemounteten Laufwerk enthält.\n"
+"\n"
+"Sammlung: %s\n"
+"Datei: %s\n"
 
 #: ../src/collect-table.cc:183
 #, c-format
@@ -2872,9 +2859,8 @@ msgstr "Leer"
 
 #: ../src/collect-table.cc:208 ../src/dupe.cc:1917 ../src/search.cc:566
 #: ../src/view-file/view-file.cc:1986 ../src/view-file/view-file.cc:2095
-#, fuzzy
 msgid "Loading thumbs…"
-msgstr "Lade Vorschaubilder..."
+msgstr "Lade Vorschaubilder…"
 
 #: ../src/collect-table.cc:1616 ../src/img-view.cc:1393
 msgid "Dropped list includes folders."
@@ -2945,11 +2931,11 @@ msgstr "Benutzerprofiel"
 #, c-format
 msgid "Remote slideshow delay out of range (%.1f to %.1f)\n"
 msgstr ""
+"Ferngesteuerte Diashow - Verzögerung außerhalb der Spanne (%.1f bis %.1f)\n"
 
 #: ../src/command-line-handling.cc:462 ../src/command-line-handling.cc:1480
-#, fuzzy
 msgid " is not a folder"
-msgstr "%s ist kein Verzeichnis"
+msgstr " ist kein Verzeichnis"
 
 #: ../src/command-line-handling.cc:626
 #, c-format
@@ -2977,14 +2963,13 @@ msgid "Timezone: %s\n"
 msgstr "Zeitzone: %s\n"
 
 #: ../src/command-line-handling.cc:662
-#, fuzzy
 msgid "Marks:"
-msgstr "Markierungen"
+msgstr "Markierungen:"
 
 #: ../src/command-line-handling.cc:677
-#, fuzzy, c-format
+#, c-format
 msgid "Thumb: %s\n"
-msgstr "Zeitzone: %s\n"
+msgstr "Vorschau: %s\n"
 
 #: ../src/command-line-handling.cc:775
 #, c-format
@@ -2992,19 +2977,17 @@ msgid "%dx%d+%d+%d"
 msgstr "%dx%d+%d+%d"
 
 #: ../src/command-line-handling.cc:915 ../src/command-line-handling.cc:920
-#, fuzzy
 msgid "lua error: no data\n"
-msgstr "lua Fehler: keine Daten"
+msgstr "lua Fehler: keine Daten\n"
 
 #: ../src/command-line-handling.cc:923
-#, fuzzy
 msgid "Lua is not available\n"
-msgstr "%s ist kein Verzeichnis"
+msgstr "Lua nicht verfügbar\n"
 
 #: ../src/command-line-handling.cc:964
-#, fuzzy, c-format
+#, c-format
 msgid "[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"
-msgstr "[%d,%d]: RGB(%3d,%3d,%3d)"
+msgstr "[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"
 
 #: ../src/command-line-handling.cc:970
 #, c-format
@@ -3012,63 +2995,59 @@ msgid "[%d,%d]: RGB(%3d,%3d,%3d)"
 msgstr "[%d,%d]: RGB(%3d,%3d,%3d)"
 
 #: ../src/command-line-handling.cc:977
-#, fuzzy, c-format
+#, c-format
 msgid "[%d,%d]: RGB(---,---,---)"
-msgstr "[%*s,%*s]: RGB(---,---,---)"
+msgstr "[%d,%d]: RGB(---,---,---)"
 
 #: ../src/command-line-handling.cc:1080
 msgid "remote sent --selection-remove with empty selection.\n"
-msgstr ""
+msgstr "remote gesendet --selection-remove mit leerer Auswahl.\n"
 
 #: ../src/command-line-handling.cc:1097
 msgid "remote sent \"--selection-remove:\" with no current image\n"
-msgstr ""
+msgstr "remote gesendet \"--selection-remove:\" ohne aktuelles Bild\n"
 
 #: ../src/command-line-handling.cc:1139
 msgid "remote sent \"--selection-remove=\" but current image is not selected\n"
 msgstr ""
+"remote gesendet \"--selection-remove=\", aber aktuelles Bild ist nicht "
+"gewählt\n"
 
 #: ../src/command-line-handling.cc:1470
-#, fuzzy
 msgid "Cache Maintenance is already running\n"
-msgstr "Cachewartung"
+msgstr "Cachewartung läuft bereits\n"
 
 #: ../src/command-line-handling.cc:1490
-#, fuzzy
 msgid "Configuration file path "
-msgstr "Bestätige, dass die Datei in den Papierkorb verschoben wird"
+msgstr "Pfad der Konfigurationsdatei "
 
 #: ../src/command-line-handling.cc:1490
-#, fuzzy
 msgid " is not a file"
-msgstr "%s ist kein Verzeichnis"
+msgstr " ist kein Verzeichnis"
 
 #: ../src/command-line-handling.cc:1500
-#, fuzzy
 msgid "Cannot load "
-msgstr "Datei kann nicht gelesen werden"
+msgstr "Datei kann nicht gelesen werden "
 
 #: ../src/command-line-handling.cc:1521
-#, fuzzy
 msgid "Caching not enabled"
-msgstr "Cachewartung"
+msgstr "Cache nicht aktiviert"
 
 #: ../src/command-line-handling.cc:1589
 msgid "Geeqie is not running: --"
-msgstr ""
+msgstr "Geeqie läuft nicht: --"
 
 #: ../src/command-line-handling.cc:1589
-#, fuzzy
 msgid " is a Remote command\n"
-msgstr "Fernsteuerbefehle:\n"
+msgstr " ist ein Fernsteuerbefehl:\n"
 
 #: ../src/command-line-handling.cc:1657
 msgid "No option specified\n"
-msgstr ""
+msgstr "Keine Option angegeben\n"
 
 #: ../src/command-line-handling.cc:1658
 msgid "No option specified"
-msgstr ""
+msgstr "Keine Option angegeben"
 
 #: ../src/debug.cc:71
 msgid "error"
@@ -3079,23 +3058,21 @@ msgid "warning"
 msgstr "Warnung"
 
 #: ../src/debug.cc:341
-#, fuzzy
 msgid "Invalid input format\n"
-msgstr "Ungültiges Editorkommando"
+msgstr "Ungültiges Eingabformat\n"
 
 #: ../src/debug.cc:352
-#, fuzzy
 msgid "Failed to open file: "
-msgstr "Datei kann nicht entfernt werden"
+msgstr "Datei kann nicht geöffnet werden: "
 
 #: ../src/desktop-file.cc:97 ../src/desktop-file.cc:108
 #: ../src/desktop-file.cc:115
 msgid "Can't save"
-msgstr "Kann nichts speichern"
+msgstr "Kann nicht speichern"
 
 #: ../src/desktop-file.cc:97
 msgid "Please specify file name."
-msgstr "Bitte einen anderen Dateiname angeben."
+msgstr "Bitte einen anderen Dateinamen angeben."
 
 #: ../src/desktop-file.cc:108
 msgid "Could not create directory"
@@ -3138,10 +3115,9 @@ msgstr "neu.desktop"
 
 #: ../src/desktop-file.cc:525
 msgid "New"
-msgstr ""
+msgstr "Neu"
 
 #: ../src/desktop-file.cc:528
-#, fuzzy
 msgid "Edit"
 msgstr "_Bearbeiten"
 
@@ -3178,39 +3154,32 @@ msgid "[set 1]"
 msgstr "[menge 1]"
 
 #: ../src/dupe.cc:2085
-#, fuzzy
 msgid "Reading checksums…"
-msgstr "Lese Prüfsummen..."
+msgstr "Lese Prüfsummen…"
 
 #: ../src/dupe.cc:2117
-#, fuzzy
 msgid "Reading dimensions…"
-msgstr "Lese Bildauflösungen..."
+msgstr "Lese Bildabmessungen…"
 
 #: ../src/dupe.cc:2202
-#, fuzzy
 msgid "Reading similarity data…"
-msgstr "Lese Ähnlichkeitsdaten..."
+msgstr "Lese Ähnlichkeitsdaten…"
 
 #: ../src/dupe.cc:2239 ../src/dupe.cc:2336
-#, fuzzy
 msgid "Comparing…"
-msgstr "Vergleiche..."
+msgstr "Vergleiche…"
 
 #: ../src/dupe.cc:2256
-#, fuzzy
 msgid "Comparing"
-msgstr "Vergleiche..."
+msgstr "Vergleiche"
 
 #: ../src/dupe.cc:2272 ../src/dupe.cc:2297 ../src/pan-view/pan-view.cc:887
-#, fuzzy
 msgid "Sorting…"
-msgstr "Sortiere..."
+msgstr "Sortiere…"
 
 #: ../src/dupe.cc:2324
-#, fuzzy
 msgid "Queuing…"
-msgstr "läuft..."
+msgstr "Läuft…"
 
 #: ../src/dupe.cc:2731
 msgid "Loading file list"
@@ -3218,7 +3187,7 @@ msgstr "Lade Dateiliste"
 
 #: ../src/dupe.cc:2852
 msgid "Image thumbprint debug info"
-msgstr ""
+msgstr "Image thumbprint Debug-Informationen"
 
 #: ../src/dupe.cc:3475
 #, c-format
@@ -3229,8 +3198,8 @@ msgstr "%d Dateien (menge 2)"
 msgid "Name case-insensitive"
 msgstr "Name, ignoriere Groß-/Kleinschreibung"
 
-#: ../src/dupe.cc:3654 ../src/dupe.cc:3987 ../src/dupe.cc:4257 ../src/osd.cc:64
-#: ../src/preferences.cc:2049 ../src/search.cc:3361
+#: ../src/dupe.cc:3654 ../src/dupe.cc:3987 ../src/dupe.cc:4257
+#: ../src/osd.cc:64 ../src/preferences.cc:2049 ../src/search.cc:3361
 #: ../src/view-file/view-file-list.cc:1868
 msgid "Size"
 msgstr "Größe"
@@ -3251,19 +3220,16 @@ msgid "Checksum"
 msgstr "Prüfsumme"
 
 #: ../src/dupe.cc:3659
-#, fuzzy
 msgid "Similarity (high - 95)"
-msgstr "Ähnlichkeit (hoch)"
+msgstr "Ähnlichkeit (hoch - 95)"
 
 #: ../src/dupe.cc:3660
-#, fuzzy
 msgid "Similarity (med. - 90)"
-msgstr "Ähnlichkeit (niedrig)"
+msgstr "Ähnlichkeit (mittel -90)"
 
 #: ../src/dupe.cc:3661
-#, fuzzy
 msgid "Similarity (low - 85)"
-msgstr "Ähnlichkeit (niedrig)"
+msgstr "Ähnlichkeit (niedrig -85)"
 
 #: ../src/dupe.cc:3662
 msgid "Similarity (custom)"
@@ -3292,7 +3258,7 @@ msgstr "Ähnlichkeit"
 #: ../src/dupe.cc:3987 ../src/dupe.cc:4261 ../src/preferences.cc:1629
 #: ../src/preferences.cc:2040
 msgid "Set"
-msgstr ""
+msgstr "Set"
 
 #: ../src/dupe.cc:3987
 msgid "Thumbnail"
@@ -3308,11 +3274,11 @@ msgstr "Höhe"
 
 #: ../src/dupe.cc:4077
 msgid "No duplicates windows open"
-msgstr ""
+msgstr "Kein Dupikatsuche-Fenster geöffnet"
 
 #: ../src/dupe.cc:4081
 msgid "Incomplete"
-msgstr ""
+msgstr "Unvollständig"
 
 #: ../src/dupe.cc:4098
 #, c-format
@@ -3320,18 +3286,16 @@ msgid "Error creating Export duplicates data file: Error: %s\n"
 msgstr "Fehler beim Erstellen der Exportduplikat-Datendatei: Fehler: %s\n"
 
 #: ../src/dupe.cc:4149
-#, fuzzy
 msgid "Untitled.csv"
-msgstr "Unbenannt"
+msgstr "Unbenannt.csv"
 
 #: ../src/dupe.cc:4149
-#, fuzzy
 msgid "Untitled.tsv"
-msgstr "Unbenannt"
+msgstr "Unbenannt.tsv"
 
 #: ../src/dupe.cc:4150
 msgid "Export duplicates data"
-msgstr ""
+msgstr "Exportierte Übereinstimmungsdaten"
 
 #: ../src/dupe.cc:4194 ../src/dupe.cc:4574 ../src/dupe.cc:4642
 msgid "Find duplicates"
@@ -3343,7 +3307,7 @@ msgstr "Rang"
 
 #: ../src/dupe.cc:4255 ../src/search.cc:3359
 msgid "Thumb"
-msgstr ""
+msgstr "Vorschaubild"
 
 #: ../src/dupe.cc:4294
 msgid "Compare to:"
@@ -3366,6 +3330,8 @@ msgid ""
 "Custom similarity threshold\n"
 "(Use tab key to set value)"
 msgstr ""
+"Eigener Ähnlichkeits-Schwellenwert\n"
+"(Setzen mit Tabulator-Taste)"
 
 #: ../src/dupe.cc:4389
 #, fuzzy
@@ -3377,22 +3343,20 @@ msgid "Ignore Orientation"
 msgstr "Ausrichtung ignorieren"
 
 #: ../src/dupe.cc:4403
-#, fuzzy
 msgid "Ignore image orientation"
-msgstr "Bildausrichtung"
+msgstr "Ignoriere Bildausrichtung"
 
 #: ../src/dupe.cc:4417
 msgid "Compare two file sets"
 msgstr "Vergleiche zwei Dateimengen"
 
 #: ../src/dupe.cc:4576
-#, fuzzy
 msgid "Dropped list includes folders"
-msgstr "Markierung enthält Verzeichnisse."
+msgstr "Abgelegte Auswahl enthält Verzeichnisse"
 
 #: ../src/dupe.cc:4577
 msgid "Select how folders should be added."
-msgstr ""
+msgstr "Auswahl, wie Verzeichnisse hinzugefügt werden sollen."
 
 #: ../src/dupe.cc:4642
 msgid "Please wait for the current file selection to be loaded."
@@ -3402,7 +3366,8 @@ msgstr "Bitte warten, bis die aktuelle Dateiauswahl geladen ist."
 #, c-format
 msgid "Desktop file '%s' should not include extension in Icon key: '%s'\n"
 msgstr ""
-"Desktop-Datei '%s' sollte keine Extension im Icon-Schlüssel '%s' enthalten.\n"
+"Desktop-Datei '%s' sollte keine Extension im Icon-Schlüssel '%s' "
+"enthalten.\n"
 
 #: ../src/editors.cc:444 ../src/exif-common.cc:383 ../src/exif.cc:224
 msgid "yes"
@@ -3413,9 +3378,8 @@ msgid "no"
 msgstr "nein"
 
 #: ../src/editors.cc:613
-#, fuzzy
 msgid "stopping…"
-msgstr "Halte an..."
+msgstr "Halte an…"
 
 #: ../src/editors.cc:627
 msgid "Edit command results"
@@ -3838,7 +3802,7 @@ msgstr "D50"
 
 #: ../src/exif.cc:217
 msgid "ISO studio tungsten"
-msgstr ""
+msgstr "ISO studio tungsten"
 
 #: ../src/exif.cc:225
 msgid "yes, not detected by strobe"
@@ -3849,50 +3813,48 @@ msgid "yes, detected by strobe"
 msgstr "ja, erkannt durch Abtastimpuls"
 
 #: ../src/exif.cc:232
-#, fuzzy
 msgid "uncalibrated"
-msgstr "Unkalibriert"
+msgstr "unkalibriert"
 
 #: ../src/exif.cc:238
 msgid "1 chip color area"
-msgstr ""
+msgstr "1 chip color area"
 
 #: ../src/exif.cc:239
 msgid "2 chip color area"
-msgstr ""
+msgstr "2 chip color area"
 
 #: ../src/exif.cc:240
 msgid "3 chip color area"
-msgstr ""
+msgstr "3 chip color area"
 
 #: ../src/exif.cc:241
 msgid "color sequential area"
-msgstr ""
+msgstr "color sequential area"
 
 #: ../src/exif.cc:242
 msgid "trilinear"
-msgstr "Trilinear"
+msgstr "trilinear"
 
 #: ../src/exif.cc:243
 msgid "color sequential linear"
-msgstr ""
+msgstr "color sequential linear"
 
 #: ../src/exif.cc:248
 msgid "digital still camera"
-msgstr "Photoapparat"
+msgstr "digital still camera"
 
 #: ../src/exif.cc:253
 msgid "direct photo"
-msgstr ""
+msgstr "direct photo"
 
 #: ../src/exif.cc:259
 msgid "custom"
 msgstr "benutzerdefiniert"
 
 #: ../src/exif.cc:266
-#, fuzzy
 msgid "auto bracket"
-msgstr "Automatisches Umbenennen"
+msgstr "auto bracket"
 
 #: ../src/exif.cc:277
 msgid "standard"
@@ -3907,21 +3869,20 @@ msgid "none"
 msgstr "nichts"
 
 #: ../src/exif.cc:286
-#, fuzzy
 msgid "low gain up"
-msgstr "Bereinigen"
+msgstr "low gain up"
 
 #: ../src/exif.cc:287
 msgid "high gain up"
-msgstr ""
+msgstr "high gain up"
 
 #: ../src/exif.cc:288
 msgid "low gain down"
-msgstr ""
+msgstr "low gain down"
 
 #: ../src/exif.cc:289
 msgid "high gain down"
-msgstr ""
+msgstr "high gain down"
 
 #: ../src/exif.cc:295 ../src/exif.cc:309
 msgid "soft"
@@ -4001,7 +3962,7 @@ msgstr "Weißpunkt"
 
 #: ../src/exif.cc:343
 msgid "Primary chromaticities"
-msgstr ""
+msgstr "Primary chromaticities"
 
 #: ../src/exif.cc:344
 msgid "YCbCy coefficients"
@@ -4017,7 +3978,7 @@ msgstr "Schwarz-Weiß-Referenz"
 
 #: ../src/exif.cc:348
 msgid "SubIFD Exif offset"
-msgstr ""
+msgstr "SubIFD Exif offset"
 
 #: ../src/exif.cc:350
 msgid "Exposure time (seconds)"
@@ -4036,9 +3997,8 @@ msgid "Spectral Sensitivity"
 msgstr "Spektrale Empfindlichkeit"
 
 #: ../src/exif.cc:355
-#, fuzzy
 msgid "Optoelectric conversion factor"
-msgstr "Öffne Sammlungen oben drauf"
+msgstr "Optoelectric conversion factor"
 
 #: ../src/exif.cc:356
 msgid "Exif version"
@@ -4077,13 +4037,12 @@ msgid "Light source"
 msgstr "Lichtquelle"
 
 #: ../src/exif.cc:371
-#, fuzzy
 msgid "Subject area"
-msgstr "Objectentfernung"
+msgstr "Subject area"
 
 #: ../src/exif.cc:372
 msgid "MakerNote"
-msgstr ""
+msgstr "MakerNote"
 
 #: ../src/exif.cc:373
 msgid "UserComment"
@@ -4091,22 +4050,19 @@ msgstr "Anwenderkommentar"
 
 #: ../src/exif.cc:374
 msgid "Subsecond time"
-msgstr ""
+msgstr "Subsecond time"
 
 #: ../src/exif.cc:375
-#, fuzzy
 msgid "Subsecond time original"
-msgstr "Gehe zum Original"
+msgstr "Subsecond time original"
 
 #: ../src/exif.cc:376
-#, fuzzy
 msgid "Subsecond time digitized"
-msgstr "Digitalisierungsdatum"
+msgstr "Subsecond time digitized"
 
 #: ../src/exif.cc:377
-#, fuzzy
 msgid "FlashPix version"
-msgstr "Exifversion"
+msgstr "FlashPix version"
 
 #: ../src/exif.cc:378
 msgid "Colorspace"
@@ -4126,7 +4082,7 @@ msgstr "Blitzstärke"
 
 #: ../src/exif.cc:385
 msgid "Spatial frequency response"
-msgstr ""
+msgstr "Spatial frequency response"
 
 #: ../src/exif.cc:386
 msgid "X Pixel density"
@@ -4141,9 +4097,8 @@ msgid "Pixel density units"
 msgstr "Pixeldichteeinheiten"
 
 #: ../src/exif.cc:389
-#, fuzzy
 msgid "Subject location"
-msgstr "Objectentfernung"
+msgstr "Subject location"
 
 #: ../src/exif.cc:391
 msgid "Sensor type"
@@ -4187,7 +4142,7 @@ msgstr "Szenenerfassungstyp"
 
 #: ../src/exif.cc:402
 msgid "Gain control"
-msgstr ""
+msgstr "Gain control"
 
 #: ../src/exif.cc:403
 msgid "Contrast"
@@ -4290,7 +4245,7 @@ msgstr "Rohbild"
 
 #: ../src/filefilter.cc:92 ../src/search.cc:2413 ../src/search.cc:3310
 msgid "Video"
-msgstr ""
+msgstr "Video"
 
 #: ../src/filefilter.cc:93 ../src/osd.cc:67
 msgid "Collection"
@@ -4301,34 +4256,33 @@ msgid "Document"
 msgstr "Dokument"
 
 #: ../src/filefilter.cc:95 ../src/search.cc:2425 ../src/search.cc:3313
-#, fuzzy
 msgid "Archive"
-msgstr "Architektur"
+msgstr "Archiv"
 
 #: ../src/filefilter.cc:101
 msgid "1"
-msgstr ""
+msgstr "1"
 
 #: ../src/filefilter.cc:102
 msgid "2"
-msgstr ""
+msgstr "2"
 
 #: ../src/filefilter.cc:103
 msgid "3"
-msgstr ""
+msgstr "3"
 
 #: ../src/filefilter.cc:104
 msgid "4"
-msgstr ""
+msgstr "4"
 
 #: ../src/filefilter.cc:105
 msgid "5"
-msgstr ""
+msgstr "5"
 
 #: ../src/fullscreen.cc:324
-#, fuzzy, c-format
+#, c-format
 msgid "Monitor %d"
-msgstr "Monitor"
+msgstr "Monitor %d"
 
 #: ../src/fullscreen.cc:329
 msgid "Screen"
@@ -4392,7 +4346,7 @@ msgstr "Lineares Histogramm für Wert"
 
 #: ../src/image-load-j2k.cc:149
 msgid "Unknown jpeg2000 decoder type"
-msgstr ""
+msgstr "Unbekannter jpeg2000 Decoder-Typ"
 
 #: ../src/image-load-j2k.cc:156
 msgid "Could not open file for reading"
@@ -4400,12 +4354,11 @@ msgstr "Datei konnte nicht zum Lesen geöffnet werden"
 
 #: ../src/image-load-j2k.cc:178
 msgid "Couldn't set parameters on decoder for file."
-msgstr ""
+msgstr "Konnte Decoder-Parameter für Datei nicht setzen."
 
 #: ../src/image-load-j2k.cc:184
-#, fuzzy
 msgid "Couldn't allocate worker threads on decoder for file."
-msgstr "JP2-Header konnte nicht aus Datei gelesen werden"
+msgstr "JP2-Header konnte nicht aus Datei gelesen werden."
 
 #: ../src/image-load-j2k.cc:191
 msgid "Couldn't read JP2 header from file"
@@ -4434,6 +4387,8 @@ msgid ""
 "JPEG image is too large to decode safely (%u × %u, approximately %s working "
 "memory; limit %s)"
 msgstr ""
+"JPEG-Datei ist zu groß zur sicheren Decodierung (%u × %u, ungefähr %s "
+"Arbeitsspeicher; maximal %s)"
 
 #: ../src/image.cc:395
 #, c-format
@@ -4441,85 +4396,74 @@ msgid " (Collection %s)"
 msgstr " (Sammlung %s)"
 
 #: ../src/image.cc:953
-#, fuzzy
 msgid "Image load failed"
-msgstr "Bilddatum"
+msgstr "Laden des Bildes fehlgeschlagen"
 
 #: ../src/image.cc:956
-#, fuzzy
 msgid "Image is too large"
-msgstr "Bildgröße ist"
+msgstr "Bild ist zu groß"
 
 #: ../src/img-view.cc:511 ../src/layout-image.cc:542
 #: ../src/layout-image.cc:1822 ../src/layout-util.cc:958
 #: ../src/view-file/view-file.cc:565
-#, fuzzy
 msgid "Cannot open archive file"
-msgstr "Datei kann nicht umbenannt werden"
+msgstr "Kann Archivdatei nicht öffnen"
 
 #: ../src/img-view.cc:511 ../src/layout-image.cc:542
 #: ../src/layout-image.cc:1822 ../src/layout-util.cc:958
 #: ../src/preferences.cc:3702 ../src/preferences.cc:3709
 #: ../src/view-file/view-file.cc:565
-#, fuzzy
 msgid "See the Log Window"
-msgstr "Protokollfenster"
+msgstr "Protokollfenster einsehen"
 
 #: ../src/keyboard-shortcuts.cc:77
 msgid "Keys"
-msgstr ""
+msgstr "Tasten"
 
 #: ../src/keyboard-shortcuts.cc:78
 #, c-format
 msgid "Keys (%d)"
-msgstr ""
+msgstr "Tasten (%d)"
 
 #: ../src/keyboard-shortcuts.cc:324 ../src/layout-util.cc:1840
-#, fuzzy
 msgid "All Windows"
-msgstr "Fenster"
+msgstr "Alle Fenster"
 
 #: ../src/keyboard-shortcuts.cc:325 ../src/layout-util.cc:1832
-#, fuzzy
 msgid "Main Window"
-msgstr "Protokollfenster"
+msgstr "Hauptfenster"
 
 #: ../src/keyboard-shortcuts.cc:326 ../src/layout-util.cc:1838
 msgid "Advanced EXIF Window"
-msgstr ""
+msgstr "Erweitertes EXIF-Fenster"
 
 #: ../src/keyboard-shortcuts.cc:327 ../src/layout-util.cc:1834
-#, fuzzy
 msgid "Collection Window"
-msgstr "Sammlung"
+msgstr "Sammlungsfenster"
 
 #: ../src/keyboard-shortcuts.cc:328
 msgid "Duplicates Main Window"
-msgstr ""
+msgstr "Duplikat-Hauptfenster"
 
 #: ../src/keyboard-shortcuts.cc:329
 msgid "Duplicates Second Window"
-msgstr ""
+msgstr "Duplikat-Zweitfenster"
 
 #: ../src/keyboard-shortcuts.cc:330 ../src/layout-util.cc:1833
-#, fuzzy
 msgid "Image View Window"
-msgstr "Bildbetrachter"
+msgstr "Bildansichtsfenster"
 
 #: ../src/keyboard-shortcuts.cc:331 ../src/layout-util.cc:1836
-#, fuzzy
 msgid "Pan View Window"
-msgstr "Neues Fenster"
+msgstr "Panel-Fenster"
 
 #: ../src/keyboard-shortcuts.cc:332 ../src/layout-util.cc:1837
-#, fuzzy
 msgid "Search Window"
-msgstr "Suchmaschine:"
+msgstr "Suchfenster"
 
 #: ../src/keyboard-shortcuts.cc:333 ../src/layout-util.cc:1839
-#, fuzzy
 msgid "View File Window"
-msgstr "In neuem Fenster anzeigen"
+msgstr "Dateifenster anzeigen"
 
 #: ../src/layout-config.cc:82 ../src/layout.cc:1809
 msgid "Tools"
@@ -4558,9 +4502,9 @@ msgid "Original state"
 msgstr "Originalversion"
 
 #: ../src/layout-image.cc:2041
-#, fuzzy, c-format
+#, c-format
 msgid "[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"
-msgstr "[%*d,%*d]: RGB(%3d,%3d,%3d)"
+msgstr "[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"
 
 #: ../src/layout-image.cc:2048
 #, c-format
@@ -4568,9 +4512,9 @@ msgid "[%*d,%*d]: RGB(%3d,%3d,%3d)"
 msgstr "[%*d,%*d]: RGB(%3d,%3d,%3d)"
 
 #: ../src/layout-image.cc:2056
-#, fuzzy, c-format
+#, c-format
 msgid "[%*d,%*d]: RGB(---,---,---)"
-msgstr "[%*s,%*s]: RGB(---,---,---)"
+msgstr "[%*d,%*d]: RGB(---,---,---)"
 
 #: ../src/layout-image.cc:2063
 #, c-format
@@ -4578,15 +4522,16 @@ msgid "[%*s,%*s]: RGB(---,---,---)"
 msgstr "[%*s,%*s]: RGB(---,---,---)"
 
 #: ../src/layout-util.cc:370
-#, fuzzy
 msgid "Clear all marks?"
-msgstr "Makierungen löschen"
+msgstr "Alle Makierungen löschen?"
 
 #: ../src/layout-util.cc:370
 msgid ""
 "This will clear all marks for all images,\n"
 "including those linked to keywords"
 msgstr ""
+"Dies wird alle Markierungen für alle Dateien\n"
+"löschen, einschließlich mit Markierungen verbundene"
 
 #: ../src/layout-util.cc:625
 msgid "Operation failed:\n"
@@ -4610,7 +4555,7 @@ msgstr "Exiftran-Fehler\n"
 
 #: ../src/layout-util.cc:636
 msgid "Mogrify error\n"
-msgstr ""
+msgstr "Mogrify-Fehler\n"
 
 #: ../src/layout-util.cc:640 ../src/layout-util.cc:641
 msgid "Image orientation"
@@ -4620,49 +4565,43 @@ msgstr "Bildausrichtung"
 #: ../src/ui-bookmark.cc:899 ../src/ui-file-chooser.cc:819
 #: ../src/ui-tabcomp.cc:893
 msgid "Open"
-msgstr ""
+msgstr "Öffnen"
 
 #: ../src/layout-util.cc:1098
-#, fuzzy
 msgid "Image files"
-msgstr "Das Bild ist"
+msgstr "Bilddateien"
 
 #: ../src/layout-util.cc:1101
 msgid "Geeqie - Open File"
-msgstr ""
+msgstr "Geeqie - Datei öffnen"
 
 #: ../src/layout-util.cc:1109
-#, fuzzy
 msgid "Open Recent File"
-msgstr "_Letzte Sammlung öffnen"
+msgstr "Zuletzt verwendete Datei öffnen"
 
 #: ../src/layout-util.cc:1169
-#, fuzzy
 msgid "No recent files available."
-msgstr "Benutze Bildschirmprofil des Systems wenn verfügbar"
+msgstr "Keine kürzlich verwendeten Dateien verfügbar."
 
 #: ../src/layout-util.cc:1181
 msgid "_Open"
-msgstr ""
+msgstr "_Öffnen"
 
 #: ../src/layout-util.cc:1222
-#, fuzzy
 msgid "Geeqie - Open Collection"
-msgstr "Sammlung öffnen ..."
+msgstr "Geeqie - Sammlung öffnen"
 
 #: ../src/layout-util.cc:1835
-#, fuzzy
 msgid "Duplicates Window"
-msgstr "Fenster löschen"
+msgstr "Duplikate-Fenster"
 
 #: ../src/layout-util.cc:1892 ../src/layout-util.cc:1895
-#, fuzzy
 msgid "Keyboard Map"
-msgstr "Tastatur"
+msgstr "Tastaturbelegung"
 
 #: ../src/layout-util.cc:1896
 msgid "Select the window whose shortcuts should be displayed."
-msgstr ""
+msgstr "Fenster Auswählen dessen Tastenkürzel angezeigt werden soll."
 
 #: ../src/layout-util.cc:2474
 #, c-format
@@ -4672,7 +4611,7 @@ msgstr "Fensterlayoutname \"%s\" existiert bereits."
 #: ../src/layout-util.cc:2641 ../src/layout-util.cc:2714
 #: ../src/ui-bookmark.cc:870
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: ../src/layout-util.cc:2642
 msgid "rename window"
@@ -4724,14 +4663,12 @@ msgid "Keep the region from previous image"
 msgstr "Ausschnitt des vorherigen Bildes beibehalten"
 
 #: ../src/layout.cc:892
-#, fuzzy
 msgid " Slideshow ["
-msgstr " Diashow"
+msgstr " Diashow ["
 
 #: ../src/layout.cc:896
-#, fuzzy
 msgid " Paused ["
-msgstr " Pausiert"
+msgstr " Pausiert ["
 
 #: ../src/layout.cc:928
 #, c-format
@@ -4754,9 +4691,9 @@ msgid "( ? x ? ) %s bytes"
 msgstr "( ? x ? ) %s Byte"
 
 #: ../src/layout.cc:993
-#, fuzzy, c-format
+#, c-format
 msgid "( %d x %d ) %s bytes [%d/%d]"
-msgstr "( %d x %d ) %s Bytes %s%d%s%d%s"
+msgstr "( %d x %d ) %s Bytes [%d/%d]"
 
 #: ../src/layout.cc:997
 #, c-format
@@ -4768,11 +4705,12 @@ msgid "Select sort order"
 msgstr "Sortierreigenfolge wählen"
 
 #: ../src/layout.cc:1090
-#, fuzzy
 msgid ""
 "Folder contents (files selected)\n"
 "Slideshow [time interval]"
-msgstr "Inhalt des Verzeichnis (Selektierte Dateien)"
+msgstr ""
+"Inhalt des Verzeichnis (Selektierte Dateien)\n"
+"Diashow [Zeitspanne]"
 
 #: ../src/layout.cc:1100
 msgid "(Image dimensions) Image size [page n of m]"
@@ -4784,7 +4722,7 @@ msgstr "Wähle den Zoom- und Bildlaufmodus"
 
 #: ../src/layout.cc:1130
 msgid "[Pixel x,y coord]: (Pixel R,G,B value)"
-msgstr ""
+msgstr "[Pixel x,y Koordinate]: (Pixel R,G,B Wert)"
 
 #: ../src/layout.cc:2423
 msgid "Window options and layout"
@@ -4792,7 +4730,7 @@ msgstr "Fensteroptionen und Layout"
 
 #: ../src/layout.cc:2448
 msgid "Apply"
-msgstr ""
+msgstr "Anwenden"
 
 #: ../src/layout.cc:2462
 msgid "General options"
@@ -4839,70 +4777,56 @@ msgid "Debug level:"
 msgstr "Debuglevel:"
 
 #: ../src/logwindow.cc:368
-#, fuzzy
 msgid "Pause scrolling"
-msgstr ""
-"Mausrad scrollt Bild vertikal statt Bildwechsel (Bildwechsel mit Shift)"
+msgstr "Unterbreche Scrollen"
 
 #: ../src/logwindow.cc:373
-#, fuzzy
 msgid "Enable line wrap"
 msgstr "Gruppierung von Dateien einschalten"
 
 #: ../src/logwindow.cc:377
-#, fuzzy
 msgid "Timer"
-msgstr "Zeitmesser Daten"
+msgstr "Timer"
 
 #: ../src/logwindow.cc:378
-#, fuzzy
 msgid "Enable timer data"
-msgstr "Zeitmesser Daten"
+msgstr "Timer-Daten aktivieren"
 
 #: ../src/logwindow.cc:393
 msgid "Search for text in log window"
-msgstr ""
+msgstr "Suche nach Text im Protokollfenster"
 
 #: ../src/logwindow.cc:398
-#, fuzzy
 msgid "Search backwards"
-msgstr "Such nach Schlüsselwörtern"
+msgstr "Rückwärtssuche"
 
 #: ../src/logwindow.cc:403
-#, fuzzy
 msgid "Search forwards"
-msgstr "Such nach Schlüsselwörtern"
+msgstr "Vorwärtssuche"
 
 #: ../src/logwindow.cc:411
 msgid "Highlight all"
-msgstr ""
+msgstr "Alle hervorheben"
 
 #: ../src/logwindow.cc:416
-#, fuzzy
 msgid "Filter regexp"
-msgstr "Filter"
+msgstr "regexp-Filter"
 
 #: ../src/main.cc:102
 msgid ""
-" All other command line parameters are used as plain files if they exist, or "
-"a URL or a folder.\n"
-" The name of a collection, with or without either path or extension (.gqv) "
-"may be used.\n"
+" All other command line parameters are used as plain files if they exist, or a URL or a folder.\n"
+" The name of a collection, with or without either path or extension (.gqv) may be used.\n"
 "\n"
-" If more than one folder is on the command line, only the last will be "
-"used.\n"
+" If more than one folder is on the command line, only the last will be used.\n"
 "\n"
 " If more than one file is on the command line:\n"
-"     If they are in the same folder, that folder will be opened and those "
-"files will be selected.\n"
-"     If they are not in the same folder, a new Collection containing those "
-"files will be opened.\n"
+"     If they are in the same folder, that folder will be opened and those files will be selected.\n"
+"     If they are not in the same folder, a new Collection containing those files will be opened.\n"
 "\n"
 " To run Geeqie as a new instance, use:\n"
 " GQ_NEW_INSTANCE=y[es] geeqie\n"
 " Normally a single set of configuration files is used for all instances.\n"
-" However, the environment variables XDG_CONFIG_HOME, XDG_CACHE_HOME, "
-"XDG_DATA_HOME\n"
+" However, the environment variables XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME\n"
 " can be used to modify this behavior on an individual basis e.g.\n"
 " XDG_CONFIG_HOME=/tmp/a XDG_CACHE_HOME=/tmp/b GQ_NEW_INSTANCE=y geeqie\n"
 "\n"
@@ -4913,16 +4837,35 @@ msgid ""
 " User manual: https://www.geeqie.org/help/GuideIndex.html\n"
 "            : https://www.geeqie.org/help-pdf/help.pdf"
 msgstr ""
+" Alle weiteren Kommandozeilenparameter werden als Textdateien, URL oder Ordner interpretiert, falls sie existieren.\n"
+"Der Name eines Sammlung, mit oder ohne Dateipfad oder Endung (.gqv) kann verwendet werden.\n"
+"\n"
+"Falls mehr als ein Ordner in der Kommandozeile angegeben wurde, wird nur der letzte benutzt.\n"
+"\n"
+"Falls mehr als eine Datei in der Kommandozeile angegeben wurde:\n"
+"    Wenn sie im gleichen Ordner sind, wird dieser Ordner geöffnet und die Dateien ausgewählt.\n"
+"    Wenn sie nicht im gleichen Ordner sind, wird eine neue Sammlung mit den Dateien geöffnet.\n"
+"\n"
+"Um Geeeqie als neue Instanz zu starten, verwende:\n"
+" GQ_NEW_INSTANCE=y[es] geeqie\n"
+" Standardmäßig wird ein einziger Satz an Konfigurationsdateien für alle Instanzen genutzt.\n"
+" Allerdings können die Umgebungsvariablen XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME\n"
+" genutzt werden, um dieses Verhalten inidviduell zu ändern, z. B.:\n"
+" XDG_CONFIG_HOME=/tmp/a XDG_CACHE_HOME=/tmp/b GQ_NEW_INSTANCE=y geeqie\n"
+"\n"
+"Um Geeqie im Cacheverwaltungsmodus (kein GUI) zu nutzen:\n"
+" GQ_CACHE_MAINTENANCE=y[es] geeqie --help\n"
+" Bash-Befehlszeilenvervollständigung funktioniert in diesem Modus nicht.\n"
+"\n"
+" Benutzerhandbuch: https://www.geeqie.org/help/GuideIndex.html\n"
+"            : https://www.geeqie.org/help-pdf/help.pdf"
 
 #: ../src/main.cc:121
 msgid ""
-" This is a command line program that will recursively remove orphaned "
-"thumbnails and\n"
-" .sim files, and create thumbnails and similarity data for all images found "
-"under FOLDER.\n"
+" This is a command line program that will recursively remove orphaned thumbnails and\n"
+" .sim files, and create thumbnails and similarity data for all images found under FOLDER.\n"
 "\n"
-" It may also be called from cron or anacron thus enabling automatic updating "
-"of the cached\n"
+" It may also be called from cron or anacron thus enabling automatic updating of the cached\n"
 " data for all your images.\n"
 "\n"
 " Note that bash command line completion does not work in this mode.\n"
@@ -4930,52 +4873,58 @@ msgid ""
 " User manual: https://www.geeqie.org/help/GuideIndex.html\n"
 "            : https://www.geeqie.org/help-pdf/help.pdf"
 msgstr ""
+" Dies ist ein Kommandozeilenprogramm, das rekursiv verwaiste Thumbnails und\n"
+" .sim-Dateien löscht und Thumbnails und Ähnlichkeitswerte für alle Bilder in FOLDER erstellt.\n"
+"\n"
+" Es kann auch über cron oder anacron ausgeführt werden, um automatische Updates der\n"
+" Cache-Dateien für alle Bilder zu aktivieren.\n"
+"\n"
+"  Bash-Befehlszeilenvervollständigung funktioniert in diesem Modus nicht.\n"
+"\n"
+" Benutzerhandbuch: https://www.geeqie.org/help/GuideIndex.html\n"
+"            : https://www.geeqie.org/help-pdf/help.pdf"
 
 #: ../src/main.cc:132
 msgid ""
-"execute keyboard action (https://www.geeqie.org/help/"
-"GuideReferenceRemoteKeyboardActions.html)"
+"execute keyboard action "
+"(https://www.geeqie.org/help/GuideReferenceRemoteKeyboardActions.html)"
 msgstr ""
+"Tastenkombination ausführen "
+"(https://www.geeqie.org/help/GuideReferenceRemoteKeyboardActions.html)"
 
 #: ../src/main.cc:133
 msgid "list available keyboard actions (some are redundant)"
-msgstr ""
+msgstr "verfügbare Tastenkombinationen auflisten (einige sind redundant)"
 
 #: ../src/main.cc:134
 msgid "previous image"
 msgstr "vorheriges Bild"
 
 #: ../src/main.cc:135
-#, fuzzy
 msgid "clean the metadata cache"
-msgstr "    Bereinige den Metadaten-Cache"
+msgstr "Bereinige den Metadaten-Cache"
 
 #: ../src/main.cc:136
-#, fuzzy
 msgid "render thumbnails"
-msgstr " Vorschaubilder erzeugen"
+msgstr "Vorschaubilder erzeugen"
 
 #: ../src/main.cc:137
 msgid "render thumbnails recursively"
 msgstr "Erzeuge Vorschaubilder rekursiv"
 
 #: ../src/main.cc:138
-#, fuzzy
 msgid "render thumbnails (see Help)"
-msgstr " Erzeuge Vorschaubilder (siehe Hilfe)"
+msgstr "Erzeuge Vorschaubilder (siehe Hilfe)"
 
 #: ../src/main.cc:139
-#, fuzzy
 msgid "render thumbnails recursively (see Help)"
-msgstr " Erzeuge Vorschaubilder rekursiv (siehe Hilfe)"
+msgstr "Erzeuge Vorschaubilder rekursiv (siehe Hilfe)"
 
 #: ../src/main.cc:140
-#, fuzzy
 msgid "clear or clean shared thumbnail cache"
 msgstr "lösche oder berreinige den geteilten Vorschaubilder-Cache"
 
 #: ../src/main.cc:141
-#, fuzzy
 msgid "clear or clean thumbnail cache"
 msgstr "lösche oder berreinige den Vorschaubilder-Cache"
 
@@ -4984,62 +4933,53 @@ msgid "close window"
 msgstr "Fenster schließen"
 
 #: ../src/main.cc:143
-#, fuzzy
 msgid "load configuration from FILE"
-msgstr "Lade Konfiguration aus FILE"
+msgstr "Lade Konfiguration aus DATEI"
 
 #: ../src/main.cc:148
 msgid "debug output: 0 none, 1 to 4 increasing level of verbosity"
-msgstr ""
+msgstr "debug-Ausgabe:0 keine, 1 bis 4 zunehmende Ausführlichkeit"
 
 #: ../src/main.cc:150
-#, fuzzy
 msgid "set slide show delay to Hrs Mins N.M seconds,"
-msgstr "Diashowverzögerung auf Stunden Minuten N.M Sekunden setzen"
+msgstr "Diashowverzögerung auf Stunden Minuten N.M Sekunden setzen,"
 
 #: ../src/main.cc:151
-#, fuzzy
 msgid "find duplicates in folder"
-msgstr "Duplikate suchen"
+msgstr "Duplikate in Verzeichnis suchen"
 
 #: ../src/main.cc:152
 msgid "export duplicates search result"
-msgstr ""
+msgstr "Duplikat-Suchergebnis exportieren"
 
 #: ../src/main.cc:153
-#, fuzzy
 msgid "find duplicates in folder recursively"
-msgstr "Du_plikate rekursiv suchen..."
+msgstr "Du_plikate rekursiv suchen"
 
 #: ../src/main.cc:154
-#, fuzzy
 msgid "open FILE or URL bring Geeqie window to the top"
 msgstr "Öffne eine DATEI oder URL, und bringe das Geeqie-Fenster nach oben"
 
 #: ../src/main.cc:155
-#, fuzzy
 msgid "open FILE or URL do not bring Geeqie window to the top"
 msgstr ""
 "Öffne eine DATEI oder URL, und bringe das Geeqie-Fenster nicht nach oben"
 
 #: ../src/main.cc:156
-#, fuzzy
 msgid "list known file extensions"
-msgstr "Keine Dateierweiterung\n"
+msgstr "Liste bekannte Dateierweiterungen auf"
 
 #: ../src/main.cc:157
 msgid "first image"
 msgstr "erstes Bild"
 
 #: ../src/main.cc:158
-#, fuzzy
 msgid "start / toggle in fullscreen mode"
-msgstr "Angepaßte Rahmenfarbe im Vollbildmodus verwenden"
+msgstr "Starte im / schalte auf Vollbildmodus"
 
 #: ../src/main.cc:159
-#, fuzzy
 msgid "set main window location and geometry"
-msgstr "Fenstergeometrie einstellen"
+msgstr "Hauptfenster-Position und -Geometrie einstellen"
 
 #: ../src/main.cc:160
 msgid "get collection content"
@@ -5050,11 +4990,12 @@ msgid "get collection list"
 msgstr "Sammlungsliste abrufen"
 
 #: ../src/main.cc:162
-#, fuzzy
 msgid ""
-"get destination path of FILE (https://www.geeqie.org/help/"
-"GuidePluginsConfig.html)"
-msgstr "Zielpfad der DATEI zurückgeben"
+"get destination path of FILE "
+"(https://www.geeqie.org/help/GuidePluginsConfig.html)"
+msgstr ""
+"Zielpfad der DATEI zurückgeben "
+"(https://www.geeqie.org/help/GuidePluginsConfig.html)"
 
 #: ../src/main.cc:163
 msgid "get file info"
@@ -5078,22 +5019,20 @@ msgid "get render intent"
 msgstr "Renderabsicht erhalten"
 
 #: ../src/main.cc:168
-#, fuzzy
 msgid "get list of selected files"
-msgstr "Text zu den ausgewählen Dateien hinzufügen"
+msgstr "Hole Liste der ausgewählten Dateien"
 
 #: ../src/main.cc:169
 msgid "get list of sidecars of FILE"
 msgstr "Liste der \"Sidecars\" der DATEI zurückgeben"
 
 #: ../src/main.cc:170
-#, fuzzy
 msgid "get list of windows"
-msgstr "Liste der Dateien und Klassen abrufen"
+msgstr "Liste der Fenster abrufen"
 
 #: ../src/main.cc:172
 msgid "filter debug output"
-msgstr ""
+msgstr "Debug-Ausgabe filtern"
 
 #: ../src/main.cc:174
 msgid "window id for following commands"
@@ -5105,11 +5044,11 @@ msgstr "letztes Bild"
 
 #: ../src/main.cc:176
 msgid "save log data to file"
-msgstr ""
+msgstr "speichere Protokolldaten in Datei"
 
 #: ../src/main.cc:177
 msgid "run lua script on FILE"
-msgstr ""
+msgstr "führe lua-Skript uber DATEI aus"
 
 #: ../src/main.cc:178
 msgid "new window"
@@ -5140,21 +5079,23 @@ msgstr "Geeqie-Fenster nach oben bringen"
 #: ../src/main.cc:184
 msgid "adds the current file (or the specified file) to the current selection"
 msgstr ""
+"fügt die aktuelle Datei (oder die angegebene Datei) der aktuellen Auswahl "
+"hinzu"
 
 #: ../src/main.cc:185
-#, fuzzy
 msgid "clears the current selection"
-msgstr "Bitte warten, bis die aktuelle Dateiauswahl geladen ist."
+msgstr "hebt die aktuelle Auswahl auf"
 
 #: ../src/main.cc:186
 msgid ""
 "removes the current file (or the specified file) from the current selection"
 msgstr ""
+"entfernt die aktuelle Datei (oder die angegebene Datei) aus der aktuellen "
+"Auswahl"
 
 #: ../src/main.cc:187
-#, fuzzy
 msgid "show log window"
-msgstr "Zeige Fenster IDs"
+msgstr "zeige Protokollfenster"
 
 #: ../src/main.cc:188
 msgid "start recursive slide show in FOLDER"
@@ -5169,14 +5110,12 @@ msgid "print filename [and Collection] of current image"
 msgstr "Dateiname [und Sammlung] des aktuellen Bildes drucken"
 
 #: ../src/main.cc:191
-#, fuzzy
 msgid "toggle tools"
-msgstr "Lade Vorschaubilder..."
+msgstr "schalte Werkzeuge um"
 
 #: ../src/main.cc:192
-#, fuzzy
 msgid "print version info"
-msgstr "Exifversion"
+msgstr "zeige Versionsinfo"
 
 #: ../src/main.cc:193
 msgid "open FILE in new window"
@@ -5184,12 +5123,11 @@ msgstr "DATEI in neuem Fenster öffnen"
 
 #: ../src/main.cc:199
 msgid "execute cache maintenance recursively on FOLDER"
-msgstr ""
+msgstr "führe Cacheverwaltung rekursiv in ORDNER aus"
 
 #: ../src/main.cc:200
-#, fuzzy
 msgid "stop cache maintenance"
-msgstr "Cachewartung"
+msgstr "stoppe Cachewartung"
 
 #: ../src/main.cc:391
 #, c-format
@@ -5208,11 +5146,8 @@ msgid "exit"
 msgstr "beenden"
 
 #: ../src/main.cc:498
-#, fuzzy
 msgid "Collections have been modified.\n"
-msgstr ""
-"Sammlungen wurden verändert.\n"
-"Trotzdem beenden?"
+msgstr "Sammlungen wurden verändert.\n"
 
 #: ../src/main.cc:503
 #, c-format
@@ -5220,10 +5155,12 @@ msgid ""
 "%d windows are open.\n"
 "\n"
 msgstr ""
+"%d Fenster sind geöffnet.\n"
+"\n"
 
 #: ../src/main.cc:506
 msgid "Quit anyway?"
-msgstr ""
+msgstr "Dennoch beenden?"
 
 #: ../src/main.cc:508
 #, c-format
@@ -5233,10 +5170,8 @@ msgstr "Beende %s"
 #: ../src/main.cc:748
 #, c-format
 msgid ""
-"As part of the GTK3/GTK4 migration, it was necessary to rework the entire "
-"menu and action code.\n"
-" Superficially, you should not see significant differences, however you "
-"should be aware there may be resulting problems.\n"
+"As part of the GTK3/GTK4 migration, it was necessary to rework the entire menu and action code.\n"
+" Superficially, you should not see significant differences, however you should be aware there may be resulting problems.\n"
 "\n"
 " Some shortcuts have changed.\n"
 " Command line option --action parameters are all changed.\n"
@@ -5253,14 +5188,31 @@ msgid ""
 "\n"
 " Select OK to dismiss this message."
 msgstr ""
+"Als Teil der GTK3/GTK4-Migration war es notwendig, das gesamte Menü- und den Aktions-Code zu überarbeiten.\n"
+" Oberflächlich sollten keine signifikanten Unterschiede erkennbar sein, allerdings können Probleme auftreten.\n"
+"\n"
+"Einige Tastenkürzel wurden geändert.\n"
+"Sämtliche Parameter für Kommandozeilen-Option --action wurden geändert.\n"
+"\n"
+"Bei Problemen, prüfe folgende Dateien:\n"
+" %s (old)\n"
+" %s (new)\n"
+" %s (revised Toolbar sections)\n"
+" %s (backup of original)\n"
+"\n"
+"tastenkürzel und Konfigurationsdateien werden automatisch konvertiert.\n"
+"\n"
+"Diese Nachricht wird nicht mehr angezeigt werden.\n"
+"\n"
+"OK wählen, um diese Nachricht zu schließen."
 
 #: ../src/main.cc:765
 msgid "Some keyboard shortcuts and menu actions have changed."
-msgstr ""
+msgstr "Einige Tastenkürzel und Menüaktionen wurden geändert."
 
 #: ../src/main.cc:766
 msgid "Changes to menus and shortcuts"
-msgstr ""
+msgstr "Änderungen an Menüs und Tastenküzeln"
 
 #: ../src/main.cc:935
 msgid ""
@@ -5269,19 +5221,26 @@ msgid ""
 "Usage for cache maintenance:\n"
 " GQ_CACHE_MAINTENANCE=y[es] geeqie OPTION"
 msgstr ""
+"\n"
+"\n"
+"Verwendung für Cacheverwaltung:\n"
+" GQ_CACHE_MAINTENANCE=y[es] geeqie OPTION"
 
 #: ../src/main.cc:939
-#, fuzzy
 msgid ""
 "Geeqie Cache Maintenance. \n"
 " Version: Geeqie "
-msgstr "Cachewartung"
+msgstr ""
+"Geeqie-Cachewartung.\n"
+" Version: Geeqie "
 
 #: ../src/main.cc:976
 msgid ""
 "Geeqie is an image viewer.\n"
 " Version: Geeqie "
 msgstr ""
+"Geeqie ist ein Bildbetrachter.\n"
+"Version: Geeqie "
 
 #: ../src/metadata.cc:1731
 msgid "People"
@@ -5542,7 +5501,7 @@ msgstr "Belichtungszeit"
 
 #: ../src/osd.cc:87
 msgid "ISO"
-msgstr ""
+msgstr "ISO"
 
 #: ../src/osd.cc:89
 msgid "Focal len. 35mm"
@@ -5550,7 +5509,7 @@ msgstr "35mm-Brennweite"
 
 #: ../src/osd.cc:93
 msgid "Lat, Long"
-msgstr ""
+msgstr "Lat, Long"
 
 #: ../src/osd.cc:94
 msgid "Altitude"
@@ -5593,7 +5552,7 @@ msgstr "Benötigt"
 
 #: ../src/pan-view/pan-view-filter.cc:228
 msgid "R"
-msgstr ""
+msgstr "R (Require)"
 
 #: ../src/pan-view/pan-view-filter.cc:229
 msgid "Exclude"
@@ -5601,7 +5560,7 @@ msgstr "Ausschließen"
 
 #: ../src/pan-view/pan-view-filter.cc:229
 msgid "E"
-msgstr ""
+msgstr "E (Exclude)"
 
 #: ../src/pan-view/pan-view-filter.cc:230
 msgid "Include"
@@ -5609,11 +5568,11 @@ msgstr "Einschließen"
 
 #: ../src/pan-view/pan-view-filter.cc:230
 msgid "I"
-msgstr ""
+msgstr "I (Include)"
 
 #: ../src/pan-view/pan-view-filter.cc:231
 msgid "G"
-msgstr ""
+msgstr "G (Group)"
 
 #: ../src/pan-view/pan-view-filter.cc:241
 msgid "Keyword Filter:"
@@ -5662,9 +5621,8 @@ msgid "Folder not supported"
 msgstr "Verzeichnis nicht unterstützt"
 
 #: ../src/pan-view/pan-view.cc:877 ../src/pan-view/pan-view.cc:891
-#, fuzzy
 msgid "Reading image data…"
-msgstr "Lese Bilddaten ..."
+msgstr "Lese Bilddaten …"
 
 #: ../src/pan-view/pan-view.cc:958
 #, c-format
@@ -5672,9 +5630,8 @@ msgid "%d images, %s"
 msgstr "%d Bilder, %s"
 
 #: ../src/pan-view/pan-view.cc:975
-#, fuzzy
 msgid "Sorting images…"
-msgstr "Sortiere Bilder ..."
+msgstr "Sortiere Bilder …"
 
 #: ../src/pan-view/pan-view.cc:1120
 msgid "Filename:"
@@ -5797,7 +5754,7 @@ msgstr "Frag"
 
 #: ../src/preferences.cc:828
 msgid "Primary"
-msgstr ""
+msgstr "Primär"
 
 #: ../src/preferences.cc:828
 msgid "Clipboard"
@@ -5809,11 +5766,11 @@ msgstr "Beide"
 
 #: ../src/preferences.cc:866
 msgid "Geometric"
-msgstr ""
+msgstr "Geometrisch"
 
 #: ../src/preferences.cc:866
 msgid "Arithmetic"
-msgstr ""
+msgstr "Arithmetisch"
 
 #: ../src/preferences.cc:964
 msgid "Custom"
@@ -5825,39 +5782,39 @@ msgstr "Einzelnes Bild"
 
 #: ../src/preferences.cc:1044
 msgid "Anaglyph Red-Cyan"
-msgstr ""
+msgstr "Anaglyph Rot-Cyan"
 
 #: ../src/preferences.cc:1045
 msgid "Anaglyph Green-Magenta"
-msgstr ""
+msgstr "Anaglyph Grün-Magenta"
 
 #: ../src/preferences.cc:1046
 msgid "Anaglyph Yellow-Blue"
-msgstr ""
+msgstr "Anaglyph Gelb-Blau"
 
 #: ../src/preferences.cc:1047
 msgid "Anaglyph Gray Red-Cyan"
-msgstr ""
+msgstr "Anaglyph Grau Rot-Cyan"
 
 #: ../src/preferences.cc:1048
 msgid "Anaglyph Gray Green-Magenta"
-msgstr ""
+msgstr "Anaglyph Grau Grün-Magenta"
 
 #: ../src/preferences.cc:1049
 msgid "Anaglyph Gray Yellow-Blue"
-msgstr ""
+msgstr "Anaglyph Grau Gelb-Blau"
 
 #: ../src/preferences.cc:1050
 msgid "Anaglyph Dubois Red-Cyan"
-msgstr ""
+msgstr "Anaglyph Dubois Rot-Cyan"
 
 #: ../src/preferences.cc:1051
 msgid "Anaglyph Dubois Green-Magenta"
-msgstr ""
+msgstr "Anaglyph Dubois Grün-Magenta"
 
 #: ../src/preferences.cc:1052
 msgid "Anaglyph Dubois Yellow-Blue"
-msgstr ""
+msgstr "Anaglyph Dubois Gelb-Blau"
 
 #: ../src/preferences.cc:1054
 msgid "Side by Side Half size"
@@ -5930,35 +5887,32 @@ msgid ""
 "This will reset the image overlay template string to the default.\n"
 "Continue?"
 msgstr ""
-"Hiermit wird die Vorlage der Anzeige im Bild auf die Voreinstellung "
-"zurückgesetzt.\n"
+"Hiermit wird die Vorlage der Anzeige im Bild auf die Voreinstellung zurückgesetzt.\n"
 "Fortfahren?"
 
 #: ../src/preferences.cc:1345
-#, fuzzy
 msgid "Image Overlay Font"
-msgstr "Anzeige im Bild"
+msgstr "Anzeige im Bild: Schriftart"
 
 #: ../src/preferences.cc:1392
-#, fuzzy
 msgid "Image Overlay Text Color"
-msgstr "Anzeige im Bild"
+msgstr "Anzeige im Bild: Textfarbe"
 
 #: ../src/preferences.cc:1409
-#, fuzzy
 msgid "Image Overlay Background Color"
-msgstr "Anzeige im Bild"
+msgstr "Anzeige im Bild: Hintergrundfarbe"
 
 #: ../src/preferences.cc:1468
-#, fuzzy
 msgid "Invalid shortcut"
-msgstr "Ungültiges Verzeichnis"
+msgstr "Ungültige Tastenkombination"
 
 #: ../src/preferences.cc:1468
 msgid ""
 "The shortcut must use GTK accelerator syntax. Separate multiple shortcuts "
 "with semicolons."
 msgstr ""
+"Das Tastenkürzel muss GTK-accelerator-Syntax benutzen. Trenne mehrere "
+"Tastenkürzel mit Semikolons."
 
 #: ../src/preferences.cc:1616
 msgid ""
@@ -6023,9 +5977,8 @@ msgstr ""
 "veraltet sein)"
 
 #: ../src/preferences.cc:1701
-#, fuzzy
 msgid "Thumbnail color management"
-msgstr "Farbverwaltung"
+msgstr "Thumbnail-Farbverwaltung"
 
 #: ../src/preferences.cc:1704
 msgid "Collection preview:"
@@ -6045,12 +5998,11 @@ msgstr ""
 
 #: ../src/preferences.cc:1720
 msgid "Star character: "
-msgstr ""
+msgstr "Stern-Schriftzeichen: "
 
 #: ../src/preferences.cc:1722
-#, fuzzy
 msgid "Rejected character: "
-msgstr "Ausgewähltes Zeichen anzeigen"
+msgstr "Zurückgewiesen-Schriftzeichen:"
 
 #: ../src/preferences.cc:1727
 msgid "Slide show"
@@ -6073,21 +6025,19 @@ msgid "Image loading and caching"
 msgstr "Laden der Bilder und Zwischenspeicher"
 
 #: ../src/preferences.cc:1761
-#, fuzzy
 msgid "Decoded image cache size (MiB):"
-msgstr "Zwischenspeichergröße für dekodierte Bilder (MB):"
+msgstr "Zwischenspeichergröße für dekodierte Bilder (MiB):"
 
 #: ../src/preferences.cc:1763
-#, fuzzy
 msgid "Display tile cache per image (MiB):"
-msgstr "Zwischenspeichergröße für dekodierte Bilder (MB):"
+msgstr "Anzeigekachel-Zwischenspeichergröße je Bild (MiB):"
 
 #: ../src/preferences.cc:1766
 msgid ""
 "Maximum memory used to cache rendered image tiles for each image view. "
 "Larger values may improve panning and repaint performance, particularly on "
 "high-resolution displays. A value of 64 MiB is recommended."
-msgstr ""
+msgstr "Maximaler Speicher "
 
 #: ../src/preferences.cc:1767
 msgid "Preload next image"
@@ -6098,32 +6048,30 @@ msgid "Refresh on file change"
 msgstr "Dateiliste bei Änderung aktualisieren"
 
 #: ../src/preferences.cc:1776
-#, fuzzy
 msgid "Menu style"
-msgstr "Menüname"
+msgstr "Menüstil"
 
 #: ../src/preferences.cc:1778
-#, fuzzy
 msgid ""
 "☰ style menu button (NOTE! Geeqie must be restarted for change to take "
 "effect)"
 msgstr ""
-"Erweitere Menü und Symbolleiste (HINWEIS! Geeqie muss neu gestartet werden, "
-"damit die Änderung wirksam wird.)"
+"☰-Menübutton (HINWEIS! Geeqie muss neu gestartet werden, damit die Änderung "
+"wirksam wird.)"
 
 #: ../src/preferences.cc:1780
 msgid ""
-"Use a ☰ style menu button instead of the classic style across the top of the "
-"frame"
+"Use a ☰ style menu button instead of the classic style across the top of the"
+" frame"
 msgstr ""
+"Verwende einen ☰-Menübutton anstelle des klassischen Stils über den oberen "
+"Fensterteil hinweg"
 
 #: ../src/preferences.cc:1784
-#, fuzzy
 msgid "Expand toolbar"
-msgstr "Erweitere Menü und Symbolleiste"
+msgstr "Erweitere Werkzeugleiste"
 
 #: ../src/preferences.cc:1786
-#, fuzzy
 msgid ""
 "Expand menu/toolbar (NOTE! Geeqie must be restarted for change to take "
 "effect)"
@@ -6133,45 +6081,43 @@ msgstr ""
 
 #: ../src/preferences.cc:1788
 msgid "Expand the menu/toolbar to the full width of the window"
-msgstr ""
+msgstr "Weite das Menü auf die volle Fensterbreite aus."
 
 #: ../src/preferences.cc:1794
-#, fuzzy
 msgid "Menu bar"
-msgstr "Menüname"
+msgstr "Menüleiste"
 
 #: ../src/preferences.cc:1797
-#, fuzzy
 msgid "Tool bar"
-msgstr "Haupt Werkzeugleiste"
+msgstr "Werkzeugleiste"
 
 #: ../src/preferences.cc:1800
-#, fuzzy
 msgid "Status bar"
-msgstr ""
-"\n"
-"Status: "
+msgstr "Statusleiste"
 
 #: ../src/preferences.cc:1802
 msgid ""
 "The Hide Selectable Bars menu item (default keystroke is control-backtick) "
 "will toggle the display of the bars selected here"
 msgstr ""
+"Das Verstecke-Auswählbare-Leisten Menüitem (Standard-Tastenkombination ist "
+"Strg + Gravis) schaltet die Anzeiger der hier gewählten Leisten um"
 
 #: ../src/preferences.cc:1808
 msgid "AppImage updates notifications"
-msgstr ""
+msgstr "AppImage Update-Benachrichtigungen"
 
 #: ../src/preferences.cc:1810
-#, fuzzy
 msgid "Enable"
-msgstr "Deaktiviert"
+msgstr "Aktiviere"
 
 #: ../src/preferences.cc:1811
 msgid ""
 "Show a notification on start-up if the server has a newer version than the "
 "current. Requires an Internet connection"
 msgstr ""
+"Zeige eine Benachrichtigung beim Start wenn auf dem Server eine neuere "
+"Version bereitsteht, als die verwendete. Benötigt Internetverbindung."
 
 #: ../src/preferences.cc:1825 ../src/preferences.cc:3760
 msgid "Timezone database"
@@ -6179,11 +6125,11 @@ msgstr "Zeitzonendatenbank"
 
 #: ../src/preferences.cc:1833 ../src/preferences.cc:3771
 msgid "Update"
-msgstr ""
+msgstr "Update"
 
 #: ../src/preferences.cc:1833
 msgid "Install"
-msgstr ""
+msgstr "Installieren"
 
 #: ../src/preferences.cc:1839
 msgid ""
@@ -6191,21 +6137,25 @@ msgid ""
 "The timezone database is used to display exif time and date\n"
 "corrected for UTC offset and Daylight Saving Time"
 msgstr ""
+"Keine Internetverbindung!\n"
+"Die Zeitzonendatenbank wird verwendet, um EXIF-Zeit und Datum anzuzeigen,\n"
+"korrigiert um den UTC-Offset und Sommerzeit"
 
 #: ../src/preferences.cc:1843
 msgid ""
 "The timezone database is used to display exif time and date\n"
 "corrected for UTC offset and Daylight Saving Time"
 msgstr ""
+"Die Zeitzonendatenbank wird verwendet, um EXIF-Zeit und Datum anzuzeigen,\n"
+"korrigiert um den UTC-Offset und Sommerzeit"
 
 #: ../src/preferences.cc:1846
-#, fuzzy
 msgid "Download database from: "
-msgstr "Lade Zeitzonen Datenbank"
+msgstr "Lade Datenbank von: "
 
 #: ../src/preferences.cc:1851
 msgid "On-line help search engine"
-msgstr ""
+msgstr "Onlinehilfe-Suchmaschine"
 
 #: ../src/preferences.cc:1857
 msgid ""
@@ -6213,6 +6163,9 @@ msgid ""
 "https://www.search_engine.com/search?q=site:geeqie.org/help\n"
 "https://www.search_engine.com/?q=site:geeqie.org/help"
 msgstr ""
+"Das Format variiert zwischen Suchmaschinen, beispielsweise:\n"
+"https://www.search_engine.com/search?q=site:geeqie.org/help\n"
+"https://www.search_engine.com/?q=site:geeqie.org/help"
 
 #: ../src/preferences.cc:1889
 msgid "Two pass rendering (apply HQ zoom and color correction in second pass)"
@@ -6225,9 +6178,8 @@ msgid "Zoom increment:"
 msgstr "Zoomstufen:"
 
 #: ../src/preferences.cc:1900
-#, fuzzy
 msgid "Zoom style:"
-msgstr "Verkleinern"
+msgstr "Zoom-Stil:"
 
 #: ../src/preferences.cc:1905
 msgid "Allow enlargement of image (max. size in %)"
@@ -6241,11 +6193,15 @@ msgid ""
 "window'. This value sets the maximum expansion permitted in percent i.e. "
 "100% is full-size."
 msgstr ""
+"Aktivieren, um Geeqie das Vergrößern von Bildern zu erlauben, die kleiner "
+"als die aktuelle Bildanzeige sind, wenn als Zoom-Einstellung \"In Fenster "
+"einpassen\" gewählt ist. Dieser Wert setzt die maximal erlaubte "
+"Vergrößerung, 100% ist die volle Größe."
 
 #: ../src/preferences.cc:1916
 #, c-format
 msgid "Virtual window size (%% of actual window):"
-msgstr ""
+msgstr "Größe des virtuellen Fensters (%% des tatsächlichen Fensters)"
 
 #: ../src/preferences.cc:1923
 msgid ""
@@ -6255,28 +6211,36 @@ msgid ""
 "border around the image (values lower than 100%) or to auto zoom the image "
 "(values greater than 100%). It affects fullscreen mode too."
 msgstr ""
+"Dieser Wert setzt die virtuelle Größe des Fensters, wenn \"Bild in Fenster "
+"einpassen\" gesetzt ist. Anstelle der tatsächlichen Fenstergröße wird die "
+"angegebene Prozentzahl des Fensters genutzt. Dies erlaubt, einen Rahmen um "
+"das Bild zu behalten (Werte kleiner als 100%) oder einen Auto-Zoom des "
+"Bildes (Werte größer als 100%). Wirkt sich ebenfalls auf den Vollbildmodus "
+"aus."
 
 #: ../src/preferences.cc:1925
-#, fuzzy
 msgid "Tile size"
-msgstr "Dateigröße"
+msgstr "Kachelgröße"
 
 #: ../src/preferences.cc:1928
-#, fuzzy
 msgid "Pixels"
 msgstr "Pixelinformationen"
 
 #: ../src/preferences.cc:1928
 msgid "(Requires restart)"
-msgstr ""
+msgstr "(Erfordert Neustart)"
 
 #: ../src/preferences.cc:1932
 msgid ""
 "This value changes the size of the tiles large images are split into. "
-"Increasing the size of the tiles will reduce the tiling effect seen on image "
-"changes, but will also slightly increase the delay before the first part of "
-"a large image is seen."
+"Increasing the size of the tiles will reduce the tiling effect seen on image"
+" changes, but will also slightly increase the delay before the first part of"
+" a large image is seen."
 msgstr ""
+"Dieser Wert ändert die Größe der Kacheln, in die große Bilder geteilt "
+"werden. Größere Kacheln verringern den Tiling-Effekt beim Bildwechsel, "
+"erhöhen aber auch die Verzögerung vor der Anzeige der ersten Bildteile eines"
+" großen Bildes."
 
 #: ../src/preferences.cc:1934
 msgid "Appearance"
@@ -6311,9 +6275,8 @@ msgid "State"
 msgstr "Status"
 
 #: ../src/preferences.cc:2013
-#, fuzzy
 msgid "Remember session"
-msgstr "Druckeinstellungen merken"
+msgstr "Sitzung speichern"
 
 #: ../src/preferences.cc:2016
 msgid "Use saved window positions also for new windows"
@@ -6332,7 +6295,6 @@ msgid "Remember dialog window positions"
 msgstr "Positionen von Dialogfenstern merken"
 
 #: ../src/preferences.cc:2030
-#, fuzzy
 msgid "Hide window decorations"
 msgstr "Fenster im Vollbildmodus ausblenden"
 
@@ -6341,6 +6303,8 @@ msgid ""
 "Remove borders and title bar from windows. A restart of Geeqie is required "
 "for this feature to take effect on the main layout window"
 msgstr ""
+"Ränder und Titelleiste von Fenstern entfernen. Ein Neustart von geeqie ist "
+"notwendig, um diese Funktion für das Hauptfenster zu aktivieren."
 
 #: ../src/preferences.cc:2034
 msgid "Show window IDs"
@@ -6348,13 +6312,15 @@ msgstr "Zeige Fenster IDs"
 
 #: ../src/preferences.cc:2038
 msgid "Use current layout for default: "
-msgstr ""
+msgstr "Benutze aktuelles Layout als Standard:"
 
 #: ../src/preferences.cc:2045
 msgid ""
 "Current window layout\n"
 "has been set as default"
 msgstr ""
+"Aktuelles Fenster-Layout\n"
+"wurde als Standard gesetzt"
 
 #: ../src/preferences.cc:2051
 msgid "Fit window to image when tools are hidden/floating"
@@ -6402,7 +6368,7 @@ msgstr "Standardeinstellungen"
 
 #: ../src/preferences.cc:2151
 msgid "OSD"
-msgstr ""
+msgstr "OSD"
 
 #: ../src/preferences.cc:2153
 msgid "Overlay Screen Display"
@@ -6410,11 +6376,11 @@ msgstr "Anzeige im Bild"
 
 #: ../src/preferences.cc:2173
 msgid "Exif, XMP or IPTC tags"
-msgstr ""
+msgstr "Exif, XMP oder IPTC-Tags"
 
 #: ../src/preferences.cc:2176
 msgid "%Exif.Image.Orientation%"
-msgstr ""
+msgstr "%Exif.Image.Orientation%"
 
 #: ../src/preferences.cc:2180
 msgid "Field separators"
@@ -6425,18 +6391,20 @@ msgid ""
 "Separator shown only if both fields are non-null:\n"
 "%formatted.ShutterSpeed%|%formatted.ISOSpeedRating%"
 msgstr ""
+"Trenner nur angezeigt, wenn beide Werte nicht-Null:\n"
+"%formatted.ShutterSpeed%|%formatted.ISOSpeedRating%"
 
 #: ../src/preferences.cc:2187
 msgid "Field maximum length"
-msgstr ""
+msgstr "maximale Feldlänge"
 
 #: ../src/preferences.cc:2190
 msgid "%path:39%"
-msgstr ""
+msgstr "%path:39%"
 
 #: ../src/preferences.cc:2194
 msgid "Pre- and post- text"
-msgstr ""
+msgstr "Vor- und Nach- Text"
 
 #: ../src/preferences.cc:2197
 msgid ""
@@ -6444,10 +6412,13 @@ msgid ""
 "%formatted.Aperture:F no. * setting%\n"
 " %formatted.Aperture:10:F no. * setting%"
 msgstr ""
+"Text wird nur angezeigt, wenn Feld nicht null ist:\n"
+"%formatted.Aperture:F no. * setting%\n"
+" %formatted.Aperture:10:F no. * setting%"
 
 #: ../src/preferences.cc:2201
 msgid "Pango markup"
-msgstr ""
+msgstr "Pango markup"
 
 #: ../src/preferences.cc:2204
 msgid ""
@@ -6456,9 +6427,12 @@ msgid ""
 "<i>italic</i>\n"
 "<s>strikethrough</s>"
 msgstr ""
+"<b>fett</b>\n"
+"<u>unterstrichen</u>\n"
+"<i>kursiv</i>\n"
+"<s>durchgestrichen</s>"
 
 #: ../src/preferences.cc:2342
-#, fuzzy
 msgid "File Filters"
 msgstr "Zeige Dateifilter"
 
@@ -6468,15 +6442,18 @@ msgstr "Zeige versteckte Dateien und Verzeichnisse"
 
 #: ../src/preferences.cc:2348
 msgid "Use dot prefix as hidden file indicator"
-msgstr ""
+msgstr "Verwende Punkt-Präfix als Indikator für versteckte Dateien"
 
 #: ../src/preferences.cc:2350
 msgid "Show parent folder (..)"
 msgstr "Zeige übergeordnetes Verzeichnis (..)"
 
 #: ../src/preferences.cc:2352
-msgid "Case sensitive sort (Search and Collection windows, and tab completion)"
+msgid ""
+"Case sensitive sort (Search and Collection windows, and tab completion)"
 msgstr ""
+"Groß-/Kleinschreibung beim Sortieren beachten (Such- und Sammlungsfenster "
+"und Tab-Vervollständigung)"
 
 #: ../src/preferences.cc:2353
 msgid "Disable file extension checks"
@@ -6495,14 +6472,12 @@ msgid "File types"
 msgstr "Dateitypen"
 
 #: ../src/preferences.cc:2368
-#, fuzzy
 msgid "Search file extensions"
-msgstr "Keine Dateierweiterung\n"
+msgstr "Suche Dateierweiterungen"
 
 #: ../src/preferences.cc:2392
-#, fuzzy
 msgid "Enabled"
-msgstr "Deaktiviert"
+msgstr "Aktiviert"
 
 #: ../src/preferences.cc:2395 ../src/view-file/view-file.cc:1837
 msgid "Class"
@@ -6517,88 +6492,83 @@ msgid "Sidecar is allowed"
 msgstr "\"Sidecars\" erlaubt"
 
 #: ../src/preferences.cc:2439
-#, fuzzy
 msgid "Metadata writing sequence"
-msgstr "Vorgehen zum Speichern der Metadaten"
+msgstr "Metadaten-Schreibsequenz"
 
 #: ../src/preferences.cc:2441
 msgid "Warning: Geeqie is built without Exiv2. Some options are disabled."
 msgstr ""
-"Warnung: Geeqie wurde ohne Exiv2 übersetzt. Manche Einstellungsmöglichkeiten "
-"sind abgeschaltet."
+"Warnung: Geeqie wurde ohne Exiv2 übersetzt. Manche Einstellungsmöglichkeiten"
+" sind abgeschaltet."
 
 #: ../src/preferences.cc:2443
 msgid ""
 "When writing metadata, Geeqie will follow these steps, if selected. This "
 "process will stop when the first successful write occurs."
 msgstr ""
+"Beim Schreiben von Metadaten wird Geeqie diese Schritte durchführen, falls "
+"ausgewählt. Der Prozess wird nach dem ersten erfolgreichen Schreiben "
+"gestoppt."
 
 #: ../src/preferences.cc:2448
-#, fuzzy
 msgid "A flowchart of the sequence is shown in the Help file"
-msgstr "Umfangreiche Formatierungsoptionen werden in der Hilfedatei angezeigt"
+msgstr "Eine Flowchart der Sequenz wird in der Hilfedatei gezeigt"
 
 #: ../src/preferences.cc:2452
 msgid "Step 1"
-msgstr ""
+msgstr "Schritt 1"
 
 #: ../src/preferences.cc:2452
-#, fuzzy
 msgid ""
-"Save metadata in either the image file or the sidecar file, according to the "
-"XMP standard"
+"Save metadata in either the image file or the sidecar file, according to the"
+" XMP standard"
 msgstr ""
-"1) Speicher Metadaten in Bilddateien oder Sidecar-Dateien gemäß dem XMP-"
+"Speichere Metadaten in Bilddateien oder Sidecar-Dateien gemäß dem XMP-"
 "Standard"
 
 #: ../src/preferences.cc:2455
 msgid "The destination is dependent on the settings in the "
-msgstr ""
+msgstr "Das Ziel hängt von den Einstellungen in den "
 
 #: ../src/preferences.cc:2456
 msgid " and "
-msgstr ""
+msgstr " und "
 
 #: ../src/preferences.cc:2456
-#, fuzzy
 msgid "Sidecar Is Allowed"
-msgstr "\"Sidecars\" erlaubt"
+msgstr "Sidecar-Dateien erlaubt"
 
 #: ../src/preferences.cc:2456
 msgid " columns of the File Filters tab)"
-msgstr ""
+msgstr " Spalten der Dateifilter-Tabelle"
 
 #: ../src/preferences.cc:2465
 msgid "Step 2"
-msgstr ""
+msgstr "Schritt 2"
 
 #: ../src/preferences.cc:2465
-#, fuzzy
 msgid "Save metadata in the folder"
-msgstr "3) Speichere Metadaten in Geeqies eigenem Verzeichnis '%s'"
+msgstr "Speichere Metadaten im Verzeichnis"
 
 #: ../src/preferences.cc:2465
-#, fuzzy
 msgid "local to the image folder (non-standard)"
 msgstr ""
-"Vorschaubilder im lokal innerhalb des Bildverzeichnis speichern (kein "
+"Vorschaubilder im lokal innerhalb des Bildverzeichnisses speichern (kein "
 "Standard)"
 
 #: ../src/preferences.cc:2469
 msgid "Step 3"
-msgstr ""
+msgstr "Schritt 3"
 
 #: ../src/preferences.cc:2469
-#, fuzzy
 msgid ") Save metadata in Geeqie private directory "
-msgstr "3) Speichere Metadaten in Geeqies eigenem Verzeichnis '%s'"
+msgstr "Speichere Metadaten in Geeqies eigenem Verzeichnis"
 
 #: ../src/preferences.cc:2477
 msgid "Step 1 Options:"
-msgstr ""
+msgstr "Schritt 1 optional:"
 
 #: ../src/preferences.cc:2485
-#, fuzzy
 msgid ""
 "Store metadata also in IPTC tags (converted according to the IPTC4XMP "
 "standard)"
@@ -6608,12 +6578,11 @@ msgstr ""
 
 #: ../src/preferences.cc:2486
 msgid "A simplified conversion list is in the Help file"
-msgstr ""
+msgstr "Eine vereinfachte Konversionsliste ist in der Hilfsdatei"
 
 #: ../src/preferences.cc:2488
-#, fuzzy
 msgid "Warn if the image or sidecar file is not writable"
-msgstr "Warne wenn die Bilddatei unbeschreibbar ist"
+msgstr "Warne wenn die Bilddatei oder das Sidecar unbeschreibbar sind"
 
 #: ../src/preferences.cc:2490
 msgid "Ask before writing to image files"
@@ -6621,26 +6590,24 @@ msgstr "Frage nach bevor in eine Bilddatei geschrieben wird"
 
 #: ../src/preferences.cc:2493
 msgid "This file naming convention is used by Darktable"
-msgstr ""
+msgstr "Diese Namensgebungsregel wird von Darktable verwendet"
 
 #: ../src/preferences.cc:2496
-#, fuzzy
 msgid "Create sidecar files named"
-msgstr "Erstellen Sie Ähnlichkeitsdateien Dateien"
+msgstr "Erstellen Sidecar-Dateien namens"
 
 #: ../src/preferences.cc:2496
 msgid "as opposed to the normal"
-msgstr ""
+msgstr "im Gegensatz zum Standard"
 
 #: ../src/preferences.cc:2500
 msgid "Steps 2 and 3 Option:"
-msgstr ""
+msgstr "Schritte 2 und 3 optional:"
 
 #: ../src/preferences.cc:2505
-#, fuzzy
 msgid ""
-"Use GQview legacy metadata format instead of XMP (supports only Keywords and "
-"Comments)"
+"Use GQview legacy metadata format instead of XMP (supports only Keywords and"
+" Comments)"
 msgstr ""
 "Benutze zu GQview kompatibles Metadatenformat (unterstützt nur "
 "Schlüsselwörter und Kommentare) anstelle XMP"
@@ -6654,20 +6621,20 @@ msgstr "Verschiedenes"
 #, fuzzy
 msgid "Write the same description tags to all grouped sidecars"
 msgstr ""
-"Speichere die selben Tags (Schlüsselwörter, Kommentare, ...) in alle "
+"Speichere die selben Tags (Schlüsselwörter, Kommentare, …) in alle "
 "gruppierten Dateien"
 
 #: ../src/preferences.cc:2511
 msgid "See the Help file for a list of the tags used"
-msgstr ""
+msgstr "Vergleiche die Hilfsdatei für eine Liste verwendeter Tags"
 
 #: ../src/preferences.cc:2513
 msgid "Permit Keywords to be case-sensitive"
-msgstr ""
+msgstr "Beachte Groß- und Kleinschreibung bei Schlüsselwörtern"
 
 #: ../src/preferences.cc:2514
 msgid "When selected, 'Place' and 'place' are two different keywords"
-msgstr ""
+msgstr "Wenn gesetzt, sind \"Ort\" und \"ort\" verschiedene Schlüsselwörter"
 
 #: ../src/preferences.cc:2516
 msgid "Write altered image orientation to the metadata"
@@ -6675,11 +6642,11 @@ msgstr "Schreibe geänderte Bildausrichtung in die Metadaten"
 
 #: ../src/preferences.cc:2517
 msgid ""
-"If checked, the results of orientation commands (Rotate, Mirror and Flip) "
-"issued on an image will be written to metadata\n"
-"Note: If this option is not checked, the results of orientation commands "
-"will be lost when Geeqie closes"
+"If checked, the results of orientation commands (Rotate, Mirror and Flip) issued on an image will be written to metadata\n"
+"Note: If this option is not checked, the results of orientation commands will be lost when Geeqie closes"
 msgstr ""
+"Falls gesetzt, werden Befehle zur Orientierung (Drehung, Spiegelung) eines Bilds in die Metadaten geschrieben\n"
+"Hinweis: Falls nicht gesetzt, gehen die Auswirkungen beim Schließen von Geeqie verloren"
 
 #: ../src/preferences.cc:2525
 msgid "Auto-save options"
@@ -6702,19 +6669,20 @@ msgid "Write metadata on directory change"
 msgstr "Schreibe Metadaten beim Wechseln des Verzeichnisses"
 
 #: ../src/preferences.cc:2541
-#, fuzzy
 msgid "Spelling checks"
-msgstr "Lese Prüfsummen..."
+msgstr "Rechtschreibprüfungen"
 
 #: ../src/preferences.cc:2543
 msgid "Check spelling - Requires restart"
-msgstr ""
+msgstr "Rechtschreibprüfung - erfordert Neustart"
 
 #: ../src/preferences.cc:2544
 msgid ""
 "Spelling checks are performed on info sidebar panes Comment, Headline and "
 "Title"
 msgstr ""
+"Rechtschreibprüfung in den Info-Sidebar-Feldern Kommentar, Überschrift und "
+"Titel prüfen"
 
 #: ../src/preferences.cc:2549
 msgid "Pre-load metadata"
@@ -6726,11 +6694,11 @@ msgstr "Lesen Metadaten im Hintergrund"
 
 #: ../src/preferences.cc:2552
 msgid ""
-"On folder change, read DateTimeOriginal, DateTimeDigitized and Star Rating "
-"in the idle loop.\n"
-"If this is not selected, initial loading of the folder will be faster but "
-"sorting on these items will be slower"
+"On folder change, read DateTimeOriginal, DateTimeDigitized and Star Rating in the idle loop.\n"
+"If this is not selected, initial loading of the folder will be faster but sorting on these items will be slower"
 msgstr ""
+"Bei Verzeichniswechsel, lese DateTimeOriginal, DateTimeDigitized und Bewertung, wenn untätig.\n"
+"Falls nicht ausgewählt, ist das Laden der Verzeichnisse schneller, das Sortieren jedoch langsamer"
 
 #: ../src/preferences.cc:2728 ../src/preferences.cc:2742
 msgid "Search for keywords"
@@ -6741,9 +6709,8 @@ msgid "Edit keywords autocompletion list"
 msgstr "Bearbeite die Autovervollständigungsliste für Schlüsselwörter"
 
 #: ../src/preferences.cc:2813
-#, fuzzy
 msgid "Search for existing keywords"
-msgstr "Such nach Schlüsselwörtern"
+msgstr "Suche nach existierenden Schlüsselwörtern"
 
 #: ../src/preferences.cc:2885
 msgid "Perceptual"
@@ -6762,6 +6729,8 @@ msgid ""
 "Refer to the lcms documentation for the defaults used when the selected "
 "Intent is not available"
 msgstr ""
+"Vergleiche die Icms-Dokumentation für die Standardwerte, falls gewählte "
+"Priorität nicht verfügbar"
 
 #: ../src/preferences.cc:2917
 msgid "Color management"
@@ -6797,7 +6766,6 @@ msgid "Screen profile"
 msgstr "Bildschirmprofil"
 
 #: ../src/preferences.cc:2965
-#, fuzzy
 msgid "Use system display profile when available"
 msgstr "Benutze Bildschirmprofil des Systems wenn verfügbar"
 
@@ -6807,7 +6775,7 @@ msgstr "Bildschirmprofil:"
 
 #: ../src/preferences.cc:2975
 msgid "Render Intent:"
-msgstr ""
+msgstr "Renderpriorität:"
 
 #: ../src/preferences.cc:3015 ../src/preferences.cc:3074
 msgid "Behavior"
@@ -6834,9 +6802,8 @@ msgid "Maximum size:"
 msgstr "Maximale Größe:"
 
 #: ../src/preferences.cc:3049
-#, fuzzy
 msgid "MiB"
-msgstr "MB"
+msgstr "MiB"
 
 #: ../src/preferences.cc:3051
 msgid "Set to 0 for unlimited size"
@@ -6855,7 +6822,6 @@ msgid "Descend folders in tree view"
 msgstr "Verzeichnisstruktur beim Start lesen"
 
 #: ../src/preferences.cc:3079
-#, fuzzy
 msgid "In-place renaming"
 msgstr "Umbenennung an Ort und Stelle (ohne Dialogfenster)"
 
@@ -6864,13 +6830,12 @@ msgid "List directory view uses single click to enter"
 msgstr "Listenverzeichnisansicht wird mit einem Klick betreten"
 
 #: ../src/preferences.cc:3085
-#, fuzzy
 msgid "Circular selection lists"
-msgstr "Sammlung existiert"
+msgstr "Zirkuläre Auswahllisten"
 
 #: ../src/preferences.cc:3087
 msgid "Traverse selection lists in a circular manner"
-msgstr ""
+msgstr "Auswahllisten zyklisch "
 
 #: ../src/preferences.cc:3089
 msgid "Save marks on exit"
@@ -6881,22 +6846,25 @@ msgid ""
 "Note that marks linked to a keyword will be saved irrespective of this "
 "setting"
 msgstr ""
+"Hinweis: Mit Schlüsselwörtern verbundene Markierungen werden unabhängig "
+"dieser Einstellung behalten"
 
 #: ../src/preferences.cc:3093
 msgid "Use 'With Rename' as default for Copy/Move dialogs"
 msgstr ""
+"Verwende 'mit Umbenennen' als Standard für Kopieren/Verschieben-Dialoge"
 
 #: ../src/preferences.cc:3095
 msgid "Change the default button for Copy/Move dialogs"
-msgstr ""
+msgstr "Änderung des Standardbuttons für Kopieren/Verschieben-Dialoge"
 
 #: ../src/preferences.cc:3097
 msgid "Permit duplicates in Collections"
-msgstr ""
+msgstr "Erlaube Duplikate in Sammlungen"
 
 #: ../src/preferences.cc:3099
 msgid "Allow the same image to be in a Collection more than once"
-msgstr ""
+msgstr "Erlaube dasselbe Bild mehrfach in einer Sammlung"
 
 #: ../src/preferences.cc:3101
 msgid "Hide window in fullscreen"
@@ -6907,23 +6875,22 @@ msgid ""
 "When alt-tabbing, prevent the normal Geeqie window from showing alongside "
 "the fullscreen window"
 msgstr ""
+"Verhindere die Anzeige des Standard-Geeqie-Fensters neben dem "
+"Vollbildfenster bei Alt-Tab"
 
 #: ../src/preferences.cc:3105
-#, fuzzy
 msgid "Hide OSD in fullscreen"
-msgstr "Fenster im Vollbildmodus ausblenden"
+msgstr "OSD im Vollbildmodus ausblenden"
 
 #: ../src/preferences.cc:3107
-#, fuzzy
 msgid "Hide Overlay Screen Display in fullscreen mode"
-msgstr "Anzeige im Bild"
+msgstr "Verberge Overlay Screen Display im Vollbildmodus"
 
 #: ../src/preferences.cc:3109
 msgid "Recent folder list maximum size"
 msgstr "Maximale Größe der Liste der letzten Ordner"
 
 #: ../src/preferences.cc:3112
-#, fuzzy
 msgid "Recent folder-image list maximum size"
 msgstr "Maximale Größe der Liste der letzten Ordner"
 
@@ -6932,14 +6899,14 @@ msgid ""
 "List of the last image viewed in each recent folder.\n"
 "Re-opening a folder will set focus to the last image viewed."
 msgstr ""
+"Liste der zuletzt angesehenen Bilder in jedem kürzlich betrachteten Ordner.\n"
+"Erneutes Öffnen eines Ordners legt den Fouks auf das zuletzt betrachtete Bild."
 
 #: ../src/preferences.cc:3115
-#, fuzzy
 msgid "Drag-and-drop icon size"
 msgstr "Größe der Vorschau beim Klicken und Ziehen"
 
 #: ../src/preferences.cc:3119
-#, fuzzy
 msgid "Drag-and-drop default action:"
 msgstr "Standardaktion ziehen und ablegen:"
 
@@ -6966,16 +6933,15 @@ msgstr ""
 
 #: ../src/preferences.cc:3134
 msgid "Show bird's-eye view when zoomed in"
-msgstr ""
+msgstr "Zeige Vogelperspektive, wenn hereingezoomt"
 
 #: ../src/preferences.cc:3136
 msgid "Navigation by left or middle click on image"
 msgstr "Navigiere mit einem Links- oder Mittel-Klick auf das Bild"
 
 #: ../src/preferences.cc:3138
-#, fuzzy
 msgid "Open archive by left click on image"
-msgstr "Video mit einem Klick der linken Maustaste auf das Bild abspielen"
+msgstr "Video mit Rechtsklick auf Bild öffnen"
 
 #: ../src/preferences.cc:3140
 msgid "Play video by left click on image"
@@ -7006,38 +6972,32 @@ msgid "Log Window max. lines:"
 msgstr "Protokollfenster maximale Zeilen:"
 
 #: ../src/preferences.cc:3166
-#, fuzzy
 msgid "Log Window F1 command: "
-msgstr "Protokollfenster maximale Zeilen:"
+msgstr "Protokollfenster F1 Befehl: "
 
 #: ../src/preferences.cc:3308
 msgid "Keyboard"
 msgstr "Tastatur"
 
 #: ../src/preferences.cc:3310
-#, fuzzy
 msgid "Keyboard Shortcuts"
 msgstr "Tastenkürzel"
 
 #: ../src/preferences.cc:3312
-#, fuzzy
 msgid "Search commands"
-msgstr "Suchen und Ausführen Befehl"
+msgstr "Suche Befehle"
 
 #: ../src/preferences.cc:3331
-#, fuzzy
 msgid "Command"
-msgstr "Befehlszeile"
+msgstr "Befehl"
 
 #: ../src/preferences.cc:3332
-#, fuzzy
 msgid "Shortcut"
-msgstr "Tastenkürzel hinzufügen"
+msgstr "Tastenkürzel"
 
 #: ../src/preferences.cc:3333
-#, fuzzy
 msgid "Icon"
-msgstr "Icon:"
+msgstr "Icon"
 
 #: ../src/preferences.cc:3343
 msgid ""
@@ -7047,6 +7007,12 @@ msgid ""
 " Use a semicolon to separate multiple entries. \n"
 " Double-click on the Key column and add or replace the text.\n"
 msgstr ""
+"Hier klicken und benötigte Tastenkombination eingeben\n"
+"Der konvertierte Keycode wird in die Zwischenablage kopiert.\b\n"
+"\n"
+"Semikolon benutzen, um mehrere Einträge zu trennen.\n"
+"\n"
+"Auf Tasten-Spalte doppelklicken und Text hinzufügen oder ersetzen.\n"
 
 #: ../src/preferences.cc:3366
 msgid "Reset selected"
@@ -7062,80 +7028,75 @@ msgstr "Werkzeugleisten Status"
 
 #: ../src/preferences.cc:3393
 msgid "Advanced"
-msgstr ""
+msgstr "Erweitert"
 
 #: ../src/preferences.cc:3394
 msgid "External preview extraction"
-msgstr ""
+msgstr "Externe Vorschaubild-Erzeugung"
 
 #: ../src/preferences.cc:3396
 msgid "Use external preview extraction -  Requires restart"
-msgstr ""
+msgstr "Nutze externe Vorschaubild-Erzeugung - Erfordert Neustart"
 
 #: ../src/preferences.cc:3406
-#, fuzzy
 msgid "Usable file types:\n"
-msgstr "Dateitypen"
+msgstr "Nutzbare Dateitypen:\n"
 
 #: ../src/preferences.cc:3412
-#, fuzzy
 msgid "File identification tool"
-msgstr "Orientierung In Datei schreiben"
+msgstr "Deiteiidentifizierungs-Tool"
 
 #: ../src/preferences.cc:3414
 msgid "Select file identification tool"
-msgstr ""
+msgstr "Auswahl des Dateiidentifizierungs-Tools"
 
 #: ../src/preferences.cc:3416
-#, fuzzy
 msgid "Preview extraction tool"
-msgstr "Orientierung In Datei schreiben"
+msgstr "Vorschau des Extraktions-Tools"
 
 #: ../src/preferences.cc:3418
 msgid "Select preview extraction tool"
-msgstr ""
+msgstr "Auswahl des Vorschaubild-Erzeugungs-Tools"
 
 #: ../src/preferences.cc:3424
 msgid "Thread pool limits"
-msgstr ""
+msgstr "Thread-Pool-Begrenzungen"
 
 #: ../src/preferences.cc:3426
 msgid ""
-"This option limits the number of threads (or cpu cores) that Geeqie will use "
-"when running duplicate checks.\n"
+"This option limits the number of threads (or cpu cores) that Geeqie will use when running duplicate checks.\n"
 "The value 0 means all available cores will be used."
 msgstr ""
+"Diese Option begrenzt die Anzahl der threads (oder CPU-Kerne), die Geeqie bei der Duplikatsuche verwendet.\n"
+"Beim Wert 0 werden alle Kerne verwendet."
 
 #: ../src/preferences.cc:3431
 msgid "Duplicate check:"
-msgstr ""
+msgstr "Duplikats-Prüfung:"
 
 #: ../src/preferences.cc:3431
 msgid "max. threads"
-msgstr ""
+msgstr "max. threads"
 
 #: ../src/preferences.cc:3432
-#, fuzzy
 msgid "Set to 0 for unlimited"
-msgstr "Auf 0 setzen für unbeschränkte Größe"
+msgstr "Auf 0 setzen für unbegrenzt"
 
 #: ../src/preferences.cc:3438
-#, fuzzy
 msgid "Alternate similarity algorithm"
-msgstr "Dateiähnlichkeits-Cache"
+msgstr "Alternativer Ähnlichkeits-Algorithmus"
 
 #: ../src/preferences.cc:3440
 msgid "Enable alternate similarity algorithm"
-msgstr ""
+msgstr "Alternativen Ähnlichkeits-Algorithmus verwenden"
 
 #: ../src/preferences.cc:3445
-#, fuzzy
 msgid "Use grayscale"
 msgstr "Graustufen ein-/ausschalten"
 
 #: ../src/preferences.cc:3446
 msgid "Reduce fingerprint to grayscale"
-msgstr ""
+msgstr "Fingerabdruck auf Graustufen reduzieren"
 
 #: ../src/preferences.cc:3454
 msgid "Stereo"
@@ -7180,14 +7141,20 @@ msgid ""
 "See https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n"
 "\n"
 msgstr ""
+"Dieses Programm wird ohne jegliche Garantie zur Verfügung gestellt.\n"
+"GNU General Public License, Version 2 oder neuer.\n"
+"Siehe https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n"
+"\n"
 
 #: ../src/preferences.cc:3609
 msgid ""
 "\n"
 "\n"
-"Map Data Open Database License OpenStreetMap Contributors Map Imagery CC-BY-"
-"SA 2.0"
+"Map Data Open Database License OpenStreetMap Contributors Map Imagery CC-BY-SA 2.0"
 msgstr ""
+"\n"
+"\n"
+"Kartendaten Open Database License OpenStreetMap Contributors Map Imagery CC-BY-SA 2.0"
 
 #: ../src/preferences.cc:3610
 msgid ""
@@ -7195,6 +7162,9 @@ msgid ""
 "\n"
 "Some icons by https://www.flaticon.com"
 msgstr ""
+"\n"
+"\n"
+"Manche Icons von https://www.flaticon.com"
 
 #: ../src/preferences.cc:3635
 msgid ""
@@ -7205,12 +7175,20 @@ msgid ""
 "\n"
 "Development and bug reports:\n"
 msgstr ""
+"Projekt geschaffen von John Ellis\n"
+"GQview 1998\n"
+"Geeqie 2007\n"
+"\n"
+"\n"
+"Entwicklung und Fehlermeldungen:\n"
 
 #: ../src/preferences.cc:3636
 msgid ""
 "\n"
 "https://github.com/BestImageViewer/geeqie/issues"
 msgstr ""
+"\n"
+"https://github.com/BestImageViewer/geeqie/issues"
 
 #: ../src/preferences.cc:3644
 msgid "About Geeqie"
@@ -7218,17 +7196,15 @@ msgstr "Über Geeqie"
 
 #: ../src/preferences.cc:3651
 msgid "Website"
-msgstr ""
+msgstr "Website"
 
 #: ../src/preferences.cc:3702 ../src/preferences.cc:3709
-#, fuzzy
 msgid "Warning: Cannot open timezone database file"
-msgstr "Lade Zeitzonen Datenbank"
+msgstr "Achtung: Kann Zeitzonen-Datenbankdatei nicht öffnen"
 
 #: ../src/preferences.cc:3715
-#, fuzzy
 msgid "Error: Timezone database download failed"
-msgstr "Zeitzonen Datenbankdownload fehlgeschlagen"
+msgstr "Fehler: Zeitzonen Datenbankdownload fehlgeschlagen"
 
 #: ../src/preferences.cc:3752
 msgid "Timezone database download failed"
@@ -7247,22 +7223,20 @@ msgid "Show image text"
 msgstr "Zeige Bildtext"
 
 #: ../src/print.cc:231 ../src/print.cc:300
-#, fuzzy
 msgid "Header 1"
-msgstr "Überschrift"
+msgstr "Überschrift 1"
 
 #: ../src/print.cc:235 ../src/print.cc:304
-#, fuzzy
 msgid "Header 2"
-msgstr "Überschrift"
+msgstr "Überschrift 2"
 
 #: ../src/print.cc:239 ../src/print.cc:308
 msgid "Footer 1"
-msgstr ""
+msgstr "Fußzeile 1"
 
 #: ../src/print.cc:243 ../src/print.cc:312
 msgid "Footer 2"
-msgstr ""
+msgstr "Fußzeile 2"
 
 #: ../src/print.cc:288
 msgid "Page text"
@@ -7274,27 +7248,23 @@ msgstr "Seitentext anzeigen"
 
 #: ../src/print.cc:339
 msgid "Text shown on each page of a single or multi-page print job"
-msgstr ""
+msgstr "Auf jeder Seite eines mehrseitigen Druckauftrag angezeigter Text"
 
 #: ../src/print.cc:719
-#, fuzzy
 msgid "Options"
-msgstr "Sport"
+msgstr "Optionen"
 
 #: ../src/rcfile.cc:136
-#, fuzzy
 msgid "Error reading configuration file: "
-msgstr "Fehler beim Speichern der Konfigurationsdatei: %s\n"
+msgstr "Fehler beim Lesen der Konfigurationsdatei: "
 
 #: ../src/rcfile.cc:142
-#, fuzzy
 msgid "Show log window"
-msgstr "Zeige Fenster IDs"
+msgstr "Zeige Protokollfenster"
 
 #: ../src/rcfile.cc:147
-#, fuzzy
 msgid "Configuration file error"
-msgstr "Bestätige, dass die Datei in den Papierkorb verschoben wird"
+msgstr "Konfigurationsdatei-Fehler"
 
 #: ../src/search.cc:242
 msgid "Modified"
@@ -7407,14 +7377,12 @@ msgid "%s, %d files"
 msgstr "%s, %d Dateien"
 
 #: ../src/search.cc:564
-#, fuzzy
 msgid "Searching…"
-msgstr "Suche..."
+msgstr "Suche…"
 
 #: ../src/search.cc:1461
-#, fuzzy
 msgid "Image is not geocoded"
-msgstr "nicht geocodiert"
+msgstr "Bild ist nicht geocodiert"
 
 #: ../src/search.cc:2329
 msgid "File not found"
@@ -7477,14 +7445,12 @@ msgid "Match case"
 msgstr "Groß-/Kleinschreibung beachten"
 
 #: ../src/search.cc:3111
-#, fuzzy
 msgid "Symbolic link"
-msgstr "Symbolische Verknüpfung löschen?"
+msgstr "Symbolische Verknüpfung"
 
 #: ../src/search.cc:3113
 msgid ""
-"When set to 'contains' or 'path contains', this field uses Perl Compatible "
-"Regular Expressions.\n"
+"When set to 'contains' or 'path contains', this field uses Perl Compatible Regular Expressions.\n"
 "e.g. use \n"
 ".*\\.jpg\n"
 " and not \n"
@@ -7492,6 +7458,13 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"Dieses Feld benutzt bei \"enthält\" und \"Pfad enthält\" Perl-kompatible reguläre Ausdrücke.\n"
+"z. B. verwende \n"
+"abc.*ghk\n"
+" und nicht \n"
+"abc*ghk\n"
+"\n"
+"Siehe Hilfsdatei."
 
 #: ../src/search.cc:3118
 msgid "File size is"
@@ -7533,6 +7506,13 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"Dieses Feld benutzt Perl-kompatible reguläre Ausdrücke.\n"
+"z. B. verwende \n"
+"abc.*ghk\n"
+" und nicht \n"
+"abc*ghk\n"
+"\n"
+"Siehe Hilfsdatei."
 
 #: ../src/search.cc:3241
 msgid ""
@@ -7543,6 +7523,12 @@ msgid ""
 "\n"
 "See https://exiv2.org/tags.html"
 msgstr ""
+"z. B. Exif.Image.Model\n"
+"Groß-/Kleinschreibung immer beachtet \n"
+"\n"
+"Drag-and-drop aus dem Exif-Fenster möglich\n"
+"\n"
+"Siehe https://exiv2.org/tags.html"
 
 #: ../src/search.cc:3257
 msgid ""
@@ -7556,6 +7542,15 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"z. B. Canon EOS\n"
+"\n"
+"Dieses Feld benutzt Perl-kompatible reguläre Ausdrücke.\n"
+"z. B. verwende \n"
+"abc.*ghk\n"
+" und nicht \n"
+"abc*ghk\n"
+"\n"
+"Siehe Hilfsdatei."
 
 #: ../src/search.cc:3262
 msgid "Image rating is"
@@ -7567,7 +7562,7 @@ msgstr "Das Bild ist"
 
 #: ../src/search.cc:3283
 msgid "n.m."
-msgstr ""
+msgstr "n.m."
 
 #: ../src/search.cc:3289
 msgid "from"
@@ -7586,8 +7581,7 @@ msgstr ""
 "Geben Sie eine Koordinate in das Formular ein:\n"
 "89,123 179,456\n"
 "oder ziehen Sie ein geocodiertes Bild per Drag & Drop\n"
-"oder klicken Sie mit der linken Maustaste auf die Karte und fügen Sie sie "
-"ein\n"
+"oder klicken Sie mit der linken Maustaste auf die Karte und fügen Sie sie ein\n"
 "oder Ausschneiden und Einfügen oder Ziehen und Ablegen\n"
 "eine Internet-Such-URL\n"
 "Siehe in der Hilfedatei"
@@ -7605,9 +7599,8 @@ msgid "Marks"
 msgstr "Markierungen"
 
 #: ../src/shortcuts.cc:44
-#, fuzzy
 msgid "Add Shortcut - Geeqie"
-msgstr "Tastenkürzel hinzufügen"
+msgstr "Tastenkürzel hinzufügen - Geeqie"
 
 #: ../src/shortcuts.cc:74
 msgid "Add Shortcut"
@@ -7641,11 +7634,12 @@ msgid ""
 "The original location already contains a file named:\n"
 "%s"
 msgstr ""
+"Der ursprüngliche Ort enthält bereits eine Datei mit Namen:\n"
+"%s"
 
 #: ../src/trash.cc:207 ../src/trash.cc:215 ../src/trash.cc:227
-#, fuzzy
 msgid "Restore failed"
-msgstr "Fehler beim Löschen"
+msgstr "Wiederherstellen gescheitert"
 
 #: ../src/trash.cc:214
 #, c-format
@@ -7653,14 +7647,16 @@ msgid ""
 "The original folder no longer exists:\n"
 "%s"
 msgstr ""
+"Das ursprüngliche Verzeichnis existiert nicht mehr:\n"
+"%s"
 
 #: ../src/trash.cc:226
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Unable to restore file to:\n"
 "%s"
 msgstr ""
-"Fehler beim Löschen der Datei:\n"
+"Fehler beim Wiederherstellen der Datei nach:\n"
 "%s"
 
 #: ../src/trash.cc:248
@@ -7672,9 +7668,8 @@ msgid "Could not create folder"
 msgstr "Fehler beim Erstellen des Verzeichnisses"
 
 #: ../src/trash.cc:287
-#, fuzzy
 msgid "Could not create trash information file"
-msgstr "Fehler beim Erstellen des Verzeichnisses"
+msgstr "Fehler beim Erstellen der Papierkorb-Infodatei"
 
 #: ../src/trash.cc:297
 msgid "Permission denied"
@@ -7691,17 +7686,15 @@ msgstr ""
 
 #: ../src/trash.cc:316
 msgid "See the Help file for a possible workaround."
-msgstr ""
+msgstr "Siehe die Hilfe für einen möglichen Workaround."
 
 #: ../src/trash.cc:316
-#, fuzzy
 msgid "Unknown error"
-msgstr "Unbekannter Fehler."
+msgstr "Unbekannter Fehler"
 
 #: ../src/trash.cc:318
-#, fuzzy
 msgid "Move to trash failed"
-msgstr "In den Papierkorb Verschieben"
+msgstr "In den Papierkorb Verschieben fehlgeschlagen"
 
 #: ../src/trash.cc:333
 msgid "Deletion by external command"
@@ -7712,9 +7705,9 @@ msgid "Deleting without trash"
 msgstr "Löschen ohne Papierkorb"
 
 #: ../src/trash.cc:345
-#, fuzzy, c-format
+#, c-format
 msgid " (max. %d MiB)"
-msgstr " (max. %d MB)"
+msgstr " (max. %d MiB)"
 
 #: ../src/trash.cc:349
 #, c-format
@@ -7754,9 +7747,8 @@ msgid "Select icon"
 msgstr "Icon-Auswahl"
 
 #: ../src/ui-bookmark.cc:438
-#, fuzzy
 msgid "_Properties…"
-msgstr "_Eigenschaften..."
+msgstr "_Eigenschaften…"
 
 #: ../src/ui-bookmark.cc:439
 msgid "Move _up"
@@ -7779,14 +7771,12 @@ msgid "Desktop"
 msgstr "Desktop"
 
 #: ../src/ui-bookmark.cc:869
-#, fuzzy
 msgid "Optional name"
-msgstr "Originalname:"
+msgstr "Optionaler Name"
 
 #: ../src/ui-bookmark.cc:873
-#, fuzzy
 msgid "Optional name…"
-msgstr "Originalname:"
+msgstr "Optionaler Name…"
 
 #: ../src/ui-bookmark.cc:874
 msgid ""
@@ -7794,45 +7784,47 @@ msgid ""
 "This may be amended or added from the Sort Manager pane.\n"
 "If none given, the basename of the folder is used"
 msgstr ""
+"Optionaler Alias-Name für das Kürzel.\n"
+"Dies kann vom Sortiermanager-Reiter ergänzt oder hinzugefügt werden.\n"
+"Falls nicht vergeben, wird der Verzeichnisname benutzt."
 
 #: ../src/ui-bookmark.cc:979 ../src/ui-tabcomp.cc:746
-#, fuzzy
 msgid "Show history"
-msgstr "Zeige Histogramm"
+msgstr "Zeige Verlauf"
 
 #: ../src/ui-file-chooser.cc:273
 msgid ""
 "iccdump is not installed.\n"
 "Install argyll package"
 msgstr ""
+"iccdump ist nicht installiert.\n"
+"Installiere argyll-Paket"
 
 #: ../src/ui-file-chooser.cc:296
-#, fuzzy, c-format
+#, c-format
 msgid "Error loading PDF: %s\n"
-msgstr "Fehler beim Speichern der Datei: %s\n"
+msgstr "Fehler Laden der PDF: %s\n"
 
 #: ../src/ui-file-chooser.cc:303
 msgid "Failed to get page 0\n"
-msgstr ""
+msgstr "Konnte Seite 0 nicht aufrufen\n"
 
 #: ../src/ui-file-chooser.cc:434
-#, fuzzy
 msgid "No preview"
-msgstr "Vorschau"
+msgstr "Keine Vorschau"
 
 #: ../src/ui-file-chooser.cc:629
-#, fuzzy, c-format
+#, c-format
 msgid "A file named \"%s\" already exists. Do you want to replace it?"
-msgstr "Datei %s existiert bereits."
+msgstr "Datei %s existiert bereits. Ersetzen?"
 
 #: ../src/ui-file-chooser.cc:630 ../src/ui-file-chooser.cc:829
-#, fuzzy
 msgid "_Cancel"
 msgstr "_Abbrechen"
 
 #: ../src/ui-file-chooser.cc:630
 msgid "_Replace"
-msgstr ""
+msgstr "_Ersetzen"
 
 #: ../src/ui-file-chooser.cc:695
 msgid "All files"
@@ -7924,9 +7916,8 @@ msgid "Downloading "
 msgstr "Herunterladen "
 
 #: ../src/ui-fileops.cc:1056
-#, fuzzy
 msgid "File was not saved"
-msgstr "Datei wurde übersprungen."
+msgstr "Datei wurde nicht gespreichert"
 
 #: ../src/ui-help.cc:112
 #, c-format
@@ -7946,87 +7937,77 @@ msgid "Input 1: AdobeRGB compatible"
 msgstr "Profil 1: AdobeRGB kompatibel"
 
 #: ../src/ui-menu.cc:553 ../src/ui-menu.cc:557
-#, fuzzy, c-format
+#, c-format
 msgid "Input %d: %s"
-msgstr "Input _%d: %s"
+msgstr "Eingabe %d: %s"
 
 #: ../src/ui-utildlg.cc:446
-#, fuzzy
 msgid "AppImage"
-msgstr "Bild"
+msgstr "AppImage"
 
 #: ../src/ui-utildlg.cc:447
 msgid "A new Geeqie AppImage is available"
-msgstr ""
+msgstr "Ein neues Geeqie AppImage ist verfügbar"
 
 #: ../src/uri-utils.cc:41
 msgid "Drag and Drop failed"
 msgstr "Drag&Drop fehlgeschlagen"
 
 #: ../src/utilops.cc:847
-#, fuzzy
 msgid "Cancelling…"
-msgstr "_Abbrechen"
+msgstr "Breche ab…"
 
 #: ../src/utilops.cc:876
-#, fuzzy
 msgid "Copying files"
-msgstr "Dateien kopieren?"
+msgstr "Kopiere Dateien"
 
 #: ../src/utilops.cc:879
-#, fuzzy
 msgid "Moving files"
-msgstr "Dateien verschieben?"
+msgstr "Verschiebe Dateien"
 
 #: ../src/utilops.cc:884
-#, fuzzy
 msgid "Deleting files"
-msgstr "Dateien löschen?"
+msgstr "Lösche Dateien"
 
 #: ../src/utilops.cc:887
-#, fuzzy
 msgid "Renaming files"
-msgstr "Dateien umbenennen?"
+msgstr "Benenne Dateien um"
 
 #: ../src/utilops.cc:890
-#, fuzzy
 msgid "Processing files"
-msgstr "Fehler beim Speichern der Datei: %s\n"
+msgstr "Verarbeite Dateien"
 
 #: ../src/utilops.cc:905
-#, fuzzy
 msgid "Starting…"
-msgstr "Bewertung in Sternen"
+msgstr "Beginne…"
 
 #: ../src/utilops.cc:955
-#, fuzzy, c-format
+#, c-format
 msgid "%d of %d files"
-msgstr "%s, %d Dateien"
+msgstr "%d von %d Dateien"
 
 #: ../src/utilops.cc:968
-#, fuzzy, c-format
+#, c-format
 msgid "Processing: %s %s"
-msgstr "Erstelle %s Verzeichnis: %s\n"
+msgstr "Verarbeite: %s %s"
 
 #: ../src/utilops.cc:972
-#, fuzzy, c-format
+#, c-format
 msgid "Processing: %s"
-msgstr "Pfad: %s"
+msgstr "Verarbeite: %s"
 
 #: ../src/utilops.cc:986
-#, fuzzy
 msgid "Operation cancelled"
-msgstr "Operation fehlgeschlagen:\n"
+msgstr "Operation abgebrochen"
 
 #: ../src/utilops.cc:991
-#, fuzzy, c-format
+#, c-format
 msgid "%d files completed"
-msgstr "%d Dateien (menge 2)"
+msgstr "%d Dateien erledigt"
 
 #: ../src/utilops.cc:993
-#, fuzzy
 msgid "Operation completed"
-msgstr "Operation fehlgeschlagen:\n"
+msgstr "Operation ausgeführt"
 
 #: ../src/utilops.cc:1025
 msgid ""
@@ -8097,11 +8078,11 @@ msgstr "In Datei schreiben"
 
 #: ../src/utilops.cc:1890
 msgid "Geeqie - Move File"
-msgstr ""
+msgstr "Geeqie - Verschiebe Datei"
 
 #: ../src/utilops.cc:1890
 msgid "Geeqie - Copy File"
-msgstr ""
+msgstr "Geeqie - Kopiere Datei"
 
 #: ../src/utilops.cc:1946
 msgid "New name"
@@ -8112,9 +8093,8 @@ msgid "Source"
 msgstr "Quelle"
 
 #: ../src/utilops.cc:1960
-#, fuzzy
 msgid "Destination"
-msgstr "Ziel:"
+msgstr "Ziel"
 
 #: ../src/utilops.cc:1976
 msgid "Manual rename"
@@ -8206,43 +8186,36 @@ msgid "The following metadata tags will be written to the image file itself."
 msgstr "Die folgenden Metadaten werden ins Bild selbst gespeichert."
 
 #: ../src/utilops.cc:2436
-#, fuzzy
 msgid "⚠ This will move the following    "
-msgstr "Das wird folgende Dateien verschieben"
+msgstr "⚠ Das wird folgende    "
 
 #: ../src/utilops.cc:2436
-#, fuzzy
 msgid "    files to the Trash bin"
-msgstr "Das wird die folgende Dateien in den Papierkorb verschieben"
+msgstr "    Dateien in den Papierkorb verschieben"
 
 #: ../src/utilops.cc:2440
-#, fuzzy
 msgid "⚠ This will permanently delete the following    "
-msgstr "Das wird die folgenden Dateien dauerhaft löschen"
+msgstr "Das wird die folgenden Dateien dauerhaft löschen   "
 
 #: ../src/utilops.cc:2440
-#, fuzzy
 msgid "    files"
-msgstr "%d Dateien"
+msgstr "   Dateien"
 
 #: ../src/utilops.cc:2442
 msgid "Delete files?"
 msgstr "Dateien löschen?"
 
 #: ../src/utilops.cc:2448
-#, fuzzy
 msgid "This will move the following file to the Trash bin"
-msgstr "Das wird die folgende Dateien in den Papierkorb verschieben"
+msgstr "Das wird die folgende Datei in den Papierkorb verschieben"
 
 #: ../src/utilops.cc:2452
-#, fuzzy
 msgid "This will permanently delete the following file"
-msgstr "Das wird die folgenden Dateien dauerhaft löschen"
+msgstr "Das wird die folgende Datei dauerhaft löschen"
 
 #: ../src/utilops.cc:2454
-#, fuzzy
 msgid "Delete file?"
-msgstr "Dateien löschen?"
+msgstr "Datei löschen?"
 
 #: ../src/utilops.cc:2477
 msgid "Can't write metadata"
@@ -8371,8 +8344,7 @@ msgstr ""
 "\n"
 "%s\n"
 "\n"
-"Das Verzeichnis enthält Unterverzeichnisse, die zuerst verschoben werden "
-"müssen bevor es gelöscht werden kann."
+"Das Verzeichnis enthält Unterverzeichnisse, die zuerst verschoben werden müssen bevor es gelöscht werden kann."
 
 #: ../src/utilops.cc:2927
 msgid "Subfolders:"
@@ -8407,14 +8379,12 @@ msgid "Create Folder"
 msgstr "Verzeichnis erstellen"
 
 #: ../src/utilops.cc:3266
-#, fuzzy
 msgid "Folder was not created"
-msgstr "Verzeichnis nicht unterstützt"
+msgstr "Verzeichnis nicht erstellt"
 
 #: ../src/utilops.cc:3297
-#, fuzzy
 msgid "Geeqie - Create Folder"
-msgstr "Verzeichnis erstellen"
+msgstr "Geeqie - Verzeichnis erstellen"
 
 #: ../src/view-dir.cc:377
 msgid "_Copy"
@@ -8459,9 +8429,9 @@ msgid "Stars"
 msgstr "Sterne"
 
 #: ../src/view-file/view-file.cc:1030
-#, fuzzy, c-format
+#, c-format
 msgid "Clear mark %d"
-msgstr "Nach Markierung %d filtern"
+msgstr "Entferne Markierung %d"
 
 #: ../src/view-file/view-file.cc:1030
 #, c-format
@@ -8469,17 +8439,16 @@ msgid "Set mark %d"
 msgstr "Setze Markierung %d"
 
 #: ../src/view-file/view-file.cc:1043
-#, fuzzy
 msgid "All marks"
-msgstr "Jede Markierung"
+msgstr "Alle Markierungen"
 
 #: ../src/view-file/view-file.cc:1083
 msgid "Copy back to original location"
-msgstr ""
+msgstr "Kopiere zurück an ursprünglichen Ort"
 
 #: ../src/view-file/view-file.cc:1084
 msgid "Move back to original location"
-msgstr ""
+msgstr "Verschiebe zurück an ursprünglichen Ort"
 
 #: ../src/view-file/view-file.cc:1103
 msgid "Show thumbnails"
@@ -8499,21 +8468,19 @@ msgstr "Dadurch wird der markierte Text festgelegt oder gelöscht."
 
 #: ../src/view-file/view-file.cc:1723
 msgid "Right-click for comparison options"
-msgstr ""
+msgstr "Rechsklick für Vergleichsoptionen"
 
 #: ../src/view-file/view-file.cc:1747
-#, fuzzy
 msgid "Ignore Rating"
-msgstr "Ausrichtung ignorieren"
+msgstr "Bewertung ignorieren"
 
 #: ../src/view-file/view-file.cc:1796
 msgid "Use regular expressions"
-msgstr ""
+msgstr "Verwende reguläre Ausdrücke"
 
 #: ../src/view-file/view-file.cc:1806
-#, fuzzy
 msgid "Show filter history"
-msgstr "Zeige Dateifilter"
+msgstr "Zeige Filter-Verlauf"
 
 #: ../src/view-file/view-file.cc:1834
 msgid "Case sensitive"
@@ -8524,14 +8491,12 @@ msgid "Select Class filter"
 msgstr "Wählen einen Klassenfilter"
 
 #: ../src/view-file/view-file.cc:1840
-#, fuzzy
 msgid "Select Rating filter"
-msgstr "Wählen einen Klassenfilter"
+msgstr "Wählen einen Bewertungsfilter"
 
 #: ../src/view-file/view-file.cc:2400 ../src/view-file/view-file.cc:2438
-#, fuzzy
 msgid "Loading meta…"
-msgstr "Lade Meta..."
+msgstr "Lade Metadaten…"
 
 #: ../src/window.cc:215
 msgid "On-line help search"
@@ -8550,17 +8515,15 @@ msgid "Search terms:"
 msgstr "Suchbegriff:"
 
 #: ../src/window.cc:258
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: Failed to execute command: %s\n"
-msgstr ""
-"Fehler beim Ausführen des Befehles:\n"
-"%s\n"
+msgstr "Fehler beim Ausführen des Befehles: %s\n"
 
 #, fuzzy
 #~ msgid ""
-#~ "Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It "
-#~ "can be used as a simple, fast, database-free image viewer, but equally it "
-#~ "can be used to manage large collections of images."
+#~ "Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It can"
+#~ " be used as a simple, fast, database-free image viewer, but equally it can "
+#~ "be used to manage large collections of images."
 #~ msgstr ""
 #~ "Es kann als einfacher, schneller und datenbankfreier Bildbetrachter "
 #~ "verwendet werden, aber auch zum Verwalten großer Bildersammlungen."
@@ -8772,15 +8735,15 @@ msgstr ""
 #~ msgid "%d bytes"
 #~ msgstr "%d Byte"
 
-#, fuzzy, c-format
+#, c-format, fuzzy
 #~ msgid "%.1f KiB"
 #~ msgstr "%.1f kB"
 
-#, fuzzy, c-format
+#, c-format, fuzzy
 #~ msgid "%.1f MiB"
 #~ msgstr "%.1f MB"
 
-#, fuzzy, c-format
+#, c-format, fuzzy
 #~ msgid "%.1f GiB"
 #~ msgstr "%.1f GB"
 
@@ -8801,8 +8764,8 @@ msgstr ""
 #, fuzzy
 #~ msgid "Rotate flip"
 #~ msgstr ""
-#~ "Glatter Bildwechsel (nächstes Bild erst anzeigen, wenn es komplett "
-#~ "geladen ist)"
+#~ "Glatter Bildwechsel (nächstes Bild erst anzeigen, wenn es komplett geladen "
+#~ "ist)"
 
 #, fuzzy
 #~ msgid " Rotate counterclockwise 90°"
@@ -9388,16 +9351,14 @@ msgstr ""
 #~ msgstr "  -h, --help                       Zeigt diese Meldung\n"
 
 #~ msgid ""
-#~ "  -l, --list [files] [collections] open collection window for command "
-#~ "line\n"
+#~ "  -l, --list [files] [collections] open collection window for command line\n"
 #~ msgstr ""
 #~ "  -l, --list [dateien] [Sammlung] Neue Sammlung mit angegebenen Bildern "
 #~ "erstellen\n"
 
 #, fuzzy
 #~ msgid "  -n, --new-instance               open a new instance of Geeqie *\n"
-#~ msgstr ""
-#~ "  -n --new-instance               öffnet eine neue Instanz von Geeqie\n"
+#~ msgstr "  -n --new-instance               öffnet eine neue Instanz von Geeqie\n"
 
 #, fuzzy
 #~ msgid "  -o, --log-file=<file>            save log data to file\n"
@@ -9405,8 +9366,7 @@ msgstr ""
 #~ "  -o: <Datei>, --log-file:<Datei>     Protokolldaten in Datei speichern\n"
 
 #~ msgid ""
-#~ "  -r, --remote                     send following commands to open "
-#~ "window\n"
+#~ "  -r, --remote                     send following commands to open window\n"
 #~ msgstr ""
 #~ "  -r, --remote                     Sende angegebene Befehle an offenes "
 #~ "Fenster\n"
@@ -9416,12 +9376,10 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "  -T, --with-tools                 force show of tools\n"
-#~ msgstr ""
-#~ "  +t, --with-tools                 Anzeige der Werkzeuge erzwingen\n"
+#~ msgstr "  +t, --with-tools                 Anzeige der Werkzeuge erzwingen\n"
 
 #~ msgid "  -t, --without-tools              force hide of tools\n"
-#~ msgstr ""
-#~ "  -t, --without-tools              Verbergen der Werkzeuge erzwingen\n"
+#~ msgstr "  -t, --without-tools              Verbergen der Werkzeuge erzwingen\n"
 
 #~ msgid "  -v, --version                    print version info\n"
 #~ msgstr "  -v, --version                    Zeige Versionsnummer\n"
@@ -9519,7 +9477,7 @@ msgstr ""
 #~ "Fehler beim Speichern der Konfigurationdatei %s.\n"
 #~ "Fehler: %s\n"
 
-#, fuzzy, c-format
+#, c-format, fuzzy
 #~ msgid "error saving default layout file: %s\n"
 #~ msgstr "Fehler beim Speichern der Datei: %s\n"
 
@@ -9607,15 +9565,12 @@ msgstr ""
 #~ msgid ""
 #~ "\n"
 #~ "\n"
-#~ "  All other command line parameters are used as plain files if they "
-#~ "exist.\n"
+#~ "  All other command line parameters are used as plain files if they exist.\n"
 #~ "\n"
-#~ "  The name of a collection, with or without either path or extension "
-#~ "(.gqv) may be used.\n"
+#~ "  The name of a collection, with or without either path or extension (.gqv) may be used.\n"
 #~ msgstr ""
 #~ "\n"
-#~ "  Alle weiteren Kommandozeilenparameter werden als Dateien angesehen wenn "
-#~ "sie existieren.\n"
+#~ "  Alle weiteren Kommandozeilenparameter werden als Dateien angesehen wenn sie existieren.\n"
 
 #, c-format
 #~ msgid "Remote %s not running, starting..."
@@ -9856,8 +9811,7 @@ msgstr ""
 #~ "erfolgreiche Vorgang beendet das Schreiben."
 
 #~ msgid ""
-#~ "2) Save metadata in '.metadata' folder, local to image folder (non-"
-#~ "standard)"
+#~ "2) Save metadata in '.metadata' folder, local to image folder (non-standard)"
 #~ msgstr ""
 #~ "2) Speichere Metadaten im '.metadata'-Verzeichnis innerhalb des "
 #~ "Bilderverzeichnis (kein Standard)"
@@ -9870,8 +9824,7 @@ msgstr ""
 
 #~ msgid "Allow keywords to differ only in case"
 #~ msgstr ""
-#~ "Erlaube, daß Schlüsselwörter sich nur in Groß-/Kleinschreibung "
-#~ "unterscheiden"
+#~ "Erlaube, daß Schlüsselwörter sich nur in Groß-/Kleinschreibung unterscheiden"
 
 #~ msgid "Fit image to _window"
 #~ msgstr "In _Fenster einpassen"
@@ -9981,44 +9934,24 @@ msgstr ""
 
 #~ msgid ""
 #~ "<i>%name%</i> results in the filename of the picture.\n"
-#~ "Also available: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, "
-#~ "<i>%date%</i>,\n"
-#~ "<i>%size%</i> (filesize), <i>%width%</i>, <i>%height%</i>, <i>%res%</i> "
-#~ "(resolution)\n"
-#~ "To access exif data use the exif name, e. g. <i>%formatted.Camera%</i> is "
-#~ "the formatted camera name,\n"
+#~ "Also available: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, <i>%date%</i>,\n"
+#~ "<i>%size%</i> (filesize), <i>%width%</i>, <i>%height%</i>, <i>%res%</i> (resolution)\n"
+#~ "To access exif data use the exif name, e. g. <i>%formatted.Camera%</i> is the formatted camera name,\n"
 #~ "<i>%Exif.Photo.DateTimeOriginal%</i> the date of the original shot.\n"
-#~ "<i>%formatted.Camera:20</i> notation will truncate the displayed data to "
-#~ "20 characters and will add 3 dots at the end to denote the truncation.\n"
-#~ "If two or more variables are connected with the |-sign, it prints "
-#~ "available variables with a separator.\n"
-#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|"
-#~ "<i>%formatted.FocalLength%</i> could show \"1/20s - 400 - 80 mm\" or "
-#~ "\"1/200 - 80 mm\",\n"
+#~ "<i>%formatted.Camera:20</i> notation will truncate the displayed data to 20 characters and will add 3 dots at the end to denote the truncation.\n"
+#~ "If two or more variables are connected with the |-sign, it prints available variables with a separator.\n"
+#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|<i>%formatted.FocalLength%</i> could show \"1/20s - 400 - 80 mm\" or \"1/200 - 80 mm\",\n"
 #~ "if there's no ISO information in the Exif data.\n"
-#~ "If a line is empty, it is removed. This allows one to add lines that "
-#~ "totally disappear when no data is available.\n"
+#~ "If a line is empty, it is removed. This allows one to add lines that totally disappear when no data is available.\n"
 #~ msgstr ""
 #~ "<i>%name%</i> Dateinamen des Bildes.\n"
-#~ "Weiter: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, "
-#~ "<i>%date%<i>\n"
-#~ "<i>%size%</i> (Dateigröße), <i>%width%</i>, <i>%height%</i>, <i>%res%</i> "
-#~ "(Auflösung).\n"
-#~ "Um die EXIF-Daten anzuzeigen kann der EXIF-Name verwendet werden. "
-#~ "Beispielsweise ist <i>%formatted.Camera%</i> der formatierte Kameraname "
-#~ "oder <i>%Exif.Photo.DateTimeOriginal%</i> das Datum der "
-#~ "Originalaufnahme.\n"
-#~ "Die <i>%formatted.Camera:20%</i>-Notation schneidet den Text nach 20 "
-#~ "Zeichen ab und ergänzt ihn um 3 Punkte am Ende um die Verkürzung zu "
-#~ "kennzeichnen.\n"
-#~ "Wenn mehrere Variablen mit dem |-Zeichen verbunden werden, werden die "
-#~ "verfügbaren Variablen mit einem Trennzeichen angezeigt.\n"
-#~ "\"<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|"
-#~ "<i>%formatted.FocalLength%</i>\" könnte somit als \"1/20s - 400 - 80 mm\" "
-#~ "oder als \"1/200 - 80 mm\" angezeigt werden, wenn keine Information über "
-#~ "die ISO-Einstellungen in den EXIF-Daten enthalten ist.\n"
-#~ "Eine leere Zeile wird entfernt. Das erlaubt es, Zeilen hinzuzufügen, die "
-#~ "komplett verschwinden, wenn keine Daten verfügbar sind.\n"
+#~ "Weiter: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, <i>%date%<i>\n"
+#~ "<i>%size%</i> (Dateigröße), <i>%width%</i>, <i>%height%</i>, <i>%res%</i> (Auflösung).\n"
+#~ "Um die EXIF-Daten anzuzeigen kann der EXIF-Name verwendet werden. Beispielsweise ist <i>%formatted.Camera%</i> der formatierte Kameraname oder <i>%Exif.Photo.DateTimeOriginal%</i> das Datum der Originalaufnahme.\n"
+#~ "Die <i>%formatted.Camera:20%</i>-Notation schneidet den Text nach 20 Zeichen ab und ergänzt ihn um 3 Punkte am Ende um die Verkürzung zu kennzeichnen.\n"
+#~ "Wenn mehrere Variablen mit dem |-Zeichen verbunden werden, werden die verfügbaren Variablen mit einem Trennzeichen angezeigt.\n"
+#~ "\"<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|<i>%formatted.FocalLength%</i>\" könnte somit als \"1/20s - 400 - 80 mm\" oder als \"1/200 - 80 mm\" angezeigt werden, wenn keine Information über die ISO-Einstellungen in den EXIF-Daten enthalten ist.\n"
+#~ "Eine leere Zeile wird entfernt. Das erlaubt es, Zeilen hinzuzufügen, die komplett verschwinden, wenn keine Daten verfügbar sind.\n"
 
 #~ msgid "Safe delete"
 #~ msgstr "Papierkorb verwenden"
