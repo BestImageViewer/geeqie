@@ -563,6 +563,27 @@ void setup_sig_handler()
 	sigaction(SIGSEGV, &sigsegv_action, nullptr);
 }
 
+GdkRGBA theme_background_color(GtkWidget *widget)
+{
+	GdkRGBA theme_color {};
+
+	/* GTK 4 has no non-deprecated API for reading theme-defined symbolic colors. */
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+	GtkStyleContext *context = gtk_widget_get_style_context(widget);
+
+	if (gtk_style_context_lookup_color(context, "theme_bg_color", &theme_color) ||
+	    gtk_style_context_lookup_color(context, "theme_base_color", &theme_color))
+		{
+		G_GNUC_END_IGNORE_DEPRECATIONS
+		return theme_color;
+		}
+	G_GNUC_END_IGNORE_DEPRECATIONS
+
+	theme_color.alpha = 1.0;
+
+	return theme_color;
+}
+
 void set_theme_bg_color()
 {
 	if (!options->image.use_custom_border_color)
@@ -571,11 +592,7 @@ void set_theme_bg_color()
 
 		if (lw && lw->window)
 			{
-			GdkRGBA theme_color {};
-
-/** @FIXME This sets the foreground color. CSS should be used.
- */
-			gtk_widget_get_color(lw->window, &theme_color);
+			GdkRGBA theme_color = theme_background_color(lw->window);
 
 			layout_window_foreach([&theme_color](LayoutWindow *lw)
 				{
@@ -589,13 +606,13 @@ void set_theme_bg_color()
 
 void theme_change_cb(GSettings *iface, gchar, gpointer)
 {
-	set_theme_bg_color();
-
 	g_autofree gchar *scheme = g_settings_get_string(iface, "color-scheme");
 	const gboolean prefer_dark_theme = (g_strcmp0(scheme, "prefer-dark") == 0);
 
 	GtkSettings *settings = gtk_settings_get_default();
 	g_object_set(settings, "gtk-application-prefer-dark-theme", prefer_dark_theme, nullptr);
+
+	set_theme_bg_color();
 }
 
 /**
@@ -852,7 +869,7 @@ void startup_cb(GtkApplication *app, gpointer)
 	GSettings *iface = g_settings_new("org.gnome.desktop.interface");
 	g_signal_connect(iface, "changed::color-scheme", G_CALLBACK(theme_change_cb), nullptr);
 
-	set_theme_bg_color();
+	theme_change_cb(iface, 0, nullptr);
 
 	/* Show a notification if the server has a newer AppImage version */
 	if (options->appimage_notifications)
