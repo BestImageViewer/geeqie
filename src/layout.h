@@ -186,6 +186,8 @@ GtkBuilder *builder;
 
 	GtkWidget *menu_tool_bar; /**< Combined menu and toolbar box */
 	GtkWidget *menu_bar; /**< referenced by lw, exist during whole lw lifetime */
+	GtkWidget *hamburger_menu_button;
+	GtkWidget *hamburger_menu_previous_focus;
 	GMenuModel *menu_model;
 	/* toolbar */
 

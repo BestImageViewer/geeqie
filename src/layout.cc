@@ -492,6 +492,61 @@ static gboolean path_entry_tooltip_cb(GtkWidget *widget, gpointer)
 	return FALSE;
 }
 
+static gboolean layout_hamburger_menu_restore_focus_cb(gpointer data)
+{
+	auto focus = static_cast<GtkWidget *>(data);
+
+	GtkRoot *root = gtk_widget_get_root(focus);
+	if (GTK_IS_WINDOW(root))
+		{
+		gtk_window_set_focus(GTK_WINDOW(root), nullptr);
+		gtk_widget_grab_focus(focus);
+		}
+
+	return G_SOURCE_REMOVE;
+}
+
+static void layout_hamburger_menu_closed_cb(GtkPopover *, gpointer data)
+{
+	auto lw = static_cast<LayoutWindow *>(data);
+	GtkWidget *previous_focus = lw->hamburger_menu_previous_focus;
+
+	if (!previous_focus) return;
+
+	g_object_remove_weak_pointer(G_OBJECT(previous_focus),
+	                             reinterpret_cast<gpointer *>(&lw->hamburger_menu_previous_focus));
+	lw->hamburger_menu_previous_focus = nullptr;
+
+	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, layout_hamburger_menu_restore_focus_cb,
+	                g_object_ref(previous_focus), g_object_unref);
+}
+
+static gboolean layout_hamburger_menu_key_press_cb(GtkEventControllerKey *, guint keyval, guint,
+	                                                GdkModifierType state, gpointer data)
+{
+	auto lw = static_cast<LayoutWindow *>(data);
+
+	if (keyval != GDK_KEY_F10 || state & gtk_accelerator_get_default_mod_mask()) return FALSE;
+
+	GtkPopover *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(lw->hamburger_menu_button));
+	if (gtk_widget_get_visible(GTK_WIDGET(popover)))
+		{
+		gtk_popover_popdown(GTK_POPOVER(popover));
+		return TRUE;
+		}
+
+	GtkWidget *focus = gtk_window_get_focus(GTK_WINDOW(lw->window));
+	if (focus)
+		{
+		lw->hamburger_menu_previous_focus = focus;
+		g_object_add_weak_pointer(G_OBJECT(focus),
+		                          reinterpret_cast<gpointer *>(&lw->hamburger_menu_previous_focus));
+		}
+
+	gtk_menu_button_popup(GTK_MENU_BUTTON(lw->hamburger_menu_button));
+	return TRUE;
+}
+
 static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 {
 	GtkWidget *box;
@@ -549,10 +604,18 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gtk_window_set_titlebar(GTK_WINDOW(lw->window), header);
 		GtkWidget *menu_button = gtk_menu_button_new();
 		GtkWidget *image = gtk_image_new_from_icon_name("open-menu-symbolic");
+		lw->hamburger_menu_button = menu_button;
 
 		gtk_menu_button_set_child(GTK_MENU_BUTTON(menu_button), image);
 
 		gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), lw->menu_model);
+		GtkPopover *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(menu_button));
+		g_signal_connect(popover, "closed", G_CALLBACK(layout_hamburger_menu_closed_cb), lw);
+
+		GtkEventController *controller = gtk_event_controller_key_new();
+		gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
+		g_signal_connect(controller, "key-pressed", G_CALLBACK(layout_hamburger_menu_key_press_cb), lw);
+		gtk_widget_add_controller(lw->window, controller);
 
 		gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
 		}
