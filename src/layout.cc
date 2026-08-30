@@ -155,6 +155,7 @@ void layout_load_attributes(LayoutOptions &lop, const gchar **attribute_names, c
 		if (READ_INT(lop, main_window.vdivider_pos)) continue;
 
 		if (READ_INT_CLAMP(lop, folder_window.vdivider_pos, 1, 1000)) continue;
+		if (READ_INT_CLAMP(lop, file_view_list.vdivider_pos, 1, 1000)) continue;
 
 		if (READ_INT_FULL("float_window.x", lop.float_window.rect.x)) continue;
 		if (READ_INT_FULL("float_window.y", lop.float_window.rect.y)) continue;
@@ -236,6 +237,7 @@ LayoutOptions init_layout_options(const gchar **attribute_names, const gchar **a
 	lop.dupe_window.rect = {100, 100, 800, 400};
 	lop.advanced_exif_window = {0, 0, 900, 600};
 	lop.folder_window.vdivider_pos = 100;
+	lop.file_view_list.vdivider_pos = 320;
 	lop.order = g_strdup("123");
 	lop.show_directory_date = FALSE;
 	lop.show_marks = FALSE;
@@ -2902,6 +2904,8 @@ static void layout_write_attributes(const LayoutOptions &lop, GString *outstr, g
 	WRITE_SEPARATOR();
 
 	WRITE_NL(); WRITE_INT(lop, folder_window.vdivider_pos);
+	WRITE_SEPARATOR();
+	WRITE_NL(); WRITE_INT(lop, file_view_list.vdivider_pos);
 	WRITE_SEPARATOR();
 
 	WRITE_NL(); WRITE_INT_FULL("float_window.x", lop.float_window.rect.x);

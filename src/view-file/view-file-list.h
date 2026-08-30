@@ -35,6 +35,13 @@ struct ViewFileInfoList
 	FileData *select_fd;
 
 	gboolean thumbs_enabled;
+	gboolean syncing_selection;
+	gboolean syncing_expansion;
+
+	GtkWidget *paned;
+	GtkWidget *name_scrolled;
+	GtkWidget *details_scrolled;
+	GtkWidget *details_view;
 
 	guint select_idle_id; /**< event source id */
 };
@@ -49,6 +56,9 @@ FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *i
 
 void vflist_destroy_cb(ViewFile *vf);
 ViewFile *vflist_new(ViewFile *vf);
+GtkWidget *vflist_get_view_widget(ViewFile *vf);
+GtkWidget *vflist_get_details_view(ViewFile *vf);
+void vflist_restore_divider_position(ViewFile *vf);
 
 gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd);
 gboolean vflist_refresh(ViewFile *vf);

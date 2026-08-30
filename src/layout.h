@@ -96,6 +96,10 @@ struct LayoutOptions
 	} folder_window;
 
 	struct {
+		gint vdivider_pos;
+	} file_view_list;
+
+	struct {
 		guint state;
 		gint histogram_channel;
 		gint histogram_mode;

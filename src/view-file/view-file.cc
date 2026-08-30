@@ -1888,20 +1888,31 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	g_object_add_weak_pointer(G_OBJECT(vf->listview), reinterpret_cast<gpointer *>(&vf->listview));
 	g_object_set_data(G_OBJECT(vf->listview), VIEW_FILE_DATA_KEY, vf);
 
-	GtkEventController *key_controller = gtk_event_controller_key_new();
+	auto add_view_controllers = [vf](GtkWidget *view)
+	{
+		GtkEventController *key_controller = gtk_event_controller_key_new();
+		g_signal_connect(key_controller, "key-pressed", G_CALLBACK(vf_press_key_cb), vf);
+		gtk_widget_add_controller(view, key_controller);
 
-	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(vf_press_key_cb), vf);
+		GtkGesture *gesture = gtk_gesture_click_new();
+		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
+		gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
+		g_signal_connect(gesture, "pressed", G_CALLBACK(vf_gesture_press_cb), vf);
+		g_signal_connect(gesture, "released", G_CALLBACK(vf_gesture_release_cb), vf);
+		gtk_widget_add_controller(view, GTK_EVENT_CONTROLLER(gesture));
+	};
 
-	gtk_widget_add_controller(vf->listview, key_controller);
-
-	GtkGesture *gesture = gtk_gesture_click_new();
-	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
-	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
-	g_signal_connect(gesture, "pressed", G_CALLBACK(vf_gesture_press_cb), vf);
-	g_signal_connect(gesture, "released", G_CALLBACK(vf_gesture_release_cb), vf);
-	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(gesture));
-
-	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vf->scrolled), vf->listview);
+	add_view_controllers(vf->listview);
+	if (type == FILEVIEW_LIST)
+		{
+		add_view_controllers(vflist_get_details_view(vf));
+		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(vf->scrolled), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vf->scrolled), vflist_get_view_widget(vf));
+		}
+	else
+		{
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vf->scrolled), vf->listview);
+		}
 
 	vf_dnd_init(vf);
 
@@ -2275,6 +2286,7 @@ guint vf_class_get_filter(ViewFile *vf)
 void vf_set_layout(ViewFile *vf, LayoutWindow *layout)
 {
 	vf->layout = layout;
+	if (vf->type == FILEVIEW_LIST) vflist_restore_divider_position(vf);
 	if (layout && layout->window)
 		{
 		GtkGesture *gesture = gtk_gesture_click_new();
