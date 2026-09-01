@@ -115,28 +115,14 @@ void toolbarlist_add_button(const gchar *name, const gchar *label,
 	gtk_box_append(GTK_BOX(hbox), button_label);
 }
 
-void toolbarlist_add_button_main_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+void toolbarlist_add_button_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	const gchar *action_name = g_variant_get_string(parameter, nullptr);
-
 
 	const gchar *label = get_description_for_action_name(action_name);
 	const gchar *icon = get_icon_for_action_name(action_name);
 
 	toolbarlist_add_button(action_name, label, icon, GTK_BOX(data));
-
-}
-
-void toolbarlist_add_button_status_cb(GSimpleAction *, GVariant *parameter, gpointer data)
-{
-	const gchar *action_name = g_variant_get_string(parameter, nullptr);
-
-
-	const gchar *label = get_description_for_action_name(action_name);
-	const gchar *icon = get_icon_for_action_name(action_name);
-
-	toolbarlist_add_button(action_name, label, icon, GTK_BOX(data));
-
 }
 
 void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType bar)
