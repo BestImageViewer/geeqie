@@ -1332,31 +1332,6 @@ bool widget_is_editable_text(GtkWidget *widget)
 	return GTK_IS_EDITABLE(widget) || GTK_IS_TEXT_VIEW(widget);
 }
 
-bool widget_or_descendant_is_editable_text(GtkWidget *widget)
-{
-	if (!widget)
-		{
-		return false;
-		}
-
-	if (widget_is_editable_text(widget))
-		{
-		return true;
-		}
-
-	for (GtkWidget *child = gtk_widget_get_first_child(widget);
-	     child;
-	     child = gtk_widget_get_next_sibling(child))
-		{
-		if (widget_or_descendant_is_editable_text(child))
-			{
-			return true;
-			}
-		}
-
-	return false;
-}
-
 bool focus_widget_is_editable_text(GtkWidget *focus)
 {
 	for (GtkWidget *widget = focus; widget; widget = gtk_widget_get_parent(widget))
@@ -1367,7 +1342,7 @@ bool focus_widget_is_editable_text(GtkWidget *focus)
 			}
 		}
 
-	return widget_or_descendant_is_editable_text(focus);
+	return false;
 }
 
 } // namespace
