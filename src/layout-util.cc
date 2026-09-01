@@ -26,8 +26,6 @@
 #include <unistd.h>
 
 #include <algorithm>
-#include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include <gio/gio.h>
@@ -86,8 +84,6 @@
 #include "view-dir.h"
 #include "view-file.h"
 #include "window.h"
-
-extern const ActionDef app_actions[];
 
 namespace
 {
@@ -3724,78 +3720,6 @@ void register_main_window_actions(GtkApplication *app,  LayoutWindow *lw)
 
 	register_actions_from_table(app, lw->window, main_actions, accels_keyfile, lw);
 	layout_menu_new_window_update(lw);
-}
-
-GStrv get_tooltips()
-{
-	GPtrArray *array = g_ptr_array_new_with_free_func(g_free);
-
-	for (const auto & app_action : app_actions)
-		{
-		if (app_action.description)
-			{
-			g_ptr_array_add(array, g_strdup(app_action.description));
-			}
-		}
-
-	g_ptr_array_add(array, nullptr);  /* NULL terminate */
-
-	return (GStrv) g_ptr_array_free(array, FALSE);
-}
-
-struct ActionLine
-{
-	const char *action_name;
-	const char *description;
-};
-
-struct ActionLine2
-{
-	const char *action_name;
-};
-
-GStrv get_actions_for_toolbar()
-{
-	size_t n_app_actions = G_N_ELEMENTS(app_actions);
-
-	std::vector<ActionLine2> rows;
-	rows.reserve(n_app_actions);
-
-	size_t max_entry_len = 0;
-
-	for (size_t i = 0; i < n_app_actions; i++)
-		{
-		if (!app_actions[i].icon_name)
-			{
-			continue;
-			}
-
-		if (!app_actions[i].action_name || !app_actions[i].description || (g_strcmp0(app_actions[i].icon_name, GQ_ICON_MISSING_IMAGE) == 0) || app_actions[i].parameter_type || !app_actions[i].icon_name)
-			{
-			continue;
-			}
-
-		rows.push_back({ app_actions[i].action_name});
-
-		size_t len = strlen(app_actions[i].description);
-		max_entry_len = std::max(len, max_entry_len);
-		}
-
-	std::sort(rows.begin(), rows.end(), [](const ActionLine2 & a, const ActionLine2 & b)
-		{
-		return g_strcmp0(a.action_name, b.action_name) < 0;
-		});
-
-	GPtrArray *array = g_ptr_array_new_with_free_func(g_free);
-
-	for (const auto &row : rows)
-		{
-		g_ptr_array_add(array, g_strdup_printf("%s", row.action_name));
-		}
-
-	g_ptr_array_add(array, nullptr);
-
-	return (GStrv) g_ptr_array_free(array, FALSE);
 }
 
 const ActionDef *get_app_actions()

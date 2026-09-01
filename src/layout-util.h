@@ -94,11 +94,6 @@ void register_main_window_actions(GtkApplication *app,  LayoutWindow *lw);
 
 void plugin_run_cb(GSimpleAction *action, GVariant *parameter, gpointer user_data);
 
-GKeyFile *get_accels_as_keyfile();
-
-GStrv get_tooltips(void);
-GStrv get_actions_for_toolbar();
-
 void register_app_actions(GtkApplication *app );
 
 #endif
