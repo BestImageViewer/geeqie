@@ -30,6 +30,7 @@
 
 #include <glib-object.h>
 
+#include "accelerators.h"
 #include "actions.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -110,7 +111,7 @@ void editor_plugin_accels_clear()
 void editor_plugin_accel_register(const EditorDescription *editor)
 {
 	if (!editor || editor->disabled || editor->hidden || editor->ignored ||
-	    !editor->hotkey || !*editor->hotkey)
+	    !editor->key || !*editor->key)
 		{
 		return;
 		}
@@ -126,10 +127,15 @@ void editor_plugin_accel_register(const EditorDescription *editor)
 	if (!plugin_accel_actions)
 		{
 		plugin_accel_actions = g_ptr_array_new_with_free_func(g_free);
-		}
+	}
 
 	g_autofree gchar *detailed_action = g_strdup_printf("win.main-win-plugin-run::%s", editor->key);
-	g_auto(GStrv) accels = g_strsplit(editor->hotkey, ";", -1);
+	GKeyFile *key_file = get_keyfile_merged();
+	g_auto(GStrv) accels = key_file ? g_key_file_get_string_list(key_file, detailed_action, "accels", nullptr, nullptr) : nullptr;
+	if (!accels)
+		{
+		accels = editor->hotkey && *editor->hotkey ? g_strsplit(editor->hotkey, ";", -1) : g_new0(gchar *, 1);
+		}
 
 	register_accels_for_action(app, detailed_action, accels);
 	g_ptr_array_add(plugin_accel_actions, g_strdup(detailed_action));
@@ -585,6 +591,15 @@ EditorsList editor_list_get()
 	std::sort(editors_list.begin(), editors_list.end(), editor_sort);
 
 	return editors_list;
+}
+
+void editor_plugin_accels_reload()
+{
+	editor_plugin_accels_clear();
+	for (const EditorDescription *editor : editor_list_get())
+		{
+		editor_plugin_accel_register(editor);
+		}
 }
 
 /* ------------------------------ */

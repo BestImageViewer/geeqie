@@ -111,6 +111,7 @@ std::vector<std::string> editor_get_disabled_plugins();
 
 using EditorsList = std::vector<EditorDescription *>;
 EditorsList editor_list_get();
+void editor_plugin_accels_reload();
 
 
 /**

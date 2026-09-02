@@ -1428,21 +1428,44 @@ static void accel_store_populate()
 
 	gsize n_groups = 0;
 	g_auto(GStrv) groups = g_key_file_get_groups(kf, &n_groups);
+	g_autoptr(GHashTable) listed_actions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
 
 	for (gsize i = 0; i < n_groups; i++)
 		{
 		g_autofree gchar *accels = g_key_file_get_string(kf, groups[i], "accels", nullptr);
 
 		const char *description = get_description_for_action_name(groups[i]);
+		const char *icon_name = get_icon_for_action_name(groups[i]);
+		constexpr auto plugin_action_prefix = "win.main-win-plugin-run::";
+		if (g_str_has_prefix(groups[i], plugin_action_prefix))
+			{
+			const EditorDescription *editor = get_editor_by_command(groups[i] + strlen(plugin_action_prefix));
+			if (editor)
+				{
+				description = editor->comment && *editor->comment ? editor->comment : editor->name;
+				icon_name = editor->icon && *editor->icon ? editor->icon : GQ_ICON_MISSING_IMAGE;
+				}
+			}
 
 		if (!description)
 			{
 			description = "UNKNOWN";
 			}
 
-		const char *icon_name = get_icon_for_action_name(groups[i]);
-
 		auto *row = accel_row_new(groups[i], accels ? accels : "", description, icon_name);
+		g_list_store_append(accel_store, row);
+		g_object_unref(row);
+		g_hash_table_add(listed_actions, g_strdup(groups[i]));
+		}
+
+	for (const EditorDescription *editor : editor_list_get())
+		{
+		g_autofree gchar *action = g_strdup_printf("win.main-win-plugin-run::%s", editor->key);
+		if (g_hash_table_contains(listed_actions, action)) continue;
+
+		const gchar *description = editor->comment && *editor->comment ? editor->comment : editor->name;
+		const gchar *icon_name = editor->icon && *editor->icon ? editor->icon : GQ_ICON_MISSING_IMAGE;
+		auto *row = accel_row_new(action, editor->hotkey ? editor->hotkey : "", description, icon_name);
 		g_list_store_append(accel_store, row);
 		g_object_unref(row);
 		}
@@ -1452,6 +1475,7 @@ static void accel_reload_and_apply()
 {
 	accel_map_load_merged();
 	reload_registered_accels(GTK_APPLICATION(g_application_get_default()), get_keyfile_merged());
+	editor_plugin_accels_reload();
 	g_list_store_remove_all(accel_store);
 	accel_store_populate();
 }

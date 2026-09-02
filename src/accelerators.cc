@@ -17,7 +17,9 @@ GKeyFile *accels_merged = nullptr;
 
 void key_file_copy_group(GKeyFile *merged, GKeyFile *user, const char *group)
 {
-	if (g_key_file_has_group(merged, group))
+	constexpr auto plugin_action_prefix = "win.main-win-plugin-run::";
+	/* Plugin targets are discovered at runtime and have no built-in group. */
+	if (g_key_file_has_group(merged, group) || g_str_has_prefix(group, plugin_action_prefix))
 		{
 		size_t n_keys = 0;
 		g_autoptr(GError) error = nullptr;
