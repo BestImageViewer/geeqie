@@ -1705,10 +1705,10 @@ void keyword_tree_set_default(GtkTreeStore *keyword_tree)
 }
 
 
-static void keyword_tree_node_write_config(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr, GString *outstr, gint indent)
+static void keyword_tree_node_write_config(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr, RcString &rc)
 {
 	GtkTreeIter iter = *iter_ptr;
-	while (TRUE)
+	do
 		{
 		GtkTreeIter children;
 
@@ -1725,30 +1725,30 @@ static void keyword_tree_node_write_config(GtkTreeModel *keyword_tree, GtkTreeIt
 		if (gtk_tree_model_iter_children(keyword_tree, &children, &iter))
 			{
 			WRITE_STRING(">");
-			indent++;
-			keyword_tree_node_write_config(keyword_tree, &children, outstr, indent);
-			indent--;
+			rc.indent++;
+			keyword_tree_node_write_config(keyword_tree, &children, rc);
+			rc.indent--;
 			WRITE_NL(); WRITE_STRING("</keyword>");
 			}
 		else
 			{
 			WRITE_STRING("/>");
 			}
-		if (!gtk_tree_model_iter_next(keyword_tree, &iter)) return;
 		}
+	while (gtk_tree_model_iter_next(keyword_tree, &iter));
 }
 
-void keyword_tree_write_config(GString *outstr, gint indent)
+void keyword_tree_write_config(RcString &rc)
 {
 	GtkTreeIter iter;
 	WRITE_NL(); WRITE_STRING("<keyword_tree>");
-	indent++;
+	rc.indent++;
 
 	if (keyword_tree && gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_tree), &iter))
 		{
-		keyword_tree_node_write_config(GTK_TREE_MODEL(keyword_tree), &iter, outstr, indent);
+		keyword_tree_node_write_config(GTK_TREE_MODEL(keyword_tree), &iter, rc);
 		}
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</keyword_tree>");
 }
 

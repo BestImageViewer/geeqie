@@ -38,6 +38,7 @@ enum ImageSplitMode : gint;
 struct AnimationData;
 struct FullScreenData;
 struct ImageWindow;
+struct RcString;
 struct SlideShow;
 struct ViewDir;
 struct ViewFile;
@@ -261,7 +262,7 @@ gboolean layout_valid(LayoutWindow **lw);
 void layout_show_config_window(LayoutWindow *lw);
 
 void layout_sync_options_with_current_state(LayoutWindow *lw);
-void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent);
+void layout_write_config(LayoutWindow *lw, RcString &rc);
 
 
 LayoutWindow *layout_find_by_image(ImageWindow *imd);

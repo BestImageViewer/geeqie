@@ -2869,7 +2869,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	return lw;
 }
 
-static void layout_write_attributes(const LayoutOptions &lop, GString *outstr, gint indent)
+static void layout_write_attributes(const LayoutOptions &lop, RcString &rc)
 {
 	WRITE_NL(); WRITE_CHAR(lop, id);
 
@@ -2966,22 +2966,30 @@ static void layout_write_attributes(const LayoutOptions &lop, GString *outstr, g
 }
 
 
-void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent)
+void layout_write_config(LayoutWindow *lw, RcString &rc)
 {
 	layout_sync_options_with_current_state(lw);
 	WRITE_NL(); WRITE_STRING("<layout");
-	layout_write_attributes(lw->options, outstr, indent + 1);
+	rc.indent++;
+	layout_write_attributes(lw->options, rc);
+	rc.indent--;
 	WRITE_STRING(">");
 
-	bar_sort_write_config(lw->bar_sort, outstr, indent + 1);
-	bar_write_config(lw->bar, outstr, indent + 1);
+	rc.indent++;
+	bar_sort_write_config(lw->bar_sort, rc);
+	bar_write_config(lw->bar, rc);
+	rc.indent--;
 
 	WRITE_SEPARATOR();
-	generic_dialog_windows_write_config(outstr, indent + 1);
+	rc.indent++;
+	generic_dialog_windows_write_config(rc);
+	rc.indent--;
 
 	WRITE_SEPARATOR();
-	layout_toolbar_write_config(lw, TOOLBAR_MAIN, outstr, indent + 1);
-	layout_toolbar_write_config(lw, TOOLBAR_STATUS, outstr, indent + 1);
+	rc.indent++;
+	layout_toolbar_write_config(lw, TOOLBAR_MAIN, rc);
+	layout_toolbar_write_config(lw, TOOLBAR_STATUS, rc);
+	rc.indent--;
 
 	WRITE_NL(); WRITE_STRING("</layout>");
 }

@@ -769,7 +769,7 @@ const gchar *bar_pane_gps_get_map_id(const PaneGPSData *pgd)
 	return pgd->map_source ? pgd->map_source : DEFAULT_MAP_ID;
 }
 
-void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
+void bar_pane_gps_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pgd) return;
@@ -783,7 +783,7 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	gint w;
 	gtk_widget_get_size_request(pane, &w, &pgd->height);
 	WRITE_INT(*pgd, height);
-	indent++;
+	rc.indent++;
 
 	const gchar *map_id = bar_pane_gps_get_map_id(pgd);
 	WRITE_NL();
@@ -794,19 +794,13 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_NL();
 	WRITE_INT_FULL("zoom-level", static_cast<gint>(zoom));
 
-	const auto write_lat_long_option = [pgd, outstr, indent](const gchar *option)
-	{
-		gdouble position = g_strcmp0(option, "latitude") == 0
-		                    ? shumate_location_get_latitude(SHUMATE_LOCATION(pgd->viewport))
-		                    : shumate_location_get_longitude(SHUMATE_LOCATION(pgd->viewport));
-		const gint int_position = position * 1000000;
-		WRITE_NL();
-		WRITE_INT_FULL(option, int_position);
-	};
-	write_lat_long_option("latitude");
-	write_lat_long_option("longitude");
+	WRITE_NL();
+	WRITE_INT_FULL("latitude", shumate_location_get_latitude(SHUMATE_LOCATION(pgd->viewport)) * 1000000);
 
-	indent--;
+	WRITE_NL();
+	WRITE_INT_FULL("longitude", shumate_location_get_longitude(SHUMATE_LOCATION(pgd->viewport)) * 1000000);
+
+	rc.indent--;
 	WRITE_NL();
 	WRITE_STRING("/>");
 }

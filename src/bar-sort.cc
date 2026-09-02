@@ -739,12 +739,11 @@ GtkWidget *bar_sort_new_default(LayoutWindow *lw)
 	return bar_sort_new_from_config(lw, nullptr, nullptr);
 }
 
-void bar_sort_write_config(GtkWidget *bar, GString *outstr, gint indent)
+void bar_sort_write_config(GtkWidget *bar, RcString &rc)
 {
-	SortData *sd;
-
 	if (!bar) return;
-	sd = static_cast<SortData *>(g_object_get_data(G_OBJECT(bar), "bar_sort_data"));
+
+	auto *sd = static_cast<SortData *>(g_object_get_data(G_OBJECT(bar), "bar_sort_data"));
 	if (!sd) return;
 
 	WRITE_NL(); WRITE_STRING("<bar_sort ");

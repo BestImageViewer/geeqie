@@ -77,11 +77,9 @@ static void bar_pane_rating_set_fd(GtkWidget *pane, FileData *fd)
 	bar_pane_rating_update(prd);
 }
 
-static void bar_pane_rating_write_config(GtkWidget *pane, GString *outstr, gint indent)
+static void bar_pane_rating_write_config(GtkWidget *pane, RcString &rc)
 {
-	PaneRatingData *prd;
-
-	prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!prd) return;
 
 	WRITE_NL();

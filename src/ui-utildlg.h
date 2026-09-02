@@ -27,6 +27,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+struct RcString;
+
 struct GenericDialog
 {
 	GtkWidget *dialog;	/**< window */
@@ -61,7 +63,7 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 
 std::optional<GdkRectangle> generic_dialog_find_window(const gchar *title, const gchar *role);
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values);
-void generic_dialog_windows_write_config(GString *outstr, gint indent);
+void generic_dialog_windows_write_config(RcString &rc);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

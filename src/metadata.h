@@ -30,6 +30,7 @@
 enum NotifyType : gint;
 
 class FileData;
+struct RcString;
 
 #define COMMENT_KEY "Xmp.dc.description"
 #define KEYWORD_KEY "Xmp.dc.subject"
@@ -103,7 +104,7 @@ void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keyword
 void keyword_tree_set_default(GtkTreeStore *keyword_tree);
 GtkTreeStore *keyword_tree_get_or_new();
 
-void keyword_tree_write_config(GString *outstr, gint indent);
+void keyword_tree_write_config(RcString &rc);
 GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar **attribute_names, const gchar **attribute_values);
 
 void keyword_tree_disconnect_marks();

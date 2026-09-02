@@ -131,11 +131,9 @@ static void bar_pane_histogram_set_fd(GtkWidget *pane, FileData *fd)
 	bar_pane_histogram_update(phd);
 }
 
-static void bar_pane_histogram_write_config(GtkWidget *pane, GString *outstr, gint indent)
+static void bar_pane_histogram_write_config(GtkWidget *pane, RcString &rc)
 {
-	PaneHistogramData *phd;
-
-	phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!phd) return;
 
 	WRITE_NL(); WRITE_STRING("<pane_histogram ");
