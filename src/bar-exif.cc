@@ -668,7 +668,7 @@ void bar_pane_exif_copy_gesture_cb(GtkGestureClick *gesture, gint, gdouble, gdou
 	bar_pane_exif_copy_to_primary(widget);
 }
 
-void bar_pane_exif_entry_write_config(GtkWidget *entry, GString *outstr, gint indent)
+void bar_pane_exif_entry_write_config(GtkWidget *entry, RcString &rc)
 {
 	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
 	if (!ee) return;
@@ -681,7 +681,7 @@ void bar_pane_exif_entry_write_config(GtkWidget *entry, GString *outstr, gint in
 	WRITE_STRING("/>");
 }
 
-void bar_pane_exif_write_config(GtkWidget *pane, GString *outstr, gint indent)
+void bar_pane_exif_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!ped) return;
@@ -692,16 +692,16 @@ void bar_pane_exif_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_BOOL(ped->pane, expanded);
 	WRITE_BOOL(*ped, show_all);
 	WRITE_STRING(">");
-	indent++;
+	rc.indent++;
 
 	for (GtkWidget *entry = gtk_widget_get_first_child(ped->vbox);
 	    entry;
 	    entry = gtk_widget_get_next_sibling(entry))
 		{
-		bar_pane_exif_entry_write_config(entry, outstr, indent);
+		bar_pane_exif_entry_write_config(entry, rc);
 		}
 
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</pane_exif>");
 }
 

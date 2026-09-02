@@ -535,7 +535,7 @@ void bar_clear(GtkWidget *bar)
 		}
 }
 
-void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
+void bar_write_config(GtkWidget *bar, RcString &rc)
 {
 	if (!bar) return;
 
@@ -547,7 +547,7 @@ void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 	WRITE_INT(*bd, width);
 	WRITE_STRING(">");
 
-	indent++;
+	rc.indent++;
 	WRITE_NL(); WRITE_STRING("<clear/>");
 
 	for (GtkWidget *expander = gtk_widget_get_first_child(bd->vbox);
@@ -562,10 +562,10 @@ void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 		pd->expanded = gtk_expander_get_expanded(GTK_EXPANDER(expander));
 
 		if (pd->pane_write_config)
-			pd->pane_write_config(widget, outstr, indent);
+			pd->pane_write_config(widget, rc);
 		}
 
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</bar>");
 }
 

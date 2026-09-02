@@ -159,12 +159,12 @@ void config_file_error(const gchar *message)
  *-----------------------------------------------------------------------------
  */
 
-void write_indent(GString *str, gint indent)
+void RcString::write_indent() const
 {
 	g_string_append_printf(str, "\n%*s", indent * 4, "");
 }
 
-void write_char_option(GString *str, const gchar *label, const gchar *text)
+void RcString::write_char_option(const gchar *label, const gchar *text) const
 {
 	/* this is needed for overlay string, because g_markup_escape_text does not handle \n and such,
 	   ideas for improvement are welcome
@@ -209,16 +209,16 @@ gboolean read_char_option(const gchar *option, const gchar *label, const gchar *
 	return TRUE;
 }
 
-void write_color_option(GString *str, const gchar *label, const GdkRGBA *color)
+void RcString::write_color_option(const gchar *label, const GdkRGBA *color) const
 {
 	if (color)
 		{
 		g_autofree gchar *colorstring = gdk_rgba_to_string(color);
 
-		write_char_option(str, label, colorstring);
+		write_char_option(label, colorstring);
 		}
 	else
-		write_char_option(str, label, "");
+		write_char_option(label, "");
 }
 
 /**
@@ -259,7 +259,7 @@ gboolean read_color_option(const gchar *option, const gchar *label, const gchar 
 	return TRUE;
 }
 
-void write_int_option(GString *str, const gchar *label, gint n)
+void RcString::write_int_option(const gchar *label, gint n) const
 {
 	g_string_append_printf(str, "%s = \"%d\" ", label, n);
 }
@@ -289,7 +289,7 @@ bool read_uchar_option(const gchar *option, const gchar *label, const gchar *val
 	return read_unsigned_int_option(option, label, value, n);
 }
 
-void write_uint_option(GString *str, const gchar *label, guint n)
+void RcString::write_uint_option(const gchar *label, guint n) const
 {
 	g_string_append_printf(str, "%s = \"%u\" ", label, n);
 }
@@ -320,7 +320,7 @@ gboolean read_int_option_clamp(const gchar *option, const gchar *label, const gc
 	return ret;
 }
 
-void write_int_unit_option(GString *str, const gchar *label, gint n, gint subunits)
+void RcString::write_int_unit_option(const gchar *label, gint n, gint subunits) const
 {
 	gint l;
 	gint r;
@@ -370,7 +370,7 @@ gboolean read_int_unit_option(const gchar *option, const gchar *label, const gch
 	return TRUE;
 }
 
-void write_bool_option(GString *str, const gchar *label, gboolean value)
+void RcString::write_bool_option(const gchar *label, gboolean value) const
 {
 	g_string_append_printf(str, "%s = \"%s\" ", label, value ? "true" : "false");
 }
@@ -394,7 +394,7 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
  *-----------------------------------------------------------------------------
  */
 
-static void write_global_attributes(const ConfOptions *options, GString *outstr, gint indent)
+static void write_global_attributes(const ConfOptions *options, RcString &rc)
 {
 	/* General Options */
 	WRITE_NL(); WRITE_BOOL(*options, show_icon_names);
@@ -633,9 +633,8 @@ static void write_global_attributes(const ConfOptions *options, GString *outstr,
 	WRITE_SEPARATOR();
 }
 
-static void write_color_profile(const ConfOptions *options, GString *outstr, gint indent)
+static void write_color_profile(const ConfOptions *options, RcString &rc)
 {
-	gint i;
 #if !HAVE_LCMS
 	WRITE_FORMAT_STRING("<!-- NOTICE: %s was not built with support for color profiles,\n"
 	                    "		 color profile options will have no effect.\n-->\n", GQ_APPNAME);
@@ -650,87 +649,81 @@ static void write_color_profile(const ConfOptions *options, GString *outstr, gin
 	WRITE_INT(options->color_profile, render_intent);
 	WRITE_STRING(">");
 
-	indent++;
-	for (i = 0; i < COLOR_PROFILE_INPUTS; i++)
+	rc.indent++;
+	for (int i = 0; i < COLOR_PROFILE_INPUTS; i++)
 		{
 		WRITE_NL(); WRITE_STRING("<profile ");
 		WRITE_CHAR_FULL("input_file", options->color_profile.input_file[i]);
 		WRITE_CHAR_FULL("input_name", options->color_profile.input_name[i]);
 		WRITE_STRING("/>");
 		}
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</color_profiles>");
 }
 
-static void write_osd_profiles(const ConfOptions *options, GString *outstr, gint indent)
+static void write_osd_profiles(const ConfOptions *options, RcString &rc)
 {
-	gint i;
-
 	WRITE_NL(); WRITE_STRING("<osd_profiles>");
 
-	indent++;
-	for (i = 0; i < OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT; i++)
+	rc.indent++;
+	for (const ConfOptions::ImageOverlay &image_overlay : options->image_overlay_n)
 		{
 		WRITE_NL(); WRITE_STRING("<osd ");
-		indent++;
-		WRITE_NL(); WRITE_CHAR(options->image_overlay_n[i], template_string);
-		WRITE_NL(); WRITE_INT(options->image_overlay_n[i], x);
-		WRITE_NL(); WRITE_INT(options->image_overlay_n[i], y);
-		WRITE_NL(); WRITE_INT_FULL("text_red", options->image_overlay_n[i].text_color.r);
-		WRITE_NL(); WRITE_INT_FULL("text_green", options->image_overlay_n[i].text_color.g);
-		WRITE_NL(); WRITE_INT_FULL("text_blue", options->image_overlay_n[i].text_color.b);
-		WRITE_NL(); WRITE_INT_FULL("text_alpha", options->image_overlay_n[i].text_color.a);
-		WRITE_NL(); WRITE_INT_FULL("background_red", options->image_overlay_n[i].background.r);
-		WRITE_NL(); WRITE_INT_FULL("background_green", options->image_overlay_n[i].background.g);
-		WRITE_NL(); WRITE_INT_FULL("background_blue", options->image_overlay_n[i].background.b);
-		WRITE_NL(); WRITE_INT_FULL("background_alpha", options->image_overlay_n[i].background.a);
-		WRITE_NL(); WRITE_CHAR(options->image_overlay_n[i], font);
-		indent--;
+		rc.indent++;
+		WRITE_NL(); WRITE_CHAR(image_overlay, template_string);
+		WRITE_NL(); WRITE_INT(image_overlay, x);
+		WRITE_NL(); WRITE_INT(image_overlay, y);
+		WRITE_NL(); WRITE_INT_FULL("text_red", image_overlay.text_color.r);
+		WRITE_NL(); WRITE_INT_FULL("text_green", image_overlay.text_color.g);
+		WRITE_NL(); WRITE_INT_FULL("text_blue", image_overlay.text_color.b);
+		WRITE_NL(); WRITE_INT_FULL("text_alpha", image_overlay.text_color.a);
+		WRITE_NL(); WRITE_INT_FULL("background_red", image_overlay.background.r);
+		WRITE_NL(); WRITE_INT_FULL("background_green", image_overlay.background.g);
+		WRITE_NL(); WRITE_INT_FULL("background_blue", image_overlay.background.b);
+		WRITE_NL(); WRITE_INT_FULL("background_alpha", image_overlay.background.a);
+		WRITE_NL(); WRITE_CHAR(image_overlay, font);
+		rc.indent--;
 		WRITE_NL();
 		WRITE_STRING("/>");
 		}
-	indent--;
+	rc.indent--;
 	WRITE_NL();
 	WRITE_STRING("</osd_profiles>");
 }
 
-static void write_marks_tooltips(const ConfOptions *options, GString *outstr, gint indent)
+static void write_marks_tooltips(const ConfOptions *options, RcString &rc)
 {
-	gint i;
-
 	WRITE_NL(); WRITE_STRING("<marks_tooltips>");
-	indent++;
-	for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
+	rc.indent++;
+	for (const gchar *marks_tooltip : options->marks_tooltips)
 		{
 		WRITE_NL(); WRITE_STRING("<tooltip ");
-		WRITE_CHAR_FULL("text", options->marks_tooltips[i]);
+		WRITE_CHAR_FULL("text", marks_tooltip);
 		WRITE_STRING("/>");
 		}
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</marks_tooltips>");
 }
 
-static void write_class_filter(const ConfOptions *options, GString *outstr, gint indent)
+static void write_class_filter(const ConfOptions *options, RcString &rc)
 {
-	gint i;
-
 	WRITE_NL(); WRITE_STRING("<class_filter>");
-	indent++;
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
+	rc.indent++;
+	for (int i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
 		WRITE_NL(); WRITE_STRING("<filter_type ");
 		WRITE_CHAR_FULL("filter", format_class_list[i]);
 		WRITE_BOOL_FULL("enabled", options->class_filter[i]);
 		WRITE_STRING("/>");
 		}
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</class_filter>");
 }
 
-static void write_disabled_plugins(GString *outstr, gint indent)
+static void write_disabled_plugins(RcString &rc)
 {
 	WRITE_NL(); WRITE_STRING("<disabled_plugins>");
-	indent++;
+	rc.indent++;
 
 	std::vector<std::string> disabled_plugins = editor_get_disabled_plugins();
 	for (const std::string &plugin : disabled_plugins)
@@ -740,7 +733,7 @@ static void write_disabled_plugins(GString *outstr, gint indent)
 		WRITE_STRING("/>");
 		}
 
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</disabled_plugins>");
 }
 
@@ -750,13 +743,17 @@ static void write_disabled_plugins(GString *outstr, gint indent)
  *-----------------------------------------------------------------------------
  */
 
+void RcString::save_to_file(const gchar *utf8_path) const
+{
+	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
+	secure_save(rc_pathl, str->str, -1);
+}
+
 gboolean save_config_to_file(const gchar *utf8_path, const ConfOptions *options, LayoutWindow *lw)
 {
-	gint indent = 0;
-
-	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
-
 	g_autoptr(GString) outstr = g_string_new("<!--\n");
+	RcString rc{ outstr, 0 };
+
 	WRITE_STRING("######################################################################\n");
 	WRITE_FORMAT_STRING("# %30s config file	  version %-10s #\n", GQ_APPNAME, VERSION);
 	WRITE_STRING("######################################################################\n");
@@ -769,72 +766,67 @@ gboolean save_config_to_file(const gchar *utf8_path, const ConfOptions *options,
 	WRITE_SEPARATOR();
 
 	WRITE_STRING("<gq>\n");
-	indent++;
+	rc.indent++;
 
 	if (!lw)
 		{
 		WRITE_NL(); WRITE_STRING("<global\n");
-		indent++;
-		write_global_attributes(options, outstr, indent + 1);
-		indent--;
+		rc.indent += 2;
+		write_global_attributes(options, rc);
+		rc.indent -= 2;
 		WRITE_STRING(">\n");
 
-		indent++;
+		rc.indent++;
 
-		write_color_profile(options, outstr, indent);
-
-		WRITE_SEPARATOR();
-		write_osd_profiles(options, outstr, indent);
+		write_color_profile(options, rc);
 
 		WRITE_SEPARATOR();
-		filter_write_list(outstr, indent);
+		write_osd_profiles(options, rc);
 
 		WRITE_SEPARATOR();
-		write_marks_tooltips(options, outstr, indent);
+		filter_write_list(rc);
 
 		WRITE_SEPARATOR();
-		write_disabled_plugins(outstr, indent);
+		write_marks_tooltips(options, rc);
 
 		WRITE_SEPARATOR();
-		write_class_filter(options, outstr, indent);
+		write_disabled_plugins(rc);
 
 		WRITE_SEPARATOR();
-		keyword_tree_write_config(outstr, indent);
-		indent--;
+		write_class_filter(options, rc);
+
+		WRITE_SEPARATOR();
+		keyword_tree_write_config(rc);
+		rc.indent--;
 		WRITE_NL(); WRITE_STRING("</global>\n");
 		}
 	WRITE_SEPARATOR();
 
 	/* Layout Options */
-	if (!lw)
+	if (lw)
 		{
-		/* If not save_window_positions, do not include a <layout> section */
-		if (options->save_window_positions)
-			{
-			layout_window_foreach([outstr, indent](LayoutWindow *lw){ layout_write_config(lw, outstr, indent); });
-			}
+		layout_write_config(lw, rc);
 		}
-	else
+	/* If not save_window_positions, do not include a <layout> section */
+	else if (options->save_window_positions)
 		{
-		layout_write_config(lw, outstr, indent);
+		layout_window_foreach([&rc](LayoutWindow *lw){ layout_write_config(lw, rc); });
 		}
 
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</gq>\n");
 	WRITE_SEPARATOR();
 
-	secure_save(rc_pathl, outstr->str, -1);
+	rc.save_to_file(utf8_path);
 
 	return TRUE;
 }
 
 gboolean save_default_layout_options_to_file(const gchar *utf8_path, LayoutWindow *lw)
 {
-	gint indent = 0;
-
-	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
-
 	g_autoptr(GString) outstr = g_string_new("<!--\n");
+	RcString rc{ outstr, 0 };
+
 	WRITE_STRING("######################################################################\n");
 	WRITE_FORMAT_STRING("# %8s default layout file	  version %-10s #\n", GQ_APPNAME, VERSION);
 	WRITE_STRING("######################################################################\n");
@@ -847,15 +839,15 @@ gboolean save_default_layout_options_to_file(const gchar *utf8_path, LayoutWindo
 	WRITE_SEPARATOR();
 
 	WRITE_STRING("<gq>\n");
-	indent++;
+	rc.indent++;
 
-	layout_write_config(lw, outstr, indent);
+	layout_write_config(lw, rc);
 
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</gq>\n");
 	WRITE_SEPARATOR();
 
-	secure_save(rc_pathl, outstr->str, -1);
+	rc.save_to_file(utf8_path);
 
 	return TRUE;
 }

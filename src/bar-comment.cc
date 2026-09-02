@@ -144,15 +144,13 @@ static gint bar_pane_comment_event(GtkWidget *bar, GdkEvent *event)
 	return FALSE;
 }
 
-static void bar_pane_comment_write_config(GtkWidget *pane, GString *outstr, gint indent)
+static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
 {
-	PaneCommentData *pcd;
-	gint w;
-	gint h;
-
-	pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
 
+	gint w;
+	gint h;
 	gtk_widget_get_size_request(pane, &w, &h);
 
 	if (!g_strcmp0(pcd->pane.id, "title"))

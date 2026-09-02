@@ -25,6 +25,7 @@
 #include <glib.h>
 
 class FileData;
+struct RcString;
 
 enum FileFormatClass : gint {
 	FORMAT_CLASS_UNKNOWN,
@@ -86,7 +87,7 @@ FileFormatRating filter_file_get_rating(FileData *fd);
 gboolean filter_name_is_writable(const gchar *name);
 gboolean filter_name_allow_sidecar(const gchar *name);
 
-void filter_write_list(GString *outstr, gint indent);
+void filter_write_list(RcString &rc);
 void filter_load_file_type(const gchar **attribute_names, const gchar **attribute_values);
 
 

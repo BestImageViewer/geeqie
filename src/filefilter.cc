@@ -530,18 +530,14 @@ gboolean filter_name_allow_sidecar(const gchar *name)
 	return !!filter_name_find(file_sidecar_list, name);
 }
 
-void filter_write_list(GString *outstr, gint indent)
+void filter_write_list(RcString &rc)
 {
-	GList *work;
-
 	WRITE_NL(); WRITE_STRING("<filter>");
-	indent++;
+	rc.indent++;
 
-	work = filter_list;
-	while (work)
+	for (GList *work = filter_list; work; work = work->next)
 		{
-		auto fe = static_cast<FilterEntry *>(work->data);
-		work = work->next;
+		auto *fe = static_cast<FilterEntry *>(work->data);
 
 		WRITE_NL(); WRITE_STRING("<file_type ");
 		WRITE_CHAR(*fe, key);
@@ -553,7 +549,7 @@ void filter_write_list(GString *outstr, gint indent)
 		WRITE_BOOL(*fe, allow_sidecar);
 		WRITE_STRING("/>");
 		}
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</filter>");
 }
 

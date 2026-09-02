@@ -278,12 +278,12 @@ void generic_dialog_windows_load_config(const gchar **attribute_names, const gch
 		}
 }
 
-void generic_dialog_windows_write_config(GString *outstr, gint indent)
+void generic_dialog_windows_write_config(RcString &rc)
 {
 	if (!options->save_dialog_window_positions || dialog_windows.empty()) return;
 
 	WRITE_NL(); WRITE_STRING("<dialogs>");
-	indent++;
+	rc.indent++;
 
 	for (const auto &[key, rect] : dialog_windows)
 		{
@@ -297,7 +297,7 @@ void generic_dialog_windows_write_config(GString *outstr, gint indent)
 		WRITE_STRING("/>");
 		}
 
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_STRING("</dialogs>");
 }
 

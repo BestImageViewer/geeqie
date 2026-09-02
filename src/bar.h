@@ -28,6 +28,7 @@
 
 class FileData;
 struct LayoutWindow;
+struct RcString;
 
 enum PaneType {
 	PANE_UNDEF = 0,
@@ -43,7 +44,7 @@ struct PaneData {
 	void (*pane_set_fd)(GtkWidget *pane, FileData *fd); /**< filled in by pane */
 	void (*pane_notify_selection)(GtkWidget *pane, gint count); /**< filled in by pane */
 	gint (*pane_event)(GtkWidget *pane, GdkEvent *event); /**< filled in by pane */
-	void (*pane_write_config)(GtkWidget *pane, GString *outstr, gint indent); /**< filled in by pane */
+	void (*pane_write_config)(GtkWidget *pane, RcString &rc); /**< filled in by pane */
 	GtkWidget *title; /**< filled in by pane */
 	gboolean expanded; /**< filled in by pane */
 	gchar *id; /**< filled in by pane */
@@ -62,7 +63,7 @@ GtkWidget *bar_update_from_config(GtkWidget *bar, const gchar **attribute_names,
 
 void bar_close(GtkWidget *bar);
 
-void bar_write_config(GtkWidget *bar, GString *outstr, gint indent);
+void bar_write_config(GtkWidget *bar, RcString &rc);
 
 void bar_populate_default(GtkWidget *bar);
 

@@ -3044,21 +3044,21 @@ void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
 }
 
 
-void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, GString *outstr, gint indent)
+void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, RcString &rc)
 {
 	const gchar *name = toolbar_type_config_name(type);
 
 	WRITE_NL(); WRITE_FORMAT_STRING("<%s>", name);
-	indent++;
+	rc.indent++;
 	WRITE_NL(); WRITE_STRING("<clear/>");
 	for (GList *work = lw->toolbar_actions[type]; work; work = work->next)
 		{
-		auto action = static_cast<gchar *>(work->data);
+		auto *action = static_cast<gchar *>(work->data);
 		WRITE_NL(); WRITE_STRING("<toolitem ");
 		WRITE_CHAR_FULL("action", action);
 		WRITE_STRING("/>");
 		}
-	indent--;
+	rc.indent--;
 	WRITE_NL(); WRITE_FORMAT_STRING("</%s>", name);
 }
 

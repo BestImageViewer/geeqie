@@ -28,39 +28,48 @@
 struct ConfOptions;
 struct LayoutWindow;
 
-void write_indent(GString *str, gint indent);
-void write_char_option(GString *str, const gchar *label, const gchar *text);
+struct RcString
+{
+	void write_indent() const;
+	void write_char_option(const gchar *label, const gchar *text) const;
+	void write_color_option(const gchar *label, const GdkRGBA *color) const;
+	void write_int_option(const gchar *label, gint n) const;
+	void write_uint_option(const gchar *label, guint n) const;
+	void write_int_unit_option(const gchar *label, gint n, gint subunits) const;
+	void write_bool_option(const gchar *label, gboolean value) const;
+
+	void save_to_file(const gchar *utf8_path) const;
+
+	GString *str;
+	int indent;
+};
+
 gboolean read_dummy_option(const gchar *option, const gchar *label, const gchar *message);
 gboolean read_char_option(const gchar *option, const gchar *label, const gchar *value, gchar **text);
-void write_color_option(GString *str, const gchar *label, const GdkRGBA *color);
 gboolean read_color_option(const gchar *option, const gchar *label, const gchar *value, GdkRGBA *color);
-void write_int_option(GString *str, const gchar *label, gint n);
 gboolean read_int_option(const gchar *option, const gchar *label, const gchar *value, gint *n);
 bool read_uchar_option(const gchar *option, const gchar *label, const gchar *value, guint8 &n);
-void write_uint_option(GString *str, const gchar *label, guint n);
 gboolean read_uint_option(const gchar *option, const gchar *label, const gchar *value, guint *n);
 gboolean read_uint_option_clamp(const gchar *option, const gchar *label, const gchar *value, guint *n, guint min, guint max);
 gboolean read_int_option_clamp(const gchar *option, const gchar *label, const gchar *value, gint *n, gint min, gint max);
-void write_int_unit_option(GString *str, const gchar *label, gint n, gint subunits);
 gboolean read_int_unit_option(const gchar *option, const gchar *label, const gchar *value, gint *n, gint subunits);
-void write_bool_option(GString *str, const gchar *label, gboolean value);
 gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *value, gint *n);
 
-#define WRITE_BOOL(_source_, _name_) write_bool_option(outstr, #_name_, (_source_)._name_)
-#define WRITE_INT(_source_, _name_) write_int_option(outstr, #_name_, (_source_)._name_)
-#define WRITE_UINT(_source_, _name_) write_uint_option(outstr, #_name_, (_source_)._name_)
-#define WRITE_INT_UNIT(_source_, _name_, _unit_) write_int_unit_option(outstr, #_name_, (_source_)._name_, _unit_)
-#define WRITE_CHAR(_source_, _name_) write_char_option(outstr, #_name_, (_source_)._name_)
-#define WRITE_COLOR(_source_, _name_) write_color_option(outstr, #_name_, &(_source_)._name_)
+#define WRITE_BOOL(_source_, _name_) rc.write_bool_option(#_name_, (_source_)._name_)
+#define WRITE_INT(_source_, _name_) rc.write_int_option(#_name_, (_source_)._name_)
+#define WRITE_UINT(_source_, _name_) rc.write_uint_option(#_name_, (_source_)._name_)
+#define WRITE_INT_UNIT(_source_, _name_, _unit_) rc.write_int_unit_option(#_name_, (_source_)._name_, _unit_)
+#define WRITE_CHAR(_source_, _name_) rc.write_char_option(#_name_, (_source_)._name_)
+#define WRITE_COLOR(_source_, _name_) rc.write_color_option(#_name_, &(_source_)._name_)
 
-#define WRITE_BOOL_FULL(_name_, _source_) write_bool_option(outstr, _name_, _source_)
-#define WRITE_INT_FULL(_name_, _source_) write_int_option(outstr, _name_, _source_)
-#define WRITE_CHAR_FULL(_name_, _source_) write_char_option(outstr, _name_, _source_)
+#define WRITE_BOOL_FULL(_name_, _source_) rc.write_bool_option(_name_, _source_)
+#define WRITE_INT_FULL(_name_, _source_) rc.write_int_option(_name_, _source_)
+#define WRITE_CHAR_FULL(_name_, _source_) rc.write_char_option(_name_, _source_)
 
-#define WRITE_NL() write_indent(outstr, indent)
-#define WRITE_SEPARATOR() g_string_append(outstr, "\n")
-#define WRITE_STRING(_str_) g_string_append(outstr, _str_)
-#define WRITE_FORMAT_STRING(...) g_string_append_printf(outstr, __VA_ARGS__)
+#define WRITE_NL() rc.write_indent()
+#define WRITE_SEPARATOR() g_string_append(rc.str, "\n")
+#define WRITE_STRING(_str_) g_string_append(rc.str, _str_)
+#define WRITE_FORMAT_STRING(...) g_string_append_printf(rc.str, __VA_ARGS__)
 
 #define READ_BOOL(_target_, _name_) read_bool_option(option, #_name_, value, &(_target_)._name_)
 #define READ_INT(_target_, _name_) read_int_option(option, #_name_, value, &(_target_)._name_)
