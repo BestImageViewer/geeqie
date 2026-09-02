@@ -3523,13 +3523,37 @@ static bool accel_capture_key_press(GtkEventControllerKey *, guint keyval, [[may
 		return TRUE;
 		}
 
-	char *accel = gtk_accelerator_name(key, mods);
+	g_autofree char *accel = nullptr;
+	const guint lowercase_key = gdk_keyval_to_lower(key);
+	const bool alphabetic_key = lowercase_key != gdk_keyval_to_upper(key);
+	const bool shifted_alpha = alphabetic_key &&
+	                           ((mods & GDK_SHIFT_MASK) || (gdk_keyval_is_upper(key) && lowercase_key != key));
+	if (shifted_alpha)
+		{
+		/* GTK may report a shifted letter as an uppercase keyval without
+		 * retaining Shift in the controller state. Build the explicit form. */
+		key = lowercase_key;
+		auto mods_without_shift = static_cast<GdkModifierType>(mods & ~GDK_SHIFT_MASK);
+		g_autofree gchar *unshifted = gtk_accelerator_name(key, mods_without_shift);
+		accel = g_strconcat("<Shift>", unshifted, nullptr);
+		}
+	else if ((mods & GDK_SHIFT_MASK) &&
+	         g_unichar_isgraph(gdk_keyval_to_unicode(key)) &&
+	         !g_unichar_isalnum(gdk_keyval_to_unicode(key)))
+		{
+		/* The keyval already represents the shifted symbol, for example
+		 * parenright for Shift+0, so an additional Shift is incorrect. */
+		auto mods_without_shift = static_cast<GdkModifierType>(mods & ~GDK_SHIFT_MASK);
+		accel = gtk_accelerator_name(key, mods_without_shift);
+		}
+	else
+		{
+		accel = gtk_accelerator_name(key, mods);
+		}
 	gtk_editable_set_text(GTK_EDITABLE(widget), accel);
 
 	GdkClipboard *cb = gdk_display_get_clipboard(gdk_display_get_default());
 	gdk_clipboard_set_text(cb, accel);
-
-	g_free(accel);
 
 	return TRUE;
 }
@@ -3594,6 +3618,7 @@ Double-click on the Key column and add or replace the text.\n");
 	gtk_box_append(GTK_BOX(hbox), key_value);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
 	g_signal_connect(controller, "key-pressed",  G_CALLBACK(accel_capture_key_press), key_value);
 	gtk_widget_add_controller(key_value, controller);
 
