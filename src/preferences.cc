@@ -1480,6 +1480,191 @@ static void accel_reload_and_apply()
 	accel_store_populate();
 }
 
+static gchar *accel_normalize(const gchar *accelerator)
+{
+	guint key = 0;
+	GdkModifierType modifiers = GDK_NO_MODIFIER_MASK;
+	gtk_accelerator_parse(accelerator, &key, &modifiers);
+	return key ? gtk_accelerator_name(key, modifiers) : nullptr;
+}
+
+static GHashTable *accel_normalized_set(const gchar *accelerators)
+{
+	auto *set = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
+	g_auto(GStrv) accelerator_list = g_strsplit(accelerators ? accelerators : "", ";", -1);
+	for (gchar **accelerator = accelerator_list; *accelerator; accelerator++)
+		{
+		g_strstrip(*accelerator);
+		g_autofree gchar *normalized = accel_normalize(*accelerator);
+		if (normalized) g_hash_table_add(set, g_steal_pointer(&normalized));
+		}
+	return set;
+}
+
+static gchar *accel_remove_conflicts(const gchar *accelerators, GHashTable *conflicts)
+{
+	g_autoptr(GString) result = g_string_new(nullptr);
+	g_auto(GStrv) accelerator_list = g_strsplit(accelerators ? accelerators : "", ";", -1);
+	for (gchar **accelerator = accelerator_list; *accelerator; accelerator++)
+		{
+		g_strstrip(*accelerator);
+		g_autofree gchar *normalized = accel_normalize(*accelerator);
+		if (!normalized || g_hash_table_contains(conflicts, normalized)) continue;
+		if (result->len > 0) g_string_append_c(result, ';');
+		g_string_append(result, *accelerator);
+		}
+	return g_string_free(g_steal_pointer(&result), FALSE);
+}
+
+static gchar *accel_action_window(const gchar *action)
+{
+	if (!g_str_has_prefix(action, "win.")) return nullptr;
+	const gchar *window_end = g_strstr_len(action, -1, "-win-");
+	return window_end ? g_strndup(action, window_end + strlen("-win-") - action) : nullptr;
+}
+
+static bool accel_actions_share_window(const gchar *action1, const gchar *action2)
+{
+	/* Application actions are active in every Geeqie window. */
+	if (g_str_has_prefix(action1, "app.") || g_str_has_prefix(action2, "app.")) return true;
+
+	g_autofree gchar *window1 = accel_action_window(action1);
+	g_autofree gchar *window2 = accel_action_window(action2);
+	if (!window1 || !window2) return g_strcmp0(action1, action2) == 0;
+	return g_strcmp0(window1, window2) == 0;
+}
+
+static std::vector<AccelRow *> accel_conflicting_rows(const AccelRow *edited_row, const gchar *accelerators)
+{
+	std::vector<AccelRow *> rows;
+	g_autoptr(GHashTable) requested = accel_normalized_set(accelerators);
+	for (guint i = 0; i < g_list_model_get_n_items(G_LIST_MODEL(accel_store)); i++)
+		{
+		auto *row = static_cast<AccelRow *>(g_list_model_get_item(G_LIST_MODEL(accel_store), i));
+		if (row != edited_row && accel_actions_share_window(edited_row->action, row->action))
+			{
+			g_autoptr(GHashTable) assigned = accel_normalized_set(row->key);
+			GHashTableIter iter;
+			gpointer accelerator;
+			g_hash_table_iter_init(&iter, requested);
+			while (g_hash_table_iter_next(&iter, &accelerator, nullptr))
+				{
+				if (g_hash_table_contains(assigned, accelerator))
+					{
+					rows.push_back(row);
+					break;
+					}
+				}
+			}
+		g_object_unref(row);
+		}
+	return rows;
+}
+
+static gchar *accel_existing_conflicts_message()
+{
+	g_autoptr(GString) conflicts = g_string_new(nullptr);
+	const guint n_rows = g_list_model_get_n_items(G_LIST_MODEL(accel_store));
+	for (guint i = 0; i < n_rows; i++)
+		{
+		auto *row1 = static_cast<AccelRow *>(g_list_model_get_item(G_LIST_MODEL(accel_store), i));
+		g_autoptr(GHashTable) assigned1 = accel_normalized_set(row1->key);
+		for (guint j = i + 1; j < n_rows; j++)
+			{
+			auto *row2 = static_cast<AccelRow *>(g_list_model_get_item(G_LIST_MODEL(accel_store), j));
+			if (accel_actions_share_window(row1->action, row2->action))
+				{
+				g_autoptr(GHashTable) assigned2 = accel_normalized_set(row2->key);
+				GHashTableIter iter;
+				gpointer accelerator;
+				g_hash_table_iter_init(&iter, assigned1);
+				while (g_hash_table_iter_next(&iter, &accelerator, nullptr))
+					{
+					if (g_hash_table_contains(assigned2, accelerator))
+						{
+						g_string_append_printf(conflicts, "%s: %s / %s\n", static_cast<gchar *>(accelerator), row1->action, row2->action);
+						}
+					}
+				}
+			g_object_unref(row2);
+			}
+		g_object_unref(row1);
+		}
+	return conflicts->len > 0 ? g_string_free(g_steal_pointer(&conflicts), FALSE) : nullptr;
+}
+
+static gboolean accel_show_existing_conflicts_cb(gpointer data)
+{
+	auto *keyboard_page = static_cast<GtkWidget *>(data);
+	if (!gtk_widget_get_mapped(keyboard_page))
+		{
+		g_object_set_data(G_OBJECT(keyboard_page), "conflicts-warned", nullptr);
+		return G_SOURCE_REMOVE;
+		}
+
+	g_object_set_data(G_OBJECT(keyboard_page), "conflicts-warned", GINT_TO_POINTER(TRUE));
+
+	g_autofree gchar *conflicts = accel_existing_conflicts_message();
+	if (!conflicts) return G_SOURCE_REMOVE;
+	g_autofree gchar *message = g_strdup_printf(_("The following keyboard shortcuts have conflicting assignments:\n\n%s"), conflicts);
+	GtkWidget *parent = GTK_IS_WINDOW(configwindow) ? configwindow : widget_get_toplevel(keyboard_page);
+	GenericDialog *gd = generic_dialog_new(_("Shortcut conflicts"), "shortcut_conflicts", parent, TRUE, nullptr, nullptr);
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING, _("Shortcut conflicts"), message, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", generic_dialog_dummy_cb, TRUE);
+	gtk_window_set_modal(GTK_WINDOW(gd->dialog), TRUE);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
+
+	return G_SOURCE_REMOVE;
+}
+
+static void accel_keyboard_page_map_cb(GtkWidget *keyboard_page, gpointer)
+{
+	if (g_object_get_data(G_OBJECT(keyboard_page), "conflicts-warned")) return;
+	g_object_set_data(G_OBJECT(keyboard_page), "conflicts-warned", GINT_TO_POINTER(TRUE));
+
+	/* Let the Preferences window receive its compositor placement before
+	 * creating the transient warning window. */
+	g_timeout_add_full(G_PRIORITY_DEFAULT, 250, accel_show_existing_conflicts_cb,
+	                   g_object_ref(keyboard_page), g_object_unref);
+}
+
+struct AccelReplaceData
+{
+	GtkEditable *label;
+	std::string action;
+	std::string old_accelerators;
+	std::string new_accelerators;
+	std::vector<std::pair<std::string, std::string>> conflicts;
+};
+
+static void accel_replace_data_free(AccelReplaceData *data)
+{
+	g_object_unref(data->label);
+	delete data;
+}
+
+static void accel_replace_cancel_cb(GenericDialog *, gpointer data)
+{
+	auto *replace_data = static_cast<AccelReplaceData *>(data);
+	gtk_editable_set_text(replace_data->label, replace_data->old_accelerators.c_str());
+	accel_replace_data_free(replace_data);
+}
+
+static void accel_replace_ok_cb(GenericDialog *, gpointer data)
+{
+	auto *replace_data = static_cast<AccelReplaceData *>(data);
+	g_autoptr(GHashTable) replacements = accel_normalized_set(replace_data->new_accelerators.c_str());
+	bool success = true;
+	for (const auto &[action, accelerators] : replace_data->conflicts)
+		{
+		g_autofree gchar *remaining = accel_remove_conflicts(accelerators.c_str(), replacements);
+		success = update_modified_shortcut(action.c_str(), remaining) && success;
+		}
+	if (success) success = update_modified_shortcut(replace_data->action.c_str(), replace_data->new_accelerators.c_str());
+	if (success) accel_reload_and_apply();
+	accel_replace_data_free(replace_data);
+}
+
 static void accel_key_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer)
 {
 	if (gtk_editable_label_get_editing(label)) return;
@@ -1491,11 +1676,34 @@ static void accel_key_editing_changed(GtkEditableLabel *label, GParamSpec *, gpo
 	if (!accelerator_string_is_valid(new_text))
 		{
 		warning_dialog(_("Invalid shortcut"), _("The shortcut must use GTK accelerator syntax. Separate multiple shortcuts with semicolons."),
-		               GQ_ICON_DIALOG_WARNING, nullptr);
+		               GQ_ICON_DIALOG_WARNING, configwindow);
 		return;
 		}
 
-	if (update_modified_shortcut(row->action, new_text)) accel_reload_and_apply();
+	const auto conflicts = accel_conflicting_rows(row, new_text);
+	if (conflicts.empty())
+		{
+		if (update_modified_shortcut(row->action, new_text)) accel_reload_and_apply();
+		return;
+		}
+
+	auto *replace_data = new AccelReplaceData{GTK_EDITABLE(g_object_ref(label)), row->action, row->key, new_text, {}};
+	g_autoptr(GString) conflicting_commands = g_string_new(nullptr);
+	for (const AccelRow *conflict : conflicts)
+		{
+		replace_data->conflicts.emplace_back(conflict->action, conflict->key);
+		if (conflicting_commands->len > 0) g_string_append_c(conflicting_commands, '\n');
+		g_string_append(conflicting_commands, conflict->action);
+		}
+
+	g_autofree gchar *message = g_strdup_printf(_("The shortcut is already assigned to:\n%s\n\nReplace the existing assignment?"), conflicting_commands->str);
+	GtkWidget *parent = GTK_IS_WINDOW(configwindow) ? configwindow : widget_get_toplevel(GTK_WIDGET(label));
+	GenericDialog *gd = generic_dialog_new(_("Shortcut conflict"), "shortcut_conflict", parent, TRUE,
+	                                       accel_replace_cancel_cb, replace_data);
+	gtk_window_set_modal(GTK_WINDOW(gd->dialog), TRUE);
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING, _("Shortcut conflict"), message, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, _("Replace"), accel_replace_ok_cb, TRUE);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void accel_default_cb(GtkWidget *, gpointer)
@@ -3335,6 +3543,8 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	GtkWidget *accel_view;
 
 	vbox = scrolled_notebook_page(notebook, _("Keyboard"));
+	GtkWidget *keyboard_page = gtk_widget_get_parent(vbox);
+	g_signal_connect(keyboard_page, "map", G_CALLBACK(accel_keyboard_page_map_cb), nullptr);
 
 	group = pref_group_new(vbox, TRUE, _("Keyboard Shortcuts"), GTK_ORIENTATION_VERTICAL);
 	GtkWidget *search_entry = gtk_search_entry_new();
