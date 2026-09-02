@@ -56,8 +56,6 @@ constexpr gint VFICON_MAX_COLUMNS = 32;
 
 constexpr gint THUMB_BORDER_PADDING = 2;
 
-constexpr gint VFICON_TIP_DELAY = 500;
-
 struct ViewFileIconItem
 {
 	GObject parent;
@@ -259,107 +257,6 @@ static gint vficon_mark_at_coord(ViewFile *vf, gint x, gint y)
 	return -1;
 }
 
-
-/*
- *-------------------------------------------------------------------
- * tooltip type window
- *-------------------------------------------------------------------
- */
-
-static void tip_show(ViewFile *vf)
-{
-	if (VFICON(vf)->tip_window) return;
-
-	gint x;
-	gint y;
-	get_pointer_position(vf->listview, x, y);
-
-	VFICON(vf)->tip_fd = vficon_find_data_by_coord(vf, x, y, nullptr);
-	if (!VFICON(vf)->tip_fd) return;
-
-	VFICON(vf)->tip_window = gtk_window_new();
-	gtk_window_set_transient_for(GTK_WINDOW(VFICON(vf)->tip_window), GTK_WINDOW(widget_get_toplevel(vf->listview)));
-	gtk_window_set_resizable(GTK_WINDOW(VFICON(vf)->tip_window), FALSE);
-	gtk_widget_set_margin_top(VFICON(vf)->tip_window, 2);
-	gtk_widget_set_margin_bottom(VFICON(vf)->tip_window, 2);
-	gtk_widget_set_margin_start(VFICON(vf)->tip_window, 2);
-	gtk_widget_set_margin_end(VFICON(vf)->tip_window, 2);
-
-	VFICON(vf)->tip_label = gtk_label_new(VFICON(vf)->tip_fd->name);
-	gtk_window_set_child(GTK_WINDOW(VFICON(vf)->tip_window), VFICON(vf)->tip_label);
-
-	if (!gtk_widget_get_realized(VFICON(vf)->tip_window)) gtk_widget_realize(VFICON(vf)->tip_window);
-	gtk_window_present(GTK_WINDOW(VFICON(vf)->tip_window));
-}
-
-static void tip_hide(ViewFile *vf)
-{
-	if (VFICON(vf)->tip_window) gtk_window_destroy(GTK_WINDOW(VFICON(vf)->tip_window));
-	VFICON(vf)->tip_window = nullptr;
-}
-
-static gboolean tip_schedule_cb(gpointer data)
-{
-	auto *vf = static_cast<ViewFile *>(data);
-
-	if (VFICON(vf)->tip_delay_id)
-		{
-		GtkRoot *root = gtk_widget_get_root(vf->listview);
-
-		if (GTK_IS_WINDOW(root))
-			{
-			auto *window = GTK_WINDOW(root);
-
-			if (gtk_widget_get_sensitive(GTK_WIDGET(window)) && gtk_window_is_active(window))
-				{
-				tip_show(vf);
-				}
-			}
-
-		VFICON(vf)->tip_delay_id = 0;
-		}
-
-	return G_SOURCE_REMOVE;
-}
-
-static void tip_unschedule(ViewFile *vf)
-{
-	tip_hide(vf);
-
-	g_clear_handle_id(&(VFICON(vf)->tip_delay_id), g_source_remove);
-}
-
-static void tip_schedule(ViewFile *vf)
-{
-	tip_unschedule(vf);
-
-	if (!VFICON(vf)->show_text)
-		{
-		VFICON(vf)->tip_delay_id = g_timeout_add(VFICON_TIP_DELAY, tip_schedule_cb, vf);
-		}
-}
-
-static void tip_update(ViewFile *vf, FileData *fd)
-{
-	if (!VFICON(vf)->tip_window)
-		{
-		tip_schedule(vf);
-		return;
-		}
-
-	if (VFICON(vf)->tip_fd == fd) return;
-
-	VFICON(vf)->tip_fd = fd;
-
-	if (!VFICON(vf)->tip_fd)
-		{
-		tip_hide(vf);
-		tip_schedule(vf);
-		return;
-		}
-
-	gtk_label_set_text(GTK_LABEL(VFICON(vf)->tip_label), VFICON(vf)->tip_fd->name);
-}
 
 /*
  *-------------------------------------------------------------------
@@ -958,7 +855,6 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifie
 			vf->click_fd = fd;
 
 			vficon_selection_add(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
-			tip_unschedule(vf);
 
 			vf->popup = vf_pop_menu(vf);
 			break;
@@ -1005,11 +901,6 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifie
 			}
 		}
 
-	if (stop_signal)
-		{
-		tip_unschedule(vf);
-		}
-
 	return stop_signal;
 }
 
@@ -1019,21 +910,8 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifie
  *-------------------------------------------------------------------
  */
 
-static gboolean vficon_motion_cb(GtkEventControllerMotion *, double x, double y, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	FileData *fd;
-
-	fd = vficon_find_data_by_coord(vf, static_cast<gint>(x), static_cast<gint>(y), nullptr);
-	tip_update(vf, fd);
-
-	return FALSE;
-}
-
 void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
-	tip_unschedule(vf);
-
 	FileData *fd = vficon_find_data_by_coord(vf, static_cast<gint>(event.x), static_cast<gint>(event.y), nullptr);
 	if (!fd) return;
 
@@ -1085,8 +963,6 @@ void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
 	FileData *fd = nullptr;
 	gboolean was_selected;
-
-	tip_schedule(vf);
 
 	if (layout_handle_user_defined_mouse_buttons(vf->layout, event.button))
 		{
@@ -1158,13 +1034,6 @@ void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 		{
 		vficon_send_layout_select(vf, fd);
 		}
-}
-
-static void vficon_leave_cb(GtkEventControllerMotion *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	tip_unschedule(vf);
 }
 
 /*
@@ -1536,6 +1405,7 @@ static void vficon_item_update(ViewFileIconItem *item, GtkWidget *child)
 	FileData *fd = item->fd;
 	g_object_set_data(G_OBJECT(child), "view-file-fd", fd);
 	gtk_widget_set_size_request(child, vficon_get_icon_width(vf), -1);
+	gtk_widget_set_tooltip_text(child, VFICON(vf)->show_text ? nullptr : fd->name);
 
 	auto *picture = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(child), "view-file-picture"));
 	g_autoptr(GdkTexture) texture = fd->thumb_pixbuf ? pixbuf_to_texture(fd->thumb_pixbuf) : nullptr;
@@ -1709,8 +1579,6 @@ void vficon_destroy_cb(ViewFile *vf)
 
 	file_data_unregister_notify_func(vf_notify_cb, vf);
 
-	tip_unschedule(vf);
-
 	vf_thumb_cleanup(vf);
 	vf_star_cleanup(vf);
 
@@ -1739,14 +1607,6 @@ ViewFile *vficon_new(ViewFile *vf)
 
 	g_signal_connect(G_OBJECT(gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(vf->scrolled))), "notify::page-size",
 			 G_CALLBACK(vficon_sized_cb), vf);
-
-	GtkEventController *controller = gtk_event_controller_motion_new();
-	g_signal_connect(controller, "motion", G_CALLBACK(vficon_motion_cb), vf);
-	gtk_widget_add_controller(vf->listview, controller);
-
-	GtkEventController *motion_controller = gtk_event_controller_motion_new();
-	g_signal_connect(motion_controller, "leave", G_CALLBACK(vficon_leave_cb), vf);
-	gtk_widget_add_controller(vf->listview, motion_controller);
 
 	/* force VFICON(vf)->columns to be at least 1 (sane) - this will be corrected in the size_cb */
 	vficon_populate_at_new_size(vf, 1, 1, FALSE);
