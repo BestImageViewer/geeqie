@@ -83,7 +83,7 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 #define READ_DUMMY(_target_, _name_, _msg_) read_dummy_option(option, #_name_, _msg_)
 
 
-gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, LayoutWindow *lw);
+gboolean save_config_to_file(const gchar *utf8_path, const ConfOptions *options, LayoutWindow *lw);
 gboolean save_default_layout_options_to_file(const gchar *utf8_path, LayoutWindow *lw);
 
 gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup);
