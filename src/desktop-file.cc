@@ -142,7 +142,7 @@ gboolean editor_window_save(EditorWindow *ew)
 	if (conflicting_plugin)
 		{
 		g_autofree gchar *message = g_strdup_printf(_("The shortcut is already assigned to plugin \"%s\".\n\nThe operation cannot be completed."), conflicting_plugin);
-		file_util_warning_dialog(_("Shortcut conflict"), message, GQ_ICON_DIALOG_WARNING, ew->window);
+		warning_dialog(_("Shortcut conflict"), message, GQ_ICON_DIALOG_WARNING, ew->window);
 		return FALSE;
 		}
 
@@ -244,12 +244,12 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 	gtk_window_set_default_size(GTK_WINDOW(ew->window), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 	gtk_window_set_resizable(GTK_WINDOW(ew->window), TRUE);
-	gtk_widget_set_margin_top(ew->window, PREF_PAD_BORDER);
-	gtk_widget_set_margin_bottom(ew->window, PREF_PAD_BORDER);
-	gtk_widget_set_margin_start(ew->window, PREF_PAD_BORDER);
-	gtk_widget_set_margin_end(ew->window, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	gtk_widget_set_margin_top(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(win_vbox, PREF_PAD_BORDER);
 	gtk_window_set_child(GTK_WINDOW(ew->window), win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
@@ -549,12 +549,12 @@ EditorListWindow *editor_list_window_new()
 			 G_CALLBACK(editor_list_window_delete), NULL);
 	gtk_window_set_default_size(GTK_WINDOW(ewl->window), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 	gtk_window_set_resizable(GTK_WINDOW(ewl->window), TRUE);
-	gtk_widget_set_margin_top(ewl->window, PREF_PAD_BORDER);
-	gtk_widget_set_margin_bottom(ewl->window, PREF_PAD_BORDER);
-	gtk_widget_set_margin_start(ewl->window, PREF_PAD_BORDER);
-	gtk_widget_set_margin_end(ewl->window, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	gtk_widget_set_margin_top(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(win_vbox, PREF_PAD_BORDER);
 	gtk_window_set_child(GTK_WINDOW(ewl->window), win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);

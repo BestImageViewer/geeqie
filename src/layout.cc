@@ -2494,13 +2494,13 @@ void layout_show_config_window(LayoutWindow *lw)
 
 	gtk_window_set_default_size(GTK_WINDOW(lc->configwindow), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 	gtk_window_set_resizable(GTK_WINDOW(lc->configwindow), TRUE);
-	gtk_widget_set_margin_top(lc->configwindow, PREF_PAD_BORDER);
-	gtk_widget_set_margin_bottom(lc->configwindow, PREF_PAD_BORDER);
-	gtk_widget_set_margin_start(lc->configwindow, PREF_PAD_BORDER);
-	gtk_widget_set_margin_end(lc->configwindow, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	DEBUG_NAME(win_vbox);
+	gtk_widget_set_margin_top(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(win_vbox, PREF_PAD_BORDER);
 	gtk_window_set_child(GTK_WINDOW(lc->configwindow), win_vbox);
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);

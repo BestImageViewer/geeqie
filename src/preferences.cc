@@ -3765,12 +3765,12 @@ static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 		gtk_window_set_default_size(GTK_WINDOW(configwindow), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 		}
 	gtk_window_set_resizable(GTK_WINDOW(configwindow), TRUE);
-	gtk_widget_set_margin_top(configwindow, PREF_PAD_BORDER);
-	gtk_widget_set_margin_bottom(configwindow, PREF_PAD_BORDER);
-	gtk_widget_set_margin_start(configwindow, PREF_PAD_BORDER);
-	gtk_widget_set_margin_end(configwindow, PREF_PAD_BORDER);
 
 	GtkWidget *win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	gtk_widget_set_margin_top(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(win_vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(win_vbox, PREF_PAD_BORDER);
 	gtk_window_set_child(GTK_WINDOW(configwindow), win_vbox);
 
 	GtkWidget *notebook = gtk_notebook_new();
