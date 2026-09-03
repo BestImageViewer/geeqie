@@ -253,8 +253,12 @@ gchar *metadata_lua_info(FileData *fd, const gchar *key)
 
 static gboolean metadata_write_queue_idle_cb(gpointer data);
 static gboolean metadata_legacy_write(FileData *fd);
-static void metadata_legacy_delete(FileData *fd, const gchar *except);
 static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **comment);
+static void metadata_legacy_delete(FileData *fd, const gchar *except);
+
+static gboolean keyword_equal(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTreeIter *b);
+static GList *keyword_tree_get_path(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr);
+static gboolean keyword_tree_get_iter(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr, GList *path);
 
 
 /*
@@ -922,18 +926,6 @@ gdouble metadata_read_GPS_direction(FileData *fd, const gchar *key, gdouble fall
 	return deg;
 }
 
-gboolean metadata_append_string(FileData *fd, const gchar *key, const char *value)
-{
-	g_autofree gchar *str = metadata_read_string(fd, key, METADATA_PLAIN);
-	if (!str)
-		{
-		return metadata_write_string(fd, key, value);
-		}
-
-	g_autofree gchar *new_string = g_strconcat(str, value, NULL);
-	return metadata_write_string(fd, key, new_string);
-}
-
 gboolean metadata_write_GPS_coord(FileData *fd, const gchar *key, gdouble value)
 {
 	gint deg;
@@ -984,6 +976,18 @@ gboolean metadata_write_GPS_coord(FileData *fd, const gchar *key, gdouble value)
 		}
 
 	return ok;
+}
+
+gboolean metadata_append_string(FileData *fd, const gchar *key, const char *value)
+{
+	g_autofree gchar *str = metadata_read_string(fd, key, METADATA_PLAIN);
+	if (!str)
+		{
+		return metadata_write_string(fd, key, value);
+		}
+
+	g_autofree gchar *new_string = g_strconcat(str, value, NULL);
+	return metadata_write_string(fd, key, new_string);
 }
 
 gboolean metadata_append_list(FileData *fd, const gchar *key, const GList *values)
@@ -1095,7 +1099,7 @@ GList *string_to_keywords_list(const gchar *text)
  */
 
 
-gboolean meta_data_get_keyword_mark(FileData *fd, gint, gpointer data)
+static gboolean meta_data_get_keyword_mark(FileData *fd, gint, gpointer data)
 {
 	/** @FIXME do not use global keyword_tree */
 	GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
@@ -1110,7 +1114,7 @@ gboolean meta_data_get_keyword_mark(FileData *fd, gint, gpointer data)
 	return found;
 }
 
-gboolean meta_data_set_keyword_mark(FileData *fd, gint, gboolean value, gpointer data)
+static gboolean meta_data_set_keyword_mark(FileData *fd, gint, gboolean value, gpointer data)
 {
 	auto path = static_cast<GList *>(data);
 	GtkTreeIter iter;
@@ -1185,14 +1189,14 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
  *-------------------------------------------------------------------
  */
 
-gchar *keyword_get_name(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
+static gchar *keyword_get_name(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
 {
 	gchar *name;
 	gtk_tree_model_get(keyword_tree, iter, KEYWORD_COLUMN_NAME, &name, -1);
 	return name;
 }
 
-gchar *keyword_get_mark(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
+static gchar *keyword_get_mark(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
 {
 	gchar *mark_str;
 
@@ -1200,14 +1204,14 @@ gchar *keyword_get_mark(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
 	return mark_str;
 }
 
-gchar *keyword_get_casefold(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
+static gchar *keyword_get_casefold(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
 {
 	gchar *casefold;
 	gtk_tree_model_get(keyword_tree, iter, KEYWORD_COLUMN_CASEFOLD, &casefold, -1);
 	return casefold;
 }
 
-gboolean keyword_get_is_keyword(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
+static gboolean keyword_get_is_keyword(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
 {
 	gboolean is_keyword;
 	gtk_tree_model_get(keyword_tree, iter, KEYWORD_COLUMN_IS_KEYWORD, &is_keyword, -1);
@@ -1223,28 +1227,12 @@ void keyword_set(GtkTreeStore *keyword_tree, GtkTreeIter *iter, const gchar *nam
 						KEYWORD_COLUMN_IS_KEYWORD, is_keyword, -1);
 }
 
-gboolean keyword_equal(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTreeIter *b)
+static gboolean keyword_equal(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTreeIter *b)
 {
 	g_autoptr(GtkTreePath) pa = gtk_tree_model_get_path(keyword_tree, a);
 	g_autoptr(GtkTreePath) pb = gtk_tree_model_get_path(keyword_tree, b);
 
 	return gtk_tree_path_compare(pa, pb) == 0;
-}
-
-gboolean keyword_same_parent(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTreeIter *b)
-{
-	GtkTreeIter parent_a;
-	GtkTreeIter parent_b;
-
-	gboolean valid_pa = gtk_tree_model_iter_parent(keyword_tree, &parent_a, a);
-	gboolean valid_pb = gtk_tree_model_iter_parent(keyword_tree, &parent_b, b);
-
-	if (valid_pa && valid_pb)
-		{
-		return keyword_equal(keyword_tree, &parent_a, &parent_b);
-		}
-
-	return (!valid_pa && !valid_pb); /* both are toplevel */
 }
 
 gboolean keyword_exists(GtkTreeModel *keyword_tree, GtkTreeIter *parent_ptr, GtkTreeIter *sibling, const gchar *name, gboolean exclude_sibling, GtkTreeIter *result)
@@ -1296,49 +1284,7 @@ gboolean keyword_exists(GtkTreeModel *keyword_tree, GtkTreeIter *parent_ptr, Gtk
 }
 
 
-void keyword_copy(GtkTreeStore *keyword_tree, GtkTreeIter *to, GtkTreeIter *from)
-{
-	g_autofree gchar *mark = nullptr;
-	g_autofree gchar *name = nullptr;
-	g_autofree gchar *casefold = nullptr;
-	gboolean is_keyword;
-
-	/* do not copy KEYWORD_COLUMN_HIDE_IN, it fully shows the new subtree */
-	gtk_tree_model_get(GTK_TREE_MODEL(keyword_tree), from, KEYWORD_COLUMN_MARK, &mark,
-						KEYWORD_COLUMN_NAME, &name,
-						KEYWORD_COLUMN_CASEFOLD, &casefold,
-						KEYWORD_COLUMN_IS_KEYWORD, &is_keyword, -1);
-
-	gtk_tree_store_set(keyword_tree, to, KEYWORD_COLUMN_MARK, mark,
-						KEYWORD_COLUMN_NAME, name,
-						KEYWORD_COLUMN_CASEFOLD, casefold,
-						KEYWORD_COLUMN_IS_KEYWORD, is_keyword, -1);
-}
-
-void keyword_copy_recursive(GtkTreeStore *keyword_tree, GtkTreeIter *to, GtkTreeIter *from)
-{
-	GtkTreeIter from_child;
-
-	keyword_copy(keyword_tree, to, from);
-
-	if (!gtk_tree_model_iter_children(GTK_TREE_MODEL(keyword_tree), &from_child, from)) return;
-
-	while (TRUE)
-		{
-		GtkTreeIter to_child;
-		gtk_tree_store_append(keyword_tree, &to_child, to);
-		keyword_copy_recursive(keyword_tree, &to_child, &from_child);
-		if (!gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_tree), &from_child)) return;
-		}
-}
-
-void keyword_move_recursive(GtkTreeStore *keyword_tree, GtkTreeIter *to, GtkTreeIter *from)
-{
-	keyword_copy_recursive(keyword_tree, to, from);
-	keyword_delete(keyword_tree, from);
-}
-
-GList *keyword_tree_get_path(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr)
+static GList *keyword_tree_get_path(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr)
 {
 	GList *path = nullptr;
 	GtkTreeIter iter = *iter_ptr;
@@ -1608,7 +1554,7 @@ void keyword_hide_in(GtkTreeStore *keyword_tree, GtkTreeIter *iter, gpointer id)
 		}
 }
 
-void keyword_show_in(GtkTreeStore *keyword_tree, GtkTreeIter *iter, gpointer id)
+static void keyword_show_in(GtkTreeStore *keyword_tree, GtkTreeIter *iter, gpointer id)
 {
 	GList *list;
 	gtk_tree_model_get(GTK_TREE_MODEL(keyword_tree), iter, KEYWORD_COLUMN_HIDE_IN, &list, -1);
