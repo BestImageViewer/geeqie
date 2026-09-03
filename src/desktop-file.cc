@@ -31,6 +31,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "accelerators.h"
 #include "editors.h"
 #include "intl.h"
 #include "layout-util.h"
@@ -87,6 +88,44 @@ constexpr gint CONFIG_WINDOW_DEF_HEIGHT = 400;
 
 EditorListWindow *editor_list_window = nullptr;
 
+gchar *plugin_shortcut_conflict(const gchar *desktop_text, const gchar *desktop_name)
+{
+	g_autoptr(GKeyFile) key_file = g_key_file_new();
+	if (!g_key_file_load_from_data(key_file, desktop_text, -1, G_KEY_FILE_NONE, nullptr)) return nullptr;
+
+	g_autofree gchar *hotkey = g_key_file_get_string(key_file, G_KEY_FILE_DESKTOP_GROUP,
+	                                                "X-Geeqie-Hotkey", nullptr);
+	if (!hotkey || !*hotkey || !accelerator_string_is_valid(hotkey)) return nullptr;
+
+	g_auto(GStrv) shortcuts = g_strsplit(hotkey, ";", -1);
+	for (const EditorDescription *editor : editor_list_get())
+		{
+		if (g_strcmp0(editor->key, desktop_name) == 0 || !editor->hotkey || !*editor->hotkey) continue;
+
+		g_auto(GStrv) existing_shortcuts = g_strsplit(editor->hotkey, ";", -1);
+		for (gchar **shortcut = shortcuts; *shortcut; shortcut++)
+			{
+			guint key = 0;
+			GdkModifierType modifiers = GDK_NO_MODIFIER_MASK;
+			gtk_accelerator_parse(g_strstrip(*shortcut), &key, &modifiers);
+			if (!key) continue;
+
+			for (gchar **existing = existing_shortcuts; *existing; existing++)
+				{
+				guint existing_key = 0;
+				GdkModifierType existing_modifiers = GDK_NO_MODIFIER_MASK;
+				gtk_accelerator_parse(g_strstrip(*existing), &existing_key, &existing_modifiers);
+				if (key == existing_key && modifiers == existing_modifiers)
+					{
+					return g_strdup(editor->name && *editor->name ? editor->name : editor->key);
+					}
+				}
+			}
+		}
+
+	return nullptr;
+}
+
 gboolean editor_window_save(EditorWindow *ew)
 {
 	gboolean ret = TRUE;
@@ -99,6 +138,13 @@ gboolean editor_window_save(EditorWindow *ew)
 		}
 
 	g_autofree gchar *text = text_buffer_get_text(ew->buffer, FALSE);
+	g_autofree gchar *conflicting_plugin = plugin_shortcut_conflict(text, ew->desktop_name);
+	if (conflicting_plugin)
+		{
+		g_autofree gchar *message = g_strdup_printf(_("The shortcut is already assigned to plugin \"%s\".\n\nThe operation cannot be completed."), conflicting_plugin);
+		file_util_warning_dialog(_("Shortcut conflict"), message, GQ_ICON_DIALOG_WARNING, ew->window);
+		return FALSE;
+		}
 
 	g_autofree gchar *dir = g_build_filename(get_rc_dir(), "applications", NULL);
 	g_autofree gchar *path = g_build_filename(dir, name, NULL);
@@ -141,10 +187,7 @@ void editor_window_save_cb(GtkWidget *, gpointer data)
 {
 	auto ew = static_cast<EditorWindow *>(data);
 
-	if (ew->modified)
-		{
-		editor_window_save(ew);
-		}
+	if (ew->modified && !editor_window_save(ew)) return;
 
 	gtk_widget_set_sensitive(ew->save_button, FALSE);
 	gtk_text_buffer_set_modified(ew->buffer, FALSE);
