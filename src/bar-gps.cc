@@ -464,8 +464,7 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_widget_add_css_class(box, "gps-marker");
 
-	marker_data->summary = gtk_image_new_from_icon_name("mark-location-symbolic");
-	gtk_image_set_pixel_size(GTK_IMAGE(marker_data->summary), 24);
+	marker_data->summary = GTK_WIDGET(shumate_point_new());
 	gtk_widget_add_css_class(marker_data->summary, "gps-marker-summary");
 	gtk_box_append(GTK_BOX(box), marker_data->summary);
 
