@@ -74,6 +74,23 @@ TEST(KeyboardShortcuts, PrefersAppThenMainThenRemainingWindow)
 	EXPECT_EQ(g_strstr_len(xml, -1, "<property name=\"title\">Copy</property>"), nullptr);
 }
 
+TEST(KeyboardShortcuts, AcceptsPrimaryForBackwardCompatibility)
+{
+	g_autoptr(GKeyFile) key_file = g_key_file_new();
+
+	g_key_file_set_string(key_file, "app.open-file", "accels", "<Control>o");
+	g_key_file_set_string(key_file, "win.main-win-open-archive", "accels", "<Primary>o");
+
+	EXPECT_TRUE(accelerator_string_is_valid("<Primary>o"));
+
+	g_autofree gchar *xml = shortcuts_xml_from_keyfile(key_file);
+
+	ASSERT_NE(xml, nullptr);
+	EXPECT_NE(g_strstr_len(xml, -1, "<property name=\"title\">Open file…</property>"), nullptr);
+	EXPECT_EQ(g_strstr_len(xml, -1, "<property name=\"title\">Open archive</property>"), nullptr);
+	EXPECT_EQ(substring_count(xml, "&lt;Control&gt;o"), 1);
+}
+
 TEST(KeyboardMap, PrefersAppThenMainThenRemainingWindow)
 {
 	g_autoptr(GKeyFile) key_file = g_key_file_new();
