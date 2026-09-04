@@ -249,6 +249,8 @@ static gint debug_c;
 #endif
 
 static GtkWidget *configwindow = nullptr;
+static GtkWidget *accel_conflicts_window = nullptr;
+static GtkTextBuffer *accel_conflicts_buffer = nullptr;
 static GListStore *filter_store = nullptr;
 
 namespace
@@ -648,6 +650,8 @@ static void config_window_apply(const ConfOptions *c_options)
 	toolbar_apply(TOOLBAR_STATUS);
 }
 
+static void accel_conflicts_window_update();
+
 /*
  *-----------------------------------------------------------------------------
  * config window main button callbacks (private)
@@ -656,6 +660,12 @@ static void config_window_apply(const ConfOptions *c_options)
 
 static void config_window_close_cb(GtkWidget *, gpointer)
 {
+	if (accel_conflicts_window)
+		{
+		gtk_window_destroy(GTK_WINDOW(accel_conflicts_window));
+		accel_conflicts_window = nullptr;
+		accel_conflicts_buffer = nullptr;
+		}
 	gtk_window_destroy(GTK_WINDOW(configwindow));
 	configwindow = nullptr;
 	g_clear_object(&filter_store);
@@ -1478,6 +1488,7 @@ static void accel_reload_and_apply()
 	editor_plugin_accels_reload();
 	g_list_store_remove_all(accel_store);
 	accel_store_populate();
+	accel_conflicts_window_update();
 }
 
 static gchar *accel_normalize(const gchar *accelerator)
@@ -1593,6 +1604,82 @@ static gchar *accel_existing_conflicts_message()
 	return conflicts->len > 0 ? g_string_free(g_steal_pointer(&conflicts), FALSE) : nullptr;
 }
 
+static gboolean accel_conflicts_window_close_cb(GtkWindow *window, gpointer)
+{
+	gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
+	return TRUE;
+}
+
+static void accel_conflicts_window_close_button_cb(GtkWidget *, gpointer)
+{
+	if (accel_conflicts_window) gtk_widget_set_visible(accel_conflicts_window, FALSE);
+}
+
+static void accel_conflicts_window_update()
+{
+	if (!accel_conflicts_buffer) return;
+
+	g_autofree gchar *conflicts = accel_existing_conflicts_message();
+	gtk_text_buffer_set_text(accel_conflicts_buffer,
+	                         conflicts ? conflicts : _("No conflicting shortcuts."), -1);
+}
+
+static void accel_conflicts_window_show(GtkWidget *parent)
+{
+	if (!accel_conflicts_window)
+		{
+		accel_conflicts_window = window_new("shortcut_conflicts", GQ_ICON_DIALOG_WARNING,
+		                                    _("Shortcut conflicts"));
+		DEBUG_NAME(accel_conflicts_window);
+		gtk_window_set_default_size(GTK_WINDOW(accel_conflicts_window), 700, 300);
+		gtk_window_set_resizable(GTK_WINDOW(accel_conflicts_window), TRUE);
+		gtk_window_set_modal(GTK_WINDOW(accel_conflicts_window), FALSE);
+		if (GTK_IS_WINDOW(parent))
+			{
+			gtk_window_set_transient_for(GTK_WINDOW(accel_conflicts_window), GTK_WINDOW(parent));
+			}
+		g_signal_connect(accel_conflicts_window, "close-request",
+		                 G_CALLBACK(accel_conflicts_window_close_cb), nullptr);
+
+		GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+		gtk_widget_set_margin_top(vbox, PREF_PAD_BORDER);
+		gtk_widget_set_margin_bottom(vbox, PREF_PAD_BORDER);
+		gtk_widget_set_margin_start(vbox, PREF_PAD_BORDER);
+		gtk_widget_set_margin_end(vbox, PREF_PAD_BORDER);
+		gtk_window_set_child(GTK_WINDOW(accel_conflicts_window), vbox);
+
+		GtkWidget *label = gtk_label_new(_("The following keyboard shortcuts have conflicting assignments:"));
+		gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+		gtk_box_append(GTK_BOX(vbox), label);
+
+		GtkWidget *scrolled = gtk_scrolled_window_new();
+		gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), TRUE);
+		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
+		                               GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+		gtk_widget_set_hexpand(scrolled, TRUE);
+		gtk_widget_set_vexpand(scrolled, TRUE);
+		gtk_box_append(GTK_BOX(vbox), scrolled);
+
+		GtkWidget *text_view = gtk_text_view_new();
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(text_view), FALSE);
+		gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(text_view), FALSE);
+		gtk_text_view_set_monospace(GTK_TEXT_VIEW(text_view), TRUE);
+		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(text_view), GTK_WRAP_WORD_CHAR);
+		accel_conflicts_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), text_view);
+
+		GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+		gtk_widget_set_halign(button_box, GTK_ALIGN_END);
+		gtk_box_append(GTK_BOX(vbox), button_box);
+		GtkWidget *close_button = pref_button_new(button_box, GQ_ICON_CLOSE, _("Close"),
+		                                          G_CALLBACK(accel_conflicts_window_close_button_cb), nullptr);
+		gtk_window_set_default_widget(GTK_WINDOW(accel_conflicts_window), close_button);
+		}
+
+	accel_conflicts_window_update();
+	gtk_window_present(GTK_WINDOW(accel_conflicts_window));
+}
+
 static gboolean accel_show_existing_conflicts_cb(gpointer data)
 {
 	auto *keyboard_page = static_cast<GtkWidget *>(data);
@@ -1606,13 +1693,8 @@ static gboolean accel_show_existing_conflicts_cb(gpointer data)
 
 	g_autofree gchar *conflicts = accel_existing_conflicts_message();
 	if (!conflicts) return G_SOURCE_REMOVE;
-	g_autofree gchar *message = g_strdup_printf(_("The following keyboard shortcuts have conflicting assignments:\n\n%s"), conflicts);
 	GtkWidget *parent = GTK_IS_WINDOW(configwindow) ? configwindow : widget_get_toplevel(keyboard_page);
-	GenericDialog *gd = generic_dialog_new(_("Shortcut conflicts"), "shortcut_conflicts", parent, TRUE, nullptr, nullptr);
-	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING, _("Shortcut conflicts"), message, TRUE);
-	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", generic_dialog_dummy_cb, TRUE);
-	gtk_window_set_modal(GTK_WINDOW(gd->dialog), TRUE);
-	gtk_window_present(GTK_WINDOW(gd->dialog));
+	accel_conflicts_window_show(parent);
 
 	return G_SOURCE_REMOVE;
 }
