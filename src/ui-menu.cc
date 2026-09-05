@@ -492,8 +492,19 @@ void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_li
 
 		g_autoptr(GMenuItem) item = g_menu_item_new(label, nullptr);
 
-		g_menu_item_set_action_and_target_value( item, action, g_variant_new_string(ed->key)
-		);
+		g_menu_item_set_action_and_target_value(item, action, g_variant_new_string(ed->key));
+
+		/* Context-menu actions use the main-menu plugin shortcut for display. */
+		auto *app = GTK_APPLICATION(g_application_get_default());
+		if (app && g_strcmp0(action, "win.main-win-plugin-run") != 0)
+			{
+			g_autofree gchar *detailed_action = g_strdup_printf("win.main-win-plugin-run::%s", ed->key);
+			g_auto(GStrv) accels = gtk_application_get_accels_for_action(app, detailed_action);
+			if (accels && accels[0])
+				{
+				g_menu_item_set_attribute(item, "accel", "s", accels[0]);
+				}
+			}
 
 		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
 		g_menu_item_set_icon(item, icon);
