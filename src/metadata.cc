@@ -804,6 +804,11 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 		{
 		return g_list_append(nullptr, metadata_file_info(fd, key));
 		}
+	else if (strcmp(key, "formatted.MediaDate") == 0)
+		{
+		read_media_time_data(fd);
+		return g_list_append(nullptr, g_strdup(text_from_time(fd->media_date)));
+		}
 #if HAVE_LUA
 	else if (strncmp(key, "lua.", 4) == 0)
 		{

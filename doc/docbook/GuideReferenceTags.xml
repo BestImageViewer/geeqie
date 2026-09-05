@@ -62,6 +62,27 @@
           </row>
           <row>
             <entry>
+              <para>formatted.MediaDate</para>
+            </entry>
+            <entry>
+              <para>
+                Exif.Photo.DateTimeOriginal
+                <para />
+                Xmp.video.DateUTC
+                <para />
+                Xmp.video.TrackCreateDate
+                <para />
+                Xmp.video.TrackModifyDate
+                <para />
+                File modification date
+              </para>
+            </entry>
+            <entry>
+              <para>Media date</para>
+            </entry>
+          </row>
+          <row>
+            <entry>
               <para>formatted.ShutterSpeed</para>
             </entry>
             <entry>
@@ -574,6 +595,14 @@
             </entry>
             <entry>
               <para>Date</para>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <para>formatted.MediaDate</para>
+            </entry>
+            <entry>
+              <para>Media date</para>
             </entry>
           </row>
           <row>

@@ -756,7 +756,7 @@ static GtkWidget *layout_sort_popover_new(LayoutWindow *lw)
 	g_autoptr(GMenu) options_section = g_menu_new();
 
 	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
-	                                  SORT_EXIFTIMEDIGITIZED, SORT_SIZE, SORT_RATING, SORT_CLASS })
+	                                  SORT_EXIFTIMEDIGITIZED, SORT_MEDIA_TIME, SORT_SIZE, SORT_RATING, SORT_CLASS })
 		{
 		layout_sort_popover_append_method_item(sort_section, sort_type);
 		}

@@ -18,7 +18,8 @@ enum SortType : gint {
 	SORT_EXIFTIME,
 	SORT_EXIFTIMEDIGITIZED,
 	SORT_RATING,
-	SORT_CLASS
+	SORT_CLASS,
+	SORT_MEDIA_TIME
 };
 
 const gchar *sort_type_get_text(SortType method);

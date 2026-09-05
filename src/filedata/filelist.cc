@@ -380,6 +380,11 @@ gint FileData::FileList::sort_compare_filedata(
 			if (fa->exifdate_digitized > fb->exifdate_digitized) return 1;
 			/* fall back to name */
 			break;
+		case SORT_MEDIA_TIME:
+			if (fa->media_date < fb->media_date) return -1;
+			if (fa->media_date > fb->media_date) return 1;
+			/* fall back to name */
+			break;
 		case SORT_RATING:
 			if (fa->rating < fb->rating) return -1;
 			if (fa->rating > fb->rating) return 1;

@@ -48,21 +48,21 @@ class FileDataSortTest : public t::Test
 		fd_first = FileData::new_simple("/noexist/noexist/1_first.jpg", &context);
 		fd_first->size = 11;
 		fd_first->date = fd_first->cdate = 1111111111;
-		fd_first->exifdate = fd_first->exifdate_digitized = 1111111111;
+		fd_first->exifdate = fd_first->exifdate_digitized = fd_first->media_date = 1111111111;
 		fd_first->rating = 1;
 		fd_first->format_class = FORMAT_CLASS_IMAGE;
 
 		fd_middle = FileData::new_simple("/noexist/noexist/2_middle.jpg", &context);
 		fd_middle->size = 222;
 		fd_middle->date = fd_middle->cdate = 2222222222;
-		fd_middle->exifdate = fd_middle->exifdate_digitized = 2222222222;
+		fd_middle->exifdate = fd_middle->exifdate_digitized = fd_middle->media_date = 2222222222;
 		fd_middle->rating = 2;
 		fd_middle->format_class = FORMAT_CLASS_RAWIMAGE;
 
 		fd_last = FileData::new_simple("/noexist/noexist/3_last.jpg", &context);
 		fd_last->size = 3333;
 		fd_last->date = fd_last->cdate = 3333333333;
-		fd_last->exifdate = fd_last->exifdate_digitized = 3333333333;
+		fd_last->exifdate = fd_last->exifdate_digitized = fd_last->media_date = 3333333333;
 		fd_last->rating = 3;
 		fd_last->format_class = FORMAT_CLASS_META;
 	}
@@ -134,7 +134,7 @@ TEST_F(FileDataSortTest, CompareByEachNonPathTrait)
 	// SORT_NUMBER, and SORT_PATH.
 	for (const auto &sort_type : {SORT_SIZE, SORT_TIME, SORT_CTIME, SORT_NUMBER,
 				      SORT_EXIFTIME, SORT_EXIFTIMEDIGITIZED, SORT_RATING,
-				      SORT_CLASS})
+				      SORT_CLASS, SORT_MEDIA_TIME})
 		{
 		// This shows the sort_type in any assertion failure messages.
 		SCOPED_TRACE(std::to_string(sort_type));
@@ -189,6 +189,13 @@ TEST_F(FileDataSortTest, NumberSort)
 	EXPECT_LT(sort_compare_filedata(fd_10, fd_50, &number_sort), 0);
 }
 
+TEST_F(FileDataSortTest, QuickTimeMediaDate)
+{
+	EXPECT_EQ(date_time_from_quicktime("3825155349"), 1742310549);
+	EXPECT_EQ(date_time_from_quicktime("0"), 0);
+	EXPECT_EQ(date_time_from_quicktime("invalid"), 0);
+}
+
 TEST_F(FileDataSortTest, TieBreakerFallbackBehavior)
 {
 	// Convenience alias.
@@ -201,6 +208,7 @@ TEST_F(FileDataSortTest, TieBreakerFallbackBehavior)
 	fd_other_middle->cdate = fd_middle->cdate;
 	fd_other_middle->exifdate = fd_middle->exifdate;
 	fd_other_middle->exifdate_digitized = fd_middle->exifdate_digitized;
+	fd_other_middle->media_date = fd_middle->media_date;
 	fd_other_middle->rating = fd_middle->rating;
 	fd_other_middle->format_class = fd_middle->format_class;
 
@@ -213,7 +221,7 @@ TEST_F(FileDataSortTest, TieBreakerFallbackBehavior)
 	// SORT_NUMBER, and SORT_PATH.
 	for (const auto &sort_type : {SORT_SIZE, SORT_TIME, SORT_CTIME, SORT_NUMBER,
 				      SORT_EXIFTIME, SORT_EXIFTIMEDIGITIZED, SORT_RATING,
-				      SORT_CLASS})
+				      SORT_CLASS, SORT_MEDIA_TIME})
 		{
 		// This shows the sort_type in any assertion failure messages.
 		SCOPED_TRACE(std::to_string(sort_type));

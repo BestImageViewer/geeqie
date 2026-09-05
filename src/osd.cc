@@ -78,6 +78,7 @@ constexpr struct OsdTag
 	{"%file.page_no%",					N_("File page no.")},
 	{"%formatted.DateTime%",			N_("Image date")},
 	{"%formatted.DateTimeDigitized%",	N_("Date digitized")},
+	{"%formatted.MediaDate%",			N_("Media date")},
 	{"%formatted.ShutterSpeed%",		N_("ShutterSpeed")},
 	{"%formatted.Aperture%",			N_("Aperture")},
 	{"%formatted.ExposureBias%",		N_("Exposure bias")},

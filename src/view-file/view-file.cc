@@ -1093,7 +1093,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 
 	GMenu *sort_menu = G_MENU(gtk_builder_get_object(builder, "sort-submenu"));
 	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
-	                                  SORT_EXIFTIMEDIGITIZED, SORT_SIZE, SORT_RATING, SORT_CLASS })
+	                                  SORT_EXIFTIMEDIGITIZED, SORT_MEDIA_TIME, SORT_SIZE, SORT_RATING, SORT_CLASS })
 		{
 		gmenu_append_int32_action_item(sort_menu, sort_type_get_text(sort_type), "win.view-file-sort", sort_type);
 		}
@@ -2428,6 +2428,10 @@ static gboolean vf_read_metadata_in_idle_cb(gpointer data)
 			if (!fd->exifdate_digitized)
 				{
 				read_exif_time_digitized_data(fd);
+				}
+			if (!fd->media_date)
+				{
+				read_media_time_data(fd);
 				}
 			if (fd->rating == STAR_RATING_NOT_READ)
 				{

@@ -126,6 +126,11 @@
           </item>
           <item>
             <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by media date</attribute>
+            <attribute name="target">media-date</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
             <attribute name="label" translatable="yes">Sort by size</attribute>
             <attribute name="target">size</attribute>
           </item>

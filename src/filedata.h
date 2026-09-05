@@ -250,6 +250,7 @@ public:
 	ExifData *exif;
 	time_t exifdate;
 	time_t exifdate_digitized;
+	time_t media_date;
 	GHashTable *modified_xmp; /**< hash table which contains unwritten xmp metadata in format: key->list of string values */
 	GList *cached_metadata;
 	gint rating;
@@ -393,6 +394,7 @@ public:
 
 	void read_exif_time_data(FileData *file);
 	void read_exif_time_digitized_data(FileData *file);
+	void read_media_time_data(FileData *file);
 
 	static gboolean marks_list_save(gchar *path, gboolean save);
 	static gboolean marks_list_load(const gchar *path);
@@ -624,6 +626,8 @@ gboolean file_data_unregister_real_time_monitor(FileData *fd);
 
 void read_exif_time_data(FileData *file);
 void read_exif_time_digitized_data(FileData *file);
+void read_media_time_data(FileData *file);
+time_t date_time_from_quicktime(const gchar *value);
 
 gboolean marks_list_save(gchar *path, gboolean save);
 gboolean marks_list_load(const gchar *path);

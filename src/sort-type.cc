@@ -20,6 +20,8 @@ const gchar *sort_type_get_text(SortType method)
 			return _("Sort by Exif date original");
 		case SORT_EXIFTIMEDIGITIZED:
 			return _("Sort by Exif date digitized");
+		case SORT_MEDIA_TIME:
+			return _("Sort by media date");
 		case SORT_NONE:
 			return _("Unsorted");
 		case SORT_PATH:
@@ -42,6 +44,7 @@ bool sort_type_requires_metadata(SortType method)
 {
 	return method == SORT_EXIFTIME
 	    || method == SORT_EXIFTIMEDIGITIZED
+	    || method == SORT_MEDIA_TIME
 	    || method == SORT_RATING;
 }
 

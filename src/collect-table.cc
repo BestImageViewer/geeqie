@@ -585,6 +585,7 @@ static SortType sort_type_from_string(const char *value)
 	if (g_strcmp0(value, "date-creation") == 0) return SORT_CTIME;
 	if (g_strcmp0(value, "exif-digitized") == 0) return SORT_EXIFTIMEDIGITIZED;
 	if (g_strcmp0(value, "exif-original") == 0) return SORT_EXIFTIME;
+	if (g_strcmp0(value, "media-date") == 0) return SORT_MEDIA_TIME;
 	if (g_strcmp0(value, "name") == 0) return SORT_NAME;
 	if (g_strcmp0(value, "number") == 0) return SORT_NUMBER;
 	if (g_strcmp0(value, "path") == 0) return SORT_PATH;

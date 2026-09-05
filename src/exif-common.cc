@@ -766,6 +766,7 @@ const ExifFormattedText ExifFormattedList[] = {
 	EXIF_FORMATTED_TAG(Camera,		N_("Camera")),
 	EXIF_FORMATTED_TAG(DateTime,		N_("Date")),
 	EXIF_FORMATTED_TAG(DateTimeDigitized,	N_("DateDigitized")),
+	{"formatted.MediaDate",		N_("Media date"),	nullptr},
 	EXIF_FORMATTED_TAG(ShutterSpeed,	N_("Shutter speed")),
 	EXIF_FORMATTED_TAG(Aperture,		N_("Aperture")),
 	EXIF_FORMATTED_TAG(ExposureBias,	N_("Exposure bias")),

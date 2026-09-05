@@ -158,6 +158,10 @@ static gint collection_list_sort_cb(gconstpointer a, gconstpointer b,
 			if (cia->fd->exifdate_digitized < cib->fd->exifdate_digitized) return -1;
 			if (cia->fd->exifdate_digitized > cib->fd->exifdate_digitized) return 1;
 			break;
+		case SORT_MEDIA_TIME:
+			if (cia->fd->media_date < cib->fd->media_date) return -1;
+			if (cia->fd->media_date > cib->fd->media_date) return 1;
+			break;
 		case SORT_RATING:
 			if (cia->fd->rating < cib->fd->rating) return -1;
 			if (cia->fd->rating > cib->fd->rating) return 1;

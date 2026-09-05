@@ -526,6 +526,11 @@ void read_exif_time_digitized_data(FileData *file)
 	file->read_exif_time_digitized_data(file);
 }
 
+void read_media_time_data(FileData *file)
+{
+	file->read_media_time_data(file);
+}
+
 
 gboolean marks_list_save(gchar *path, gboolean save)
 {

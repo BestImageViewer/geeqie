@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <limits>
 
 #include <glib-object.h>
 #include <pwd.h>
@@ -506,6 +507,50 @@ void FileData::read_exif_time_digitized_data(FileData *file)
 			file->exifdate_digitized = mktime(&time_str);
 			}
 		}
+}
+
+time_t date_time_from_quicktime(const gchar *value)
+{
+	if (!value || !*value) return 0;
+
+	constexpr guint64 quicktime_epoch_offset = 2082844800;
+	gchar *end = nullptr;
+	const guint64 quicktime_date = g_ascii_strtoull(value, &end, 10);
+	if (end == value || *end != '\0' || quicktime_date < quicktime_epoch_offset) return 0;
+
+	const guint64 unix_date = quicktime_date - quicktime_epoch_offset;
+	if (unix_date > static_cast<guint64>(std::numeric_limits<time_t>::max())) return 0;
+
+	return static_cast<time_t>(unix_date);
+}
+
+void FileData::read_media_time_data(FileData *file)
+{
+	if (file->media_date > 0) return;
+
+	read_exif_time_data(file);
+	if (file->exifdate > 0)
+		{
+		file->media_date = file->exifdate;
+		return;
+		}
+
+	constexpr const gchar *quicktime_date_keys[] = {
+		"Xmp.video.DateUTC",
+		"Xmp.video.TrackCreateDate",
+		"Xmp.video.TrackModifyDate"
+	};
+
+	for (const gchar *key : quicktime_date_keys)
+		{
+		g_autofree gchar *value = metadata_read_string(file, key, METADATA_PLAIN);
+		if (!value || !*value) continue;
+
+		file->media_date = date_time_from_quicktime(value);
+		if (file->media_date > 0) return;
+		}
+
+	file->media_date = file->date;
 }
 
 void FileData::read_rating_data(FileData *file)

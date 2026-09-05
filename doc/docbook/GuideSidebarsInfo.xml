@@ -243,6 +243,10 @@
             <entry>Image Date</entry>
           </row>
           <row>
+            <entry>formatted.MediaDate</entry>
+            <entry>Media date, with Exif, QuickTime and file modification date fallbacks</entry>
+          </row>
+          <row>
             <entry>formatted.ShutterSpeed</entry>
             <entry>Shutter speed in seconds (e.g. 1/60s)</entry>
           </row>
