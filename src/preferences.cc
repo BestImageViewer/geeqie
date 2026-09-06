@@ -332,6 +332,8 @@ AccelRow *accel_row_new(const gchar *action, const gchar *key, const gchar *desc
 } // namespace
 
 static GListStore *accel_store = nullptr;
+static guint accel_reload_idle_id = 0;
+static bool accel_reloading = false;
 
 static GtkWidget *safe_delete_path_entry;
 
@@ -660,6 +662,11 @@ static void accel_conflicts_window_update();
 
 static void config_window_close_cb(GtkWidget *, gpointer)
 {
+	if (accel_reload_idle_id)
+		{
+		g_source_remove(accel_reload_idle_id);
+		accel_reload_idle_id = 0;
+		}
 	if (accel_conflicts_window)
 		{
 		gtk_window_destroy(GTK_WINDOW(accel_conflicts_window));
@@ -1481,14 +1488,34 @@ static void accel_store_populate()
 		}
 }
 
-static void accel_reload_and_apply()
+static gboolean accel_reload_and_apply_cb(gpointer)
 {
+	accel_reload_idle_id = 0;
+	accel_reloading = true;
 	accel_map_load_merged();
 	reload_registered_accels(GTK_APPLICATION(g_application_get_default()), get_keyfile_merged());
 	editor_plugin_accels_reload();
+	// GTK may restore window focus after the dialog closes. Release the focused
+	// row while it is still parented, before removing the list items.
+	GtkWidget *focus = gtk_window_get_focus(GTK_WINDOW(configwindow));
+	if (focus && gtk_widget_get_ancestor(focus, GTK_TYPE_COLUMN_VIEW))
+		{
+		gtk_window_set_focus(GTK_WINDOW(configwindow), nullptr);
+		}
 	g_list_store_remove_all(accel_store);
 	accel_store_populate();
 	accel_conflicts_window_update();
+	accel_reloading = false;
+	return G_SOURCE_REMOVE;
+}
+
+static void accel_reload_and_apply()
+{
+	// Rebuilding the list must wait until editing and dialog event handling finish.
+	if (!accel_reload_idle_id)
+		{
+		accel_reload_idle_id = g_idle_add(accel_reload_and_apply_cb, nullptr);
+		}
 }
 
 static gchar *accel_normalize(const gchar *accelerator)
@@ -1749,6 +1776,7 @@ static void accel_replace_ok_cb(GenericDialog *, gpointer data)
 
 static void accel_key_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer)
 {
+	if (accel_reloading) return;
 	if (gtk_editable_label_get_editing(label)) return;
 	auto *row = static_cast<AccelRow *>(g_object_get_data(G_OBJECT(label), "accel-row"));
 	if (!row) return;
@@ -3554,12 +3582,19 @@ static void accel_factory_bind(GtkSignalListItemFactory *factory, GtkListItem *l
 		}
 }
 
+static void accel_factory_unbind(GtkSignalListItemFactory *, GtkListItem *list_item, gpointer)
+{
+	GtkWidget *widget = gtk_list_item_get_child(list_item);
+	g_object_set_data(G_OBJECT(widget), "accel-row", nullptr);
+}
+
 static GtkColumnViewColumn *accel_column_new(const gchar *title, gint column)
 {
 	auto *factory = gtk_signal_list_item_factory_new();
 	g_object_set_data(G_OBJECT(factory), "accel-column", GINT_TO_POINTER(column));
 	g_signal_connect(factory, "setup", G_CALLBACK(accel_factory_setup), nullptr);
 	g_signal_connect(factory, "bind", G_CALLBACK(accel_factory_bind), nullptr);
+	g_signal_connect(factory, "unbind", G_CALLBACK(accel_factory_unbind), nullptr);
 
 	auto *view_column = gtk_column_view_column_new(title, GTK_LIST_ITEM_FACTORY(factory));
 	gtk_column_view_column_set_resizable(view_column, TRUE);
