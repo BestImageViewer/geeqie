@@ -134,13 +134,19 @@ wget https://raw.githubusercontent.com/BestImageViewer/geeqie/master/tools/geeqi
 chmod +x geeqie-download-appimage.sh
 ```
 
-The script can download either the full size or the minimal version of the AppIamge, and sets a symbolic link to the executable file. The `--help` option lists all options.
+The script can download either the full size or the minimal version of the AppImage, set a symbolic link to the executable file, keep local backups, revert to an earlier downloaded AppImage, install desktop icons and menu items, and optionally extract the AppImage. The `--help` option lists all options.
+
+The Continuous Build AppImages also include update information for use with AppImageUpdate or the command line `appimageupdatetool`. This is optional; the AppImages can still be downloaded and run directly. AppImageUpdate updates the `.AppImage` file and is useful when you run the AppImage directly. To update an existing downloaded AppImage with delta downloads, run for example:
+
+```sh
+appimageupdatetool $HOME/bin/Geeqie-latest-x86_64.AppImage
+```
 
 The full version takes a noticeable time to load, and runs slightly slower than a normal packaged release.
 The above script has the option `--extract` which extracts the contents of either AppImage to a sub-directory under `$HOME/bin`.
 With this option the loading and run time is the same as for a packaged release.
 
-There are also options to install desktop icons, menu items, and to revert to earlier downloaded versions.
+AppImageUpdate does not update an already extracted `squashfs-root` directory. If you use `--extract`, continue to use `geeqie-download-appimage.sh --extract`; when the script downloads a newer AppImage, it re-extracts it and updates the symbolic link.
 
 AppImages have a "portable mode" which is described [here](https://docs.appimage.org/user-guide/portable-mode.html).
 

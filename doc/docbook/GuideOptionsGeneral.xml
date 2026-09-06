@@ -260,10 +260,6 @@
       <para>Geeqie must be restarted for changes to take effect.</para>
     </note>
   </section>
-  <section id="AppImageUpdatesNotifications">
-    <title>AppImage updates notifications</title>
-    <para>Show a notification on start-up if the server has a newer version than the current. Requires an Internet connection. Displayed only if an AppImage is being run.</para>
-  </section>
   <section id="PredefinedKeywordTree">
     <title>Show predefined keyword tree</title>
     <para>Deselecting this option will hide the list of predefined keywords on the right-hand side of the keywords pane of the info sidebar.</para>

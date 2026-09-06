@@ -63,6 +63,7 @@ jobs:
             python3-pip \
             python3-venv \
             wget \
+            zsync \
             xsltproc \
             yelp-tools
 
@@ -98,11 +99,13 @@ jobs:
 
       - name: Build AppImage
         run: |
-          DEPLOY_GTK_VERSION=4 ./linuxdeploy/AppRun --appdir "${{ github.workspace }}/AppDir" \
+          DEPLOY_GTK_VERSION=4 \
+            LDAI_OUTPUT=Geeqie-latest-x86_64.AppImage \
+            LDAI_UPDATE_INFORMATION="gh-releases-zsync|BestImageViewer|geeqie|continuous|Geeqie-latest-x86_64.AppImage.zsync" \
+            ./linuxdeploy/AppRun --appdir "${{ github.workspace }}/AppDir" \
             --desktop-file "${{ github.workspace }}/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop" \
             --plugin gtk \
             --output appimage
-          mv Geeqie-x86_64.AppImage Geeqie-latest-x86_64.AppImage
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -111,7 +114,7 @@ jobs:
           tag: continuous
           name: Continuous build
           prerelease: true
-          artifacts: "Geeqie-latest-x86_64.AppImage"
+          artifacts: "Geeqie-latest-x86_64.AppImage*"
 
       - name: Upload logs
         uses: actions/upload-artifact@v4

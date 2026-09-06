@@ -107,7 +107,6 @@ ConfOptions *conf_options_new()
 	options->fullscreen.disable_saver = TRUE;
 	options->fullscreen.screen = -1;
 
-	options->appimage_notifications = TRUE;
 	options->marks_save = TRUE;
 	options->with_rename = FALSE;
 	options->collections_duplicates = FALSE;

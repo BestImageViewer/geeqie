@@ -21,8 +21,6 @@
 
 #include "ui-utildlg.h"
 
-#include <cstdio>
-#include <ctime>
 #include <map>
 #include <string>
 
@@ -425,109 +423,4 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 	return gd;
 }
 
-/*
- *-----------------------------------------------------------------------------
- * AppImage version update notification message
- *-----------------------------------------------------------------------------
- *
- * If the current version is not on GitHub, assume a newer one is available
- * and show a notification message.
- */
-
-struct AppImageData
-{
-	GThreadPool *thread_pool;
-};
-
-static void show_new_appimage_notification(GtkApplication *app)
-{
-	auto *notification = g_notification_new("Geeqie");
-
-	g_notification_set_title(notification, _("AppImage"));
-	g_notification_set_body(notification, _("A new Geeqie AppImage is available"));
-	g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_NORMAL);
-	g_notification_set_default_action(notification, "app.null");
-
-	g_application_send_notification(G_APPLICATION(app), "new-appimage-notification", notification);
-
-	g_object_unref(notification);
-}
-
-static void new_appimage_notification_func(gpointer, gpointer user_data)
-{
-	FILE *pipe;
-	GNetworkMonitor *net_mon;
-	GSocketConnectable *geeqie_github;
-	auto app = static_cast<GtkApplication *>(user_data);
-	constexpr gint max_buffer_size = 16384;
-	char buffer[max_buffer_size];
-	char result[max_buffer_size];
-	gboolean internet_available = FALSE;
-
-	/* If this is a release version, do not check for updates.
-	 * Non-release version is e.g. 2.5+git20241117-167271b8
-	 */
-	if (g_strrstr(VERSION, "git"))
-		{
-		net_mon = g_network_monitor_get_default();
-		geeqie_github = g_network_address_parse_uri("https://github.com/", 80, nullptr);
-
-		if (geeqie_github)
-			{
-			internet_available = g_network_monitor_can_reach(net_mon, geeqie_github, nullptr, nullptr);
-			g_object_unref(geeqie_github);
-			}
-
-		if (internet_available)
-			{
-			pipe = popen("curl --max-time 2 --silent https://api.github.com/repos/BestImageViewer/geeqie/releases/tags/continuous", "r");
-
-			if (pipe == nullptr)
-				{
-				log_printf("Failed to get date from GitHub");
-				}
-			else
-				{
-				while (fgets(buffer, max_buffer_size, pipe) != nullptr)
-					{
-					strcat(result, buffer);
-					}
-				pclose(pipe);
-
-				/* GitHub date looks like: "published_at": "2024-04-17T08:50:08Z" */
-				gchar *start_date = g_strstr_len(result, -1, "published_at");
-
-				if (start_date)
-					{
-					start_date += 16; // skip 'published_at": "' part
-					start_date[10] = '\0'; // drop everything after YYYY-mm-dd part
-
-					std::tm github_version_date{};
-					strptime(start_date, "%Y-%m-%d", &github_version_date);
-
-					/* VERSION looks like: 2.0.1+git20220116-c791cbee */
-					g_auto(GStrv) version_split = g_strsplit_set(VERSION, "+-", -1);
-
-					std::tm current_version_date{};
-					strptime(version_split[1] + 3, "%Y%m%d", &current_version_date);
-
-					if (mktime(&github_version_date) > mktime(&current_version_date))
-						{
-						show_new_appimage_notification(app);
-						}
-					}
-				}
-			}
-		}
-}
-
-void new_appimage_notification(GtkApplication *app)
-{
-	AppImageData *appimage_data;
-
-	appimage_data = g_new0(AppImageData, 1);
-
-	appimage_data->thread_pool = g_thread_pool_new(new_appimage_notification_func, app, 1, FALSE, nullptr);
-	g_thread_pool_push(appimage_data->thread_pool, appimage_data, nullptr);
-}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

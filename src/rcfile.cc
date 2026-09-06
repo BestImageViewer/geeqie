@@ -451,7 +451,6 @@ static void write_global_attributes(const ConfOptions *options, GString *outstr,
 	WRITE_NL(); WRITE_BOOL(*options, log_window.timer_data);
 	WRITE_NL(); WRITE_CHAR(*options, log_window.action);
 
-	WRITE_NL(); WRITE_BOOL(*options, appimage_notifications);
 	WRITE_NL(); WRITE_BOOL(*options, marks_save);
 	WRITE_NL(); WRITE_CHAR(*options, help_search_engine);
 
@@ -928,7 +927,6 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, log_window.timer_data)) continue;
 		if (READ_CHAR(*options, log_window.action)) continue;
 
-		if (READ_BOOL(*options, appimage_notifications)) continue;
 		if (READ_BOOL(*options, marks_save)) continue;
 		if (READ_CHAR(*options, help_search_engine)) continue;
 

@@ -510,9 +510,6 @@ static void config_window_apply(const ConfOptions *c_options)
 
 	options->image.enable_read_ahead = c_options->image.enable_read_ahead;
 
-	options->appimage_notifications = c_options->appimage_notifications;
-
-
 	if (options->image.use_custom_border_color != c_options->image.use_custom_border_color
 	    || options->image.use_custom_border_color_in_fullscreen != c_options->image.use_custom_border_color_in_fullscreen
 	    || !gdk_rgba_equal(&options->image.border_color, &c_options->image.border_color))
@@ -2145,17 +2142,6 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_widget_set_tooltip_text(group, _("The Hide Selectable Bars menu item (default keystroke is control-backtick) will toggle the display of the bars selected here"));
 
 	pref_spacer(group, PREF_PAD_GROUP);
-
-	if ((g_getenv("APPDIR") && strstr(g_getenv("APPDIR"), "/tmp/.mount_Geeqie")) || (g_strstr_len(gq_executable_path, -1, "squashfs-root")))
-		{
-		group = pref_group_new(vbox, FALSE, _("AppImage updates notifications"), GTK_ORIENTATION_VERTICAL);
-		hbox = pref_box_new(group, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-		pref_checkbox_new_int(group, _("Enable"), options->appimage_notifications, &c_options->appimage_notifications);
-		gtk_widget_set_tooltip_text(group, _("Show a notification on start-up if the server has a newer version than the current. Requires an Internet connection"));
-
-		pref_spacer(group, PREF_PAD_GROUP);
-		}
-
 
 	net_mon = g_network_monitor_get_default();
 	tz_org = g_network_address_parse_uri(TIMEZONE_DATABASE_WEB, 80, nullptr);

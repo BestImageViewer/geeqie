@@ -63,7 +63,5 @@ std::optional<GdkRectangle> generic_dialog_find_window(const gchar *title, const
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values);
 void generic_dialog_windows_write_config(GString *outstr, gint indent);
 
-void new_appimage_notification(GtkApplication *app);
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

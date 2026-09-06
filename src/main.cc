@@ -317,21 +317,6 @@ void config_file_error_notification_clicked_cb(GSimpleAction *, GVariant *, gpoi
 }
 
 /**
- * @brief Null action
- * @param GSimpleAction
- * @param GVariant
- * @param gpointer
- *
- * This is required for the AppImage notification.
- * If the user clicks on the notification and a default action is
- * not defined, the action taken is to activate the app (again).
- * The default action is linked to this callback.
- */
-void null_activated_cb(GSimpleAction *, GVariant *, gpointer)
-{
-}
-
-/**
  * @brief Notification Quit button pressed
  * @param action
  * @param parameter
@@ -871,20 +856,6 @@ void startup_cb(GtkApplication *app, gpointer)
 
 	theme_change_cb(iface, 0, nullptr);
 
-	/* Show a notification if the server has a newer AppImage version */
-	if (options->appimage_notifications)
-		{
-		if (g_getenv("APPDIR") && strstr(g_getenv("APPDIR"), "/tmp/.mount_Geeqie"))
-			{
-			new_appimage_notification(app);
-			}
-		else if (g_strstr_len(gq_executable_path, -1, "squashfs-root"))
-			{
-			/* Probably running an extracted AppImage */
-			new_appimage_notification(app);
-			}
-		}
-
 	auto *provider = gtk_css_provider_new();
 	gtk_css_provider_load_from_resource(provider, "/org/geeqie/geeqie/css/geeqie.css");
 	gtk_style_context_add_provider_for_display( gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -999,11 +970,6 @@ Version: Geeqie "), VERSION, nullptr);
 	g_signal_connect(app, "activate", G_CALLBACK(activate_cb), nullptr);
 	g_signal_connect(app, "command-line", G_CALLBACK(command_line_cb), nullptr);
 	g_signal_connect(app, "startup", G_CALLBACK(startup_cb), nullptr);
-
-	/* The null action is required for the AppImage notification */
-	GSimpleAction *null_action = g_simple_action_new("null", nullptr);
-	g_signal_connect(null_action, "activate", G_CALLBACK(null_activated_cb), app);
-	g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(null_action));
 
 	/* Used only for config. file error notifications */
 	GSimpleAction *config_file_error_notification_action = g_simple_action_new("config-file-error", nullptr);

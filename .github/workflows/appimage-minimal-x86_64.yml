@@ -28,6 +28,7 @@ jobs:
           apt install -y patchelf
           apt install -y wget
           apt install -y yelp-tools
+          apt install -y zsync
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
             python3 python3-pip python3-venv \
             ninja-build meson  # ← avoid pip ninja; use distro ninja
@@ -95,11 +96,13 @@ jobs:
 
       - name: Build AppImage
         run: |
-          DEPLOY_GTK_VERSION=4 ./linuxdeploy/AppRun --appdir ${{ github.workspace }}/AppDir \
+          DEPLOY_GTK_VERSION=4 \
+            LDAI_OUTPUT=Geeqie-minimal-latest-x86_64.AppImage \
+            LDAI_UPDATE_INFORMATION="gh-releases-zsync|BestImageViewer|geeqie|continuous|Geeqie-minimal-latest-x86_64.AppImage.zsync" \
+            ./linuxdeploy/AppRun --appdir ${{ github.workspace }}/AppDir \
             --desktop-file ${{ github.workspace }}/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop \
             --plugin gtk \
             --output appimage
-          mv Geeqie-x86_64.AppImage Geeqie-minimal-latest-x86_64.AppImage
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -108,7 +111,7 @@ jobs:
           tag: continuous
           name: Continuous build
           prerelease: true
-          artifacts: "Geeqie-minimal-latest-x86_64.AppImage"
+          artifacts: "Geeqie-minimal-latest-x86_64.AppImage*"
 
       - name: Upload logs
         uses: actions/upload-artifact@v4
