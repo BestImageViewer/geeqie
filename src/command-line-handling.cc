@@ -1265,9 +1265,8 @@ void gq_view(GtkApplication *, GApplicationCommandLine *app_command_line, GVaria
 GList *directories_collections_files(GtkApplication *app, GApplicationCommandLine *app_command_line)
 {
 	GList *file_list = nullptr;
-	const gchar *current_arg;
 	gboolean remote_instance;
-	gchar **argv=nullptr;
+	g_auto(GStrv) argv = nullptr;
 	gchar *download_web_tmp_file;
 	gint argc;
 
@@ -1277,8 +1276,9 @@ GList *directories_collections_files(GtkApplication *app, GApplicationCommandLin
 
 	for (gint i = 1; i < argc; i++)
 		{
-		current_arg = argv[i];
-		g_autofree gchar *real_path = g_canonicalize_filename(current_arg, nullptr);
+		g_autofree gchar *current_arg = path_to_utf8(argv[i]);
+		g_autofree gchar *path = g_canonicalize_filename(argv[i], g_application_command_line_get_cwd(app_command_line));
+		g_autofree gchar *real_path = path_to_utf8(path);
 
 		if (isdir(real_path))
 			{

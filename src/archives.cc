@@ -173,7 +173,8 @@ gchar *open_archive(const FileData *fd)
 	gboolean success;
 	gint error;
 
-	g_autofree gchar *destination_dir = g_build_filename(g_get_tmp_dir(), GQ_ARCHIVE_DIR, instance_identifier, fd->path, NULL);
+	g_autofree gchar *tmp_dir = path_to_utf8(g_get_tmp_dir());
+	g_autofree gchar *destination_dir = g_build_filename(tmp_dir, GQ_ARCHIVE_DIR, instance_identifier, fd->path, NULL);
 
 	if (!recursive_mkdir_if_not_exists(destination_dir, 0755))
 		{
@@ -182,7 +183,8 @@ gchar *open_archive(const FileData *fd)
 		}
 
 	g_autofree gchar *current_dir = g_get_current_dir();
-	error = chdir(destination_dir);
+	g_autofree gchar *destination_dir_locale = path_from_utf8(destination_dir);
+	error = chdir(destination_dir_locale);
 	if (error)
 		{
 		log_printf("%s%s%s%s\n", _("Open Archive - Cannot change directory to: "), destination_dir, _("\n  Error code: "), strerror(errno));
@@ -190,7 +192,8 @@ gchar *open_archive(const FileData *fd)
 		}
 
 	flags = ARCHIVE_EXTRACT_TIME;
-	success = extract(fd->path, true, flags);
+	g_autofree gchar *filename_locale = path_from_utf8(fd->path);
+	success = extract(filename_locale, true, flags);
 
 	error = chdir(current_dir);
 	if (error)
