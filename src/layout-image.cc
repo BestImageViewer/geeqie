@@ -2370,6 +2370,8 @@ static GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, ImageSplitMode m
 	gtk_paned_set_start_child(GTK_PANED(paned), lw->split_images[0]->widget);
 	gtk_paned_set_end_child(GTK_PANED(paned), lw->split_images[1]->widget);
 
+	gtk_widget_set_visible(lw->split_images[0]->widget, TRUE);
+	gtk_widget_set_visible(lw->split_images[1]->widget, TRUE);
 
 	return paned;
 }
