@@ -29,6 +29,9 @@ struct FileDialogData
 	const gchar *filter;
 	gpointer data;
 	GtkWindow *parent;
+	FileDialogCallback alternate_callback;
+	const gchar *alternate_text;
+	gboolean alternate_default;
 };
 
 void file_dialog_show(const FileDialogData &fdd);

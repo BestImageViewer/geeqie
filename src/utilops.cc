@@ -1503,7 +1503,7 @@ static void file_util_dest_folder_update_path(UtilityData *ud, GFile *file)
 		}
 }
 
-static void file_util_fdlg_ok_cb(GFile *file, gpointer data)
+static void file_util_dest_folder_selected(GFile *file, gpointer data, gboolean with_rename)
 {
 	auto ud = static_cast<UtilityData *>(data);
 
@@ -1532,7 +1532,7 @@ static void file_util_fdlg_ok_cb(GFile *file, gpointer data)
 				}
 			}
 
-		ud->phase = UtilityPhase::ENTERING;
+		ud->phase = with_rename ? UtilityPhase::INTERMEDIATE : UtilityPhase::ENTERING;
 
 		file_util_dialog_run(ud);
 		}
@@ -1541,6 +1541,16 @@ static void file_util_fdlg_ok_cb(GFile *file, gpointer data)
 		ud->phase = UtilityPhase::CANCEL;
 		file_util_dialog_run(ud);
 		}
+}
+
+static void file_util_fdlg_ok_cb(GFile *file, gpointer data)
+{
+	file_util_dest_folder_selected(file, data, FALSE);
+}
+
+static void file_util_fdlg_rename_cb(GFile *file, gpointer data)
+{
+	file_util_dest_folder_selected(file, data, TRUE);
 }
 
 /* format: * = filename without extension, ## = number position, extension is kept */
@@ -1889,6 +1899,13 @@ static void file_util_dialog_init_dest_folder(UtilityData *ud)
 	fdd.history_key = "move_copy";
 	fdd.title = (ud->type == UtilityType::MOVE) ? _("Geeqie - Move File") : _("Geeqie - Copy File");
 	fdd.parent = GTK_WINDOW(ud->parent);
+
+	if (ud->type == UtilityType::COPY || ud->type == UtilityType::MOVE)
+		{
+		fdd.alternate_callback = file_util_fdlg_rename_cb;
+		fdd.alternate_text = _("With Rename");
+		fdd.alternate_default = options->with_rename;
+		}
 
 	file_dialog_show(fdd);
 }

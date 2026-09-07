@@ -29,10 +29,13 @@
 
 namespace {
 
+constexpr gint FILE_DIALOG_RESPONSE_ALTERNATE = 1;
+
 struct PendingFileDialog
 {
 	FileDialogAction action;
 	FileDialogCallback callback;
+	FileDialogCallback alternate_callback;
 	gpointer data;
 	GtkWidget *dialog;
 	GtkWidget *chooser;
@@ -603,12 +606,14 @@ void finish_file_dialog(PendingFileDialog *pending, gint response_id)
 		}
 
 	g_autoptr(GFile) file = nullptr;
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (response_id == GTK_RESPONSE_ACCEPT || response_id == FILE_DIALOG_RESPONSE_ALTERNATE)
 		{
 		file = get_selected_file(pending);
 		}
 
-	pending->callback(file, pending->data);
+	FileDialogCallback callback = response_id == FILE_DIALOG_RESPONSE_ALTERNATE && pending->alternate_callback
+	                            ? pending->alternate_callback : pending->callback;
+	callback(file, pending->data);
 	gtk_window_destroy(GTK_WINDOW(pending->dialog));
 }
 
@@ -821,12 +826,18 @@ void file_dialog_show(const FileDialogData &fdd)
 	auto *pending = g_new0(PendingFileDialog, 1);
 	pending->action = fdd.action;
 	pending->callback = fdd.callback;
+	pending->alternate_callback = fdd.alternate_callback;
 	pending->data = fdd.data;
 
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
 	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
 	pending->dialog = gtk_dialog_new_with_buttons(title, parent, GTK_DIALOG_MODAL, _("_Cancel"), GTK_RESPONSE_CANCEL, accept_text, GTK_RESPONSE_ACCEPT, nullptr);
+	if (fdd.alternate_callback && fdd.alternate_text)
+		{
+		gtk_dialog_add_button(GTK_DIALOG(pending->dialog), fdd.alternate_text, FILE_DIALOG_RESPONSE_ALTERNATE);
+		gtk_dialog_set_default_response(GTK_DIALOG(pending->dialog), fdd.alternate_default ? FILE_DIALOG_RESPONSE_ALTERNATE : GTK_RESPONSE_ACCEPT);
+		}
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
 	G_GNUC_END_IGNORE_DEPRECATIONS
 #endif
