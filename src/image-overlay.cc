@@ -78,6 +78,7 @@ struct OverlayStateData {
 	guint idle_id; /* event source id */
 	guint timer_id; /* event source id */
 	gulong destroy_id;
+	gulong scale_changed_id;
 };
 
 struct OSDIcon {
@@ -431,10 +432,18 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			osd->histogram.draw(histmap, pixbuf, x, y, w, HISTOGRAM_HEIGHT);
 			}
 
-		pixbuf_draw_layout(pixbuf, layout, 5, 5, options->image_overlay.text_color);
+		const gint scale = gtk_widget_get_scale_factor(imd->pr);
+		if (scale > 1)
+			{
+			GdkPixbuf *scaled = gdk_pixbuf_scale_simple(pixbuf, width * scale, height * scale, GDK_INTERP_NEAREST);
+			g_object_unref(pixbuf);
+			pixbuf = scaled;
+			}
+		pixbuf_draw_layout(pixbuf, layout, 5, 5, options->image_overlay.text_color, scale);
 	}
 
 	g_object_unref(G_OBJECT(layout));
+	pango_font_description_free(font_desc);
 
 	return pixbuf;
 }
@@ -598,7 +607,7 @@ static void image_osd_info_show(OverlayStateData *osd, GdkPixbuf *pixbuf)
 {
 	if (osd->ovl_info == 0)
 		{
-		osd->ovl_info = image_overlay_add(osd->imd, pixbuf, osd->x, osd->y, osd->origin);
+		osd->ovl_info = image_overlay_add(osd->imd, pixbuf, osd->x, osd->y, static_cast<OverlayRendererFlags>(osd->origin | OVL_DEVICE_SCALE));
 		}
 	else
 		{
@@ -777,6 +786,7 @@ static void image_osd_free(OverlayStateData *osd)
 		{
 		image_set_osd_data(osd->imd, nullptr);
 		g_signal_handler_disconnect(osd->imd->pr, osd->destroy_id);
+		g_signal_handler_disconnect(osd->imd->pr, osd->scale_changed_id);
 
 		image_set_state_func(osd->imd, nullptr, nullptr);
 
@@ -785,6 +795,12 @@ static void image_osd_free(OverlayStateData *osd)
 		}
 
 	g_free(osd);
+}
+
+static void image_osd_scale_changed_cb(GObject *, GParamSpec *, gpointer data)
+{
+	auto *osd = static_cast<OverlayStateData *>(data);
+	image_osd_update_schedule(osd, TRUE);
 }
 
 static void image_osd_destroy_cb(GtkWidget *, gpointer data)
@@ -812,6 +828,7 @@ static void image_osd_enable(ImageWindow *imd, OsdShowFlags show)
 
 		osd->destroy_id = g_signal_connect(G_OBJECT(imd->pr), "destroy",
 						   G_CALLBACK(image_osd_destroy_cb), osd);
+		osd->scale_changed_id = g_signal_connect(imd->pr, "notify::scale-factor", G_CALLBACK(image_osd_scale_changed_cb), osd);
 		image_set_osd_data(imd, osd);
 
 		image_set_state_func(osd->imd, image_osd_state_cb, osd);

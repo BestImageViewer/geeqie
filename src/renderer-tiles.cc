@@ -476,6 +476,12 @@ GdkRectangle rt_overlay_get_position(const RendererTiles *rt, const OverlayData 
 	od_rect.y = od->y;
 	od_rect.width = gdk_pixbuf_get_width(od->pixbuf);
 	od_rect.height = gdk_pixbuf_get_height(od->pixbuf);
+	if (od->flags & OVL_DEVICE_SCALE)
+		{
+		const gint scale = gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr));
+		od_rect.width /= scale;
+		od_rect.height /= scale;
+		}
 
 	if (od->flags & OVL_RELATIVE)
 		{
@@ -1980,8 +1986,16 @@ void rt_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint, gpointer data)
 		auto *od = static_cast<OverlayData *>(work->data);
 		GdkRectangle od_rect = rt_overlay_get_position(rt, od);
 
-		gdk_cairo_set_source_pixbuf(cr, od->pixbuf, od_rect.x, od_rect.y);
+		cairo_save(cr);
+		cairo_translate(cr, od_rect.x, od_rect.y);
+		if (od->flags & OVL_DEVICE_SCALE)
+			{
+			const gint scale = gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr));
+			cairo_scale(cr, 1.0 / scale, 1.0 / scale);
+			}
+		gdk_cairo_set_source_pixbuf(cr, od->pixbuf, 0, 0);
 		cairo_paint(cr);
+		cairo_restore(cr);
 		}
 }
 

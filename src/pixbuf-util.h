@@ -101,7 +101,7 @@ void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, GqColor color);
 
 
 void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
-                        gint x, gint y, GqColor color);
+                        gint x, gint y, GqColor color, gint scale = 1);
 
 void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
                           GqPoint c1, GqPoint c2, GqPoint c3,
