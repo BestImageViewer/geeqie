@@ -30,11 +30,11 @@
 struct ImageSimilarityData
 {
 	ImageSimilarityData() = default;
-	ImageSimilarityData(GdkPixbuf *pixbuf);
+	ImageSimilarityData(const GdkPixbuf *pixbuf);
 
 	void alternate_processing();
 
-	void fill_data(GdkPixbuf *pixbuf);
+	void fill_data(const GdkPixbuf *pixbuf);
 	GdkPixbuf *to_pixbuf() const;
 
 	bool fill_data(FILE *f);
