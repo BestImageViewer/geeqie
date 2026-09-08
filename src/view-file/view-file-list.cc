@@ -776,9 +776,27 @@ static gchar *vflist_get_formatted(ViewFile *vf, const gchar *name, const gchar 
 	return g_string_free(text, FALSE);
 }
 
+static time_t vflist_display_date(const ViewFile *vf, const FileData *fd)
+{
+	switch (vf->sort.method)
+		{
+		case SORT_CTIME:
+			return fd->cdate;
+		case SORT_EXIFTIME:
+			return fd->exifdate;
+		case SORT_EXIFTIMEDIGITIZED:
+			return fd->exifdate_digitized;
+		case SORT_MEDIA_TIME:
+			return fd->media_date;
+		default:
+			return fd->date;
+		}
+}
+
 static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *iter, FileData *fd)
 {
-	const gchar *time = text_from_time(fd->date);
+	const time_t date = vflist_display_date(vf, fd);
+	const gchar *time = date ? text_from_time(date) : "";
 	const gchar *link = islink(fd->path) ? GQ_LINK_STR : "";
 	const gchar *disabled_grouping;
 	gboolean expanded = FALSE;
@@ -1010,6 +1028,16 @@ void vflist_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings)
 	gtk_tree_store_reorder(store, nullptr, new_order.data());
 
 	g_hash_table_destroy(fd_idx_hash);
+
+	/* Sorting also changes the date shown in existing rows, including sidecars. */
+	gtk_tree_model_foreach(GTK_TREE_MODEL(store), [](GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
+		{
+		auto *vf = static_cast<ViewFile *>(data);
+		FileData *fd;
+		gtk_tree_model_get(model, iter, FILE_COLUMN_POINTER, &fd, -1);
+		vflist_setup_iter(vf, GTK_TREE_STORE(model), iter, fd);
+		return FALSE;
+		}, vf);
 }
 
 /*
@@ -1708,7 +1736,11 @@ gboolean vflist_refresh(ViewFile *vf)
 
 	DEBUG_1("%s vflist_refresh: populate view", get_exec_time());
 
-	vflist_populate_view(vf, FALSE);
+	/* Metadata dates can change without a FileData version change. */
+	const gboolean metadata_date = vf->sort.method == SORT_EXIFTIME ||
+	                               vf->sort.method == SORT_EXIFTIMEDIGITIZED ||
+	                               vf->sort.method == SORT_MEDIA_TIME;
+	vflist_populate_view(vf, metadata_date);
 
 	DEBUG_1("%s vflist_refresh: free filelist", get_exec_time());
 
