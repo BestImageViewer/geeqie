@@ -85,7 +85,12 @@ gboolean ImageLoaderHEIF::write(const guchar *buf, gsize &chunk_size, gsize coun
 		gint height = heif_image_get_height(img,heif_channel_interleaved);
 		gboolean alpha = handle.has_alpha_channel();
 
-		pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, img);
+		g_autoptr(GdkPixbuf) decoded = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, img);
+
+		/* libheif tracks pixel allocations against the decoding context. Release
+		 * its pixels before ctx is destroyed, even if our pixbuf lives longer. */
+		pixbuf = gdk_pixbuf_copy(decoded);
+		if (!pixbuf) return FALSE;
 
 		area_updated_cb(nullptr, 0, 0, width, height, data);
 		}
