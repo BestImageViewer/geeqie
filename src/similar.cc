@@ -147,7 +147,7 @@ static void image_sim_channel_norm(ImageSimilarityData::Avg &pix)
 		}
 }
 
-ImageSimilarityData::ImageSimilarityData(GdkPixbuf *pixbuf)
+ImageSimilarityData::ImageSimilarityData(const GdkPixbuf *pixbuf)
 	: ImageSimilarityData()
 {
 	fill_data(pixbuf);
@@ -183,14 +183,14 @@ void ImageSimilarityData::alternate_processing()
 		}
 }
 
-void ImageSimilarityData::fill_data(GdkPixbuf *pixbuf)
+void ImageSimilarityData::fill_data(const GdkPixbuf *pixbuf)
 {
 	if (!pixbuf) return;
 
 	const gint w = gdk_pixbuf_get_width(pixbuf);
 	const gint h = gdk_pixbuf_get_height(pixbuf);
 	const gint rs = gdk_pixbuf_get_rowstride(pixbuf);
-	const guchar *pix = gdk_pixbuf_get_pixels(pixbuf);
+	const guchar *pix = gdk_pixbuf_read_pixels(pixbuf);
 	const gint p_step = gdk_pixbuf_get_has_alpha(pixbuf) ? 4 : 3;
 
 	gint x_inc = w / 32;

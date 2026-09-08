@@ -168,13 +168,12 @@ static gboolean histmap_read(HistMap *histmap, gboolean whole)
 	gint has_alpha;
 	gint step;
 	gint end_line;
-	guchar *s_pix;
-	GdkPixbuf *imgpixbuf = histmap->pixbuf;
+	const GdkPixbuf *imgpixbuf = histmap->pixbuf;
 
 	w = gdk_pixbuf_get_width(imgpixbuf);
 	h = gdk_pixbuf_get_height(imgpixbuf);
 	srs = gdk_pixbuf_get_rowstride(imgpixbuf);
-	s_pix = gdk_pixbuf_get_pixels(imgpixbuf);
+	const guchar *s_pix = gdk_pixbuf_read_pixels(imgpixbuf);
 	has_alpha = gdk_pixbuf_get_has_alpha(imgpixbuf);
 
 	if (whole)
@@ -191,7 +190,7 @@ static gboolean histmap_read(HistMap *histmap, gboolean whole)
 	step = 3 + !!(has_alpha);
 	for (i = histmap->y; i < end_line; i++)
 		{
-		guchar *sp = s_pix + (i * srs); /* 8bit */
+		const guchar *sp = s_pix + (i * srs); /* 8bit */
 		for (j = 0; j < w; j++)
 			{
 			guint max = std::max({sp[0], sp[1], sp[2]});

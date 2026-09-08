@@ -478,13 +478,11 @@ GdkTexture *utility_texture_new_from_pixbuf(GdkPixbuf *pixbuf)
 
 	const gint height = gdk_pixbuf_get_height(pixbuf);
 	const gsize stride = gdk_pixbuf_get_rowstride(pixbuf);
-	GBytes *bytes = g_bytes_new_with_free_func(gdk_pixbuf_get_pixels(pixbuf), stride * height,
-							     reinterpret_cast<GDestroyNotify>(g_object_unref), g_object_ref(pixbuf));
+	g_autoptr(GBytes) bytes = g_bytes_new_with_free_func(gdk_pixbuf_read_pixels(pixbuf), stride * height,
+	                                                     g_object_unref, g_object_ref(pixbuf));
 	const GdkMemoryFormat format = gdk_pixbuf_get_has_alpha(pixbuf) ? GDK_MEMORY_R8G8B8A8 : GDK_MEMORY_R8G8B8;
-	GdkTexture *texture = gdk_memory_texture_new(gdk_pixbuf_get_width(pixbuf), height, format, bytes, stride);
-	g_bytes_unref(bytes);
 
-	return texture;
+	return gdk_memory_texture_new(gdk_pixbuf_get_width(pixbuf), height, format, bytes, stride);
 }
 
 UtilityListItem *utility_list_item_new(FileData *fd, GdkPixbuf *pixbuf, const gchar *sidecars)

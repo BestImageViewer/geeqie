@@ -2375,18 +2375,15 @@ static void pr_create_anaglyph_color(GdkPixbuf *pixbuf, GdkPixbuf *right, gint x
 {
 	gint srs;
 	gint drs;
-	guchar *s_pix;
 	guchar *d_pix;
-	guchar *sp;
 	guchar *dp;
-	guchar *spi;
 	guchar *dpi;
 	gint i;
 	gint j;
 
 	srs = gdk_pixbuf_get_rowstride(right);
-	s_pix = gdk_pixbuf_get_pixels(right);
-	spi = s_pix + (x * COLOR_BYTES);
+	const guchar *s_pix = gdk_pixbuf_read_pixels(right);
+	const guchar *spi = s_pix + (x * COLOR_BYTES);
 
 	drs = gdk_pixbuf_get_rowstride(pixbuf);
 	d_pix = gdk_pixbuf_get_pixels(pixbuf);
@@ -2394,7 +2391,7 @@ static void pr_create_anaglyph_color(GdkPixbuf *pixbuf, GdkPixbuf *right, gint x
 
 	for (i = y; i < y + h; i++)
 		{
-		sp = spi + (i * srs);
+		const guchar *sp = spi + (i * srs);
 		dp = dpi + (i * drs);
 		for (j = 0; j < w; j++)
 			{
@@ -2423,19 +2420,16 @@ static void pr_create_anaglyph_gray(GdkPixbuf *pixbuf, GdkPixbuf *right, gint x,
 {
 	gint srs;
 	gint drs;
-	guchar *s_pix;
 	guchar *d_pix;
-	guchar *sp;
 	guchar *dp;
-	guchar *spi;
 	guchar *dpi;
 	gint i;
 	gint j;
 	const double gc[3] = {0.299, 0.587, 0.114};
 
 	srs = gdk_pixbuf_get_rowstride(right);
-	s_pix = gdk_pixbuf_get_pixels(right);
-	spi = s_pix + (x * COLOR_BYTES);
+	const guchar *s_pix = gdk_pixbuf_read_pixels(right);
+	const guchar *spi = s_pix + (x * COLOR_BYTES);
 
 	drs = gdk_pixbuf_get_rowstride(pixbuf);
 	d_pix = gdk_pixbuf_get_pixels(pixbuf);
@@ -2443,7 +2437,7 @@ static void pr_create_anaglyph_gray(GdkPixbuf *pixbuf, GdkPixbuf *right, gint x,
 
 	for (i = y; i < y + h; i++)
 		{
-		sp = spi + (i * srs);
+		const guchar *sp = spi + (i * srs);
 		dp = dpi + (i * drs);
 		for (j = 0; j < w; j++)
 			{
@@ -2479,11 +2473,8 @@ static void pr_create_anaglyph_dubois(GdkPixbuf *pixbuf, GdkPixbuf *right, gint 
 {
 	gint srs;
 	gint drs;
-	guchar *s_pix;
 	guchar *d_pix;
-	guchar *sp;
 	guchar *dp;
-	guchar *spi;
 	guchar *dpi;
 	gint i;
 	gint j;
@@ -2518,8 +2509,8 @@ static void pr_create_anaglyph_dubois(GdkPixbuf *pixbuf, GdkPixbuf *right, gint 
 		}
 
 	srs = gdk_pixbuf_get_rowstride(right);
-	s_pix = gdk_pixbuf_get_pixels(right);
-	spi = s_pix + (x * COLOR_BYTES);
+	const guchar *s_pix = gdk_pixbuf_read_pixels(right);
+	const guchar *spi = s_pix + (x * COLOR_BYTES);
 
 	drs = gdk_pixbuf_get_rowstride(pixbuf);
 	d_pix = gdk_pixbuf_get_pixels(pixbuf);
@@ -2527,7 +2518,7 @@ static void pr_create_anaglyph_dubois(GdkPixbuf *pixbuf, GdkPixbuf *right, gint 
 
 	for (i = y; i < y + h; i++)
 		{
-		sp = spi + (i * srs);
+		const guchar *sp = spi + (i * srs);
 		dp = dpi + (i * drs);
 		for (j = 0; j < w; j++)
 			{
@@ -2987,7 +2978,7 @@ std::optional<GqColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPo
 
 	const gboolean p_alpha = gdk_pixbuf_get_has_alpha(pr->pixbuf);
 	const gint p_rs = gdk_pixbuf_get_rowstride(pr->pixbuf);
-	const guchar *p_pix = gdk_pixbuf_get_pixels(pr->pixbuf);
+	const guint8 *p_pix = gdk_pixbuf_read_pixels(pr->pixbuf);
 
 	const auto xoff = static_cast<size_t>(map_rect.x) * (p_alpha ? 4 : 3);
 	const auto yoff = static_cast<size_t>(map_rect.y) * p_rs;
