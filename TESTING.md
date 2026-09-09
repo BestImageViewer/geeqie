@@ -113,6 +113,9 @@ See `build-aux/lua-test.sh` for more details.
 
 ## Static Analysis
 
+Source code checks exclude `tests/` and `src/third-party/`. Unit test sources
+are still compiled and run when unit tests are enabled.
+
 ### Code correctness
 
 Runs `clang-tidy` code correctness checks for every source file in the project.

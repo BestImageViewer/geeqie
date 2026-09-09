@@ -50,10 +50,11 @@ if not get_option('deprecated_warnings') and not get_option('all_deprecated_warn
 endif
 
 # Project requirements
-# code_sources is all human-written geeqie C/C++ code
+# code_sources is application C/C++ code checked by the analysis suite.
+# Unit tests and third-party sources are only added to project_sources.
 code_sources = []
 # project_sources will include code_sources, as well as auto-generated code,
-# third-party code, and some other code-like dependencies.
+# unit tests, third-party code, and some other code-like dependencies.
 project_sources = []
 gnome = import('gnome')
 thread_dep = dependency('threads')

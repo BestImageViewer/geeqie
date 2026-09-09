@@ -9,4 +9,4 @@ unit_test_sources = files(
 'layout-image-navigation.cc',
 'pixbuf-util.cc')
 
-code_sources += unit_test_sources
+project_sources += unit_test_sources

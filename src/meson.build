@@ -336,8 +336,6 @@ subdir('pan-view')
 subdir('third-party')
 subdir('view-file')
 
-## @FIXME code_sources is modified in ./tests/meson.build
-# We assume that code_sources is only set above.
 project_sources += code_sources
 
 geeqie_exe = executable('geeqie', project_sources,
