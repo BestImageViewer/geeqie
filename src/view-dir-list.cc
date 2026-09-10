@@ -27,6 +27,7 @@
 #include <cstring>
 
 #include <glib-object.h>
+#include <graphene.h>
 
 #include "filedata.h"
 #include "layout.h"
@@ -44,6 +45,7 @@ struct ViewDirInfoList
 	GHashTable *labels;
 	GHashTable *buttons;
 	FileData *selected_fd;
+	guint scroll_id;
 };
 
 #define VDLIST(_vd_) ((ViewDirInfoList *)((_vd_)->info))
@@ -122,9 +124,8 @@ FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row)
 
 void vdlist_scroll_to_fd(ViewDir *vd, FileData *fd, gfloat)
 {
-	if (!gtk_widget_get_realized(vd->view)) return;
-
 	vdlist_color_set(vd, fd, TRUE);
+	if (!gtk_widget_get_realized(vd->view)) return;
 
 	auto *button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, fd));
 	if (button && !gtk_widget_has_focus(button)) gtk_widget_grab_focus(button);
@@ -138,6 +139,12 @@ void vdlist_scroll_to_fd(ViewDir *vd, FileData *fd, gfloat)
 
 static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 {
+	if (VDLIST(vd)->scroll_id)
+		{
+		gtk_widget_remove_tick_callback(vd->view, VDLIST(vd)->scroll_id);
+		VDLIST(vd)->scroll_id = 0;
+		}
+
 	(void)clear;
 	GList *work;
 	GList *old_list;
@@ -260,6 +267,27 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	return ret;
 }
 
+static gboolean vdlist_scroll_after_layout(GtkWidget *, GdkFrameClock *, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+	auto *button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, VDLIST(vd)->selected_fd));
+	if (button)
+		{
+		/* Newly populated rows have no allocation until the next layout. */
+		if (gtk_widget_get_height(button) == 0) return G_SOURCE_CONTINUE;
+
+		graphene_rect_t bounds;
+		if (gtk_widget_compute_bounds(button, vd->view, &bounds))
+			{
+			GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vd->widget));
+			gtk_adjustment_set_value(adjustment, bounds.origin.y);
+			}
+		}
+
+	VDLIST(vd)->scroll_id = 0;
+	return G_SOURCE_REMOVE;
+}
+
 gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 {
 	gboolean ret;
@@ -293,14 +321,28 @@ gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 		work = work->next;
 		}
 
-	if (found) vdlist_scroll_to_fd(vd, found, 0.5);
+	if (found)
+		{
+		vdlist_scroll_to_fd(vd, found, 0.5);
+		VDLIST(vd)->scroll_id = gtk_widget_add_tick_callback(vd->view, vdlist_scroll_after_layout, vd, nullptr);
+		}
 
 	return ret;
 }
 
 void vdlist_refresh(ViewDir *vd)
 {
+	g_autofree gchar *selected_path = VDLIST(vd)->selected_fd ? g_strdup(VDLIST(vd)->selected_fd->path) : nullptr;
+	const gboolean scroll_pending = VDLIST(vd)->scroll_id != 0;
 	vdlist_populate(vd, FALSE);
+	if (FileData *fd = vdlist_row_by_path(vd, selected_path, nullptr))
+		{
+		vdlist_color_set(vd, fd, TRUE);
+		if (scroll_pending)
+			{
+			VDLIST(vd)->scroll_id = gtk_widget_add_tick_callback(vd->view, vdlist_scroll_after_layout, vd, nullptr);
+			}
+		}
 }
 
 gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
@@ -357,6 +399,7 @@ void vdlist_destroy_cb(GtkWidget *widget, gpointer data)
 
 	vd_dnd_drop_scroll_cancel(vd);
 	widget_auto_scroll_stop(widget);
+	if (VDLIST(vd)->scroll_id) gtk_widget_remove_tick_callback(vd->view, VDLIST(vd)->scroll_id);
 
 	g_clear_pointer(&VDLIST(vd)->labels, g_hash_table_unref);
 	g_clear_pointer(&VDLIST(vd)->buttons, g_hash_table_unref);
