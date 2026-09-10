@@ -64,11 +64,6 @@ enum MetadataKey {
 	MK_COMMENT
 };
 
-struct MetadataCacheEntry {
-	gchar *key;
-	GList *values;
-};
-
 /* If contents change, keep GuideOptionsMetadata.xml up to date */
 /**
  *  @brief Tags that will be written to all files in a group - selected by: options->metadata.sync_grouped_files, Preferences/Metadata/Write The Same Description Tags To All Grouped Sidecars
@@ -99,20 +94,6 @@ constexpr std::array<const gchar *, 22> group_keys{
 };
 
 GtkTreeStore *keyword_tree;
-
-gint metadata_cache_entry_compare_key(const MetadataCacheEntry *entry, const gchar *key)
-{
-	return strcmp(entry->key, key);
-}
-
-void metadata_cache_entry_free(MetadataCacheEntry *entry)
-{
-	if (!entry) return;
-
-	g_free(entry->key);
-	g_list_free_full(entry->values, g_free);
-	g_free(entry);
-}
 
 void string_list_free(gpointer data)
 {
@@ -267,74 +248,56 @@ static gboolean keyword_tree_get_iter(GtkTreeModel *keyword_tree, GtkTreeIter *i
  *-------------------------------------------------------------------
  */
 
-/* fd->cached_metadata list of MetadataCacheEntry */
-
 static void metadata_cache_update(FileData *fd, const gchar *key, const GList *values)
 {
-	GList *work;
-
-	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_entry_compare_key));
-	if (work)
+	if (!fd->cached_metadata)
 		{
-		/* key found - just replace values */
-		auto *entry = static_cast<MetadataCacheEntry *>(work->data);
+		fd->cached_metadata = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, string_list_free);
+		}
 
-		g_list_free_full(entry->values, g_free);
-		entry->values = string_list_copy(values);
+	if (!g_hash_table_insert(fd->cached_metadata, g_strdup(key), string_list_copy(values)))
+		{
 		DEBUG_1("updated %s %s\n", key, fd->path);
 		return;
 		}
 
-	/* key not found - prepend new entry */
-	auto *entry = g_new0(MetadataCacheEntry, 1);
-	entry->key = g_strdup(key);
-	entry->values = string_list_copy(values);
-
-	fd->cached_metadata = g_list_prepend(fd->cached_metadata, entry);
 	DEBUG_1("added %s %s\n", key, fd->path);
 }
 
-static const GList *metadata_cache_get(FileData *fd, const gchar *key)
+static const GList *metadata_cache_get(const FileData *fd, const gchar *key)
 {
-	GList *work;
+	if (!fd->cached_metadata) return nullptr;
 
-	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_entry_compare_key));
-	if (work)
+	gpointer values = g_hash_table_lookup(fd->cached_metadata, key);
+	if (!values)
 		{
-		/* key found */
-		auto *entry = static_cast<MetadataCacheEntry *>(work->data);
-
-		DEBUG_1("found %s %s\n", key, fd->path);
-		return entry->values;
+		DEBUG_1("not found %s %s\n", key, fd->path);
+		return nullptr;
 		}
-	DEBUG_1("not found %s %s\n", key, fd->path);
-	return nullptr;
+
+	DEBUG_1("found %s %s\n", key, fd->path);
+	return static_cast<const GList *>(values);
 }
 
 static void metadata_cache_remove(FileData *fd, const gchar *key)
 {
-	GList *work;
+	if (!fd->cached_metadata) return;
 
-	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_entry_compare_key));
-	if (work)
+	if (g_hash_table_remove(fd->cached_metadata, key))
 		{
-		/* key found */
-		auto *entry = static_cast<MetadataCacheEntry *>(work->data);
-
-		metadata_cache_entry_free(entry);
-		fd->cached_metadata = g_list_delete_link(fd->cached_metadata, work);
 		DEBUG_1("removed %s %s\n", key, fd->path);
 		return;
 		}
+
 	DEBUG_1("not removed %s %s\n", key, fd->path);
 }
 
 void metadata_cache_free(FileData *fd)
 {
-	if (fd->cached_metadata) DEBUG_1("freed %s\n", fd->path);
+	if (!fd->cached_metadata) return;
 
-	g_list_free_full(fd->cached_metadata, reinterpret_cast<GDestroyNotify>(metadata_cache_entry_free));
-	fd->cached_metadata = nullptr;
+	g_clear_pointer(&fd->cached_metadata, g_hash_table_destroy);
+	DEBUG_1("freed %s\n", fd->path);
 }
 
 
@@ -510,7 +473,7 @@ gboolean metadata_write_list(FileData *fd, const gchar *key, const GList *values
 		{
 		fd->modified_xmp = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, string_list_free);
 		}
-	g_hash_table_insert(fd->modified_xmp, g_strdup(key), string_list_copy(const_cast<GList *>(values)));
+	g_hash_table_insert(fd->modified_xmp, g_strdup(key), string_list_copy(values));
 
 	metadata_cache_remove(fd, key);
 
