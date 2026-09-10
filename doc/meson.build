@@ -5,7 +5,7 @@ destdir = join_paths(meson.current_build_dir(), 'html')
 graphicsdir = join_paths(meson.current_source_dir(), 'graphics')
 guideindex_ln = join_paths(destdir, 'index.html')
 
-option = get_option('yelp-build')
+option = get_option('yelp_build')
 if not option.disabled()
     gnome_doc_tool = find_program('yelp-build', required : false)
     if gnome_doc_tool.found()

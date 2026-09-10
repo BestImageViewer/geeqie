@@ -107,7 +107,7 @@ parts:
       - -Dhelp_pdf=disabled
       - -Dpandoc=disabled
       - -Dunit_tests=disabled
-      - -Dyelp-build=disabled
+      - -Dyelp_build=disabled
     parse-info:
       - usr/share/metainfo/org.geeqie.Geeqie.metainfo.xml
     build-environment:

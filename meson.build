@@ -312,17 +312,17 @@ shumate_dep = []
 
 conf_data.set('HAVE_LIBSHUMATE', 0)
 req_version_shumate = '>=1.5.0'
-option = get_option('gps-map')
+option = get_option('gps_map')
 if not option.disabled()
-    shumate_dep = dependency('shumate-1.0', version : req_version_shumate, required : get_option('gps-map'))
+    shumate_dep = dependency('shumate-1.0', version : req_version_shumate, required : get_option('gps_map'))
     if shumate_dep.found()
         conf_data.set('HAVE_LIBSHUMATE', 1)
-        summary({'gps-map' : ['GPS map displayed', true]}, section : 'Configuration', bool_yn : true)
+        summary({'gps_map' : ['GPS map displayed', true]}, section : 'Configuration', bool_yn : true)
     else
-        summary({'gps-map' : ['shumate-1.0 ' + req_version_shumate + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
+        summary({'gps_map' : ['shumate-1.0 ' + req_version_shumate + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
     endif
 else
-    summary({'gps-map' : ['disabled - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
+    summary({'gps_map' : ['disabled - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
 conf_data.set('HAVE_HEIF', 0)

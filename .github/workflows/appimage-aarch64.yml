@@ -61,7 +61,7 @@ jobs:
               -Dcms=enabled \
               -Ddoxygen=disabled \
               -Dunit_tests=disabled \
-              -Dyelp-build=disabled \
+              -Dyelp_build=disabled \
               -Dprefix=$GITHUB_WORKSPACE/AppDir/usr build
             ninja -C build install
             mkdir -p tools

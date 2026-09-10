@@ -51,7 +51,7 @@ jobs:
           -Dfd_verbose_debug=disabled
           -Dfits=disabled
           -Dgit=disabled
-          -Dgps-map=disabled
+          -Dgps_map=disabled
           -Dheif=disabled
           -Dhelp_pdf=disabled
           -Dj2k=disabled
@@ -67,7 +67,7 @@ jobs:
           -Dunit_tests=disabled
           -Dvideothumbnailer=disabled
           -Dwebp=disabled
-          -Dyelp-build=disabled
+          -Dyelp_build=disabled
         options: --verbose
         meson-version: 1.3.2
     - name: Upload logs
@@ -111,7 +111,7 @@ jobs:
           -Dexr=disabled
           -Dfits=disabled
           -Dgit=disabled
-          -Dgps-map=disabled
+          -Dgps_map=disabled
           -Dheif=disabled
           -Dhelp_pdf=disabled
           -Dj2k=disabled
@@ -127,7 +127,7 @@ jobs:
           -Dunit_tests=disabled
           -Dvideothumbnailer=disabled
           -Dwebp=disabled
-          -Dyelp-build=disabled
+          -Dyelp_build=disabled
         options: --verbose
         meson-version: 1.3.2
     - name: Upload logs

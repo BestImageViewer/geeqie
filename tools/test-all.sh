@@ -38,7 +38,7 @@ meson setup \
 -Dfd_verbose_debug=disabled \
 -Dfits=disabled \
 -Dgit=disabled \
--Dgps-map=disabled \
+-Dgps_map=disabled \
 -Dheif=disabled \
 -Dhelp_pdf=disabled \
 -Dj2k=disabled \
@@ -54,7 +54,7 @@ meson setup \
 -Dunit_tests=disabled \
 -Dvideothumbnailer=disabled \
 -Dwebp=disabled \
--Dyelp-build=disabled \
+-Dyelp_build=disabled \
 --buildtype=debug \
 build
 

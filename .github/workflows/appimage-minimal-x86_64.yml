@@ -58,7 +58,7 @@ jobs:
             -Dexr=disabled \
             -Dfits=disabled \
             -Dgit=disabled \
-            -Dgps-map=disabled \
+            -Dgps_map=disabled \
             -Dheif=disabled \
             -Dhelp_pdf=disabled \
             -Dj2k=disabled \
@@ -73,7 +73,7 @@ jobs:
             -Dtiff=disabled \
             -Dvideothumbnailer=disabled \
             -Dwebp=disabled \
-            -Dyelp-build=disabled
+            -Dyelp_build=disabled
 
       - name: Ninja compile
         run: DESTDIR=${{ github.workspace }}/AppDir ninja -C build install

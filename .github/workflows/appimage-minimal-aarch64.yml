@@ -51,7 +51,7 @@ jobs:
               -Dexiv2=disabled \
               -Dexr=disabled \
               -Dfits=disabled \
-              -Dgps-map=disabled \
+              -Dgps_map=disabled \
               -Dheif=disabled \
               -Dhelp_pdf=disabled  \
               -Dj2k=disabled \
