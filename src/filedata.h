@@ -252,7 +252,7 @@ public:
 	time_t exifdate_digitized;
 	time_t media_date;
 	GHashTable *modified_xmp; /**< hash table which contains unwritten xmp metadata in format: key->list of string values */
-	GList *cached_metadata;
+	GHashTable *cached_metadata;
 	gint rating;
 	gboolean metadata_in_idle_loaded;
 
