@@ -566,9 +566,14 @@ void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpoi
 
 	cairo_scale(cr, scale, scale);
 
-	cairo_rectangle(cr,  width_offset * scale , image_y, pixbuf_image_width / scale, pixbuf_image_height / scale);
-	gdk_cairo_set_source_pixbuf(cr, pixbuf, width_offset / scale, image_y / scale);
-	cairo_fill(cr);
+	cairo_surface_t *surface = pixbuf_to_cairo_surface(pixbuf);
+	if (surface)
+		{
+		cairo_rectangle(cr,  width_offset * scale , image_y, pixbuf_image_width / scale, pixbuf_image_height / scale);
+		cairo_set_source_surface(cr, surface, width_offset / scale, image_y / scale);
+		cairo_fill(cr);
+		cairo_surface_destroy(surface);
+		}
 
 	if (layout_image) g_object_unref(layout_image);
 	if (layout_page) g_object_unref(layout_page);
