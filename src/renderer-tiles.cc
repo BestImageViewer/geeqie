@@ -1979,8 +1979,13 @@ void rt_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint, gpointer data)
 			const gint scale = gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr));
 			cairo_scale(cr, 1.0 / scale, 1.0 / scale);
 			}
-		gdk_cairo_set_source_pixbuf(cr, od->pixbuf, 0, 0);
-		cairo_paint(cr);
+		cairo_surface_t *surface = pixbuf_to_cairo_surface(od->pixbuf);
+		if (surface)
+			{
+			cairo_set_source_surface(cr, surface, 0, 0);
+			cairo_paint(cr);
+			cairo_surface_destroy(surface);
+			}
 		cairo_restore(cr);
 		}
 }
