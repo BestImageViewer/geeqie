@@ -195,6 +195,25 @@ GdkTexture *pixbuf_to_texture(GdkPixbuf *pixbuf)
 	                              gdk_pixbuf_get_rowstride(pixbuf));
 }
 
+cairo_surface_t *pixbuf_to_cairo_surface(GdkPixbuf *pixbuf)
+{
+	if (!pixbuf) return nullptr;
+
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+	                                                     gdk_pixbuf_get_width(pixbuf),
+	                                                     gdk_pixbuf_get_height(pixbuf));
+	if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
+		{
+		cairo_surface_destroy(surface);
+		return nullptr;
+		}
+
+	g_autoptr(GdkTexture) texture = pixbuf_to_texture(pixbuf);
+	gdk_texture_download(texture, cairo_image_surface_get_data(surface), cairo_image_surface_get_stride(surface));
+	cairo_surface_mark_dirty(surface);
+	return surface;
+}
+
 GdkPixbuf *pixbuf_from_cairo_surface(cairo_surface_t *surface)
 {
 	if (!surface || cairo_surface_get_type(surface) != CAIRO_SURFACE_TYPE_IMAGE ||

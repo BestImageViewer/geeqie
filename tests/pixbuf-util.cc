@@ -31,6 +31,31 @@
 
 namespace {
 
+TEST(PixbufToCairoSurface, PreservesColorsAndAlpha)
+{
+	for (bool has_alpha : {false, true})
+		{
+		g_autoptr(GdkPixbuf) pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, has_alpha, 8, 3, 2);
+		gdk_pixbuf_fill(pixbuf, 0x4080c080);
+		cairo_surface_t *surface = pixbuf_to_cairo_surface(pixbuf);
+		ASSERT_NE(surface, nullptr);
+		g_autoptr(GdkPixbuf) result = pixbuf_from_cairo_surface(surface);
+		cairo_surface_destroy(surface);
+		ASSERT_NE(result, nullptr);
+		for (gint y = 0; y < 2; y++)
+			{
+			for (gint x = 0; x < 3; x++)
+				{
+				const guchar *pixel = gdk_pixbuf_get_pixels(result) + y * gdk_pixbuf_get_rowstride(result) + x * 4;
+				EXPECT_NEAR(pixel[0], 64, 1);
+				EXPECT_NEAR(pixel[1], 128, 1);
+				EXPECT_NEAR(pixel[2], 192, 1);
+				EXPECT_EQ(pixel[3], has_alpha ? 128 : 255);
+				}
+			}
+		}
+}
+
 TEST(PixbufFromCairoSurface, ConvertsPremultipliedArgbToRgba)
 {
 	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
