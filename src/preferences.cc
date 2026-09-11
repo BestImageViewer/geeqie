@@ -2318,7 +2318,7 @@ static GtkWidget *create_popover(GtkWidget *child, GtkPositionType pos)
 	gtk_widget_set_margin_bottom(popover, 6);
 	gtk_widget_set_margin_start(popover, 6);
 	gtk_widget_set_margin_end(popover, 6);
-	gtk_widget_show (child);
+	gtk_widget_set_visible(child, TRUE);
 
 	return popover;
 }
