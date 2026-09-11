@@ -27,6 +27,8 @@
 #include <gdk/gdk.h>
 #include <graphene.h>
 
+#include "pixbuf-util.h"
+
 namespace
 {
 
@@ -795,14 +797,19 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 
 		if (GdkRectangle draw_rect; gdk_rectangle_intersect(cell_area, &pix_rect, &draw_rect))
 			{
-			gdk_cairo_set_source_pixbuf(cr, pixbuf, pix_rect.x, pix_rect.y);
-			cairo_rectangle (cr,
-					draw_rect.x,
-					draw_rect.y,
-					draw_rect.width,
-					draw_rect.height);
+			cairo_surface_t *surface = pixbuf_to_cairo_surface(pixbuf);
+			if (surface)
+				{
+				cairo_set_source_surface(cr, surface, pix_rect.x, pix_rect.y);
+				cairo_rectangle (cr,
+						draw_rect.x,
+						draw_rect.y,
+						draw_rect.width,
+						draw_rect.height);
 
-			cairo_fill (cr);
+				cairo_fill (cr);
+				cairo_surface_destroy(surface);
+				}
 			}
 		}
 
