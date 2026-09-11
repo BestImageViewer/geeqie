@@ -1310,12 +1310,17 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		if (pr->func_post_process && (!pr->post_process_slow || !fast))
 			pr->func_post_process(pr, &it->pixbuf, x, y, w, h);
 
-		cairo_t *cr = cairo_create(it->surface);
-		cairo_rectangle (cr, x, y, w, h);
-		gdk_cairo_set_source_pixbuf(cr, it->pixbuf, 0, 0);
-		cairo_fill(cr);
+		cairo_surface_t *surface = pixbuf_to_cairo_surface(it->pixbuf);
+		if (surface)
+			{
+			cairo_t *cr = cairo_create(it->surface);
+			cairo_rectangle (cr, x, y, w, h);
+			cairo_set_source_surface(cr, surface, 0, 0);
+			cairo_fill(cr);
 
-		cairo_destroy (cr);
+			cairo_destroy (cr);
+			cairo_surface_destroy(surface);
+			}
 		}
 }
 
