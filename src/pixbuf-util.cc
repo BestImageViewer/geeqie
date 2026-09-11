@@ -685,11 +685,11 @@ void pixbuf_draw_layout(GdkPixbuf *dest_pixbuf, PangoLayout *layout,
 {
 	const gint width = gdk_pixbuf_get_width(dest_pixbuf);
 	const gint height = gdk_pixbuf_get_height(dest_pixbuf);
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+	cairo_surface_t *surface = pixbuf_to_cairo_surface(dest_pixbuf);
+	if (!surface) return;
+
 	cairo_t *cr = cairo_create(surface);
 
-	gdk_cairo_set_source_pixbuf(cr, dest_pixbuf, 0, 0);
-	cairo_paint(cr);
 	cairo_scale(cr, scale, scale);
 	/* Subpixel antialiasing assumes an opaque display background. */
 	cairo_font_options_t *font_options = cairo_font_options_create();
