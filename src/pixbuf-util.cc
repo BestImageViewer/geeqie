@@ -276,6 +276,13 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 
 	if (!key) return nullptr;
 
+	if (strcmp(key, PIXBUF_INLINE_COLLECTION) == 0)
+		{
+		GtkIconTheme *icon_theme = gtk_icon_theme_get_for_display(gdk_display_get_default());
+		GdkPixbuf *pixbuf = icon_theme_load_pixbuf_copy(icon_theme, key, 48, GTK_ICON_LOOKUP_NONE);
+		if (pixbuf) return pixbuf;
+		}
+
 	GtkSettings *settings = gtk_settings_get_default();
 	g_autofree gchar *theme_name = nullptr;
 	g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);

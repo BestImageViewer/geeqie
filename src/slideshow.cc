@@ -31,6 +31,7 @@
 #include "layout-image.h"
 #include "layout.h"
 #include "options.h"
+#include "view-file.h"
 
 namespace
 {
@@ -153,7 +154,10 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward)
 
 		if (ss->from_selection)
 			{
-			layout_set_fd(ss->lw, ss->slide_fd);
+			if (ss->lw->vf && ss->lw->vf->collection)
+				layout_image_set_fd(ss->lw, ss->slide_fd);
+			else
+				layout_set_fd(ss->lw, ss->slide_fd);
 			layout_status_update_info(ss->lw, nullptr);
 			}
 		else

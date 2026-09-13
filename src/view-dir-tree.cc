@@ -137,7 +137,7 @@ static void vdtree_icon_set_by_iter(ViewDir *vd, GtkTreeIter *iter, GIcon *icon)
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
 	gtk_tree_model_get(store, iter, DIR_COLUMN_ICON, &old, -1);
 
-	if (old != vd->pf->deny)
+	if (old != vd->pf->deny && old != vd->pf->collection)
 		{
 		gtk_tree_store_set(GTK_TREE_STORE(store), iter, DIR_COLUMN_ICON, icon, -1);
 		}
@@ -351,7 +351,11 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 
 	if (!fd) return;
 
-	if (access_file(fd->path, R_OK | X_OK))
+	if (vd_is_collection(fd))
+		{
+		icon = vd->pf->collection;
+		}
+	else if (access_file(fd->path, R_OK | X_OK))
 		{
 		if (islink(fd->path))
 			{
@@ -393,6 +397,8 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 	                   DIR_COLUMN_COLOR, FALSE,
 	                   -1);
 
+	if (vd_is_collection(fd)) return;
+
 	auto end = g_new0(NodeData, 1);
 	end->fd = nullptr;
 	end->expanded = TRUE;
@@ -430,6 +436,7 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 	gtk_tree_model_get(store, iter, DIR_COLUMN_POINTER, &nd, -1);
 
 	if (!nd) return FALSE;
+	if (vd_is_collection(nd->fd)) return TRUE;
 
 	current_time = time(nullptr);
 
@@ -470,7 +477,7 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 
 	vdtree_busy_push(vd);
 
-	filelist_read(nd->fd, nullptr, &list);
+	vd_read_directories(nd->fd, &list);
 
 	if (add_hidden)
 		{
@@ -669,6 +676,8 @@ gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd)
 	vd->dir_fd.reset(dir_fd);
 
 	fd = vdtree_populate_path(vd, vd->dir_fd, TRUE, FALSE);
+	/* A recently populated ancestor may still omit the new target's hidden path. */
+	if (!fd) fd = vdtree_populate_path(vd, vd->dir_fd, TRUE, TRUE);
 
 	if (!fd) return FALSE;
 

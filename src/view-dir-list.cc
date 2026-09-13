@@ -58,9 +58,9 @@ constexpr gchar VDLIST_FD_DATA[] = "vdlist-fd";
 } // namespace
 
 static void vdlist_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer data);
-static GtkWidget *vdlist_icon_widget_new(const gchar *icon_name, const gchar *emblem_name)
+static GtkWidget *vdlist_icon_widget_new(const gchar *icon_name, const gchar *emblem_name, GIcon *icon)
 {
-	GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
+	GtkWidget *image = icon ? gtk_image_new_from_gicon(icon) : gtk_image_new_from_icon_name(icon_name);
 	gtk_image_set_pixel_size(GTK_IMAGE(image), 16);
 	GtkWidget *content = image;
 	if (emblem_name)
@@ -154,7 +154,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 	old_list = VDLIST(vd)->list;
 
-	ret = filelist_read(vd->dir_fd, nullptr, &VDLIST(vd)->list);
+	ret = vd_read_directories(vd->dir_fd, &VDLIST(vd)->list);
 	VDLIST(vd)->list = filelist_sort(VDLIST(vd)->list, settings);
 
 	/* add . and .. */
@@ -190,7 +190,11 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 		fd = static_cast<FileData *>(work->data);
 
-		if (access_file(fd->path, R_OK | X_OK) && fd->name)
+		if (vd_is_collection(fd))
+			{
+			icon_name = "folder-pictures";
+			}
+		else if (access_file(fd->path, R_OK | X_OK) && fd->name)
 			{
 			if (islink(fd->path))
 				{
@@ -226,7 +230,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		g_autofree gchar *link = islink(fd->path) ? realpath(fd->path, nullptr) : nullptr;
 		GtkWidget *button = gtk_button_new();
 		GtkWidget *row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-		GtkWidget *icon_widget = vdlist_icon_widget_new(icon_name, emblem_name);
+		GtkWidget *icon_widget = vdlist_icon_widget_new(icon_name, emblem_name, vd_is_collection(fd) ? vd->pf->collection : nullptr);
 		GtkWidget *name = gtk_editable_label_new(fd->name);
 		GtkWidget *date_label = gtk_label_new(date);
 
@@ -253,7 +257,10 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		g_hash_table_insert(VDLIST(vd)->buttons, fd, button);
 		g_hash_table_insert(VDLIST(vd)->labels, fd, name);
 
-		g_signal_connect(name, "notify::editing", G_CALLBACK(vdlist_editing_changed), vd);
+		if (vd_is_collection(fd))
+			gtk_editable_set_editable(GTK_EDITABLE(name), FALSE);
+		else
+			g_signal_connect(name, "notify::editing", G_CALLBACK(vdlist_editing_changed), vd);
 		gtk_box_append(GTK_BOX(VDLIST(vd)->box), button);
 		work = work->next;
 		}
@@ -387,7 +394,7 @@ void vdlist_release_cb(ViewDir *vd, gint n_press, guint button, gdouble x, gdoub
 	if (button != GDK_BUTTON_PRIMARY || !vd->click_fd) return;
 	if (vdlist_fd_at_point(vd, x, y) != vd->click_fd) return;
 
-	if ((options->view_dir_list_single_click_enter || n_press == 2) && vd->select_func)
+	if ((vd_is_collection(vd->click_fd) || options->view_dir_list_single_click_enter || n_press == 2) && vd->select_func)
 		{
 		vd->select_func(vd, vd->click_fd, vd->select_data);
 		}

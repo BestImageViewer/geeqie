@@ -627,7 +627,7 @@ static void vficon_select_closest(ViewFile *vf, FileData *sel_fd)
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		match = filelist_sort_compare_filedata_full(fd, sel_fd, vf->sort.method, vf->sort.ascending);
+		match = vf_filelist_compare(vf, fd, sel_fd);
 
 		if (match >= 0) break;
 		}
@@ -1241,9 +1241,9 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 	GList *new_fd_list = nullptr;
 	GList *old_selected = nullptr;
 
-	if (vf->dir_fd)
+	if (vf->dir_fd || vf->collection)
 		{
-		ret = filelist_read(vf->dir_fd, &new_filelist, nullptr);
+		ret = vf_read_source(vf, &new_filelist);
 		new_filelist = file_data_filter_marks_list(new_filelist, vf_marks_get_filter(vf));
 
 		g_autoptr(GRegex) filter = vf_file_filter_get_filter(vf);
@@ -1257,8 +1257,8 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 		new_filelist = file_data_filter_rating_list(new_filelist, options->rating_filter);
 		}
 
-	vf->list = filelist_sort(vf->list, vf->sort); /* the list might not be sorted if there were renames */
-	new_filelist = filelist_sort(new_filelist, vf->sort);
+	vf->list = vf_filelist_sort(vf, vf->list); /* the list might not be sorted if there were renames */
+	new_filelist = vf_filelist_sort(vf, new_filelist);
 
 	if (VFICON(vf)->selection)
 		{
@@ -1295,7 +1295,7 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 				continue;
 				}
 
-			match = filelist_sort_compare_filedata_full(fd, new_fd, vf->sort.method, vf->sort.ascending);
+			match = vf_filelist_compare(vf, fd, new_fd);
 			if (match == 0) g_warning("multiple fd for the same path");
 			}
 		else if (work)

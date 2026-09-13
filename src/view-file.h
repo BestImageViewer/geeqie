@@ -40,6 +40,10 @@ enum FileViewType : guint {
 	FILEVIEW_LAST = FILEVIEW_ICON /**< Keep this up to date! */
 };
 
+struct CollectionData;
+
+enum class FileViewSource { DIRECTORY, COLLECTION };
+
 struct ViewFile
 {
 	FileViewType type; 	/**< @todo (xsdg): Turn this into a union (see VFLIST and VFICON). */
@@ -62,7 +66,12 @@ struct ViewFile
 		gboolean case_sensitive;
 	} file_filter;
 
+	FileViewSource source;
 	FileData *dir_fd;
+	CollectionData *collection;
+	GtkWidget *source_label;
+	GHashTable *collection_order;
+	GList *monitored_files;
 	GList *list;
 
 	FileData *click_fd;
@@ -133,6 +142,10 @@ void vf_set_layout(ViewFile *vf, LayoutWindow *layout);
 
 gboolean vf_set_fd(ViewFile *vf, FileData *fd);
 gboolean vf_refresh(ViewFile *vf);
+gboolean vf_set_collection(ViewFile *vf, CollectionData *cd);
+gboolean vf_read_source(ViewFile *vf, GList **list);
+gint vf_filelist_compare(ViewFile *vf, const FileData *a, const FileData *b);
+GList *vf_filelist_sort(ViewFile *vf, GList *list);
 void vf_refresh_idle(ViewFile *vf);
 
 void vf_thumb_set(ViewFile *vf, gboolean enable);
@@ -183,6 +196,8 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf);
 void vf_star_update(ViewFile *vf);
 void vf_star_stop(ViewFile *vf);
 void vf_star_cleanup(ViewFile *vf);
+
+void vf_collection_move(ViewFile *vf, const FileDataList *files, FileData *before);
 
 #endif /* VIEW_FILE_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

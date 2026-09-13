@@ -55,6 +55,7 @@ struct PixmapFolders
 	GIcon *deny;
 	GIcon *link;
 	GIcon *read_only;
+	GIcon *collection;
 };
 
 struct ViewDir
@@ -87,6 +88,9 @@ struct ViewDir
 
 	PixmapFolders *pf = nullptr;
 };
+
+gboolean vd_is_collection(FileData *fd);
+gboolean vd_read_directories(FileData *dir_fd, GList **list);
 
 ViewDir *vd_new(LayoutWindow *lw);
 

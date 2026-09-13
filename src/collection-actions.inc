@@ -420,6 +420,19 @@ static const ActionDef collection_actions[] =
 		},
 
 		{
+		"win.collection-win-view-in-file-pane",
+		nullptr,
+		N_("View in files pane"),
+		collection_table_popup_view_in_file_pane_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.collection-win-view-new-window",
 		nullptr,
 		N_("View in _new window"),

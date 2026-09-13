@@ -37,6 +37,8 @@
 
 #include "bar-sort.h"
 #include "bar.h"
+#include "collect-io.h"
+#include "collect.h"
 #include "filedata.h"
 #include "histogram.h"
 #include "history-list.h"
@@ -471,6 +473,29 @@ static void layout_vd_select_cb(ViewDir *, FileData *fd, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
+	if (vd_is_collection(fd))
+		{
+		CollectionData *cd = nullptr;
+		for (gint i = 0; (cd = collection_from_number(i)); i++)
+			if (g_strcmp0(cd->path, fd->path) == 0) break;
+		if (cd)
+			collection_ref(cd);
+		else
+			{
+			cd = collection_new(fd->path);
+			if (!collection_load(cd, fd->path, COLLECTION_LOAD_NONE))
+				{
+				warning_dialog(_("Unable to open collection"), fd->path, GQ_ICON_DIALOG_ERROR, lw->window);
+				collection_unref(cd);
+				return;
+				}
+			}
+		g_autofree gchar *parent = remove_level_from_path(fd->path);
+		if (!lw->dir_fd || g_strcmp0(lw->dir_fd->path, parent) != 0) layout_set_path(lw, parent);
+		layout_set_collection(lw, cd);
+		collection_unref(cd);
+		return;
+		}
 	layout_set_fd(lw, fd);
 }
 
@@ -759,6 +784,12 @@ static GtkWidget *layout_sort_popover_new(LayoutWindow *lw)
 	                                  SORT_EXIFTIMEDIGITIZED, SORT_MEDIA_TIME, SORT_SIZE, SORT_RATING, SORT_CLASS })
 		{
 		layout_sort_popover_append_method_item(sort_section, sort_type);
+		}
+	if (lw->vf && lw->vf->collection)
+		{
+		g_autoptr(GMenuItem) item = g_menu_item_new(_("Collection order"), nullptr);
+		g_menu_item_set_action_and_target(item, "sort.method", "i", SORT_NONE);
+		g_menu_append_item(sort_section, item);
 		}
 	g_menu_append_section(menu, nullptr, G_MENU_MODEL(sort_section));
 
@@ -1313,7 +1344,7 @@ GList *layout_selection_list(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return nullptr;
 
-	if (layout_image_get_collection(lw, nullptr))
+	if ((!lw->vf || !lw->vf->collection) && layout_image_get_collection(lw, nullptr))
 		{
 		FileData *fd;
 
@@ -1458,6 +1489,24 @@ gboolean layout_set_path(LayoutWindow *lw, const gchar *path)
 }
 
 
+gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
+{
+	if (!layout_valid(&lw) || !lw->vf || !cd) return FALSE;
+	layout_image_slideshow_stop(lw);
+	FileDataRef current(layout_image_get_fd(lw));
+	/* Pane navigation uses the displayed file list, not ImageWindow's collection mode. */
+	if (layout_image_get_collection(lw, nullptr)) layout_image_set_fd(lw, nullptr);
+	if (!vf_set_collection(lw->vf, cd)) return FALSE;
+	if (current && vf_index_by_fd(lw->vf, current) >= 0)
+		layout_image_set_fd(lw, current);
+	else
+		layout_image_set_index(lw, 0);
+	if (lw->info_sort) gtk_menu_button_set_popover(GTK_MENU_BUTTON(lw->info_sort), layout_sort_popover_new(lw));
+	layout_status_update_all(lw);
+	if (options->read_metadata_in_idle || sort_type_requires_metadata(lw->vf->sort.method)) vf_read_metadata_in_idle(lw->vf);
+	return TRUE;
+}
+
 gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 {
 	gboolean have_file = FALSE;
@@ -1468,6 +1517,13 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 	if (!fd || !isname(fd->path)) return FALSE;
 	if (lw->dir_fd && fd == lw->dir_fd)
 		{
+		if (lw->vf && lw->vf->collection)
+			{
+			layout_image_slideshow_stop(lw);
+			vf_set_fd(lw->vf, lw->dir_fd);
+			layout_image_set_index(lw, 0);
+			if (lw->info_sort) gtk_menu_button_set_popover(GTK_MENU_BUTTON(lw->info_sort), layout_sort_popover_new(lw));
+			}
 		return TRUE;
 		}
 
@@ -2210,6 +2266,8 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 		}
 
 	/* remember state */
+	FileDataRef current_file(layout_image_get_fd(lw));
+	CollectionData *collection = lw->vf && lw->vf->collection ? collection_ref(lw->vf->collection) : nullptr;
 
 	/* layout_image_slideshow_stop(lw); slideshow should survive */
 	layout_image_full_screen_stop(lw);
@@ -2272,7 +2330,14 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 
 	/* sync */
 
-	if (image_get_fd(lw->image))
+	if (collection)
+		{
+		layout_set_fd(lw, dir_fd);
+		layout_set_collection(lw, collection);
+		if (current_file && g_list_find(lw->vf->list, current_file)) layout_image_set_fd(lw, current_file);
+		collection_unref(collection);
+		}
+	else if (image_get_fd(lw->image))
 		{
 		layout_set_fd(lw, image_get_fd(lw->image));
 		}

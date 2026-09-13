@@ -27,6 +27,7 @@
 #include <cstring>
 #include <ctime>
 #include <utility>
+#include <vector>
 
 #include <glib-object.h>
 
@@ -434,6 +435,44 @@ void collection_by_index_add_filelist(gint index, GList *list)
  *-------------------------------------------------------------------
  */
 
+namespace
+{
+struct CollectionListener
+{
+	CollectionChangedFunc func;
+	gpointer data;
+};
+}
+
+void collection_add_listener(CollectionData *cd, CollectionChangedFunc func, gpointer data)
+{
+	auto *listener = g_new(CollectionListener, 1);
+	*listener = {func, data};
+	cd->change_listeners = g_list_append(cd->change_listeners, listener);
+}
+
+void collection_remove_listener(CollectionData *cd, CollectionChangedFunc func, gpointer data)
+{
+	for (GList *work = cd->change_listeners; work; work = work->next)
+		{
+		auto *listener = static_cast<CollectionListener *>(work->data);
+		if (listener->func == func && listener->data == data)
+			{
+			cd->change_listeners = g_list_delete_link(cd->change_listeners, work);
+			g_free(listener);
+			return;
+			}
+		}
+}
+
+void collection_changed(CollectionData *cd)
+{
+	std::vector<CollectionListener> listeners;
+	for (GList *work = cd->change_listeners; work; work = work->next)
+		listeners.push_back(*static_cast<CollectionListener *>(work->data));
+	for (const auto &listener : listeners) listener.func(cd, listener.data);
+}
+
 CollectionData *collection_new(const gchar *path)
 {
 	CollectionData *cd;
@@ -489,6 +528,7 @@ void collection_free(CollectionData *cd)
 	collection_list = g_list_remove(collection_list, cd);
 
 	g_hash_table_destroy(cd->existence);
+	g_list_free_full(cd->change_listeners, g_free);
 
 	g_free(cd->collection_path);
 	g_free(cd->path);
@@ -654,6 +694,7 @@ void collection_set_sort_method(CollectionData *cd, SortType method)
 	if (cd->list) cd->changed = TRUE;
 
 	collection_window_refresh(collection_window_find(cd));
+	collection_changed(cd);
 }
 
 void collection_randomize(CollectionData *cd)
@@ -665,6 +706,7 @@ void collection_randomize(CollectionData *cd)
 	if (cd->list) cd->changed = TRUE;
 
 	collection_window_refresh(collection_window_find(cd));
+	collection_changed(cd);
 }
 
 static void collection_set_update_info_func(CollectionData *cd, const CollectionData::InfoUpdatedFunc &func)
@@ -728,6 +770,7 @@ static gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean 
 			}
 		}
 
+	if (valid) collection_changed(cd);
 	return valid;
 }
 
@@ -755,6 +798,7 @@ gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert
 		cd->changed = TRUE;
 
 		collection_window_insert(collection_window_find(cd), ci);
+		collection_changed(cd);
 
 		return TRUE;
 		}
@@ -777,6 +821,7 @@ gboolean collection_remove(CollectionData *cd, FileData *fd)
 
 	collection_window_remove(collection_window_find(cd), ci);
 	collection_info_free(ci);
+	collection_changed(cd);
 
 	return TRUE;
 }
@@ -786,10 +831,11 @@ static void collection_remove_by_info(CollectionData *cd, CollectInfo *info)
 	if (!info || !g_list_find(cd->list, info)) return;
 
 	cd->list = g_list_remove(cd->list, info);
-	cd->changed = (cd->list != nullptr);
+	cd->changed = TRUE;
 
 	collection_window_remove(collection_window_find(cd), info);
 	collection_info_free(info);
+	collection_changed(cd);
 }
 
 void collection_remove_by_info_list(CollectionData *cd, GList *list)
@@ -811,9 +857,10 @@ void collection_remove_by_info_list(CollectionData *cd, GList *list)
 		cd->list = collection_list_remove(cd->list, static_cast<CollectInfo *>(work->data));
 		work = work->next;
 		}
-	cd->changed = (cd->list != nullptr);
+	cd->changed = TRUE;
 
 	collection_window_refresh(collection_window_find(cd));
+	collection_changed(cd);
 }
 
 gboolean collection_rename(CollectionData *cd, FileData *fd)
@@ -826,6 +873,7 @@ gboolean collection_rename(CollectionData *cd, FileData *fd)
 	cd->changed = TRUE;
 
 	collection_window_update(collection_window_find(cd), ci);
+	collection_changed(cd);
 
 	return TRUE;
 }
@@ -1093,6 +1141,8 @@ gboolean collection_window_modified_exists()
 		work = work->next;
 		}
 
+	for (GList *item = collection_list; item; item = item->next)
+		if (static_cast<CollectionData *>(item->data)->changed) ret = TRUE;
 	return ret;
 }
 
@@ -1104,7 +1154,7 @@ static gboolean collection_window_delete(GtkWidget *, gpointer data)
 	return TRUE;
 }
 
-CollectWindow *collection_window_new(const gchar *path)
+CollectWindow *collection_window_new(const gchar *path, CollectionData *collection)
 {
 	CollectWindow *cw;
 	GtkWidget *vbox;
@@ -1112,7 +1162,7 @@ CollectWindow *collection_window_new(const gchar *path)
 	GtkWidget *extra_label;
 
 	/* If the collection is already opened in another window, return that one */
-	cw = collection_window_find_by_path(path);
+	cw = collection ? collection_window_find(collection) : collection_window_find_by_path(path);
 	if (cw)
 		{
 		return cw;
@@ -1122,7 +1172,7 @@ CollectWindow *collection_window_new(const gchar *path)
 
 	collection_window_list = g_list_append(collection_window_list, cw);
 
-	cw->cd = collection_new(path);
+	cw->cd = collection ? collection_ref(collection) : collection_new(path);
 
 	cw->window = window_new("collection", PIXBUF_INLINE_ICON_BOOK, nullptr);
 	DEBUG_NAME(cw->window);
@@ -1193,7 +1243,13 @@ CollectWindow *collection_window_new(const gchar *path)
 	};
 	collection_set_update_info_func(cw->cd, collection_window_update_info);
 
-	if (path && *path == G_DIR_SEPARATOR)
+	if (collection)
+		{
+		collection_window_refresh(cw);
+		collection_load_thumb_idle(cw->cd);
+		}
+
+	if (!collection && path && *path == G_DIR_SEPARATOR)
 		{
 		if (!collection_load_begin(cw->cd, nullptr, COLLECTION_LOAD_NONE))
 			{

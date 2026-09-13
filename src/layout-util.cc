@@ -296,7 +296,7 @@ bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, guint button)
 
 		if (g_strstr_len(action_name, -1, ".desktop") != nullptr)
 			{
-			file_util_start_editor_from_filelist(action_name, layout_selection_list(lw), layout_get_path(lw), lw->window);
+			file_util_start_editor_from_filelist(action_name, layout_selection_list(lw), lw->vf && lw->vf->collection ? nullptr : layout_get_path(lw), lw->window);
 			}
 		else
 			{
@@ -415,7 +415,7 @@ static void layout_menu_dir_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();
 
-	if (lw->vd) vd_new_folder(lw->vd, lw->dir_fd);
+	if (lw->vd && (!lw->vf || !lw->vf->collection)) vd_new_folder(lw->vd, lw->dir_fd);
 }
 
 static void layout_menu_copy_cb(GSimpleAction *, GVariant *, gpointer)
@@ -2668,7 +2668,7 @@ void plugin_run_cb(GSimpleAction *, GVariant *parameter, gpointer user_data)
 
 	lw = get_current_layout();
 
-	file_util_start_editor_from_filelist(key, layout_selection_list(lw), layout_get_path(lw), lw->window);
+	file_util_start_editor_from_filelist(key, layout_selection_list(lw), lw->vf && lw->vf->collection ? nullptr : layout_get_path(lw), lw->window);
 
 
     /* run ed->exec, etc. */

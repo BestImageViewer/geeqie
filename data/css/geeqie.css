@@ -77,3 +77,11 @@ button.tab-completion-selected {
 .view-file-grid-item.view-file-grid-focus {
 	outline: 1px solid @theme_selected_bg_color;
 }
+
+.view-file-grid-item.collection-drop-before {
+  box-shadow: inset 3px 0 red;
+}
+
+.view-file-grid-item.collection-drop-after {
+  box-shadow: inset -3px 0 red;
+}

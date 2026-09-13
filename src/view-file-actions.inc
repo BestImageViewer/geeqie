@@ -3,6 +3,45 @@
 static const ActionDef view_file_actions[] =
 {
 		{
+		"win.view-file-collection-edit",
+		nullptr,
+		N_("Edit collection…"),
+		vf_collection_edit_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.view-file-collection-save",
+		nullptr,
+		N_("Save collection…"),
+		vf_collection_save_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.view-file-collection-remove",
+		nullptr,
+		N_("Remove from collection"),
+		vf_collection_remove_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.view-file-collections",
 		nullptr,
 		N_("Collection"),

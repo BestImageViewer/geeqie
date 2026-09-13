@@ -424,6 +424,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		collect_manager_entry_reset(entry);
 
 	if (!append) cd->changed = FALSE;
+	collection_changed(cd);
 
 	return success;
 }
@@ -602,6 +603,7 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 		}
 
 	cd->changed = FALSE;
+	collection_changed(cd);
 
 	return TRUE;
 }

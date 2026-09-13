@@ -2044,7 +2044,7 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	spin = pref_spin_new_int(group, _("Collection preview:"), nullptr,
 				 1, 999, 1,
 				 options->thumbnails.collection_preview, &c_options->thumbnails.collection_preview);
-	gtk_widget_set_tooltip_text(spin, _("The maximum number of thumbnails shown in a Collection preview montage"));
+	gtk_widget_set_tooltip_text(spin, _("Maximum number of cached thumbnails in a collection preview montage. Applies to .gqv files outside the default collections directory; collections in that directory open in the files pane."));
 
 #if HAVE_FFMPEGTHUMBNAILER_METADATA
 	pref_checkbox_new_int(group, _("Use embedded metadata in video files as thumbnails when available"),

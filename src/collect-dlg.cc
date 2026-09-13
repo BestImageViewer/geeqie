@@ -76,16 +76,17 @@ static void collection_dialog_new(CollectionData *cd, const gchar *title, FileDi
 	if (!cd) return;
 
 	FileDialogData fdd{};
+	g_autofree gchar *directory = action == FileDialogAction::SAVE && cd->path ? g_path_get_dirname(cd->path) : nullptr;
 
 	fdd.action = action;
 	fdd.accept_text = _("Save");
 	fdd.callback = callback;
 	fdd.data = collection_ref(cd);
-	fdd.filename = get_collections_dir();
+	fdd.filename = directory ? directory : get_collections_dir();
 	fdd.filter = GQ_COLLECTION_EXT;
 	fdd.filter_description = _("Collection files");
 	fdd.history_key = "open_collection";
-	fdd.suggested_name = _("Untitled.gqv");
+	fdd.suggested_name = cd->path ? filename_from_path(cd->path) : _("Untitled.gqv");
 	fdd.title = title;
 
 	file_dialog_show(fdd);

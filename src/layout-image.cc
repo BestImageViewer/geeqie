@@ -1569,7 +1569,7 @@ std::optional<ColorManStatus> layout_image_color_profile_get_status(LayoutWindow
  */
 static FileData *layout_get_next_sibling_dir(LayoutWindow *lw, gboolean ascending)
 {
-	if (!lw || !lw->dir_fd || !lw->dir_fd->path) return nullptr;
+	if (!lw || !lw->dir_fd || !lw->dir_fd->path || (lw->vf && lw->vf->collection)) return nullptr;
 
 	// Read the parent directory to get all subdirectories (don't follow symlinks)
 	g_autofree gchar *parent_dir = g_path_get_dirname(lw->dir_fd->path);

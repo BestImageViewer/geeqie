@@ -35,6 +35,7 @@ enum DirViewType : guint;
 enum FileViewType : guint;
 enum ImageSplitMode : gint;
 
+struct CollectionData;
 struct AnimationData;
 struct FullScreenData;
 struct ImageWindow;
@@ -272,6 +273,7 @@ LayoutWindow *layout_find_by_layout_id(const gchar *id);
 const gchar *layout_get_path(LayoutWindow *lw);
 gboolean layout_set_path(LayoutWindow *lw, const gchar *path);
 gboolean layout_set_fd(LayoutWindow *lw, FileData *fd);
+gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd);
 
 void layout_status_update_progress(LayoutWindow *lw, gdouble val, const gchar *text);
 void layout_status_update_info(LayoutWindow *lw, const gchar *text);

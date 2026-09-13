@@ -660,6 +660,13 @@ static void collection_table_popup_view_cb(GSimpleAction *, GVariant *, gpointer
 		}
 }
 
+static void collection_table_popup_view_in_file_pane_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *ct = static_cast<CollectTable *>(data);
+	LayoutWindow *lw = get_current_layout();
+	if (layout_set_collection(lw, ct->cd)) gtk_window_present(GTK_WINDOW(lw->window));
+}
+
 static void collection_table_popup_selectall_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
@@ -1764,6 +1771,7 @@ static gboolean collection_table_dnd_insert_idle_cb(gpointer data)
 				ct->cd->list = g_list_insert_before(ct->cd->list, insert_before, work->data);
 				}
 			ct->cd->changed = TRUE;
+			collection_changed(ct->cd);
 			collection_table_sync(ct);
 			}
 		collection_table_drop_insert_data_free(insert_data);

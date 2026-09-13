@@ -240,7 +240,10 @@ static void vflist_store_clear(ViewFile *vf, gboolean unlock_files)
 		{
 		// unlock locked files in this directory
 		GList *files = nullptr;
-		filelist_read(vf->dir_fd, &files, nullptr);
+		if (vf->collection)
+			files = filelist_copy(vf->list);
+		else if (vf->dir_fd)
+			filelist_read(vf->dir_fd, &files, nullptr);
 		GList *work = files;
 		while (work)
 			{
@@ -319,7 +322,7 @@ void vflist_pop_menu_rename_cb(ViewFile *vf)
 	GList *list;
 
 	list = vf_pop_menu_file_list(vf);
-	if (options->file_ops.enable_in_place_rename &&
+	if (!vf->collection && options->file_ops.enable_in_place_rename &&
 	    list && !list->next && vf->click_fd)
 		{
 		GtkTreeModel *store;
@@ -815,7 +818,7 @@ static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *it
 	g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
 
 	disabled_grouping = fd->disable_grouping ? _(" [NO GROUPING]") : "";
-	g_autofree gchar *name = g_strdup_printf("%s%s%s", link, fd->name, disabled_grouping);
+	g_autofree gchar *name = g_strdup_printf("%s%s%s", link, vf->collection ? fd->path : fd->name, disabled_grouping);
 	g_autofree gchar *size = text_from_size(fd->size);
 
 	g_autofree gchar *formatted = vflist_get_formatted(vf, name, sidecars, size, time, expanded, nullptr);
@@ -862,6 +865,19 @@ static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *it
 
 static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *parent_iter, GList *list, GList *selected, gboolean force)
 {
+	/* Collection membership is displayed as a flat list of explicit files. */
+	if (vf->collection && parent_iter)
+		{
+		GtkTreeIter child;
+		while (gtk_tree_model_iter_children(GTK_TREE_MODEL(store), &child, parent_iter))
+			{
+			FileData *fd;
+			gtk_tree_model_get(GTK_TREE_MODEL(store), &child, FILE_COLUMN_POINTER, &fd, -1);
+			file_data_unref(fd);
+			gtk_tree_store_remove(store, &child);
+			}
+		return;
+		}
 	GList *work;
 	GtkTreeIter iter;
 	gboolean valid;
@@ -898,7 +914,7 @@ static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTr
 					if (parent_iter)
 						match = filelist_sort_compare_filedata_full(fd, old_fd, SORT_NAME, TRUE); /* always sort sidecars by name */
 					else
-						match = filelist_sort_compare_filedata_full(fd, old_fd, vf->sort.method, vf->sort.ascending);
+						match = vf_filelist_compare(vf, fd, old_fd);
 
 					if (match == 0) g_warning("multiple fd for the same path");
 					}
@@ -994,12 +1010,18 @@ static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTr
 void vflist_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings)
 {
 	gint i;
-	GHashTable *fd_idx_hash = g_hash_table_new(nullptr, nullptr);
+	GHashTable *fd_idx_hash;
 	GtkTreeStore *store;
 	GList *work;
 
-	if (!vf->list || vf->sort == settings) return;
+	if (vf->sort == settings) return;
+	if (!vf->list)
+		{
+		vf->sort = settings;
+		return;
+		}
 
+	fd_idx_hash = g_hash_table_new(nullptr, nullptr);
 	work = vf->list;
 	i = 0;
 	while (work)
@@ -1011,7 +1033,7 @@ void vflist_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings)
 		}
 
 	vf->sort = settings;
-	vf->list = filelist_sort(vf->list, vf->sort);
+	vf->list = vf_filelist_sort(vf, vf->list);
 
 	std::vector<gint> new_order;
 	new_order.reserve(i);
@@ -1504,7 +1526,7 @@ static void vflist_select_closest(ViewFile *vf, FileData *sel_fd)
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		match = filelist_sort_compare_filedata_full(fd, sel_fd, vf->sort.method, vf->sort.ascending);
+		match = vf_filelist_compare(vf, fd, sel_fd);
 
 		if (match >= 0) break;
 		}
@@ -1697,11 +1719,11 @@ gboolean vflist_refresh(ViewFile *vf)
 	vf->list = nullptr;
 
 	DEBUG_1("%s vflist_refresh: read dir", get_exec_time());
-	if (vf->dir_fd)
+	if (vf->dir_fd || vf->collection)
 		{
 		file_data_unregister_notify_func(vf_notify_cb, vf); /* we don't need the notification of changes detected by filelist_read */
 
-		ret = filelist_read(vf->dir_fd, &vf->list, nullptr);
+		ret = vf_read_source(vf, &vf->list);
 
 		if (vf->marks_enabled)
 			{
@@ -1731,7 +1753,7 @@ gboolean vflist_refresh(ViewFile *vf)
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 
 		DEBUG_1("%s vflist_refresh: sort", get_exec_time());
-		vf->list = filelist_sort(vf->list, vf->sort);
+		vf->list = vf_filelist_sort(vf, vf->list);
 		}
 
 	DEBUG_1("%s vflist_refresh: populate view", get_exec_time());
@@ -1740,7 +1762,7 @@ gboolean vflist_refresh(ViewFile *vf)
 	const gboolean metadata_date = vf->sort.method == SORT_EXIFTIME ||
 	                               vf->sort.method == SORT_EXIFTIMEDIGITIZED ||
 	                               vf->sort.method == SORT_MEDIA_TIME;
-	vflist_populate_view(vf, metadata_date);
+	vflist_populate_view(vf, metadata_date || vf->collection);
 
 	DEBUG_1("%s vflist_refresh: free filelist", get_exec_time());
 

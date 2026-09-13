@@ -82,6 +82,7 @@ PixmapFolders *folder_icons_new()
 	pf->link = create_folder_icon_with_emblem(GQ_ICON_LINK);
 
 	pf->read_only = create_folder_icon_with_emblem(GQ_ICON_READONLY);
+	pf->collection = g_themed_icon_new_with_default_fallbacks("folder-pictures");
 
 	return pf;
 }
@@ -96,6 +97,7 @@ void folder_icons_free(PixmapFolders *pf)
 	g_clear_object(&pf->deny);
 	g_clear_object(&pf->link);
 	g_clear_object(&pf->read_only);
+	g_clear_object(&pf->collection);
 
 	g_free(pf);
 }
@@ -131,6 +133,38 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 	g_clear_pointer(&vd->info, g_free);
 
 	delete vd;
+}
+
+gboolean vd_is_collection(FileData *fd)
+{
+	if (!fd || !file_extension_match(fd->path, GQ_COLLECTION_EXT) || !isfile(fd->path)) return FALSE;
+	g_autofree gchar *parent = remove_level_from_path(fd->path);
+	g_autofree gchar *canonical_parent = g_canonicalize_filename(parent, nullptr);
+	g_autofree gchar *collections = g_canonicalize_filename(get_collections_dir(), nullptr);
+	return g_strcmp0(canonical_parent, collections) == 0;
+}
+
+gboolean vd_read_directories(FileData *dir_fd, GList **list)
+{
+	const gboolean result = filelist_read(dir_fd, nullptr, list);
+	if (!result) return FALSE;
+	g_autofree gchar *path = g_canonicalize_filename(dir_fd->path, nullptr);
+	g_autofree gchar *collections = g_canonicalize_filename(get_collections_dir(), nullptr);
+	if (g_strcmp0(path, collections) != 0) return result;
+
+	g_autofree gchar *path_fs = path_from_utf8(dir_fd->path);
+	GDir *directory = g_dir_open(path_fs, 0, nullptr);
+	if (!directory) return FALSE;
+	while (const gchar *name = g_dir_read_name(directory))
+		{
+		if (!options->file_filter.show_hidden_files && name[0] == '.') continue;
+		g_autofree gchar *name_utf8 = path_to_utf8(name);
+		if (!file_extension_match(name_utf8, GQ_COLLECTION_EXT)) continue;
+		g_autofree gchar *filename = g_build_filename(dir_fd->path, name_utf8, nullptr);
+		if (isfile(filename)) *list = g_list_prepend(*list, file_data_new_simple(filename));
+		}
+	g_dir_close(directory);
+	return result;
 }
 
 void vd_set_select_func(ViewDir *vd,
@@ -616,7 +650,7 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 	gboolean rename_delete_active = FALSE;
 	gboolean new_folder_active = FALSE;
 
-	active = (fd != nullptr);
+	active = (fd != nullptr && !vd_is_collection(fd));
 	switch (vd->type)
 		{
 		case DIRVIEW_LIST:
@@ -642,6 +676,12 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 				};
 			}
 			break;
+		}
+
+	if (vd_is_collection(fd))
+		{
+		rename_delete_active = FALSE;
+		new_folder_active = FALSE;
 		}
 
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dir-popup.ui");
@@ -846,6 +886,7 @@ static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
 			}
 		}
 
+	if (vd_is_collection(fd)) fd = nullptr;
 	if (fd == vd->drop_fd) return;
 
 	if (vd->drop_fd != vd->click_fd)

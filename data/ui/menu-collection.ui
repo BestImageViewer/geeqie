@@ -7,6 +7,10 @@
         <attribute name="label" translatable="yes">View</attribute>
       </item>
       <item>
+        <attribute name="action">win.collection-win-view-in-file-pane</attribute>
+        <attribute name="label" translatable="yes">View in files pane</attribute>
+      </item>
+      <item>
         <attribute name="action">win.collection-win-view-new-window</attribute>
         <attribute name="label" translatable="yes">View in _new window</attribute>
       </item>
