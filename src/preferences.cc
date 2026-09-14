@@ -213,15 +213,8 @@ std::vector<ActionItem> get_action_items()
 	return list_unique;
 }
 
-} // namespace
 
-enum {
-	EDITOR_NAME_MAX_LENGTH = 32,
-	EDITOR_COMMAND_MAX_LENGTH = 1024
-};
-
-static GtkWidget *keyword_text;
-static void config_tab_keywords_save();
+GtkWidget *keyword_text;
 
 enum {
 	FE_ENABLE,
@@ -241,20 +234,18 @@ enum {
 };
 
 /* config memory values */
-static ConfOptions *c_options = nullptr;
+ConfOptions *c_options = nullptr;
 
 
 #ifdef DEBUG
-static gint debug_c;
+gint debug_c;
 #endif
 
-static GtkWidget *configwindow = nullptr;
-static GtkWidget *accel_conflicts_window = nullptr;
-static GtkTextBuffer *accel_conflicts_buffer = nullptr;
-static GListStore *filter_store = nullptr;
+GtkWidget *configwindow = nullptr;
+GtkWidget *accel_conflicts_window = nullptr;
+GtkTextBuffer *accel_conflicts_buffer = nullptr;
+GListStore *filter_store = nullptr;
 
-namespace
-{
 
 struct FilterRow
 {
@@ -329,31 +320,33 @@ AccelRow *accel_row_new(const gchar *action, const gchar *key, const gchar *desc
 	return row;
 }
 
-} // namespace
+GListStore *accel_store = nullptr;
+guint accel_reload_idle_id = 0;
+bool accel_reloading = false;
 
-static GListStore *accel_store = nullptr;
-static guint accel_reload_idle_id = 0;
-static bool accel_reloading = false;
+GtkWidget *safe_delete_path_entry;
 
-static GtkWidget *safe_delete_path_entry;
+GtkWidget *color_profile_input_file_entry[COLOR_PROFILE_INPUTS];
+GtkWidget *color_profile_input_name_entry[COLOR_PROFILE_INPUTS];
+GtkWidget *color_profile_screen_file_entry;
+GtkWidget *external_preview_select_entry;
+GtkWidget *external_preview_extract_entry;
 
-static GtkWidget *color_profile_input_file_entry[COLOR_PROFILE_INPUTS];
-static GtkWidget *color_profile_input_name_entry[COLOR_PROFILE_INPUTS];
-static GtkWidget *color_profile_screen_file_entry;
-static GtkWidget *external_preview_select_entry;
-static GtkWidget *external_preview_extract_entry;
-
-static GtkWidget *sidecar_ext_entry;
-static GtkWidget *help_search_engine_entry;
+GtkWidget *sidecar_ext_entry;
+GtkWidget *help_search_engine_entry;
 
 #ifdef DEBUG
-static GtkWidget *log_window_f1_entry;
+GtkWidget *log_window_f1_entry;
 #endif
 
 enum {
 	CONFIG_WINDOW_DEF_WIDTH =		700,
 	CONFIG_WINDOW_DEF_HEIGHT =	600
 };
+
+} // namespace
+
+static void config_tab_keywords_save();
 
 /*
  *-----------------------------------------------------------------------------
@@ -3262,6 +3255,7 @@ static void config_tab_color(GtkWidget *notebook, ConfOptions *c_options)
 	label = pref_table_label(table, 2, 0, _("File"), GTK_ALIGN_START);
 	pref_label_bold(label, TRUE, FALSE);
 
+	constexpr int input_name_max_length = 32;
 	constexpr auto shortcuts_list = GQ_ICC_LOCAL ";" GQ_ICC_SYSTEM;
 
 	for (gint i = 0; i < COLOR_PROFILE_INPUTS; i++)
@@ -3272,7 +3266,7 @@ static void config_tab_color(GtkWidget *notebook, ConfOptions *c_options)
 		pref_table_label(table, 0, i + 1, buf, GTK_ALIGN_END);
 
 		entry = gtk_entry_new();
-		gtk_entry_set_max_length(GTK_ENTRY(entry), EDITOR_NAME_MAX_LENGTH);
+		gtk_entry_set_max_length(GTK_ENTRY(entry), input_name_max_length);
 		if (options->color_profile.input_name[i])
 			{
 			entry_set_text(GTK_ENTRY(entry), options->color_profile.input_name[i]);
