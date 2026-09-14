@@ -782,6 +782,22 @@ void add_shortcut_folder(GtkFileChooser *chooser, const gchar *path)
 #endif
 }
 
+void current_folder_clicked_cb(GtkButton *button, gpointer data)
+{
+	auto *pending = static_cast<PendingFileDialog *>(data);
+	auto *folder = G_FILE(g_object_get_data(G_OBJECT(button), "current-folder"));
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
+	auto *chooser = GTK_FILE_CHOOSER(pending->chooser);
+	g_autofree gchar *name = pending->action == FileDialogAction::SAVE ? gtk_file_chooser_get_current_name(chooser) : nullptr;
+	gtk_file_chooser_set_current_folder(chooser, folder, nullptr);
+	if (name) gtk_file_chooser_set_current_name(chooser, name);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
+}
+
 GtkWidget *create_dialog_content(PendingFileDialog *pending)
 {
 	GtkWidget *paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -877,6 +893,17 @@ void file_dialog_show(const FileDialogData &fdd)
 	gtk_widget_set_margin_bottom(content, 6);
 	gtk_widget_set_margin_start(content, 6);
 	gtk_widget_set_margin_end(content, 6);
+	const gchar *current_path = layout_get_path(get_current_layout());
+	if (current_path && isdir(current_path))
+		{
+		GtkWidget *button = gtk_button_new_with_mnemonic(_("_Current folder"));
+		gtk_widget_set_halign(button, GTK_ALIGN_START);
+		gtk_widget_set_margin_bottom(button, 6);
+		gtk_widget_set_tooltip_text(button, current_path);
+		g_object_set_data_full(G_OBJECT(button), "current-folder", g_file_new_for_path(current_path), g_object_unref);
+		g_signal_connect(button, "clicked", G_CALLBACK(current_folder_clicked_cb), pending);
+		gtk_box_append(GTK_BOX(content), button);
+		}
 	gtk_box_append(GTK_BOX(content), create_dialog_content(pending));
 
 	g_signal_connect(pending->dialog, "response", G_CALLBACK(file_dialog_response_cb), pending);
