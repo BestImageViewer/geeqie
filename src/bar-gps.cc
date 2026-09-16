@@ -776,9 +776,7 @@ void bar_pane_gps_write_config(GtkWidget *pane, RcString &rc)
 
 	WRITE_NL();
 	WRITE_STRING("<pane_gps ");
-	WRITE_CHAR(pgd->pane, id);
-	WRITE_CHAR_FULL("title", gtk_label_get_text(GTK_LABEL(pgd->pane.title)));
-	WRITE_BOOL(pgd->pane, expanded);
+	bar_pane_common_write_config(pgd->pane, rc);
 
 	gint w;
 	gtk_widget_get_size_request(pane, &w, &pgd->height);
@@ -874,10 +872,8 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	pgd->pane.pane_notify_selection = bar_pane_gps_notify_selection;
 	pgd->pane.pane_event = bar_pane_gps_event;
 	pgd->pane.pane_write_config = bar_pane_gps_write_config;
-	pgd->pane.title = bar_pane_expander_title(title);
-	pgd->pane.id = g_strdup(id);
-	pgd->pane.type = PANE_GPS;
-	pgd->pane.expanded = expanded;
+	bar_pane_common_init(pgd->pane, id, title, expanded, PANE_GPS);
+
 	pgd->height = height;
 
 	GtkWidget *frame = gtk_frame_new(nullptr);

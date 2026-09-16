@@ -687,9 +687,7 @@ void bar_pane_exif_write_config(GtkWidget *pane, RcString &rc)
 	if (!ped) return;
 
 	WRITE_NL(); WRITE_STRING("<pane_exif ");
-	WRITE_CHAR(ped->pane, id);
-	WRITE_CHAR_FULL("title", gtk_label_get_text(GTK_LABEL(ped->pane.title)));
-	WRITE_BOOL(ped->pane, expanded);
+	bar_pane_common_write_config(ped->pane, rc);
 	WRITE_BOOL(*ped, show_all);
 	WRITE_STRING(">");
 	rc.indent++;
@@ -725,12 +723,9 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 	ped->pane.pane_set_fd = bar_pane_exif_set_fd;
 	ped->pane.pane_write_config = bar_pane_exif_write_config;
 	ped->pane.pane_event = bar_pane_exif_event;
-	ped->pane.title = bar_pane_expander_title(title);
-	ped->pane.id = g_strdup(id);
-	ped->pane.expanded = expanded;
-	ped->pane.type = PANE_EXIF;
-	ped->show_all = show_all;
+	bar_pane_common_init(ped->pane, id, title, expanded, PANE_EXIF);
 
+	ped->show_all = show_all;
 	ped->size_group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
 	ped->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	ped->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
