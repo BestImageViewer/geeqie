@@ -750,14 +750,22 @@ GtkWidget *bar_new_from_config(LayoutWindow *lw, const gchar **attribute_names, 
 	return bar_update_from_config(bar, attribute_names, attribute_values, lw, TRUE);
 }
 
-GtkWidget *bar_pane_expander_title(const gchar *title)
+void bar_pane_common_init(PaneData &pane, const gchar *id, const gchar *title, gboolean expanded, PaneType type)
 {
-	GtkWidget *widget = gtk_label_new(title);
+	pane.title = gtk_label_new(title);
+	pref_label_bold(pane.title, TRUE, FALSE);
+	gtk_label_set_ellipsize(GTK_LABEL(pane.title), PANGO_ELLIPSIZE_END);
 
-	pref_label_bold(widget, TRUE, FALSE);
-	gtk_label_set_ellipsize(GTK_LABEL(widget), PANGO_ELLIPSIZE_END);
+	pane.expanded = expanded;
+	pane.id = g_strdup(id);
+	pane.type = type;
+}
 
-	return widget;
+void bar_pane_common_write_config(const PaneData &pane, RcString &rc)
+{
+	WRITE_CHAR(pane, id);
+	WRITE_CHAR_FULL("title", gtk_label_get_text(GTK_LABEL(pane.title)));
+	WRITE_BOOL(pane, expanded);
 }
 
 gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title)

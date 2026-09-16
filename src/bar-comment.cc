@@ -171,9 +171,7 @@ static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
 		}
 
 	WRITE_NL(); WRITE_STRING("<pane_comment ");
-	WRITE_CHAR(pcd->pane, id);
-	WRITE_CHAR_FULL("title", gtk_label_get_text(GTK_LABEL(pcd->pane.title)));
-	WRITE_BOOL(pcd->pane, expanded);
+	bar_pane_common_write_config(pcd->pane, rc);
 	WRITE_CHAR(*pcd, key);
 	WRITE_INT(*pcd, height);
 	WRITE_STRING("/>");
@@ -247,10 +245,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->pane.pane_set_fd = bar_pane_comment_set_fd;
 	pcd->pane.pane_event = bar_pane_comment_event;
 	pcd->pane.pane_write_config = bar_pane_comment_write_config;
-	pcd->pane.title = bar_pane_expander_title(title);
-	pcd->pane.id = g_strdup(id);
-	pcd->pane.type = PANE_COMMENT;
-	pcd->pane.expanded = expanded;
+	bar_pane_common_init(pcd->pane, id, title, expanded, PANE_COMMENT);
 
 	pcd->key = g_strdup(key);
 	pcd->height = height;

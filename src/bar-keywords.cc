@@ -289,9 +289,7 @@ void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
 	pkd->height = h;
 
 	WRITE_NL(); WRITE_STRING("<pane_keywords ");
-	WRITE_CHAR(pkd->pane, id);
-	WRITE_CHAR_FULL("title", gtk_label_get_text(GTK_LABEL(pkd->pane.title)));
-	WRITE_BOOL(pkd->pane, expanded);
+	bar_pane_common_write_config(pkd->pane, rc);
 	WRITE_CHAR(*pkd, key);
 	WRITE_INT(*pkd, height);
 	WRITE_STRING(">");
@@ -1397,11 +1395,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	pkd->pane.pane_set_fd = bar_pane_keywords_set_fd;
 	pkd->pane.pane_event = bar_pane_keywords_event;
 	pkd->pane.pane_write_config = bar_pane_keywords_write_config;
-	pkd->pane.title = bar_pane_expander_title(title);
-	pkd->pane.id = g_strdup(id);
-	pkd->pane.type = PANE_KEYWORDS;
-
-	pkd->pane.expanded = expanded;
+	bar_pane_common_init(pkd->pane, id, title, expanded, PANE_KEYWORDS);
 
 	pkd->height = height;
 	pkd->key = g_strdup(key);
