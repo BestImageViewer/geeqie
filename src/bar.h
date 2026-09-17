@@ -43,7 +43,7 @@ enum PaneType {
 struct PaneData {
 	void (*pane_set_fd)(GtkWidget *pane, FileData *fd); /**< filled in by pane */
 	void (*pane_notify_selection)(GtkWidget *pane, gint count); /**< filled in by pane */
-	gint (*pane_event)(GtkWidget *pane, GdkEvent *event); /**< filled in by pane */
+	bool (*pane_event)(GtkWidget *pane, GdkEvent *event); /**< filled in by pane */
 	void (*pane_write_config)(GtkWidget *pane, RcString &rc); /**< filled in by pane */
 	GtkWidget *title; /**< filled in by pane */
 	gboolean expanded; /**< filled in by pane */

@@ -750,8 +750,15 @@ GtkWidget *bar_new_from_config(LayoutWindow *lw, const gchar **attribute_names, 
 	return bar_update_from_config(bar, attribute_names, attribute_values, lw, TRUE);
 }
 
+static bool bar_pane_common_event(GtkWidget *, GdkEvent *)
+{
+	return false;
+}
+
 void bar_pane_common_init(PaneData &pane, const gchar *id, const gchar *title, gboolean expanded, PaneType type)
 {
+	pane.pane_event = bar_pane_common_event;
+
 	pane.title = gtk_label_new(title);
 	pref_label_bold(pane.title, TRUE, FALSE);
 	gtk_label_set_ellipsize(GTK_LABEL(pane.title), PANGO_ELLIPSIZE_END);

@@ -322,13 +322,6 @@ void bar_pane_exif_set_fd(GtkWidget *widget, FileData *fd)
 	bar_pane_exif_update(ped);
 }
 
-gint bar_pane_exif_event(GtkWidget *bar, GdkEvent *event)
-{
-	(void)bar;
-	(void)event;
-	return FALSE;
-}
-
 void bar_pane_exif_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
@@ -722,7 +715,6 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 	ped->pane.pane_set_fd = bar_pane_exif_set_fd;
 	ped->pane.pane_write_config = bar_pane_exif_write_config;
-	ped->pane.pane_event = bar_pane_exif_event;
 	bar_pane_common_init(ped->pane, id, title, expanded, PANE_EXIF);
 
 	ped->show_all = show_all;

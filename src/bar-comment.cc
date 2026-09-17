@@ -136,14 +136,6 @@ static void bar_pane_comment_set_fd(GtkWidget *bar, FileData *fd)
 	bar_pane_comment_update(pcd);
 }
 
-static gint bar_pane_comment_event(GtkWidget *bar, GdkEvent *event)
-{
-	(void)bar;
-	(void)event;
-
-	return FALSE;
-}
-
 static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
@@ -243,7 +235,6 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd = g_new0(PaneCommentData, 1);
 
 	pcd->pane.pane_set_fd = bar_pane_comment_set_fd;
-	pcd->pane.pane_event = bar_pane_comment_event;
 	pcd->pane.pane_write_config = bar_pane_comment_write_config;
 	bar_pane_common_init(pcd->pane, id, title, expanded, PANE_COMMENT);
 
