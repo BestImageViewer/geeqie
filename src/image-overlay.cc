@@ -244,6 +244,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			{
 			t = g_list_length(cd->list);
 			n = g_list_index(cd->list, info) + 1;
+			osd_template_insert(vars, "collection_info", info ? info->infotext : nullptr);
 			if (cd->name)
 				{
 				if (file_extension_match(cd->name, GQ_COLLECTION_EXT))
@@ -286,6 +287,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			t = std::max(t, 1);
 
 			osd_template_insert(vars, "collection", nullptr);
+			osd_template_insert(vars, "collection_info", nullptr);
 			}
 
 		osd_template_insert(vars, "number", std::to_string(n).c_str());

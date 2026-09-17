@@ -36,6 +36,10 @@
             <entry>Name of the collection</entry>
           </row>
           <row>
+            <entry>collection_info</entry>
+            <entry>Info text for the current image in a collection</entry>
+          </row>
+          <row>
             <entry>number</entry>
             <entry>Current number of image in the list</entry>
           </row>

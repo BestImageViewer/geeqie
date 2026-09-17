@@ -65,6 +65,7 @@ constexpr struct OsdTag
 	{"%zoom%",							N_("Zoom")},
 	{"%dimensions%",					N_("Dimensions")},
 	{"%collection%",					N_("Collection")},
+	{"%collection_info%",				N_("Collection info text")},
 	{"%number%",						N_("Image index")},
 	{"%total%",							N_("Images total")},
 	{"%comment%",						N_("Comment")},
