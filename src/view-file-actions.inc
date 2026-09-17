@@ -16,6 +16,19 @@ static const ActionDef view_file_actions[] =
 		},
 
 		{
+		"win.view-file-collection-edit-infotext",
+		nullptr,
+		N_("Edit info text"),
+		vf_collection_edit_infotext_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.view-file-collection-save",
 		nullptr,
 		N_("Save collection…"),
@@ -35,6 +48,19 @@ static const ActionDef view_file_actions[] =
 		vf_collection_remove_action_cb,
 		nullptr,
 		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.view-file-collection-show-infotext",
+		nullptr,
+		N_("Show info text"),
+		vf_collection_show_infotext_action_cb,
+		nullptr,
+		ActionStateType::BOOLEAN,
 		FALSE,
 		nullptr,
 		0,

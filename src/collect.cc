@@ -683,6 +683,36 @@ CollectInfo *collection_get_last(CollectionData *cd)
 	return nullptr;
 }
 
+const gchar *collection_get_info_text(CollectionData *cd, FileData *fd)
+{
+	if (!cd || !fd) return nullptr;
+
+	CollectInfo *ci = collection_list_find_fd(cd->list, fd);
+	if (!ci) return nullptr;
+
+	return ci->infotext;
+}
+
+gboolean collection_set_info_text(CollectionData *cd, FileData *fd, const gchar *infotext)
+{
+	if (!cd || !fd) return FALSE;
+
+	CollectInfo *ci = collection_list_find_fd(cd->list, fd);
+	if (!ci) return FALSE;
+
+	const gchar *new_infotext = (infotext && *infotext) ? infotext : nullptr;
+	if (g_strcmp0(ci->infotext, new_infotext) == 0) return TRUE;
+
+	g_free(ci->infotext);
+	ci->infotext = g_strdup(new_infotext);
+	cd->changed = TRUE;
+
+	if (cd->info_updated_func) cd->info_updated_func(cd, ci);
+	collection_changed(cd);
+
+	return TRUE;
+}
+
 void collection_set_sort_method(CollectionData *cd, SortType method)
 {
 	if (!cd) return;

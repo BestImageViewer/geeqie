@@ -109,6 +109,8 @@ CollectInfo *collection_next_by_info(CollectionData *cd, CollectInfo *info);
 CollectInfo *collection_prev_by_info(CollectionData *cd, CollectInfo *info);
 CollectInfo *collection_get_first(CollectionData *cd);
 CollectInfo *collection_get_last(CollectionData *cd);
+const gchar *collection_get_info_text(CollectionData *cd, FileData *fd);
+gboolean collection_set_info_text(CollectionData *cd, FileData *fd, const gchar *infotext);
 
 void collection_set_sort_method(CollectionData *cd, SortType method);
 void collection_randomize(CollectionData *cd);

@@ -27,6 +27,7 @@
 #include "actions.h"
 #include "archives.h"
 #include "collect-dlg.h"
+#include "collect-io.h"
 #include "collect-table.h"
 #include "collect.h"
 #include "compat.h"
@@ -1023,6 +1024,153 @@ static void vf_collection_edit_action_cb(GSimpleAction *, GVariant *, gpointer d
 	if (window) gtk_window_present(GTK_WINDOW(window->window));
 }
 
+static void vf_collection_show_infotext_action_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !vf->collection || !state) return;
+
+	options->show_collection_infotext = g_variant_get_boolean(state);
+	g_simple_action_set_state(action, state);
+
+	switch (vf->type)
+		{
+		case FILEVIEW_LIST: vflist_refresh(vf); break;
+		case FILEVIEW_ICON: vficon_refresh(vf); break;
+		}
+}
+
+struct VfCollectionInfoTextDialog
+{
+	CollectionData *collection;
+	GList *files;
+	GtkWidget *entry;
+	ViewFile *vf;
+};
+
+static void vf_collection_info_text_dialog_free(VfCollectionInfoTextDialog *dialog)
+{
+	if (!dialog) return;
+
+	if (dialog->collection) collection_unref(dialog->collection);
+	file_data_list_free(dialog->files);
+	g_free(dialog);
+}
+
+static void vf_collection_info_text_cancel_cb(GenericDialog *gd, gpointer data)
+{
+	auto *dialog = static_cast<VfCollectionInfoTextDialog *>(data);
+
+	generic_dialog_close(gd);
+	vf_collection_info_text_dialog_free(dialog);
+}
+
+static void vf_collection_info_text_save_cb(GenericDialog *gd, gpointer data)
+{
+	auto *dialog = static_cast<VfCollectionInfoTextDialog *>(data);
+	const gchar *infotext = gtk_editable_get_text(GTK_EDITABLE(dialog->entry));
+	guint updated = 0;
+
+	for (GList *work = dialog->files; work; work = work->next)
+		{
+		if (collection_set_info_text(dialog->collection, static_cast<FileData *>(work->data), infotext)) updated++;
+		}
+
+	if (updated == 0)
+		{
+		warning_dialog(_("Error saving collection"), _("No collection entries were updated."), GQ_ICON_DIALOG_ERROR, dialog->vf ? dialog->vf->listview : nullptr);
+		}
+	else if (dialog->collection->path && *dialog->collection->path)
+		{
+		if (!collection_save(dialog->collection, dialog->collection->path))
+			{
+			g_autofree gchar *message = g_strdup_printf(_("Failed to save the collection:\n%s"), dialog->collection->path);
+			warning_dialog(_("Error saving collection"), message, GQ_ICON_DIALOG_ERROR, dialog->vf ? dialog->vf->listview : nullptr);
+			}
+		}
+	else
+		{
+		collection_dialog_save(dialog->collection);
+		}
+
+	if (dialog->vf)
+		{
+		options->show_collection_infotext = TRUE;
+		switch (dialog->vf->type)
+			{
+			case FILEVIEW_LIST: vflist_refresh(dialog->vf); break;
+			case FILEVIEW_ICON: vficon_refresh(dialog->vf); break;
+			}
+		}
+
+	generic_dialog_close(gd);
+	vf_collection_info_text_dialog_free(dialog);
+}
+
+static gchar *vf_collection_info_text_common_text(CollectionData *collection, GList *files)
+{
+	const gchar *common = nullptr;
+	gboolean first = TRUE;
+
+	for (GList *work = files; work; work = work->next)
+		{
+		const gchar *infotext = collection_get_info_text(collection, static_cast<FileData *>(work->data));
+		infotext = infotext ? infotext : "";
+		if (first)
+			{
+			common = infotext;
+			first = FALSE;
+			continue;
+			}
+		if (g_strcmp0(common, infotext) != 0) return g_strdup("");
+		}
+
+	return g_strdup(common ? common : "");
+}
+
+static void vf_collection_edit_infotext_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !vf->collection) return;
+
+	GList *files = vf_pop_menu_file_list(vf);
+	if (!files) return;
+
+	auto *dialog = g_new0(VfCollectionInfoTextDialog, 1);
+	dialog->collection = collection_ref(vf->collection);
+	dialog->files = files;
+	dialog->vf = vf;
+
+	const gint file_count = g_list_length(files);
+	g_autofree gchar *heading = nullptr;
+	if (file_count == 1)
+		{
+		auto *fd = static_cast<FileData *>(files->data);
+		heading = g_strdup(fd->name);
+		}
+	else
+		{
+		heading = g_strdup_printf(_("%d files selected"), file_count);
+		}
+
+	GenericDialog *gd = generic_dialog_new(_("Edit info text"), "collection_info_text", vf->listview, FALSE,
+	                                       vf_collection_info_text_cancel_cb, dialog);
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, heading,
+	                           _("Create or edit info text for this file in the current collection file."), FALSE);
+	generic_dialog_add_button(gd, GQ_ICON_SAVE, _("Save"), vf_collection_info_text_save_cb, TRUE);
+
+	GtkWidget *table = pref_table_new(gd->vbox, 2, 1, FALSE, TRUE);
+	pref_table_label(table, 0, 0, _("Info text"), GTK_ALIGN_END);
+
+	dialog->entry = gtk_entry_new();
+	gtk_widget_set_size_request(dialog->entry, 420, -1);
+	g_autofree gchar *common_text = vf_collection_info_text_common_text(dialog->collection, files);
+	entry_set_text(GTK_ENTRY(dialog->entry), common_text);
+	gtk_grid_attach(GTK_GRID(table), dialog->entry, 1, 0, 1, 1);
+	generic_dialog_attach_default(gd, dialog->entry);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
+	gtk_widget_grab_focus(dialog->entry);
+}
+
 static void vf_pop_menu_edit_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	auto *vf = vf_from_action_data(data);
@@ -1401,11 +1549,18 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 		{
 		gmenu_append_int32_action_item(sort_menu, _("Collection order"), "win.view-file-sort", SORT_NONE);
 		g_autoptr(GMenu) collection_menu = g_menu_new();
+		g_autoptr(GMenu) info_text_menu = g_menu_new();
+		gmenu_append_action_item(info_text_menu, _("Show info text"), "win.view-file-collection-show-infotext");
+		gmenu_append_action_item(info_text_menu, _("Edit info text"), "win.view-file-collection-edit-infotext");
+		g_autoptr(GMenuItem) info_text_item = g_menu_item_new_submenu(_("Info text"), G_MENU_MODEL(info_text_menu));
+		g_menu_append_item(collection_menu, info_text_item);
 		gmenu_append_action_item(collection_menu, _("Remove from collection"), "win.view-file-collection-remove");
 		gmenu_append_action_item(collection_menu, _("Save collection…"), "win.view-file-collection-save");
 		gmenu_append_action_item(collection_menu, _("Edit collection…"), "win.view-file-collection-edit");
 		g_menu_append_section(menu_model, nullptr, G_MENU_MODEL(collection_menu));
 		vf_pop_menu_set_action_enabled(vf, "view-file-collection-remove", active);
+		vf_pop_menu_set_action_enabled(vf, "view-file-collection-edit-infotext", active);
+		vf_pop_menu_set_boolean_state(vf, "view-file-collection-show-infotext", options->show_collection_infotext);
 		}
 
 	GMenu *view_specific_menu = G_MENU(gtk_builder_get_object(builder, "view-specific-section"));

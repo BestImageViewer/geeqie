@@ -194,7 +194,7 @@ static void vficon_toggle_filenames(ViewFile *vf)
 
 static gint vficon_get_icon_width(ViewFile *vf)
 {
-	if (!VFICON(vf)->show_text && !vf->marks_enabled) return options->thumbnails.size.width;
+	if (!VFICON(vf)->show_text && !vf->marks_enabled && !(vf->collection && options->show_collection_infotext)) return options->thumbnails.size.width;
 
 	gint width = options->thumbnails.size.width + (options->thumbnails.size.width / 2);
 	width = std::max(width, THUMB_MIN_ICON_WIDTH);
@@ -773,6 +773,7 @@ static gint page_height(ViewFile *vf)
 
 	gint row_height = options->thumbnails.size.height + (THUMB_BORDER_PADDING * 2);
 	if (VFICON(vf)->show_text) row_height += options->thumbnails.size.height / 3;
+	if (vf->collection && options->show_collection_infotext) row_height += options->thumbnails.size.height / 3;
 
 	ret = page_size / row_height;
 	ret = std::max(ret, 1);
@@ -1445,6 +1446,19 @@ static void vficon_item_update(ViewFileIconItem *item, GtkWidget *child)
 		if (star_rating)
 			{
 			name_sidecars = g_string_append(name_sidecars, star_rating);
+			}
+		}
+
+	if (vf->collection && options->show_collection_infotext)
+		{
+		const gchar *infotext = collection_get_info_text(vf->collection, fd);
+		if (infotext && *infotext)
+			{
+			if (name_sidecars->len > 0)
+				{
+				name_sidecars = g_string_append_c(name_sidecars, '\n');
+				}
+			name_sidecars = g_string_append(name_sidecars, infotext);
 			}
 		}
 

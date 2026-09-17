@@ -26,7 +26,6 @@
     window.
   </para>
   <para>
-    It is assumed that you insert such text into a .gqv file via a script or program file. If you wish a facility to do this to be included within Geeqie, please raise a feature request on
-    <ulink url="https://github.com/BestImageViewer/geeqie/issues">https://github.com/BestImageViewer/geeqie/issues</ulink>
+    To add or edit this text in Geeqie, display the collection in the files pane and select <guimenuitem>Edit info text</guimenuitem> from the <guimenu>Info text</guimenu> submenu of a file's context menu. The text is stored when the collection is saved.
   </para>
 </section>
