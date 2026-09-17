@@ -1181,6 +1181,7 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 	open_recent_dialog_update(dialog_data);
 
 	gtk_window_present(GTK_WINDOW(dialog_data->gd->dialog));
+	if (gtk_widget_get_first_child(dialog_data->list)) gtk_widget_grab_focus(dialog_data->list);
 }
 
 static void open_collection_cb(GFile *file, gpointer)

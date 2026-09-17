@@ -533,6 +533,19 @@ GtkFileChooserAction to_gtk_file_chooser_action(FileDialogAction action)
 	return GTK_FILE_CHOOSER_ACTION_OPEN;
 }
 
+GtkWidget *find_file_list(GtkWidget *widget)
+{
+	/* GtkFileChooserWidget does not expose its file view directly. */
+	if (GTK_IS_COLUMN_VIEW(widget) || GTK_IS_GRID_VIEW(widget)) return widget;
+
+	for (GtkWidget *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		{
+			if (GtkWidget *file_list = find_file_list(child)) return file_list;
+		}
+
+	return nullptr;
+}
+
 GFile *get_selected_file(PendingFileDialog *pending)
 {
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
@@ -852,8 +865,9 @@ void file_dialog_show(const FileDialogData &fdd)
 	if (fdd.alternate_callback && fdd.alternate_text)
 		{
 		gtk_dialog_add_button(GTK_DIALOG(pending->dialog), fdd.alternate_text, FILE_DIALOG_RESPONSE_ALTERNATE);
-		gtk_dialog_set_default_response(GTK_DIALOG(pending->dialog), fdd.alternate_default ? FILE_DIALOG_RESPONSE_ALTERNATE : GTK_RESPONSE_ACCEPT);
 		}
+	gtk_dialog_set_default_response(GTK_DIALOG(pending->dialog), fdd.alternate_default && fdd.alternate_callback && fdd.alternate_text
+	                                ? FILE_DIALOG_RESPONSE_ALTERNATE : GTK_RESPONSE_ACCEPT);
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
 	G_GNUC_END_IGNORE_DEPRECATIONS
 #endif
@@ -913,6 +927,10 @@ void file_dialog_show(const FileDialogData &fdd)
 	pending->preview_timer_id = g_timeout_add(250, preview_timer_cb, pending);
 
 	gtk_window_present(GTK_WINDOW(pending->dialog));
+	if (fdd.action == FileDialogAction::OPEN)
+		{
+		if (GtkWidget *file_list = find_file_list(pending->chooser)) gtk_widget_grab_focus(file_list);
+		}
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
