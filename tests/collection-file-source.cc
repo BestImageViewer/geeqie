@@ -9,6 +9,7 @@
 #include <gtk/gtk.h>
 
 #include "collect.h"
+#include "collect-io.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "options.h"
@@ -87,6 +88,73 @@ protected:
 	GList *files = nullptr;
 	std::vector<std::string> paths;
 };
+
+TEST_F(CollectionFileSource, RelativePathsRoundTripAndSaveAs)
+{
+	g_autofree gchar *path = g_build_filename(directory, "a", "relative.gqv", nullptr);
+	paths.emplace_back(path);
+	cd->relative_paths = TRUE;
+	ASSERT_TRUE(collection_save(cd, path));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
+	EXPECT_NE(std::string(contents).find("\"./same.svg\""), std::string::npos);
+	EXPECT_NE(std::string(contents).find("\"../b/same.svg\""), std::string::npos);
+	ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_NONE));
+	EXPECT_TRUE(cd->relative_paths);
+	EXPECT_NE(collection_list_find_fd(cd->list, first), nullptr);
+	EXPECT_NE(collection_list_find_fd(cd->list, second), nullptr);
+
+	g_autofree gchar *other = g_build_filename(directory, "b", "relative.gqv", nullptr);
+	paths.emplace_back(other);
+	ASSERT_TRUE(collection_save(cd, other));
+	ASSERT_TRUE(collection_load(cd, other, COLLECTION_LOAD_NONE));
+	EXPECT_NE(collection_list_find_fd(cd->list, first), nullptr);
+	EXPECT_NE(collection_list_find_fd(cd->list, second), nullptr);
+}
+
+TEST_F(CollectionFileSource, LoadsMixedPathsAndAppendPreservesSaveMode)
+{
+	g_autofree gchar *path = g_build_filename(directory, "a", "mixed.gqv", nullptr);
+	paths.emplace_back(path);
+	g_autofree gchar *contents = g_strdup_printf("#Geeqie collection\n\"./same.svg\"\n\"../b/./same.svg\"\n\"%s\"\n", unlisted->path);
+	ASSERT_TRUE(g_file_set_contents(path, contents, -1, nullptr));
+	ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_APPEND));
+	EXPECT_FALSE(cd->relative_paths);
+	ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_NONE));
+	EXPECT_TRUE(cd->relative_paths);
+	EXPECT_EQ(g_list_length(cd->list), 3U);
+	EXPECT_NE(collection_list_find_fd(cd->list, first), nullptr);
+	EXPECT_NE(collection_list_find_fd(cd->list, second), nullptr);
+	EXPECT_NE(collection_list_find_fd(cd->list, unlisted), nullptr);
+}
+
+TEST_F(CollectionFileSource, AbsolutePathsRemainDefault)
+{
+	g_autofree gchar *path = g_build_filename(directory, "absolute.gqv", nullptr);
+	paths.emplace_back(path);
+	ASSERT_FALSE(cd->relative_paths);
+	ASSERT_TRUE(collection_save(cd, path));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
+	EXPECT_NE(std::string(contents).find(first->path), std::string::npos);
+	EXPECT_NE(std::string(contents).find(second->path), std::string::npos);
+	cd->relative_paths = TRUE;
+	ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_NONE));
+	EXPECT_FALSE(cd->relative_paths);
+}
+
+TEST_F(CollectionFileSource, EmptyRelativeCollectionRetainsSaveMode)
+{
+	g_autofree gchar *path = g_build_filename(directory, "empty.gqv", nullptr);
+	paths.emplace_back(path);
+	ASSERT_TRUE(collection_remove(cd, first));
+	ASSERT_TRUE(collection_remove(cd, second));
+	cd->relative_paths = TRUE;
+	ASSERT_TRUE(collection_save(cd, path));
+	cd->relative_paths = FALSE;
+	ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_NONE));
+	EXPECT_TRUE(cd->relative_paths);
+}
 
 TEST_F(CollectionFileSource, ReadsOnlyMembersAndKeepsCollectionOrder)
 {

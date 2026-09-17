@@ -41,6 +41,7 @@ static void collection_save_cb(GFile *file, gpointer data)
 		{
 		g_autofree gchar *filename = g_file_get_path(file);
 
+		g_free(cd->collection_path);
 		cd->collection_path = g_strdup(filename);
 		if (!collection_save(cd, cd->collection_path))
 			{
@@ -48,9 +49,12 @@ static void collection_save_cb(GFile *file, gpointer data)
 			file_util_warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, nullptr);
 			}
 
-		collection_unref(cd);
-		collection_window_close_by_collection(cd);
+		else
+			{
+			collection_window_close_by_collection(cd);
+			}
 		}
+	collection_unref(cd);
 }
 
 static void collection_append_cb(GFile *file, gpointer data)
@@ -88,6 +92,11 @@ static void collection_dialog_new(CollectionData *cd, const gchar *title, FileDi
 	fdd.history_key = "open_collection";
 	fdd.suggested_name = cd->path ? filename_from_path(cd->path) : _("Untitled.gqv");
 	fdd.title = title;
+	if (action == FileDialogAction::SAVE && !cd->path)
+		{
+		fdd.checkbox_text = _("Save paths relative to the collection file");
+		fdd.checkbox_value = &cd->relative_paths;
+		}
 
 	file_dialog_show(fdd);
 }

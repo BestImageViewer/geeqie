@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -214,6 +215,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			{
 			g_list_free_full(cd->list, reinterpret_cast<GDestroyNotify>(collection_info_free));
 			cd->list = nullptr;
+			g_hash_table_remove_all(cd->existence);
 			}
 		}
 
@@ -222,6 +224,8 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	if (!path) path = cd->path;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
+	g_autofree gchar *absolute_path = g_canonicalize_filename(path, nullptr);
+	g_autofree gchar *directory = g_path_get_dirname(absolute_path);
 
 	DEBUG_1("collection load: append=%d flush=%d only_geometry=%d path=%s", append, flush, only_geometry, pathl);
 
@@ -233,6 +237,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		return FALSE;
 		}
 
+	if (!append && !only_geometry) cd->relative_paths = FALSE;
 	g_autoptr(GString) extended_filename_buffer = nullptr;
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
@@ -255,6 +260,8 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 					gchar *q = strpbrk(infotext, "\r\n");
 					if (q) *q = 0;
 					}
+				if (!append && !only_geometry && g_str_has_prefix(p, "#relative-paths: true"))
+					cd->relative_paths = TRUE;
 				if (!need_header) continue;
 
 				if (g_ascii_strncasecmp(p, GQ_COLLECTION_MARKER, GQ_COLLECTION_MARKER_LEN) == 0)
@@ -333,6 +340,14 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			}
 
 		if (!*filename) continue;
+
+		if (g_str_has_prefix(filename, "./") || g_str_has_prefix(filename, "../"))
+			{
+			gchar *resolved = g_canonicalize_filename(filename, directory);
+			g_free(filename);
+			filename = resolved;
+			if (!append) cd->relative_paths = TRUE;
+			}
 
 		total++;
 
@@ -571,6 +586,10 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 	g_autofree gchar *pathl = path_from_utf8(path);
 	g_autoptr(GString) gstring = g_string_new(GQ_COLLECTION_MARKER " collection\n#created with " GQ_APPNAME " version " VERSION "\n");
 
+	g_autofree gchar *absolute_path = g_canonicalize_filename(path, nullptr);
+	g_autofree gchar *directory = g_path_get_dirname(absolute_path);
+	if (cd->relative_paths) g_string_append(gstring, "#relative-paths: true\n");
+
 	collection_update_geometry(cd);
 	if (cd->window_read)
 		{
@@ -583,12 +602,21 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 		if (ci->infotext && *ci->infotext)
 			g_string_append_printf(gstring, "#i %s\n", ci->infotext);
 
-		g_string_append_printf(gstring, "\"%s\"\n", ci->fd->path);
+		if (cd->relative_paths)
+			{
+			g_autofree gchar *absolute_filename = g_canonicalize_filename(ci->fd->path, nullptr);
+			const auto relative = std::filesystem::path(absolute_filename).lexically_relative(directory).generic_string();
+			g_string_append_printf(gstring, "\"%s%s\"\n", relative.compare(0, 3, "../") == 0 ? "" : "./", relative.c_str());
+			}
+		else
+			{
+			g_string_append_printf(gstring, "\"%s\"\n", ci->fd->path);
+			}
 		}
 
 	g_string_append(gstring, "#end\n");
 
-	secure_save(pathl, gstring->str, -1);
+	if (!secure_save(pathl, gstring->str, -1)) return FALSE;
 
 	if (!cd->path || strcmp(path, cd->path) != 0)
 		{

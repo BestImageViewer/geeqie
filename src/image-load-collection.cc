@@ -69,6 +69,8 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 	if (runcmd("which montage >/dev/null 2>&1") == 0)
 		{
 		g_autofree gchar *pathl = path_from_utf8(il->fd->path);
+		g_autofree gchar *absolute_path = g_canonicalize_filename(il->fd->path, nullptr);
+		g_autofree gchar *directory = g_path_get_dirname(absolute_path);
 		fp = fopen(pathl, "r");
 		if (fp)
 			{
@@ -77,7 +79,10 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 				if (line[0] && line[0] != '#')
 					{
 					g_auto(GStrv) split_line = g_strsplit(line, "\"", 4);
-					g_autofree gchar *cache_found = cache_find_location(CacheType::THUMB, split_line[1]);
+					if (!split_line[0] || !split_line[1]) continue;
+					g_autofree gchar *resolved = (g_str_has_prefix(split_line[1], "./") || g_str_has_prefix(split_line[1], "../"))
+					                           ? g_canonicalize_filename(split_line[1], directory) : g_strdup(split_line[1]);
+					g_autofree gchar *cache_found = cache_find_location(CacheType::THUMB, resolved);
 					if (cache_found)
 						{
 						g_string_append_printf(file_names, "\"%s\" ", cache_found);

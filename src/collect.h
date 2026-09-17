@@ -75,6 +75,7 @@ struct CollectionData
 	GdkRectangle window;
 
 	gboolean changed; /**< contents changed since save flag */
+	gboolean relative_paths; /**< Save paths relative to the collection directory */
 
 	GHashTable *existence;
 	GList *change_listeners;

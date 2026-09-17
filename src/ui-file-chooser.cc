@@ -39,6 +39,8 @@ struct PendingFileDialog
 	gpointer data;
 	GtkWidget *dialog;
 	GtkWidget *chooser;
+	GtkWidget *checkbox;
+	gboolean *checkbox_value;
 	GtkWidget *preview_scroller;
 	gchar *preview_path;
 	guint preview_timer_id;
@@ -626,6 +628,8 @@ void finish_file_dialog(PendingFileDialog *pending, gint response_id)
 
 	FileDialogCallback callback = response_id == FILE_DIALOG_RESPONSE_ALTERNATE && pending->alternate_callback
 	                            ? pending->alternate_callback : pending->callback;
+	if (file && pending->checkbox_value)
+		*pending->checkbox_value = gtk_check_button_get_active(GTK_CHECK_BUTTON(pending->checkbox));
 	callback(file, pending->data);
 	gtk_window_destroy(GTK_WINDOW(pending->dialog));
 }
@@ -919,6 +923,13 @@ void file_dialog_show(const FileDialogData &fdd)
 		gtk_box_append(GTK_BOX(content), button);
 		}
 	gtk_box_append(GTK_BOX(content), create_dialog_content(pending));
+	if (fdd.checkbox_text && fdd.checkbox_value)
+		{
+		pending->checkbox_value = fdd.checkbox_value;
+		pending->checkbox = gtk_check_button_new_with_label(fdd.checkbox_text);
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(pending->checkbox), *fdd.checkbox_value);
+		gtk_box_append(GTK_BOX(content), pending->checkbox);
+		}
 
 	g_signal_connect(pending->dialog, "response", G_CALLBACK(file_dialog_response_cb), pending);
 	g_signal_connect(pending->dialog, "destroy", G_CALLBACK(file_dialog_destroy_cb), pending);

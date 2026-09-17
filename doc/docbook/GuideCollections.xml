@@ -2,6 +2,7 @@
 <section id="GuideCollections">
   <title id="titleGuideCollections">Collections</title>
   <para>Geeqie provides the ability to build lists of images, regardless of the location of the files on disk.</para>
+  <para>When saving a new collection, select <guilabel>Save paths relative to the collection file</guilabel> to store image paths relative to the folder containing the <filename>.gqv</filename> file. Paths begin with <filename>./</filename> or <filename>../</filename>. You can move the collection and images together while preserving their folder layout. The setting is retained when the collection is reopened or saved to another location. Absolute paths remain the default.</para>
   <para>A collection window displays the contents of a collection. It allows the collection to be modified and access to the images contained in the collection.</para>
   <para>
     To open a new empty collection window select
