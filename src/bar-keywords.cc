@@ -312,13 +312,6 @@ void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("</pane_keywords>");
 }
 
-gint bar_pane_keywords_event(GtkWidget *bar, GdkEvent *event)
-{
-	(void)bar;
-	(void)event;
-	return FALSE;
-}
-
 void bar_pane_keywords_keyword_toggle(GtkCellRendererToggle *, const gchar *path, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
@@ -1393,7 +1386,6 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	pkd = g_new0(PaneKeywordsData, 1);
 
 	pkd->pane.pane_set_fd = bar_pane_keywords_set_fd;
-	pkd->pane.pane_event = bar_pane_keywords_event;
 	pkd->pane.pane_write_config = bar_pane_keywords_write_config;
 	bar_pane_common_init(pkd->pane, id, title, expanded, PANE_KEYWORDS);
 

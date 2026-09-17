@@ -757,13 +757,6 @@ void bar_pane_gps_set_fd(GtkWidget *bar, FileData *fd)
 	bar_pane_gps_update(pgd);
 }
 
-gint bar_pane_gps_event(GtkWidget *bar, GdkEvent *event)
-{
-	(void)bar;
-	(void)event;
-	return FALSE;
-}
-
 const gchar *bar_pane_gps_get_map_id(const PaneGPSData *pgd)
 {
 	return pgd->map_source ? pgd->map_source : DEFAULT_MAP_ID;
@@ -870,7 +863,6 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	pgd->pane.pane_set_fd = bar_pane_gps_set_fd;
 	pgd->pane.pane_notify_selection = bar_pane_gps_notify_selection;
-	pgd->pane.pane_event = bar_pane_gps_event;
 	pgd->pane.pane_write_config = bar_pane_gps_write_config;
 	bar_pane_common_init(pgd->pane, id, title, expanded, PANE_GPS);
 
