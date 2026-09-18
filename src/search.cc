@@ -1463,10 +1463,10 @@ static void search_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 				text = g_strdup(fd->path);
 				break;
 			case SearchDndDestination::Gps:
-				const gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-				const gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
-				text = (latitude != 1000 && longitude != 1000) ?
-				       g_strdup_printf("%f %f", latitude, longitude) :
+				const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
+				const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
+				text = (latitude && longitude) ?
+				       g_strdup_printf("%f %f", *latitude, *longitude) :
 				       g_strdup(_("Image is not geocoded"));
 				break;
 			}
@@ -2029,9 +2029,9 @@ static gboolean search_file_next(SearchData *sd)
 		tested = TRUE;
 		match = FALSE;
 
-		const gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-		const gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
-		const bool image_has_gps = (latitude != 1000 && longitude != 1000);
+		const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
+		const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
+		const bool image_has_gps = (latitude && longitude);
 
 		if (sd->match_gps == SEARCH_MATCH_NONE)
 			{
@@ -2039,7 +2039,7 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		else if (image_has_gps)
 			{
-			const gdouble range = get_gps_range(sd, latitude, longitude);
+			const gdouble range = get_gps_range(sd, *latitude, *longitude);
 			match = (sd->match_gps == SEARCH_MATCH_UNDER && range <= sd->search_gps) ||
 			        (sd->match_gps == SEARCH_MATCH_OVER && range > sd->search_gps);
 			}

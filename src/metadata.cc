@@ -827,39 +827,39 @@ gchar *metadata_read_rating_stars(FileData *fd)
 	return ret;
 }
 
-gdouble metadata_read_GPS_coord(FileData *fd, const gchar *key, gdouble fallback)
+std::optional<gdouble> metadata_read_GPS_coord(FileData *fd, const gchar *key)
 {
-	gdouble coord;
-	gchar *endptr;
-	gdouble deg;
-	gdouble min;
-	gdouble sec;
-	gboolean ok = FALSE;
 	g_autofree gchar *string = metadata_read_string(fd, key, METADATA_PLAIN);
-	if (!string) return fallback;
+	if (!string) return {};
 
-	deg = g_ascii_strtod(string, &endptr);
+	gdouble coord;
+	bool ok = false;
+
+	gchar *endptr;
+	const gdouble deg = g_ascii_strtod(string, &endptr);
+
 	if (*endptr == ',')
 		{
-		min = g_ascii_strtod(endptr + 1, &endptr);
+		const gdouble min = g_ascii_strtod(endptr + 1, &endptr);
+
+		gdouble sec;
 		if (*endptr == ',')
 			sec = g_ascii_strtod(endptr + 1, &endptr);
 		else
 			sec = 0.0;
 
-
 		if (*endptr == 'S' || *endptr == 'W' || *endptr == 'N' || *endptr == 'E')
 			{
 			coord = deg + (min /60.0) + (sec / 3600.0);
-			ok = TRUE;
+			ok = true;
 			if (*endptr == 'S' || *endptr == 'W') coord = -coord;
 			}
 		}
 
 	if (!ok)
 		{
-		coord = fallback;
 		log_printf("unable to parse GPS coordinate '%s'\n", string);
+		return {};
 		}
 
 	return coord;
