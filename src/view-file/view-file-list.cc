@@ -204,18 +204,19 @@ static gboolean vflist_filename_tooltip_cb(GtkWidget *widget, gint x, gint y, gb
 	if (!gtk_tree_model_get_iter(model, &iter, path)) return FALSE;
 
 	FileData *fd = nullptr;
-	gtk_tree_model_get(model, &iter, FILE_COLUMN_POINTER, &fd, -1);
-	if (!fd) return FALSE;
+	g_autofree gchar *name = nullptr;
+	gtk_tree_model_get(model, &iter, FILE_COLUMN_POINTER, &fd, FILE_COLUMN_NAME, &name, -1);
+	if (!fd || !name) return FALSE;
 
 	GdkRectangle cell_area;
 	gtk_tree_view_get_cell_area(tree_view, path, column, &cell_area);
-	g_autoptr(PangoLayout) layout = gtk_widget_create_pango_layout(widget, fd->name);
+	g_autoptr(PangoLayout) layout = gtk_widget_create_pango_layout(widget, name);
 	gint text_width;
 	pango_layout_get_pixel_size(layout, &text_width, nullptr);
 	const gint visible_width = gtk_widget_get_width(widget) - MAX(cell_area.x, 0);
 	if (text_width <= visible_width) return FALSE;
 
-	gtk_tooltip_set_text(tooltip, fd->name);
+	gtk_tooltip_set_text(tooltip, name);
 	gtk_tree_view_set_tooltip_row(tree_view, tooltip, path);
 	return TRUE;
 }
