@@ -1617,28 +1617,18 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	return menu;
 }
 
-static void vf_collection_label_update(ViewFile *vf)
+static void vf_collection_actions_update(ViewFile *vf)
 {
 	if (vf->layout)
 		{
 		auto *action = g_action_map_lookup_action(G_ACTION_MAP(vf->layout->window), "main-win-new-folder");
 		if (action) g_simple_action_set_enabled(G_SIMPLE_ACTION(action), vf->collection == nullptr);
 		}
-	if (!vf->collection)
-		{
-		gtk_widget_set_visible(vf->source_label, FALSE);
-		return;
-		}
-	g_autofree gchar *text = g_strdup_printf(_("Collection: %s%s"), vf->collection->name, vf->collection->changed ? " *" : "");
-	gtk_label_set_text(GTK_LABEL(vf->source_label), text);
-	gtk_widget_set_tooltip_text(vf->source_label, vf->collection->path);
-	gtk_widget_set_visible(vf->source_label, TRUE);
 }
 
 static void vf_collection_changed_cb(CollectionData *, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
-	vf_collection_label_update(vf);
 	vf_refresh_idle(vf);
 }
 
@@ -1746,7 +1736,7 @@ gboolean vf_set_collection(ViewFile *vf, CollectionData *cd)
 	vf->collection_order = g_hash_table_new(g_direct_hash, g_direct_equal);
 	vf->click_fd = nullptr;
 	collection_add_listener(cd, vf_collection_changed_cb, vf);
-	vf_collection_label_update(vf);
+	vf_collection_actions_update(vf);
 	return vf_refresh(vf);
 }
 
@@ -1773,7 +1763,7 @@ gboolean vf_set_fd(ViewFile *vf, FileData *dir_fd)
 {
 	if (!dir_fd) return FALSE;
 	vf_collection_release(vf);
-	vf_collection_label_update(vf);
+	vf_collection_actions_update(vf);
 	gboolean ret;
 
 	switch (vf->type)
@@ -2478,11 +2468,6 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	vf->file_filter.frame = vf_file_filter_init(vf);
 
 	vf->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	vf->source_label = gtk_label_new(nullptr);
-	gtk_label_set_xalign(GTK_LABEL(vf->source_label), 0.0);
-	gtk_label_set_ellipsize(GTK_LABEL(vf->source_label), PANGO_ELLIPSIZE_MIDDLE);
-	gtk_widget_set_visible(vf->source_label, FALSE);
-	gtk_box_append(GTK_BOX(vf->widget), vf->source_label);
 	gtk_box_append(GTK_BOX(vf->widget), vf->filter);
 	gtk_box_append(GTK_BOX(vf->widget), vf->file_filter.frame);
 	gtk_widget_set_hexpand(vf->scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vf->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);

@@ -465,6 +465,7 @@ static void layout_path_entry_cb(LayoutWindow *lw, const gchar *path)
 
 	g_autofree gchar *buf = g_strdup(path);
 	parse_out_relatives(buf);
+	if (lw->vf && lw->vf->collection && g_strcmp0(buf, lw->vf->collection->path) == 0) return;
 
 	layout_set_path(lw, buf);
 }
@@ -1471,7 +1472,11 @@ static void layout_sync_path(LayoutWindow *lw)
 
 	if (lw->path_entry) entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
 
-	if (lw->vd) vd_set_fd(lw->vd, lw->dir_fd);
+	if (lw->vd)
+		{
+			vd_set_collection(lw->vd, nullptr);
+		vd_set_fd(lw->vd, lw->dir_fd);
+		}
 	if (lw->vf) vf_set_fd(lw->vf, lw->dir_fd);
 }
 
@@ -1497,6 +1502,13 @@ gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 	/* Pane navigation uses the displayed file list, not ImageWindow's collection mode. */
 	if (layout_image_get_collection(lw, nullptr)) layout_image_set_fd(lw, nullptr);
 	if (!vf_set_collection(lw->vf, cd)) return FALSE;
+	g_autofree gchar *parent = cd->path ? remove_level_from_path(cd->path) : nullptr;
+	g_autofree gchar *canonical_parent = parent ? g_canonicalize_filename(parent, nullptr) : nullptr;
+	g_autofree gchar *collections_dir = g_canonicalize_filename(get_collections_dir(), nullptr);
+	const gboolean in_collections_dir = lw->dir_fd && g_strcmp0(lw->dir_fd->path, parent) == 0 &&
+	                                    g_strcmp0(canonical_parent, collections_dir) == 0;
+	if (lw->vd) vd_set_collection(lw->vd, in_collections_dir ? cd->path : nullptr);
+	if (in_collections_dir && lw->path_entry) entry_set_text(GTK_ENTRY(lw->path_entry), cd->path);
 	if (current && vf_index_by_fd(lw->vf, current) >= 0)
 		layout_image_set_fd(lw, current);
 	else
@@ -1520,6 +1532,8 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 		if (lw->vf && lw->vf->collection)
 			{
 			layout_image_slideshow_stop(lw);
+			if (lw->vd) vd_set_collection(lw->vd, nullptr);
+			if (lw->path_entry) entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
 			vf_set_fd(lw->vf, lw->dir_fd);
 			layout_image_set_index(lw, 0);
 			if (lw->info_sort) gtk_menu_button_set_popover(GTK_MENU_BUTTON(lw->info_sort), layout_sort_popover_new(lw));

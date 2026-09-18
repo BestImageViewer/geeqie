@@ -43,6 +43,7 @@ ViewDir *vdtree_new(ViewDir *vd);
 
 gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd);
 void vdtree_refresh(ViewDir *vd);
+void vdtree_set_collection(ViewDir *vd, const gchar *path);
 
 gboolean vdtree_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter, GtkTreeIter *parent);
 gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean force, FileData *target_fd);

@@ -109,6 +109,7 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data);
 static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
+	(void)widget;
 
 	g_object_set_data(G_OBJECT(vd->view), VIEW_DIR_DATA_KEY, nullptr);
 	file_data_unregister_notify_func(vd_notify_cb, vd);
@@ -123,9 +124,11 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 
 	switch (vd->type)
 		{
-		case DIRVIEW_LIST: vdlist_destroy_cb(widget, data); break;
-		case DIRVIEW_TREE: vdtree_destroy_cb(widget, data); break;
+		case DIRVIEW_LIST: vdlist_destroy_cb(vd->view, data); break;
+		case DIRVIEW_TREE: vdtree_destroy_cb(vd->view, data); break;
 		}
+	if (vd->collection_parent) g_object_unref(vd->view);
+	g_free(vd->collection_path);
 
 	folder_icons_free(vd->pf);
 	file_data_list_free(vd->drop_list);
@@ -196,8 +199,50 @@ void vd_refresh(ViewDir *vd)
 	switch (vd->type)
 	{
 	case DIRVIEW_LIST: vdlist_refresh(vd); break;
-	case DIRVIEW_TREE: vdtree_refresh(vd); break;
+	case DIRVIEW_TREE:
+		vdtree_refresh(vd);
+		vdtree_set_collection(vd, vd->collection_path);
+		break;
 	}
+}
+
+void vd_set_collection(ViewDir *vd, const gchar *path)
+{
+	if (vd->type == DIRVIEW_TREE)
+		{
+		g_free(vd->collection_path);
+		vd->collection_path = g_strdup(path);
+		vdtree_set_collection(vd, path);
+		return;
+		}
+
+	const gboolean active = path != nullptr;
+	if (active == (vd->collection_parent != nullptr)) return;
+
+	if (active)
+		{
+		g_object_ref(vd->view);
+		GtkWidget *button = gtk_button_new();
+		GtkWidget *row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+		gtk_box_append(GTK_BOX(row), gtk_image_new_from_icon_name(GQ_ICON_GO_UP));
+		gtk_box_append(GTK_BOX(row), gtk_label_new(".."));
+		gtk_button_set_child(GTK_BUTTON(button), row);
+		gtk_widget_add_css_class(button, "flat");
+		gtk_widget_set_hexpand(button, TRUE);
+		g_signal_connect_swapped(button, "clicked", G_CALLBACK(+[](ViewDir *vd)
+			{
+			if (vd->select_func) vd->select_func(vd, vd->dir_fd, vd->select_data);
+			}), vd);
+		vd->collection_parent = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+		gtk_box_append(GTK_BOX(vd->collection_parent), button);
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vd->widget), vd->collection_parent);
+		}
+	else
+		{
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vd->widget), vd->view);
+		vd->collection_parent = nullptr;
+		g_object_unref(vd->view);
+		}
 }
 
 /* the calling stack is this:
@@ -1309,7 +1354,7 @@ ViewDir *vd_new(LayoutWindow *lw)
 		{
 		g_signal_connect(G_OBJECT(vd->view), "row_activated", G_CALLBACK(vd_activate_cb), vd);
 		}
-	g_signal_connect(G_OBJECT(vd->view), "destroy",
+	g_signal_connect(G_OBJECT(vd->widget), "destroy",
 			 G_CALLBACK(vd_destroy_cb), vd);
 	GtkEventController *key_controller = gtk_event_controller_key_new();
 	if (vd->type == DIRVIEW_LIST)

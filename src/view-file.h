@@ -69,7 +69,6 @@ struct ViewFile
 	FileViewSource source;
 	FileData *dir_fd;
 	CollectionData *collection;
-	GtkWidget *source_label;
 	GHashTable *collection_order;
 	GList *monitored_files;
 	GList *list;

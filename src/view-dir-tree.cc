@@ -717,6 +717,29 @@ void vdtree_refresh(ViewDir *vd)
 	vdtree_populate_path(vd, vd->dir_fd, FALSE, TRUE);
 }
 
+void vdtree_set_collection(ViewDir *vd, const gchar *path)
+{
+	struct CollectionIconData
+	{
+		ViewDir *vd;
+		const gchar *path;
+	};
+	CollectionIconData data{vd, path};
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
+	gtk_tree_model_foreach(model, +[](GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer user_data)
+		{
+		auto *data = static_cast<CollectionIconData *>(user_data);
+		NodeData *nd = nullptr;
+		gtk_tree_model_get(model, iter, DIR_COLUMN_POINTER, &nd, -1);
+		if (nd && vd_is_collection(nd->fd))
+			{
+			GIcon *icon = g_strcmp0(nd->fd->path, data->path) == 0 ? data->vd->pf->open : data->vd->pf->collection;
+			gtk_tree_store_set(GTK_TREE_STORE(model), iter, DIR_COLUMN_ICON, icon, -1);
+			}
+		return FALSE;
+		}, &data);
+}
+
 /*
  *----------------------------------------------------------------------------
  * callbacks
