@@ -186,9 +186,8 @@ void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 			{
 			count++;
 			pgd->geocode_list = g_list_append(pgd->geocode_list, file_data_ref(fd));
-			gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-			gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
-			if (latitude != 1000 && longitude != 1000)
+			if (metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude") &&
+			    metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude"))
 				{
 				geocoded_count++;
 				}
@@ -490,19 +489,19 @@ gboolean bar_pane_gps_add_file_marker(PaneGPSData *pgd, FileData *fd)
 {
 	if (!pgd || !fd) return FALSE;
 
-	const double lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-	const double lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
+	const auto lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
+	const auto lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
 
-	if (lat == 1000 || lon == 1000)
+	if (!lat || !lon)
 		{
 		return FALSE;
 		}
 
-	bar_pane_gps_add_marker(pgd, fd, lat, lon);
+	bar_pane_gps_add_marker(pgd, fd, *lat, *lon);
 	pgd->num_added++;
 	if (pgd->centre_map_checked && pgd->selection_count == 1)
 		{
-		shumate_map_center_on(shumate_simple_map_get_map(pgd->map), lat, lon);
+		shumate_map_center_on(shumate_simple_map_get_map(pgd->map), *lat, *lon);
 		}
 
 	return TRUE;
@@ -519,13 +518,13 @@ void bar_pane_gps_fit_markers(PaneGPSData *pgd)
 	for (GList *work = pgd->selection_list; work; work = work->next)
 		{
 		auto *fd = static_cast<FileData *>(work->data);
-		const double latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-		const double longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
-		if (latitude == 1000 || longitude == 1000) continue;
+		const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
+		const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
+		if (!latitude || !longitude) continue;
 
-		min_latitude = MIN(min_latitude, latitude);
-		max_latitude = MAX(max_latitude, latitude);
-		longitudes.push_back(longitude < 0.0 ? longitude + 360.0 : longitude);
+		min_latitude = MIN(min_latitude, *latitude);
+		max_latitude = MAX(max_latitude, *latitude);
+		longitudes.push_back(longitude < 0.0 ? *longitude + 360.0 : *longitude);
 		}
 
 	if (longitudes.size() < 2) return;

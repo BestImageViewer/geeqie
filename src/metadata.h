@@ -22,6 +22,8 @@
 #ifndef METADATA_H
 #define METADATA_H
 
+#include <optional>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -60,7 +62,7 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 gchar *metadata_read_string(FileData *fd, const gchar *key, MetadataFormat format);
 guint64 metadata_read_int(FileData *fd, const gchar *key, guint64 fallback);
 gchar *metadata_read_rating_stars(FileData *fd);
-gdouble metadata_read_GPS_coord(FileData *fd, const gchar *key, gdouble fallback);
+std::optional<gdouble> metadata_read_GPS_coord(FileData *fd, const gchar *key);
 gdouble metadata_read_GPS_direction(FileData *fd, const gchar *key, gdouble fallback);
 gboolean metadata_write_GPS_coord(FileData *fd, const gchar *key, gdouble value);
 
