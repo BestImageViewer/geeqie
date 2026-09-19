@@ -5984,14 +5984,6 @@ msgstr "Использовать миниатюры EXIF, если возмож�
 msgid "Thumbnail color management"
 msgstr "Управление цветом миниатюр"
 
-#: ../src/preferences.cc:1704
-msgid "Collection preview:"
-msgstr "Предпросмотр коллекций:"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr "Максимум миниатюр в предпросмотре коллекции"
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""

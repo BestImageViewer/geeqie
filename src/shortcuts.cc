@@ -24,7 +24,6 @@
 #include <glib-object.h>
 #include <glib.h>
 
-#include "collect.h"
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
@@ -52,17 +51,7 @@ GtkWidget *shortcuts_new(LayoutWindow *lw)
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
-	const auto shortcuts_bookmark_select = [lw](const gchar *path)
-	{
-		if (file_extension_match(path, GQ_COLLECTION_EXT))
-			{
-			collection_window_new(path);
-			}
-		else
-			{
-			layout_set_path(lw, path);
-			}
-	};
+	const auto shortcuts_bookmark_select = [lw](const gchar *path) { layout_set_path(lw, path); };
 	GtkWidget *bookmarks = bookmark_list_new(SHORTCUTS, shortcuts_bookmark_select);
 	gtk_widget_set_hexpand(bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);

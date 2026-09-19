@@ -140,20 +140,13 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 
 gboolean vd_is_collection(FileData *fd)
 {
-	if (!fd || !file_extension_match(fd->path, GQ_COLLECTION_EXT) || !isfile(fd->path)) return FALSE;
-	g_autofree gchar *parent = remove_level_from_path(fd->path);
-	g_autofree gchar *canonical_parent = g_canonicalize_filename(parent, nullptr);
-	g_autofree gchar *collections = g_canonicalize_filename(get_collections_dir(), nullptr);
-	return g_strcmp0(canonical_parent, collections) == 0;
+	return fd && file_extension_match(fd->path, GQ_COLLECTION_EXT) && isfile(fd->path);
 }
 
 gboolean vd_read_directories(FileData *dir_fd, GList **list)
 {
 	const gboolean result = filelist_read(dir_fd, nullptr, list);
 	if (!result) return FALSE;
-	g_autofree gchar *path = g_canonicalize_filename(dir_fd->path, nullptr);
-	g_autofree gchar *collections = g_canonicalize_filename(get_collections_dir(), nullptr);
-	if (g_strcmp0(path, collections) != 0) return result;
 
 	g_autofree gchar *path_fs = path_from_utf8(dir_fd->path);
 	GDir *directory = g_dir_open(path_fs, 0, nullptr);

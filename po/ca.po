@@ -5971,16 +5971,6 @@ msgstr ""
 msgid "Thumbnail color management"
 msgstr "Gestió del color de les miniatures"
 
-#: ../src/preferences.cc:1704
-msgid "Collection preview:"
-msgstr "Previsualització de col·lecció:"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr ""
-"El màxim número de miniatures mostrades a la previsualització del muntatge "
-"de la Col·lecció"
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""

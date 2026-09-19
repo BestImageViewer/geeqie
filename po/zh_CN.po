@@ -6181,15 +6181,6 @@ msgstr "使用 EXIF 内嵌缩略图当可用 (EXIF 内嵌缩略图可能是过�
 msgid "Thumbnail color management"
 msgstr "色彩管理"
 
-#: ../src/preferences.cc:1704
-#, fuzzy
-msgid "Collection preview:"
-msgstr "图片集文件"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr ""
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""

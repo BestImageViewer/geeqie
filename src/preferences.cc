@@ -2034,11 +2034,6 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	pref_checkbox_new_int(group, _("Thumbnail color management"),
 				options->thumbnails.use_color_management, &c_options->thumbnails.use_color_management);
 
-	spin = pref_spin_new_int(group, _("Collection preview:"), nullptr,
-				 1, 999, 1,
-				 options->thumbnails.collection_preview, &c_options->thumbnails.collection_preview);
-	gtk_widget_set_tooltip_text(spin, _("Maximum number of cached thumbnails in a collection preview montage. Applies to .gqv files outside the default collections directory; collections in that directory open in the files pane."));
-
 #if HAVE_FFMPEGTHUMBNAILER_METADATA
 	pref_checkbox_new_int(group, _("Use embedded metadata in video files as thumbnails when available"),
 			      options->thumbnails.use_ft_metadata, &c_options->thumbnails.use_ft_metadata);

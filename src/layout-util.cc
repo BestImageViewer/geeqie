@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
 #include <gio/gio.h>
 #include <glib-object.h>
@@ -373,11 +374,11 @@ static void layout_menu_clear_marks_cb(GSimpleAction *, GVariant *, gpointer)
 
 static void layout_menu_new_collection_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = get_current_layout();
-
-	layout_exit_fullscreen(lw);
-
-		collection_window_new(nullptr);
+	LayoutWindow *lw = layout_new_from_default();
+	CollectionData *collection = collection_new(nullptr);
+	collection->changed = TRUE;
+	layout_set_collection(lw, collection);
+	collection_unref(collection);
 }
 
 static void layout_menu_search_cb(GSimpleAction *, GVariant *, gpointer)
@@ -969,14 +970,7 @@ static void open_file_cb(GFile *file, gpointer)
 
 		history_list_add_to_key("open_file", dirname, 0);
 
-		if (g_str_has_suffix(filename, GQ_COLLECTION_EXT))
-			{
-			collection_window_new(filename);
-			}
-		else
-			{
-			layout_set_path(get_current_layout(), filename);
-			}
+		layout_set_path(get_current_layout(), filename);
 		}
 }
 
@@ -987,14 +981,7 @@ static void open_recent_path(const gchar *file_name)
 		return;
 		}
 
-	if (g_str_has_suffix(file_name, GQ_COLLECTION_EXT))
-		{
-		collection_window_new(file_name);
-		}
-	else
-		{
-		layout_set_path(get_current_layout(), file_name);
-		}
+	layout_set_path(get_current_layout(), file_name);
 }
 
 struct OpenRecentDialogData
@@ -1200,7 +1187,7 @@ static void open_collection_cb(GFile *file, gpointer)
 
 		if (file_extension_match(filename, GQ_COLLECTION_EXT))
 			{
-			collection_window_new(filename);
+			layout_set_path(get_current_layout(), filename);
 			}
 		}
 }
@@ -1828,12 +1815,11 @@ static constexpr KeyboardMapScope keyboard_map_scopes[] =
 {
 	{ N_("Main Window"), "win.main-win-", "main_window" },
 	{ N_("Image View Window"), "win.image-win-", "image_view_window" },
-	{ N_("Collection Window"), "win.collection-win-", "collection_window" },
 	{ N_("Duplicates Window"), "win.dupe-win-", "duplicates_window" },
 	{ N_("Pan View Window"), "win.pan-win-", "pan_view_window" },
 	{ N_("Search Window"), "win.search-win-", "search_window" },
 	{ N_("Advanced EXIF Window"), "win.advanced-exif-win-", "advanced_exif_window" },
-	{ N_("View File Window"), "win.view-file-", "view_file_window" },
+	{ N_("Files Pane"), "win.view-file-", "view_file_window" },
 	{ N_("All Windows"), nullptr, "all_windows" },
 };
 
@@ -2609,9 +2595,26 @@ static void layout_menu_window_from_current_cb(GSimpleAction *, GVariant *, gpoi
 		}
 
 	auto *lw = static_cast<LayoutWindow *>(data);
+	CollectionData *collection = lw->vf ? lw->vf->collection : nullptr;
+	std::vector<LayoutWindow *> existing_windows;
+	if (collection)
+		{
+		collection_ref(collection);
+		layout_window_foreach([&existing_windows](LayoutWindow *window) { existing_windows.push_back(window); });
+		}
 	save_config_to_file(tmp_file_in, options, lw);
 	change_window_id(tmp_file_in, tmp_file_out);
-	load_config_from_file(tmp_file_out, FALSE);
+	if (load_config_from_file(tmp_file_out, FALSE) && collection)
+		{
+			LayoutWindow *new_window = nullptr;
+			layout_window_foreach([&](LayoutWindow *window)
+				{
+				if (!new_window && std::find(existing_windows.begin(), existing_windows.end(), window) == existing_windows.end())
+					new_window = window;
+				});
+			if (new_window) layout_set_collection(new_window, collection);
+		}
+	if (collection) collection_unref(collection);
 
 	unlink_file(tmp_file_in);
 	unlink_file(tmp_file_out);

@@ -6,7 +6,6 @@
 <gresources>
   <gresource prefix="/org/geeqie/geeqie/ui">
     <file>keyboard-shortcuts-extra.ui.inc</file>
-    <file>menu-collection.ui</file>
     <file>menu-bar-exif.ui</file>
     <file>menu-dupe-main.ui</file>
     <file>menu-dupe-second.ui</file>

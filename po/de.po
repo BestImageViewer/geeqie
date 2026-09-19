@@ -5797,16 +5797,6 @@ msgstr ""
 msgid "Thumbnail color management"
 msgstr "Thumbnail-Farbverwaltung"
 
-#: ../src/preferences.cc:1705
-msgid "Collection preview:"
-msgstr "Sammlungsvorschau:"
-
-#: ../src/preferences.cc:1708
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr ""
-"Die maximale Anzahl von Miniaturansichten, die in einer Sammlungsvorschau-"
-"Montage angezeigt werden"
-
 #: ../src/preferences.cc:1711
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""

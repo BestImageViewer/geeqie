@@ -243,7 +243,6 @@ struct ConfOptions
 		gboolean use_exif;
 		gboolean use_color_management;
 		gboolean use_ft_metadata;
-		gint collection_preview;
 	} thumbnails;
 
 	/* file filtering */

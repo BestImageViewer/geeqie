@@ -5973,16 +5973,6 @@ msgstr "Använd Exif-miniatyrer om de finns (kan vara föråldrade)"
 msgid "Thumbnail color management"
 msgstr "Färghantering för Miniatyrbilder"
 
-#: ../src/preferences.cc:1704
-msgid "Collection preview:"
-msgstr "Samlingsförhandsvisning:"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr ""
-"Maximalt antal miniatyrbilder som visas i förhandsgranskningsmontage av en "
-"samling"
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""

@@ -3,9 +3,9 @@
   <title id="titleGuideCollections">Collections</title>
   <para>Geeqie provides the ability to build lists of images, regardless of the location of the files on disk.</para>
   <para>When saving a new collection, select <guilabel>Save paths relative to the collection file</guilabel> to store image paths relative to the folder containing the <filename>.gqv</filename> file. Paths begin with <filename>./</filename> or <filename>../</filename>. You can move the collection and images together while preserving their folder layout. The setting is retained when the collection is reopened or saved to another location. Absolute paths remain the default.</para>
-  <para>A collection window displays the contents of a collection. It allows the collection to be modified and access to the images contained in the collection.</para>
+  <para>The files pane displays and edits collections in the main window.</para>
   <para>
-    To open a new empty collection window select
+    To create a new empty collection in a new default window, select
     <menuchoice>
       <shortcut>
         <keycombo>
@@ -28,7 +28,7 @@
       <guimenu>File</guimenu>
       <guimenuitem>Open collection</guimenuitem>
     </menuchoice>
-    . A dialog will appear requesting the location of the collection file. A window will the open containing the selected collection. Recently opened or saved collections can also be opened by selecting the collection's file name from the Open recent sub menu of the file menu.
+    . A dialog will appear requesting the location of the collection file. The selected collection will appear in the files pane. Recently opened or saved collections can also be opened from the Open recent submenu of the File menu.
   </para>
   <para>
     To delete or rename a collection, select
@@ -47,89 +47,17 @@
     <emphasis role="strong">Rename</emphasis>
     .
   </para>
-  <para>The collection window consists of a pane to display the contents of the collection, and a status bar along the bottom of the window.</para>
-  <para />
   <section id="CollectionFilesPane">
     <title>Viewing a collection in the files pane</title>
-    <para>When browsing the default collections directory, the folder pane displays collection files as folders with a pictures-folder icon. Click one to display its members in the files pane. This works in both folder-list and folder-tree views; these entries are not actual disk directories.</para>
-    <para>Right-click in a collection window and select <guimenuitem>View in files pane</guimenuitem> to display its members in the main window. The pane supports list and icon views, selection, filtering, sorting, and the usual file operations. A label above the files identifies the collection; an asterisk indicates unsaved changes.</para>
-    <para>Copy, move, rename, and delete operate on the actual files. Use <guimenuitem>Remove from collection</guimenuitem> in the files pane context menu to remove membership while leaving the files on disk. Dropping files into the pane adds them to the collection. The same menu provides <guimenuitem>Save collection</guimenuitem> and <guimenuitem>Edit collection</guimenuitem>.</para>
+    <para>When browsing a directory containing collection files, the folder pane displays them as folders with a pictures-folder icon. Click one to display its members in the files pane. This works in both folder-list and folder-tree views; these entries are not actual disk directories.</para>
+    <para>The files pane supports list and icon views, selection, filtering, sorting, and the usual file operations. The main path bar shows the collection path, or its name until it is saved.</para>
+    <para>Copy, move, rename, and delete operate on the actual files. Use <guimenuitem>Remove from collection</guimenuitem> in the files pane context menu to remove membership while leaving the files on disk. Dropping files into the pane adds them to the collection. When a drop includes folders, choose whether to add their contents, add contents recursively, or skip the folders. The same menu can append another collection, save or save as, and change or randomize the collection order.</para>
+    <para>Use <guimenuitem>Go to original</guimenuitem> on a collection member to open its containing folder in the files pane.</para>
+    <para>Use <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>S</keycap></keycombo> to save the current collection, <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>S</keycap></keycombo> to save it as another file, or <keycombo><keycap>Ctrl</keycap><keycap>Alt</keycap><keycap>Backspace</keycap></keycombo> to remove selected files from the collection.</para>
     <para>When the files pane shows a collection, its context menu includes <guimenu>Info text</guimenu>. Select <guimenuitem>Show info text</guimenuitem> to display each entry's text in the list or icon view. Select <guimenuitem>Edit info text</guimenuitem> to create or change the text for the clicked file or selected files. Enter the text in the dialog and select <guibutton>Save</guibutton>. When multiple files are selected, the same text is applied to each one.</para>
-    <para>In icon view, drag images within the files pane to change their collection order. Drop on the left or right half of an icon to insert before or after it, or in empty space to append. A red line indicates the insertion side. Selected images move together. Reordering switches the pane to collection order; save the collection to retain the new order.</para>
-    <para>You can drag images between the files panes of two main windows, whether each pane shows a folder or a collection. Dropping onto a collection adds references to the images without moving the files or removing them from the source collection. In icon view, the drop position determines where new entries are inserted; in list view, they are appended. Dropping onto a folder uses the usual file copy or move operation.</para>
-    <para>Select <guimenuitem>Collection order</guimenuitem> from the sort menu to use the collection's order. Other pane sorts do not change the saved collection order. Changes in the collection window also update the files pane. Select a directory to return to directory browsing. Collection mode is not restored after restarting Geeqie.</para>
-  </section>
-  <section id="Iconpane">
-    <title>Icon pane</title>
-    <para>The icon pane displays images contained in the collection as thumbnails in a grid, by default the file names also appear below each thumbnail.</para>
-    <para>
-      The Icon pane works exactly like the Icon view mode of the
-      <emphasis role="underline"><link linkend="GuideMainWindowFilePane" endterm="titleGuideMainWindowFilePane" /></emphasis>
-      in a main window, but with the addition that the contents of the collection can be organized with drag and drop.
-    </para>
-    <para>
-      Select <menuchoice><guimenu>View</guimenu><guimenuitem>Show marks</guimenuitem></menuchoice>
-      to display the ten file-mark checkboxes below each thumbnail. This option is off by default.
-      Clicking a checkbox sets or clears the corresponding mark for that file. Mark definitions and
-      keyboard shortcuts are shared with the file pane.
-    </para>
-    <para>
-      A
-      <emphasis role="strong">context menu</emphasis>
-      is available for the icon pane by right clicking the mouse or pressing the Menu key.
-    </para>
-    <para>
-      Keyboard Shortcuts are available in the collection window:
-    </para>
-    <para>
-      The
-      <emphasis role="strong">selection</emphasis>
-      can be changed using the keyboard and mouse the same as in a
-      <emphasis role="underline"><link linkend="GuideMainWindowFilePane" endterm="titleGuideMainWindowFilePane" /></emphasis>
-      of the main window.
-    </para>
-    <para />
-  </section>
-  <section id="Statusbar3">
-    <title>Status bar</title>
-    <para>The status bar displays the total number of images in the collection, and the number of selected images in parenthesis. A progress bar also displays whenever thumbnails are loading from disk.</para>
-    <para />
-  </section>
-  <section id="DragandDrop4">
-    <title>Drag and Drop</title>
-    <para>Drag and drop can be initialized with the primary or middle mouse buttons. Dragging an image that is selected will include all selected images in the drag. Dragging an image that is not selected will drag only that image.</para>
-    <para>Dropping files and folders onto the collection window will add them to the collection, they will be inserted at the location of the drop. A red arrow will indicate the location of the drop as files are dragged over the collection window. When one or more folders are included in the drop list, a menu will appear to select how to handle the contents of the folders.</para>
-    <para>To move images within the collection to change their order, initiate a drag for the selected image(s) and then move the mouse to the desired location within the window. A red arrow will appear to assist in determining the destination of the dragged images. Release the drag to move the images to the new location in the list.</para>
-    <note>
-      <para>
-        When renaming or moving files within Geeqie, the contents of collections located in the
-        <emphasis role="underline"><link linkend="GuideReferenceConfig">collections folder</link></emphasis>
-        will automatically update to the new name or location.
-      </para>
-    </note>
-    <para />
-  </section>
-  <section id="AppendImages">
-    <title>Append Images</title>
-    <para>Right-click menu items permit images to be appended from either another collection or from the currently selected folder.</para>
-    <para />
-  </section>
-  <section id="RandomizedSort">
-    <title>Randomized Sort</title>
-    <para>
-      Right-click menu item
-      <emphasis role="strong">Sort</emphasis>
-      , in addition to the standard sort methods, permits images to be randomly arranged.
-    </para>
-    <para />
-  </section>
-  <section id="InfoText">
-    <title>Infotext</title>
-    <para>
-      Right-click menu item
-      <emphasis role="strong">Infotext</emphasis>
-      , allows additional text to be placed against a thumbnail. See <link linkend="GuideReferenceCollectionFiles">Collection file format</link>.
-    </para>
-    <para />
+    <para>In list or icon view, drag images within the files pane to change their collection order. Drop before or after a row or icon, or in empty space to append. A marker indicates the insertion side. Selected images move together. Reordering switches the pane to collection order; save the collection to retain the new order.</para>
+    <para>You can drag images between the files panes of two main windows, whether each pane shows a folder or a collection. Dropping onto a collection adds references to the images without moving the files or removing them from the source collection. The drop position determines where new entries are inserted in both list and icon views. Dropping onto a folder uses the usual file copy or move operation.</para>
+    <para>Use <guimenu>Windows</guimenu> → <guimenu>New window</guimenu> → <guimenuitem>New window from current</guimenuitem> to show the same collection in another main window. Each window can then browse independently.</para>
+    <para>Select <guimenuitem>Collection order</guimenuitem> from the sort menu to use the collection's order. Other pane sorts do not change the saved collection order. Select a directory to return to directory browsing. If this is the last window showing a modified collection, Geeqie asks whether to save or discard the changes, or cancel navigation. The same choices are offered when closing or quitting. Collection mode is not restored after restarting Geeqie.</para>
   </section>
 </section>

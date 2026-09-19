@@ -28,7 +28,6 @@
 #include "archives.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
-#include "collect-table.h"
 #include "collect.h"
 #include "compat.h"
 #include "dnd.h"
@@ -446,6 +445,8 @@ static void vf_dnd_begin(GtkDragSource *, GdkDrag *drag, gpointer data)
 
 static void vf_dnd_clear_marker(ViewFile *vf)
 {
+	if (vf->type == FILEVIEW_LIST)
+		gtk_tree_view_set_drag_dest_row(GTK_TREE_VIEW(vf->listview), nullptr, GTK_TREE_VIEW_DROP_BEFORE);
 	auto *marker = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(vf->listview), "collection-drop-marker"));
 	if (!marker) return;
 	gtk_widget_remove_css_class(marker, "collection-drop-before");
@@ -522,7 +523,7 @@ static DnDAction vf_dnd_requested_action(GtkDropTargetAsync *target)
 static gboolean vf_dnd_collection_reorder(ViewFile *vf, GdkDrop *drop)
 {
 	GdkDrag *drag = gdk_drop_get_drag(drop);
-	return vf->collection && vf->type == FILEVIEW_ICON && vf->drag_selection &&
+	return vf->collection && vf->drag_selection &&
 	       drag && g_object_get_data(G_OBJECT(drag), VIEW_FILE_DATA_KEY) == vf;
 }
 
@@ -550,7 +551,6 @@ void vf_collection_move(ViewFile *vf, const FileDataList *files, FileData *befor
 	cd->sort_method = SORT_NONE;
 	cd->changed = TRUE;
 	collection_changed(cd);
-	if (CollectWindow *window = collection_window_find(cd)) collection_table_refresh(window->table);
 
 	auto sort = vf->sort;
 	sort.method = SORT_NONE;
@@ -562,6 +562,22 @@ void vf_collection_move(ViewFile *vf, const FileDataList *files, FileData *befor
 static FileData *vf_dnd_collection_insert_before(ViewFile *vf, gdouble x, gdouble y)
 {
 	vf_dnd_clear_marker(vf);
+	if (vf->type == FILEVIEW_LIST)
+		{
+			GtkTreePath *path = nullptr;
+			GtkTreeViewDropPosition position = GTK_TREE_VIEW_DROP_BEFORE;
+			if (!gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(vf->listview), static_cast<gint>(x),
+			                                       static_cast<gint>(y), &path, &position)) return nullptr;
+			FileData *fd = vf_find_data_by_coord(vf, static_cast<gint>(x), static_cast<gint>(y), nullptr);
+			gtk_tree_view_set_drag_dest_row(GTK_TREE_VIEW(vf->listview), path, position);
+			gtk_tree_path_free(path);
+			if (position == GTK_TREE_VIEW_DROP_AFTER || position == GTK_TREE_VIEW_DROP_INTO_OR_AFTER)
+				{
+				GList *row = g_list_find(vf->list, fd);
+				return row && row->next ? static_cast<FileData *>(row->next->data) : nullptr;
+				}
+			return fd;
+		}
 	GtkWidget *picked = gtk_widget_pick(vf->listview, x, y, GTK_PICK_DEFAULT);
 	while (picked && picked != vf->listview)
 		{
@@ -639,6 +655,52 @@ static void vf_dnd_file_drop_free(gpointer data)
 	g_free(drop_data);
 }
 
+static gboolean vf_collection_insert_files(CollectionData *collection, GList *files, FileData *before)
+{
+	gboolean added = FALSE;
+	for (GList *work = files; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		if (isdir(fd->path)) continue;
+		CollectInfo *insert_before = collection_list_find_fd(collection->list, before);
+		if (collection_insert(collection, fd, insert_before, FALSE)) added = TRUE;
+		}
+	return added;
+}
+
+static gboolean vf_collection_insert_directory(CollectionData *collection, FileData *directory, FileData *before, gboolean recursive)
+{
+	GList *files = nullptr;
+	GList *directories = nullptr;
+	if (!filelist_read(directory, &files, recursive ? &directories : nullptr)) return FALSE;
+	files = filelist_sort_path(filelist_filter(files, FALSE));
+	directories = filelist_sort_path(filelist_filter(directories, TRUE));
+	gboolean added = vf_collection_insert_files(collection, files, before);
+	for (GList *work = g_list_last(directories); work; work = work->prev)
+		if (vf_collection_insert_directory(collection, static_cast<FileData *>(work->data), before, TRUE)) added = TRUE;
+	file_data_list_free(files);
+	file_data_list_free(directories);
+	return added;
+}
+
+template<gboolean recursive>
+static void vf_dnd_collection_add_folders(GtkWidget *, gpointer data)
+{
+	auto *drop_data = static_cast<VfDndFileDropData *>(data);
+	for (GList *work = drop_data->list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		if (isdir(fd->path)) vf_collection_insert_directory(drop_data->collection, fd, drop_data->before, recursive);
+		}
+	vf_collection_insert_files(drop_data->collection, drop_data->list, drop_data->before);
+}
+
+static void vf_dnd_collection_skip_folders(GtkWidget *, gpointer data)
+{
+	auto *drop_data = static_cast<VfDndFileDropData *>(data);
+	vf_collection_insert_files(drop_data->collection, drop_data->list, drop_data->before);
+}
+
 template<bool move>
 static void vf_dnd_file_operation(GtkWidget *, gpointer data)
 {
@@ -665,12 +727,26 @@ static void vf_dnd_files_received(GdkDrop *drop, GList *list, gpointer data)
 		if (drop_data->collection)
 			{
 			/* Adding references never moves files or removes source members. */
+			drop_data->list = filelist_copy(list);
+			gboolean contains_folders = FALSE;
 			for (GList *work = list; work; work = work->next)
 				{
-				CollectInfo *before = collection_list_find_fd(drop_data->collection->list, drop_data->before);
-				if (collection_insert(drop_data->collection, static_cast<FileData *>(work->data), before, FALSE))
-					action = GDK_ACTION_COPY;
+				auto *fd = static_cast<FileData *>(work->data);
+				if (isdir(fd->path)) contains_folders = TRUE;
 				}
+			if (contains_folders)
+				{
+				GtkWidget *menu = popover_box_new(drop_data->listview, drop_data->x, drop_data->y);
+				g_object_set_data_full(G_OBJECT(menu), "collection-drop-data", drop_data, vf_dnd_file_drop_free);
+				popover_item_add(menu, _("_Add contents"), G_CALLBACK(vf_dnd_collection_add_folders<FALSE>), drop_data);
+				popover_item_add(menu, _("Add contents _recursive"), G_CALLBACK(vf_dnd_collection_add_folders<TRUE>), drop_data);
+				popover_item_add(menu, _("_Skip folders"), G_CALLBACK(vf_dnd_collection_skip_folders), drop_data);
+				popover_item_add(menu, _("Cancel"), G_CALLBACK(+[](GtkWidget *, gpointer) {}), nullptr);
+				popover_box_popup(menu);
+				gdk_drop_finish(drop, GDK_ACTION_COPY);
+				return;
+				}
+			if (vf_collection_insert_files(drop_data->collection, list, drop_data->before)) action = GDK_ACTION_COPY;
 			gdk_drop_finish(drop, action);
 			vf_dnd_file_drop_free(drop_data);
 			return;
@@ -973,6 +1049,8 @@ static void vf_pop_menu_refresh_cb(GtkWidget *, gpointer data)
 	}
 }
 
+static void vf_collection_actions_update(ViewFile *vf);
+
 static void vf_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -985,6 +1063,7 @@ static void vf_popup_destroy_cb(GtkWidget *, gpointer data)
 
 	vf->click_fd = nullptr;
 	vf->popup = nullptr;
+	vf_collection_actions_update(vf);
 
 	file_data_list_free(vf->editmenu_fd_list);
 	vf->editmenu_fd_list = nullptr;
@@ -996,6 +1075,8 @@ static ViewFile *vf_from_action_data(gpointer data)
 
 	return layout ? layout->vf : nullptr;
 }
+
+static void vf_pop_menu_set_sort(ViewFile *vf, FileData::FileList::SortSettings sort);
 
 static void vf_collection_remove_action_cb(GSimpleAction *, GVariant *, gpointer data)
 {
@@ -1010,18 +1091,59 @@ static void vf_collection_remove_action_cb(GSimpleAction *, GVariant *, gpointer
 		while (collection_remove(vf->collection, static_cast<FileData *>(work->data))) {}
 }
 
+static void vf_collection_go_to_original_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !vf->collection || !vf->layout || !vf->click_fd) return;
+	layout_set_path(vf->layout, vf->click_fd->path);
+}
+
 static void vf_collection_save_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !vf->collection) return;
+	if (!vf->collection->path)
+		{
+		collection_dialog_save(vf->collection);
+		return;
+		}
+	if (!collection_save(vf->collection, vf->collection->path))
+		{
+		g_autofree gchar *message = g_strdup_printf(_("Failed to save the collection:\n%s"), vf->collection->path);
+		warning_dialog(_("Save Failed"), message, GQ_ICON_DIALOG_ERROR, vf->listview);
+		}
+}
+
+static void vf_collection_save_as_action_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *vf = vf_from_action_data(data);
 	if (vf && vf->collection) collection_dialog_save(vf->collection);
 }
 
-static void vf_collection_edit_action_cb(GSimpleAction *, GVariant *, gpointer data)
+static void vf_collection_append_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (vf && vf->collection) collection_dialog_append(vf->collection);
+}
+
+static void vf_collection_sort_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !vf->collection || !parameter) return;
+	collection_set_sort_method(vf->collection, static_cast<SortType>(g_variant_get_int32(parameter)));
+	auto sort = vf->sort;
+	sort.method = SORT_NONE;
+	vf_pop_menu_set_sort(vf, sort);
+}
+
+static void vf_collection_randomize_action_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *vf = vf_from_action_data(data);
 	if (!vf || !vf->collection) return;
-	CollectWindow *window = collection_window_new(nullptr, vf->collection);
-	if (window) gtk_window_present(GTK_WINDOW(window->window));
+	collection_randomize(vf->collection);
+	auto sort = vf->sort;
+	sort.method = SORT_NONE;
+	vf_pop_menu_set_sort(vf, sort);
 }
 
 static void vf_collection_show_infotext_action_cb(GSimpleAction *action, GVariant *state, gpointer data)
@@ -1555,10 +1677,20 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 		g_autoptr(GMenuItem) info_text_item = g_menu_item_new_submenu(_("Info text"), G_MENU_MODEL(info_text_menu));
 		g_menu_append_item(collection_menu, info_text_item);
 		gmenu_append_action_item(collection_menu, _("Remove from collection"), "win.view-file-collection-remove");
-		gmenu_append_action_item(collection_menu, _("Save collection…"), "win.view-file-collection-save");
-		gmenu_append_action_item(collection_menu, _("Edit collection…"), "win.view-file-collection-edit");
+		gmenu_append_action_item(collection_menu, _("Go to original"), "win.view-file-collection-go-to-original");
+		gmenu_append_action_item(collection_menu, _("Append from collection…"), "win.view-file-collection-append");
+		gmenu_append_action_item(collection_menu, _("Save collection"), "win.view-file-collection-save");
+		gmenu_append_action_item(collection_menu, _("Save collection as…"), "win.view-file-collection-save-as");
+		g_autoptr(GMenu) order_menu = g_menu_new();
+		for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
+		                                  SORT_EXIFTIMEDIGITIZED, SORT_MEDIA_TIME, SORT_SIZE, SORT_RATING, SORT_CLASS, SORT_PATH })
+			gmenu_append_int32_action_item(order_menu, sort_type_get_text(sort_type), "win.view-file-collection-sort", sort_type);
+		gmenu_append_action_item(order_menu, _("Randomize"), "win.view-file-collection-randomize");
+		g_autoptr(GMenuItem) order_item = g_menu_item_new_submenu(_("Change collection order"), G_MENU_MODEL(order_menu));
+		g_menu_append_item(collection_menu, order_item);
 		g_menu_append_section(menu_model, nullptr, G_MENU_MODEL(collection_menu));
 		vf_pop_menu_set_action_enabled(vf, "view-file-collection-remove", active);
+		vf_pop_menu_set_action_enabled(vf, "view-file-collection-go-to-original", active);
 		vf_pop_menu_set_action_enabled(vf, "view-file-collection-edit-infotext", active);
 		vf_pop_menu_set_boolean_state(vf, "view-file-collection-show-infotext", options->show_collection_infotext);
 		}
@@ -1619,6 +1751,12 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 
 static void vf_collection_actions_update(ViewFile *vf)
 {
+	for (const gchar *name : {"view-file-collection-append", "view-file-collection-save",
+	                          "view-file-collection-save-as", "view-file-collection-sort",
+	                          "view-file-collection-randomize", "view-file-collection-remove",
+	                          "view-file-collection-go-to-original",
+	                          "view-file-collection-show-infotext", "view-file-collection-edit-infotext"})
+		vf_pop_menu_set_action_enabled(vf, name, vf->collection != nullptr);
 	if (vf->layout)
 		{
 		auto *action = g_action_map_lookup_action(G_ACTION_MAP(vf->layout->window), "main-win-new-folder");
@@ -1626,9 +1764,15 @@ static void vf_collection_actions_update(ViewFile *vf)
 		}
 }
 
-static void vf_collection_changed_cb(CollectionData *, gpointer data)
+static void vf_collection_changed_cb(CollectionData *collection, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
+	if (vf->layout && vf->layout->path_entry && collection->path &&
+	    g_strcmp0(gtk_editable_get_text(GTK_EDITABLE(vf->layout->path_entry)), collection->path) != 0)
+		{
+		layout_set_collection(vf->layout, collection);
+		return;
+		}
 	vf_refresh_idle(vf);
 }
 
@@ -1644,9 +1788,6 @@ static void vf_collection_release(ViewFile *vf)
 		}
 	g_clear_pointer(&vf->monitored_files, g_list_free);
 	g_clear_pointer(&vf->collection_order, g_hash_table_destroy);
-	/* Keep unsaved membership edits accessible after the last pane is closed. */
-	if (vf->collection->ref == 1 && vf->collection->changed && !collection_window_find(vf->collection))
-		collection_window_new(nullptr, vf->collection);
 	collection_unref(vf->collection);
 	vf->collection = nullptr;
 	vf->source = FileViewSource::DIRECTORY;
@@ -2911,6 +3052,7 @@ void vf_set_layout(ViewFile *vf, LayoutWindow *layout)
 		auto *application = GTK_APPLICATION(gtk_window_get_application(GTK_WINDOW(layout->window)));
 		register_actions_from_table(application, layout->window, view_file_actions, get_keyfile_merged(), layout);
 		}
+	vf_collection_actions_update(vf);
 }
 
 const ActionDef *get_view_file_actions()

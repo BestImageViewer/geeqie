@@ -430,14 +430,7 @@ void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_
 
 	if (isfile(filename))
 		{
-		if (file_extension_match(filename, GQ_COLLECTION_EXT))
-			{
-			collection_window_new(filename);
-			}
-		else
-			{
-			layout_set_path(lw_id, filename);
-			}
+		layout_set_path(lw_id, filename);
 		}
 	else if (isdir(filename))
 		{
@@ -1286,8 +1279,8 @@ GList *directories_collections_files(GtkApplication *app, GApplicationCommandLin
 			}
 		else if (is_collection(current_arg))
 			{
-			const gchar *path = collection_path(current_arg);
-			collection_window_new(path);
+			g_autofree gchar *collection_file = collection_path(current_arg);
+			layout_set_path(lw_id, collection_file);
 			}
 		else if (isfile(real_path))
 			{
@@ -1325,6 +1318,7 @@ void process_files(GList *file_list)
 {
 	if (file_list)
 		{
+		layout_valid(&lw_id);
 		GList *work;
 		gboolean multiple_dirs = FALSE;
 		work = file_list;
@@ -1347,13 +1341,7 @@ void process_files(GList *file_list)
 
 		if (multiple_dirs)
 			{
-			CollectWindow *cw;
-
-			cw = collection_window_new(nullptr);
-			CollectionData *cd = nullptr;
-			cd = cw->cd;
-			g_free(cd->path);
-			cd->path = nullptr;
+			CollectionData *cd = collection_new(nullptr);
 
 			for (GList *work = file_list; work; work = work->next)
 				{
@@ -1361,10 +1349,12 @@ void process_files(GList *file_list)
 				collection_add(cd, fd, FALSE);
 				file_data_unref(fd);
 				}
+			cd->changed = TRUE;
+			layout_set_collection(lw_id, cd);
+			collection_unref(cd);
 			}
 		else
 			{
-			layout_valid(&lw_id);
 			layout_set_path(lw_id, static_cast<const gchar *>(file_list->data));
 
 			g_autoptr(FileDataList) selected = nullptr;

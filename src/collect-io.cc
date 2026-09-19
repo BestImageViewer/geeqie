@@ -44,7 +44,6 @@
 #include "layout-util.h"
 #include "main-defines.h"
 #include "options.h"
-#include "thumb.h"
 #include "ui-fileops.h"
 
 #ifdef __NetBSD__
@@ -114,23 +113,6 @@ CollectManagerEntry *collect_manager_get_entry(const gchar *path)
 	return work ? static_cast<CollectManagerEntry *>(work->data) : nullptr;
 }
 
-gboolean scan_geometry(gchar *buffer, GdkRectangle &window)
-{
-	gint nx;
-	gint ny;
-	gint nw;
-	gint nh;
-
-	if (sscanf(buffer, "%d %d %d %d", &nx, &ny, &nw, &nh) != 4) return FALSE;
-
-	window.x = nx;
-	window.y = ny;
-	window.width = nw;
-	window.height = nh;
-
-	return TRUE;
-}
-
 bool is_file_on_mounted_drive(const gchar *filename)
 {
 	const auto is_file_in_dir = [filename](const gchar *dirname)
@@ -176,8 +158,6 @@ bool is_file_on_mounted_drive(const gchar *filename)
 
 } // namespace
 
-static void collection_load_thumb_step(CollectionData *cd);
-static gboolean collection_load_thumb_idle_cb(gpointer data);
 static gboolean collection_save_private(CollectionData *cd, const gchar *path);
 
 static void collect_manager_entry_reset(CollectManagerEntry *entry);
@@ -190,7 +170,6 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	gboolean limit_failures = TRUE;
 	gboolean success = TRUE;
 	gboolean has_official_header = FALSE;
-	gboolean has_geometry_header = FALSE;
 	gboolean has_gqview_header   = FALSE;
 	gboolean need_header	 = TRUE;
 	guint total = 0;
@@ -199,24 +178,15 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	CollectManagerEntry *entry = nullptr;
 	guint flush = !!(flags & COLLECTION_LOAD_FLUSH);
 	guint append = !!(flags & COLLECTION_LOAD_APPEND);
-	guint only_geometry = !!(flags & COLLECTION_LOAD_GEOMETRY);
 	g_autofree gchar *infotext = nullptr;
 
-	if (!only_geometry)
+	if (flush) collect_manager_flush();
+	else entry = collect_manager_get_entry(path);
+	if (!append)
 		{
-		collection_load_stop(cd);
-
-		if (flush)
-			collect_manager_flush();
-		else
-			entry = collect_manager_get_entry(path);
-
-		if (!append)
-			{
-			g_list_free_full(cd->list, reinterpret_cast<GDestroyNotify>(collection_info_free));
-			cd->list = nullptr;
-			g_hash_table_remove_all(cd->existence);
-			}
+		g_list_free_full(cd->list, reinterpret_cast<GDestroyNotify>(collection_info_free));
+		cd->list = nullptr;
+		g_hash_table_remove_all(cd->existence);
 		}
 
 	if (!path && !cd->path) return FALSE;
@@ -227,7 +197,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	g_autofree gchar *absolute_path = g_canonicalize_filename(path, nullptr);
 	g_autofree gchar *directory = g_path_get_dirname(absolute_path);
 
-	DEBUG_1("collection load: append=%d flush=%d only_geometry=%d path=%s", append, flush, only_geometry, pathl);
+	DEBUG_1("collection load: append=%d flush=%d path=%s", append, flush, pathl);
 
 	/* load it */
 	f = fopen(pathl, "r");
@@ -237,7 +207,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		return FALSE;
 		}
 
-	if (!append && !only_geometry) cd->relative_paths = FALSE;
+	if (!append) cd->relative_paths = FALSE;
 	g_autoptr(GString) extended_filename_buffer = nullptr;
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
@@ -260,7 +230,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 					gchar *q = strpbrk(infotext, "\r\n");
 					if (q) *q = 0;
 					}
-				if (!append && !only_geometry && g_str_has_prefix(p, "#relative-paths: true"))
+				if (!append && g_str_has_prefix(p, "#relative-paths: true"))
 					cd->relative_paths = TRUE;
 				if (!need_header) continue;
 
@@ -274,12 +244,6 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 					has_official_header = TRUE;
 					limit_failures = FALSE;
 					}
-				else if (strncmp(p, "#geometry:", 10 ) == 0 && scan_geometry(p + 10, cd->window))
-					{
-					has_geometry_header = TRUE;
-					cd->window_read = TRUE;
-					if (only_geometry) break;
-					}
 				else if (g_ascii_strncasecmp(p, gqview_collection_marker, gqview_collection_marker_len) == 0)
 					{
 					/* As 2008/04/15 there is no difference between our collection file format
@@ -287,11 +251,10 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 					has_gqview_header = TRUE;
 					limit_failures = FALSE;
 					}
-				need_header = (!has_official_header && !has_gqview_header) || !has_geometry_header;
+				need_header = !has_official_header && !has_gqview_header;
 				continue;
 				}
 
-			if (only_geometry) continue;
 			}
 
 		/* Read filenames */
@@ -413,10 +376,9 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			}
 		}
 
-	DEBUG_1("collection files: total = %u fail = %u official=%d gqview=%d geometry=%d", total, fail, has_official_header, has_gqview_header, has_geometry_header);
+	DEBUG_1("collection files: total = %u fail = %u official=%d gqview=%d", total, fail, has_official_header, has_gqview_header);
 
 	fclose(f);
-	if (only_geometry) return has_geometry_header;
 
 	if (!flush)
 		{
@@ -455,125 +417,6 @@ gboolean collection_load(CollectionData *cd, const gchar *path, CollectionLoadFl
 	return FALSE;
 }
 
-static void collection_load_thumb_do(CollectionData *cd)
-{
-	GdkPixbuf *pixbuf;
-
-	if (!cd->thumb_loader || !g_list_find(cd->list, cd->thumb_info)) return;
-
-	pixbuf = thumb_loader_get_pixbuf(cd->thumb_loader);
-	collection_info_set_thumb(cd->thumb_info, pixbuf);
-	g_object_unref(pixbuf);
-
-	if (cd->info_updated_func) cd->info_updated_func(cd, cd->thumb_info);
-}
-
-static void collection_load_thumb_error_cb(ThumbLoader *, gpointer data)
-{
-	auto cd = static_cast<CollectionData *>(data);
-
-	collection_load_thumb_do(cd);
-	collection_load_thumb_step(cd);
-}
-
-static void collection_load_thumb_done_cb(ThumbLoader *, gpointer data)
-{
-	auto cd = static_cast<CollectionData *>(data);
-
-	collection_load_thumb_do(cd);
-	collection_load_thumb_step(cd);
-}
-
-static void collection_load_thumb_step(CollectionData *cd)
-{
-	GList *work;
-	CollectInfo *ci;
-
-	if (!cd->list)
-		{
-		collection_load_stop(cd);
-		return;
-		}
-
-	work = cd->list;
-	ci = static_cast<CollectInfo *>(work->data);
-	work = work->next;
-	/* find first unloaded thumb */
-	while (work && ci->pixbuf)
-		{
-		ci = static_cast<CollectInfo *>(work->data);
-		work = work->next;
-		}
-
-	if (!ci || ci->pixbuf)
-		{
-		/* done */
-		collection_load_stop(cd);
-
-		/* send a NULL CollectInfo to notify end */
-		if (cd->info_updated_func) cd->info_updated_func(cd, nullptr);
-
-		return;
-		}
-
-	/* setup loader and call it */
-	cd->thumb_info = ci;
-	thumb_loader_free(cd->thumb_loader);
-	cd->thumb_loader = thumb_loader_new(options->thumbnails.size.width, options->thumbnails.size.height);
-	thumb_loader_set_callbacks(cd->thumb_loader,
-				   collection_load_thumb_done_cb,
-				   collection_load_thumb_error_cb,
-				   nullptr,
-				   cd);
-
-	/* start it */
-	if (!thumb_loader_start(cd->thumb_loader, ci->fd))
-		{
-		/* error, handle it, do next */
-		DEBUG_1("error loading thumb for %s", ci->fd->path);
-		collection_load_thumb_do(cd);
-		collection_load_thumb_step(cd);
-		}
-}
-
-static gboolean collection_load_thumb_idle_cb(gpointer data)
-{
-	auto cd = static_cast<CollectionData *>(data);
-
-	cd->thumb_idle_id = 0;
-
-	if (!cd->thumb_loader) collection_load_thumb_step(cd);
-
-	return G_SOURCE_REMOVE;
-}
-
-void collection_load_thumb_idle(CollectionData *cd)
-{
-	if (cd->thumb_loader || cd->thumb_idle_id) return;
-
-	cd->thumb_idle_id = g_idle_add_full(G_PRIORITY_LOW, collection_load_thumb_idle_cb, cd, nullptr);
-}
-
-gboolean collection_load_begin(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
-{
-	if (!collection_load(cd, path, flags)) return FALSE;
-
-	collection_load_thumb_idle(cd);
-
-	return TRUE;
-}
-
-void collection_load_stop(CollectionData *cd)
-{
-	g_clear_handle_id(&cd->thumb_idle_id, g_source_remove);
-
-	if (!cd->thumb_loader) return;
-
-	thumb_loader_free(cd->thumb_loader);
-	cd->thumb_loader = nullptr;
-	cd->thumb_info = nullptr;
-}
-
 static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 {
 	if (!path && !cd->path) return FALSE;
@@ -589,12 +432,6 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 	g_autofree gchar *absolute_path = g_canonicalize_filename(path, nullptr);
 	g_autofree gchar *directory = g_path_get_dirname(absolute_path);
 	if (cd->relative_paths) g_string_append(gstring, "#relative-paths: true\n");
-
-	collection_update_geometry(cd);
-	if (cd->window_read)
-		{
-		g_string_append_printf(gstring, "#geometry: %d %d %d %d\n", cd->window.x, cd->window.y, cd->window.width, cd->window.height);
-		}
 
 	for (GList *work = cd->list; work; work = work->next)
 		{
@@ -617,6 +454,7 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 	g_string_append(gstring, "#end\n");
 
 	if (!secure_save(pathl, gstring->str, -1)) return FALSE;
+	cd->changed = FALSE;
 
 	if (!cd->path || strcmp(path, cd->path) != 0)
 		{
@@ -630,7 +468,6 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 		collection_path_changed(cd);
 		}
 
-	cd->changed = FALSE;
 	collection_changed(cd);
 
 	return TRUE;
@@ -646,12 +483,6 @@ gboolean collection_save(CollectionData *cd, const gchar *path)
 
 	return FALSE;
 }
-
-gboolean collection_load_only_geometry(CollectionData *cd, const gchar *path)
-{
-	return collection_load(cd, path, COLLECTION_LOAD_GEOMETRY);
-}
-
 
 /*
  *-------------------------------------------------------------------
@@ -1081,16 +912,15 @@ void collect_manager_moved(FileData *fd)
 void collect_manager_add(FileData *fd, const gchar *collection)
 {
 	CollectManagerAction *action;
-	CollectWindow *cw;
 
 	if (!fd || !collection) return;
 
-	cw = collection_window_find_by_path(collection);
-	if (cw)
+	for (gint i = 0; CollectionData *cd = collection_from_number(i); i++)
 		{
-		if (collection_list_find_fd(cw->cd->list, fd) == nullptr)
+		if (g_strcmp0(cd->path, collection) != 0) continue;
+		if (collection_list_find_fd(cd->list, fd) == nullptr)
 			{
-			collection_add(cw->cd, fd, FALSE);
+			collection_add(cd, fd, FALSE);
 			}
 		return;
 		}
@@ -1105,14 +935,13 @@ void collect_manager_add(FileData *fd, const gchar *collection)
 void collect_manager_remove(FileData *fd, const gchar *collection)
 {
 	CollectManagerAction *action;
-	CollectWindow *cw;
 
 	if (!fd || !collection) return;
 
-	cw = collection_window_find_by_path(collection);
-	if (cw)
+	for (gint i = 0; CollectionData *cd = collection_from_number(i); i++)
 		{
-		while (collection_remove(cw->cd, fd));
+		if (g_strcmp0(cd->path, collection) != 0) continue;
+		while (collection_remove(cd, fd)) {}
 		return;
 		}
 

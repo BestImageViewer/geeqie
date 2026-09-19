@@ -25,6 +25,7 @@
 struct CollectionData;
 
 void collection_dialog_save(CollectionData *cd);
+void collection_dialog_save_with_callback(CollectionData *cd, void (*callback)(gboolean, gpointer), gpointer data);
 void collection_dialog_append(CollectionData *cd);
 
 #endif

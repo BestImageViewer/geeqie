@@ -40,7 +40,6 @@ const gchar *get_description_for_action_name(const gchar *action_name);
 gchar *action_accelerator_label(const gchar *action_name);
 
 const ActionDef *get_advanced_exif_actions();
-const ActionDef *get_collection_actions();
 const ActionDef *get_dupe_main_actions();
 const ActionDef *get_dupe_second_actions();
 const ActionDef *get_image_actions();

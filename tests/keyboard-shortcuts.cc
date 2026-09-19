@@ -33,6 +33,7 @@ TEST(KeyboardShortcuts, GeneratesNonEmptySectionsAndCombinedAlternatives)
 	g_key_file_set_string_list(key_file, "app.preferences", "accels", preferences_accels, G_N_ELEMENTS(preferences_accels));
 	g_key_file_set_string(key_file, "win.advanced-exif-win-close", "accels", "<Control>w");
 	g_key_file_set_string(key_file, "win.view-file-rename", "accels", "F2");
+	g_key_file_set_string(key_file, "win.view-file-collection-save-as", "accels", "<Control><Shift>s");
 
 	g_autofree gchar *xml = shortcuts_xml_from_keyfile(key_file);
 
@@ -44,8 +45,9 @@ TEST(KeyboardShortcuts, GeneratesNonEmptySectionsAndCombinedAlternatives)
 	EXPECT_TRUE(g_markup_parse_context_end_parse(context, &error));
 	EXPECT_NE(g_strstr_len(xml, -1, ">All Windows</property>"), nullptr);
 	EXPECT_NE(g_strstr_len(xml, -1, ">Advanced EXIF Window</property>"), nullptr);
-	EXPECT_NE(g_strstr_len(xml, -1, ">View File Window</property>"), nullptr);
+	EXPECT_NE(g_strstr_len(xml, -1, ">Files Pane</property>"), nullptr);
 	EXPECT_EQ(g_strstr_len(xml, -1, ">Collection Window</property>"), nullptr);
+	EXPECT_NE(g_strstr_len(xml, -1, "<property name=\"title\">Save collection as…</property>"), nullptr);
 	EXPECT_NE(g_strstr_len(xml, -1, "&lt;Control&gt;comma &lt;Control&gt;o"), nullptr);
 	EXPECT_EQ(substring_count(xml, "<property name=\"title\">Preferences…</property>"), 1);
 	EXPECT_NE(g_strstr_len(xml, -1, "<property name=\"section-name\">mouse-arrow-keys</property>"), nullptr);
@@ -61,7 +63,7 @@ TEST(KeyboardShortcuts, PrefersAppThenMainThenRemainingWindow)
 	g_key_file_set_string(key_file, "win.main-win-close-window", "accels", "<Control>w");
 	g_key_file_set_string(key_file, "win.advanced-exif-win-close", "accels", "<Control>w");
 	g_key_file_set_string(key_file, "win.advanced-exif-win-context-menu", "accels", "<Control>x");
-	g_key_file_set_string(key_file, "win.collection-win-copy", "accels", "<Control>x");
+	g_key_file_set_string(key_file, "win.view-file-collection-save-as", "accels", "<Control>x");
 
 	g_autofree gchar *xml = shortcuts_xml_from_keyfile(key_file);
 
@@ -71,7 +73,7 @@ TEST(KeyboardShortcuts, PrefersAppThenMainThenRemainingWindow)
 	EXPECT_NE(g_strstr_len(xml, -1, "<property name=\"title\">Close window</property>"), nullptr);
 	EXPECT_EQ(g_strstr_len(xml, -1, "<property name=\"title\">Close</property>"), nullptr);
 	EXPECT_NE(g_strstr_len(xml, -1, "<property name=\"title\">Context help</property>"), nullptr);
-	EXPECT_EQ(g_strstr_len(xml, -1, "<property name=\"title\">Copy</property>"), nullptr);
+	EXPECT_EQ(g_strstr_len(xml, -1, "<property name=\"title\">Save collection as…</property>"), nullptr);
 }
 
 TEST(KeyboardShortcuts, AcceptsPrimaryForBackwardCompatibility)

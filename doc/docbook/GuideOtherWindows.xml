@@ -11,6 +11,5 @@
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideOtherWindowsImageWindow.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideOtherWindowsExif.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideOtherWindowsPanView.xml" />
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideCollections.xml" />
   <para />
 </chapter>

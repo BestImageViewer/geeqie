@@ -33,19 +33,11 @@ enum CollectionLoadFlags {
 	COLLECTION_LOAD_NONE	= 0,
 	COLLECTION_LOAD_APPEND	= 1 << 0,
 	COLLECTION_LOAD_FLUSH	= 1 << 1,
-	COLLECTION_LOAD_GEOMETRY= 1 << 2,
 };
 
 gboolean collection_load(CollectionData *cd, const gchar *path, CollectionLoadFlags flags);
 
-gboolean collection_load_begin(CollectionData *cd, const gchar *path, CollectionLoadFlags flags);
-void collection_load_stop(CollectionData *cd);
-
-void collection_load_thumb_idle(CollectionData *cd);
-
 gboolean collection_save(CollectionData *cd, const gchar *path);
-
-gboolean collection_load_only_geometry(CollectionData *cd, const gchar *path);
 
 void collect_manager_moved(FileData *fd);
 

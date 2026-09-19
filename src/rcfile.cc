@@ -515,7 +515,6 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.use_exif);
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.use_color_management);
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.use_ft_metadata);
-	WRITE_NL(); WRITE_INT(*options, thumbnails.collection_preview);
 
 	/* File sorting Options */
 	WRITE_NL(); WRITE_BOOL(*options, file_sort.case_sensitive);
@@ -971,7 +970,6 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_UINT_ENUM_CLAMP(*options, thumbnails.quality, GDK_INTERP_NEAREST, GDK_INTERP_BILINEAR)) continue;
 		if (READ_BOOL(*options, thumbnails.use_exif)) continue;
 		if (READ_BOOL(*options, thumbnails.use_color_management)) continue;
-		if (READ_INT(*options, thumbnails.collection_preview)) continue;
 		if (READ_BOOL(*options, thumbnails.use_ft_metadata)) continue;
 
 		/* File sorting options */

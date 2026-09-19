@@ -102,6 +102,7 @@
     .
   </para>
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideMainWindowFilePane.xml" />
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideCollections.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideMainWindowFolderPane.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideMainWindowImagePane.xml" />
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="GuideMainWindowNavigation.xml" />

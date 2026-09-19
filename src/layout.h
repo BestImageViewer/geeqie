@@ -213,6 +213,7 @@ GtkBuilder *builder;
 	LayoutLocation file_location;
 
 	ViewFile *vf;
+	gpointer collection_confirm_data = nullptr;
 
 	GtkWidget *file_view;
 
@@ -274,6 +275,7 @@ const gchar *layout_get_path(LayoutWindow *lw);
 gboolean layout_set_path(LayoutWindow *lw, const gchar *path);
 gboolean layout_set_fd(LayoutWindow *lw, FileData *fd);
 gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd);
+gboolean layout_confirm_collection_leave(LayoutWindow *lw, const std::function<void()> &continuation, gboolean force);
 
 void layout_status_update_progress(LayoutWindow *lw, gdouble val, const gchar *text);
 void layout_status_update_info(LayoutWindow *lw, const gchar *text);

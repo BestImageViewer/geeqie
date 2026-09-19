@@ -5970,14 +5970,6 @@ msgstr ""
 msgid "Thumbnail color management"
 msgstr "Správa barev náhledů"
 
-#: ../src/preferences.cc:1704
-msgid "Collection preview:"
-msgstr "Náhled kolekce:"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr "Maximální počet miniatur zobrazených v náhledu kolekce"
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr "Použit metadata z video souborů jako náhled, pokud jsou k dispozici"

@@ -22,7 +22,7 @@
   <section id="Navigation4">
     <title>Navigation</title>
     <para>
-      When the image window is initiated from an image selection or from a collection window, the displayed image can be changed forward or backward in the list with the respective
+      When the image window is initiated from an image selection or from a collection in the files pane, the displayed image can be changed forward or backward in the list with the respective
       <keycap>PageDown</keycap>
       and
       <keycap>PageUp</keycap>
@@ -37,9 +37,9 @@
     <para>
       Images can be dragged and dropped onto an image window, but the process is somewhat different to that of an
       <emphasis role="underline"><link linkend="GuideMainWindowImagePane" endterm="titleGuideMainWindowImagePane" /></emphasis>
-      . If multiple images, a folder or an image from a collection window is dropped onto the image window, you can cycle through all these images using the navigation keys.
+      . If multiple images, a folder or an image from a collection in the files pane is dropped onto the image window, you can cycle through all these images using the navigation keys.
     </para>
-    <para>The dropped item can be one or more files, folders, or an image from a collection window:</para>
+    <para>The dropped item can be one or more files, folders, or an image from a collection in the files pane:</para>
     <variablelist>
       <varlistentry>
         <term>

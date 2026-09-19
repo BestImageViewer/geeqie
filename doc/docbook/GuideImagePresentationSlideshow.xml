@@ -102,7 +102,7 @@
     <title>Selecting the images to include in a slide show</title>
     <para>When a single image is selected, all images in the current folder are included in the slide show. The sequence will begin with the current image; however if random slide shows are enabled, the sequence will begin with a random image from the list.</para>
     <para>To only include some images in a slide show, use multiple selection to select the images to include before starting the slide show.</para>
-    <para>An image collection can be used as the list of images, to do this drag an image from a collection window onto the image pane. Starting a slide show will then include the images from that collection.</para>
+    <para>An image collection can be used as the list of images, to do this drag an image from a collection in the files pane onto the image pane. Starting a slide show will then include the images from that collection.</para>
     <para>
       So far, the methods described are for slide shows in a main window, in an
       <emphasis role="underline"><link linkend="GuideOtherWindowsImageWindow">Image Window</link></emphasis>

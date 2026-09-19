@@ -25,6 +25,14 @@
           <attribute name="action">app.open-collection</attribute>
           <attribute name="label" translatable="yes">_Open collection…</attribute>
         </item>
+        <item>
+          <attribute name="action">win.view-file-collection-save</attribute>
+          <attribute name="label" translatable="yes">Save collection</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.view-file-collection-save-as</attribute>
+          <attribute name="label" translatable="yes">Save collection as…</attribute>
+        </item>
       </section>
       <section>
         <item>

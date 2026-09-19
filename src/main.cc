@@ -463,7 +463,7 @@ gint exit_confirm_dlg()
 		return TRUE;
 		}
 
-	if (!collection_window_modified_exists() && (layout_window_count() == 1)) return FALSE;
+	if (layout_window_count() == 1) return FALSE;
 
 	parent = nullptr;
 	LayoutWindow *lw = get_current_layout();
@@ -477,11 +477,6 @@ gint exit_confirm_dlg()
 	                                 exit_confirm_cancel_cb, nullptr);
 
 	g_autoptr(GString) message = g_string_new(nullptr);
-
-	if (collection_window_modified_exists())
-		{
-		message = g_string_append(message, _("Collections have been modified.\n"));
-		}
 
 	if (layout_window_count() > 1)
 		{
@@ -878,6 +873,13 @@ void exit_program()
 	layout_image_full_screen_stop(nullptr);
 
 	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb)) return;
+	gboolean collection_confirmation_pending = FALSE;
+	layout_window_foreach([&](LayoutWindow *lw)
+		{
+		if (!collection_confirmation_pending)
+			collection_confirmation_pending = !layout_confirm_collection_leave(lw, []() { exit_program(); }, TRUE);
+		});
+	if (collection_confirmation_pending) return;
 
 	marks_save(options->marks_save);
 

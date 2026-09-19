@@ -149,24 +149,6 @@
         </listitem>
       </varlistentry>
     </variablelist>
-    <variablelist>
-      <varlistentry>
-        <term>
-          <guilabel>Collection preview</guilabel>
-        </term>
-        <listitem>
-          <para>
-            When a <filename>.gqv</filename> collection outside the default collections directory is displayed as a file, Geeqie can show a preview montage made from cached thumbnails of its members. This option limits the number of thumbnails included in that montage.
-          </para>
-          <para>
-            In the default collections directory, collections appear as folders with a pictures-folder icon. Clicking one opens its members in the files pane; no preview montage is used. See <link linkend="CollectionFilesPane">Viewing a collection in the files pane</link>.
-          </para>
-          <note>
-            <para>Preview montages require ImageMagick and existing cached thumbnails.</para>
-          </note>
-        </listitem>
-      </varlistentry>
-    </variablelist>
   </section>
   <section id="StarRatingCharacters">
     <title>Star Rating</title>

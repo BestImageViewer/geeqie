@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -37,6 +38,7 @@
 
 #include "bar-sort.h"
 #include "bar.h"
+#include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "filedata.h"
@@ -465,9 +467,32 @@ static void layout_path_entry_cb(LayoutWindow *lw, const gchar *path)
 
 	g_autofree gchar *buf = g_strdup(path);
 	parse_out_relatives(buf);
-	if (lw->vf && lw->vf->collection && g_strcmp0(buf, lw->vf->collection->path) == 0) return;
+	if (lw->vf && lw->vf->collection &&
+	    g_strcmp0(buf, lw->vf->collection->path ? lw->vf->collection->path : lw->vf->collection->name) == 0) return;
 
 	layout_set_path(lw, buf);
+}
+
+static gboolean layout_open_collection(LayoutWindow *lw, FileData *fd)
+{
+	CollectionData *cd = nullptr;
+	for (gint i = 0; (cd = collection_from_number(i)); i++)
+		if (g_strcmp0(cd->path, fd->path) == 0) break;
+	if (cd)
+		collection_ref(cd);
+	else
+		{
+		cd = collection_new(fd->path);
+		if (!collection_load(cd, fd->path, COLLECTION_LOAD_NONE))
+			{
+			warning_dialog(_("Unable to open collection"), fd->path, GQ_ICON_DIALOG_ERROR, lw->window);
+			collection_unref(cd);
+			return FALSE;
+			}
+		}
+	const gboolean result = layout_set_collection(lw, cd);
+	collection_unref(cd);
+	return result;
 }
 
 static void layout_vd_select_cb(ViewDir *, FileData *fd, gpointer data)
@@ -476,25 +501,7 @@ static void layout_vd_select_cb(ViewDir *, FileData *fd, gpointer data)
 
 	if (vd_is_collection(fd))
 		{
-		CollectionData *cd = nullptr;
-		for (gint i = 0; (cd = collection_from_number(i)); i++)
-			if (g_strcmp0(cd->path, fd->path) == 0) break;
-		if (cd)
-			collection_ref(cd);
-		else
-			{
-			cd = collection_new(fd->path);
-			if (!collection_load(cd, fd->path, COLLECTION_LOAD_NONE))
-				{
-				warning_dialog(_("Unable to open collection"), fd->path, GQ_ICON_DIALOG_ERROR, lw->window);
-				collection_unref(cd);
-				return;
-				}
-			}
-		g_autofree gchar *parent = remove_level_from_path(fd->path);
-		if (!lw->dir_fd || g_strcmp0(lw->dir_fd->path, parent) != 0) layout_set_path(lw, parent);
-		layout_set_collection(lw, cd);
-		collection_unref(cd);
+		layout_open_collection(lw, fd);
 		return;
 		}
 	layout_set_fd(lw, fd);
@@ -1466,6 +1473,102 @@ const gchar *layout_get_path(LayoutWindow *lw)
 	return lw->dir_fd ? lw->dir_fd->path : nullptr;
 }
 
+struct CollectionConfirmData
+{
+	LayoutWindow *layout;
+	CollectionData *collection;
+	GenericDialog *dialog;
+	std::function<void()> continuation;
+};
+
+static void layout_collection_confirm_finish(CollectionConfirmData *data, gboolean proceed)
+{
+	auto continuation = std::move(data->continuation);
+	data->layout->collection_confirm_data = nullptr;
+	if (data->collection->path && data->layout->vf && data->layout->vf->collection == data->collection &&
+	    data->layout->path_entry &&
+	    g_strcmp0(gtk_editable_get_text(GTK_EDITABLE(data->layout->path_entry)), data->collection->path) != 0)
+		layout_set_collection(data->layout, data->collection);
+	if (!proceed && data->layout->path_entry && data->layout->vf &&
+	    data->layout->vf->collection == data->collection)
+		entry_set_text(GTK_ENTRY(data->layout->path_entry),
+		               data->collection->path ? data->collection->path : data->collection->name);
+	collection_unref(data->collection);
+	delete data;
+	if (proceed) continuation();
+}
+
+static void layout_collection_confirm_cancel_cb(GenericDialog *dialog, gpointer user_data)
+{
+	auto *data = static_cast<CollectionConfirmData *>(user_data);
+	generic_dialog_close(dialog);
+	layout_collection_confirm_finish(data, FALSE);
+}
+
+static void layout_collection_confirm_discard_cb(GenericDialog *dialog, gpointer user_data)
+{
+	auto *data = static_cast<CollectionConfirmData *>(user_data);
+	generic_dialog_close(dialog);
+	data->collection->changed = FALSE;
+	layout_collection_confirm_finish(data, TRUE);
+}
+
+static void layout_collection_confirm_save_done_cb(gboolean saved, gpointer user_data)
+{
+	layout_collection_confirm_finish(static_cast<CollectionConfirmData *>(user_data), saved);
+}
+
+static void layout_collection_confirm_save_cb(GenericDialog *dialog, gpointer user_data)
+{
+	auto *data = static_cast<CollectionConfirmData *>(user_data);
+	generic_dialog_close(dialog);
+	data->dialog = nullptr;
+	if (!data->collection->path)
+		{
+		collection_dialog_save_with_callback(data->collection, layout_collection_confirm_save_done_cb, data);
+		return;
+		}
+	if (!collection_save(data->collection, data->collection->path))
+		{
+		g_autofree gchar *message = g_strdup_printf(_("Failed to save the collection:\n%s"), data->collection->path);
+		warning_dialog(_("Save Failed"), message, GQ_ICON_DIALOG_ERROR, data->layout->window);
+		layout_collection_confirm_finish(data, FALSE);
+		return;
+		}
+	layout_collection_confirm_finish(data, TRUE);
+}
+
+gboolean layout_confirm_collection_leave(LayoutWindow *lw, const std::function<void()> &continuation, gboolean force)
+{
+	if (lw->collection_confirm_data)
+		{
+		auto *data = static_cast<CollectionConfirmData *>(lw->collection_confirm_data);
+		if (data->dialog) gtk_window_present(GTK_WINDOW(data->dialog->dialog));
+		return FALSE;
+		}
+	CollectionData *collection = lw->vf ? lw->vf->collection : nullptr;
+	if (!collection || !collection->changed) return TRUE;
+	if (!force)
+		{
+		gboolean shared = FALSE;
+		layout_window_foreach([&](LayoutWindow *other)
+			{
+			if (other != lw && other->vf && other->vf->collection == collection) shared = TRUE;
+			});
+		if (shared) return TRUE;
+		}
+	auto *data = new CollectionConfirmData{lw, collection_ref(collection), nullptr, continuation};
+	lw->collection_confirm_data = data;
+	data->dialog = generic_dialog_new(_("Close collection"), "close_collection", lw->window, FALSE,
+	                                  layout_collection_confirm_cancel_cb, data);
+	g_autofree gchar *message = g_strdup_printf(_("Save changes to collection %s?"), collection->name);
+	generic_dialog_add_message(data->dialog, GQ_ICON_DIALOG_QUESTION, _("Collection has been modified"), message, TRUE);
+	generic_dialog_add_button(data->dialog, GQ_ICON_SAVE, _("Save"), layout_collection_confirm_save_cb, TRUE);
+	generic_dialog_add_button(data->dialog, GQ_ICON_DELETE, _("_Discard"), layout_collection_confirm_discard_cb, FALSE);
+	gtk_window_present(GTK_WINDOW(data->dialog->dialog));
+	return FALSE;
+}
+
 static void layout_sync_path(LayoutWindow *lw)
 {
 	if (!lw->dir_fd) return;
@@ -1488,7 +1591,7 @@ gboolean layout_set_path(LayoutWindow *lw, const gchar *path)
 	if (!path) return FALSE;
 
 	fd = file_data_new_group(path);
-	ret = layout_set_fd(lw, fd);
+	ret = vd_is_collection(fd) ? layout_open_collection(lw, fd) : layout_set_fd(lw, fd);
 	file_data_unref(fd);
 	return ret;
 }
@@ -1497,18 +1600,30 @@ gboolean layout_set_path(LayoutWindow *lw, const gchar *path)
 gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 {
 	if (!layout_valid(&lw) || !lw->vf || !cd) return FALSE;
-	layout_image_slideshow_stop(lw);
+	if (lw->vf->collection && lw->vf->collection != cd)
+		{
+			auto next = std::shared_ptr<CollectionData>(collection_ref(cd), [](CollectionData *item) { collection_unref(item); });
+			if (!layout_confirm_collection_leave(lw, [lw, next]() { layout_set_collection(lw, next.get()); }, FALSE)) return FALSE;
+		}
+	collection_ref(cd);
 	FileDataRef current(layout_image_get_fd(lw));
+	g_autofree gchar *parent = cd->path ? remove_level_from_path(cd->path) : nullptr;
+	if (parent && (!lw->dir_fd || g_strcmp0(lw->dir_fd->path, parent) != 0) && !layout_set_path(lw, parent))
+		{
+		collection_unref(cd);
+		return FALSE;
+		}
+	layout_image_slideshow_stop(lw);
 	/* Pane navigation uses the displayed file list, not ImageWindow's collection mode. */
 	if (layout_image_get_collection(lw, nullptr)) layout_image_set_fd(lw, nullptr);
-	if (!vf_set_collection(lw->vf, cd)) return FALSE;
-	g_autofree gchar *parent = cd->path ? remove_level_from_path(cd->path) : nullptr;
-	g_autofree gchar *canonical_parent = parent ? g_canonicalize_filename(parent, nullptr) : nullptr;
-	g_autofree gchar *collections_dir = g_canonicalize_filename(get_collections_dir(), nullptr);
-	const gboolean in_collections_dir = lw->dir_fd && g_strcmp0(lw->dir_fd->path, parent) == 0 &&
-	                                    g_strcmp0(canonical_parent, collections_dir) == 0;
-	if (lw->vd) vd_set_collection(lw->vd, in_collections_dir ? cd->path : nullptr);
-	if (in_collections_dir && lw->path_entry) entry_set_text(GTK_ENTRY(lw->path_entry), cd->path);
+	if (!vf_set_collection(lw->vf, cd))
+		{
+		collection_unref(cd);
+		return FALSE;
+		}
+	const gboolean in_collection_parent = lw->dir_fd && parent && g_strcmp0(lw->dir_fd->path, parent) == 0;
+	if (lw->vd) vd_set_collection(lw->vd, in_collection_parent ? cd->path : nullptr);
+	if (lw->path_entry) entry_set_text(GTK_ENTRY(lw->path_entry), cd->path ? cd->path : cd->name);
 	if (current && vf_index_by_fd(lw->vf, current) >= 0)
 		layout_image_set_fd(lw, current);
 	else
@@ -1516,6 +1631,7 @@ gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 	if (lw->info_sort) gtk_menu_button_set_popover(GTK_MENU_BUTTON(lw->info_sort), layout_sort_popover_new(lw));
 	layout_status_update_all(lw);
 	if (options->read_metadata_in_idle || sort_type_requires_metadata(lw->vf->sort.method)) vf_read_metadata_in_idle(lw->vf);
+	collection_unref(cd);
 	return TRUE;
 }
 
@@ -1527,6 +1643,11 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 	if (!layout_valid(&lw)) return FALSE;
 
 	if (!fd || !isname(fd->path)) return FALSE;
+	if (lw->vf && lw->vf->collection)
+		{
+			auto target = std::shared_ptr<FileData>(file_data_ref(fd), [](FileData *item) { file_data_unref(item); });
+			if (!layout_confirm_collection_leave(lw, [lw, target]() { layout_set_fd(lw, target.get()); }, FALSE)) return FALSE;
+		}
 	if (lw->dir_fd && fd == lw->dir_fd)
 		{
 		if (lw->vf && lw->vf->collection)
@@ -2704,6 +2825,7 @@ void layout_close(LayoutWindow *lw)
 {
 	if (layout_window_count() > 1)
 		{
+		if (!layout_confirm_collection_leave(lw, [lw]() { layout_close(lw); }, FALSE)) return;
 		save_layout(lw);
 		layout_free(lw);
 		}

@@ -21,7 +21,6 @@ const char *get_description_for_action_name(const char *action_name)
 	const ActionDef *action_sets[] =
 		{
 		get_app_actions(),
-		get_collection_actions(),
 		get_dupe_main_actions(),
 		get_dupe_second_actions(),
 		get_image_actions(),
@@ -358,7 +357,6 @@ const char *get_icon_for_action_name(const char *action_name)
 	const ActionDef *action_sets[] =
 		{
 		get_app_actions(),
-		get_collection_actions(),
 		get_dupe_main_actions(),
 		get_dupe_second_actions(),
 		get_image_actions(),

@@ -31,21 +31,17 @@
 
 enum SortType : gint;
 
-struct CollectTable;
 class FileData;
 struct ThumbLoader;
 
 struct CollectInfo
 {
 	FileData *fd;
-	GdkPixbuf *pixbuf;
 	guint flag_mask;
 	gchar *infotext;
 };
 
 void collection_info_free(CollectInfo *ci);
-
-void collection_info_set_thumb(CollectInfo *ci, GdkPixbuf *pixbuf);
 
 GList *collection_list_sort(GList *list, SortType method);
 GList *collection_list_add(GList *list, CollectInfo *ci, SortType method);
@@ -61,18 +57,7 @@ struct CollectionData
 	GList *list;
 	SortType sort_method;
 
-	ThumbLoader *thumb_loader;
-	CollectInfo *thumb_info;
-	guint thumb_idle_id;
-
-	using InfoUpdatedFunc = std::function<void(CollectionData *, CollectInfo *)>;
-	InfoUpdatedFunc info_updated_func;
-
 	gint ref;
-
-	/* geometry */
-	gboolean window_read;
-	GdkRectangle window;
 
 	gboolean changed; /**< contents changed since save flag */
 	gboolean relative_paths; /**< Save paths relative to the collection directory */
@@ -80,9 +65,6 @@ struct CollectionData
 	GHashTable *existence;
 	GList *change_listeners;
 
-	GtkWidget *dialog_name_entry;
-	gchar *collection_path; /**< Full path to collection including extension */
-	gint collection_append_index;
 };
 
 using CollectionChangedFunc = void (*)(CollectionData *, gpointer);
@@ -121,25 +103,6 @@ gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert
 gboolean collection_remove(CollectionData *cd, FileData *fd);
 void collection_remove_by_info_list(CollectionData *cd, GList *list);
 gboolean collection_rename(CollectionData *cd, FileData *fd);
-
-void collection_update_geometry(CollectionData *cd);
-
-struct CollectWindow
-{
-	GtkWidget *window;
-	CollectTable *table;
-	GtkWidget *status_box;
-
-	GtkWidget *close_dialog;
-
-	CollectionData *cd;
-};
-
-CollectWindow *collection_window_new(const gchar *path, CollectionData *collection = nullptr);
-void collection_window_close_by_collection(CollectionData *cd);
-CollectWindow *collection_window_find(CollectionData *cd);
-CollectWindow *collection_window_find_by_path(const gchar *path);
-gboolean collection_window_modified_exists();
 
 gboolean is_collection(const gchar *param);
 gchar *collection_path(const gchar *param);

@@ -324,13 +324,12 @@ ActionTableDef shortcut_tables[] =
 	{ nullptr, "app", N_("All Windows") },
 	{ nullptr, "main", N_("Main Window") },
 	{ nullptr, "advanced-exif", N_("Advanced EXIF Window") },
-	{ nullptr, "collection", N_("Collection Window") },
 	{ nullptr, "dupe-main", N_("Duplicates Main Window") },
 	{ nullptr, "dupe-second", N_("Duplicates Second Window") },
 	{ nullptr, "image", N_("Image View Window") },
 	{ nullptr, "pan", N_("Pan View Window") },
 	{ nullptr, "search", N_("Search Window") },
-	{ nullptr, "view-file", N_("View File Window") },
+	{ nullptr, "view-file", N_("Files Pane") },
 };
 
 void shortcut_tables_set_actions()
@@ -338,13 +337,12 @@ void shortcut_tables_set_actions()
 	shortcut_tables[0].actions = get_app_actions();
 	shortcut_tables[1].actions = get_main_actions();
 	shortcut_tables[2].actions = get_advanced_exif_actions();
-	shortcut_tables[3].actions = get_collection_actions();
-	shortcut_tables[4].actions = get_dupe_main_actions();
-	shortcut_tables[5].actions = get_dupe_second_actions();
-	shortcut_tables[6].actions = get_image_actions();
-	shortcut_tables[7].actions = get_pan_view_actions();
-	shortcut_tables[8].actions = get_search_actions();
-	shortcut_tables[9].actions = get_view_file_actions();
+	shortcut_tables[3].actions = get_dupe_main_actions();
+	shortcut_tables[4].actions = get_dupe_second_actions();
+	shortcut_tables[5].actions = get_image_actions();
+	shortcut_tables[6].actions = get_pan_view_actions();
+	shortcut_tables[7].actions = get_search_actions();
+	shortcut_tables[8].actions = get_view_file_actions();
 }
 
 } // namespace

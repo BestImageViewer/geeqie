@@ -32,6 +32,7 @@
 #include "filedata.h"
 #include "intl.h"
 #include "layout-image.h"
+#include "layout.h"
 #include "layout-util.h"
 #include "main-defines.h"
 #include "misc.h"
@@ -931,7 +932,7 @@ void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 				{
 				if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
 					{
-					collection_window_new(vf->click_fd->path);
+					layout_set_path(vf->layout, vf->click_fd->path);
 					}
 				else
 					{

@@ -6979,16 +6979,6 @@ msgstr ""
 msgid "Thumbnail color management"
 msgstr "Rendezés kezelő"
 
-# src/collect-dlg.cc:194
-#: ../src/preferences.cc:1704
-#, fuzzy
-msgid "Collection preview:"
-msgstr "Gyűjteményfájlok"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr ""
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""

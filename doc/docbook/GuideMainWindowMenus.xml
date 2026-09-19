@@ -34,7 +34,7 @@
           </menuchoice>
         </term>
         <listitem>
-          <para>Opens a new collection window, the new collection will be empty.</para>
+          <para>Opens a new default window with an empty collection in its files pane.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -49,7 +49,7 @@
           </menuchoice>
         </term>
         <listitem>
-          <para>Displays a dialog to open a collection stored on disk, the selected collection will then appear in a new window.</para>
+          <para>Displays a dialog to open a collection stored on disk in the files pane.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -58,11 +58,19 @@
         </term>
         <listitem>
           <para>
-            This menu item lists the recently active collections, selecting an item from the list will open that collection in a new window. The most recent item will appear at the top of the list. Maximum number of entries can be modified through
+            This menu item lists the recently active collections. Selecting one displays it in the files pane. The most recent item will appear at the top of the list. Maximum number of entries can be modified through
             <emphasis role="underline"><link linkend="Behaviour">Open recent list maximum size</link></emphasis>
             option.
           </para>
         </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guimenu>Save collection</guimenu></term>
+        <listitem><para>Saves the collection displayed in the files pane. For a new collection, opens the save dialog.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guimenu>Save collection as…</guimenu></term>
+        <listitem><para>Saves the displayed collection to a selected file.</para></listitem>
       </varlistentry>
       <varlistentry>
         <term>

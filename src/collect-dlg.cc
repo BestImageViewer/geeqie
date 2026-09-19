@@ -41,20 +41,40 @@ static void collection_save_cb(GFile *file, gpointer data)
 		{
 		g_autofree gchar *filename = g_file_get_path(file);
 
-		g_free(cd->collection_path);
-		cd->collection_path = g_strdup(filename);
-		if (!collection_save(cd, cd->collection_path))
+		if (!collection_save(cd, filename))
 			{
-			g_autofree gchar *buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cd->collection_path);
+			g_autofree gchar *buf = g_strdup_printf(_("Failed to save the collection:\n%s"), filename);
 			file_util_warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, nullptr);
 			}
 
-		else
-			{
-			collection_window_close_by_collection(cd);
-			}
 		}
 	collection_unref(cd);
+}
+
+struct CollectionSaveData
+{
+	CollectionData *collection;
+	void (*callback)(gboolean, gpointer);
+	gpointer data;
+};
+
+static void collection_save_with_callback_cb(GFile *file, gpointer data)
+{
+	auto *save_data = static_cast<CollectionSaveData *>(data);
+	gboolean saved = FALSE;
+	if (file)
+		{
+		g_autofree gchar *filename = g_file_get_path(file);
+		saved = collection_save(save_data->collection, filename);
+		if (!saved)
+			{
+			g_autofree gchar *message = g_strdup_printf(_("Failed to save the collection:\n%s"), filename);
+			file_util_warning_dialog(_("Save Failed"), message, GQ_ICON_DIALOG_ERROR, nullptr);
+			}
+		}
+	save_data->callback(saved, save_data->data);
+	collection_unref(save_data->collection);
+	delete save_data;
 }
 
 static void collection_append_cb(GFile *file, gpointer data)
@@ -75,7 +95,7 @@ static void collection_append_cb(GFile *file, gpointer data)
 	collection_unref(cd);
 }
 
-static void collection_dialog_new(CollectionData *cd, const gchar *title, FileDialogAction action, FileDialogCallback callback)
+static void collection_dialog_new(CollectionData *cd, const gchar *title, FileDialogAction action, FileDialogCallback callback, gpointer callback_data = nullptr)
 {
 	if (!cd) return;
 
@@ -85,7 +105,7 @@ static void collection_dialog_new(CollectionData *cd, const gchar *title, FileDi
 	fdd.action = action;
 	fdd.accept_text = _("Save");
 	fdd.callback = callback;
-	fdd.data = collection_ref(cd);
+	fdd.data = callback_data ? callback_data : collection_ref(cd);
 	fdd.filename = directory ? directory : get_collections_dir();
 	fdd.filter = GQ_COLLECTION_EXT;
 	fdd.filter_description = _("Collection files");
@@ -104,6 +124,13 @@ static void collection_dialog_new(CollectionData *cd, const gchar *title, FileDi
 void collection_dialog_save(CollectionData *cd)
 {
 	collection_dialog_new(cd, _("Save Collection As - Geeqie"), FileDialogAction::SAVE, collection_save_cb);
+}
+
+void collection_dialog_save_with_callback(CollectionData *cd, void (*callback)(gboolean, gpointer), gpointer data)
+{
+	auto *save_data = new CollectionSaveData{collection_ref(cd), callback, data};
+	collection_dialog_new(cd, _("Save Collection As - Geeqie"), FileDialogAction::SAVE,
+	                      collection_save_with_callback_cb, save_data);
 }
 
 void collection_dialog_append(CollectionData *cd)

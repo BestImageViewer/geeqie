@@ -30,7 +30,6 @@
 #include "exif.h"
 #include "filedata.h"
 #include "geometry.h"
-#include "image-load-collection.h"
 #include "image-load-dds.h"
 #if HAVE_DJVU
 #  include "image-load-djvu.h"
@@ -768,12 +767,6 @@ static void image_loader_setup_loader(ImageLoader *il)
 			{
 			DEBUG_1("Using custom zxscr loader");
 			il->backend = get_image_loader_backend_zxscr();
-			}
-		else
-		if (il->fd->format_class == FORMAT_CLASS_COLLECTION)
-			{
-			DEBUG_1("Using custom collection loader");
-			il->backend = get_image_loader_backend_collection();
 			}
 		else
 		if (g_strcmp0(strrchr(il->fd->path, '.'), ".svgz") == 0)

@@ -6152,14 +6152,6 @@ msgstr "EXIFサムネイルがあれば使う(EXIFサムネイルは古いこと
 msgid "Thumbnail color management"
 msgstr "カラーマネジメント"
 
-#: ../src/preferences.cc:1704
-msgid "Collection preview:"
-msgstr "コレクション・プレビュー:"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr ""
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr "ビデオファイルに埋め込まれたメタデータがあればサムネイルとして使う"

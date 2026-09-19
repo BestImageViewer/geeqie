@@ -456,7 +456,7 @@
   <section id="Draganddrop">
     <title>Drag and drop</title>
     <para>Image files can be dropped onto folders displayed in the folder pane. A menu will appear allowing you to select to move or copy the dropped images into the target folder. The list will automatically scroll up or down when the drag pointer is near the respective top or bottom of the list. When in tree mode, hovering over a folder for a brief period of time will expand that folder.</para>
-    <para>The folders can used as a drag source for drag and drop, for example to add images in a folder to a collection window. However drag and drop can not be used to move or copy folders in Geeqie.</para>
+    <para>The folders can used as a drag source for drag and drop, for example to add images in a folder to a collection in the files pane. However drag and drop can not be used to move or copy folders in Geeqie.</para>
     <para>
       Using
       <code>Shift</code>

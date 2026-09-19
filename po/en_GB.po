@@ -5977,14 +5977,6 @@ msgstr "Use EXIF thumbnails when available (EXIF thumbnails may be outdated)"
 msgid "Thumbnail color management"
 msgstr "Thumbnail color management"
 
-#: ../src/preferences.cc:1704
-msgid "Collection preview:"
-msgstr "Collection preview:"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr "The maximum number of thumbnails shown in a Collection preview montage"
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr "Use embedded metadata in video files as thumbnails when available"
@@ -7772,11 +7764,6 @@ msgstr "error saving file: %s\n"
 #: ../src/ui-file-chooser.cc:303
 msgid "Failed to get page 0\n"
 msgstr ""
-
-#: ../src/ui-file-chooser.cc:434
-#, fuzzy
-msgid "No preview"
-msgstr "Collection preview:"
 
 #: ../src/ui-file-chooser.cc:629
 #, fuzzy, c-format

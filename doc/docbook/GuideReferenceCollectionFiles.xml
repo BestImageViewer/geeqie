@@ -6,7 +6,6 @@
     <programlisting xml:space="preserve">
       #Geeqie collection
       #created with Geeqie version 2.6+git20250705-01d997ed
-      #geometry: 0 0 1080 1106
       "&lt;filepath1&gt;"
       "&lt;filepath2&gt;"
       #end
@@ -21,9 +20,8 @@
     </programlisting>
   </para>
   <para>
-    This text can be displayed via a right-click menu option from a
-    <link linkend="GuideCollections" endterm="titleGuideCollections"/>
-    window.
+    This text can be displayed from the files pane when viewing a
+    <link linkend="GuideCollections" endterm="titleGuideCollections"/>.
   </para>
   <para>
     To add or edit this text in Geeqie, display the collection in the files pane and select <guimenuitem>Edit info text</guimenuitem> from the <guimenu>Info text</guimenu> submenu of a file's context menu. The text is stored when the collection is saved.

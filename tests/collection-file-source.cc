@@ -12,6 +12,8 @@
 #include "collect-io.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "intl.h"
+#include "layout.h"
 #include "options.h"
 #include "sort-type.h"
 #include "ui-fileops.h"
@@ -20,6 +22,31 @@
 
 namespace
 {
+
+GtkWidget *find_button_by_label(GtkWidget *widget, const gchar *label)
+{
+	if (GTK_IS_BUTTON(widget) && g_strcmp0(gtk_button_get_label(GTK_BUTTON(widget)), label) == 0) return widget;
+	for (GtkWidget *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		if (GtkWidget *button = find_button_by_label(child, label)) return button;
+	return nullptr;
+}
+
+GtkWidget *collection_confirm_dialog(GtkWidget *parent)
+{
+	GList *windows = gtk_window_list_toplevels();
+	GtkWidget *dialog = nullptr;
+	for (GList *work = windows; work; work = work->next)
+		{
+		auto *window = GTK_WINDOW(work->data);
+		if (gtk_window_get_transient_for(window) == GTK_WINDOW(parent))
+			{
+			dialog = GTK_WIDGET(window);
+			break;
+			}
+		}
+	g_list_free(windows);
+	return dialog;
+}
 
 class CollectionFileSource : public testing::Test
 {
@@ -112,6 +139,27 @@ TEST_F(CollectionFileSource, RelativePathsRoundTripAndSaveAs)
 	EXPECT_NE(collection_list_find_fd(cd->list, second), nullptr);
 }
 
+TEST_F(CollectionFileSource, SaveAsNotifiesAfterClearingModifiedState)
+{
+	g_autofree gchar *first_path = g_build_filename(directory, "first.gqv", nullptr);
+	g_autofree gchar *second_path = g_build_filename(directory, "second.gqv", nullptr);
+	paths.emplace_back(first_path);
+	paths.emplace_back(second_path);
+	ASSERT_TRUE(collection_save(cd, first_path));
+	ASSERT_TRUE(collection_add(cd, unlisted, FALSE));
+	gint dirty_notifications = 0;
+	const auto changed = [](CollectionData *collection, gpointer data)
+		{
+		if (collection->changed) ++*static_cast<gint *>(data);
+		};
+	collection_add_listener(cd, changed, &dirty_notifications);
+	ASSERT_TRUE(collection_save(cd, second_path));
+	EXPECT_EQ(dirty_notifications, 0);
+	EXPECT_FALSE(cd->changed);
+	EXPECT_STREQ(cd->path, second_path);
+	collection_remove_listener(cd, changed, &dirty_notifications);
+}
+
 TEST_F(CollectionFileSource, LoadsMixedPathsAndAppendPreservesSaveMode)
 {
 	g_autofree gchar *path = g_build_filename(directory, "a", "mixed.gqv", nullptr);
@@ -190,6 +238,19 @@ TEST_F(CollectionFileSource, NotifiesAllSubscribersAndRemovalLeavesFileIntact)
 	collection_remove_listener(cd, changed, &second_count);
 }
 
+TEST_F(CollectionFileSource, CollectionManagerUpdatesOpenCollectionWithoutSeparateWindow)
+{
+	g_autofree gchar *path = g_build_filename(directory, "managed.gqv", nullptr);
+	paths.emplace_back(path);
+	ASSERT_TRUE(collection_save(cd, path));
+	ASSERT_EQ(collection_list_find_fd(cd->list, unlisted), nullptr);
+
+	collect_manager_add(unlisted, path);
+	EXPECT_NE(collection_list_find_fd(cd->list, unlisted), nullptr);
+	collect_manager_remove(unlisted, path);
+	EXPECT_EQ(collection_list_find_fd(cd->list, unlisted), nullptr);
+}
+
 TEST_F(CollectionFileSource, MissingMemberDoesNotAddOtherFilesOrChangeMembership)
 {
 	ASSERT_EQ(g_remove(first->path), 0);
@@ -199,7 +260,7 @@ TEST_F(CollectionFileSource, MissingMemberDoesNotAddOtherFilesOrChangeMembership
 	EXPECT_EQ(g_list_length(cd->list), 2U);
 }
 
-TEST_F(CollectionFileSource, DefaultCollectionDirectoryHasVirtualFolders)
+TEST_F(CollectionFileSource, CollectionFilesAreVirtualFoldersInAnyDirectory)
 {
 	const gchar *collection_directory = get_collections_dir();
 	if (!g_str_has_prefix(collection_directory, "/tmp/")) GTEST_SKIP() << "Requires an isolated home directory";
@@ -231,10 +292,81 @@ TEST_F(CollectionFileSource, DefaultCollectionDirectoryHasVirtualFolders)
 	ASSERT_TRUE(g_file_set_contents(outside, "#Geeqie collection\n#end\n", -1, nullptr));
 	paths.emplace_back(outside);
 	FileData *ordinary_collection = file_data_new_simple(outside);
-	EXPECT_FALSE(vd_is_collection(ordinary_collection));
+	EXPECT_TRUE(vd_is_collection(ordinary_collection));
+	FileData *outside_folder = file_data_new_dir(directory);
+	directories = nullptr;
+	ASSERT_TRUE(vd_read_directories(outside_folder, &directories));
+	EXPECT_NE(g_list_find(directories, ordinary_collection), nullptr);
+	file_data_list_free(directories);
+	file_data_unref(outside_folder);
 	file_data_unref(ordinary_collection);
 	file_data_unref(folder);
 	file_data_unref(collection_file);
+}
+
+TEST_F(CollectionFileSource, LeavingModifiedCollectionCanCancelOrDiscard)
+{
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	ASSERT_TRUE(gtk_init_check());
+	g_autoptr(GtkApplication) app = gtk_application_new("org.geeqie.CollectionConfirmTest", G_APPLICATION_NON_UNIQUE);
+	g_application_set_default(G_APPLICATION(app));
+	ASSERT_TRUE(g_application_register(G_APPLICATION(app), nullptr, nullptr));
+	GtkWidget *window = gtk_window_new();
+	LayoutWindow layout{};
+	layout.window = window;
+	layout.vf = &view;
+	cd->changed = TRUE;
+	gboolean continued = FALSE;
+
+	EXPECT_FALSE(layout_confirm_collection_leave(&layout, [&continued]() { continued = TRUE; }, FALSE));
+	GtkWidget *dialog = collection_confirm_dialog(window);
+	ASSERT_NE(dialog, nullptr);
+	GtkWidget *cancel = find_button_by_label(dialog, _("Cancel"));
+	ASSERT_NE(cancel, nullptr);
+	g_signal_emit_by_name(cancel, "clicked");
+	EXPECT_FALSE(continued);
+	EXPECT_TRUE(cd->changed);
+	EXPECT_EQ(layout.collection_confirm_data, nullptr);
+
+	EXPECT_FALSE(layout_confirm_collection_leave(&layout, [&continued]() { continued = TRUE; }, FALSE));
+	dialog = collection_confirm_dialog(window);
+	ASSERT_NE(dialog, nullptr);
+	GtkWidget *discard = find_button_by_label(dialog, _("_Discard"));
+	ASSERT_NE(discard, nullptr);
+	g_signal_emit_by_name(discard, "clicked");
+	EXPECT_TRUE(continued);
+	EXPECT_FALSE(cd->changed);
+	EXPECT_EQ(layout.collection_confirm_data, nullptr);
+	gtk_window_destroy(GTK_WINDOW(window));
+}
+
+TEST_F(CollectionFileSource, LeavingModifiedCollectionCanSave)
+{
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	ASSERT_TRUE(gtk_init_check());
+	g_autoptr(GtkApplication) app = gtk_application_new("org.geeqie.CollectionConfirmSaveTest", G_APPLICATION_NON_UNIQUE);
+	g_application_set_default(G_APPLICATION(app));
+	ASSERT_TRUE(g_application_register(G_APPLICATION(app), nullptr, nullptr));
+	g_autofree gchar *path = g_build_filename(directory, "save.gqv", nullptr);
+	paths.emplace_back(path);
+	ASSERT_TRUE(collection_save(cd, path));
+	ASSERT_TRUE(collection_add(cd, unlisted, FALSE));
+	GtkWidget *window = gtk_window_new();
+	LayoutWindow layout{};
+	layout.window = window;
+	layout.vf = &view;
+	gboolean continued = FALSE;
+
+	EXPECT_FALSE(layout_confirm_collection_leave(&layout, [&continued]() { continued = TRUE; }, FALSE));
+	GtkWidget *dialog = collection_confirm_dialog(window);
+	ASSERT_NE(dialog, nullptr);
+	GtkWidget *save = find_button_by_label(dialog, _("Save"));
+	ASSERT_NE(save, nullptr);
+	g_signal_emit_by_name(save, "clicked");
+	EXPECT_TRUE(continued);
+	EXPECT_FALSE(cd->changed);
+	EXPECT_EQ(layout.collection_confirm_data, nullptr);
+	gtk_window_destroy(GTK_WINDOW(window));
 }
 
 TEST_F(CollectionFileSource, MovingIconsPreservesSelectionAndCollectionOrder)

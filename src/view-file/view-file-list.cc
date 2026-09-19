@@ -560,7 +560,7 @@ void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 		{
 		if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
 			{
-			collection_window_new(vf->click_fd->path);
+			if (vf->layout) layout_set_path(vf->layout, vf->click_fd->path);
 			}
 		else
 			{

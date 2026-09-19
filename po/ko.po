@@ -5967,14 +5967,6 @@ msgstr ""
 msgid "Thumbnail color management"
 msgstr "마중그림 색상 관리"
 
-#: ../src/preferences.cc:1704
-msgid "Collection preview:"
-msgstr "컬렉션 미리보기:"
-
-#: ../src/preferences.cc:1707
-msgid "The maximum number of thumbnails shown in a Collection preview montage"
-msgstr "컬렉션 미리보기 몽타주에 표시되는 마중그림의 최대 개수"
-
 #: ../src/preferences.cc:1710
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""

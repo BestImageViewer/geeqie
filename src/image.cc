@@ -27,7 +27,6 @@
 #include <cairo.h>
 #include <glib-object.h>
 
-#include "collect-table.h"
 #include "collect.h"
 #include "color-man.h"
 #include "exif.h"
@@ -1505,18 +1504,9 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 
 void image_change_from_collection(ImageWindow *imd, CollectionData *cd, CollectInfo *info, gdouble zoom)
 {
-	CollectWindow *cw;
-
 	if (!cd || !info || !g_list_find(cd->list, info)) return;
 
 	image_change_real(imd, info->fd, cd, info, zoom);
-	cw = collection_window_find(cd);
-	if (cw)
-		{
-		collection_table_set_focus(cw->table, info);
-		collection_table_unselect_all(cw->table);
-		collection_table_select(cw->table,info);
-		}
 
 	if (info->fd)
 		{
