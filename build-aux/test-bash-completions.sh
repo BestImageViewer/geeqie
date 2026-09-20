@@ -43,7 +43,7 @@ echo "$options4" | sort > "$options_cc"
 action_list1=$(grep 'actions=' "$completions_file")
 action_list2=$(echo "$action_list1" | cut --delimiter='=' --fields=2)
 action_list3=$(echo "$action_list2" | sed "s/\x27//g")
-action_list4=$(echo "$action_list3" | sed 's/ /\n/g')
+action_list4=$(echo "$action_list3" | tr ' \t' '\n' | sed -e 's/::.*//' -e 's/(.*//' -e '/^$/d')
 echo "$action_list4" | sort > "$actions_cc"
 
 xvfb-run --auto-servernum "$geeqie_exe" --help > "$help_output"
@@ -117,29 +117,18 @@ then
 	exit_status=1
 fi
 
-xvfb-run --auto-servernum "$geeqie_exe" --action-list --quit | cut --delimiter=' ' --fields=1 | sed '/^$/d' > "$actions_help"
+if ! xvfb-run --auto-servernum "$geeqie_exe" --action-list --quit > "$actions_help"
+then
+    printf '%s\n' 'Unable to get Geeqie action list' >&2
+    exit 1
+fi
 
-## @FIXME Find a better way to ignore the junk
-awk -W posix -v actions_help_filtered="$actions_help_filtered" '
-BEGIN {
-LINT = "fatal"
-valid_found = 0
-}
-
-/about/ {
-	valid_found = 1
-	}
-
-/^[A-Z].*?/ && valid_found {
-	if ((index($0, "desktop") == 0) && (index($0, "glx") == 0) && (index($0, "Geeqie not running") == 0) && (index($0, "Gtk-Message") == 0)) {
-		print $0 >> actions_help_filtered
-		}
-	}
-
-END {
-close(actions_help_filtered)
-}
-' "$actions_help"
+LC_ALL=C awk '/^[a-z][a-z0-9-]*[[:space:]]/ { print $1 }' "$actions_help" > "$actions_help_filtered"
+if [ ! -s "$actions_help_filtered" ]
+then
+    printf '%s\n' 'Geeqie action list is empty' >&2
+    exit 1
+fi
 
 awk -W posix '
 BEGIN {
