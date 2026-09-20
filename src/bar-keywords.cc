@@ -1216,6 +1216,7 @@ void bar_pane_keywords_destroy(gpointer data)
 
 	file_data_unref(pkd->fd);
 	g_free(pkd->key);
+	g_free(pkd->pane.id);
 
 	g_free(pkd);
 }
