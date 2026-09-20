@@ -183,9 +183,10 @@ FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *)
 }
 
 static gboolean vflist_filename_tooltip_cb(GtkWidget *widget, gint x, gint y, gboolean keyboard_mode,
-	                                        GtkTooltip *tooltip, gpointer)
+	                                        GtkTooltip *tooltip, gpointer data)
 {
-	if (keyboard_mode) return FALSE;
+	auto *vf = static_cast<ViewFile *>(data);
+	if (keyboard_mode && !vf->collection) return FALSE;
 
 	auto *tree_view = GTK_TREE_VIEW(widget);
 	gint tree_x;
@@ -194,10 +195,18 @@ static gboolean vflist_filename_tooltip_cb(GtkWidget *widget, gint x, gint y, gb
 
 	g_autoptr(GtkTreePath) path = nullptr;
 	GtkTreeViewColumn *column = nullptr;
-	if (!gtk_tree_view_get_path_at_pos(tree_view, tree_x, tree_y, &path, &column, nullptr, nullptr)) return FALSE;
+	if (keyboard_mode)
+		{
+		gtk_tree_view_get_cursor(tree_view, &path, &column);
+		if (!path) return FALSE;
+		}
+	else if (!gtk_tree_view_get_path_at_pos(tree_view, tree_x, tree_y, &path, &column, nullptr, nullptr)) return FALSE;
 
-	const gint column_store_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
-	if (column_store_idx != FILE_COLUMN_FORMATTED && column_store_idx != FILE_COLUMN_FORMATTED_WITH_STARS) return FALSE;
+	if (!vf->collection)
+		{
+		const gint column_store_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
+		if (column_store_idx != FILE_COLUMN_FORMATTED && column_store_idx != FILE_COLUMN_FORMATTED_WITH_STARS) return FALSE;
+		}
 
 	GtkTreeIter iter;
 	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
@@ -207,6 +216,13 @@ static gboolean vflist_filename_tooltip_cb(GtkWidget *widget, gint x, gint y, gb
 	g_autofree gchar *name = nullptr;
 	gtk_tree_model_get(model, &iter, FILE_COLUMN_POINTER, &fd, FILE_COLUMN_NAME, &name, -1);
 	if (!fd || !name) return FALSE;
+
+	if (vf->collection)
+		{
+		gtk_tooltip_set_text(tooltip, fd->path);
+		gtk_tree_view_set_tooltip_row(tree_view, tooltip, path);
+		return TRUE;
+		}
 
 	GdkRectangle cell_area;
 	gtk_tree_view_get_cell_area(tree_view, path, column, &cell_area);
@@ -827,7 +843,7 @@ static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *it
 	g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
 
 	disabled_grouping = fd->disable_grouping ? _(" [NO GROUPING]") : "";
-	g_autofree gchar *name = g_strdup_printf("%s%s%s", link, vf->collection ? fd->path : fd->name, disabled_grouping);
+	g_autofree gchar *name = g_strdup_printf("%s%s%s", link, fd->name, disabled_grouping);
 	g_autofree gchar *size = text_from_size(fd->size);
 	const gchar *infotext = (vf->collection && options->show_collection_infotext) ? collection_get_info_text(vf->collection, fd) : nullptr;
 
@@ -2010,6 +2026,8 @@ ViewFile *vflist_new(ViewFile *vf)
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(VFLIST(vf)->details_view), FALSE);
 	gtk_tree_view_set_show_expanders(GTK_TREE_VIEW(VFLIST(vf)->details_view), FALSE);
 	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(VFLIST(vf)->details_view), -1);
+	gtk_widget_set_has_tooltip(VFLIST(vf)->details_view, TRUE);
+	g_signal_connect(VFLIST(vf)->details_view, "query-tooltip", G_CALLBACK(vflist_filename_tooltip_cb), vf);
 
 	column = 0;
 

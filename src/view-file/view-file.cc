@@ -1669,6 +1669,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 
 	if (vf->collection)
 		{
+		gmenu_append_int32_action_item(sort_menu, sort_type_get_text(SORT_PATH), "win.view-file-sort", SORT_PATH);
 		gmenu_append_int32_action_item(sort_menu, _("Collection order"), "win.view-file-sort", SORT_NONE);
 		g_autoptr(GMenu) collection_menu = g_menu_new();
 		g_autoptr(GMenu) info_text_menu = g_menu_new();
@@ -1840,6 +1841,11 @@ gboolean vf_read_source(ViewFile *vf, GList **list)
 gint vf_filelist_compare(ViewFile *vf, const FileData *a, const FileData *b)
 {
 	if (a == b) return 0;
+	if (vf->collection && vf->sort.method == SORT_PATH)
+		{
+		const gint result = utf8_compare(a->path, b->path, vf->sort.case_sensitive);
+		return vf->sort.ascending ? result : -result;
+		}
 	if (vf->collection && vf->sort.method == SORT_NONE)
 		{
 		const gint first = GPOINTER_TO_INT(g_hash_table_lookup(vf->collection_order, a));

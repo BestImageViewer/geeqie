@@ -795,6 +795,7 @@ static GtkWidget *layout_sort_popover_new(LayoutWindow *lw)
 		}
 	if (lw->vf && lw->vf->collection)
 		{
+		layout_sort_popover_append_method_item(sort_section, SORT_PATH);
 		g_autoptr(GMenuItem) item = g_menu_item_new(_("Collection order"), nullptr);
 		g_menu_item_set_action_and_target(item, "sort.method", "i", SORT_NONE);
 		g_menu_append_item(sort_section, item);
