@@ -1,3 +1,73 @@
+Geeqie 3.2
+============
+
+  - Collections integrated into the main window. .gqv files appear as virtual folders, with their
+    contents displayed in the files pane. Collection management now includes editing, appending,
+    saving, reordering, sorting, randomizing, and navigating to an image’s original folder.
+    Standalone collection windows and collection previews were removed. Unsaved changes are protected
+    by Save/Discard/Cancel prompts.
+
+  - Collection information and paths improved. Added editing and display of per-image collection info
+    text, including in the overlay display. Added forced relative-path saving. Collection list rows
+    now show filenames with full-path tooltips and a collection-only “Sort by path” option. Opening
+    collections with Enter or double-click was fixed.
+
+  - Extensive GTK4 modernization. Migrated the icon view to GtkGridView, and search results, file
+    filters, shortcut configuration, plugin lists, file-operation lists, and advanced EXIF displays
+    to GtkColumnView. Converted folder lists and layout configuration to newer widgets. Replaced
+    numerous deprecated drawing, dialog, positioning, and widget APIs and removed compatibility
+    wrappers. The files list and directory tree still retain legacy APIs.
+
+  - Keyboard shortcuts and menus revised. Made shortcuts consistently configurable, revised defaults
+    toward GNOME conventions, added per-window keyboard maps, improved conflict reporting, and fixed
+    plugin shortcut overrides and duplicate detection. Fixed menu keyboard navigation, F10
+    activation, focus restoration, folder-tree toggling, and inverted boolean actions. Configured
+    shortcuts now appear in tooltips and plugin context menus.
+
+  - Files-pane interaction improved. Added an adjustable, remembered filename-column width and
+    display of the date used for sorting. Fixed selection in folder lists and search results, main-
+    menu selection actions, right-click preservation of multiple selections, and selection when
+    starting a drag. Improved drag-and-drop between Geeqie windows and fixed Wayland drops into
+    Signal.
+
+  - Image display and rendering corrected. Fixed undersized thumbnails, intermittent AVIF thumbnail
+    failures, search and duplicate-window thumbnails, excessive mouse-wheel image skipping, and fuzzy
+    overlay text at 200% scaling. Added an optional navigator overlay. Improved rendering queues,
+    coalesced redraw requests, restored configurable tile caching, and prevented oversized-image
+    scaling crashes.
+    
+  - Metadata and color handling improved. Fixed MP4 EXIF reading, embedded ICC-profile handling,
+    color-management menus, and invisible GPS markers. Enabled color management in full AppImages.
+    Added a metadata-key entry to the sidebar’s Add menu and a rating “greater than or equal to”
+    filter. Fixed deleting keywords from multiple files and a metadata-buffer crash.
+
+  - File operations and dialogs refined. Revised Geeqie’s trash system, clarified copy/cut behavior,
+    corrected the GNOME clipboard MIME type, and fixed filename completion in address and copy
+    dialogs. Added a “Current folder” button to file choosers and fixed Latin-1 filename handling. An
+    intermediate copy/move dialog change was reverted.
+
+  - Layout and general UI fixes. Repaired horizontal and vertical splits, sidebar expanders,
+    transparent window borders, duplicated toolbar contents, automatic navigation to the next folder,
+    and fullscreen plugin availability. Improved theme-based image borders, pan-view scrolling and
+    filtering, and spelling-checker behavior.
+
+  - Shutdown and memory fixes. Corrected sidebar removal, directory-view lifetime during destruction,
+    and rating-popover cleanup to eliminate normal-quit warnings. Fixed a keyword-sidebar memory leak
+    and several pointer/compiler warnings. Thumbnail-size tracking was simplified to avoid deprecated
+    widget calls.
+
+  - Build, packaging, and testing updated. Added deprecation-warning build options and test coverage,
+    resolved Meson option naming inconsistencies, fixed debug builds, and excluded tests from source
+    correctness checks. Added AppImage update information, fixed Snap SVG support, and expanded
+    isolated-display tooling for Wayland/Weston.
+
+  - Documentation, translations, and internal cleanup. Updated German and other translation catalogs,
+    corrected translation format validation, and revised translation maintenance. Added contributor
+    guidance and EditorConfig settings. Refactored configuration writing, metadata storage, event
+    handling, sidebar implementations, and numerous helpers to reduce duplication and unused code.
+
+  - Revised Bash completions
+  
 Geeqie 3.1
 ============
 
