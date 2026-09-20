@@ -35,6 +35,8 @@ struct ViewFileInfoList
 	FileData *select_fd;
 
 	gboolean thumbs_enabled;
+	gint thumb_width;
+	gint thumb_height;
 	gboolean syncing_selection;
 	gboolean syncing_expansion;
 

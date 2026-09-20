@@ -107,20 +107,14 @@ static gboolean vflist_is_multiline(ViewFile *vf);
 
 static gboolean vflist_thumb_size_changed(ViewFile *vf)
 {
-	GtkTreeViewColumn *column = gtk_tree_view_get_column(GTK_TREE_VIEW(vf->listview), FILE_VIEW_COLUMN_THUMB);
-	if (!column) return FALSE;
+	auto *info = VFLIST(vf);
+	const gboolean changed = info->thumb_width != options->thumbnails.size.width ||
+	                         info->thumb_height != options->thumbnails.size.height;
 
-	g_autoptr(GList) cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
-	if (!cells) return FALSE;
+	info->thumb_width = options->thumbnails.size.width;
+	info->thumb_height = options->thumbnails.size.height;
 
-	auto *renderer = static_cast<GtkCellRenderer *>(cells->data);
-	const gint old_width = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(renderer), "thumbnail-width"));
-	const gint old_height = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(renderer), "thumbnail-height"));
-
-	g_object_set_data(G_OBJECT(renderer), "thumbnail-width", GINT_TO_POINTER(options->thumbnails.size.width));
-	g_object_set_data(G_OBJECT(renderer), "thumbnail-height", GINT_TO_POINTER(options->thumbnails.size.height));
-
-	return old_width != options->thumbnails.size.width || old_height != options->thumbnails.size.height;
+	return changed;
 }
 static gchar *vflist_get_formatted(ViewFile *vf, const gchar *name, const gchar *sidecars, const gchar *size, const gchar *time, gboolean expanded, const gchar *star_rating, const gchar *infotext);
 static void vflist_listview_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str, gpointer data);
