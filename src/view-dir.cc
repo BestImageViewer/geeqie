@@ -128,6 +128,7 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 		case DIRVIEW_TREE: vdtree_destroy_cb(vd->view, data); break;
 		}
 	if (vd->collection_parent) g_object_unref(vd->view);
+	g_object_unref(vd->view);
 	g_free(vd->collection_path);
 
 	folder_icons_free(vd->pf);
@@ -1340,6 +1341,8 @@ ViewDir *vd_new(LayoutWindow *lw)
 		}
 
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vd->widget), vd->view);
+	// Keep the view alive until directory cleanup has released its model data.
+	g_object_ref(vd->view);
 
 	vd_dnd_init(vd);
 

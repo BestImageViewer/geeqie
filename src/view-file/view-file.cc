@@ -2469,6 +2469,7 @@ static GtkWidget *rating_filter_popover_new(ViewFile *vf)
 			gtk_widget_set_tooltip_text(button, _("Right-click for comparison options"));
 			GtkWidget *comparison_popover = gtk_popover_new();
 			gtk_widget_set_parent(comparison_popover, button);
+			g_signal_connect_swapped(button, "destroy", G_CALLBACK(gtk_widget_unparent), comparison_popover);
 			g_autofree gchar *comparison_label = g_strdup_printf(">= %s", _(format_rating_list[i]));
 			GtkWidget *comparison_item = gtk_button_new_with_label(comparison_label);
 			gtk_button_set_has_frame(GTK_BUTTON(comparison_item), FALSE);
