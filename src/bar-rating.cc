@@ -242,7 +242,7 @@ void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	bar_update_expander(pane);
+	bar_update_expander(pane, prd->pane);
 	bar_pane_rating_update(prd);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

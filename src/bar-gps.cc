@@ -1053,7 +1053,7 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 		}
 
 	gtk_widget_set_size_request(pgd->widget, -1, pgd->height);
-	bar_update_expander(pane);
+	bar_update_expander(pane, pgd->pane);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

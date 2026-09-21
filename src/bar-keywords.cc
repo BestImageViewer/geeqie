@@ -1708,7 +1708,7 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
 		}
 
-	bar_update_expander(pane);
+	bar_update_expander(pane, pkd->pane);
 	bar_pane_keywords_update(pkd);
 }
 

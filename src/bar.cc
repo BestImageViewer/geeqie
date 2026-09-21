@@ -569,16 +569,11 @@ void bar_write_config(GtkWidget *bar, RcString &rc)
 	WRITE_NL(); WRITE_STRING("</bar>");
 }
 
-void bar_update_expander(GtkWidget *pane)
+void bar_update_expander(GtkWidget *pane, const PaneData &pd)
 {
-	auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	GtkWidget *expander;
+	GtkWidget *expander = gtk_widget_get_parent(pane);
 
-	if (!pd) return;
-
-	expander = gtk_widget_get_parent(pane);
-
-	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd->expanded);
+	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd.expanded);
 }
 
 void bar_add(GtkWidget *bar, GtkWidget *pane)
