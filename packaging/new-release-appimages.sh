@@ -92,3 +92,9 @@ strip_appimage_update_information "$new_name"
 rm "$tmp_file"
 
 printf '%s\n' "$tmp_dir"
+
+gh release upload "$latest_tag" \
+    "$tmp_dir"/Geeqie-"$latest_version"-x86_64.AppImage \
+    "$tmp_dir"/Geeqie-"$latest_version"-minimal-x86_64.AppImage \
+    "$tmp_dir"/Geeqie-"$latest_version"-aarch64.AppImage \
+    "$tmp_dir"/Geeqie-"$latest_version"-minimal-aarch64.AppImage
