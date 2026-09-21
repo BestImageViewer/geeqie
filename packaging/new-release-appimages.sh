@@ -18,23 +18,45 @@
 ## the major/minor version plus git commit and not the patch version.
 ##
 
+set -e
+
+# readelf supports foreign architectures without rewriting the AppImage payload.
+for tool in readelf dd wget
+do
+	if ! command -v "$tool" > /dev/null
+	then
+		printf '%s was not found\n' "$tool" >&2
+		exit 1
+	fi
+done
+
 tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
 tmp_file=$(mktemp  "$tmp_dir/geeqie.XXXXXXXXXX")
 
 latest_tag=$(git tag | tail -1)
 latest_version="${latest_tag#?}"
 
-if ! command -v objcopy > /dev/null
-then
-	printf "objcopy was not found\n" >&2
-	exit 1
-fi
-
 strip_appimage_update_information()
 {
 	appimage="$1"
 
-	objcopy --remove-section=.upd_info "$appimage"
+	# AppImages append a filesystem after the ELF runtime. objcopy discards it.
+	# Keep the section and its size, but clear its contents in place.
+	sections=$(LC_ALL=C readelf --section-headers --wide "$appimage")
+	update_section=$(printf '%s\n' "$sections" | awk '
+		{
+		for (i = 1; i <= NF; i++)
+			if ($i == ".upd_info" && $(i + 1) == "PROGBITS")
+				print $(i + 3), $(i + 4)
+		}')
+	if [ -z "$update_section" ]
+	then
+		printf 'No update information section found in %s\n' "$appimage" >&2
+		exit 1
+	fi
+	update_offset=$((0x${update_section% *}))
+	update_size=$((0x${update_section#* }))
+	dd if=/dev/zero of="$appimage" bs=1 seek="$update_offset" count="$update_size" conv=notrunc status=none
 }
 
 cd "$tmp_dir" || exit
@@ -69,4 +91,4 @@ strip_appimage_update_information "$new_name"
 
 rm "$tmp_file"
 
-echo "$tmp_dir"
+printf '%s\n' "$tmp_dir"
