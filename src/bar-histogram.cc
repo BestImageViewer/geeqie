@@ -416,7 +416,7 @@ void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attrib
 	phd->histogram.set_channel(histogram_channel);
 	phd->histogram.set_mode(histogram_mode);
 
-	bar_update_expander(pane);
+	bar_update_expander(pane, phd->pane);
 	bar_pane_histogram_update(phd);
 }
 

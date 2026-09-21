@@ -813,7 +813,7 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 		gtk_label_set_text(GTK_LABEL(ped->pane.title), title);
 		}
 
-	bar_update_expander(pane);
+	bar_update_expander(pane, ped->pane);
 	bar_pane_exif_update(ped);
 }
 

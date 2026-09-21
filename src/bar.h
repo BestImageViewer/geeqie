@@ -67,7 +67,7 @@ void bar_write_config(GtkWidget *bar, RcString &rc);
 
 void bar_populate_default(GtkWidget *bar);
 
-void bar_update_expander(GtkWidget *pane);
+void bar_update_expander(GtkWidget *pane, const PaneData &pd);
 void bar_add(GtkWidget *bar, GtkWidget *pane);
 GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id);
 
