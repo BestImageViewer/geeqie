@@ -1087,32 +1087,6 @@ static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, g
  *-----------------------------------------------------------------------------
  */
 
-static void pan_info_add_exif(PanTextAlignment &ta, FileData *fd)
-{
-	GList *exif_list;
-	gchar *title;
-	gchar *key;
-
-	if (!fd) return;
-
-	exif_list = bar_pane_exif_list();
-	while (exif_list)
-		{
-		title = static_cast<gchar *>(exif_list->data);
-		exif_list = exif_list->next;
-		key = static_cast<gchar *>(exif_list->data);
-		exif_list = exif_list->next;
-
-		g_autofree gchar *text = metadata_read_string(fd, key, METADATA_FORMATTED);
-		if (text && text[0] != '\0')
-			{
-			ta.add(title, text);
-			}
-		}
-
-	g_list_free_full(exif_list, g_free);
-}
-
 static void pan_info_calc_text_alignment(PanWindow *pw, PanItem *pbox, FileData *fd)
 {
 	PanTextAlignment ta{ pw, pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, PanKey::Info };
@@ -1129,7 +1103,16 @@ static void pan_info_calc_text_alignment(PanWindow *pw, PanItem *pbox, FileData 
 
 	if (pw->info_includes_exif)
 		{
-		pan_info_add_exif(ta, fd);
+		const auto add_exif = [fd, &ta](const gchar *key, const gchar *title)
+		{
+			g_autofree gchar *text = metadata_read_string(fd, key, METADATA_FORMATTED);
+			if (text && text[0] != '\0')
+				{
+				ta.add(title, text);
+				}
+		};
+
+		bar_pane_exif_foreach(add_exif);
 		}
 
 	ta.calc(pbox);

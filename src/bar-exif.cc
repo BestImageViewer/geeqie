@@ -735,17 +735,15 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 } // namespace
 
-GList *bar_pane_exif_list()
+void bar_pane_exif_foreach(const ExifEntryFunc &exif_entry_func)
 {
 	const LayoutWindow *lw = layout_window_first();
 
 	GtkWidget *pane = bar_find_pane_by_id(lw->bar, PANE_EXIF, "exif");
-	if (!pane) return nullptr;
+	if (!pane) return;
 
 	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!ped) return nullptr;
-
-	GList *exif_list = nullptr;
+	if (!ped) return;
 
 	for (GtkWidget *widget = gtk_widget_get_first_child(ped->vbox);
 	     widget;
@@ -754,11 +752,8 @@ GList *bar_pane_exif_list()
 		auto *ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
 		if (!ee) continue;
 
-		exif_list = g_list_append(exif_list, g_strdup(ee->title));
-		exif_list = g_list_append(exif_list, g_strdup(ee->key));
+		exif_entry_func(ee->key, ee->title);
 		}
-
-	return exif_list;
 }
 
 GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
