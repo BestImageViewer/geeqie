@@ -311,12 +311,12 @@ gboolean load_options(ConfOptions *)
 	if (isdir(GQ_SYSTEM_WIDE_DIR))
 		{
 		g_autofree gchar *rc_path = g_build_filename(GQ_SYSTEM_WIDE_DIR, RC_FILE_NAME, NULL);
-		success = load_config_from_file(rc_path, TRUE);
+		success = isfile(rc_path) && load_config_from_file(rc_path, TRUE);
 		DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed");
 		}
 
 	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
-	success = load_config_from_file(rc_path, TRUE);
+	success = isfile(rc_path) && load_config_from_file(rc_path, TRUE);
 	DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed");
 	return success;
 }
