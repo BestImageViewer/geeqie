@@ -739,7 +739,7 @@ void startup_common(GtkApplication *, gpointer)
 	g_autofree gchar *rc_file = g_build_filename(config_home, GQ_APPNAME_LC, RC_FILE_NAME, nullptr);
 	g_autofree gchar *rc_backup = g_strconcat(rc_file, "~", nullptr);
 
-	if (!isfile(accels_ini_path))
+	if (isfile(accels_old) && !isfile(accels_ini_path))
 		{
 		g_autofree gchar *description = g_strdup_printf(
 		_("As part of the GTK3/GTK4 migration, it was necessary to rework the entire menu and action code.\n \
