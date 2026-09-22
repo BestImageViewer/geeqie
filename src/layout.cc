@@ -3259,7 +3259,7 @@ LayoutWindow *layout_new_from_default()
 	LayoutWindow *lw;
 
 	g_autofree gchar *default_path = g_build_filename(get_rc_dir(), DEFAULT_WINDOW_LAYOUT, NULL);
-	if (load_config_from_file(default_path, TRUE))
+	if (isfile(default_path) && load_config_from_file(default_path, TRUE))
 		{
 		lw = layout_window_list.back();
 		}
