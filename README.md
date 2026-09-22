@@ -10,7 +10,7 @@ Package Status:
 [![Packaging status](https://repology.org/badge/tiny-repos/geeqie.svg)](https://repology.org/project/geeqie/versions)
 [![latest packaged version(s)](https://repology.org/badge/latest-versions/geeqie.svg)](https://repology.org/project/geeqie/versions)
 
-## ![](data/icons/geeqie.svg) Geeqie - an image viewer
+## <img src="data/icons/geeqie.svg" width="32" height="32" alt=""> Geeqie - an image viewer
 
 Geeqie is a free open software image viewer and organiser program for Linux,
 FreeBSD and other Unix-like operating systems. It can be used as a simple
