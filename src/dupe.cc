@@ -2669,7 +2669,7 @@ static gboolean dupe_insert_in_list_cache(DupeWindow *dw, FileData *fd)
 		dw->second_drop ? dw->second_list_cache : dw->list_cache;
 	/* We do this as a lookup + add as we don't want to overwrite
 	   items as that would leak the old value. */
-	if (g_hash_table_lookup(table, fd) != nullptr)
+	if (g_hash_table_contains(table, fd))
 		return FALSE;
 	return g_hash_table_add(table, fd);
 }

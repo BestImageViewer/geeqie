@@ -282,7 +282,7 @@ void FileData::set_path(const gchar *new_path)
 		g_free(original_path);
 		}
 
-	g_assert(!g_hash_table_lookup(context->file_data_pool, new_path));
+	g_assert(!g_hash_table_contains(context->file_data_pool, new_path));
 
 	original_path = g_strdup(new_path);
 	g_hash_table_insert(context->file_data_pool, original_path, this);
@@ -2593,7 +2593,7 @@ gboolean FileData::file_data_apply_ci(FileData *fd)
 		DEBUG_1("planned change: applying %s -> %s", fd->change->dest, fd->path);
 		fd->planned_change_remove();
 
-		if (g_hash_table_lookup(fd->context->file_data_pool, fd->change->dest))
+		if (g_hash_table_contains(fd->context->file_data_pool, fd->change->dest))
 			{
 			/* this change overwrites another file which is already known to other modules
 			   renaming fd would create duplicate FileData structure
