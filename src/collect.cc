@@ -711,15 +711,14 @@ void collection_randomize(CollectionData *cd)
 
 static CollectInfo *collection_info_new_if_not_exists(CollectionData *cd, struct stat *st, FileData *fd, const gchar *infotext)
 {
-	CollectInfo *ci;
-
-	if (!options->collections_duplicates)
+	if (!options->collections_duplicates &&
+	    g_hash_table_contains(cd->existence, fd->path))
 		{
-		if (g_hash_table_lookup(cd->existence, fd->path)) return nullptr;
+		return nullptr;
 		}
 
-	ci = collection_info_new(fd, st, infotext);
-	if (ci) g_hash_table_insert(cd->existence, fd->path, g_strdup(""));
+	CollectInfo *ci = collection_info_new(fd, st, infotext);
+	if (ci) g_hash_table_add(cd->existence, fd->path);
 	return ci;
 }
 

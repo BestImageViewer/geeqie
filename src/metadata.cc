@@ -697,23 +697,24 @@ static gboolean metadata_legacy_read(FileData *fd, GList **keywords, gchar **com
 
 static GList *remove_duplicate_strings_from_list(GList *list)
 {
-	GList *work = list;
-	GHashTable *hashtable = g_hash_table_new(g_str_hash, g_str_equal);
+	g_autoptr(GHashTable) hashtable = g_hash_table_new(g_str_hash, g_str_equal);
 	GList *newlist = nullptr;
 
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
-		auto key = static_cast<gchar *>(work->data);
+		auto *key = static_cast<gchar *>(work->data);
 
-		if (g_hash_table_lookup(hashtable, key) == nullptr)
+		if (g_hash_table_contains(hashtable, key))
 			{
-			g_hash_table_insert(hashtable, key, GINT_TO_POINTER(1));
+			g_free(key);
+			}
+		else
+			{
+			g_hash_table_add(hashtable, key);
 			newlist = g_list_prepend(newlist, key);
 			}
-		work = work->next;
 		}
 
-	g_hash_table_destroy(hashtable);
 	g_list_free(list);
 
 	return g_list_reverse(newlist);
