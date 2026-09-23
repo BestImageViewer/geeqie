@@ -9,7 +9,7 @@
 ## Dialogs allow the user to install additional features.
 ##
 
-version="2026-07-01"
+version="2026-09-23"
 description='
 Geeqie is an image viewer.
 This script will download, compile, and install Geeqie on Debian-based systems.
@@ -26,23 +26,32 @@ Command line options are:
 -l --list List required dependencies
 '
 
+# Required before starting the graphical installer
+prerequisite_array="zenity
+sudo"
+
 # Essential for compiling
-essential_array="git
+essential_array="tar
+git
 build-essential
-libglib2.0-0
+gettext
+pkg-config
+libglib2.0-dev
 libgtk-4-dev
-libtool
 meson
-ninja-build
-yelp-tools
-help2man
-doclifter"
+ninja-build"
 
 # Optional libraries
-optional_array="LCMS (for color management)
+optional_array="yelp-tools (optional HTML-help generation)
+yelp-tools
+help2man (developer documentation tools)
+help2man
+doclifter (developer documentation tools)
+doclifter
+LCMS (for color management)
 liblcms2-dev
 exiv2 (for exif handling)
-libgexiv2-dev
+libexiv2-dev
 lua (for lua commands)
 liblua5.3-dev
 libffmpegthumbnailer (for mpeg thumbnails)
@@ -54,7 +63,7 @@ libjpeg-dev
 librsvg2 (for viewing .svg images)
 librsvg2-common
 libwmf (for viewing .wmf images)
-libwmf0.2-7-gtk
+libwmf-0.2-7-gtk
 exiftran (for image rotation)
 exiftran
 imagemagick (for image rotation)
@@ -83,13 +92,11 @@ libopenjp2 (for JP2 images)
 libopenjp2-7-dev
 libraw (for CR3 images)
 libraw-dev
-libomp (required by libraw)
-libomp-dev
 libarchive (for compressed files e.g. zip, including timezone)
 libarchive-dev
 libspelling (for spelling checks)
 libspelling-1-dev
-libshumate (for GPS maps)
+libshumate >= 1.5.0 (for GPS maps)
 libshumate-dev
 libpoppler (for pdf file preview)
 libpoppler-glib-dev
@@ -181,7 +188,7 @@ install_essential()
 	do
 		if package_query "$file"
 		then
-			package_install "$file"
+			package_install "$file" || exit_install
 		fi
 	done
 }
@@ -196,10 +203,61 @@ install_options()
 		set $options
 		while [ $# -gt 0 ]
 		do
-			package_install "$1"
+			package_install "$1" || exit_install
+			if [ "$1" = "libshumate-dev" ]
+			then
+				gps_map=enabled
+			fi
 			shift
 		done
 		IFS=$OLDIFS
+	fi
+}
+
+uninstall_previous()
+{
+	if [ -f build/build.ninja ] && [ -f build/meson-logs/install-log.txt ]
+	then
+		# shellcheck disable=SC2024
+		sudo --askpass ninja -C build uninstall >> "$install_log" 2>&1 || exit_install
+	fi
+}
+
+install_staged()
+{
+	# Keep privileged writes off the source filesystem (which may be NFS).
+	install_stage=$(mktemp -d /tmp/geeqie-install.XXXXXXXXXX) || exit_install
+	meson compile -C build >> "$install_log" 2>&1 || exit_install
+	meson install -C build --no-rebuild --destdir "$install_stage/files" >> "$install_log" 2>&1 || exit_install
+	tar -C "$install_stage/files" -cpf "$install_stage/files.tar" . >> "$install_log" 2>&1 || exit_install
+	# Preserve installed file modes, but leave existing system directories alone.
+	# shellcheck disable=SC2024
+	sudo --askpass tar --no-same-owner --no-overwrite-dir -xpf "$install_stage/files.tar" -C / >> "$install_log" 2>&1 || exit_install
+
+	# Meson records DESTDIR paths; uninstall needs the actual system paths.
+	awk -v prefix="$install_stage/files" '
+		index($0, prefix "/") == 1 { $0 = substr($0, length(prefix) + 1) }
+		{ print }
+	' build/meson-logs/install-log.txt > "$install_stage/install-log.txt" || exit_install
+	cat "$install_stage/install-log.txt" > build/meson-logs/install-log.txt || exit_install
+	rm -rf "$install_stage"
+	install_stage=
+}
+
+stop_progress()
+{
+	if [ -n "$progress_pid" ]
+	then
+		exec 3>&-
+		kill "$progress_pid" 2> /dev/null
+		wait "$progress_pid" 2> /dev/null
+		progress_pid=
+	fi
+	if [ -n "$zen_pipe" ]
+	then
+		rm -f "$zen_pipe"
+		rmdir "$progress_dir"
+		zen_pipe=
 	fi
 }
 
@@ -209,7 +267,7 @@ uninstall()
 	if [ "$current_dir" = "geeqie" ]
 	then
 
-		sudo --askpass  ninja -C build uninstall
+		uninstall_previous
 
 		if ! zenity --title="Uninstall Geeqie" --text="WARNING.\nThis will delete folder:\n\n$PWD\n\nand all sub-folders!" --question --ok-label="Cancel" --cancel-label="OK" 2> /dev/null
 		then
@@ -249,19 +307,45 @@ package_install()
 	fi
 }
 
+# Keep these minimum versions in sync with meson.build.
+check_versions()
+{
+	meson_version=$(meson --version)
+	if ! dpkg --compare-versions "$meson_version" ge 1.3.2
+	then
+		printf '%s\n' "Meson >= 1.3.2 is required (found $meson_version)." >> "$install_log"
+		exit_install
+	fi
+
+	check_library gtk4 4.18
+	check_library glib-2.0 2.66
+	check_library pango 1.46
+	if [ "$gps_map" = "enabled" ]
+	then
+		check_library shumate-1.0 1.5.0
+	fi
+}
+
+check_library()
+{
+	if ! pkg-config --atleast-version="$2" "$1"
+	then
+		printf '%s\n' "$1 >= $2 is required. Install a sufficiently recent development package." >> "$install_log"
+		exit_install
+	fi
+}
+
 exit_install()
 {
 	rm "$install_pass_script" > /dev/null 2>&1
 
-	if [ -p "$zen_pipe" ]
+	stop_progress
+	if [ -n "$install_stage" ]
 	then
-		printf '%b\n' "100" > "$zen_pipe"
-		printf '%b\n' "#End" > "$zen_pipe"
+		rm -rf "$install_stage"
 	fi
-
-	zenity --title="$title" --text="Geeqie is not installed\nLog file: $install_log" --info 2> /dev/null
-
-	rm "$zen_pipe" > /dev/null 2>&1
+	printf '%s\n' "Geeqie installation did not complete. Log file: $install_log" >&2
+	zenity --title="$title" --text="Geeqie installation did not complete\nLog file: $install_log" --info 2> /dev/null
 
 	exit 1
 }
@@ -270,30 +354,6 @@ exit_install()
 
 IFS='
 '
-
-# If uninstall has been run, maybe the current directory no longer exists
-if [ ! -d "$PWD" ]
-then
-	zenity --error --title="Install Geeqie and dependencies" --text="Folder $PWD does not exist!" 2> /dev/null
-
-	exit
-fi
-
-# Check system type
-systemProfile
-if [ "$DistroBasedOn" != "debian" ]
-then
-	zenity --error --title="Install Geeqie and dependencies" --text="Unknown operating system:\n
-Operating System: $OS
-Distribution: $DIST
-Psuedoname: $PSUEDONAME
-Revision: $REV
-DistroBasedOn: $DistroBasedOn
-Kernel: $KERNEL
-Machine: $MACH" 2> /dev/null
-
-	exit
-fi
 
 # Parse the command line
 OPTS=$(getopt -o vhc:t:b:ld: --long version,help,commit:,tag:,back:,list,debug: -- "$@")
@@ -326,8 +386,7 @@ do
 			shift
 			;;
 		-l | --list)
-			LIST="$2"
-			shift
+			LIST=yes
 			shift
 			;;
 		*)
@@ -338,7 +397,9 @@ done
 
 if [ -n "$LIST" ]
 then
-	printf '%b\n' "Essential libraries:"
+	printf '%b\n' "Installer prerequisites:" "$prerequisite_array" ""
+	printf '%b\n' "Minimum versions: Meson 1.3.2, GTK 4.18, GLib 2.66, Pango 1.46; GPS: libshumate 1.5.0" ""
+	printf '%b\n' "Essential build dependencies:"
 	for file in $essential_array
 	do
 		printf '%b\n' "$file"
@@ -350,6 +411,40 @@ then
 	do
 		printf '%b\n' "$file"
 	done
+
+	exit
+fi
+
+# Check prerequisites before using any graphical dialogs or sudo askpass.
+for prerequisite in $prerequisite_array
+do
+	if ! command -v "$prerequisite" > /dev/null 2>&1
+	then
+		printf '%s\n' "Missing installer prerequisite: $prerequisite" "Install zenity and sudo first (as root: apt-get install zenity sudo)." >&2
+		exit 1
+	fi
+done
+
+# If uninstall has been run, maybe the current directory no longer exists
+if [ ! -d "$PWD" ]
+then
+	zenity --error --title="Install Geeqie and dependencies" --text="Folder $PWD does not exist!" 2> /dev/null
+
+	exit
+fi
+
+# Check system type
+systemProfile
+if [ "$DistroBasedOn" != "debian" ]
+then
+	zenity --error --title="Install Geeqie and dependencies" --text="Unknown operating system:\n
+Operating System: $OS
+Distribution: $DIST
+Psuedoname: $PSUEDONAME
+Revision: $REV
+DistroBasedOn: $DistroBasedOn
+Kernel: $KERNEL
+Machine: $MACH" 2> /dev/null
 
 	exit
 fi
@@ -401,21 +496,17 @@ fi
 # so create a temporary script containing the command
 install_pass_script=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
 printf '%b\n' "#!/bin/sh
-if zenity --password --title=\"$title\" 2>/dev/null
-then
-	exit 1
-fi" > "$install_pass_script"
+exec zenity --password --title=\"$title\" 2>/dev/null" > "$install_pass_script"
 chmod +x "$install_pass_script"
 export SUDO_ASKPASS="$install_pass_script"
+
+# Put the install log in tmp, to avoid writing to PWD during a new install.
+install_log=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
 
 if [ "$install_action" = "Uninstall" ]
 then
 	uninstall
 fi
-
-# Put the install log in tmp, to avoid writing to PWD during a new install
-rm install.log 2> /dev/null
-install_log=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
 
 sleep 100 | zenity --title="$title" --text="Checking for installed files" --progress --pulsate 2> /dev/null &
 zen_pid=$!
@@ -453,25 +544,37 @@ then
 fi
 
 # Start of Zenity progress section
-zen_pipe=$(mktemp -u "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
-mkfifo "$zen_pipe"
-(tail -f "$zen_pipe" 2> /dev/null) | zenity --progress --title="$title" --text="Installing options…" --auto-close --auto-kill --percentage=0 2> /dev/null &
+progress_dir=$(mktemp -d "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX") || exit_install
+zen_pipe="$progress_dir/progress"
+mkfifo "$zen_pipe" || exit_install
+trap 'exit_install' HUP INT TERM PIPE
+zenity --progress --title="$title" --text="Installing options…" --auto-close --no-cancel --percentage=0 < "$zen_pipe" 2> /dev/null &
+progress_pid=$!
+# Keep the pipe open until completion; no tail process or auto-kill is needed.
+exec 3> "$zen_pipe"
 
-printf '%b\n' "2" > "$zen_pipe"
-printf '%b\n' "#Installing essential libraries…" > "$zen_pipe"
+printf '%b\n' "2" >&3
+printf '%b\n' "#Installing essential libraries…" >&3
 
 install_essential
 
-printf '%b\n' "4" > "$zen_pipe"
-printf '%b\n' "#Installing options…" > "$zen_pipe"
+printf '%b\n' "4" >&3
+printf '%b\n' "#Installing options…" >&3
 
+gps_map=auto
 install_options
+# Installed GPS dependencies are omitted from the selection dialog.
+if ! package_query libshumate-dev
+then
+	gps_map=enabled
+fi
+check_versions
 
-printf '%b\n' "6" > "$zen_pipe"
-printf '%b\n' "#Installing extra loaders…" > "$zen_pipe"
+printf '%b\n' "6" >&3
+printf '%b\n' "#Installing extra loaders…" >&3
 
-printf '%b\n' "10" > "$zen_pipe"
-printf '%b\n' "#Getting new sources from server…" > "$zen_pipe"
+printf '%b\n' "10" >&3
+printf '%b\n' "#Getting new sources from server…" >&3
 
 if [ "$mode" = "install" ]
 then
@@ -496,18 +599,18 @@ else
 	fi
 fi
 
-printf '%b\n' "20" > "$zen_pipe"
-printf '%b\n' "#Cleaning installed version…" > "$zen_pipe"
+printf '%b\n' "20" >&3
+printf '%b\n' "#Cleaning installed version…" >&3
 
 if [ "$mode" = "install" ]
 then
 	cd geeqie || exit 1
 else
-	sudo --askpass  ninja -C build uninstall
+	uninstall_previous
 fi
 
-printf '%b\n' "30" > "$zen_pipe"
-printf '%b\n' "#Checkout required version…" > "$zen_pipe"
+printf '%b\n' "30" >&3
+printf '%b\n' "#Checkout required version…" >&3
 
 if [ -n "$BACK" ]
 then
@@ -536,20 +639,26 @@ then
 	fi
 fi
 
-printf '%b\n' "40" > "$zen_pipe"
-printf '%b\n' "#Creating configuration files…" > "$zen_pipe"
+printf '%b\n' "40" >&3
+printf '%b\n' "#Creating configuration files…" >&3
 
-meson setup build
-meson configure --no-pager build
-printf '%b\n' "90 " > "$zen_pipe"
-printf '%b\n' "#Installing Geeqie…" > "$zen_pipe"
-sudo --askpass meson install -C build
+if [ -f build/meson-private/coredata.dat ]
+then
+	meson setup --reconfigure build -Dgps_map="$gps_map" >> "$install_log" 2>&1 || exit_install
+else
+	meson setup build -Dgps_map="$gps_map" >> "$install_log" 2>&1 || exit_install
+fi
+meson configure --no-pager build >> "$install_log" 2>&1 || exit_install
+printf '%b\n' "90 " >&3
+printf '%b\n' "#Installing Geeqie…" >&3
+install_staged
 
 rm "$install_pass_script"
 mv -f "$install_log" "./build/install.log"
 
-printf '%b\n' "100 " > "$zen_pipe"
-rm "$zen_pipe"
+printf '%b\n' "100 " >&3
+stop_progress
+trap - HUP INT TERM PIPE
 
 (for i in $(seq 0 4 100)
 do
