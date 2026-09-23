@@ -352,22 +352,21 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	gtk_window_set_resizable(GTK_WINDOW(gd->dialog), TRUE);
 
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_BUTTON_SPACE);
+	gtk_widget_set_margin_top(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(vbox, PREF_PAD_BORDER);
+	gtk_window_set_child(GTK_WINDOW(gd->dialog), vbox);
+
 	GtkWidget *scrolled = gtk_scrolled_window_new();
-	gtk_widget_set_margin_top(scrolled, PREF_PAD_BORDER);
-	gtk_widget_set_margin_bottom(scrolled, PREF_PAD_BORDER);
-	gtk_widget_set_margin_start(scrolled, PREF_PAD_BORDER);
-	gtk_widget_set_margin_end(scrolled, PREF_PAD_BORDER);
+	gtk_widget_set_vexpand(scrolled, TRUE);
 	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scrolled), TRUE);
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_BUTTON_SPACE);
-	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), vbox);
-	gtk_window_set_child(GTK_WINDOW(gd->dialog), scrolled);
-
+	gtk_box_append(GTK_BOX(vbox), scrolled);
 
 	gd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gtk_widget_set_hexpand(gd->vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
-	gtk_widget_set_vexpand(gd->vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-	gtk_box_append(GTK_BOX(vbox), gd->vbox);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), gd->vbox);
 
 	gd->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(gd->hbox, GTK_ALIGN_END);
