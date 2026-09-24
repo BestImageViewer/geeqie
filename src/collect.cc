@@ -217,7 +217,7 @@ GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *insert_
 	return list;
 }
 
-GList *collection_list_remove(GList *list, CollectInfo *ci)
+static GList *collection_list_remove(GList *list, CollectInfo *ci)
 {
 	list = g_list_remove(list, ci);
 	collection_info_free(ci);
@@ -801,10 +801,9 @@ gboolean collection_remove(CollectionData *cd, FileData *fd)
 
 	g_hash_table_remove(cd->existence, fd->path);
 
-	cd->list = g_list_remove(cd->list, ci);
+	cd->list = collection_list_remove(cd->list, ci);
 	cd->changed = TRUE;
 
-	collection_info_free(ci);
 	collection_changed(cd);
 
 	return TRUE;
@@ -814,10 +813,9 @@ static void collection_remove_by_info(CollectionData *cd, CollectInfo *info)
 {
 	if (!info || !g_list_find(cd->list, info)) return;
 
-	cd->list = g_list_remove(cd->list, info);
+	cd->list = collection_list_remove(cd->list, info);
 	cd->changed = TRUE;
 
-	collection_info_free(info);
 	collection_changed(cd);
 }
 

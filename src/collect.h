@@ -46,7 +46,6 @@ void collection_info_free(CollectInfo *ci);
 GList *collection_list_sort(GList *list, SortType method);
 GList *collection_list_add(GList *list, CollectInfo *ci, SortType method);
 GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *insert_ci, SortType method);
-GList *collection_list_remove(GList *list, CollectInfo *ci);
 CollectInfo *collection_list_find_fd(GList *list, FileData *fd);
 GList *collection_list_to_filelist(GList *list);
 
