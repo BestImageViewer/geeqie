@@ -130,15 +130,13 @@ git checkout v2.9
 
 ## System requirements for compiling
 
-| Component | Requirement |
-|-----------|-------------|
-| System | Linux or a compatible Unix-like environment |
-| Compiler | C compiler and C++ compiler supporting C++17 |
-| Build tools | Meson ≥1.3.2, Ninja, pkg-config/pkgconf |
-| GTK | GTK4 ≥4.18, including development headers |
-| GLib | ≥2.66, including development headers |
-| Pango | ≥1.46, including development headers |
-| Supporting tools | Python for Meson, gettext, standard shell utilities |
+* **System:** Linux or a compatible Unix-like environment
+* **Compiler:** C compiler and C++ compiler supporting C++17
+* **Build tools:** Meson ≥1.3.2, Ninja, pkg-config/pkgconf
+* **GTK:** GTK4 ≥4.18, including development headers
+* **GLib:** ≥2.66, including development headers
+* **Pango:** ≥1.46, including development headers
+* **Supporting tools:** Python for Meson, gettext, standard shell utilities
 
 These are the versions declared in meson.build. GTK and other dependencies may impose higher minimum versions on their own dependencies.
 

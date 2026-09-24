@@ -417,6 +417,20 @@ Doxygen comments should start each line with `##`, and each file should contain:
 
 ### Markdown
 
+Use CommonMark syntax for project documentation.
+
+Other than in exceptional circumstances do not use extensions such as GitHub Flavored
+Markdown (GFM).
+
+Use standard Markdown links or angle-bracket autolinks instead of relying on
+automatic linking of bare URLs or email addresses.
+
+GitHub issue-template YAML metadata is exempt from this policy. Extension
+syntax may be shown literally inside code spans or code blocks.
+
+The `mdl` linter checks style but does not enforce the exclusion of GFM
+extensions; check for these during documentation review.
+
 For a newline use two spaces (a backslash is not interpreted correctly by Doxygen).
 
 ## Doxygen
