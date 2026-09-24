@@ -42,7 +42,7 @@ project(
 add_global_arguments('-Wno-overlength-strings', language : 'c')
 
 # To enable debug statements in all files
-add_global_arguments('-include', 'debug.h', language : 'cpp')
+add_project_arguments('-include', 'debug.h', language : 'cpp')
 
 # To inhibit warnings for deprecated GTK stuff
 if not get_option('deprecated_warnings') and not get_option('all_deprecated_warnings')
