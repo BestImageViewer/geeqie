@@ -116,6 +116,41 @@ protected:
 	std::vector<std::string> paths;
 };
 
+TEST_F(CollectionFileSource, ManagerIgnoresNonCollectionFiles)
+{
+	ASSERT_EQ(g_mkdir_with_parents(get_collections_dir(), 0700), 0);
+	g_autofree gchar *basename = g_path_get_basename(directory);
+	g_autofree gchar *name = g_strconcat(basename, ".gqv", nullptr);
+	g_autofree gchar *path = g_build_filename(get_collections_dir(), name, nullptr);
+	paths.emplace_back(path);
+	ASSERT_TRUE(collection_save(cd, path));
+
+	// Non-collection files must not be parsed or rewritten by the manager.
+	g_autofree gchar *image_name = g_strconcat("image-", basename, ".jpg", nullptr);
+	g_autofree gchar *image_path = g_build_filename(get_collections_dir(), image_name, nullptr);
+	paths.emplace_back(image_path);
+	g_autofree gchar *image_contents = g_strdup_printf("#Geeqie collection\n\"%s\"\n", first->path);
+	ASSERT_TRUE(g_file_set_contents(image_path, image_contents, -1, nullptr));
+
+	FileData *renamed = make_file("a", "next.svg");
+	ASSERT_NE(renamed, nullptr);
+	ASSERT_TRUE(file_data_add_ci(first, FILEDATA_CHANGE_RENAME, first->path, renamed->path));
+	collect_manager_moved(first);
+	collect_manager_flush();
+	file_data_change_info_free(first->change, first);
+
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
+	EXPECT_NE(std::string(contents).find(renamed->path), std::string::npos);
+	EXPECT_EQ(std::string(contents).find(first->path), std::string::npos);
+	EXPECT_NE(std::string(contents).find(second->path), std::string::npos);
+	g_autofree gchar *image_after = nullptr;
+	ASSERT_TRUE(g_file_get_contents(image_path, &image_after, nullptr, nullptr));
+	EXPECT_STREQ(image_after, image_contents);
+
+	file_data_unref(renamed);
+}
+
 TEST_F(CollectionFileSource, RelativePathsRoundTripAndSaveAs)
 {
 	g_autofree gchar *path = g_build_filename(directory, "a", "relative.gqv", nullptr);

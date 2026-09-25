@@ -689,6 +689,19 @@ static void collect_manager_refresh()
 	filelist_read(dir_fd, &list, nullptr);
 	file_data_unref(dir_fd);
 
+	work = list;
+	while (work)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		GList *next = work->next;
+		if (!file_extension_match(fd->path, GQ_COLLECTION_EXT))
+			{
+			list = g_list_delete_link(list, work);
+			file_data_unref(fd);
+			}
+		work = next;
+		}
+
 	work = collection_manager_entry_list;
 	while (work && list)
 		{
