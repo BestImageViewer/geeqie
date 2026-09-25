@@ -2290,6 +2290,8 @@ static void pr_mouse_press_cb(GtkGestureClick *gesture, gint n_press, gdouble x,
 static void pr_mouse_release_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	gtk_widget_set_cursor_from_name(widget, nullptr);
+
 	auto *pr = PIXBUF_RENDERER(widget);
 	guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 	GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
