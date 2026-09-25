@@ -3431,7 +3431,7 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	pref_spin_new_int(group, _("Recent folder list maximum size"), nullptr,
 			  1, 50, 1, options->open_recent_list_maxsize, &c_options->open_recent_list_maxsize);
 
-	tmp = pref_spin_new_int(group, _("Recent folder-image list maximum size"), nullptr, 0, 50, 1, options->recent_folder_image_list_maxsize, &c_options->recent_folder_image_list_maxsize);
+	tmp = pref_spin_new_int(group, _("Recent folder-image list maximum size"), nullptr, 0, 1000, 1, options->recent_folder_image_list_maxsize, &c_options->recent_folder_image_list_maxsize);
 	gtk_widget_set_tooltip_text(tmp, _("List of the last image viewed in each recent folder.\nRe-opening a folder will set focus to the last image viewed."));
 
 	pref_spin_new_int(group, _("Drag-and-drop icon size"), nullptr,
