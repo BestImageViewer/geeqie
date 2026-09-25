@@ -259,26 +259,26 @@ gboolean history_list_save(const gchar *path)
 
 		const bool is_recent = (key == "recent");
 
-		/* save them inverted (oldest to newest)
+		/* Keep the newest entries, but save them inverted (oldest to newest)
 		 * so that when reading they are added correctly
 		 */
-		auto last = items.crend();
+		auto first = items.crbegin();
 		if (key == "path_list")
 			{
 			if (static_cast<size_t>(options->open_recent_list_maxsize) < items.size())
 				{
-				last = std::next(items.crbegin(), options->open_recent_list_maxsize);
+				first = std::next(items.crbegin(), items.size() - options->open_recent_list_maxsize);
 				}
 			}
 		else if (key == "image_list")
 			{
 			if (static_cast<size_t>(options->recent_folder_image_list_maxsize) < items.size())
 				{
-				last = std::next(items.crbegin(), options->recent_folder_image_list_maxsize);
+				first = std::next(items.crbegin(), items.size() - options->recent_folder_image_list_maxsize);
 				}
 			}
 
-		for (auto work = items.crbegin(); work != last; ++work)
+		for (auto work = first; work != items.crend(); ++work)
 			{
 			if (is_recent && !isfile(work->c_str())) continue;
 
