@@ -866,6 +866,7 @@ void file_dialog_show(const FileDialogData &fdd)
 	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
 	pending->dialog = gtk_dialog_new_with_buttons(title, parent, GTK_DIALOG_MODAL, _("_Cancel"), GTK_RESPONSE_CANCEL, accept_text, GTK_RESPONSE_ACCEPT, nullptr);
+	GtkWidget *accept_button = gtk_dialog_get_widget_for_response(GTK_DIALOG(pending->dialog), GTK_RESPONSE_ACCEPT);
 	if (fdd.alternate_callback && fdd.alternate_text)
 		{
 		gtk_dialog_add_button(GTK_DIALOG(pending->dialog), fdd.alternate_text, FILE_DIALOG_RESPONSE_ALTERNATE);
@@ -938,7 +939,11 @@ void file_dialog_show(const FileDialogData &fdd)
 	pending->preview_timer_id = g_timeout_add(250, preview_timer_cb, pending);
 
 	gtk_window_present(GTK_WINDOW(pending->dialog));
-	if (fdd.action == FileDialogAction::OPEN)
+	if (fdd.focus_accept)
+		{
+		gtk_widget_grab_focus(accept_button);
+		}
+	else if (fdd.action == FileDialogAction::OPEN)
 		{
 		if (GtkWidget *file_list = find_file_list(pending->chooser)) gtk_widget_grab_focus(file_list);
 		}

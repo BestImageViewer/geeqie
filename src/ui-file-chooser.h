@@ -34,6 +34,7 @@ struct FileDialogData
 	gboolean alternate_default;
 	const gchar *checkbox_text;
 	gboolean *checkbox_value; /**< Updated only when a file is accepted; must outlive the dialog */
+	gboolean focus_accept; /**< Initially focus the accept button */
 };
 
 void file_dialog_show(const FileDialogData &fdd);
