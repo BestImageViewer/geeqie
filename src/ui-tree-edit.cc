@@ -56,10 +56,9 @@ struct AutoScrollData
  *-------------------------------------------------------------------
  */
 
-static void tree_edit_close(TreeEditData *ted)
+static gboolean tree_edit_close_idle_cb(gpointer data)
 {
-	if (ted->closing) return;
-	ted->closing = TRUE;
+	auto *ted = static_cast<TreeEditData *>(data);
 
 	if (GTK_IS_POPOVER(ted->window))
 		{
@@ -75,6 +74,16 @@ static void tree_edit_close(TreeEditData *ted)
 	gtk_tree_path_free(ted->path);
 
 	g_free(ted);
+	return G_SOURCE_REMOVE;
+}
+
+static void tree_edit_close(TreeEditData *ted)
+{
+	if (ted->closing) return;
+	ted->closing = TRUE;
+
+	// GTK must finish dispatching the focus/key event before removing the editor.
+	g_idle_add(tree_edit_close_idle_cb, ted);
 }
 
 static void tree_edit_do(TreeEditData *ted)
@@ -99,9 +108,19 @@ static void tree_edit_focus_out_cb(GtkEventControllerFocus *, gpointer data)
 	tree_edit_close(ted);
 }
 
+static void tree_edit_activate_cb(GtkEntry *, gpointer data)
+{
+	auto *ted = static_cast<TreeEditData *>(data);
+	if (ted->closing) return;
+
+	tree_edit_do(ted);
+	tree_edit_close(ted);
+}
+
 static gboolean tree_edit_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType, gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
+	if (ted->closing) return TRUE;
 
 	switch (keyval)
 		{
@@ -230,6 +249,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 	gtk_popover_set_has_arrow(GTK_POPOVER(ted->window), FALSE);
 	gtk_popover_set_position(GTK_POPOVER(ted->window), GTK_POS_BOTTOM);
 	gtk_popover_set_child(GTK_POPOVER(ted->window), ted->entry);
+	g_signal_connect(ted->entry, "activate", G_CALLBACK(tree_edit_activate_cb), ted);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(tree_edit_key_press_cb), ted);

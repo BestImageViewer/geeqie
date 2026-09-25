@@ -316,6 +316,11 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 		if (!flush)
 			changed |= collect_manager_process_action(entry, &filename);
+		if (!*filename)
+			{
+			g_clear_pointer(&infotext, g_free);
+			continue;
+			}
 
 		if (filename[0] == G_DIR_SEPARATOR && collection_add(cd, file_data_new_simple(filename), FALSE, infotext))
 			{
@@ -672,7 +677,8 @@ static gboolean collect_manager_process_action(CollectManagerEntry *entry, gchar
 
 	if (action)
 		{
-		strcpy(*path_ptr, action->newpath);
+		g_free(*path_ptr);
+		*path_ptr = g_strdup(action->newpath ? action->newpath : "");
 		return TRUE;
 		}
 

@@ -116,6 +116,40 @@ protected:
 	std::vector<std::string> paths;
 };
 
+TEST_F(CollectionFileSource, ManagerRenamesToLongerPathAndRemovesFile)
+{
+	ASSERT_EQ(g_mkdir_with_parents(get_collections_dir(), 0700), 0);
+	g_autofree gchar *basename = g_path_get_basename(directory);
+	g_autofree gchar *name = g_strconcat(basename, ".gqv", nullptr);
+	g_autofree gchar *path = g_build_filename(get_collections_dir(), name, nullptr);
+	paths.emplace_back(path);
+	ASSERT_TRUE(collection_save(cd, path));
+
+	const std::string long_name = std::string(200, 'x') + ".svg";
+	FileData *renamed = make_file("a", long_name.c_str());
+	ASSERT_NE(renamed, nullptr);
+	ASSERT_TRUE(file_data_add_ci(first, FILEDATA_CHANGE_RENAME, first->path, renamed->path));
+	collect_manager_moved(first);
+	collect_manager_flush();
+	file_data_change_info_free(first->change, first);
+
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
+	EXPECT_NE(std::string(contents).find(renamed->path), std::string::npos);
+	EXPECT_EQ(std::string(contents).find(first->path), std::string::npos);
+	EXPECT_NE(std::string(contents).find(second->path), std::string::npos);
+
+	collection_unref(cd);
+	cd = nullptr;
+	collect_manager_remove(renamed, path);
+	collect_manager_flush();
+	g_clear_pointer(&contents, g_free);
+	ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
+	EXPECT_EQ(std::string(contents).find(renamed->path), std::string::npos);
+	EXPECT_NE(std::string(contents).find(second->path), std::string::npos);
+	file_data_unref(renamed);
+}
+
 TEST_F(CollectionFileSource, ManagerIgnoresNonCollectionFiles)
 {
 	ASSERT_EQ(g_mkdir_with_parents(get_collections_dir(), 0700), 0);
