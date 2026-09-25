@@ -37,7 +37,6 @@ struct ThumbLoader;
 struct CollectInfo
 {
 	FileData *fd;
-	guint flag_mask;
 	gchar *infotext;
 };
 
