@@ -118,7 +118,7 @@ void clear_mouse_cursor(GtkWidget *widget, gint state)
 		}
 	else
 		{
-		gtk_widget_set_cursor_from_name(widget, nullptr);
+		gtk_widget_set_cursor_from_name(widget, "none");
 		}
 }
 
