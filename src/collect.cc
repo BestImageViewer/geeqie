@@ -23,9 +23,11 @@
 
 #include <sys/stat.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <list>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -55,10 +57,8 @@ namespace
 
 /**
  * @brief  List of currently open Collections.
- *
- * Type ::_CollectionData
  */
-GList *collection_list = nullptr;
+std::list<CollectionData *> collection_list;
 
 } // namespace
 
@@ -456,8 +456,7 @@ CollectionData *collection_new(const gchar *path)
 
 	file_data_register_notify_func(collection_notify_cb, cd, NOTIFY_PRIORITY_MEDIUM);
 
-
-	collection_list = g_list_append(collection_list, cd);
+	collection_list.push_back(cd);
 
 	return cd;
 }
@@ -472,7 +471,7 @@ void collection_free(CollectionData *cd)
 
 	file_data_unregister_notify_func(collection_notify_cb, cd);
 
-	collection_list = g_list_remove(collection_list, cd);
+	collection_list.remove(cd);
 
 	g_hash_table_destroy(cd->existence);
 	g_list_free_full(cd->change_listeners, g_free);
@@ -510,19 +509,14 @@ void collection_path_changed(CollectionData *cd)
 
 bool collection_valid(const CollectionData *cd)
 {
-	return g_list_find(collection_list, cd) != nullptr;
+	return std::find(collection_list.cbegin(), collection_list.cend(), cd) != collection_list.cend();
 }
 
 CollectionData *collection_find(const gchar *path)
 {
-	static const auto collection_data_compare_path = [](gconstpointer data, gconstpointer user_data)
-	{
-		const auto *cd = static_cast<const CollectionData *>(data);
-		const auto *path = static_cast<const gchar *>(user_data);
-		return g_strcmp0(cd->path, path);
-	};
-	GList *work = g_list_find_custom(collection_list, path, collection_data_compare_path);
-	return work ? static_cast<CollectionData *>(work->data) : nullptr;
+	const auto work = std::find_if(collection_list.cbegin(), collection_list.cend(),
+	                               [path](const CollectionData *cd) { return g_strcmp0(cd->path, path) == 0; });
+	return (work != collection_list.cend()) ? *work : nullptr;
 }
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info)
