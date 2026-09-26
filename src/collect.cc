@@ -368,19 +368,17 @@ void collection_by_index_add_filelist(gint index, GList *list)
 			auto files = std::shared_ptr<GList>(filelist_copy(list), [](GList *items) { file_data_list_free(items); });
 			if (!layout_confirm_collection_leave(lw, [index, files]() { collection_by_index_add_filelist(index, files.get()); }, FALSE)) return;
 		}
-	CollectionData *cd = nullptr;
-	for (gint i = 0; (cd = collection_from_number(i)); i++)
-		if (path && g_strcmp0(cd->path, path) == 0) break;
+	CollectionData *cd = path ? collection_find(path) : nullptr;
 	if (cd)
 		collection_ref(cd);
 	else
 		{
-			cd = collection_new(path);
-			if (path && isfile(path) && !collection_load(cd, path, COLLECTION_LOAD_NONE))
-				{
-				collection_unref(cd);
-				return;
-				}
+		cd = collection_new(path);
+		if (path && isfile(path) && !collection_load(cd, path, COLLECTION_LOAD_NONE))
+			{
+			collection_unref(cd);
+			return;
+			}
 		}
 	if (layout_set_collection(lw, cd))
 		for (GList *work = list; work; work = work->next)
@@ -522,9 +520,16 @@ bool collection_valid(const CollectionData *cd)
 	return g_list_find(collection_list, cd) != nullptr;
 }
 
-CollectionData *collection_from_number(gint n)
+CollectionData *collection_find(const gchar *path)
 {
-	return static_cast<CollectionData *>(g_list_nth_data(collection_list, n));
+	static const auto collection_data_compare_path = [](gconstpointer data, gconstpointer user_data)
+	{
+		const auto *cd = static_cast<const CollectionData *>(data);
+		const auto *path = static_cast<const gchar *>(user_data);
+		return g_strcmp0(cd->path, path);
+	};
+	GList *work = g_list_find_custom(collection_list, path, collection_data_compare_path);
+	return work ? static_cast<CollectionData *>(work->data) : nullptr;
 }
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info)

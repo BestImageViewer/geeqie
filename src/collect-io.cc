@@ -934,9 +934,8 @@ void collect_manager_add(FileData *fd, const gchar *collection)
 
 	if (!fd || !collection) return;
 
-	for (gint i = 0; CollectionData *cd = collection_from_number(i); i++)
+	if (CollectionData *cd = collection_find(collection); cd)
 		{
-		if (g_strcmp0(cd->path, collection) != 0) continue;
 		if (collection_list_find_fd(cd->list, fd) == nullptr)
 			{
 			collection_add(cd, fd, FALSE);
@@ -957,9 +956,8 @@ void collect_manager_remove(FileData *fd, const gchar *collection)
 
 	if (!fd || !collection) return;
 
-	for (gint i = 0; CollectionData *cd = collection_from_number(i); i++)
+	if (CollectionData *cd = collection_find(collection); cd)
 		{
-		if (g_strcmp0(cd->path, collection) != 0) continue;
 		while (collection_remove(cd, fd)) {}
 		return;
 		}
