@@ -73,7 +73,7 @@ void collection_unref(CollectionData *cd);
 void collection_path_changed(CollectionData *cd);
 
 bool collection_valid(const CollectionData *cd);
-CollectionData *collection_from_number(gint n);
+CollectionData *collection_find(const gchar *path);
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info);
 
