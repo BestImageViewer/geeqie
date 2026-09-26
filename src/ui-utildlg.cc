@@ -142,6 +142,12 @@ static gboolean generic_dialog_default_key_press_cb(GtkEventControllerKey *contr
 void generic_dialog_attach_default(GenericDialog *gd, GtkWidget *widget)
 {
 	if (!gd || !widget) return;
+	if (GTK_IS_ENTRY(widget))
+		{
+		gtk_entry_set_activates_default(GTK_ENTRY(widget), TRUE);
+		return;
+		}
+
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(generic_dialog_default_key_press_cb), gd);
 	gtk_widget_add_controller(widget, controller);
