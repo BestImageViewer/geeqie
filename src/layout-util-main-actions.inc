@@ -2378,6 +2378,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-show-history",
+		GQ_ICON_PAN_DOWN,
+		N_("Show address bar history"),
+		layout_menu_show_history_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-show-info-pixel",
 		GQ_ICON_SELECT_COLOR,
 		N_("Show Pixel Info"),

@@ -113,6 +113,23 @@ static void tab_completion_history_item_cb(GtkWidget *button, gpointer data)
 	if (td->history_func) td->history_func(text);
 }
 
+static gboolean tab_completion_history_focus_cb(gpointer data)
+{
+	auto *list = GTK_WIDGET(data);
+	if (!gtk_widget_get_mapped(list)) return G_SOURCE_REMOVE;
+
+	GtkWidget *button = gtk_widget_get_first_child(list);
+	if (button) gtk_widget_grab_focus(button);
+
+	return G_SOURCE_REMOVE;
+}
+
+static void tab_completion_history_map_cb(GtkWidget *, gpointer data)
+{
+	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, tab_completion_history_focus_cb,
+	                g_object_ref(data), g_object_unref);
+}
+
 static void tab_completion_history_rebuild(TabCompData *td)
 {
 	GtkWidget *list = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -140,8 +157,21 @@ static void tab_completion_history_rebuild(TabCompData *td)
 
 	GtkWidget *popover = gtk_popover_new();
 	gtk_popover_set_child(GTK_POPOVER(popover), scrolled);
+	g_signal_connect(popover, "map", G_CALLBACK(tab_completion_history_map_cb), list);
 	gtk_menu_button_set_popover(GTK_MENU_BUTTON(td->history_button), popover);
 	gtk_widget_set_sensitive(td->history_button, count > 0);
+}
+
+void tab_completion_show_history(GtkWidget *entry)
+{
+	if (!entry) return;
+
+	TabCompData *td = tab_completion_get_from_entry(entry);
+	if (!td || !td->history_button ||
+	    !gtk_widget_is_sensitive(td->history_button) ||
+	    !gtk_widget_get_mapped(td->history_button)) return;
+
+	gtk_menu_button_popup(GTK_MENU_BUTTON(td->history_button));
 }
 
 static void tab_completion_read_dir(TabCompData *td, const gchar *path)
@@ -744,7 +774,7 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 	td->history_button = gtk_menu_button_new();
 	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(td->history_button), GQ_ICON_PAN_DOWN);
 	gtk_widget_set_tooltip_text(td->history_button, _("Show history"));
-	gtk_widget_set_can_focus(td->history_button, FALSE);
+	gtk_widget_set_focusable(td->history_button, FALSE);
 	gtk_box_append(GTK_BOX(box), td->history_button);
 	tab_completion_history_rebuild(td);
 

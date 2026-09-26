@@ -80,6 +80,7 @@
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
+#include "ui-tabcomp.h"
 #include "ui-utildlg.h"
 #include "utilops.h"
 #include "view-dir.h"
@@ -2197,6 +2198,12 @@ static void layout_menu_forward_cb(GSimpleAction *, GVariant *, gpointer)
 	dir_fd = file_data_new_dir(history_chain_forward());
 	layout_set_fd(lw, dir_fd);
 	file_data_unref(dir_fd);
+}
+
+static void layout_menu_show_history_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	auto lw = get_current_layout();
+	if (lw) tab_completion_show_history(lw->path_entry);
 }
 
 static void layout_menu_home_cb(GSimpleAction *, GVariant *, gpointer)

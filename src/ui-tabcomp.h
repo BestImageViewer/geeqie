@@ -34,6 +34,7 @@ using TabCompTabAppendFunc = std::function<void(const gchar *, gint)>;
 GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *text,
                                            const gchar *history_key, gint max_levels);
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path);
+void tab_completion_show_history(GtkWidget *entry);
 
 GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text);
 gboolean tab_completion_complete(GtkWidget *entry, gboolean directory_only);
