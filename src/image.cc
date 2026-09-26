@@ -387,7 +387,7 @@ void image_update_title(ImageWindow *imd)
 		g_string_append_printf(title, " [%s]", buf);
 		}
 
-	if (imd->collection && collection_to_number(imd->collection) >= 0)
+	if (imd->collection && collection_valid(imd->collection))
 		{
 		const gchar *name = imd->collection->name;
 		if (!name) name = _("Untitled");
@@ -1518,7 +1518,7 @@ CollectionData *image_get_collection(ImageWindow *imd, CollectInfo **info)
 {
 	if (info) *info = nullptr;
 
-	if (collection_to_number(imd->collection) < 0) return nullptr;
+	if (!collection_valid(imd->collection)) return nullptr;
 
 	if (info && g_list_find(imd->collection->list, imd->collection_info))
 		{
