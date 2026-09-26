@@ -44,11 +44,8 @@
 #include "options.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
-#include "ui-misc.h"
-#include "ui-utildlg.h"
 #include "utilops.h"
 #include "view-file.h"
-#include "window.h"
 
 namespace
 {
@@ -65,6 +62,7 @@ GList *collection_list = nullptr;
 
 } // namespace
 
+static void collection_free(CollectionData *cd);
 static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
 /*
@@ -186,7 +184,7 @@ static GList *collection_list_randomize(GList *list)
 	return list;
 }
 
-GList *collection_list_add(GList *list, CollectInfo *ci, SortType method)
+static GList *collection_list_add(GList *list, CollectInfo *ci, SortType method)
 {
 	if (method != SORT_NONE)
 		{
@@ -200,7 +198,7 @@ GList *collection_list_add(GList *list, CollectInfo *ci, SortType method)
 	return list;
 }
 
-GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *insert_ci, SortType method)
+static GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *insert_ci, SortType method)
 {
 	if (method != SORT_NONE)
 		{
@@ -236,22 +234,6 @@ CollectInfo *collection_list_find_fd(GList *list, FileData *fd)
 		}
 
 	return nullptr;
-}
-
-GList *collection_list_to_filelist(GList *list)
-{
-	GList *filelist = nullptr;
-	GList *work = list;
-
-	while (work)
-		{
-		auto info = static_cast<CollectInfo *>(work->data);
-		filelist = g_list_prepend(filelist, file_data_ref(info->fd));
-		work = work->next;
-		}
-
-	filelist = g_list_reverse(filelist);
-	return filelist;
 }
 
 /**
@@ -545,68 +527,6 @@ CollectionData *collection_from_number(gint n)
 	return static_cast<CollectionData *>(g_list_nth_data(collection_list, n));
 }
 
-/**
- * @brief Pass a NULL pointer to whatever you don't need
- * use free_selected_list to free list, and
- * g_list_free to free info_list, which is a list of
- * CollectInfo pointers into CollectionData
- */
- CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList **info_list)
-{
-	if (list) *list = nullptr;
-	if (info_list) *info_list = nullptr;
-
-	if (strncmp(data, "COLLECTION:", 11) != 0) return nullptr;
-
-	data += 11;
-
-	gint collection_number = atoi(data);
-	CollectionData *cd = collection_from_number(collection_number);
-	if (!cd) return nullptr;
-
-	if (!list && !info_list) return cd;
-
-	g_auto(GStrv) numbers = g_strsplit(data, "\n", -1);
-	for (gint i = 1; numbers[i] != nullptr; i++)
-		{
-		if (!numbers[i + 1]) break; // numbers[i] is data after last \n, skip it
-
-		auto item_number = static_cast<guint>(atoi(numbers[i]));
-		auto *info = static_cast<CollectInfo *>(g_list_nth_data(cd->list, item_number));
-		if (!info) continue;
-
-		if (list) *list = g_list_append(*list, file_data_ref(info->fd));
-		if (info_list) *info_list = g_list_append(*info_list, info);
-		}
-
-	return cd;
-}
-
-gchar *collection_info_list_to_dnd_data(const CollectionData *cd, const GList *list, gint &length)
-{
-	length = 0;
-	if (!list) return nullptr;
-
-	gint collection_number = collection_to_number(cd);
-	if (collection_number < 0) return nullptr;
-
-	GString *text = g_string_new(nullptr);
-	g_string_printf(text, "COLLECTION:%d\n", collection_number);
-
-	for (const GList *work = list; work; work = work->next)
-		{
-		gint item_number = g_list_index(cd->list, work->data);
-
-		if (item_number < 0) continue;
-
-		g_string_append_printf(text, "%d\n", item_number);
-		}
-
-	length = text->len + 1; /* ending nul char */
-
-	return g_string_free(text, FALSE);
-}
-
 gint collection_info_valid(CollectionData *cd, CollectInfo *info)
 {
 	if (collection_to_number(cd) < 0) return FALSE;
@@ -809,40 +729,7 @@ gboolean collection_remove(CollectionData *cd, FileData *fd)
 	return TRUE;
 }
 
-static void collection_remove_by_info(CollectionData *cd, CollectInfo *info)
-{
-	if (!info || !g_list_find(cd->list, info)) return;
-
-	cd->list = collection_list_remove(cd->list, info);
-	cd->changed = TRUE;
-
-	collection_changed(cd);
-}
-
-void collection_remove_by_info_list(CollectionData *cd, GList *list)
-{
-	GList *work;
-
-	if (!list) return;
-
-	if (!list->next)
-		{
-		collection_remove_by_info(cd, static_cast<CollectInfo *>(list->data));
-		return;
-		}
-
-	work = list;
-	while (work)
-		{
-		cd->list = collection_list_remove(cd->list, static_cast<CollectInfo *>(work->data));
-		work = work->next;
-		}
-	cd->changed = TRUE;
-
-	collection_changed(cd);
-}
-
-gboolean collection_rename(CollectionData *cd, FileData *fd)
+static gboolean collection_rename(CollectionData *cd, FileData *fd)
 {
 	CollectInfo *ci;
 	ci = collection_list_find_fd(cd->list, fd);
@@ -887,6 +774,5 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
 		}
 
 }
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

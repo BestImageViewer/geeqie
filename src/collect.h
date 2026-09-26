@@ -22,8 +22,6 @@
 #ifndef COLLECT_H
 #define COLLECT_H
 
-#include <functional>
-
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <glib.h>
@@ -43,10 +41,7 @@ struct CollectInfo
 void collection_info_free(CollectInfo *ci);
 
 GList *collection_list_sort(GList *list, SortType method);
-GList *collection_list_add(GList *list, CollectInfo *ci, SortType method);
-GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *insert_ci, SortType method);
 CollectInfo *collection_list_find_fd(GList *list, FileData *fd);
-GList *collection_list_to_filelist(GList *list);
 
 struct CollectionData
 {
@@ -71,7 +66,6 @@ void collection_remove_listener(CollectionData *cd, CollectionChangedFunc func, 
 void collection_changed(CollectionData *cd);
 
 CollectionData *collection_new(const gchar *path);
-void collection_free(CollectionData *cd);
 
 CollectionData *collection_ref(CollectionData *cd);
 void collection_unref(CollectionData *cd);
@@ -80,9 +74,6 @@ void collection_path_changed(CollectionData *cd);
 
 gint collection_to_number(const CollectionData *cd);
 CollectionData *collection_from_number(gint n);
-
-CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList **info_list);
-gchar *collection_info_list_to_dnd_data(const CollectionData *cd, const GList *list, gint &length);
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info);
 
@@ -99,8 +90,6 @@ void collection_randomize(CollectionData *cd);
 gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext = nullptr);
 gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert_ci, gboolean sorted);
 gboolean collection_remove(CollectionData *cd, FileData *fd);
-void collection_remove_by_info_list(CollectionData *cd, GList *list);
-gboolean collection_rename(CollectionData *cd, FileData *fd);
 
 gboolean is_collection(const gchar *param);
 gchar *collection_path(const gchar *param);
