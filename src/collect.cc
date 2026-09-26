@@ -215,13 +215,6 @@ static GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *
 	return list;
 }
 
-static GList *collection_list_remove(GList *list, CollectInfo *ci)
-{
-	list = g_list_remove(list, ci);
-	collection_info_free(ci);
-	return list;
-}
-
 CollectInfo *collection_list_find_fd(GList *list, FileData *fd)
 {
 	GList *work = list;
@@ -726,9 +719,10 @@ gboolean collection_remove(CollectionData *cd, FileData *fd)
 
 	g_hash_table_remove(cd->existence, fd->path);
 
-	cd->list = collection_list_remove(cd->list, ci);
+	cd->list = g_list_remove(cd->list, ci);
 	cd->changed = TRUE;
 
+	collection_info_free(ci);
 	collection_changed(cd);
 
 	return TRUE;
