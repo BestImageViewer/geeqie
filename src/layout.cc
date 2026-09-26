@@ -475,9 +475,7 @@ static void layout_path_entry_cb(LayoutWindow *lw, const gchar *path)
 
 static gboolean layout_open_collection(LayoutWindow *lw, FileData *fd)
 {
-	CollectionData *cd = nullptr;
-	for (gint i = 0; (cd = collection_from_number(i)); i++)
-		if (g_strcmp0(cd->path, fd->path) == 0) break;
+	CollectionData *cd = collection_find(fd->path);
 	if (cd)
 		collection_ref(cd);
 	else
