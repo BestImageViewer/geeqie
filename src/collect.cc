@@ -517,9 +517,9 @@ void collection_path_changed(CollectionData *cd)
 	collection_changed(cd);
 }
 
-gint collection_to_number(const CollectionData *cd)
+bool collection_valid(const CollectionData *cd)
 {
-	return g_list_index(collection_list, cd);
+	return g_list_find(collection_list, cd) != nullptr;
 }
 
 CollectionData *collection_from_number(gint n)
@@ -529,7 +529,7 @@ CollectionData *collection_from_number(gint n)
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info)
 {
-	if (collection_to_number(cd) < 0) return FALSE;
+	if (!collection_valid(cd)) return FALSE;
 
 	return (g_list_index(cd->list, info) != 0);
 }

@@ -72,7 +72,7 @@ void collection_unref(CollectionData *cd);
 
 void collection_path_changed(CollectionData *cd);
 
-gint collection_to_number(const CollectionData *cd);
+bool collection_valid(const CollectionData *cd);
 CollectionData *collection_from_number(gint n);
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info);
