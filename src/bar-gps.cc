@@ -53,6 +53,7 @@ extern "C" {
 #include "pixbuf-util.h"
 #include "rcfile.h"
 #include "thumb.h"
+#include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
 
@@ -634,6 +635,28 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
+/* Deleted files stay in the layout selection until the file list is refreshed.
+ * Reading their metadata triggers NOTIFY_REREAD, which would restart the
+ * marker creation and starve the file list refresh (#2569).
+ */
+GList *bar_pane_gps_remove_missing_files(GList *list)
+{
+	GList *work = list;
+	while (work)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		GList *next = work->next;
+
+		if (!isfile(fd->path))
+			{
+			list = g_list_delete_link(list, work);
+			file_data_unref(fd);
+			}
+		work = next;
+		}
+	return list;
+}
+
 void bar_pane_gps_update(PaneGPSData *pgd)
 {
 	if (!pgd) return;
@@ -652,6 +675,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 		pgd->selection_list = g_list_append(nullptr, file_data_ref(pgd->fd));
 		}
 	pgd->selection_list = file_data_process_groups_in_selection(pgd->selection_list, FALSE, nullptr);
+	pgd->selection_list = bar_pane_gps_remove_missing_files(pgd->selection_list);
 	pgd->selection_count = g_list_length(pgd->selection_list);
 	pgd->num_added = 0;
 
