@@ -71,7 +71,7 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data);
  *-------------------------------------------------------------------
  */
 
-static CollectInfo *collection_info_new(FileData *fd, struct stat *, const gchar *infotext)
+static CollectInfo *collection_info_new(FileData *fd, const gchar *infotext)
 {
 	CollectInfo *ci;
 
@@ -626,7 +626,7 @@ void collection_randomize(CollectionData *cd)
 	collection_changed(cd);
 }
 
-static CollectInfo *collection_info_new_if_not_exists(CollectionData *cd, struct stat *st, FileData *fd, const gchar *infotext)
+static CollectInfo *collection_info_new_if_not_exists(CollectionData *cd, FileData *fd, const gchar *infotext)
 {
 	if (!options->collections_duplicates &&
 	    g_hash_table_contains(cd->existence, fd->path))
@@ -634,47 +634,37 @@ static CollectInfo *collection_info_new_if_not_exists(CollectionData *cd, struct
 		return nullptr;
 		}
 
-	CollectInfo *ci = collection_info_new(fd, st, infotext);
+	CollectInfo *ci = collection_info_new(fd, infotext);
 	if (ci) g_hash_table_add(cd->existence, fd->path);
 	return ci;
+}
+
+static bool collection_valid(const FileData *fd)
+{
+	struct stat st;
+	return stat_utf8(fd->path, &st) && !S_ISDIR(st.st_mode);
 }
 
 // @TODO Drop must_exist and merge with collection_add()?
 static gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean sorted, gboolean must_exist, const gchar *infotext)
 {
-	struct stat st;
-	gboolean valid;
-
 	if (!fd) return FALSE;
 
 	g_assert(fd->magick == FD_MAGICK);
 
-	if (must_exist)
-		{
-		valid = (stat_utf8(fd->path, &st) && !S_ISDIR(st.st_mode));
-		}
-	else
-		{
-		valid = TRUE;
-		st.st_size = 0;
-		st.st_mtime = 0;
-		}
+	if (must_exist && !collection_valid(fd)) return FALSE;
 
-	if (valid)
-		{
-		CollectInfo *ci;
+	CollectInfo *ci = collection_info_new_if_not_exists(cd, fd, infotext);
+	if (!ci) return FALSE;
 
-		ci = collection_info_new_if_not_exists(cd, &st, fd, infotext);
-		if (!ci) return FALSE;
-		DEBUG_3("add to collection: %s", fd->path);
+	DEBUG_3("add to collection: %s", fd->path);
 
-		cd->list = collection_list_add(cd->list, ci, sorted ? cd->sort_method : SORT_NONE);
-		cd->changed = TRUE;
+	cd->list = collection_list_add(cd->list, ci, sorted ? cd->sort_method : SORT_NONE);
+	cd->changed = TRUE;
 
-		}
+	collection_changed(cd);
 
-	if (valid) collection_changed(cd);
-	return valid;
+	return TRUE;
 }
 
 gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext)
@@ -684,28 +674,21 @@ gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted, const
 
 gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert_ci, gboolean sorted)
 {
-	struct stat st;
-
 	if (!insert_ci) return collection_add(cd, fd, sorted);
 
-	if (stat_utf8(fd->path, &st) >= 0 && !S_ISDIR(st.st_mode))
-		{
-		CollectInfo *ci;
+	if (!collection_valid(fd)) return FALSE;
 
-		ci = collection_info_new_if_not_exists(cd, &st, fd, nullptr);
-		if (!ci) return FALSE;
+	CollectInfo *ci = collection_info_new_if_not_exists(cd, fd, nullptr);
+	if (!ci) return FALSE;
 
-		DEBUG_3("insert in collection: %s", fd->path);
+	DEBUG_3("insert in collection: %s", fd->path);
 
-		cd->list = collection_list_insert(cd->list, ci, insert_ci, sorted ? cd->sort_method : SORT_NONE);
-		cd->changed = TRUE;
+	cd->list = collection_list_insert(cd->list, ci, insert_ci, sorted ? cd->sort_method : SORT_NONE);
+	cd->changed = TRUE;
 
 	collection_changed(cd);
 
-		return TRUE;
-		}
-
-	return FALSE;
+	return TRUE;
 }
 
 gboolean collection_remove(CollectionData *cd, FileData *fd)
