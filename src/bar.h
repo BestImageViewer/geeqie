@@ -31,7 +31,6 @@ struct LayoutWindow;
 struct RcString;
 
 enum PaneType {
-	PANE_UNDEF = 0,
 	PANE_COMMENT,
 	PANE_EXIF,
 	PANE_HISTOGRAM,

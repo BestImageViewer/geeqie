@@ -21,6 +21,7 @@
 
 #include "bar.h"
 
+#include <algorithm>
 #include <string>
 
 #include <glib-object.h>
@@ -216,7 +217,6 @@ static const KnownPanes known_panes[] = {
 #if HAVE_LIBSHUMATE
 	{PANE_GPS,		"gps",	N_("GPS Map"),	default_config_gps},
 #endif
-	{PANE_UNDEF,		nullptr,		nullptr,			nullptr}
 };
 
 struct BarData
@@ -232,15 +232,9 @@ struct BarData
 
 static const gchar *bar_pane_get_default_config(const gchar *id)
 {
-	const KnownPanes *pane = known_panes;
-
-	while (pane->id)
-		{
-		if (strcmp(pane->id, id) == 0) break;
-		pane++;
-		}
-	if (!pane->id) return nullptr;
-	return pane->config;
+	const auto pane = std::find_if(std::cbegin(known_panes), std::cend(known_panes),
+	                               [id](const KnownPanes &pane){ return strcmp(pane.id, id) == 0; });
+	return (pane != std::cend(known_panes)) ? pane->config : nullptr;
 }
 
 static void bar_expander_add_action_cb(GSimpleAction *, GVariant *parameter, gpointer)
@@ -397,10 +391,10 @@ static GtkWidget *bar_menu_add_button_new(GtkWidget *toolbar)
 	GtkWidget *label = gtk_label_new(_("Add"));
 	g_autoptr(GMenu) menu_model = g_menu_new();
 
-	for (const KnownPanes *pane = known_panes; pane->id; pane++)
+	for (const KnownPanes &pane : known_panes)
 		{
-		g_autoptr(GMenuItem) item = g_menu_item_new(_(pane->title), nullptr);
-		g_menu_item_set_action_and_target_value(item, "bar.add-pane", g_variant_new_string(pane->id));
+		g_autoptr(GMenuItem) item = g_menu_item_new(_(pane.title), nullptr);
+		g_menu_item_set_action_and_target_value(item, "bar.add-pane", g_variant_new_string(pane.id));
 		g_menu_append_item(menu_model, item);
 		}
 
@@ -771,15 +765,11 @@ void bar_pane_common_write_config(const PaneData &pane, RcString &rc)
 
 gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title)
 {
-	const KnownPanes *pane = known_panes;
-
 	if (!title) return FALSE;
-	while (pane->id)
-		{
-		if (pane->type == type && strcmp(pane->id, id) == 0) break;
-		pane++;
-		}
-	if (!pane->id) return FALSE;
+
+	const auto pane = std::find_if(std::cbegin(known_panes), std::cend(known_panes),
+	                               [type, id](const KnownPanes &pane){ return pane.type == type && strcmp(pane.id, id) == 0; });
+	if (pane == std::cend(known_panes)) return FALSE;
 
 	if (*title && **title && strcmp(pane->title, *title) != 0) return FALSE;
 
