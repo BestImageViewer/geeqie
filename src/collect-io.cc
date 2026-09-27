@@ -184,8 +184,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	else entry = collect_manager_get_entry(path);
 	if (!append)
 		{
-		g_list_free_full(cd->list, reinterpret_cast<GDestroyNotify>(collection_info_free));
-		cd->list = nullptr;
+		collection_list_clear(&cd->list);
 		g_hash_table_remove_all(cd->existence);
 		}
 

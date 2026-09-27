@@ -30,7 +30,6 @@
 enum SortType : gint;
 
 class FileData;
-struct ThumbLoader;
 
 struct CollectInfo
 {
@@ -38,10 +37,9 @@ struct CollectInfo
 	gchar *infotext;
 };
 
-void collection_info_free(CollectInfo *ci);
-
 GList *collection_list_sort(GList *list, SortType method);
 CollectInfo *collection_list_find_fd(GList *list, FileData *fd);
+void collection_list_clear(GList **list);
 
 struct CollectionData
 {

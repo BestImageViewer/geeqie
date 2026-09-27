@@ -85,7 +85,7 @@ static CollectInfo *collection_info_new(FileData *fd, struct stat *, const gchar
 	return ci;
 }
 
-void collection_info_free(CollectInfo *ci)
+static void collection_info_free(CollectInfo *ci)
 {
 	if (!ci) return;
 
@@ -227,6 +227,11 @@ CollectInfo *collection_list_find_fd(GList *list, FileData *fd)
 		}
 
 	return nullptr;
+}
+
+void collection_list_clear(GList **list)
+{
+	g_clear_list(list, reinterpret_cast<GDestroyNotify>(collection_info_free));
 }
 
 /**
@@ -461,13 +466,13 @@ CollectionData *collection_new(const gchar *path)
 	return cd;
 }
 
-void collection_free(CollectionData *cd)
+static void collection_free(CollectionData *cd)
 {
 	if (!cd) return;
 
 	DEBUG_1("collection \"%s\" freed", cd->name);
 
-	g_list_free_full(cd->list, reinterpret_cast<GDestroyNotify>(collection_info_free));
+	collection_list_clear(&cd->list);
 
 	file_data_unregister_notify_func(collection_notify_cb, cd);
 
