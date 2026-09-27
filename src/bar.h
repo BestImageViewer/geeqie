@@ -26,6 +26,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <config.h>
+
 class FileData;
 struct LayoutWindow;
 struct RcString;
@@ -33,9 +35,11 @@ struct RcString;
 enum PaneType {
 	PANE_COMMENT,
 	PANE_EXIF,
+#if HAVE_LIBSHUMATE
+	PANE_GPS,
+#endif
 	PANE_HISTOGRAM,
 	PANE_KEYWORDS,
-	PANE_GPS,
 	PANE_RATING
 };
 

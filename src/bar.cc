@@ -27,8 +27,6 @@
 #include <glib-object.h>
 #include <pango/pango.h>
 
-#include <config.h>
-
 #include "exif.h"
 #include "filedata.h"
 #include "intl.h"
@@ -339,9 +337,11 @@ static void bar_menu_popup(GtkWidget *widget)
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 
 		display_height_option = pd && (pd->type == PANE_COMMENT ||
-		                                pd->type == PANE_KEYWORDS ||
-		                                pd->type == PANE_GPS ||
-		                                pd->type == PANE_RATING);
+#if HAVE_LIBSHUMATE
+		                               pd->type == PANE_GPS ||
+#endif
+		                               pd->type == PANE_KEYWORDS ||
+		                               pd->type == PANE_RATING);
 		}
 
 	popup_menu_bar(expander, display_height_option);
