@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <list>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -43,7 +44,6 @@
 #include "intl.h"
 #include "layout-util.h"
 #include "main-defines.h"
-#include "options.h"
 #include "ui-fileops.h"
 
 #ifdef __NetBSD__
@@ -98,8 +98,7 @@ struct CollectManagerAction
 
 
 GList *collection_manager_entry_list = nullptr;
-GList *collection_manager_action_list = nullptr;
-GList *collection_manager_action_tail = nullptr;
+std::list<CollectManagerAction *> collection_manager_action_list;
 
 CollectManagerEntry *collect_manager_get_entry(const gchar *path)
 {
@@ -754,15 +753,13 @@ static void collect_manager_refresh()
 
 static void collect_manager_process_actions(gint max)
 {
-	if (collection_manager_action_list) DEBUG_1("collection manager processing actions");
+	if (!collection_manager_action_list.empty()) DEBUG_1("collection manager processing actions");
 
-	while (collection_manager_action_list != nullptr && max > 0)
+	while (!collection_manager_action_list.empty() && max > 0)
 		{
-		CollectManagerAction *action;
-		GList *work;
+		CollectManagerAction *action = collection_manager_action_list.front();
 
-		action = static_cast<CollectManagerAction *>(collection_manager_action_list->data);
-		work = collection_manager_entry_list;
+		GList *work = collection_manager_entry_list;
 		while (work)
 			{
 			CollectManagerEntry *entry;
@@ -802,11 +799,7 @@ static void collect_manager_process_actions(gint max)
 				action->oldpath, action->newpath);
 			}
 
-		if (collection_manager_action_tail == collection_manager_action_list)
-			{
-			collection_manager_action_tail = nullptr;
-			}
-		collection_manager_action_list = g_list_remove(collection_manager_action_list, action);
+		collection_manager_action_list.remove(action);
 		collect_manager_action_unref(action);
 		}
 }
@@ -846,9 +839,9 @@ static gboolean collect_manager_process_entry_list()
 
 static gboolean collect_manager_process_cb(gpointer)
 {
-	if (collection_manager_action_list) collect_manager_refresh();
+	if (!collection_manager_action_list.empty()) collect_manager_refresh();
 	collect_manager_process_actions(COLLECT_MANAGER_ACTIONS_PER_IDLE);
-	if (collection_manager_action_list) return G_SOURCE_CONTINUE;
+	if (!collection_manager_action_list.empty()) return G_SOURCE_CONTINUE;
 
 	if (collect_manager_process_entry_list()) return G_SOURCE_CONTINUE;
 
@@ -891,18 +884,7 @@ static void collect_manager_add_action(CollectManagerAction *action)
 {
 	if (!action) return;
 
-	/* we keep track of the list's tail to keep this a n(1) operation */
-
-	if (collection_manager_action_tail)
-		{
-		collection_manager_action_tail = g_list_append(collection_manager_action_tail, action);
-		collection_manager_action_tail = collection_manager_action_tail->next;
-		}
-	else
-		{
-		collection_manager_action_list = g_list_append(collection_manager_action_list, action);
-		collection_manager_action_tail = collection_manager_action_list;
-		}
+	collection_manager_action_list.push_back(action);
 
 	collect_manager_timer_push(FALSE);
 }
