@@ -61,8 +61,6 @@ struct PaneExifData
 	GtkSizeGroup *size_group;
 
 	gboolean show_all;
-
-	FileData *fd;
 };
 
 struct ExifEntry
@@ -113,10 +111,10 @@ void bar_pane_exif_copy_to_primary(GtkWidget *widget)
 void bar_pane_exif_entry_changed(GtkEntry *, gpointer data)
 {
 	auto ee = static_cast<ExifEntry *>(data);
-	if (!ee->ped->fd) return;
+	if (!ee->ped->pane.fd) return;
 
 	g_autofree gchar *text = text_widget_text_pull(ee->value_widget);
-	metadata_write_string(ee->ped->fd, ee->key, text);
+	metadata_write_string(ee->ped->pane.fd, ee->key, text);
 }
 
 void bar_pane_exif_entry_destroy(gpointer data)
@@ -257,12 +255,12 @@ void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean &a
 	g_autofree gchar *text = nullptr;
 	if (g_strcmp0(ee->key, "Xmp.xmp.Rating") == 0)
 		{
-		rating = metadata_read_int(ee->ped->fd, ee->key, 0);
+		rating = metadata_read_int(ee->ped->pane.fd, ee->key, 0);
 		text = g_strdup_printf("%d", rating);
 		}
 	else
 		{
-		text = metadata_read_string(ped->fd, ee->key, ee->editable ? METADATA_PLAIN : METADATA_FORMATTED);
+		text = metadata_read_string(ped->pane.fd, ee->key, ee->editable ? METADATA_PLAIN : METADATA_FORMATTED);
 		}
 
 	if (!ped->show_all && ee->if_set && !ee->editable && (!text || !*text))
@@ -303,15 +301,10 @@ void bar_pane_exif_update(PaneExifData *ped)
 	gtk_widget_set_sensitive(ped->pane.title, !all_hidden);
 }
 
-void bar_pane_exif_set_fd(GtkWidget *widget, FileData *fd)
+void bar_pane_exif_update(GtkWidget *pane)
 {
-	PaneExifData *ped;
-
-	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!ped) return;
-
-	file_data_unref(ped->fd);
-	ped->fd = file_data_ref(fd);
 
 	bar_pane_exif_update(ped);
 }
@@ -319,7 +312,7 @@ void bar_pane_exif_set_fd(GtkWidget *widget, FileData *fd)
 void bar_pane_exif_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
-	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == ped->fd)
+	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == ped->pane.fd)
 		{
 		DEBUG_1("Notify pane_exif: %s %04x", fd->path, type);
 		bar_pane_exif_update(ped);
@@ -696,8 +689,7 @@ void bar_pane_exif_destroy(gpointer data)
 
 	file_data_unregister_notify_func(bar_pane_exif_notify_cb, ped);
 	g_object_unref(ped->size_group);
-	file_data_unref(ped->fd);
-	g_free(ped->pane.id);
+	bar_pane_common_free(ped->pane);
 	g_free(ped);
 }
 
@@ -707,7 +699,7 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 	ped = g_new0(PaneExifData, 1);
 
-	ped->pane.pane_set_fd = bar_pane_exif_set_fd;
+	ped->pane.pane_update = bar_pane_exif_update;
 	ped->pane.pane_write_config = bar_pane_exif_write_config;
 	bar_pane_common_init(ped->pane, id, title, expanded, PANE_EXIF);
 

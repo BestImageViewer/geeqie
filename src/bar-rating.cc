@@ -48,7 +48,6 @@ struct PaneRatingData
 	PaneData pane;
 	GtkWidget *widget;
 	GtkWidget *radio_button_first;
-	FileData *fd;
 	GtkCheckButton *rating_buttons[7];
 	gboolean updating;
 };
@@ -57,22 +56,17 @@ static void bar_pane_rating_update(PaneRatingData *prd)
 {
 	guint64 rating;
 
-	rating = metadata_read_int(prd->fd, RATING_KEY, 0) + 1;
+	rating = metadata_read_int(prd->pane.fd, RATING_KEY, 0) + 1;
 
 	prd->updating = TRUE;
 	gtk_check_button_set_active(prd->rating_buttons[rating], TRUE);
 	prd->updating = FALSE;
 }
 
-static void bar_pane_rating_set_fd(GtkWidget *pane, FileData *fd)
+static void bar_pane_rating_update(GtkWidget *pane)
 {
-	PaneRatingData *prd;
-
-	prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!prd) return;
-
-	file_data_unref(prd->fd);
-	prd->fd = file_data_ref(fd);
 
 	bar_pane_rating_update(prd);
 }
@@ -92,7 +86,7 @@ static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer da
 {
 	auto prd = static_cast<PaneRatingData *>(data);
 
-	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_METADATA | NOTIFY_PIXBUF)) && fd == prd->fd)
+	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_METADATA | NOTIFY_PIXBUF)) && fd == prd->pane.fd)
 		{
 		DEBUG_1("Notify pane_rating: %s %04x", fd->path, type);
 		bar_pane_rating_update(prd);
@@ -104,8 +98,7 @@ static void bar_pane_rating_destroy(gpointer data)
 	auto prd = static_cast<PaneRatingData *>(data);
 
 	file_data_unregister_notify_func(bar_pane_rating_notify_cb, prd);
-	file_data_unref(prd->fd);
-	g_free(prd->pane.id);
+	bar_pane_common_free(prd->pane);
 	g_free(prd);
 }
 
@@ -132,7 +125,7 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 		rating = g_strdup(rating_label);
 		}
 
-	metadata_write_string(prd->fd, RATING_KEY, rating);
+	metadata_write_string(prd->pane.fd, RATING_KEY, rating);
 }
 
 static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gboolean expanded)
@@ -146,7 +139,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 	prd = g_new0(PaneRatingData, 1);
 
-	prd->pane.pane_set_fd = bar_pane_rating_set_fd;
+	prd->pane.pane_update = bar_pane_rating_update;
 	prd->pane.pane_write_config = bar_pane_rating_write_config;
 	bar_pane_common_init(prd->pane, id, title, expanded, PANE_RATING);
 
