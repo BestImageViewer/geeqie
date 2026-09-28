@@ -21,6 +21,7 @@
 #include "exif.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <exception>
@@ -43,6 +44,7 @@
 #include "misc.h"
 #include "options.h"
 #include "ui-fileops.h"
+#include "video-metadata.h"
 
 struct ExifItem;
 
@@ -161,6 +163,21 @@ struct ExifData
 	virtual void set_image_comment(const std::string& comment) = 0;
 };
 
+static void video_gps_set_coordinate(Exiv2::ExifData &data, const char *key, const char *ref_key,
+                                     double coordinate, const char *positive, const char *negative)
+{
+	if (data.findKey(Exiv2::ExifKey(key)) != data.end()) return;
+
+	// Store ordinary EXIF DMS rationals so the existing EXIF/XMP conversion applies.
+	const auto microseconds = static_cast<uint64_t>(std::llround(std::abs(coordinate) * 3600.0 * 1000000.0));
+	g_autofree gchar *value = g_strdup_printf("%u/1 %u/1 %u/1000000",
+	                                        static_cast<unsigned int>(microseconds / 3600000000ULL),
+	                                        static_cast<unsigned int>(microseconds / 60000000ULL % 60),
+	                                        static_cast<unsigned int>(microseconds % 60000000ULL));
+	data[key] = value;
+	data[ref_key] = std::signbit(coordinate) ? negative : positive;
+}
+
 // This allows read-only access to the original metadata
 struct ExifDataOriginal : public ExifData
 {
@@ -215,6 +232,18 @@ public:
 		catch (Exiv2::AnyError& e)
 			{
 			valid_ = FALSE;
+			}
+
+		if (filter_file_class(path, FORMAT_CLASS_VIDEO))
+			{
+			if (auto gps = video_metadata_read_gps(path))
+				{
+				auto &data = exifData();
+				video_gps_set_coordinate(data, "Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef",
+				                         gps->latitude, "N", "S");
+				video_gps_set_coordinate(data, "Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef",
+				                         gps->longitude, "E", "W");
+				}
 			}
 	}
 

@@ -505,6 +505,21 @@ else
     summary({'tiff' : ['disabled - tiff files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_VIDEO_METADATA', 0)
+libavformat_dep = []
+libavutil_dep = []
+option = get_option('videometadata')
+if not option.disabled() and conf_data.get('HAVE_EXIV2') == 1
+    libavformat_dep = dependency('libavformat', required : option)
+    libavutil_dep = dependency('libavutil', required : option)
+    if libavformat_dep.found() and libavutil_dep.found()
+        conf_data.set('HAVE_VIDEO_METADATA', 1)
+    endif
+elif option.enabled()
+    error('Video metadata requires Exiv2')
+endif
+summary({'videometadata' : ['video GPS metadata supported:', conf_data.get('HAVE_VIDEO_METADATA') == 1]}, section : 'Configuration', bool_yn : true)
+
 conf_data.set('HAVE_FFMPEGTHUMBNAILER', 0)
 conf_data.set('HAVE_FFMPEGTHUMBNAILER_METADATA', 0)
 conf_data.set('HAVE_FFMPEGTHUMBNAILER_RGB', 0)

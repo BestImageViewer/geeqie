@@ -53,6 +53,7 @@ meson setup \
 -Dtiff=disabled \
 -Dunit_tests=disabled \
 -Dvideothumbnailer=disabled \
+-Dvideometadata=disabled \
 -Dwebp=disabled \
 -Dyelp_build=disabled \
 --buildtype=debug \

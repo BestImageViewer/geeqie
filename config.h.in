@@ -45,6 +45,9 @@
 /* Define to enable exr support */
 #mesondefine HAVE_EXR
 
+/* Define to enable video GPS metadata support */
+#mesondefine HAVE_VIDEO_METADATA
+
 /* Define to enable ffmpegthumbnailer support */
 #mesondefine HAVE_FFMPEGTHUMBNAILER
 

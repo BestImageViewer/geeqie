@@ -148,6 +148,10 @@ chmod +x geeqie-install-debian.sh
 ./geeqie-install-debian.sh --list
 ```
 
+GPS metadata in smartphone videos requires the Exiv2, libavformat, and libavutil
+development libraries. This support is detected automatically; use
+`-Dvideometadata=enabled` to require it or `-Dvideometadata=disabled` to omit it.
+
 ## Installation scripts
 
 Geeqie is stable and you may compile the latest version from sources.

@@ -65,6 +65,7 @@ jobs:
           -Dspell=disabled
           -Dtiff=disabled
           -Dunit_tests=disabled
+          -Dvideometadata=disabled
           -Dvideothumbnailer=disabled
           -Dwebp=disabled
           -Dyelp_build=disabled
@@ -125,6 +126,7 @@ jobs:
           -Dspell=disabled
           -Dtiff=disabled
           -Dunit_tests=disabled
+          -Dvideometadata=disabled
           -Dvideothumbnailer=disabled
           -Dwebp=disabled
           -Dyelp_build=disabled
