@@ -45,6 +45,8 @@
 namespace
 {
 
+constexpr gint MIN_HEIGHT = 25;
+
 /*
  *-------------------------------------------------------------------
  * EXIF widget
@@ -712,6 +714,8 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 	ped->show_all = show_all;
 	ped->size_group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
 	ped->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	// Keep an empty pane clickable so entries can be added from its context menu.
+	gtk_widget_set_size_request(ped->widget, -1, MIN_HEIGHT);
 	ped->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
 	gtk_box_append(GTK_BOX(ped->widget), ped->vbox);
