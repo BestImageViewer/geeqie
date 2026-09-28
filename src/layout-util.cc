@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <future>
 #include <string>
 #include <vector>
 
@@ -110,8 +111,17 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(WindowNames, window_names_free)
 struct LayoutEditors
 {
 	gint reload_idle_id = -1;
-	GList *desktop_files = nullptr;
+	GTask *discovery_task = nullptr;
+	EditorDesktopFiles desktop_files;
+	std::size_t next_file = 0;
 } layout_editors;
+
+struct EditorDiscovery
+{
+	std::vector<std::string> directories = editor_get_desktop_dirs();
+	std::promise<EditorDesktopFiles> result;
+	std::future<EditorDesktopFiles> ready = result.get_future();
+};
 
 /**
  * @brief Checks if event key is mapped to Help
@@ -2735,18 +2745,12 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 {
 	auto *layout_editors = static_cast<LayoutEditors *>(user_data);
 
-	if (!layout_editors->desktop_files)
+	if (layout_editors->next_file < layout_editors->desktop_files.size())
 		{
-		DEBUG_1("%s layout_editors_reload_idle_cb: get_desktop_files", get_exec_time());
-		layout_editors->desktop_files = editor_get_desktop_files();
-		return G_SOURCE_CONTINUE;
+		editor_add_desktop_file(layout_editors->desktop_files[layout_editors->next_file++]);
 		}
 
-	editor_read_desktop_file(static_cast<const gchar *>(layout_editors->desktop_files->data));
-	g_free(layout_editors->desktop_files->data);
-	layout_editors->desktop_files = g_list_delete_link(layout_editors->desktop_files, layout_editors->desktop_files);
-
-	if (layout_editors->desktop_files) return G_SOURCE_CONTINUE;
+	if (layout_editors->next_file < layout_editors->desktop_files.size()) return G_SOURCE_CONTINUE;
 
 	DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors", get_exec_time());
 	editor_table_finish();
@@ -2782,28 +2786,68 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 			}
 	};
 
-	layout_window_foreach(layout_toolbars_apply);
+	if (cur_lw) layout_window_foreach(layout_toolbars_apply);
 
+	layout_editors->desktop_files.clear();
 	layout_editors->reload_idle_id = -1;
 	return G_SOURCE_REMOVE;
+}
+
+static void layout_editors_discover(GTask *task, gpointer, gpointer task_data, GCancellable *cancellable)
+{
+	auto *discovery = static_cast<EditorDiscovery *>(task_data);
+	discovery->result.set_value(editor_load_desktop_files(discovery->directories, cancellable));
+	g_task_return_boolean(task, TRUE);
+}
+
+static void layout_editors_take_discovery()
+{
+	auto *discovery = static_cast<EditorDiscovery *>(g_task_get_task_data(layout_editors.discovery_task));
+	// Explicit finish requests wait for the worker without reentering the GTK event loop.
+	layout_editors.desktop_files = discovery->ready.get();
+	layout_editors.next_file = 0;
+	g_clear_object(&layout_editors.discovery_task);
+	editor_table_clear();
+	layout_editors.reload_idle_id = g_idle_add(layout_editors_reload_idle_cb, &layout_editors);
+}
+
+static void layout_editors_discovered_cb(GObject *, GAsyncResult *result, gpointer)
+{
+	// A newer reload or a synchronous finish may already have consumed this request.
+	if (G_TASK(result) != layout_editors.discovery_task) return;
+	layout_editors_take_discovery();
 }
 
 void layout_editors_reload_start()
 {
 	DEBUG_1("%s layout_editors_reload_start", get_exec_time());
 
+	// The plugin dialog can be opened before the first discovery completes.
+	if (!desktop_file_list) editor_table_clear();
+
 	if (layout_editors.reload_idle_id != -1)
 		{
 		g_source_remove(layout_editors.reload_idle_id);
-		g_list_free_full(layout_editors.desktop_files, g_free);
+		layout_editors.reload_idle_id = -1;
+		}
+	layout_editors.desktop_files.clear();
+	if (layout_editors.discovery_task)
+		{
+		g_cancellable_cancel(g_task_get_cancellable(layout_editors.discovery_task));
+		g_clear_object(&layout_editors.discovery_task);
 		}
 
-	editor_table_clear();
-	layout_editors.reload_idle_id = g_idle_add(layout_editors_reload_idle_cb, &layout_editors);
+	g_autoptr(GCancellable) cancellable = g_cancellable_new();
+	layout_editors.discovery_task = g_task_new(nullptr, cancellable, layout_editors_discovered_cb, nullptr);
+	g_task_set_return_on_cancel(layout_editors.discovery_task, FALSE);
+	g_task_set_task_data(layout_editors.discovery_task, new EditorDiscovery,
+	                     +[](gpointer data) { delete static_cast<EditorDiscovery *>(data); });
+	g_task_run_in_thread(layout_editors.discovery_task, layout_editors_discover);
 }
 
 void layout_editors_reload_finish()
 {
+	if (layout_editors.discovery_task) layout_editors_take_discovery();
 	if (layout_editors.reload_idle_id == -1) return;
 
 	DEBUG_1("%s layout_editors_reload_finish", get_exec_time());

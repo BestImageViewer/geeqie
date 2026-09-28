@@ -2,6 +2,7 @@
 
 unit_test_sources = files(
 'collection-file-source.cc',
+'editors.cc',
 'filecache.cc',
 'filedata/filedata.cc',
 'filedata/filelist.cc',

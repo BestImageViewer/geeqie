@@ -22,9 +22,11 @@
 #ifndef EDITORS_H
 #define EDITORS_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
+#include <gio/gio.h>
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -105,8 +107,22 @@ extern GListStore *desktop_file_list;
 
 void editor_table_finish();
 void editor_table_clear();
-GList *editor_get_desktop_files();
-gboolean editor_read_desktop_file(const gchar *path);
+
+struct EditorDesktopFile
+{
+	std::string path;
+	std::unique_ptr<GKeyFile, decltype(&g_key_file_unref)> key_file{nullptr, g_key_file_unref};
+	bool try_exec_available = true;
+};
+
+using EditorDesktopFiles = std::vector<EditorDesktopFile>;
+
+/** @brief Snapshot search paths on the main thread before starting discovery. */
+std::vector<std::string> editor_get_desktop_dirs();
+/** @brief Read and parse desktop files without accessing GTK or the live editor table. */
+EditorDesktopFiles editor_load_desktop_files(const std::vector<std::string> &directories, GCancellable *cancellable);
+/** @brief Register a loaded desktop file on the main thread. Earlier files take precedence. */
+gboolean editor_add_desktop_file(const EditorDesktopFile &file);
 std::vector<std::string> editor_get_disabled_plugins();
 
 using EditorsList = std::vector<EditorDescription *>;

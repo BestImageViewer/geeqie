@@ -163,7 +163,7 @@ gboolean editor_window_save(EditorWindow *ew)
 		}
 
 	layout_editors_reload_start();
-	/* idle function is not needed, everything should be cached */
+	/* Wait for discovery and register the updated plugin before returning. */
 	layout_editors_reload_finish();
 	return ret;
 }
@@ -348,7 +348,7 @@ void editor_list_window_delete_dlg_ok_cb(GenericDialog *gd, gpointer data)
 		{
 		/* refresh list */
 		layout_editors_reload_start();
-		/* idle function is not needed, everything should be cached */
+		/* Wait for discovery so the deleted plugin disappears immediately. */
 		layout_editors_reload_finish();
 		}
 

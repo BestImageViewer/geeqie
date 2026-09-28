@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #include <glib-object.h>
 
@@ -293,27 +294,20 @@ static GList *editor_mime_types_to_extensions(gchar **mime_types)
 	return list;
 }
 
-gboolean editor_read_desktop_file(const gchar *path)
+gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 {
-	GKeyFile *key_file;
+	const gchar *path = file.path.c_str();
+	GKeyFile *key_file = file.key_file.get();
 	EditorDescription *editor;
 	gboolean category_geeqie = FALSE;
 
 	const gchar *key = filename_from_path(path);
 	if (is_valid_editor_command(key)) return FALSE; /* the file found earlier wins */
 
-	key_file = g_key_file_new();
-	if (!g_key_file_load_from_file(key_file, path, G_KEY_FILE_NONE, nullptr))
-		{
-		g_key_file_free(key_file);
-		return FALSE;
-		}
-
 	g_autofree gchar *type = g_key_file_get_string(key_file, DESKTOP_GROUP, "Type", nullptr);
 	if (!type || strcmp(type, "Application") != 0)
 		{
 		/* We only consider desktop entries of Application type */
-		g_key_file_free(key_file);
 		return FALSE;
 		}
 
@@ -369,17 +363,11 @@ gboolean editor_read_desktop_file(const gchar *path)
 		}
 
 
-	g_autofree gchar *try_exec = g_key_file_get_string(key_file, DESKTOP_GROUP, "TryExec", nullptr);
-	if (try_exec && !editor->hidden && !editor->ignored)
-		{
-		g_autofree gchar *try_exec_res = g_find_program_in_path(try_exec);
-		if (!try_exec_res) editor->hidden = TRUE;
-		}
+	if (!file.try_exec_available && !editor->hidden && !editor->ignored) editor->hidden = TRUE;
 
 	if (editor->ignored)
 		{
 		/* ignored editors will be deleted, no need to parse the rest */
-		g_key_file_free(key_file);
 		return TRUE;
 		}
 
@@ -439,8 +427,6 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	if ((editor->flags & EDITOR_NO_PARAM) && !category_geeqie) editor->hidden = TRUE;
 
-	g_key_file_free(key_file);
-
 	editor->disabled = !path || std::any_of(options->disabled_plugins.cbegin(), options->disabled_plugins.cend(),
 	                                        [path](const std::string &plugin){ return plugin == path; });
 
@@ -486,7 +472,7 @@ void editor_table_clear()
 	editors_finished = FALSE;
 }
 
-static GList *editor_add_desktop_dir(GList *list, const gchar *path)
+static GList *editor_add_desktop_dir(GList *list, const gchar *path, GCancellable *cancellable)
 {
 	DIR *dp;
 	struct dirent *dir;
@@ -498,7 +484,7 @@ static GList *editor_add_desktop_dir(GList *list, const gchar *path)
 		/* dir not found */
 		return list;
 		}
-	while ((dir = readdir(dp)) != nullptr)
+	while (!g_cancellable_is_cancelled(cancellable) && (dir = readdir(dp)) != nullptr)
 		{
 		gchar *namel = dir->d_name;
 
@@ -513,9 +499,9 @@ static GList *editor_add_desktop_dir(GList *list, const gchar *path)
 	return list;
 }
 
-GList *editor_get_desktop_files()
+std::vector<std::string> editor_get_desktop_dirs()
 {
-	GList *list = nullptr;
+	std::vector<std::string> directories;
 
 	const gchar *xdg_data_dirs_env = getenv("XDG_DATA_DIRS");
 	g_autofree gchar *xdg_data_dirs = (xdg_data_dirs_env && *xdg_data_dirs_env) ? path_to_utf8(xdg_data_dirs_env) : g_strdup("/usr/share");
@@ -524,13 +510,40 @@ GList *editor_get_desktop_files()
 
 	g_auto(GStrv) split_dirs = g_strsplit(all_dirs, ":", 0);
 
-	for (gint i = g_strv_length(split_dirs) - 1; i >= 0; i--)
+	for (guint i = 0; split_dirs[i]; ++i)
 		{
 		g_autofree gchar *path = g_build_filename(split_dirs[i], "applications", NULL);
-		list = editor_add_desktop_dir(list, path);
+		directories.emplace_back(path);
 		}
 
-	return list;
+	return directories;
+}
+
+EditorDesktopFiles editor_load_desktop_files(const std::vector<std::string> &directories, GCancellable *cancellable)
+{
+	EditorDesktopFiles files;
+	for (const auto &directory : directories)
+		{
+		if (g_cancellable_is_cancelled(cancellable)) break;
+		GList *paths = editor_add_desktop_dir(nullptr, directory.c_str(), cancellable);
+		for (GList *work = paths; work && !g_cancellable_is_cancelled(cancellable); work = work->next)
+			{
+			EditorDesktopFile file;
+			file.path = static_cast<const gchar *>(work->data);
+			file.key_file.reset(g_key_file_new());
+			if (!g_key_file_load_from_file(file.key_file.get(), file.path.c_str(), G_KEY_FILE_NONE, nullptr)) continue;
+
+			g_autofree gchar *try_exec = g_key_file_get_string(file.key_file.get(), DESKTOP_GROUP, "TryExec", nullptr);
+			if (try_exec)
+				{
+				g_autofree gchar *executable = g_find_program_in_path(try_exec);
+				file.try_exec_available = executable != nullptr;
+				}
+			files.push_back(std::move(file));
+			}
+		g_list_free_full(paths, g_free);
+		}
+	return files;
 }
 
 std::vector<std::string> editor_get_disabled_plugins()
@@ -1337,7 +1350,7 @@ static EditorFlags editor_command_start(const EditorDescription *editor, GList *
 
 EditorDescription *get_editor_by_command(const gchar *key)
 {
-	if (!key) return nullptr;
+	if (!editors || !key) return nullptr;
 	return static_cast<EditorDescription *>(g_hash_table_lookup(editors, key));
 }
 
