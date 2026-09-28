@@ -128,7 +128,6 @@ struct PaneKeywordsData
 	gboolean hide_unchecked;
 
 	guint idle_id; /* event source id */
-	FileData *fd;
 	gchar *key;
 	gint height;
 
@@ -159,11 +158,11 @@ void bar_pane_keywords_write(PaneKeywordsData *pkd)
 {
 	GList *list;
 
-	if (!pkd->fd) return;
+	if (!pkd->pane.fd) return;
 
 	list = keyword_list_pull(pkd->keyword_view);
 
-	metadata_write_list(pkd->fd, KEYWORD_KEY, list);
+	metadata_write_list(pkd->pane.fd, KEYWORD_KEY, list);
 
 	g_list_free_full(list, g_free);
 }
@@ -225,7 +224,7 @@ void bar_pane_keywords_update(PaneKeywordsData *pkd)
 	GList *work2;
 	GtkTextBuffer *keyword_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
 
-	keywords = metadata_read_list(pkd->fd, KEYWORD_KEY, METADATA_PLAIN);
+	keywords = metadata_read_list(pkd->pane.fd, KEYWORD_KEY, METADATA_PLAIN);
 	orig_keywords = keyword_list_pull(pkd->keyword_view);
 
 	/* compare the lists */
@@ -250,15 +249,10 @@ void bar_pane_keywords_update(PaneKeywordsData *pkd)
 	g_list_free_full(orig_keywords, g_free);
 }
 
-void bar_pane_keywords_set_fd(GtkWidget *pane, FileData *fd)
+void bar_pane_keywords_update(GtkWidget *pane)
 {
-	PaneKeywordsData *pkd;
-
-	pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pkd) return;
-
-	file_data_unref(pkd->fd);
-	pkd->fd = file_data_ref(fd);
 
 	bar_pane_keywords_update(pkd);
 }
@@ -436,7 +430,7 @@ void bar_pane_keywords_remove_selection_cb(GSimpleAction *, GVariant *, gpointer
 void bar_pane_keywords_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
-	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pkd->fd)
+	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pkd->pane.fd)
 		{
 		DEBUG_1("Notify pane_keywords: %s %04x", fd->path, type);
 		bar_pane_keywords_update(pkd);
@@ -1214,9 +1208,8 @@ void bar_pane_keywords_destroy(gpointer data)
 	if (pkd->idle_id) g_source_remove(pkd->idle_id);
 	file_data_unregister_notify_func(bar_pane_keywords_notify_cb, pkd);
 
-	file_data_unref(pkd->fd);
 	g_free(pkd->key);
-	g_free(pkd->pane.id);
+	bar_pane_common_free(pkd->pane);
 
 	g_free(pkd);
 }
@@ -1386,7 +1379,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	pkd = g_new0(PaneKeywordsData, 1);
 
-	pkd->pane.pane_set_fd = bar_pane_keywords_set_fd;
+	pkd->pane.pane_update = bar_pane_keywords_update;
 	pkd->pane.pane_write_config = bar_pane_keywords_write_config;
 	bar_pane_common_init(pkd->pane, id, title, expanded, PANE_KEYWORDS);
 

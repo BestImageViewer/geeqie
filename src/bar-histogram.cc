@@ -56,7 +56,6 @@ struct PaneHistogramData
 	gint histogram_width;
 	gint histogram_height;
 	GdkPixbuf *pixbuf;
-	FileData *fd;
 	gboolean need_update;
 	guint idle_id; /* event source id */
 };
@@ -71,7 +70,7 @@ static void bar_pane_histogram_update(PaneHistogramData *phd)
 
 	gtk_label_set_text(GTK_LABEL(phd->pane.title), phd->histogram.label());
 
-	if (!phd->histogram_width || !phd->histogram_height || !phd->fd) return;
+	if (!phd->histogram_width || !phd->histogram_height || !phd->pane.fd) return;
 
 	/** histmap_get is relatively expensive, run it only when we really need it
 	   and with lower priority than pixbuf_renderer
@@ -98,9 +97,9 @@ static gboolean bar_pane_histogram_update_cb(gpointer data)
 
 	gtk_widget_queue_draw(phd->drawing_area);
 
-	if (phd->fd != nullptr)
+	if (phd->pane.fd != nullptr)
 		{
-		const HistMap *histmap = histmap_get(phd->fd);
+		const HistMap *histmap = histmap_get(phd->pane.fd);
 
 		if (histmap)
 			{
@@ -110,7 +109,7 @@ static gboolean bar_pane_histogram_update_cb(gpointer data)
 			}
 		else
 			{
-			histmap_start_idle(phd->fd);
+			histmap_start_idle(phd->pane.fd);
 			}
 		}
 
@@ -118,15 +117,10 @@ static gboolean bar_pane_histogram_update_cb(gpointer data)
 }
 
 
-static void bar_pane_histogram_set_fd(GtkWidget *pane, FileData *fd)
+static void bar_pane_histogram_update(GtkWidget *pane)
 {
-	PaneHistogramData *phd;
-
-	phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!phd) return;
-
-	file_data_unref(phd->fd);
-	phd->fd = file_data_ref(fd);
 
 	bar_pane_histogram_update(phd);
 }
@@ -146,7 +140,7 @@ static void bar_pane_histogram_write_config(GtkWidget *pane, RcString &rc)
 static void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
-	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_PIXBUF)) && fd == phd->fd)
+	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_PIXBUF)) && fd == phd->pane.fd)
 		{
 		DEBUG_1("Notify pane_histogram: %s %04x", fd->path, type);
 		bar_pane_histogram_update(phd);
@@ -189,9 +183,8 @@ static void bar_pane_histogram_destroy(gpointer data)
 	if (phd->idle_id) g_source_remove(phd->idle_id);
 	file_data_unregister_notify_func(bar_pane_histogram_notify_cb, phd);
 
-	file_data_unref(phd->fd);
 	if (phd->pixbuf) g_object_unref(phd->pixbuf);
-	g_free(phd->pane.id);
+	bar_pane_common_free(phd->pane);
 
 	g_free(phd);
 }
@@ -328,7 +321,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 {
 	auto *phd = g_new0(PaneHistogramData, 1);
 
-	phd->pane.pane_set_fd = bar_pane_histogram_set_fd;
+	phd->pane.pane_update = bar_pane_histogram_update;
 	phd->pane.pane_write_config = bar_pane_histogram_write_config;
 	bar_pane_common_init(phd->pane, id, title, expanded, PANE_HISTOGRAM);
 

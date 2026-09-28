@@ -57,7 +57,6 @@ struct PaneCommentData
 	PaneData pane;
 	GtkWidget *widget;
 	GtkWidget *comment_view;
-	FileData *fd;
 	gchar *key;
 	gint height;
 };
@@ -65,11 +64,11 @@ struct PaneCommentData
 
 static void bar_pane_comment_write(PaneCommentData *pcd)
 {
-	if (!pcd->fd) return;
+	if (!pcd->pane.fd) return;
 
 	g_autofree gchar *comment = text_widget_text_pull(pcd->comment_view);
 
-	metadata_write_string(pcd->fd, pcd->key, comment);
+	metadata_write_string(pcd->pane.fd, pcd->key, comment);
 }
 
 
@@ -83,12 +82,12 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 	g_autofree gchar *orig_comment = text_widget_text_pull(pcd->comment_view);
 	if (g_strcmp0(pcd->key, "Xmp.xmp.Rating") == 0)
 		{
-		rating = metadata_read_int(pcd->fd, pcd->key, 0);
+		rating = metadata_read_int(pcd->pane.fd, pcd->key, 0);
 		comment = g_strdup_printf("%d", rating);
 		}
 	else
 		{
-		comment = metadata_read_string(pcd->fd, pcd->key, METADATA_PLAIN);
+		comment = metadata_read_string(pcd->pane.fd, pcd->key, METADATA_PLAIN);
 		}
 	comment_not_null = (comment) ? comment : "";
 
@@ -99,7 +98,7 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 		g_signal_handlers_unblock_by_func(comment_buffer, (gpointer)bar_pane_comment_changed, pcd);
 		}
 
-	gtk_widget_set_sensitive(pcd->comment_view, (pcd->fd != nullptr));
+	gtk_widget_set_sensitive(pcd->comment_view, (pcd->pane.fd != nullptr));
 }
 
 template<gboolean append>
@@ -116,22 +115,17 @@ static void bar_pane_comment_set_selection_cb(GSimpleAction *, GVariant *, gpoin
 	for (GList *work = list; work; work = work->next)
 		{
 		auto *fd = static_cast<FileData *>(work->data);
-		if (fd == pcd->fd) continue;
+		if (fd == pcd->pane.fd) continue;
 
 		metadata_func(fd, pcd->key, comment);
 		}
 }
 
 
-static void bar_pane_comment_set_fd(GtkWidget *bar, FileData *fd)
+static void bar_pane_comment_update(GtkWidget *pane)
 {
-	PaneCommentData *pcd;
-
-	pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
+	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
-
-	file_data_unref(pcd->fd);
-	pcd->fd = file_data_ref(fd);
 
 	bar_pane_comment_update(pcd);
 }
@@ -172,7 +166,7 @@ static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
 static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
-	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pcd->fd)
+	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pcd->pane.fd)
 		{
 		DEBUG_1("Notify pane_comment: %s %04x", fd->path, type);
 
@@ -194,10 +188,9 @@ static void bar_pane_comment_destroy(gpointer data)
 
 	file_data_unregister_notify_func(bar_pane_comment_notify_cb, pcd);
 
-	file_data_unref(pcd->fd);
 	g_free(pcd->key);
 
-	g_free(pcd->pane.id);
+	bar_pane_common_free(pcd->pane);
 
 	g_free(pcd);
 }
@@ -234,7 +227,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 
 	pcd = g_new0(PaneCommentData, 1);
 
-	pcd->pane.pane_set_fd = bar_pane_comment_set_fd;
+	pcd->pane.pane_update = bar_pane_comment_update;
 	pcd->pane.pane_write_config = bar_pane_comment_write_config;
 	bar_pane_common_init(pcd->pane, id, title, expanded, PANE_COMMENT);
 

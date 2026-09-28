@@ -82,7 +82,6 @@ struct PaneGPSData
 	gchar *map_source;
 	ShumateMapSource *shumate_map_source;
 	gint height;
-	FileData *fd;
 	ShumateSimpleMap *map;
 	ShumateMarkerLayer *marker_layer;
 	ShumateViewport *viewport;
@@ -670,9 +669,9 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 	bar_pane_gps_clear_marker_queue(pgd);
 	file_data_list_free(pgd->selection_list);
 	pgd->selection_list = layout_selection_list(pgd->pane.lw);
-	if (!pgd->selection_list && pgd->fd)
+	if (!pgd->selection_list && pgd->pane.fd)
 		{
-		pgd->selection_list = g_list_append(nullptr, file_data_ref(pgd->fd));
+		pgd->selection_list = g_list_append(nullptr, file_data_ref(pgd->pane.fd));
 		}
 	pgd->selection_list = file_data_process_groups_in_selection(pgd->selection_list, FALSE, nullptr);
 	pgd->selection_list = bar_pane_gps_remove_missing_files(pgd->selection_list);
@@ -767,15 +766,10 @@ void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
 	bar_pane_gps_update(pgd);
 }
 
-void bar_pane_gps_set_fd(GtkWidget *bar, FileData *fd)
+void bar_pane_gps_update(GtkWidget *pane)
 {
-	PaneGPSData *pgd;
-
-	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
+	auto *pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pgd) return;
-
-	file_data_unref(pgd->fd);
-	pgd->fd = file_data_ref(fd);
 
 	bar_pane_gps_update(pgd);
 }
@@ -866,10 +860,9 @@ void bar_pane_gps_destroy(gpointer data)
 
 	file_data_list_free(pgd->selection_list);
 
-	file_data_unref(pgd->fd);
 	g_clear_object(&pgd->shumate_map_source);
 	g_free(pgd->map_source);
-	g_free(pgd->pane.id);
+	bar_pane_common_free(pgd->pane);
 	g_free(pgd);
 }
 
@@ -884,7 +877,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	pgd = g_new0(PaneGPSData, 1);
 
-	pgd->pane.pane_set_fd = bar_pane_gps_set_fd;
+	pgd->pane.pane_update = bar_pane_gps_update;
 	pgd->pane.pane_notify_selection = bar_pane_gps_notify_selection;
 	pgd->pane.pane_write_config = bar_pane_gps_write_config;
 	bar_pane_common_init(pgd->pane, id, title, expanded, PANE_GPS);
