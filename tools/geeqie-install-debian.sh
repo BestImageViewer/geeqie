@@ -9,7 +9,7 @@
 ## Dialogs allow the user to install additional features.
 ##
 
-version="2026-09-23"
+version="2026-09-28"
 description='
 Geeqie is an image viewer.
 This script will download, compile, and install Geeqie on Debian-based systems.
@@ -52,6 +52,10 @@ LCMS (for color management)
 liblcms2-dev
 exiv2 (for exif handling)
 libexiv2-dev
+FFmpeg libavformat (for video GPS metadata, requires exiv2)
+libavformat-dev
+FFmpeg libavutil (for video GPS metadata, requires exiv2)
+libavutil-dev
 lua (for lua commands)
 liblua5.3-dev
 libffmpegthumbnailer (for mpeg thumbnails)
