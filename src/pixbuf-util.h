@@ -28,6 +28,8 @@
 #include <glib.h>
 #include <pango/pango.h>
 
+#include "main-defines.h"
+
 class FileData;
 struct GqColor;
 struct GqPoint;
@@ -48,7 +50,7 @@ gboolean pixbuf_scale_aspect(gint req_w, gint req_h, gint old_w, gint old_h, gin
 
 #define PIXBUF_INLINE_ARCHIVE               "gq-icon-archive-file"
 #define PIXBUF_INLINE_BROKEN                "gq-icon-broken"
-#define PIXBUF_INLINE_COLLECTION            "folder-pictures"
+#define PIXBUF_INLINE_COLLECTION            GQ_ICON_FOLDER_PICTURES
 #define PIXBUF_INLINE_ICON_180              "gq-icon-rotate-180"
 #define PIXBUF_INLINE_ICON_BOOK             "gq-icon-book"
 #define PIXBUF_INLINE_ICON_CONFIG           "gq-icon-config"

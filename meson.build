@@ -737,6 +737,12 @@ else
     summary({'Pan-view execution test' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
+# Icon naming checks
+icon_naming_python = find_program('python3', required : true)
+test('Icon naming', icon_naming_python,
+     args : [files('build-aux/icon-naming-check.py'), meson.current_source_dir()],
+     timeout : 30, suite : 'analysis')
+
 # Code correctness checks
 clang_tidy_exe = find_program('clang-tidy', required : false)
 if running_from_git and clang_tidy_exe.found()

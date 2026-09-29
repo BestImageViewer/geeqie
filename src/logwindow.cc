@@ -406,7 +406,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *all_button = gtk_toggle_button_new();
 
-	gtk_button_set_child(GTK_BUTTON(all_button), gtk_image_new_from_icon_name("edit-select-all-symbolic"));
+	gtk_button_set_child(GTK_BUTTON(all_button), gtk_image_new_from_icon_name(GQ_ICON_SELECT_ALL));
 
 	gtk_widget_set_tooltip_text(all_button, _("Highlight all"));
 	gtk_box_append(GTK_BOX(search_box), all_button);

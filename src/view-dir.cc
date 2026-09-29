@@ -82,7 +82,7 @@ PixmapFolders *folder_icons_new()
 	pf->link = create_folder_icon_with_emblem(GQ_ICON_LINK);
 
 	pf->read_only = create_folder_icon_with_emblem(GQ_ICON_READONLY);
-	pf->collection = g_themed_icon_new_with_default_fallbacks("folder-pictures");
+	pf->collection = g_themed_icon_new_with_default_fallbacks(GQ_ICON_FOLDER_PICTURES);
 
 	return pf;
 }

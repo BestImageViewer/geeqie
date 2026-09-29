@@ -162,32 +162,32 @@ const gchar *dir_entry_icon_name(const gchar *base_path, const gchar *entry)
 
 	if (isdir(fullpath))
 		{
-		return "folder";
+		return GQ_ICON_DIRECTORY;
 		}
 	if (is_image_file(fullpath))
 		{
-		return "image-x-generic";
+		return GQ_ICON_IMAGE;
 		}
 #if HAVE_ARCHIVE
 	if (is_archive_file(fullpath))
 		{
-		return "package-x-generic";
+		return GQ_ICON_ARCHIVE;
 		}
 #endif
 	if (g_str_has_suffix(fullpath, ".pdf"))
 		{
-		return "application-pdf";
+		return GQ_ICON_PDF;
 		}
 	if (g_str_has_suffix(fullpath, ".icc"))
 		{
-		return "applications-graphics";
+		return GQ_ICON_GRAPHICS;
 		}
 	if (g_str_has_suffix(fullpath, GQ_COLLECTION_EXT))
 		{
 		return GQ_ICON_FILE_FILTER;
 		}
 
-	return "text-x-generic";
+	return GQ_ICON_FILE;
 }
 
 GtkWidget *create_dir_preview_row(const gchar *base_path, const gchar *entry)

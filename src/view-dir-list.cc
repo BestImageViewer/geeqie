@@ -31,6 +31,7 @@
 
 #include "filedata.h"
 #include "layout.h"
+#include "main-defines.h"
 #include "options.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
@@ -192,7 +193,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 		if (vd_is_collection(fd))
 			{
-			icon_name = "folder-pictures";
+			icon_name = GQ_ICON_FOLDER_PICTURES;
 			}
 		else if (access_file(fd->path, R_OK | X_OK) && fd->name)
 			{

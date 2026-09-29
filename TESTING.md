@@ -116,6 +116,19 @@ See `build-aux/lua-test.sh` for more details.
 Source code checks exclude `tests/` and `src/third-party/`. Unit test sources
 are still compiled and run when unit tests are enabled.
 
+### Icon naming
+
+Checks that C/C++ code uses the theme icon constants in `src/main-defines.h`.
+Reports repeated hyphenated icon names, including names in tables and return
+statements, and literal icon arguments to the APIs and wrappers listed in the
+script. Comments, third-party code, and unit test sources are excluded.
+
+Run with `meson test -C build 'Icon naming'` or
+`python3 build-aux/icon-naming-check.py`. Diagnostics include the file and line.
+When adding an icon wrapper, extend `ICON_ARGUMENTS` in the script.
+This is a source check, not a C++ parser: it does not track names through
+variables or validate XML UI files or the availability of icon artwork.
+
 ### Code correctness
 
 Runs `clang-tidy` code correctness checks for every source file in the project.

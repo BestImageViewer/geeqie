@@ -636,7 +636,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
 		gtk_window_set_titlebar(GTK_WINDOW(lw->window), header);
 		GtkWidget *menu_button = gtk_menu_button_new();
-		GtkWidget *image = gtk_image_new_from_icon_name("open-menu-symbolic");
+		GtkWidget *image = gtk_image_new_from_icon_name(GQ_ICON_MENU);
 		lw->hamburger_menu_button = menu_button;
 
 		gtk_menu_button_set_child(GTK_MENU_BUTTON(menu_button), image);
