@@ -2210,6 +2210,46 @@ static void layout_menu_forward_cb(GSimpleAction *, GVariant *, gpointer)
 	file_data_unref(dir_fd);
 }
 
+enum class LayoutFocusTarget
+{
+	DIRECTORIES,
+	FILES,
+	ADDRESS_BAR
+};
+
+template<LayoutFocusTarget target>
+static void layout_menu_focus_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+
+	layout_tools_float_set(lw, lw->options.tools_float, FALSE);
+
+	GtkWidget *widget = nullptr;
+	switch (target)
+		{
+		case LayoutFocusTarget::DIRECTORIES:
+			if (lw->vd) widget = lw->vd->view;
+			break;
+		case LayoutFocusTarget::FILES:
+			if (lw->vf) widget = lw->vf->listview;
+			break;
+		case LayoutFocusTarget::ADDRESS_BAR:
+			widget = lw->path_entry;
+			break;
+		}
+
+	if (!widget) return;
+
+	GtkRoot *root = gtk_widget_get_root(widget);
+	if (GTK_IS_WINDOW(root)) gtk_window_present(GTK_WINDOW(root));
+	if (!gtk_widget_grab_focus(widget)) gtk_widget_child_focus(widget, GTK_DIR_TAB_FORWARD);
+
+	if (target == LayoutFocusTarget::ADDRESS_BAR)
+		{
+		gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+		}
+}
+
 static void layout_menu_show_history_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();

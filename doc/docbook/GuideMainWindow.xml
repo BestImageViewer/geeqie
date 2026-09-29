@@ -51,6 +51,15 @@
     .
   </para>
   <para>
+    The <guimenuitem>Focus directories pane</guimenuitem>,
+    <guimenuitem>Focus files pane</guimenuitem>, and
+    <guimenuitem>Focus address bar</guimenuitem> actions move keyboard focus
+    directly to those areas. Assign shortcuts in
+    <link linkend="GuideOptionsKeyboard">Keyboard Options</link>; these actions
+    have no default shortcuts. They reveal hidden panes and also work when
+    the file list is floating. Focusing the address bar selects its text.
+  </para>
+  <para>
     Multiple instances of the main window may be started via the
     <menuchoice>
       <shortcut>

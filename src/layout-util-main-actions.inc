@@ -1104,6 +1104,45 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-focus-address-bar",
+		GQ_ICON_GO_JUMP,
+		N_("Focus address bar"),
+		layout_menu_focus_cb<LayoutFocusTarget::ADDRESS_BAR>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.main-win-focus-directories",
+		GQ_ICON_DIRECTORY,
+		N_("Focus directories pane"),
+		layout_menu_focus_cb<LayoutFocusTarget::DIRECTORIES>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.main-win-focus-files",
+		GQ_ICON_FILE,
+		N_("Focus files pane"),
+		layout_menu_focus_cb<LayoutFocusTarget::FILES>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-folder-tree",
 		PIXBUF_INLINE_ICON_FLOAT,
 		N_("Toggle Folder View"),
