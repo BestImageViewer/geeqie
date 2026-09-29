@@ -683,6 +683,32 @@ void bar_pane_exif_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_NL(); WRITE_STRING("</pane_exif>");
 }
 
+void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!ped) return;
+
+	g_autofree gchar *key = nullptr;
+	g_autofree gchar *title = nullptr;
+	gboolean if_set = TRUE;
+	gboolean editable = FALSE;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("key", key)) continue;
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_BOOL_FULL("if_set", if_set)) continue;
+		if (READ_BOOL_FULL("editable", editable)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	if (key && key[0]) bar_pane_exif_add_entry(ped, key, title, if_set, editable);
+}
+
 void bar_pane_exif_destroy(gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
@@ -701,6 +727,7 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 	ped->pane.pane_update = bar_pane_exif_update;
 	ped->pane.pane_write_config = bar_pane_exif_write_config;
+	ped->pane.pane_entry_add_from_config = bar_pane_exif_entry_add_from_config;
 	bar_pane_common_init(ped->pane, id, title, expanded, PANE_EXIF);
 
 	ped->show_all = show_all;
@@ -807,34 +834,5 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 	bar_update_expander(pane, ped->pane);
 	bar_pane_exif_update(ped);
 }
-
-
-void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	PaneExifData *ped;
-	gchar *key = nullptr;
-	gchar *title = nullptr;
-	gboolean if_set = TRUE;
-	gboolean editable = FALSE;
-
-	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!ped) return;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("key", key)) continue;
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_BOOL_FULL("if_set", if_set)) continue;
-		if (READ_BOOL_FULL("editable", editable)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	if (key && key[0]) bar_pane_exif_add_entry(ped, key, title, if_set, editable);
-}
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

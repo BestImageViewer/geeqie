@@ -30,8 +30,6 @@
 GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gchar **attribute_values);
 void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 
-void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
-
 using ExifEntryFunc = std::function<void(const gchar *key, const gchar *title)>;
 void bar_pane_exif_foreach(const ExifEntryFunc &exif_entry_func); /**< these are exposed for when duplication of the exif bar's text is needed */
 

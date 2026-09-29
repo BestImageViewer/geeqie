@@ -306,6 +306,29 @@ void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("</pane_keywords>");
 }
 
+void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pkd) return;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+		gchar *path = nullptr;
+
+		if (READ_CHAR_FULL("path", path))
+			{
+			g_autoptr(GtkTreePath) tree_path = gtk_tree_path_new_from_string(path);
+			gtk_tree_view_expand_to_path(GTK_TREE_VIEW(pkd->keyword_treeview), tree_path);
+			pkd->expanded_rows = g_list_append(pkd->expanded_rows, path);
+			continue;
+			}
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+}
+
 void bar_pane_keywords_keyword_toggle(GtkCellRendererToggle *, const gchar *path, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
@@ -1381,6 +1404,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	pkd->pane.pane_update = bar_pane_keywords_update;
 	pkd->pane.pane_write_config = bar_pane_keywords_write_config;
+	pkd->pane.pane_entry_add_from_config = bar_pane_keywords_entry_add_from_config;
 	bar_pane_common_init(pkd->pane, id, title, expanded, PANE_KEYWORDS);
 
 	pkd->height = height;
@@ -1703,30 +1727,6 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 
 	bar_update_expander(pane, pkd->pane);
 	bar_pane_keywords_update(pkd);
-}
-
-
-void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	auto pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!pkd) return;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-		gchar *path = nullptr;
-
-		if (READ_CHAR_FULL("path", path))
-			{
-			g_autoptr(GtkTreePath) tree_path = gtk_tree_path_new_from_string(path);
-			gtk_tree_view_expand_to_path(GTK_TREE_VIEW(pkd->keyword_treeview), tree_path);
-			pkd->expanded_rows = g_list_append(pkd->expanded_rows, path);
-			continue;
-			}
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
 }
 
 /*
