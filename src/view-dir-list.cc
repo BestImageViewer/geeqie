@@ -357,6 +357,19 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
+	if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
+		{
+		GtkRoot *root = gtk_widget_get_root(widget);
+		GtkWidget *focus = root ? gtk_root_get_focus(root) : nullptr;
+		if (!GTK_IS_BUTTON(focus)) return FALSE;
+
+		auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(focus), VDLIST_FD_DATA));
+		if (!fd || !vd->select_func) return FALSE;
+
+		vd->select_func(vd, fd, vd->select_data);
+		return TRUE;
+		}
+
 	if (keyval == GDK_KEY_Up || keyval == GDK_KEY_KP_Up ||
 	    keyval == GDK_KEY_Down || keyval == GDK_KEY_KP_Down)
 		{
@@ -371,7 +384,6 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 
 	if (keyval != GDK_KEY_Menu) return FALSE;
 
-	(void)widget;
 	vd->click_fd = VDLIST(vd)->selected_fd;
 
 	vd_color_set(vd, vd->click_fd, TRUE);
