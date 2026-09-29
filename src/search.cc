@@ -1255,6 +1255,27 @@ static void search_start_button_cb(GtkWidget *, gpointer data)
 	search_start_do(sd);
 }
 
+static gboolean search_start_key_pressed_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	g_auto(GStrv) accels = g_key_file_get_string_list(get_keyfile_merged(), "win.search-win-search-start", "accels", nullptr, nullptr);
+	if (!accels) return FALSE;
+
+	for (guint i = 0; accels[i]; i++)
+		{
+		guint key;
+		GdkModifierType modifiers;
+		if (gtk_accelerator_parse(accels[i], &key, &modifiers) &&
+		    gdk_keyval_to_lower(keyval) == key &&
+		    (state & gtk_accelerator_get_default_mod_mask()) == modifiers)
+			{
+			search_start_do(static_cast<SearchData *>(data));
+			return TRUE;
+			}
+		}
+
+	return FALSE;
+}
+
 /**
  * @brief Handle text box keystrokes instead of accelerators
  * @param window 
@@ -3453,6 +3474,12 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	GApplication *app = g_application_get_default();
 	register_actions_from_table(GTK_APPLICATION(app), sd->ui.window, search_actions, get_keyfile_merged(), sd);
+
+	/* Handle the search shortcut before path completion or text-entry bindings. */
+	GtkEventController *key_controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(key_controller, GTK_PHASE_CAPTURE);
+	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(search_start_key_pressed_cb), sd);
+	gtk_widget_add_controller(sd->ui.window, key_controller);
 
 	gtk_window_present(GTK_WINDOW(sd->ui.window));
 }
