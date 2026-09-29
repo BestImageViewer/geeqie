@@ -974,7 +974,8 @@ static void sr_menu_view_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (sd->click_fd) layout_set_fd(nullptr, sd->click_fd);
+	g_autoptr(FileDataList) list = search_result_selection_list(sd);
+	if (list) layout_set_fd(nullptr, static_cast<FileData *>(list->data));
 }
 
 static void sr_menu_viewnew_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -1144,7 +1145,7 @@ static SearchResultRow *search_result_at_point(SearchData *sd, gdouble x, gdoubl
 	return nullptr;
 }
 
-static void search_result_press_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+static void search_result_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 	auto *sd = static_cast<SearchData *>(data);
@@ -1187,19 +1188,19 @@ static void search_result_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 		search_result_menu(sd, TRUE, widget, x, y);
 		return;
 		}
-
-	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
-
-	if (button == GDK_BUTTON_PRIMARY && n_press == 1 &&
-	    !(state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
-	    search_result_row_selected(sd, mfd->fd))
-		{
-		/* this selection handled on release_cb */
-		gtk_widget_grab_focus(widget);
-		}
 }
 
-static void search_result_release_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+static void search_result_activate_cb(GtkColumnView *, guint position, gpointer data)
+{
+	auto *sd = static_cast<SearchData *>(data);
+	g_autoptr(GObject) item = G_OBJECT(g_list_model_get_item(G_LIST_MODEL(sd->ui.result_selection), position));
+	if (!item) return;
+
+	auto *row = reinterpret_cast<SearchResultRow *>(item);
+	layout_set_fd(nullptr, row->mfd->fd);
+}
+
+static void search_result_release_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 
@@ -1213,10 +1214,6 @@ static void search_result_release_cb(GtkGestureClick *gesture, gint n_press, gdo
 	guint position;
 	SearchResultRow *row = (x != 0 || y != 0) ? search_result_at_point(sd, x, y, &position) : nullptr;
 	MatchFileData *mfd = row ? row->mfd : nullptr;
-	if (button == GDK_BUTTON_PRIMARY && n_press == 2 && mfd && sd->click_fd == mfd->fd)
-		{
-		layout_set_fd(nullptr, mfd->fd);
-		}
 
 	if (button == GDK_BUTTON_MIDDLE)
 		{
@@ -1234,18 +1231,6 @@ static void search_result_release_cb(GtkGestureClick *gesture, gint n_press, gdo
 
 		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		return;
-		}
-
-	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
-
-	if (mfd && sd->click_fd == mfd->fd &&
-	    !(state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
-	    search_result_row_selected(sd, mfd->fd))
-		{
-		gtk_selection_model_unselect_all(GTK_SELECTION_MODEL(sd->ui.result_selection));
-		gtk_selection_model_select_item(GTK_SELECTION_MODEL(sd->ui.result_selection), position, TRUE);
-
-		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		}
 }
 
@@ -1535,7 +1520,7 @@ static void search_buffer_flush(SearchData *sd)
 	sd->search_buffer_count = 0;
 }
 
-static void search_stop(SearchData *sd)
+static void search_stop(SearchData *sd, gboolean focus_results = FALSE)
 {
 	g_clear_handle_id(&sd->search_idle_id, g_source_remove);
 
@@ -1564,6 +1549,14 @@ static void search_stop(SearchData *sd)
 	gtk_widget_set_sensitive(sd->ui.button_stop, FALSE);
 	search_progress_update(sd, TRUE, -1.0);
 	search_status_update(sd);
+
+	if (focus_results && g_list_model_get_n_items(G_LIST_MODEL(sd->ui.result_selection)) > 0)
+		{
+		gtk_selection_model_select_item(GTK_SELECTION_MODEL(sd->ui.result_selection), 0, TRUE);
+		gtk_widget_grab_focus(sd->ui.result_view);
+		gtk_column_view_scroll_to(GTK_COLUMN_VIEW(sd->ui.result_view), 0,
+		                          sd->ui.result_columns[SEARCH_COLUMN_NAME], GTK_LIST_SCROLL_FOCUS, nullptr);
+		}
 }
 
 static void search_file_load_process(SearchData *sd, CacheData *cd)
@@ -2103,7 +2096,7 @@ static gboolean search_step_cb(gpointer data)
 		{
 		sd->search_idle_id = 0;
 
-		search_stop(sd);
+		search_stop(sd, TRUE);
 		search_result_thumb_step(sd);
 
 		return G_SOURCE_REMOVE;
@@ -2294,7 +2287,7 @@ static void search_start_do(SearchData *sd)
 {
 	if (sd->search_folder_list)
 		{
-		search_stop(sd);
+		search_stop(sd, TRUE);
 		search_result_thumb_step(sd);
 		return;
 		}
@@ -2606,7 +2599,7 @@ static void search_result_factory_setup(GtkSignalListItemFactory *, GtkListItem 
 {
 	auto *column_data = static_cast<std::pair<SearchData *, gint> *>(data);
 	const gint column = column_data->second;
-	gtk_list_item_set_activatable(list_item, FALSE);
+	gtk_list_item_set_activatable(list_item, TRUE);
 	GtkWidget *child;
 	if (column == SEARCH_COLUMN_THUMB)
 		{
@@ -3363,6 +3356,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), sd->ui.result_view);
 
 	g_signal_connect(sd->ui.result_selection, "selection-changed", G_CALLBACK(search_result_select_cb), sd);
+	g_signal_connect(sd->ui.result_view, "activate", G_CALLBACK(search_result_activate_cb), sd);
 
 	search_result_add_column(sd, SEARCH_COLUMN_RANK, _("Rank"), FALSE, FALSE);
 	search_result_add_column(sd, SEARCH_COLUMN_THUMB, _("Thumb"), TRUE, FALSE);
