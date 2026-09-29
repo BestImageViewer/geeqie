@@ -1477,8 +1477,8 @@ static void options_parse_pane_exif(GQParserData *parser_data, const gchar *elem
 {
 	if (g_ascii_strcasecmp(element_name, "entry") == 0)
 		{
-		auto pane = static_cast<GtkWidget *>(data);
-		bar_pane_exif_entry_add_from_config(pane, attribute_names, attribute_values);
+		auto *pane = static_cast<GtkWidget *>(data);
+		bar_pane_entry_add_from_config(pane, attribute_names, attribute_values);
 		}
 	else
 		{
@@ -1492,8 +1492,8 @@ static void options_parse_pane_keywords(GQParserData *parser_data, const gchar *
 {
 	if (g_ascii_strcasecmp(element_name, "expanded") == 0)
 		{
-		auto pane = static_cast<GtkWidget *>(data);
-		bar_pane_keywords_entry_add_from_config(pane, attribute_names, attribute_values);
+		auto *pane = static_cast<GtkWidget *>(data);
+		bar_pane_entry_add_from_config(pane, attribute_names, attribute_values);
 		}
 	else
 		{

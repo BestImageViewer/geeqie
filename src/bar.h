@@ -48,6 +48,7 @@ struct PaneData {
 	void (*pane_notify_selection)(GtkWidget *pane, gint count); /**< filled in by pane */
 	bool (*pane_event)(GtkWidget *pane, GdkEvent *event); /**< filled in by pane */
 	void (*pane_write_config)(GtkWidget *pane, RcString &rc); /**< filled in by pane */
+	void (*pane_entry_add_from_config)(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values); /**< filled in by pane */
 	gchar *id; /**< filled in by pane */
 	GtkWidget *title; /**< filled in by pane */
 	gboolean expanded; /**< filled in by pane */
@@ -84,6 +85,7 @@ gboolean bar_event(GtkWidget *bar, GdkEvent *event);
 void bar_pane_common_init(PaneData &pane, const gchar *id, const gchar *title, gboolean expanded, PaneType type);
 void bar_pane_common_free(PaneData &pane);
 void bar_pane_common_write_config(const PaneData &pane, RcString &rc);
+void bar_pane_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title);
 
 #endif
