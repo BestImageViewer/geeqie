@@ -20,7 +20,7 @@ namespace
 
 TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
 {
-	if (!gtk_init_check()) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
 	if (!options) options = conf_options_new();
 	auto *window = GTK_WINDOW(gtk_window_new());
 	auto *pr = pixbuf_renderer_new();
@@ -178,7 +178,7 @@ TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
 
 TEST(RendererTilesTexture, StereoModes)
 {
-	if (!gtk_init_check()) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
 	if (!options) options = conf_options_new();
 	auto *window = GTK_WINDOW(gtk_window_new());
 	auto *pr = pixbuf_renderer_new();
