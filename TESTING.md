@@ -127,7 +127,15 @@ Run with `meson test -C build 'Icon naming'` or
 `python3 build-aux/icon-naming-check.py`. Diagnostics include the file and line.
 When adding an icon wrapper, extend `ICON_ARGUMENTS` in the script.
 This is a source check, not a C++ parser: it does not track names through
-variables or validate XML UI files or the availability of icon artwork.
+variables or validate XML UI files. It also verifies that used theme icon
+constants have bundled fallback entries and source files in the icon resource
+manifest. Use the fallback-aware `ui_*` icon helpers from `ui-misc.h` instead
+of the corresponding GTK constructors and setters; the check enforces this.
+
+The `IconFallback` unit tests use an isolated icon theme to check resource
+lookup and decoding without system icons, selected-theme priority, theme
+changes, and unknown plugin icons. They require a display; run them under
+`xvfb-run` when testing without a desktop session.
 
 ### Code correctness
 

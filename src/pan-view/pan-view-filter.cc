@@ -133,7 +133,7 @@ void pan_filter_ui_replace_filter_button_arrow(PanViewFilterUi *ui, const gchar 
 	GtkWidget *parent = gtk_widget_get_parent(ui->filter_button_arrow);
 
 	gtk_box_remove(GTK_BOX(parent), ui->filter_button_arrow);
-	ui->filter_button_arrow = gtk_image_new_from_icon_name(new_icon_name);
+	ui->filter_button_arrow = ui_image_new_from_icon_name(new_icon_name);
 
 	gtk_box_append(GTK_BOX(parent), ui->filter_button_arrow);
 	gtk_box_reorder_child_after(GTK_BOX(parent), ui->filter_button_arrow, nullptr);
@@ -265,7 +265,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	gtk_widget_set_focus_on_click(ui->filter_button, FALSE);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_button_set_child(GTK_BUTTON(ui->filter_button), hbox);
-	ui->filter_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
+	ui->filter_button_arrow = ui_image_new_from_icon_name(GQ_ICON_PAN_UP);
 	gtk_box_append(GTK_BOX(hbox), ui->filter_button_arrow);
 	pref_label_new(hbox, _("Filter"));
 

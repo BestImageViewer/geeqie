@@ -35,6 +35,7 @@
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
+#include "ui-misc.h"
 
 namespace
 {
@@ -402,7 +403,7 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 
 	sar->entry = gtk_entry_new();
 	gtk_widget_set_tooltip_text(sar->entry, _("Search for commands and run them"));
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(sar->entry), GTK_ENTRY_ICON_PRIMARY, GQ_ICON_FIND);
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(sar->entry), GTK_ENTRY_ICON_PRIMARY, GQ_ICON_FIND);
 	gtk_window_set_child(GTK_WINDOW(sar->window), sar->entry);
 
 	sar->command_list = gtk_list_box_new();

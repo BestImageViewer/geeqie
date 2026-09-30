@@ -402,7 +402,7 @@ static void bookmark_menu_remove_cb(GSimpleAction *, GVariant *, gpointer data)
 static void bookmark_menu_append_item(GMenu *menu, const gchar *label, const gchar *icon_name, const gchar *action_name)
 {
 	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
-	g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+	g_autoptr(GIcon) icon = ui_icon_new(icon_name);
 
 	g_menu_item_set_icon(item, icon);
 	g_menu_append_item(menu, item);
@@ -559,12 +559,12 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 			}
 		else
 			{
-			image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY);
+			image = ui_image_new_from_icon_name(GQ_ICON_DIRECTORY);
 			}
 		}
 	else
 		{
-		image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY);
+		image = ui_image_new_from_icon_name(GQ_ICON_DIRECTORY);
 		}
 	gtk_box_append(GTK_BOX(box), image);
 
@@ -975,7 +975,7 @@ GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 	gtk_box_append(GTK_BOX(hc->control), hc->entry);
 
 	hc->history_button = gtk_menu_button_new();
-	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(hc->history_button), GQ_ICON_PAN_DOWN);
+	ui_menu_button_set_icon_name(GTK_MENU_BUTTON(hc->history_button), GQ_ICON_PAN_DOWN);
 	gtk_widget_set_tooltip_text(hc->history_button, _("Show history"));
 	gtk_widget_set_can_focus(hc->history_button, FALSE);
 	gtk_box_append(GTK_BOX(hc->control), hc->history_button);

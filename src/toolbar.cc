@@ -102,12 +102,12 @@ void toolbarlist_add_button(const gchar *name, const gchar *label,
 			}
 		else
 			{
-			image = gtk_image_new_from_icon_name(get_icon_for_action_name(name));
+			image = ui_image_new_from_icon_name(stock_id);
 			}
 		}
 	else
 		{
-		image = gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP);
+		image = ui_image_new_from_icon_name(GQ_ICON_GO_JUMP);
 		}
 	gtk_box_append(GTK_BOX(hbox), image);
 
@@ -147,7 +147,7 @@ void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType
 			item = g_menu_item_new(actions[i].description,
 			                       "win.preferences-win-main-toolbarlist-add");
 
-			g_autoptr(GIcon) themed_icon = g_themed_icon_new(icon);
+			g_autoptr(GIcon) themed_icon = ui_icon_new(icon);
 			g_menu_item_set_icon(item, themed_icon);
 
 			g_menu_item_set_action_and_target(item,
@@ -160,7 +160,7 @@ void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType
 			item = g_menu_item_new(actions[i].description,
 			                       "win.preferences-win-status-toolbarlist-add");
 
-			g_autoptr(GIcon) themed_icon = g_themed_icon_new(icon);
+			g_autoptr(GIcon) themed_icon = ui_icon_new(icon);
 			g_menu_item_set_icon(item, themed_icon);
 
 			g_menu_item_set_action_and_target(item,
@@ -244,7 +244,7 @@ static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 
 		if (g_strcmp0(name, "Separator") == 0)
 			{
-			toolbarlist_add_button(name, name, "no-icon", box);
+			toolbarlist_add_button(name, name, PIXBUF_INLINE_ICON_PLACEHOLDER, box);
 			continue;
 			}
 
@@ -270,7 +270,7 @@ static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 
 				if ((*it)->icon)
 					{
-					icon = g_strconcat((*it)->icon, ".desktop", nullptr);
+					icon = g_strdup((*it)->icon);
 					}
 				}
 			}
@@ -288,7 +288,7 @@ static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 
 		toolbarlist_add_button(name,
 		                       label ? label : name,
-		                       icon ? icon : "no-icon",
+		                       icon ? icon : PIXBUF_INLINE_ICON_PLACEHOLDER,
 		                       box);
 		}
 }

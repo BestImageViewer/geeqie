@@ -1655,7 +1655,7 @@ void cache_maintenance_notification(GtkApplication *app, const gchar *message, g
 	GNotification *notification;
 
 	notification = g_notification_new("Geeqie");
-	geeqie_icon = g_themed_icon_new(PIXBUF_INLINE_ICON);
+	geeqie_icon = ui_icon_new(PIXBUF_INLINE_ICON);
 
 	g_notification_set_body(notification, message);
 	g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_NORMAL);

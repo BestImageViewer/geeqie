@@ -35,6 +35,7 @@
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-misc.h"
 
 
 /**
@@ -723,7 +724,7 @@ static GtkWidget *tab_completion_create_complete_button(GtkWidget *entry)
 {
 	GtkWidget *button;
 
-	button = gtk_button_new_from_icon_name(GQ_ICON_GO_LAST);
+	button = ui_button_new_from_icon_name(GQ_ICON_GO_LAST);
 	gtk_widget_set_can_focus(button, FALSE);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(tab_completion_button_pressed), entry);
@@ -772,7 +773,7 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 	td->history_key = g_strdup(history_key);
 	td->history_levels = max_levels;
 	td->history_button = gtk_menu_button_new();
-	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(td->history_button), GQ_ICON_PAN_DOWN);
+	ui_menu_button_set_icon_name(GTK_MENU_BUTTON(td->history_button), GQ_ICON_PAN_DOWN);
 	gtk_widget_set_tooltip_text(td->history_button, _("Show history"));
 	gtk_widget_set_focusable(td->history_button, FALSE);
 	gtk_box_append(GTK_BOX(box), td->history_button);

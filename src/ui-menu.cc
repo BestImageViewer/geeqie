@@ -30,6 +30,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "options.h"
+#include "ui-misc.h"
 
 /*
  *-----------------------------------------------------------------------------
@@ -68,7 +69,7 @@ static GtkWidget *menu_item_icon_button_new(const gchar *text, const gchar *icon
 {
 	GtkWidget *item = gtk_button_new();
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-	GtkWidget *image = gtk_image_new_from_icon_name(icon_name ? icon_name : GQ_ICON_MISSING_IMAGE);
+	GtkWidget *image = ui_image_new_from_icon_name(icon_name ? icon_name : GQ_ICON_MISSING_IMAGE);
 	GtkWidget *label = menu_item_label_new(text, use_mnemonic);
 
 	gtk_widget_set_size_request(image, 16, -1);
@@ -506,7 +507,7 @@ void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_li
 				}
 			}
 
-		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+		g_autoptr(GIcon) icon = ui_icon_new(icon_name);
 		g_menu_item_set_icon(item, icon);
 
 		g_menu_append_item(plugins_menu, item);

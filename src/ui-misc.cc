@@ -250,7 +250,7 @@ GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
 
 	if (icon_name)
 		{
-		button = gtk_button_new_from_icon_name(icon_name);
+		button = ui_button_new_from_icon_name(icon_name);
 		}
 	else
 		{
@@ -621,7 +621,7 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 
 	if (icon_name)
 		{
-		gtk_button_set_icon_name(GTK_BUTTON(item), icon_name);
+		ui_button_set_icon_name(GTK_BUTTON(item), icon_name);
 		}
 
 	if (label)
@@ -779,7 +779,7 @@ GtkWidget *date_selection_new()
 	ds->button = gtk_menu_button_new();
 	gtk_widget_set_valign(ds->button, GTK_ALIGN_CENTER);
 
-	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
+	icon = ui_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gtk_menu_button_set_child(GTK_MENU_BUTTON(ds->button), icon);
 
 	gtk_box_append(GTK_BOX(ds->box), ds->button);
@@ -1032,16 +1032,88 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 	
 }
 
+GIcon *ui_icon_new(const gchar *icon_name)
+{
+	if (!icon_name || !*icon_name) return nullptr;
+
+	if (g_str_has_prefix(icon_name, "gq-"))
+		{
+		g_autofree gchar *path = g_strconcat(GQ_RESOURCE_PATH_ICONS "/", icon_name, ".svg", nullptr);
+		if (g_resources_get_info(path, G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr, nullptr, nullptr))
+			{
+			g_autofree gchar *theme_name = nullptr;
+			if (auto *settings = gtk_settings_get_default())
+				{
+				g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);
+				}
+			g_autofree gchar *theme_lower = g_ascii_strdown(theme_name ? theme_name : "", -1);
+			g_autofree gchar *dark_path = g_strconcat(GQ_RESOURCE_PATH_ICONS "/", icon_name, "-dark.svg", nullptr);
+			const gchar *selected = g_str_has_suffix(theme_lower, "dark") &&
+			                        g_resources_get_info(dark_path, G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr, nullptr, nullptr)
+			                        ? dark_path : path;
+			g_autofree gchar *uri = g_strconcat("resource://", selected, nullptr);
+			g_autoptr(GFile) file = g_file_new_for_uri(uri);
+			return g_file_icon_new(file);
+			}
+		}
+
+	g_autofree gchar *fallback = g_strconcat("gq-fallback-", icon_name,
+	                                      g_str_has_suffix(icon_name, "-symbolic") ||
+	                                      g_str_equal(icon_name, GQ_ICON_PDF) ? "" : "-symbolic",
+	                                      nullptr);
+	g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+	g_themed_icon_append_name(G_THEMED_ICON(icon), fallback);
+	g_themed_icon_append_name(G_THEMED_ICON(icon), "gq-fallback-" GQ_ICON_RUN "-symbolic");
+	return G_ICON(g_steal_pointer(&icon));
+}
+
+GtkWidget *ui_image_new_from_icon_name(const gchar *icon_name)
+{
+	g_autoptr(GIcon) icon = ui_icon_new(icon_name);
+	return gtk_image_new_from_gicon(icon);
+}
+
+void ui_image_set_from_icon_name(GtkImage *image, const gchar *icon_name)
+{
+	g_autoptr(GIcon) icon = ui_icon_new(icon_name);
+	gtk_image_set_from_gicon(image, icon);
+}
+
+GtkWidget *ui_button_new_from_icon_name(const gchar *icon_name)
+{
+	GtkWidget *button = gtk_button_new();
+	ui_button_set_icon_name(GTK_BUTTON(button), icon_name);
+	return button;
+}
+
+void ui_button_set_icon_name(GtkButton *button, const gchar *icon_name)
+{
+	gtk_button_set_child(button, ui_image_new_from_icon_name(icon_name));
+}
+
+void ui_menu_button_set_icon_name(GtkMenuButton *button, const gchar *icon_name)
+{
+	gtk_menu_button_set_child(button, ui_image_new_from_icon_name(icon_name));
+}
+
+void ui_entry_set_icon_from_icon_name(GtkEntry *entry, GtkEntryIconPosition position, const gchar *icon_name)
+{
+	g_autoptr(GIcon) icon = ui_icon_new(icon_name);
+	gtk_entry_set_icon_from_gicon(entry, position, icon);
+}
+
 GdkPixbuf *icon_theme_load_pixbuf_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags)
 {
 	g_autoptr(GtkIconPaintable) icon = nullptr;
 	g_autoptr(GFile) file = nullptr;
-	g_autofree gchar *path = nullptr;
+	g_autoptr(GFileInputStream) stream = nullptr;
 	g_autoptr(GError) error = nullptr;
 
-	icon = gtk_icon_theme_lookup_icon(icon_theme,
-					  icon_name,
-					  nullptr,
+	g_autoptr(GIcon) themed_icon = ui_icon_new(icon_name);
+	if (!themed_icon) return nullptr;
+
+	icon = gtk_icon_theme_lookup_by_gicon(icon_theme,
+					  themed_icon,
 					  size,
 					  1,
 					  GTK_TEXT_DIR_NONE,
@@ -1057,13 +1129,13 @@ GdkPixbuf *icon_theme_load_pixbuf_copy(GtkIconTheme *icon_theme, const gchar *ic
 		return nullptr;
 		}
 
-	path = g_file_get_path(file);
-	if (!path)
+	stream = g_file_read(file, nullptr, &error);
+	if (!stream)
 		{
 		return nullptr;
 		}
 
-	return gdk_pixbuf_new_from_file_at_scale(path, size, size, TRUE, &error);
+	return gdk_pixbuf_new_from_stream_at_scale(G_INPUT_STREAM(stream), size, size, TRUE, nullptr, &error);
 }
 
 gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos)

@@ -1947,11 +1947,11 @@ static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_
 	entry_set_text(GTK_ENTRY(star_rating_entry), rating_symbol);
 	gtk_editable_set_width_chars(GTK_EDITABLE(star_rating_entry), 15);
 	gtk_widget_set_tooltip_text(star_rating_entry, _("Hexadecimal representation of a Unicode character. A list of all Unicode characters may be found on the Internet."));
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
 	                                  GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(star_rating_entry),
 	                                GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
 	                                  GTK_ENTRY_ICON_PRIMARY, GQ_ICON_REVERT);
 	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(star_rating_entry),
 	                                GTK_ENTRY_ICON_PRIMARY, _("Default"));
@@ -2173,11 +2173,11 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 
 	gtk_widget_set_tooltip_text(help_search_engine_entry, _("The format varies between search engines, e.g the format may be:\nhttps://www.search_engine.com/search?q=site:geeqie.org/help\nhttps://www.search_engine.com/?q=site:geeqie.org/help"));
 
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(help_search_engine_entry),
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(help_search_engine_entry),
 						GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(help_search_engine_entry),
 						GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(help_search_engine_entry),
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(help_search_engine_entry),
 						GTK_ENTRY_ICON_PRIMARY, GQ_ICON_REVERT);
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(help_search_engine_entry),
 						GTK_ENTRY_ICON_PRIMARY, _("Default"));
@@ -3544,7 +3544,7 @@ static void accel_factory_bind(GtkSignalListItemFactory *factory, GtkListItem *l
 	const gint column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(factory), "accel-column"));
 	if (column == AE_ICON)
 		{
-		gtk_image_set_from_icon_name(GTK_IMAGE(widget), row->icon);
+		ui_image_set_from_icon_name(GTK_IMAGE(widget), row->icon);
 		}
 	else if (column == AE_KEY)
 		{

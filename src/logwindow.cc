@@ -388,25 +388,25 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	logwin->search_entry_box = gtk_entry_new();
 	gtk_box_append(GTK_BOX(search_box), logwin->search_entry_box);
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_PRIMARY, GQ_ICON_FIND);
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_PRIMARY, GQ_ICON_FIND);
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_widget_set_tooltip_text(logwin->search_entry_box, _("Search for text in log window"));
 	g_signal_connect(logwin->search_entry_box, "icon-press", G_CALLBACK(search_entry_icon_cb), logwin);
 	g_signal_connect(logwin->search_entry_box, "activate", G_CALLBACK(search_activate_event), logwin);
 
-	GtkWidget *backwards_button = gtk_button_new_from_icon_name(GQ_ICON_PAN_UP);
+	GtkWidget *backwards_button = ui_button_new_from_icon_name(GQ_ICON_PAN_UP);
 	gtk_widget_set_tooltip_text(backwards_button, _("Search backwards"));
 	gtk_box_append(GTK_BOX(search_box), backwards_button);
 	g_signal_connect(backwards_button, "clicked", G_CALLBACK(search_keypress_event_cb<LogWindow::SEARCH_BACKWARDS>), logwin);
 
-	GtkWidget *forwards_button = gtk_button_new_from_icon_name(GQ_ICON_PAN_DOWN);
+	GtkWidget *forwards_button = ui_button_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gtk_widget_set_tooltip_text(forwards_button, _("Search forwards"));
 	gtk_box_append(GTK_BOX(search_box), forwards_button);
 	g_signal_connect(forwards_button, "clicked", G_CALLBACK(search_keypress_event_cb<LogWindow::SEARCH_FORWARDS>), logwin);
 
 	GtkWidget *all_button = gtk_toggle_button_new();
 
-	gtk_button_set_child(GTK_BUTTON(all_button), gtk_image_new_from_icon_name(GQ_ICON_SELECT_ALL));
+	gtk_button_set_child(GTK_BUTTON(all_button), ui_image_new_from_icon_name(GQ_ICON_SELECT_ALL));
 
 	gtk_widget_set_tooltip_text(all_button, _("Highlight all"));
 	gtk_box_append(GTK_BOX(search_box), all_button);
@@ -417,7 +417,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	logwin->regexp_box = gtk_entry_new();
 	gtk_box_append(GTK_BOX(hbox), logwin->regexp_box);
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->regexp_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->regexp_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	g_signal_connect(G_OBJECT(logwin->regexp_box), "activate",
 	                 G_CALLBACK(log_window_regexp_cb), logwin);
 	g_signal_connect(logwin->regexp_box, "icon-press", G_CALLBACK(filter_entry_icon_cb), nullptr);

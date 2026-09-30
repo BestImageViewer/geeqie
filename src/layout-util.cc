@@ -3020,7 +3020,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 			{
 			const EditorDescription *editor = get_editor_by_command(action_name);
 			tooltip_text = (editor && editor->name && *editor->name) ? editor->name : action_name;
-			icon_name = (editor && editor->icon && *editor->icon) ? editor->icon : GQ_ICON_MISSING_IMAGE;
+			icon_name = (editor && editor->icon && *editor->icon) ? editor->icon : GQ_ICON_RUN;
 			plugin_action_name = g_strdup_printf("win.main-win-plugin-run::%s", action_name);
 			button_action_name = plugin_action_name;
 			button = gtk_button_new();
@@ -3092,7 +3092,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 
 		if (GTK_IS_BUTTON(button))
 			{
-			GtkWidget *image = gtk_image_new_from_icon_name(icon_name ? icon_name : get_icon_for_action_name(action_name));
+			GtkWidget *image = ui_image_new_from_icon_name(icon_name ? icon_name : get_icon_for_action_name(action_name));
 			gtk_button_set_child(GTK_BUTTON(button), image);
 			}
 
@@ -3200,7 +3200,7 @@ void layout_util_status_update_write(LayoutWindow *lw)
 			GtkWidget *image = gtk_button_get_child(GTK_BUTTON(widget));
 			if (GTK_IS_IMAGE(image))
 				{
-				gtk_image_set_from_icon_name(GTK_IMAGE(image), icon_name);
+				ui_image_set_from_icon_name(GTK_IMAGE(image), icon_name);
 				}
 
 			gtk_widget_set_tooltip_text(widget, icon_tooltip);

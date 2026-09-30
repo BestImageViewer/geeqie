@@ -204,7 +204,7 @@ void help_search_window_show()
 	GtkWidget *label2;
 
 	GtkWidget *edit_widget = gtk_entry_new();
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(edit_widget),
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(edit_widget),
 	                                  GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(edit_widget),
 	                                GTK_ENTRY_ICON_SECONDARY, _("Clear"));

@@ -2094,7 +2094,7 @@ static void vf_marks_tooltip_open_dialog(GtkWidget *widget, gint mark_no)
 	gtk_grid_attach(GTK_GRID(table), mte->edit_widget, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, mte->edit_widget);
 
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(mte->edit_widget),
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(mte->edit_widget),
 				      GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(mte->edit_widget),
 					GTK_ENTRY_ICON_SECONDARY, _("Clear"));
@@ -2503,7 +2503,7 @@ static GtkWidget *file_filter_menu_button_new(const gchar *label_text, const gch
 	GtkWidget *button = gtk_menu_button_new();
 	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	GtkWidget *label = gtk_label_new(label_text);
-	GtkWidget *icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
+	GtkWidget *icon = ui_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 
 	gtk_box_append(GTK_BOX(content), label);
 	gtk_box_append(GTK_BOX(content), icon);
@@ -2543,13 +2543,13 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	gtk_widget_set_tooltip_text(vf->file_filter.control, _("Use regular expressions"));
 	gtk_box_append(GTK_BOX(vf->file_filter.control), vf->file_filter.entry);
 
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(vf->file_filter.entry), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
+	ui_entry_set_icon_from_icon_name(GTK_ENTRY(vf->file_filter.entry), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(vf->file_filter.entry), GTK_ENTRY_ICON_SECONDARY, _("Clear"));
 	g_signal_connect(GTK_ENTRY(vf->file_filter.entry), "icon-press",
 	                 G_CALLBACK(file_filter_clear_cb), nullptr);
 
 	vf->file_filter.history_button = gtk_menu_button_new();
-	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(vf->file_filter.history_button), GQ_ICON_PAN_DOWN);
+	ui_menu_button_set_icon_name(GTK_MENU_BUTTON(vf->file_filter.history_button), GQ_ICON_PAN_DOWN);
 	gtk_widget_set_tooltip_text(vf->file_filter.history_button, _("Show filter history"));
 	gtk_widget_set_can_focus(vf->file_filter.history_button, FALSE);
 	gtk_box_append(GTK_BOX(vf->file_filter.control), vf->file_filter.history_button);

@@ -193,6 +193,19 @@ gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_cha
 gchar *text_widget_text_pull_selected(GtkWidget *text_widget);
 
 // Load a themed icon through the GTK4 icon theme API and return a copy as a pixbuf
+/** @brief Create a themed icon with bundled artwork as a fallback.
+ * Keeps the selected theme first; GTK resolves the names again on theme changes.
+ * Unknown external icon names fall back to the bundled run icon.
+ * @return A newly allocated icon, or nullptr for an empty name.
+ */
+GIcon *ui_icon_new(const gchar *icon_name);
+GtkWidget *ui_image_new_from_icon_name(const gchar *icon_name);
+void ui_image_set_from_icon_name(GtkImage *image, const gchar *icon_name);
+GtkWidget *ui_button_new_from_icon_name(const gchar *icon_name);
+void ui_button_set_icon_name(GtkButton *button, const gchar *icon_name);
+void ui_menu_button_set_icon_name(GtkMenuButton *button, const gchar *icon_name);
+void ui_entry_set_icon_from_icon_name(GtkEntry *entry, GtkEntryIconPosition position, const gchar *icon_name);
+
 GdkPixbuf *icon_theme_load_pixbuf_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);
 
 gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos);

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- SPDX-License-Identifier: LGPL-3.0-only OR CC-BY-SA-3.0-US -->
+<!-- Artwork: GNOME Project; see COPYING.Adwaita. -->
+<svg
+   width="16"
+   height="16"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="preferences-color-symbolic.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="72.5"
+     inkscape:cx="7.9931034"
+     inkscape:cy="8"
+     inkscape:window-width="5120"
+     inkscape:window-height="1371"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <g
+     color="#000"
+     fill="#474747"
+     id="g4">
+    <path
+       d="M8 1C5.797 1 4 2.797 4 5c0 2.203 1.797 4 4 4 2.203 0 4-1.797 4-4 0-2.203-1.797-4-4-4zm0 1.066A2.926 2.926 0 0110.934 5 2.926 2.926 0 018 7.934 2.926 2.926 0 015.067 5 2.926 2.926 0 018 2.066z"
+       style="line-height:normal;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;text-orientation:mixed;shape-padding:0;isolation:auto;mix-blend-mode:normal;marker:none"
+       font-weight="400"
+       font-family="sans-serif"
+       overflow="visible"
+       id="path1" />
+    <path
+       d="M4 8c-2.203 0-4 1.797-4 4 0 2.203 1.797 4 4 4 2.203 0 4-1.797 4-4 0-2.203-1.797-4-4-4zm0 1.066A2.926 2.926 0 016.934 12 2.926 2.926 0 014 14.934 2.926 2.926 0 011.067 12 2.926 2.926 0 014 9.066z"
+       style="line-height:normal;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;text-orientation:mixed;shape-padding:0;isolation:auto;mix-blend-mode:normal;marker:none"
+       font-weight="400"
+       font-family="sans-serif"
+       overflow="visible"
+       id="path2" />
+    <path
+       d="M15.998 12A4 4 0 0112 16a4 4 0 01-4-4 4 4 0 014-4 4 4 0 013.998 4z"
+       style="marker:none"
+       overflow="visible"
+       id="path3" />
+    <path
+       d="M 6.934,12 A 2.9339231,2.9339231 0 0 1 4.0000769,14.933923 2.9339231,2.9339231 0 0 1 1.067,12 2.9339231,2.9339231 0 0 1 4.0000769,9.0660769 2.9339231,2.9339231 0 0 1 6.934,12 Z"
+       style="stroke-width:0.999996;marker:none"
+       overflow="visible"
+       opacity="0.5"
+       id="path4" />
+  </g>
+</svg>

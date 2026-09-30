@@ -636,7 +636,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
 		gtk_window_set_titlebar(GTK_WINDOW(lw->window), header);
 		GtkWidget *menu_button = gtk_menu_button_new();
-		GtkWidget *image = gtk_image_new_from_icon_name(GQ_ICON_MENU);
+		GtkWidget *image = ui_image_new_from_icon_name(GQ_ICON_MENU);
 		lw->hamburger_menu_button = menu_button;
 
 		gtk_menu_button_set_child(GTK_MENU_BUTTON(menu_button), image);
@@ -819,7 +819,7 @@ GtkWidget *layout_info_menu_button_new(const gchar *label_text, const gchar *ico
 	GtkWidget *button = gtk_menu_button_new();
 	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
 	GtkWidget *label = gtk_label_new(label_text);
-	GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
+	GtkWidget *image = ui_image_new_from_icon_name(icon_name);
 
 	gtk_box_append(GTK_BOX(content), label);
 	gtk_box_append(GTK_BOX(content), image);

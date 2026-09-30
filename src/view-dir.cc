@@ -61,8 +61,8 @@ constexpr gint VIEW_DIR_DND_SCROLL_REGION = 20;
 
 GIcon *create_folder_icon_with_emblem(const gchar *emblem)
 {
-	g_autoptr(GIcon) icon_folder = g_themed_icon_new(GQ_ICON_DIRECTORY);
-	g_autoptr(GIcon) icon_emblem = g_themed_icon_new(emblem);
+	g_autoptr(GIcon) icon_folder = ui_icon_new(GQ_ICON_DIRECTORY);
+	g_autoptr(GIcon) icon_emblem = ui_icon_new(emblem);
 	g_autoptr(GEmblem) emblem_new = g_emblem_new(icon_emblem);
 
 	return g_emblemed_icon_new(icon_folder, emblem_new);
@@ -73,16 +73,16 @@ PixmapFolders *folder_icons_new()
 {
 	auto pf = g_new0(PixmapFolders, 1);
 
-	pf->close  = g_themed_icon_new(GQ_ICON_DIRECTORY);
-	pf->open   = g_themed_icon_new(GQ_ICON_OPEN);
-	pf->parent = g_themed_icon_new(GQ_ICON_GO_UP);
+	pf->close  = ui_icon_new(GQ_ICON_DIRECTORY);
+	pf->open   = ui_icon_new(GQ_ICON_OPEN);
+	pf->parent = ui_icon_new(GQ_ICON_GO_UP);
 
 	pf->deny = create_folder_icon_with_emblem(GQ_ICON_UNREADABLE);
 
 	pf->link = create_folder_icon_with_emblem(GQ_ICON_LINK);
 
 	pf->read_only = create_folder_icon_with_emblem(GQ_ICON_READONLY);
-	pf->collection = g_themed_icon_new_with_default_fallbacks(GQ_ICON_FOLDER_PICTURES);
+	pf->collection = ui_icon_new(GQ_ICON_FOLDER_PICTURES);
 
 	return pf;
 }
@@ -218,7 +218,7 @@ void vd_set_collection(ViewDir *vd, const gchar *path)
 		g_object_ref(vd->view);
 		GtkWidget *button = gtk_button_new();
 		GtkWidget *row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-		gtk_box_append(GTK_BOX(row), gtk_image_new_from_icon_name(GQ_ICON_GO_UP));
+		gtk_box_append(GTK_BOX(row), ui_image_new_from_icon_name(GQ_ICON_GO_UP));
 		gtk_box_append(GTK_BOX(row), gtk_label_new(".."));
 		gtk_button_set_child(GTK_BUTTON(button), row);
 		gtk_widget_add_css_class(button, "flat");
@@ -416,7 +416,7 @@ static void vd_drop_menu_append_item(GMenu *menu, const gchar *label, const gcha
 
 	if (icon_name)
 		{
-		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+		g_autoptr(GIcon) icon = ui_icon_new(icon_name);
 		g_menu_item_set_icon(item, icon);
 		}
 

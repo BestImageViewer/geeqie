@@ -61,13 +61,13 @@ constexpr gchar VDLIST_FD_DATA[] = "vdlist-fd";
 static void vdlist_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer data);
 static GtkWidget *vdlist_icon_widget_new(const gchar *icon_name, const gchar *emblem_name, GIcon *icon)
 {
-	GtkWidget *image = icon ? gtk_image_new_from_gicon(icon) : gtk_image_new_from_icon_name(icon_name);
+	GtkWidget *image = icon ? gtk_image_new_from_gicon(icon) : ui_image_new_from_icon_name(icon_name);
 	gtk_image_set_pixel_size(GTK_IMAGE(image), 16);
 	GtkWidget *content = image;
 	if (emblem_name)
 		{
 		GtkWidget *overlay = gtk_overlay_new();
-		GtkWidget *emblem = gtk_image_new_from_icon_name(emblem_name);
+		GtkWidget *emblem = ui_image_new_from_icon_name(emblem_name);
 		gtk_image_set_pixel_size(GTK_IMAGE(emblem), 10);
 		gtk_widget_set_halign(emblem, GTK_ALIGN_END);
 		gtk_widget_set_valign(emblem, GTK_ALIGN_END);

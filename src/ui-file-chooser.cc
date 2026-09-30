@@ -25,6 +25,7 @@
 #include "options.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
+#include "ui-misc.h"
 #include "ui-tabcomp.h"
 
 namespace {
@@ -198,7 +199,7 @@ GtkWidget *create_dir_preview_row(const gchar *base_path, const gchar *entry)
 	gtk_widget_set_margin_start(box, 4);
 	gtk_widget_set_margin_end(box, 4);
 
-	GtkWidget *icon = gtk_image_new_from_icon_name(dir_entry_icon_name(base_path, entry));
+	GtkWidget *icon = ui_image_new_from_icon_name(dir_entry_icon_name(base_path, entry));
 	gtk_image_set_pixel_size(GTK_IMAGE(icon), 16);
 	gtk_box_append(GTK_BOX(box), icon);
 

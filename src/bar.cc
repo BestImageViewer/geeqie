@@ -387,7 +387,7 @@ static GtkWidget *bar_menu_add_button_new(GtkWidget *toolbar)
 {
 	GtkWidget *button = gtk_menu_button_new();
 	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-	GtkWidget *image = gtk_image_new_from_icon_name(GQ_ICON_ADD);
+	GtkWidget *image = ui_image_new_from_icon_name(GQ_ICON_ADD);
 	GtkWidget *label = gtk_label_new(_("Add"));
 	g_autoptr(GMenu) menu_model = g_menu_new();
 

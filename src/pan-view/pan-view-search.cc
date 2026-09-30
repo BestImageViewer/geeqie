@@ -72,7 +72,7 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	gtk_widget_set_focus_on_click(ui->search_button, FALSE);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_button_set_child(GTK_BUTTON(ui->search_button), hbox);
-	ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
+	ui->search_button_arrow = ui_image_new_from_icon_name(GQ_ICON_PAN_UP);
 	gtk_box_append(GTK_BOX(hbox), ui->search_button_arrow);
 	pref_label_new(hbox, _("Find"));
 
@@ -378,7 +378,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		parent = gtk_widget_get_parent(ui->search_button_arrow);
 
 		gtk_box_remove(GTK_BOX(parent), ui->search_button_arrow);
-		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
+		ui->search_button_arrow = ui_image_new_from_icon_name(GQ_ICON_PAN_UP);
 
 		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
 		gtk_box_reorder_child_after(GTK_BOX(parent), ui->search_button_arrow, nullptr);
@@ -389,7 +389,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		parent = gtk_widget_get_parent(ui->search_button_arrow);
 
 		gtk_box_remove(GTK_BOX(parent), ui->search_button_arrow);
-		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
+		ui->search_button_arrow = ui_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 
 		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
 		gtk_box_reorder_child_after(GTK_BOX(parent), ui->search_button_arrow, nullptr);

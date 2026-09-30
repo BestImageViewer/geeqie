@@ -56,6 +56,7 @@
 #include "slideshow.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-misc.h"
 #include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
@@ -1351,7 +1352,7 @@ static void view_confirm_dir_list_append_item(GMenu *menu, const gchar *label, c
 
 	if (icon_name)
 		{
-		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+		g_autoptr(GIcon) icon = ui_icon_new(icon_name);
 		g_menu_item_set_icon(item, icon);
 		}
 
