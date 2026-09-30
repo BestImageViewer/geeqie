@@ -46,9 +46,14 @@ struct PendingFileDialog
 	gchar *preview_path;
 	guint preview_timer_id;
 	gboolean finished;
+	GtkWidget *destination_label;
+	GFile *navigation_child;
+	GList *selection_models;
 };
 
 void finish_file_dialog(PendingFileDialog *pending, gint response_id);
+GFile *get_selected_file(PendingFileDialog *pending);
+void update_destination(PendingFileDialog *pending);
 
 gboolean file_dialog_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint,
 	                                GdkModifierType state, gpointer)
@@ -482,6 +487,7 @@ GtkWidget *create_preview_for_file(const gchar *file_name)
 
 void update_preview(PendingFileDialog *pending)
 {
+	update_destination(pending);
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
 	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
@@ -549,6 +555,79 @@ GtkWidget *find_file_list(GtkWidget *widget)
 	return nullptr;
 }
 
+void update_destination(PendingFileDialog *pending)
+{
+	if (!pending->destination_label) return;
+	g_autoptr(GFile) file = get_selected_file(pending);
+	g_autofree gchar *path = file ? g_file_get_parse_name(file) : nullptr;
+	g_autofree gchar *text = g_strdup_printf(_("Destination: %s"), path ? path : "");
+	gtk_label_set_text(GTK_LABEL(pending->destination_label), text);
+}
+
+void folder_selection_changed_cb(GtkSelectionModel *model, guint, guint, gpointer data)
+{
+	auto *pending = static_cast<PendingFileDialog *>(data);
+	if (pending->navigation_child)
+		{
+		auto *selected = gtk_selection_model_get_selection(model);
+		GtkBitsetIter iter;
+		guint index;
+		for (gboolean valid = gtk_bitset_iter_init_first(&iter, selected, &index); valid;
+		     valid = gtk_bitset_iter_next(&iter, &index))
+			{
+			g_autoptr(GObject) item = G_OBJECT(g_list_model_get_item(G_LIST_MODEL(model), index));
+			if (!G_IS_FILE_INFO(item)) continue;
+			auto *file = g_file_info_get_attribute_object(G_FILE_INFO(item), "standard::file");
+			if (G_IS_FILE(file) && g_file_equal(G_FILE(file), pending->navigation_child))
+				{
+				// GTK selects the child we came from after breadcrumb navigation.
+				g_clear_object(&pending->navigation_child);
+				gtk_selection_model_unselect_all(model);
+				break;
+				}
+			}
+		gtk_bitset_unref(selected);
+		}
+	update_destination(pending);
+}
+
+void folder_path_clicked_cb(GtkWidget *, GFile *, GFile *child, gboolean, gpointer data)
+{
+	auto *pending = static_cast<PendingFileDialog *>(data);
+	g_set_object(&pending->navigation_child, child);
+	update_destination(pending);
+}
+
+void folder_list_pressed_cb(GtkGestureClick *, gint, gdouble, gdouble, gpointer data)
+{
+	auto *pending = static_cast<PendingFileDialog *>(data);
+	// An explicit selection takes precedence over a pending navigation selection.
+	g_clear_object(&pending->navigation_child);
+}
+
+void connect_folder_navigation(GtkWidget *widget, PendingFileDialog *pending)
+{
+	if (g_signal_lookup("path-clicked", G_OBJECT_TYPE(widget)))
+		{
+		g_signal_connect_after(widget, "path-clicked", G_CALLBACK(folder_path_clicked_cb), pending);
+		}
+	GtkSelectionModel *model = nullptr;
+	if (GTK_IS_COLUMN_VIEW(widget)) model = gtk_column_view_get_model(GTK_COLUMN_VIEW(widget));
+	if (GTK_IS_GRID_VIEW(widget)) model = gtk_grid_view_get_model(GTK_GRID_VIEW(widget));
+	if (model)
+		{
+		g_signal_connect(model, "selection-changed", G_CALLBACK(folder_selection_changed_cb), pending);
+		pending->selection_models = g_list_prepend(pending->selection_models, g_object_ref(model));
+		auto *gesture = gtk_gesture_click_new();
+		gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
+		g_signal_connect(gesture, "pressed", G_CALLBACK(folder_list_pressed_cb), pending);
+		gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(gesture));
+		}
+	for (GtkWidget *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		connect_folder_navigation(child, pending);
+}
+
+
 GFile *get_selected_file(PendingFileDialog *pending)
 {
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
@@ -561,11 +640,14 @@ GFile *get_selected_file(PendingFileDialog *pending)
 		}
 
 	g_autoptr(GFile) folder = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(pending->chooser));
+	if (pending->action == FileDialogAction::SELECT_FOLDER)
+		{
+		return G_FILE(g_steal_pointer(&folder));
+		}
 	g_autofree gchar *name = gtk_file_chooser_get_current_name(GTK_FILE_CHOOSER(pending->chooser));
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
 	G_GNUC_END_IGNORE_DEPRECATIONS
 #endif
-
 	if (!name || name[0] == '\0')
 		{
 		return nullptr;
@@ -706,6 +788,10 @@ void file_dialog_destroy_cb(GtkWidget *, gpointer data)
 		}
 
 	g_free(pending->preview_path);
+	g_clear_object(&pending->navigation_child);
+	for (GList *work = pending->selection_models; work; work = work->next)
+		g_signal_handlers_disconnect_by_data(work->data, pending);
+	g_list_free_full(pending->selection_models, g_object_unref);
 	g_free(pending);
 }
 
@@ -925,6 +1011,14 @@ void file_dialog_show(const FileDialogData &fdd)
 		gtk_box_append(GTK_BOX(content), button);
 		}
 	gtk_box_append(GTK_BOX(content), create_dialog_content(pending));
+	if (fdd.action == FileDialogAction::SELECT_FOLDER)
+		{
+		pending->destination_label = gtk_label_new(nullptr);
+		gtk_label_set_xalign(GTK_LABEL(pending->destination_label), 0.0);
+		gtk_label_set_ellipsize(GTK_LABEL(pending->destination_label), PANGO_ELLIPSIZE_MIDDLE);
+		gtk_box_append(GTK_BOX(content), pending->destination_label);
+		connect_folder_navigation(pending->chooser, pending);
+		}
 	if (fdd.checkbox_text && fdd.checkbox_value)
 		{
 		pending->checkbox_value = fdd.checkbox_value;
