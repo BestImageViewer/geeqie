@@ -1,0 +1,210 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+
+#include "gtest/gtest.h"
+
+#include <algorithm>
+#include <array>
+#include <cstdlib>
+#include <cstdint>
+#include <cstring>
+#include <functional>
+
+#include <cairo.h>
+
+#include "renderer-tiles.h"
+#include "options.h"
+#include "pixbuf-renderer.h"
+
+namespace
+{
+
+TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
+{
+	if (!gtk_init_check()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	gtk_window_set_default_size(window, 600, 400);
+	pr->tile_cache_max = 1;
+	pr->zoom_quality = GDK_INTERP_NEAREST;
+	pr->zoom_2pass = TRUE;
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 800, 600);
+	for (int row = 0; row < 600; ++row)
+		{
+		for (int col = 0; col < 800; ++col)
+			{
+			auto *pixel = gdk_pixbuf_get_pixels(image) + (row * gdk_pixbuf_get_rowstride(image)) + (col * 3);
+			pixel[0] = col % 256;
+			pixel[1] = row % 256;
+			pixel[2] = 0x56;
+			}
+		}
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	gtk_window_present(window);
+	auto finish_rendering = [pr]()
+		{
+		for (int i = 0; i < 1000; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (pr->complete && gtk_widget_get_mapped(GTK_WIDGET(pr))) return true;
+			g_usleep(1000);
+			}
+		return false;
+		};
+	ASSERT_TRUE(finish_rendering());
+	auto viewport_texture = [pr]()
+		{
+		auto *snapshot = gtk_snapshot_new();
+		pr->renderer->snapshot(pr->renderer, snapshot);
+		auto *node = gtk_snapshot_free_to_node(snapshot);
+		if (!node) return static_cast<GdkTexture *>(nullptr);
+		std::function<GdkTexture *(GskRenderNode *)> find_texture;
+		find_texture = [&find_texture](GskRenderNode *child) -> GdkTexture *
+			{
+			switch (gsk_render_node_get_node_type(child))
+				{
+				case GSK_TEXTURE_NODE:
+					return gsk_texture_node_get_texture(child);
+				case GSK_CLIP_NODE:
+					return find_texture(gsk_clip_node_get_child(child));
+				case GSK_CONTAINER_NODE:
+					for (guint i = 0; i < gsk_container_node_get_n_children(child); ++i)
+						{
+						if (auto *texture = find_texture(gsk_container_node_get_child(child, i))) return texture;
+						}
+					return nullptr;
+				default:
+					return nullptr;
+				}
+			};
+		auto *found = find_texture(node);
+		auto *texture = found ? GDK_TEXTURE(g_object_ref(found)) : nullptr;
+		gsk_render_node_unref(node);
+		return texture;
+		};
+	g_autoptr(GdkTexture) first = viewport_texture();
+	g_autoptr(GdkTexture) second = viewport_texture();
+	ASSERT_NE(first, nullptr);
+	EXPECT_EQ(first, second);
+	g_autoptr(GdkPixbuf) overlay = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 2, 2);
+	gdk_pixbuf_fill(overlay, 0xffffffff);
+	const int overlay_id = pr->renderer->overlay_add(pr->renderer, overlay, 0, 0, OVL_NORMAL);
+	g_autoptr(GdkTexture) with_overlay = viewport_texture();
+	EXPECT_EQ(first, with_overlay);
+	pr->renderer->overlay_set(pr->renderer, overlay_id, nullptr, 0, 0);
+	g_autoptr(GdkTexture) without_overlay = viewport_texture();
+	EXPECT_EQ(first, without_overlay);
+
+	// Verify tile placement and viewport clipping against the source pixels.
+	// The visible tile footprint exceeds the configured cache limit.
+	auto verify_pixels = [pr, &image]()
+		{
+		auto *snapshot = gtk_snapshot_new();
+		pr->renderer->snapshot(pr->renderer, snapshot);
+		auto *node = gtk_snapshot_free_to_node(snapshot);
+		ASSERT_NE(node, nullptr);
+		auto *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+		                                          gtk_widget_get_width(GTK_WIDGET(pr)),
+		                                          gtk_widget_get_height(GTK_WIDGET(pr)));
+		auto *cr = cairo_create(surface);
+		gsk_render_node_draw(node, cr);
+		cairo_destroy(cr);
+		cairo_surface_flush(surface);
+		g_autoptr(GdkPixbuf) reference = gdk_pixbuf_scale_simple(image, pr->width, pr->height, pr->zoom_quality);
+		for (int row = 0; row < pr->vis_height; row += 29)
+			{
+			for (int col = 0; col < pr->vis_width; col += 37)
+				{
+				uint32_t pixel;
+				const auto *address = cairo_image_surface_get_data(surface) +
+				                      ((row + pr->y_offset) * cairo_image_surface_get_stride(surface)) +
+				                      ((col + pr->x_offset) * 4);
+				std::memcpy(&pixel, address, sizeof(pixel));
+				const auto *source = gdk_pixbuf_get_pixels(reference) +
+				                     ((row + pr->y_scroll) * gdk_pixbuf_get_rowstride(reference)) +
+				                     ((col + pr->x_scroll) * 3);
+				const uint32_t expected = 0xff000000U | (source[0] << 16) | (source[1] << 8) | source[2];
+				EXPECT_EQ(pixel, expected) << col << ", " << row;
+				}
+			}
+		cairo_surface_destroy(surface);
+		gsk_render_node_unref(node);
+		};
+	verify_pixels();
+	pixbuf_renderer_scroll(pr, 31, 27);
+	ASSERT_TRUE(finish_rendering());
+	verify_pixels();
+	pixbuf_renderer_scroll(pr, -17, -19);
+	ASSERT_TRUE(finish_rendering());
+	verify_pixels();
+
+	pr->zoom_quality = GDK_INTERP_BILINEAR;
+	g_autoptr(GdkTexture) before_zoom = viewport_texture();
+	pixbuf_renderer_zoom_set(pr, 2.0);
+	// Snapshot before dispatching render work: retain the complete previous image.
+	g_autoptr(GdkTexture) pending_zoom = viewport_texture();
+	EXPECT_EQ(before_zoom, pending_zoom);
+	pixbuf_renderer_zoom_set(pr, 3.0);
+	g_autoptr(GdkTexture) repeated_zoom = viewport_texture();
+	EXPECT_EQ(before_zoom, repeated_zoom);
+	pixbuf_renderer_zoom_set(pr, 2.0);
+	ASSERT_TRUE(finish_rendering());
+	verify_pixels();
+	pixbuf_renderer_zoom_set(pr, -2.0);
+	ASSERT_TRUE(finish_rendering());
+	verify_pixels();
+
+	gdk_pixbuf_fill(image, 0xabcdefFF);
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) changed = viewport_texture();
+	EXPECT_NE(first, changed);
+	pixbuf_renderer_zoom_set(pr, 0.0);
+	ASSERT_TRUE(finish_rendering());
+	verify_pixels();
+	// Resize without dispatching tiles: the retained preview must already fit.
+	g_signal_emit_by_name(pr, "resize", 500, 350);
+	verify_pixels();
+	g_signal_emit_by_name(pr, "resize", 550, 375);
+	verify_pixels();
+	ASSERT_TRUE(finish_rendering());
+	verify_pixels();
+	pixbuf_renderer_set_pixbuf(pr, nullptr, 1.0);
+	g_autoptr(GdkTexture) cleared = viewport_texture();
+	EXPECT_EQ(cleared, nullptr);
+	gtk_window_destroy(window);
+}
+
+TEST(RendererTilesTexture, PreservesOpaqueColorsAndOwnsItsPixels)
+{
+	std::array<unsigned char, 32> pixels = {};
+	const uint32_t color = 0x00123456;
+	for (int row = 0; row < 2; ++row)
+		{
+		for (int col = 0; col < 3; ++col)
+			{
+			std::memcpy(pixels.data() + (row * 16) + (col * 4), &color, sizeof(color));
+			}
+		}
+	auto *surface = cairo_image_surface_create_for_data(pixels.data(), CAIRO_FORMAT_RGB24, 3, 2, 16);
+	auto *texture = renderer_tiles_surface_to_texture(surface);
+	ASSERT_NE(texture, nullptr);
+	EXPECT_EQ(gdk_texture_get_width(texture), 3);
+	EXPECT_EQ(gdk_texture_get_height(texture), 2);
+	pixels.fill(0);
+	cairo_surface_mark_dirty(surface);
+	cairo_surface_destroy(surface);
+	std::array<unsigned char, 24> downloaded = {};
+	gdk_texture_download(texture, downloaded.data(), 12);
+	for (int i = 0; i < 6; ++i)
+		{
+		uint32_t pixel;
+		std::memcpy(&pixel, downloaded.data() + (i * 4), sizeof(pixel));
+		EXPECT_EQ(pixel, 0xff123456U);
+		}
+	g_object_unref(texture);
+}
+
+
+} // namespace

@@ -11,6 +11,7 @@ unit_test_sources = files(
 'keyboard-shortcuts.cc',
 'layout-image-navigation.cc',
 'pixbuf-util.cc',
+'renderer-tiles.cc',
 'ui-tree-edit.cc',
 'video-metadata.cc')
 

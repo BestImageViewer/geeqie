@@ -137,6 +137,7 @@ enum StereoPixbufData : gint {
 
 struct RendererFuncs
 {
+	void (*snapshot)(void *renderer, GtkSnapshot *snapshot);
 	void (*area_changed)(void *renderer, GdkRectangle src); /**< pixbuf area changed */
 	void (*invalidate_region)(void *renderer, GdkRectangle region);
 	void (*scroll)(void *renderer, gint x_off, gint y_off); /**< scroll */

@@ -190,11 +190,23 @@ GType pixbuf_renderer_get_type()
 	return pixbuf_renderer_type;
 }
 
+static void pixbuf_renderer_snapshot(GtkWidget *widget, GtkSnapshot *snapshot)
+{
+	auto *pr = PIXBUF_RENDERER(widget);
+	graphene_rect_t bounds;
+	graphene_rect_init(&bounds, 0, 0, gtk_widget_get_width(widget), gtk_widget_get_height(widget));
+	gtk_snapshot_push_clip(snapshot, &bounds);
+	if (pr->renderer) pr->renderer->snapshot(pr->renderer, snapshot);
+	if (pr->renderer2) pr->renderer2->snapshot(pr->renderer2, snapshot);
+	gtk_snapshot_pop(snapshot);
+}
+
 static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS(renderer_class);
 
 	parent_class = static_cast<GtkDrawingAreaClass *>(g_type_class_peek_parent(renderer_class));
+	GTK_WIDGET_CLASS(renderer_class)->snapshot = pixbuf_renderer_snapshot;
 
 	gobject_class->set_property = pixbuf_renderer_set_property;
 	gobject_class->get_property = pixbuf_renderer_get_property;
@@ -354,7 +366,6 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 							  500,
 							  static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
-
 	signals[SIGNAL_ZOOM] =
 		g_signal_new("zoom",
 			     G_OBJECT_CLASS_TYPE(gobject_class),
@@ -496,7 +507,6 @@ static void pixbuf_renderer_finalize(GObject *object)
 
 	pr->renderer->free(pr->renderer);
 	if (pr->renderer2) pr->renderer2->free(pr->renderer2);
-
 
 	if (pr->pixbuf) g_object_unref(pr->pixbuf);
 
@@ -2689,7 +2699,6 @@ void pixbuf_renderer_set_stereo_data(PixbufRenderer *pr, StereoPixbufData stereo
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 	if (pr->stereo_data == stereo_data) return;
-
 
 	pr->stereo_data = stereo_data;
 

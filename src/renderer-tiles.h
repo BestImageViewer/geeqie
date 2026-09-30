@@ -22,10 +22,15 @@
 #ifndef RENDERER_TILES_H
 #define RENDERER_TILES_H
 
+#include <cairo.h>
+#include <gdk/gdk.h>
+
 struct PixbufRenderer;
 struct RendererFuncs;
 
 RendererFuncs *renderer_tiles_new(PixbufRenderer *pr);
+/** @brief Create an immutable, opaque texture copy of an RGB24 image surface. */
+GdkTexture *renderer_tiles_surface_to_texture(cairo_surface_t *surface);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

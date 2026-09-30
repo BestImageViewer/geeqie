@@ -61,13 +61,30 @@ enum ExifOrientationType {
 };
 #endif
 
+
+GdkTexture *renderer_tiles_surface_to_texture(cairo_surface_t *surface)
+{
+	if (!surface || cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS) return nullptr;
+
+	cairo_surface_flush(surface);
+	const int width = cairo_image_surface_get_width(surface);
+	const int height = cairo_image_surface_get_height(surface);
+	const int stride = cairo_image_surface_get_stride(surface);
+	// GTK retains textures after snapshotting; mutable tile pixels cannot be shared.
+	GBytes *bytes = g_bytes_new(cairo_image_surface_get_data(surface), static_cast<size_t>(stride) * height);
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+	constexpr GdkMemoryFormat format = GDK_MEMORY_B8G8R8X8;
+#else
+	constexpr GdkMemoryFormat format = GDK_MEMORY_X8R8G8B8;
+#endif
+	auto *texture = gdk_memory_texture_new(width, height, format, bytes, stride);
+	g_bytes_unref(bytes);
+	return texture;
+}
+
+
 namespace
 {
-
-cairo_surface_t *rt_surface_new(gint width, gint height)
-{
-	return cairo_image_surface_create(CAIRO_FORMAT_RGB24, std::max(width, 1), std::max(height, 1));
-}
 
 struct QueueData;
 
@@ -80,6 +97,8 @@ enum class TileRender {
 struct ImageTile
 {
 	cairo_surface_t *surface;	/* off screen buffer */
+	GdkTexture *texture;
+	gboolean surface_valid;
 	GdkPixbuf *pixbuf;	/* pixbuf area for zooming */
 	gint x;			/* x offset into image */
 	gint y;			/* y offset into image */
@@ -135,12 +154,19 @@ struct RendererTiles
 	GQueue draw_queue;	/* queue of areas to redraw */
 	GQueue draw_queue_2pass;/* queue when 2 pass is enabled */
 
+	GskRenderNode *image_node; /* Last complete image, retained during a zoom first pass. */
+	gboolean preserve_image;
+	gint preview_width;
+	gint preview_height;
+	gint preview_x;
+	gint preview_y;
+
 	GList *overlay_list;
 	cairo_surface_t *overlay_buffer;
-	cairo_surface_t *surface;
 
 	guint draw_idle_id; /* event source id */
 	gboolean draw_pending;
+	gint64 draw_pending_since;
 
 	GdkPixbuf *spare_tile;
 
@@ -204,62 +230,9 @@ void rt_sync_scroll(RendererTiles *rt)
  *-------------------------------------------------------------------
  */
 
-void rt_border_draw(RendererTiles *rt, GdkRectangle border_rect)
+void rt_border_draw(RendererTiles *rt, GdkRectangle)
 {
-	PixbufRenderer *pr = rt->pr;
-	auto *box = GTK_WIDGET(pr);
-
-	if (!gtk_widget_get_root(box)) return;
-	if (!rt->surface) return;
-
-	cairo_t *cr = cairo_create(rt->surface);
-
-	auto draw_if_intersect = [&border_rect, rt, pr, cr](GdkRectangle rect)
-	{
-		GdkRectangle r;
-		if (!gdk_rectangle_intersect(&border_rect, &rect, &r)) return;
-
-		cairo_set_source_rgb(cr, pr->color.red, pr->color.green, pr->color.blue);
-		cairo_rectangle(cr, r.x + rt->stereo_off_x, r.y + rt->stereo_off_y, r.width, r.height);
-		cairo_fill(cr);
-	};
-
-	if (!pr->pixbuf && !pr->source_tiles_enabled)
-		{
-		draw_if_intersect({0, 0, pr->viewport_width, pr->viewport_height});
-		cairo_destroy(cr);
-		return;
-		}
-
-	if (pr->vis_width < pr->viewport_width)
-		{
-		if (pr->x_offset > 0)
-			{
-			draw_if_intersect({0, 0, pr->x_offset, pr->viewport_height});
-			}
-
-		gint right_edge = pr->x_offset + pr->vis_width;
-		if (pr->viewport_width > right_edge)
-			{
-			draw_if_intersect({right_edge, 0, pr->viewport_width - right_edge, pr->viewport_height});
-			}
-		}
-
-	if (pr->vis_height < pr->viewport_height)
-		{
-		if (pr->y_offset > 0)
-			{
-			draw_if_intersect({pr->x_offset, 0, pr->vis_width, pr->y_offset});
-			}
-
-		gint bottom_edge = pr->y_offset + pr->vis_height;
-		if (pr->viewport_height  > bottom_edge)
-			{
-			draw_if_intersect({pr->x_offset, bottom_edge, pr->vis_width, pr->viewport_height - bottom_edge});
-			}
-		}
-
-	cairo_destroy(cr);
+	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
 }
 
 void rt_border_clear(RendererTiles *rt)
@@ -295,6 +268,7 @@ void rt_tile_free(ImageTile *it)
 
 	if (it->pixbuf) g_object_unref(it->pixbuf);
 	if (it->surface) cairo_surface_destroy(it->surface);
+	g_clear_object(&it->texture);
 
 	g_free(it);
 }
@@ -366,7 +340,7 @@ void rt_tile_free_space(RendererTiles *rt, guint space, ImageTile *it)
 		gint tiles;
 
 		tiles = (pr->vis_width / rt->tile_width + 1) * (pr->vis_height / rt->tile_height + 1);
-		const gint tile_memory = surface_calc_size(rt->tile_width, rt->tile_height) +
+		const gint tile_memory = (2 * surface_calc_size(rt->tile_width, rt->tile_height)) +
 		                         (rt->tile_width * rt->tile_height * COLOR_BYTES);
 		tile_max = std::max<gint>(tiles * tile_memory,
 		                          pr->tile_cache_max * 1048576.0 * pr->scale);
@@ -382,8 +356,8 @@ void rt_tile_free_space(RendererTiles *rt, guint space, ImageTile *it)
 
 		needle = static_cast<ImageTile *>(work->data);
 		work = work->prev;
-		if (needle != it &&
-		    ((!needle->qd && !needle->qd2) || !rt_tile_is_visible(rt, needle))) rt_tile_remove(rt, needle);
+		// Visible tiles are the displayed image; retain them even above the cache limit.
+		if (needle != it && !rt_tile_is_visible(rt, needle)) rt_tile_remove(rt, needle);
 		}
 }
 
@@ -400,6 +374,8 @@ void rt_tile_invalidate_all(RendererTiles *rt)
 		it = static_cast<ImageTile *>(work->data);
 		work = work->next;
 
+		g_clear_object(&it->texture);
+		it->surface_valid = FALSE;
 		it->render_done = TileRender::NONE;
 		it->render_todo = TileRender::ALL;
 		it->blank = FALSE;
@@ -438,7 +414,8 @@ void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 {
 	if (!it->surface)
 		{
-		const guint size = surface_calc_size(rt->tile_width, rt->tile_height);
+		// Reserve space for both the Cairo pixels and their immutable texture copy.
+		const guint size = 2 * surface_calc_size(rt->tile_width, rt->tile_height);
 
 		rt_tile_free_space(rt, size, it);
 
@@ -493,33 +470,6 @@ GdkRectangle rt_overlay_get_position(const RendererTiles *rt, const OverlayData 
 	return od_rect;
 }
 
-void rt_overlay_queue_draw(RendererTiles *rt, OverlayData *od, gint x1, gint y1, gint x2, gint y2)
-{
-	GdkRectangle od_rect = rt_overlay_get_position(rt, od);
-
-	/* add borders */
-	od_rect.x -= x1;
-	od_rect.y -= y1;
-	od_rect.width += x1 + x2;
-	od_rect.height += y1 + y2;
-
-	rt_redraw(rt, od_rect, false, FALSE);
-}
-
-void rt_overlay_queue_all(RendererTiles *rt, gint x1, gint y1, gint x2, gint y2)
-{
-	GList *work;
-
-	work = rt->overlay_list;
-	while (work)
-		{
-		auto od = static_cast<OverlayData *>(work->data);
-		work = work->next;
-
-		rt_overlay_queue_draw(rt, od, x1, y1, x2, y2);
-		}
-}
-
 void rt_overlay_update_sizes(RendererTiles *)
 {
 }
@@ -563,7 +513,6 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 
 	rt->overlay_list = g_list_append(rt->overlay_list, od);
 
-	rt_overlay_queue_draw(rt, od, 0, 0, 0, 0);
 	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
 
 	return od->id;
@@ -593,14 +542,11 @@ void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint
 
 	OverlayData *od = rt_overlay_find(rt, id);
 	if (!od) return;
-	GdkRectangle old_rect = rt_overlay_get_position(rt, od);
 
 	if (pixbuf)
 		{
 		g_object_unref(od->pixbuf);
 		od->pixbuf = g_object_ref(pixbuf);
-		GdkRectangle new_rect = rt_overlay_get_position(rt, od);
-		gdk_rectangle_union(&old_rect, &new_rect, &old_rect);
 		}
 	else
 		{
@@ -613,7 +559,6 @@ void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint
 			}
 		}
 
-	rt_redraw(rt, old_rect, false, FALSE);
 	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
 }
 
@@ -656,13 +601,6 @@ void rt_scale_factor_changed_cb(GObject *, GParamSpec *, gpointer data)
 
 	rt_queue_clear(rt);
 	rt_tile_free_all(rt);
-	g_clear_pointer(&rt->surface, cairo_surface_destroy);
-	rt->surface = rt_surface_new(gtk_widget_get_width(widget), gtk_widget_get_height(widget));
-
-	cairo_t *cr = cairo_create(rt->surface);
-	cairo_set_source_rgb(cr, rt->pr->color.red, rt->pr->color.green, rt->pr->color.blue);
-	cairo_paint(cr);
-	cairo_destroy(cr);
 
 	rt_redraw(rt, {0, 0, gtk_widget_get_width(widget), gtk_widget_get_height(widget)}, false, TRUE);
 	gtk_widget_queue_draw(widget);
@@ -1219,6 +1157,7 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 	if (new_data) it->blank = FALSE;
 
 	rt_tile_prepare(rt, it);
+	g_clear_object(&it->texture);
 	has_alpha = (pr->pixbuf && gdk_pixbuf_get_has_alpha(pr->pixbuf));
 
 	/** @FIXME checker colors for alpha should be configurable,
@@ -1308,7 +1247,9 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 	if (draw && it->pixbuf && !it->blank)
 		{
 		if (pr->func_post_process && (!pr->post_process_slow || !fast))
+			{
 			pr->func_post_process(pr, &it->pixbuf, x, y, w, h);
+			}
 
 		cairo_surface_t *surface = pixbuf_to_cairo_surface(it->pixbuf);
 		if (surface)
@@ -1322,6 +1263,7 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 			cairo_surface_destroy(surface);
 			}
 		}
+	it->surface_valid = TRUE;
 }
 
 
@@ -1330,7 +1272,6 @@ void rt_tile_expose(RendererTiles *rt, ImageTile *it,
                     gboolean new_data, gboolean fast)
 {
 	PixbufRenderer *pr = rt->pr;
-	cairo_t *cr;
 
 	/* clamp to visible */
 	if (it->x + x < rt->x_scroll)
@@ -1356,13 +1297,11 @@ void rt_tile_expose(RendererTiles *rt, ImageTile *it,
 
 	rt_tile_render(rt, it, x, y, w, h, new_data, fast);
 
-	cr = cairo_create(rt->surface);
-	cairo_set_source_surface(cr, it->surface, pr->x_offset + (it->x - rt->x_scroll) + rt->stereo_off_x, pr->y_offset + (it->y - rt->y_scroll) + rt->stereo_off_y);
-	cairo_rectangle (cr, pr->x_offset + (it->x - rt->x_scroll) + x + rt->stereo_off_x, pr->y_offset + (it->y - rt->y_scroll) + y + rt->stereo_off_y, w, h);
-	cairo_fill (cr);
-	cairo_destroy (cr);
-
-	rt->draw_pending = TRUE;
+	if (!rt->draw_pending)
+		{
+		rt->draw_pending_since = g_get_monotonic_time();
+		rt->draw_pending = TRUE;
+		}
 }
 
 
@@ -1539,6 +1478,18 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 		g_free(qd);
 		}
 
+	if (rt->draw_pending && g_get_monotonic_time() - rt->draw_pending_since >= 16000)
+		{
+		/* Request a frame every 16 ms during long render batches. */
+		rt_present_pending(rt);
+		}
+
+	if (first_pass && g_queue_is_empty(&rt->draw_queue))
+		{
+		/* Present the fast preview before refining it in the second pass. */
+		rt_present_pending(rt);
+		}
+
 	if (g_queue_is_empty(&rt->draw_queue) && g_queue_is_empty(&rt->draw_queue_2pass))
 		{
 		/* Present all tiles updated by this render batch in one frame. */
@@ -1690,6 +1641,9 @@ void renderer_scroll(void *renderer, gint x_off, gint y_off)
 	PixbufRenderer *pr = rt->pr;
 
 	rt_sync_scroll(rt);
+	rt->draw_pending = TRUE;
+	rt->draw_pending_since = g_get_monotonic_time();
+	rt_present_pending(rt);
 	if (rt->stereo_mode & PR_STEREO_MIRROR) x_off = -x_off;
 	if (rt->stereo_mode & PR_STEREO_FLIP) y_off = -y_off;
 
@@ -1703,29 +1657,7 @@ void renderer_scroll(void *renderer, gint x_off, gint y_off)
 		return;
 		}
 
-	const gint x1 = abs(std::min(0, x_off));
-	const gint y1 = abs(std::min(0, y_off));
-
-	const gint x2 = std::max(0, x_off);
-	const gint y2 = std::max(0, y_off);
-
-	cairo_t *cr = cairo_create(rt->surface);
-	cairo_surface_t *surface = rt->surface;
-
-	/* clipping restricts the intermediate surface's size, so it's a good idea
-	 * to use it. */
-	cairo_rectangle(cr, x1 + pr->x_offset + rt->stereo_off_x, y1 + pr->y_offset + rt->stereo_off_y, w, h);
-	cairo_clip (cr);
-	/* Now push a group to change the target */
-	cairo_push_group (cr);
-	cairo_set_source_surface(cr, surface, x1 - x2, y1 - y2);
-	cairo_paint(cr);
-	/* Now copy the intermediate target back */
-	cairo_pop_group_to_source(cr);
-	cairo_paint(cr);
-	cairo_destroy(cr);
-
-	rt_overlay_queue_all(rt, x2, y2, x1, y1);
+	if (rt->overlay_list) gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
 
 	/* @todo Check if pr->vis_width/height could change after w/h initialization.
 	 * If not this could be simplified to w/h = abs(x/y_off) or even removed */
@@ -1797,7 +1729,10 @@ void rt_redraw(RendererTiles *rt, GdkRectangle rect,
 
 void renderer_update_pixbuf(void *renderer, gboolean)
 {
-	rt_queue_clear(static_cast<RendererTiles *>(renderer));
+	auto *rt = static_cast<RendererTiles *>(renderer);
+	g_clear_pointer(&rt->image_node, gsk_render_node_unref);
+	rt->preserve_image = FALSE;
+	rt_queue_clear(rt);
 }
 
 void renderer_update_zoom(void *renderer, gboolean lazy)
@@ -1805,6 +1740,7 @@ void renderer_update_zoom(void *renderer, gboolean lazy)
 	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
 
+	rt->preserve_image = rt->image_node != nullptr;
 	rt_tile_invalidate_all(rt);
 	if (!lazy)
 		{
@@ -1830,6 +1766,8 @@ void renderer_invalidate_region(void *renderer, GdkRectangle region)
 		if (it->x < x2 && it->x + it->w > x1 &&
 		    it->y < y2 && it->y + it->h > y1)
 			{
+			g_clear_object(&it->texture);
+			it->surface_valid = FALSE;
 			it->render_done = TileRender::NONE;
 			it->render_todo = TileRender::ALL;
 			}
@@ -1888,110 +1826,112 @@ void renderer_free(void *renderer)
 	if (rt->spare_tile) g_object_unref(rt->spare_tile);
 	g_list_free_full(rt->overlay_list, reinterpret_cast<GDestroyNotify>(overlay_data_free));
 	g_clear_pointer(&rt->overlay_buffer, cairo_surface_destroy);
+	g_clear_pointer(&rt->image_node, gsk_render_node_unref);
 	g_signal_handlers_disconnect_matched(G_OBJECT(rt->pr), G_SIGNAL_MATCH_DATA,
 	                                     0, 0, nullptr, nullptr, rt);
 	g_free(rt);
 }
 
-gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
-{
-	auto rt = static_cast<RendererTiles *>(data);
-	cairo_t *cr;
-
-	if (!rt->surface)
-		{
-		rt->surface = rt_surface_new(gtk_widget_get_width(widget), gtk_widget_get_height(widget));
-
-		cr = cairo_create(rt->surface);
-		cairo_set_source_rgb(cr, rt->pr->color.red, rt->pr->color.green, rt->pr->color.blue);
-		cairo_paint(cr);
-		cairo_destroy(cr);
-		}
-
-	return FALSE;
-}
-
 void rt_resize_cb(GtkDrawingArea *, gint width, gint height, gpointer data)
 {
-	auto rt = static_cast<RendererTiles *>(data);
-	cairo_t *cr;
-	cairo_surface_t *old_surface;
-
+	auto *rt = static_cast<RendererTiles *>(data);
 	if (gtk_widget_get_realized(GTK_WIDGET(rt->pr)))
 		{
-		old_surface = rt->surface;
-		rt->surface = rt_surface_new(width, height);
-
-		cr = cairo_create(rt->surface);
-
-		cairo_set_source_rgb(cr, options->image.border_color.red, options->image.border_color.green, options->image.border_color.blue);
-		cairo_paint(cr);
-		if (old_surface)
-			{
-			cairo_set_source_surface(cr, old_surface, 0, 0);
-			cairo_paint(cr);
-			}
-		cairo_destroy(cr);
-		g_clear_pointer(&old_surface, cairo_surface_destroy);
-
 		rt_redraw(rt, {0, 0, width, height}, false, FALSE);
 		}
 }
 
-void rt_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint, gpointer data)
+void rt_snapshot(void *data, GtkSnapshot *snapshot)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 
-	if (rt->stereo_mode & (PR_STEREO_HORIZ | PR_STEREO_VERT))
-		{
-		cairo_push_group(cr);
-		cairo_set_source_rgb(cr, rt->pr->color.red, rt->pr->color.green, rt->pr->color.blue);
 
-		if (rt->stereo_mode & PR_STEREO_HORIZ)
+
+	graphene_rect_t bounds;
+	if (rt->preserve_image && !g_queue_is_empty(&rt->draw_queue))
+		{
+		// Do not show a background-only or partially rebuilt zoom frame.
+		if (rt->pr->zoom == 0.0 && rt->preview_width > 0 && rt->preview_height > 0)
 			{
-			cairo_rectangle(cr, rt->stereo_off_x, 0, rt->pr->viewport_width, rt->pr->viewport_height);
+			// Resize the retained fit preview immediately while new tiles render.
+			graphene_rect_t viewport;
+			graphene_rect_init(&viewport, rt->stereo_off_x, rt->stereo_off_y,
+			                   rt->pr->viewport_width, rt->pr->viewport_height);
+			GdkRGBA color = {rt->pr->color.red, rt->pr->color.green, rt->pr->color.blue, 1.0};
+			gtk_snapshot_append_color(snapshot, &color, &viewport);
+			graphene_rect_t image;
+			graphene_rect_init(&image, rt->pr->x_offset + rt->stereo_off_x,
+			                   rt->pr->y_offset + rt->stereo_off_y, rt->pr->vis_width, rt->pr->vis_height);
+			gtk_snapshot_push_clip(snapshot, &image);
+			const float scale_x = static_cast<float>(rt->pr->width) / rt->preview_width;
+			const float scale_y = static_cast<float>(rt->pr->height) / rt->preview_height;
+			graphene_point_t position;
+			graphene_point_init(&position, image.origin.x - (rt->preview_x * scale_x),
+			                    image.origin.y - (rt->preview_y * scale_y));
+			gtk_snapshot_save(snapshot);
+			gtk_snapshot_translate(snapshot, &position);
+			gtk_snapshot_scale(snapshot, scale_x, scale_y);
+			gtk_snapshot_append_node(snapshot, rt->image_node);
+			gtk_snapshot_restore(snapshot);
+			gtk_snapshot_pop(snapshot);
 			}
 		else
 			{
-			cairo_rectangle(cr, 0, rt->stereo_off_y, rt->pr->viewport_width, rt->pr->viewport_height);
+			gtk_snapshot_append_node(snapshot, rt->image_node);
 			}
-		cairo_clip(cr);
-		cairo_paint(cr);
-
-		cairo_rectangle(cr, rt->pr->x_offset + rt->stereo_off_x, rt->pr->y_offset + rt->stereo_off_y, rt->pr->vis_width, rt->pr->vis_height);
-		cairo_clip(cr);
-		cairo_set_source_surface(cr, rt->surface, 0, 0);
-		cairo_paint(cr);
-
-		cairo_pop_group_to_source(cr);
-		cairo_paint(cr);
 		}
 	else
 		{
-		cairo_set_source_surface(cr, rt->surface, 0, 0);
-		cairo_paint(cr);
+		auto *image_snapshot = gtk_snapshot_new();
+		graphene_rect_t viewport;
+		graphene_rect_init(&viewport, rt->stereo_off_x, rt->stereo_off_y,
+		                   rt->pr->viewport_width, rt->pr->viewport_height);
+		gtk_snapshot_push_clip(image_snapshot, &viewport);
+		GdkRGBA color = {rt->pr->color.red, rt->pr->color.green, rt->pr->color.blue, 1.0};
+		gtk_snapshot_append_color(image_snapshot, &color, &viewport);
+		graphene_rect_t image;
+		graphene_rect_init(&image, rt->pr->x_offset + rt->stereo_off_x,
+		                   rt->pr->y_offset + rt->stereo_off_y, rt->pr->vis_width, rt->pr->vis_height);
+		gtk_snapshot_push_clip(image_snapshot, &image);
+		for (GList *work = (rt->pr->pixbuf || rt->pr->source_tiles_enabled) ? rt->tiles : nullptr; work; work = work->next)
+			{
+			auto *it = static_cast<ImageTile *>(work->data);
+			if (!it->surface_valid || !rt_tile_is_visible(rt, it)) continue;
+			if (!it->texture)
+				{
+				it->texture = renderer_tiles_surface_to_texture(it->surface);
+				}
+			if (!it->texture) continue;
+			graphene_rect_init(&bounds, rt->pr->x_offset + it->x - rt->x_scroll + rt->stereo_off_x,
+			                   rt->pr->y_offset + it->y - rt->y_scroll + rt->stereo_off_y,
+			                   gdk_texture_get_width(it->texture), gdk_texture_get_height(it->texture));
+			gtk_snapshot_append_texture(image_snapshot, it->texture, &bounds);
+			}
+		gtk_snapshot_pop(image_snapshot);
+		gtk_snapshot_pop(image_snapshot);
+
+		GskRenderNode *node = gtk_snapshot_free_to_node(image_snapshot);
+		g_clear_pointer(&rt->image_node, gsk_render_node_unref);
+		rt->image_node = node;
+		rt->preview_width = rt->pr->width;
+		rt->preview_height = rt->pr->height;
+		rt->preview_x = rt->pr->x_offset - rt->x_scroll + rt->stereo_off_x;
+		rt->preview_y = rt->pr->y_offset - rt->y_scroll + rt->stereo_off_y;
+		rt->preserve_image = FALSE;
+		if (node) gtk_snapshot_append_node(snapshot, node);
 		}
 
 	for (GList *work = rt->overlay_list; work; work = work->next)
 		{
 		auto *od = static_cast<OverlayData *>(work->data);
-		GdkRectangle od_rect = rt_overlay_get_position(rt, od);
-
-		cairo_save(cr);
-		cairo_translate(cr, od_rect.x, od_rect.y);
-		if (od->flags & OVL_DEVICE_SCALE)
-			{
-			const gint scale = gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr));
-			cairo_scale(cr, 1.0 / scale, 1.0 / scale);
-			}
-		cairo_surface_t *surface = pixbuf_to_cairo_surface(od->pixbuf);
-		if (surface)
-			{
-			cairo_set_source_surface(cr, surface, 0, 0);
-			cairo_paint(cr);
-			cairo_surface_destroy(surface);
-			}
-		cairo_restore(cr);
+		GdkRectangle rect = rt_overlay_get_position(rt, od);
+		const int scale = (od->flags & OVL_DEVICE_SCALE) ? gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr)) : 1;
+		GdkTexture *overlay = gdk_texture_new_for_pixbuf(od->pixbuf);
+		graphene_rect_init(&bounds, rect.x, rect.y,
+		                   static_cast<float>(gdk_texture_get_width(overlay)) / scale,
+		                   static_cast<float>(gdk_texture_get_height(overlay)) / scale);
+		gtk_snapshot_append_texture(snapshot, overlay, &bounds);
+		g_object_unref(overlay);
 		}
 }
 
@@ -2003,6 +1943,7 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 
 	rt->pr = pr;
 
+	rt->f.snapshot = rt_snapshot;
 	rt->f.area_changed = renderer_area_changed;
 	rt->f.update_pixbuf = renderer_update_pixbuf;
 	rt->f.free = renderer_free;
@@ -2010,7 +1951,6 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 	rt->f.invalidate_region = renderer_invalidate_region;
 	rt->f.scroll = renderer_scroll;
 	rt->f.update_viewport = renderer_update_viewport;
-
 
 	rt->f.overlay_add = renderer_tiles_overlay_add;
 	rt->f.overlay_set = renderer_tiles_overlay_set;
@@ -2037,8 +1977,6 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 	g_signal_connect(G_OBJECT(pr), "notify::scale-factor",
 			 G_CALLBACK(rt_scale_factor_changed_cb), rt);
 
-	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(pr), rt_draw_cb, rt, nullptr);
-	g_signal_connect(G_OBJECT(pr), "realize", G_CALLBACK(rt_realize_cb), rt);
 	g_signal_connect(G_OBJECT(pr), "resize", G_CALLBACK(rt_resize_cb), rt);
 
 	return reinterpret_cast<RendererFuncs *>(rt);
