@@ -1547,7 +1547,7 @@ static void layout_menu_stereo_mode_next_cb(GSimpleAction *, GVariant *, gpointe
 
 	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-stereo");
 
-	GVariant *state = g_action_get_state(G_ACTION(action));
+	g_autoptr(GVariant) state = g_action_get_state(G_ACTION(action));
 	const gchar *value = g_variant_get_string(state, nullptr);
 
 
@@ -1562,12 +1562,7 @@ static void layout_menu_stereo_mode_next_cb(GSimpleAction *, GVariant *, gpointe
 	else
 		next_value = "auto";
 
-	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string(next_value));
-
-	/*
-	this is called via fallback in layout_menu_stereo_mode_cb
-	layout_image_stereo_pixbuf_set(lw, mode);
-	*/
+	g_action_change_state(action, g_variant_new_string(next_value));
 }
 
 static const char *stereo_mode_to_string(StereoPixbufData mode)
@@ -1577,7 +1572,7 @@ static const char *stereo_mode_to_string(StereoPixbufData mode)
 		case STEREO_PIXBUF_DEFAULT: return "auto";
 		case STEREO_PIXBUF_SBS:     return "side-by-side";
 		case STEREO_PIXBUF_CROSS:   return "cross";
-		case STEREO_PIXBUF_NONE:    return "none";
+		case STEREO_PIXBUF_NONE:    return "off";
 		}
 
 	return "auto";

@@ -176,6 +176,60 @@ TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
 	gtk_window_destroy(window);
 }
 
+TEST(RendererTilesTexture, StereoModes)
+{
+	if (!gtk_init_check()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	gtk_window_set_default_size(window, 600, 400);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 400, 100);
+	gdk_pixbuf_fill(image, 0x204060ff);
+	g_autoptr(GdkPixbuf) right = gdk_pixbuf_new_subpixbuf(image, 200, 0, 200, 100);
+	gdk_pixbuf_fill(right, 0x8090a0ff);
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	pixbuf_renderer_set_stereo_data(pr, STEREO_PIXBUF_SBS);
+	gtk_window_present(window);
+	for (const int mode : std::initializer_list<int>{PR_STEREO_NONE, PR_STEREO_HORIZ, PR_STEREO_VERT, PR_STEREO_ANAGLYPH_RC, PR_STEREO_HORIZ | PR_STEREO_SWAP})
+		{
+		SCOPED_TRACE(mode);
+		pixbuf_renderer_stereo_set(pr, mode);
+		for (int i = 0; i < 300; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+		auto *snapshot = gtk_snapshot_new();
+		GTK_WIDGET_GET_CLASS(pr)->snapshot(GTK_WIDGET(pr), snapshot);
+		auto *node = gtk_snapshot_free_to_node(snapshot);
+		ASSERT_NE(node, nullptr);
+		auto *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 600, 400);
+		auto *cr = cairo_create(surface);
+		gsk_render_node_draw(node, cr);
+		cairo_destroy(cr);
+		cairo_surface_flush(surface);
+		auto pixel_at = [surface](int x, int y)
+			{
+			uint32_t pixel;
+			std::memcpy(&pixel, cairo_image_surface_get_data(surface) + y * cairo_image_surface_get_stride(surface) + x * 4, 4);
+			return pixel;
+			};
+		const bool swap = mode & PR_STEREO_SWAP;
+		EXPECT_EQ(pixel_at(pr->x_offset + 50, pr->y_offset + 50),
+		          mode == PR_STEREO_ANAGLYPH_RC ? 0xff804060U : swap ? 0xff8090a0U : 0xff204060U);
+		if (pr->renderer2)
+			{
+			EXPECT_EQ(pixel_at(pr->x_offset + 50 + ((mode & PR_STEREO_HORIZ) ? pr->viewport_width : 0),
+			                   pr->y_offset + 50 + ((mode & PR_STEREO_VERT) ? pr->viewport_height : 0)),
+			          swap ? 0xff204060U : 0xff8090a0U);
+			}
+		cairo_surface_destroy(surface);
+		gsk_render_node_unref(node);
+		}
+	gtk_window_destroy(window);
+}
+
 TEST(RendererTilesTexture, PreservesOpaqueColorsAndOwnsItsPixels)
 {
 	std::array<unsigned char, 32> pixels = {};
