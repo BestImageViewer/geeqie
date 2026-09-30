@@ -1897,7 +1897,8 @@ static void file_util_dialog_init_dest_folder(UtilityData *ud)
 	fdd.history_key = "move_copy";
 	fdd.focus_accept = TRUE;
 	fdd.title = (ud->type == UtilityType::MOVE) ? _("Geeqie - Move File") : _("Geeqie - Copy File");
-	fdd.parent = GTK_WINDOW(ud->parent);
+	auto *parent = ud->parent ? widget_get_toplevel(ud->parent) : nullptr;
+	fdd.parent = GTK_IS_WINDOW(parent) ? GTK_WINDOW(parent) : nullptr;
 
 	if (ud->type == UtilityType::COPY || ud->type == UtilityType::MOVE)
 		{
