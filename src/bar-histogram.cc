@@ -337,7 +337,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	gtk_drawing_area_set_content_height(GTK_DRAWING_AREA(phd->drawing_area), height);
 	gtk_drawing_area_set_content_width(GTK_DRAWING_AREA(phd->drawing_area), 1);
 	gtk_widget_set_hexpand(phd->drawing_area, TRUE);
-	gtk_widget_set_vexpand(phd->drawing_area, TRUE);
+	gtk_widget_set_vexpand(phd->drawing_area, FALSE);
 
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(phd->drawing_area),
 	                               bar_pane_histogram_draw_cb,
