@@ -12,6 +12,7 @@
 #include "collect-io.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "history-list.h"
 #include "intl.h"
 #include "layout.h"
 #include "options.h"
@@ -53,6 +54,7 @@ class CollectionFileSource : public testing::Test
 protected:
 	void SetUp() override
 	{
+		if (auto *recent = history_list_find_by_key("recent")) saved_recent = *recent;
 		if (!options) options = conf_options_new();
 		setup_default_options(options);
 		filter_add_defaults();
@@ -104,6 +106,11 @@ protected:
 			}
 		g_rmdir(directory);
 		g_free(directory);
+		history_list_free_key("recent");
+		for (auto work = saved_recent.crbegin(); work != saved_recent.crend(); ++work)
+			{
+			history_list_add_to_key("recent", work->c_str(), 0);
+			}
 	}
 
 	gchar *directory = nullptr;
@@ -114,7 +121,81 @@ protected:
 	ViewFile view{};
 	GList *files = nullptr;
 	std::vector<std::string> paths;
+	HistoryList saved_recent;
 };
+
+TEST_F(CollectionFileSource, ManagerUpdatesExternalCollectionsFromHistory)
+{
+	g_autofree gchar *path = g_build_filename(directory, "external.gqv", nullptr);
+	g_autofree gchar *other_path = g_build_filename(directory, "other.gqv", nullptr);
+	paths.emplace_back(path);
+	paths.emplace_back(other_path);
+	ASSERT_TRUE(collection_save(cd, path));
+	ASSERT_TRUE(collection_save(cd, other_path));
+	collection_unref(cd);
+	cd = nullptr;
+
+	// History entries that are missing, directories, or not .gqv files are ignored.
+	g_autofree gchar *ignored_path = g_build_filename(directory, "ignored.txt", nullptr);
+	paths.emplace_back(ignored_path);
+	g_autofree gchar *ignored_contents = g_strdup_printf("#Geeqie collection\n\"%s\"\n", first->path);
+	ASSERT_TRUE(g_file_set_contents(ignored_path, ignored_contents, -1, nullptr));
+	history_list_add_to_key("recent", ignored_path, 0);
+	g_autofree gchar *missing_path = g_build_filename(directory, "missing.gqv", nullptr);
+	history_list_add_to_key("recent", missing_path, 0);
+	g_autofree gchar *directory_path = g_build_filename(directory, "directory.gqv", nullptr);
+	ASSERT_EQ(g_mkdir(directory_path, 0700), 0);
+	history_list_add_to_key("recent", directory_path, 0);
+
+	FileData *renamed = make_file("a", "renamed.svg");
+	ASSERT_NE(renamed, nullptr);
+	ASSERT_TRUE(file_data_add_ci(first, FILEDATA_CHANGE_RENAME, first->path, renamed->path));
+	collect_manager_notify_cb(first, NOTIFY_CHANGE, nullptr);
+	collect_manager_flush();
+	file_data_change_info_free(first->change, first);
+
+	FileData *moved = make_file("b", "moved.svg");
+	ASSERT_NE(moved, nullptr);
+	ASSERT_TRUE(file_data_add_ci(renamed, FILEDATA_CHANGE_MOVE, renamed->path, moved->path));
+	collect_manager_notify_cb(renamed, NOTIFY_CHANGE, nullptr);
+	collect_manager_flush();
+	file_data_change_info_free(renamed->change, renamed);
+
+	for (const gchar *collection_path : {path, other_path})
+		{
+		g_autofree gchar *contents = nullptr;
+		ASSERT_TRUE(g_file_get_contents(collection_path, &contents, nullptr, nullptr));
+		EXPECT_NE(std::string(contents).find(moved->path), std::string::npos);
+		EXPECT_EQ(std::string(contents).find(first->path), std::string::npos);
+		EXPECT_EQ(std::string(contents).find(renamed->path), std::string::npos);
+		EXPECT_NE(std::string(contents).find(second->path), std::string::npos);
+		}
+
+	// External collections are no longer maintained after they leave history.
+	history_list_item_remove("recent", path);
+	history_list_item_remove("recent", other_path);
+	FileData *later = make_file("a", "later.svg");
+	ASSERT_NE(later, nullptr);
+	ASSERT_TRUE(file_data_add_ci(moved, FILEDATA_CHANGE_MOVE, moved->path, later->path));
+	collect_manager_notify_cb(moved, NOTIFY_CHANGE, nullptr);
+	collect_manager_flush();
+	file_data_change_info_free(moved->change, moved);
+	for (const gchar *collection_path : {path, other_path})
+		{
+		g_autofree gchar *contents = nullptr;
+		ASSERT_TRUE(g_file_get_contents(collection_path, &contents, nullptr, nullptr));
+		EXPECT_NE(std::string(contents).find(moved->path), std::string::npos);
+		EXPECT_EQ(std::string(contents).find(later->path), std::string::npos);
+		}
+	file_data_unref(later);
+	g_autofree gchar *ignored_after = nullptr;
+	ASSERT_TRUE(g_file_get_contents(ignored_path, &ignored_after, nullptr, nullptr));
+	EXPECT_STREQ(ignored_after, ignored_contents);
+	EXPECT_FALSE(g_file_test(missing_path, G_FILE_TEST_EXISTS));
+	EXPECT_EQ(g_rmdir(directory_path), 0);
+	file_data_unref(renamed);
+	file_data_unref(moved);
+}
 
 TEST_F(CollectionFileSource, ManagerRenamesToLongerPathAndRemovesFile)
 {

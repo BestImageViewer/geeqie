@@ -26,6 +26,8 @@
 #include <cstring>
 #include <filesystem>
 #include <list>
+#include <set>
+#include <string>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -41,9 +43,11 @@
 
 #include "collect.h"
 #include "filedata.h"
+#include "history-list.h"
 #include "intl.h"
 #include "layout-util.h"
 #include "main-defines.h"
+#include "options.h"
 #include "ui-fileops.h"
 
 #ifdef __NetBSD__
@@ -685,69 +689,41 @@ static gboolean collect_manager_process_action(CollectManagerEntry *entry, gchar
 
 static void collect_manager_refresh()
 {
-	GList *work;
-	FileData *dir_fd;
-
-	dir_fd = file_data_new_dir(get_collections_dir());
+	std::set<std::string> paths;
+	auto *dir_fd = file_data_new_dir(get_collections_dir());
 	g_autoptr(FileDataList) list = nullptr;
 	filelist_read(dir_fd, &list, nullptr);
 	file_data_unref(dir_fd);
 
-	work = list;
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
 		auto *fd = static_cast<FileData *>(work->data);
-		GList *next = work->next;
-		if (!file_extension_match(fd->path, GQ_COLLECTION_EXT))
-			{
-			list = g_list_delete_link(list, work);
-			file_data_unref(fd);
-			}
-		work = next;
+		if (file_extension_match(fd->path, GQ_COLLECTION_EXT)) paths.emplace(fd->path);
 		}
 
-	work = collection_manager_entry_list;
-	while (work && list)
+	if (const HistoryList *recent = history_list_find_by_key("recent"))
 		{
-		CollectManagerEntry *entry;
-		GList *list_step;
-
-		entry = static_cast<CollectManagerEntry *>(work->data);
-		work = work->next;
-
-		list_step = list;
-		while (list_step && entry)
+		gint count = 0;
+		for (const auto &path : *recent)
 			{
-			FileData *fd;
-
-			fd = static_cast<FileData *>(list_step->data);
-			list_step = list_step->next;
-
-			if (strcmp(fd->path, entry->path) == 0)
-				{
-				list = g_list_remove(list, fd);
-				file_data_unref(fd);
-
-				entry = nullptr;
-				}
-			else
-				{
-				collect_manager_entry_free(entry);
-
-				entry = nullptr;
-				}
+			if (!file_extension_match(path.c_str(), GQ_COLLECTION_EXT) || !isfile(path.c_str())) continue;
+			if (count >= options->recent_collections_list_maxsize) break;
+			++count;
+			paths.emplace(path);
 			}
 		}
 
-	work = list;
+	GList *work = collection_manager_entry_list;
 	while (work)
 		{
-		FileData *fd;
-
-		fd = static_cast<FileData *>(work->data);
+		auto *entry = static_cast<CollectManagerEntry *>(work->data);
 		work = work->next;
+		if (paths.erase(entry->path) == 0) collect_manager_entry_free(entry);
+		}
 
-		collect_manager_entry_new(fd->path);
+	for (const auto &path : paths)
+		{
+		collect_manager_entry_new(path.c_str());
 		}
 }
 
@@ -890,8 +866,8 @@ static void collect_manager_add_action(CollectManagerAction *action)
 }
 
 /**
- * @brief These are used to update collections contained in user's collection
- * folder when moving or renaming files.
+ * @brief Update collections in the user's collection folder or recent collection
+ * history when moving or renaming files.
  * also handles:
  *   deletes file when newpath == NULL
  *   adds file when oldpath == NULL
