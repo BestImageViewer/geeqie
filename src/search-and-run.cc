@@ -157,6 +157,7 @@ void search_and_run_destroy(SarData *sar)
 	g_signal_handlers_disconnect_by_data(sar->window, sar);
 	g_signal_handlers_disconnect_by_data(sar->entry, sar);
 	g_signal_handlers_disconnect_by_data(sar->command_list, sar);
+	gtk_widget_unparent(sar->popover);
 
 	g_clear_pointer(&sar->action_name, g_free);
 	for (SearchAndRunAction *action : sar->actions)
