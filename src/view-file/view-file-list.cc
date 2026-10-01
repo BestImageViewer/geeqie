@@ -1493,11 +1493,36 @@ void vflist_select_invert(ViewFile *vf)
 		}
 }
 
+static gboolean vflist_startup_scroll_cb(GtkWidget *widget, GdkFrameClock *, gpointer data)
+{
+	if (gtk_widget_get_height(widget) == 0) return G_SOURCE_CONTINUE;
+
+	auto *row = static_cast<GtkTreeRowReference *>(data);
+	g_autoptr(GtkTreePath) path = gtk_tree_row_reference_get_path(row);
+	g_autoptr(GtkTreePath) cursor = nullptr;
+	gtk_tree_view_get_cursor(GTK_TREE_VIEW(widget), &cursor, nullptr);
+	if (path && cursor && gtk_tree_path_compare(path, cursor) == 0)
+		{
+		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(widget), path, nullptr, TRUE, 0.5, 0.0);
+		}
+	return G_SOURCE_REMOVE;
+}
+
 void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 {
 	GtkTreeIter iter;
 
 	if (!vflist_find_row(vf, fd, &iter)) return;
+
+	if (!gtk_widget_get_mapped(vf->listview))
+		{
+		// Repeat the startup scroll after both panes have allocated their shared adjustment.
+		auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+		g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(model, &iter);
+		gtk_widget_add_tick_callback(vf->listview, vflist_startup_scroll_cb,
+		                             gtk_tree_row_reference_new(model, path),
+		                             reinterpret_cast<GDestroyNotify>(gtk_tree_row_reference_free));
+		}
 
 	tree_view_row_make_visible(GTK_TREE_VIEW(vf->listview), &iter, TRUE);
 

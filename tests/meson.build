@@ -15,6 +15,7 @@ unit_test_sources = files(
 'ui-file-chooser.cc',
 'ui-icon.cc',
 'ui-tree-edit.cc',
-'video-metadata.cc')
+'video-metadata.cc',
+'view-file-list.cc')
 
 project_sources += unit_test_sources
