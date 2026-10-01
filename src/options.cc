@@ -162,6 +162,7 @@ ConfOptions *conf_options_new()
 	options->image_l_click_video = TRUE;
 	options->image_l_click_video_editor = g_strdup("video-player.desktop");
 	options->open_recent_list_maxsize = 10;
+	options->recent_collections_list_maxsize = 100;
 	options->recent_folder_image_list_maxsize = 10;
 	options->place_dialogs_under_mouse = FALSE;
 

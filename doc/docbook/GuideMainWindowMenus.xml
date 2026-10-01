@@ -59,7 +59,7 @@
         <listitem>
           <para>
             This menu item lists the recently active collections. Selecting one displays it in the files pane. The most recent item will appear at the top of the list. Maximum number of entries can be modified through
-            <emphasis role="underline"><link linkend="Behaviour">Open recent list maximum size</link></emphasis>
+            <emphasis role="underline"><link linkend="Behaviour">Recent collections list maximum size</link></emphasis>
             option.
           </para>
         </listitem>

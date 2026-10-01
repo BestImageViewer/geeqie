@@ -1128,12 +1128,15 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 
 	if (recent_items)
 		{
+		gint count = 0;
 		for (const auto &path : *recent_items)
 			{
 			if (!isfile(path.c_str()))
 				{
 				continue;
 				}
+			if (count >= options->recent_collections_list_maxsize) break;
+			++count;
 
 			GtkWidget *row = gtk_list_box_row_new();
 			GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
@@ -2401,7 +2404,7 @@ void layout_recent_add_path(const gchar *path)
 {
 	if (!path) return;
 
-	history_list_add_to_key("recent", path, options->open_recent_list_maxsize);
+	history_list_add_to_key("recent", path, options->recent_collections_list_maxsize);
 }
 
 /*

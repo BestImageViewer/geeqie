@@ -207,6 +207,14 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <guilabel>Recent collections list maximum size</guilabel>
+        </term>
+        <listitem>
+          <para>The maximum number of recently opened or saved collections retained between sessions and displayed in Open recent. The default is 100, and the range is 1 to 1000. This is independent of the recent folder list.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Recent folder-image list maximum size</guilabel>
         </term>
         <listitem>

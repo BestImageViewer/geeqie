@@ -9,6 +9,7 @@
 #include <glib/gstdio.h>
 
 #include "history-list.h"
+#include "layout-util.h"
 #include "options.h"
 
 namespace
@@ -65,6 +66,59 @@ TEST(HistoryList, SaveKeepsNewestEntriesInOrder)
 
 	options->recent_folder_image_list_maxsize = image_limit;
 	options->open_recent_list_maxsize = path_limit;
+	g_unlink(filename);
+	g_rmdir(directory);
+}
+
+TEST(HistoryList, CollectionHistorySurvivesReloadWithIndependentLimit)
+{
+	if (!options) options = conf_options_new();
+	g_autofree gchar *directory = g_dir_make_tmp("geeqie-collection-history-XXXXXX", nullptr);
+	ASSERT_NE(directory, nullptr);
+	g_autofree gchar *filename = g_build_filename(directory, "history", nullptr);
+	HistoryList saved_items;
+	if (auto *items = history_list_find_by_key("recent")) saved_items = *items;
+	const gint folder_limit = options->open_recent_list_maxsize;
+	const gint collection_limit = options->recent_collections_list_maxsize;
+	options->open_recent_list_maxsize = 1;
+	options->recent_collections_list_maxsize = 100;
+	history_list_free_key("recent");
+	HistoryList expected;
+	for (int i = 0; i < 105; ++i)
+		{
+		g_autofree gchar *name = g_strdup_printf("%s/collection-%03d.gqv", directory, i);
+		EXPECT_TRUE(g_file_set_contents(name, "", 0, nullptr));
+		layout_recent_add_path(name);
+		expected.emplace_front(name);
+		}
+	expected.resize(100);
+	EXPECT_TRUE(history_list_save(filename));
+	history_list_free_key("recent");
+	EXPECT_TRUE(history_list_load(filename));
+	auto *actual = history_list_find_by_key("recent");
+	EXPECT_EQ(actual ? *actual : HistoryList{}, expected);
+
+	// Lowering the preference must also limit the history saved for the next session.
+	options->recent_collections_list_maxsize = 12;
+	expected.resize(12);
+	EXPECT_TRUE(history_list_save(filename));
+	history_list_free_key("recent");
+	EXPECT_TRUE(history_list_load(filename));
+	actual = history_list_find_by_key("recent");
+	EXPECT_EQ(actual ? *actual : HistoryList{}, expected);
+
+	history_list_free_key("recent");
+	for (auto work = saved_items.crbegin(); work != saved_items.crend(); ++work)
+		{
+		history_list_add_to_key("recent", work->c_str(), 0);
+		}
+	options->open_recent_list_maxsize = folder_limit;
+	options->recent_collections_list_maxsize = collection_limit;
+	for (int i = 0; i < 105; ++i)
+		{
+		g_autofree gchar *name = g_strdup_printf("%s/collection-%03d.gqv", directory, i);
+		g_unlink(name);
+		}
 	g_unlink(filename);
 	g_rmdir(directory);
 }

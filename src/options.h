@@ -122,6 +122,7 @@ struct ConfOptions
 	gboolean sort_totals;
 
 	gint open_recent_list_maxsize;
+	gint recent_collections_list_maxsize;
 	gint recent_folder_image_list_maxsize;
 	gint dnd_icon_size;
 	DnDAction dnd_default_action;

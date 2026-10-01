@@ -270,6 +270,13 @@ gboolean history_list_save(const gchar *path)
 				first = std::next(items.crbegin(), items.size() - options->open_recent_list_maxsize);
 				}
 			}
+		else if (is_recent)
+			{
+			if (static_cast<size_t>(options->recent_collections_list_maxsize) < items.size())
+				{
+				first = std::next(items.crbegin(), items.size() - options->recent_collections_list_maxsize);
+				}
+			}
 		else if (key == "image_list")
 			{
 			if (static_cast<size_t>(options->recent_folder_image_list_maxsize) < items.size())

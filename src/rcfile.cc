@@ -430,6 +430,7 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_BOOL(*options, image_l_click_video);
 	WRITE_NL(); WRITE_CHAR(*options, image_l_click_video_editor);
 	WRITE_NL(); WRITE_INT(*options, open_recent_list_maxsize);
+	WRITE_NL(); WRITE_INT(*options, recent_collections_list_maxsize);
 	WRITE_NL(); WRITE_INT(*options, recent_folder_image_list_maxsize);
 	WRITE_NL(); WRITE_INT(*options, dnd_icon_size);
 	WRITE_NL(); WRITE_UINT(*options, dnd_default_action);
@@ -897,6 +898,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_CHAR(*options, image_l_click_video_editor)) continue;
 
 		if (READ_INT(*options, open_recent_list_maxsize)) continue;
+		if (READ_INT_CLAMP(*options, recent_collections_list_maxsize, 1, 1000)) continue;
 		if (READ_INT(*options, recent_folder_image_list_maxsize)) continue;
 		if (READ_INT(*options, dnd_icon_size)) continue;
 		if (READ_UINT_ENUM(*options, dnd_default_action)) continue;
