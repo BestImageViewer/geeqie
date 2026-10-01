@@ -544,6 +544,7 @@ EditorListWindow *editor_list_window_new()
 	auto *ewl = g_new0(EditorListWindow, 1);
 
 	ewl->window = window_new("editors", PIXBUF_INLINE_ICON_CONFIG, _("Plugins"));
+	window_close_on_escape(ewl->window);
 	DEBUG_NAME(ewl->window);
 	g_signal_connect(G_OBJECT(ewl->window), "close-request",
 			 G_CALLBACK(editor_list_window_delete), NULL);

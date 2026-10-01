@@ -1657,6 +1657,7 @@ static void accel_conflicts_window_show(GtkWidget *parent)
 			}
 		g_signal_connect(accel_conflicts_window, "close-request",
 		                 G_CALLBACK(accel_conflicts_window_close_cb), nullptr);
+		window_close_on_escape(accel_conflicts_window);
 
 		GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 		gtk_widget_set_margin_top(vbox, PREF_PAD_BORDER);

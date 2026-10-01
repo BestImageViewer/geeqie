@@ -69,6 +69,22 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitl
 	return window;
 }
 
+static gboolean window_escape_key_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	if (keyval != GDK_KEY_Escape || (state & gtk_accelerator_get_default_mod_mask())) return FALSE;
+
+	gtk_window_close(GTK_WINDOW(data));
+	return TRUE;
+}
+
+void window_close_on_escape(GtkWidget *window)
+{
+	GtkEventController *controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_BUBBLE);
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(window_escape_key_cb), window);
+	gtk_widget_add_controller(window, controller);
+}
+
 gboolean window_maximized(GtkWidget *window)
 {
 	return window && gtk_window_is_maximized(GTK_WINDOW(window));

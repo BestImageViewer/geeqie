@@ -395,6 +395,22 @@ static void advanced_exif_search_stop(GtkSearchEntry *, gpointer data)
 	gtk_widget_grab_focus(ew->column_view);
 }
 
+static gboolean advanced_exif_escape_key_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	if (keyval != GDK_KEY_Escape || (state & gtk_accelerator_get_default_mod_mask())) return FALSE;
+
+	auto *ew = static_cast<ExifWin *>(data);
+	if (gtk_search_bar_get_search_mode(GTK_SEARCH_BAR(ew->search_bar)))
+		{
+		advanced_exif_search_stop(nullptr, ew);
+		}
+	else
+		{
+		gtk_window_close(GTK_WINDOW(ew->window));
+		}
+	return TRUE;
+}
+
 static void advanced_exif_search_mode_changed(GtkSearchBar *search_bar, GParamSpec *, gpointer data)
 {
 	if (gtk_search_bar_get_search_mode(search_bar)) return;
@@ -498,6 +514,10 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	g_object_set_data(G_OBJECT(ew->window), "advanced_exif_data", ew);
 	g_signal_connect(G_OBJECT(ew->window), "close-request", G_CALLBACK(advanced_exif_delete_cb), ew);
+	GtkEventController *key_controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(key_controller, GTK_PHASE_BUBBLE);
+	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(advanced_exif_escape_key_cb), ew);
+	gtk_widget_add_controller(ew->window, key_controller);
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gtk_window_set_child(GTK_WINDOW(ew->window), vbox);
