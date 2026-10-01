@@ -211,11 +211,15 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (lw->path_entry && gtk_widget_has_focus(lw->path_entry))
+	GtkRoot *root = gtk_widget_get_root(widget);
+	GtkWidget *focus = root ? gtk_root_get_focus(root) : nullptr;
+	if (lw->path_entry && focus &&
+	    (focus == lw->path_entry || gtk_widget_is_ancestor(focus, lw->path_entry)))
 		{
-		if (keyval == GDK_KEY_Escape && lw->dir_fd)
+		if (keyval == GDK_KEY_Escape && !(state & gtk_accelerator_get_default_mod_mask()))
 			{
-			entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
+			if (lw->dir_fd) entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
+			if (lw->vf) gtk_widget_grab_focus(lw->vf->listview);
 			return TRUE;
 			}
 

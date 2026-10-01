@@ -1325,14 +1325,19 @@ void autocomplete_changed_cb(GtkEditable *editable, gpointer data)
 	gtk_popover_popup(GTK_POPOVER(pkd->autocomplete_popover));
 }
 
-gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType, gpointer data)
+gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 
 	if (keyval == GDK_KEY_Escape)
 		{
-		if (pkd->autocomplete_popover) gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
-		return TRUE;
+		if (state & gtk_accelerator_get_default_mod_mask()) return FALSE;
+		if (pkd->autocomplete_popover && gtk_widget_get_visible(pkd->autocomplete_popover))
+			{
+			gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+			return TRUE;
+			}
+		return bar_pane_focus_files(&pkd->pane);
 		}
 
 	if (keyval == GDK_KEY_Down || keyval == GDK_KEY_Up)
@@ -1432,6 +1437,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_box_append(GTK_BOX(keyword_box), scrolled);
 
 	pkd->keyword_view = gtk_text_view_new();
+	bar_pane_text_escape_to_files(pkd->keyword_view, &pkd->pane);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), pkd->keyword_view);
 	bar_pane_keywords_set_extra_menu(pkd);
 

@@ -87,6 +87,8 @@ void bar_pane_common_free(PaneData &pane);
 void bar_pane_common_write_config(const PaneData &pane, RcString &rc);
 void bar_pane_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title);
+gboolean bar_pane_focus_files(PaneData *pane);
+void bar_pane_text_escape_to_files(GtkWidget *widget, PaneData *pane);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

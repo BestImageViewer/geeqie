@@ -2523,6 +2523,13 @@ static void case_sensitive_cb(GtkWidget *widget, gpointer data)
 	vf_refresh(vf);
 }
 
+static gboolean file_filter_escape_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	if (keyval != GDK_KEY_Escape || (state & gtk_accelerator_get_default_mod_mask())) return FALSE;
+	auto *vf = static_cast<ViewFile *>(data);
+	return gtk_widget_grab_focus(vf->listview);
+}
+
 static void file_filter_clear_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkEvent *, gpointer)
 {
 	if (pos != GTK_ENTRY_ICON_SECONDARY) return;
@@ -2538,6 +2545,10 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 
 	vf->file_filter.control = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	vf->file_filter.entry = gtk_entry_new();
+	GtkEventController *escape_controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(escape_controller, GTK_PHASE_BUBBLE);
+	g_signal_connect(escape_controller, "key-pressed", G_CALLBACK(file_filter_escape_cb), vf);
+	gtk_widget_add_controller(vf->file_filter.entry, escape_controller);
 	vf->file_filter.selected = -1;
 	vf->file_filter.last_selected = -1;
 	gtk_widget_set_tooltip_text(vf->file_filter.control, _("Use regular expressions"));

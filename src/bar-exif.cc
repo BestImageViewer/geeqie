@@ -148,6 +148,7 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 	if (editable)
 		{
 		ee->value_widget = gtk_entry_new();
+		bar_pane_text_escape_to_files(ee->value_widget, &ped->pane);
 		g_signal_connect(G_OBJECT(ee->value_widget), "changed",
 			 G_CALLBACK(bar_pane_exif_entry_changed), ee);
 

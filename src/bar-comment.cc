@@ -246,6 +246,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	gtk_widget_set_size_request(pcd->widget, -1, height);
 
 	pcd->comment_view = gtk_text_view_new();
+	bar_pane_text_escape_to_files(pcd->comment_view, &pcd->pane);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(pcd->comment_view), GTK_WRAP_WORD);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), pcd->comment_view);
 	bar_pane_comment_set_extra_menu(pcd);
