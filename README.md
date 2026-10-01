@@ -10,6 +10,21 @@ Package Status:
 [![Packaging status](https://repology.org/badge/tiny-repos/geeqie.svg)](https://repology.org/project/geeqie/versions)
 [![latest packaged version(s)](https://repology.org/badge/latest-versions/geeqie.svg)](https://repology.org/project/geeqie/versions)
 
+Versions:
+
+![AppImage](https://img.shields.io/badge/AppImage-CI-blue)
+![Debian Stable](https://img.shields.io/debian/v/geeqie/trixie?label=debian%20stable)
+![Debian Unstable](https://img.shields.io/debian/v/geeqie/sid?label=debian%20unstable)
+![Flathub](https://img.shields.io/flathub/v/org.geeqie.Geeqie)
+![Homebrew](https://img.shields.io/homebrew/v/geeqie)
+![MacPorts](https://img.shields.io/macports/v/geeqie)
+![Snap](https://img.shields.io/badge/Snap-CI-blue)
+
+Language Translations:
+
+[![Languages](https://img.shields.io/badge/languages-38-blue)](po/LINGUAS)
+[![German translation](https://img.shields.io/badge/German-93.6%25-brightgreen)](po/de.po)
+
 ## Geeqie - an image viewer
 
 Geeqie is a free open software image viewer and organiser program for Linux,
