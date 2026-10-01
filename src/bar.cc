@@ -796,14 +796,6 @@ void bar_pane_common_write_config(const PaneData &pane, RcString &rc)
 	WRITE_BOOL(pane, expanded);
 }
 
-void bar_pane_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!pd || !pd->pane_entry_add_from_config) return;
-
-	pd->pane_entry_add_from_config(pane, attribute_names, attribute_values);
-}
-
 gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title)
 {
 	if (!title) return FALSE;

@@ -1475,34 +1475,34 @@ static void options_parse_global_end(gpointer)
 #endif
 }
 
-static void options_parse_pane_exif(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
+static void options_parse_pane(GQParserData *parser_data, const gchar *pane_name, const gchar *entry_name, const gchar *element_name,
+                               const gchar **attribute_names, const gchar **attribute_values, gpointer data)
 {
-	if (g_ascii_strcasecmp(element_name, "entry") == 0)
+	if (g_ascii_strcasecmp(element_name, entry_name) == 0)
 		{
-		auto *pane = static_cast<GtkWidget *>(data);
-		bar_pane_entry_add_from_config(pane, attribute_names, attribute_values);
+		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(data), "pane_data"));
+		if (pd && pd->pane_entry_add_from_config)
+			{
+			pd->pane_entry_add_from_config(static_cast<GtkWidget *>(data), attribute_names, attribute_values);
+			}
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <pane_exif>: ") + element_name).c_str());
+		g_autofree gchar *message = g_strdup_printf("Unexpected in <%s>: %s", pane_name, element_name);
+		config_file_error(message);
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 }
 
+static void options_parse_pane_exif(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
+{
+	options_parse_pane(parser_data, "pane_exif", "entry", element_name, attribute_names, attribute_values, data);
+}
+
 static void options_parse_pane_keywords(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
 {
-	if (g_ascii_strcasecmp(element_name, "expanded") == 0)
-		{
-		auto *pane = static_cast<GtkWidget *>(data);
-		bar_pane_entry_add_from_config(pane, attribute_names, attribute_values);
-		}
-	else
-		{
-		config_file_error((std::string("Unexpected in <pane_keywords>: ") + element_name).c_str());
-		}
-
-	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
+	options_parse_pane(parser_data, "pane_keywords", "expanded", element_name, attribute_names, attribute_values, data);
 }
 
 static void options_parse_bar(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
