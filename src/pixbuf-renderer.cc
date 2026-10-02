@@ -125,7 +125,6 @@ enum PrZoomFlags {
 };
 
 static guint signals[SIGNAL_COUNT] = { 0 };
-static GtkDrawingAreaClass *parent_class = nullptr;
 
 
 
@@ -205,7 +204,6 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS(renderer_class);
 
-	parent_class = static_cast<GtkDrawingAreaClass *>(g_type_class_peek_parent(renderer_class));
 	GTK_WIDGET_CLASS(renderer_class)->snapshot = pixbuf_renderer_snapshot;
 
 	gobject_class->set_property = pixbuf_renderer_set_property;
