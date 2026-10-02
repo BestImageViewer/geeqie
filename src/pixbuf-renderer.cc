@@ -471,6 +471,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 	pr->scroller_id = 0;
 	pr->scroller_overlay = -1;
 	pr->birdseye_hide_id = 0;
+	pr->birdseye_pixbuf = nullptr;
 	pr->birdseye_overlay = -1;
 	pr->birdseye_drag = FALSE;
 
@@ -505,13 +506,15 @@ static void pixbuf_renderer_finalize(GObject *object)
 
 	pr = PIXBUF_RENDERER(object);
 
+	// Remove overlays while their renderers are still alive.
+	pr_birdseye_hide(pr);
+
 	pr->renderer->free(pr->renderer);
 	if (pr->renderer2) pr->renderer2->free(pr->renderer2);
 
 	if (pr->pixbuf) g_object_unref(pr->pixbuf);
 
 	pr_scroller_timer_set(pr, FALSE);
-	pr_birdseye_hide(pr);
 
 	pr_source_tile_free_all(pr);
 }
@@ -793,6 +796,7 @@ static void pixbuf_renderer_update_zoom(PixbufRenderer *pr, gboolean lazy)
 static void pr_birdseye_hide(PixbufRenderer *pr)
 {
 	g_clear_handle_id(&pr->birdseye_hide_id, g_source_remove);
+	g_clear_object(&pr->birdseye_pixbuf);
 	if (pr->birdseye_overlay != -1)
 		{
 		pixbuf_renderer_overlay_remove(pr, pr->birdseye_overlay);
@@ -823,10 +827,17 @@ static void pr_birdseye_show(PixbufRenderer *pr)
 	pr->birdseye_width = std::max(1, static_cast<gint>(pr->image_width * scale));
 	pr->birdseye_height = std::max(1, static_cast<gint>(pr->image_height * scale));
 
-	g_autoptr(GdkPixbuf) oriented = pixbuf_apply_orientation(pr->pixbuf, pr->orientation);
-	g_autoptr(GdkPixbuf) overview = gdk_pixbuf_scale_simple(oriented ? oriented : pr->pixbuf,
-	                                                       pr->birdseye_width, pr->birdseye_height,
-	                                                       GDK_INTERP_BILINEAR);
+	// Reuse the scaled image while panning; only the viewport outline changes.
+	if (!pr->birdseye_pixbuf)
+		{
+		g_autoptr(GdkPixbuf) oriented = pixbuf_apply_orientation(pr->pixbuf, pr->orientation);
+		pr->birdseye_pixbuf = gdk_pixbuf_scale_simple(oriented ? oriented : pr->pixbuf,
+		                                           pr->birdseye_width, pr->birdseye_height,
+		                                           GDK_INTERP_BILINEAR);
+		}
+	if (!pr->birdseye_pixbuf) return;
+
+	g_autoptr(GdkPixbuf) overview = gdk_pixbuf_copy(pr->birdseye_pixbuf);
 	if (!overview) return;
 
 	GdkRectangle visible;
@@ -2580,6 +2591,7 @@ void pr_create_anaglyph(guint mode, GdkPixbuf *pixbuf, GdkPixbuf *right, gint x,
  */
 static void pr_pixbuf_size_sync(PixbufRenderer *pr)
 {
+	g_clear_object(&pr->birdseye_pixbuf);
 	pr->stereo_pixbuf_offset_left = 0;
 	pr->stereo_pixbuf_offset_right = 0;
 
@@ -2614,6 +2626,7 @@ static void pr_pixbuf_size_sync(PixbufRenderer *pr)
 
 static void pr_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, PrZoomFlags flags)
 {
+	g_clear_object(&pr->birdseye_pixbuf);
 	if (pixbuf) g_object_ref(pixbuf);
 	if (pr->pixbuf) g_object_unref(pr->pixbuf);
 	pr->pixbuf = pixbuf;
@@ -2835,6 +2848,7 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 void pixbuf_renderer_area_changed(PixbufRenderer *pr, GdkRectangle area)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
+	g_clear_object(&pr->birdseye_pixbuf);
 
 	if (pr->source_tiles_enabled)
 		{

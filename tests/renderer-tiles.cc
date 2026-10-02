@@ -18,6 +18,23 @@
 namespace
 {
 
+TEST(RendererTilesBirdseye, FinalizeWithActiveOverlay)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *pr = pixbuf_renderer_new();
+	g_object_ref_sink(pr);
+	g_autoptr(GdkPixbuf) overview = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 160, 120);
+	gdk_pixbuf_fill(overview, 0x123456ff);
+	pr->birdseye_pixbuf = GDK_PIXBUF(g_object_ref(overview));
+	pr->birdseye_overlay = pixbuf_renderer_overlay_add(pr, overview, 0, 0, OVL_RELATIVE);
+	ASSERT_NE(pr->birdseye_overlay, -1);
+
+	// Finalization must remove the overview before freeing its renderer.
+	g_object_unref(pr);
+	EXPECT_EQ(G_OBJECT(overview)->ref_count, 1U);
+}
+
 TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
 {
 	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";

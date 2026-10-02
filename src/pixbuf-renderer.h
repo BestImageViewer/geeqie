@@ -256,6 +256,7 @@ struct PixbufRenderer
 	gint scroller_yinc;
 
 	guint birdseye_hide_id;
+	GdkPixbuf *birdseye_pixbuf;
 	gint birdseye_overlay;
 	gint birdseye_width;
 	gint birdseye_height;
