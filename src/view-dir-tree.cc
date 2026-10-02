@@ -423,6 +423,7 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 
 gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean force, FileData *target_fd)
 {
+	if (vd->new_folder) return TRUE;
 	GtkTreeModel *store;
 	GList *list;
 	GList *work;

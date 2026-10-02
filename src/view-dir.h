@@ -29,6 +29,7 @@
 #include "filedata/ref.h"
 
 struct LayoutWindow;
+struct NewFolderData;
 
 enum DirViewType : guint {
 	DIRVIEW_LIST,
@@ -87,6 +88,7 @@ struct ViewDir
 	LayoutWindow *layout = nullptr;
 
 	GtkWidget *popup = nullptr;
+	NewFolderData *new_folder = nullptr;
 
 	PixmapFolders *pf = nullptr;
 };
