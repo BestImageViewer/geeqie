@@ -61,6 +61,13 @@ static gchar *file_util_safe_subdir(const gchar *name)
 	return g_build_filename(options->file_ops.safe_delete_path, name, nullptr);
 }
 
+static gboolean file_util_safe_directory_empty(const gchar *path)
+{
+	g_autofree gchar *path_fs = path_from_utf8(path);
+	g_autoptr(GDir) directory = g_dir_open(path_fs, 0, nullptr);
+	return directory && !g_dir_read_name(directory);
+}
+
 static void file_util_safe_read_dir(const gchar *path, gboolean has_trashinfo, std::vector<TrashEntry> &entries)
 {
 	g_autoptr(GDir) dir = g_dir_open(path, 0, nullptr);
@@ -71,7 +78,8 @@ static void file_util_safe_read_dir(const gchar *path, gboolean has_trashinfo, s
 		{
 		g_autofree gchar *entry_path = g_build_filename(path, name, nullptr);
 		GStatBuf stat_buf;
-		if (g_stat(entry_path, &stat_buf) == 0 && S_ISREG(stat_buf.st_mode))
+		if (g_stat(entry_path, &stat_buf) == 0 &&
+		    (S_ISREG(stat_buf.st_mode) || (has_trashinfo && S_ISDIR(stat_buf.st_mode) && !islink(entry_path))))
 			entries.push_back({entry_path, stat_buf.st_size, stat_buf.st_mtime, has_trashinfo});
 		}
 }
@@ -102,7 +110,8 @@ static void file_util_safe_cleanup(gint64 incoming_size, gboolean clear)
 		if (!clear && (limit == 0 || total <= limit)) break;
 
 		DEBUG_1("expunging from trash for space: %s", entry.path.c_str());
-		if (unlink_file(entry.path.c_str()))
+		const gboolean directory = isdir(entry.path.c_str()) && !islink(entry.path.c_str());
+		if (directory ? rmdir_utf8(entry.path.c_str()) : unlink_file(entry.path.c_str()))
 			{
 			if (entry.has_trashinfo) file_util_safe_remove_info(entry.path.c_str());
 			total -= entry.size;
@@ -140,7 +149,7 @@ static gchar *file_util_safe_dest(const gchar *path)
 	g_autofree gchar *stem = g_strndup(basename, strlen(basename) - (extension ? strlen(extension) : 0));
 	g_autofree gchar *dest = g_build_filename(files_dir, basename, nullptr);
 
-	for (guint n = 2; isfile(dest); n++)
+	for (guint n = 2; isname(dest); n++)
 		{
 		g_free(g_steal_pointer(&dest));
 		g_autofree gchar *name = g_strdup_printf("%s.%u%s", stem, n, extension ? extension : "");
@@ -238,11 +247,17 @@ gboolean file_util_safe_unlink(const gchar *path)
 	static GenericDialog *gd = nullptr;
 	gboolean success = TRUE;
 
-	if (!isfile(path)) return FALSE;
+	const gboolean directory = isdir(path) && !islink(path);
+	if (directory)
+		{
+		// Preserve the directory deletion contract: contents must be removed first.
+		if (!file_util_safe_directory_empty(path)) return FALSE;
+		}
+	else if (!isfile(path)) return FALSE;
 
 	if (options->file_ops.no_trash)
 		{
-		if (!unlink_file(path))
+		if (!(directory ? rmdir_utf8(path) : unlink_file(path)))
 			{
 			file_util_warning_dialog(_("Delete failed"),
 						 _("Unable to remove file"),
@@ -279,7 +294,18 @@ gboolean file_util_safe_unlink(const gchar *path)
 				success = file_util_safe_write_info(path, dest);
 				if (success)
 					{
-					success = move_file(path, dest);
+					if (directory)
+						{
+						g_autofree gchar *source_fs = path_from_utf8(path);
+						g_autofree gchar *dest_fs = path_from_utf8(dest);
+						g_autoptr(GFile) source_file = g_file_new_for_path(source_fs);
+						g_autoptr(GFile) dest_file = g_file_new_for_path(dest_fs);
+						success = g_file_move(source_file, dest_file, G_FILE_COPY_NONE, nullptr, nullptr, nullptr, nullptr);
+						}
+					else
+						{
+						success = move_file(path, dest);
+						}
 					if (!success) file_util_safe_remove_info(dest);
 					}
 				else
