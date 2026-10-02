@@ -30,7 +30,6 @@
 
 void log_domain_print_debug(const gchar *domain, const gchar *file_name, int line_number, const gchar *function_name, const gchar *format, ...) G_GNUC_PRINTF(5, 6);
 void log_domain_printf(const gchar *domain, const gchar *format, ...) G_GNUC_PRINTF(2, 3);
-void log_print_ru(const gchar *file, gint line_number, const gchar *function_name);
 
 void print_term(bool err, const gchar *text_utf8);
 
