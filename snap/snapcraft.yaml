@@ -118,6 +118,7 @@ parts:
       - build-essential
       - curl
       - gettext
+      - git
       - libarchive-dev
       - libcfitsio-dev
       - libcogl-dev

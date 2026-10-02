@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+name: Geeqie amd64 Snap build
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: snap-amd64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Build-Snap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build Snap
+        id: build
+        uses: snapcore/action-build@v1
+
+      - name: Upload Snap
+        uses: actions/upload-artifact@v4
+        with:
+          name: geeqie-snap-amd64
+          path: ${{ steps.build.outputs.snap }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Install Snap and check version
+        env:
+          SNAP_FILE: ${{ steps.build.outputs.snap }}
+        run: |
+          sudo snap install --dangerous "$SNAP_FILE"
+          snap run geeqie --version
+
+      - name: Test packaged image loading
+        timeout-minutes: 5
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dbus-x11 libglib2.0-bin xvfb
+
+          # Confined snaps cannot reach a session bus in the host's /tmp.
+          XDG_RUNTIME_DIR="/run/user/$(id -u)"
+          export XDG_RUNTIME_DIR
+          sudo install -d -m 700 -o "$(id -u)" -g "$(id -g)" "$XDG_RUNTIME_DIR"
+          export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+          bus_pid=""
+          if [ ! -S "$XDG_RUNTIME_DIR/bus" ]; then
+            bus_pid=$(dbus-daemon --session --fork \
+              --address="$DBUS_SESSION_BUS_ADDRESS" --print-pid)
+          fi
+          trap 'if [ -n "$bus_pid" ]; then kill "$bus_pid"; fi' EXIT
+
+          # Keep Xauthority in the location allowed by the snap's x11 interface.
+          xvfb-run --auto-servernum --auth-file "$HOME/.Xauthority" \
+            python3 build-aux/snap-smoke-test.py snap run geeqie.x11
+
+      - name: Upload smoke test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: geeqie-snap-amd64-smoke-log
+          path: build/snap-smoke-test.log
+          if-no-files-found: ignore
+          retention-days: 14
