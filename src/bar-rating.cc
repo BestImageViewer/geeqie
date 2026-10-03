@@ -46,7 +46,6 @@
 struct PaneRatingData
 {
 	PaneData pane;
-	GtkWidget *widget;
 	GtkWidget *radio_button_first;
 	GtkCheckButton *rating_buttons[7];
 	gboolean updating;
@@ -131,11 +130,7 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gboolean expanded)
 {
 	PaneRatingData *prd;
-	GtkWidget *radio_rejected;
-	GtkWidget *radio_unrated;
 	GtkWidget *radio_rating;
-	GtkWidget *row_1;
-	GtkWidget *row_2;
 
 	prd = g_new0(PaneRatingData, 1);
 
@@ -143,26 +138,25 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	prd->pane.pane_write_config = bar_pane_rating_write_config;
 	bar_pane_common_init(prd->pane, id, title, expanded, PANE_RATING);
 
-	prd->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	prd->pane.widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	g_object_set_data_full(G_OBJECT(prd->pane.widget), "pane_data", prd, bar_pane_rating_destroy);
 
-	g_object_set_data_full(G_OBJECT(prd->widget), "pane_data", prd, bar_pane_rating_destroy);
+	GtkWidget *row_1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	gtk_box_append(GTK_BOX(prd->pane.widget), row_1);
 
-	row_1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gtk_box_append(GTK_BOX(prd->widget), row_1);
-
-	radio_rejected = gtk_check_button_new_with_label(_("Rejected"));
+	GtkWidget *radio_rejected = gtk_check_button_new_with_label(_("Rejected"));
 	gtk_box_append(GTK_BOX(row_1), radio_rejected);
 	g_signal_connect(radio_rejected, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[0] = GTK_CHECK_BUTTON(radio_rejected);
 
-	radio_unrated = gtk_check_button_new_with_label(_("Unrated"));
+	GtkWidget *radio_unrated = gtk_check_button_new_with_label(_("Unrated"));
 	gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_unrated), GTK_CHECK_BUTTON(radio_rejected));
 	gtk_box_append(GTK_BOX(row_1), radio_unrated);
 	g_signal_connect(radio_unrated, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[1] = GTK_CHECK_BUTTON(radio_unrated);
 
-	row_2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gtk_box_append(GTK_BOX(prd->widget), row_2);
+	GtkWidget *row_2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	gtk_box_append(GTK_BOX(prd->pane.widget), row_2);
 
 	for (gint i = 2; i <= 6; i++)
 		{
@@ -186,10 +180,9 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 	prd->radio_button_first = radio_rating;
 
-
 	file_data_register_notify_func(bar_pane_rating_notify_cb, prd, NOTIFY_PRIORITY_LOW);
 
-	return prd->widget;
+	return prd->pane.widget;
 }
 
 GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
@@ -235,7 +228,7 @@ void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	bar_update_expander(pane, prd->pane);
+	bar_pane_update_expander(prd->pane);
 	bar_pane_rating_update(prd);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

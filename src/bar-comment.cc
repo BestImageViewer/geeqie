@@ -55,7 +55,6 @@ static void bar_pane_comment_changed(GtkTextBuffer *buffer, gpointer data);
 struct PaneCommentData
 {
 	PaneData pane;
-	GtkWidget *widget;
 	GtkWidget *comment_view;
 	gchar *key;
 	gint height;
@@ -234,21 +233,19 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->key = g_strdup(key);
 	pcd->height = height;
 
-	GtkWidget *scrolled = gtk_scrolled_window_new();
+	pcd->pane.widget = gtk_scrolled_window_new();
+	g_object_set_data_full(G_OBJECT(pcd->pane.widget), "pane_data", pcd, bar_pane_comment_destroy);
 
-	pcd->widget = scrolled;
-	g_object_set_data_full(G_OBJECT(pcd->widget), "pane_data", pcd, bar_pane_comment_destroy);
-
-	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(pcd->pane.widget), true);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pcd->pane.widget),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-	gtk_widget_set_size_request(pcd->widget, -1, height);
+	gtk_widget_set_size_request(pcd->pane.widget, -1, height);
 
 	pcd->comment_view = gtk_text_view_new();
 	bar_pane_text_escape_to_files(pcd->comment_view, &pcd->pane);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(pcd->comment_view), GTK_WRAP_WORD);
-	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), pcd->comment_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(pcd->pane.widget), pcd->comment_view);
 	bar_pane_comment_set_extra_menu(pcd);
 
 #if HAVE_SPELL
@@ -265,10 +262,9 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	g_signal_connect(G_OBJECT(buffer), "changed",
 			 G_CALLBACK(bar_pane_comment_changed), pcd);
 
-
 	file_data_register_notify_func(bar_pane_comment_notify_cb, pcd, NOTIFY_PRIORITY_LOW);
 
-	return pcd->widget;
+	return pcd->pane.widget;
 }
 
 GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
@@ -344,8 +340,8 @@ void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribut
 		gtk_label_set_text(GTK_LABEL(pcd->pane.title), title);
 		}
 
-	gtk_widget_set_size_request(pcd->widget, -1, pcd->height);
-	bar_update_expander(pane, pcd->pane);
+	gtk_widget_set_size_request(pcd->pane.widget, -1, pcd->height);
+	bar_pane_update_expander(pcd->pane);
 	bar_pane_comment_update(pcd);
 }
 

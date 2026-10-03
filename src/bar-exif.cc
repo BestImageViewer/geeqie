@@ -57,7 +57,6 @@ struct PaneExifData
 {
 	PaneData pane;
 	GtkWidget *vbox;
-	GtkWidget *widget;
 	GtkSizeGroup *size_group;
 
 	gboolean show_all;
@@ -614,7 +613,7 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped, gdouble x, g
 	add_action("configure", G_CALLBACK(bar_pane_exif_conf_dialog_cb), widget, ee != nullptr);
 	add_action("remove", G_CALLBACK(widget_remove_from_parent_cb), widget, ee != nullptr);
 	add_action("copy", G_CALLBACK(bar_pane_exif_copy_entry_cb), widget, ee != nullptr);
-	add_action("add-entry", G_CALLBACK(bar_pane_exif_conf_dialog_cb), ped->widget);
+	add_action("add-entry", G_CALLBACK(bar_pane_exif_conf_dialog_cb), ped->pane.widget);
 
 	GSimpleAction *show_hidden = g_simple_action_new_stateful("show-hidden-entries", nullptr,
 	                                                         g_variant_new_boolean(ped->show_all));
@@ -629,7 +628,7 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped, gdouble x, g
 
 	GtkWidget *popover = popup_menu_at(menu_model, widget, x, y);
 	g_object_set_data(G_OBJECT(widget), "exif-popup", popover);
-	g_object_set_data(G_OBJECT(ped->widget), "exif-popup", popover);
+	g_object_set_data(G_OBJECT(ped->pane.widget), "exif-popup", popover);
 }
 
 void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint  /*n_press*/, gdouble x, gdouble y, gpointer data)
@@ -733,28 +732,27 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 	ped->show_all = show_all;
 	ped->size_group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
-	ped->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	ped->pane.widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	// Keep an empty pane clickable so entries can be added from its context menu.
-	gtk_widget_set_size_request(ped->widget, -1, MIN_HEIGHT);
+	gtk_widget_set_size_request(ped->pane.widget, -1, MIN_HEIGHT);
 	ped->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
-	gtk_box_append(GTK_BOX(ped->widget), ped->vbox);
+	gtk_box_append(GTK_BOX(ped->pane.widget), ped->vbox);
 
-	g_object_set_data_full(G_OBJECT(ped->widget), "pane_data", ped, bar_pane_exif_destroy);
+	g_object_set_data_full(G_OBJECT(ped->pane.widget), "pane_data", ped, bar_pane_exif_destroy);
 
-	bar_pane_exif_dnd_init(ped->widget);
+	bar_pane_exif_dnd_init(ped->pane.widget);
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 
 	g_signal_connect(gesture, "released", G_CALLBACK(bar_pane_exif_menu_cb), ped);
 
-	gtk_widget_add_controller(ped->widget, GTK_EVENT_CONTROLLER(gesture));
+	gtk_widget_add_controller(ped->pane.widget, GTK_EVENT_CONTROLLER(gesture));
 
 	file_data_register_notify_func(bar_pane_exif_notify_cb, ped, NOTIFY_PRIORITY_LOW);
 
-
-	return ped->widget;
+	return ped->pane.widget;
 }
 
 } // namespace
@@ -832,7 +830,7 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 		gtk_label_set_text(GTK_LABEL(ped->pane.title), title);
 		}
 
-	bar_update_expander(pane, ped->pane);
+	bar_pane_update_expander(ped->pane);
 	bar_pane_exif_update(ped);
 }
 
