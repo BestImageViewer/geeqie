@@ -2238,7 +2238,10 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 			}
 		}
 
-	if (fd->change->dest && fd->change->type != FILEDATA_CHANGE_WRITE_METADATA)
+	// Ordinary plugins have no known output path; their default destination is the source.
+	if (fd->change->dest && fd->change->type != FILEDATA_CHANGE_WRITE_METADATA &&
+	    (fd->change->type != FILEDATA_CHANGE_UNSPECIFIED ||
+	     strcmp(fd->path, fd->change->dest) != 0))
 		{
 		gboolean same;
 

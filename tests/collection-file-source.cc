@@ -295,6 +295,34 @@ TEST_F(CollectionFileSource, MissingEntriesSurviveLoadDisplayAndSave)
 		}
 }
 
+TEST_F(CollectionFileSource, OrdinaryPluginDoesNotRequireWritableSourceDirectory)
+{
+	g_autofree gchar *source_directory = g_path_get_dirname(first->path);
+	ASSERT_EQ(g_chmod(source_directory, 0500), 0);
+	EXPECT_EQ(g_chmod(first->path, 0400), 0);
+	gboolean added = file_data_sc_add_ci_unspecified(first, nullptr);
+	EXPECT_TRUE(added);
+	if (added)
+		{
+		EXPECT_EQ(file_data_verify_ci(first, nullptr), 0);
+		file_data_change_info_free(first->change, first);
+		}
+
+	// An explicitly supplied destination must still be checked for write access.
+	added = file_data_sc_add_ci_unspecified(first, second->path);
+	EXPECT_TRUE(added);
+	if (added)
+		{
+		g_autofree gchar *destination_directory = g_path_get_dirname(second->path);
+		EXPECT_EQ(g_chmod(destination_directory, 0500), 0);
+		EXPECT_NE(file_data_verify_ci(first, nullptr) & CHANGE_WARN_NO_WRITE_PERM_DEST_DIR, 0);
+		EXPECT_EQ(g_chmod(destination_directory, 0700), 0);
+		file_data_change_info_free(first->change, first);
+		}
+	EXPECT_EQ(g_chmod(first->path, 0600), 0);
+	EXPECT_EQ(g_chmod(source_directory, 0700), 0);
+}
+
 TEST_F(CollectionFileSource, MissingFileNotifiesOnlyOnAvailabilityChanges)
 {
 	gint rereads = 0;
