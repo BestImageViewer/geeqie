@@ -2685,6 +2685,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	copy_layout_options(lc->options, lw->options);
 
 	lc->configwindow = window_new("Layout", PIXBUF_INLINE_ICON_CONFIG, _("Window options and layout"));
+	window_close_on_escape(lc->configwindow, GTK_PHASE_CAPTURE);
 	DEBUG_NAME(lc->configwindow);
 	if (lw && lw->window) gtk_window_set_transient_for(GTK_WINDOW(lc->configwindow), GTK_WINDOW(lw->window));
 

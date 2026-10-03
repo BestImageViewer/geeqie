@@ -3849,6 +3849,7 @@ static void config_tab_stereo(GtkWidget *notebook, ConfOptions *c_options)
 static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 {
 	GtkWidget *configwindow = window_new("preferences", PIXBUF_INLINE_ICON_CONFIG, _("Preferences"));
+	window_close_on_escape(configwindow, GTK_PHASE_CAPTURE);
 	DEBUG_NAME(configwindow);
 	if (lw && lw->window) gtk_window_set_transient_for(GTK_WINDOW(configwindow), GTK_WINDOW(lw->window));
 	g_signal_connect(G_OBJECT(configwindow), "close-request",

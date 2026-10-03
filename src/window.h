@@ -25,7 +25,7 @@
 #include <gtk/gtk.h>
 
 GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitle);
-void window_close_on_escape(GtkWidget *window);
+void window_close_on_escape(GtkWidget *window, GtkPropagationPhase phase = GTK_PHASE_BUBBLE);
 gboolean window_maximized(GtkWidget *window);
 
 void help_window_show(const gchar *key);

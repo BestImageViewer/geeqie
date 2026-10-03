@@ -237,6 +237,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	ew = g_new0(EditorWindow, 1);
 
 	ew->window = window_new("Desktop", PIXBUF_INLINE_ICON_CONFIG, _("Desktop file"));
+	window_close_on_escape(ew->window, GTK_PHASE_CAPTURE);
 	DEBUG_NAME(ew->window);
 
 	g_signal_connect(G_OBJECT(ew->window), "close-request",
@@ -544,7 +545,7 @@ EditorListWindow *editor_list_window_new()
 	auto *ewl = g_new0(EditorListWindow, 1);
 
 	ewl->window = window_new("editors", PIXBUF_INLINE_ICON_CONFIG, _("Plugins"));
-	window_close_on_escape(ewl->window);
+	window_close_on_escape(ewl->window, GTK_PHASE_CAPTURE);
 	DEBUG_NAME(ewl->window);
 	g_signal_connect(G_OBJECT(ewl->window), "close-request",
 			 G_CALLBACK(editor_list_window_delete), NULL);

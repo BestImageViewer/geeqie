@@ -77,10 +77,10 @@ static gboolean window_escape_key_cb(GtkEventControllerKey *, guint keyval, guin
 	return TRUE;
 }
 
-void window_close_on_escape(GtkWidget *window)
+void window_close_on_escape(GtkWidget *window, GtkPropagationPhase phase)
 {
 	GtkEventController *controller = gtk_event_controller_key_new();
-	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_BUBBLE);
+	gtk_event_controller_set_propagation_phase(controller, phase);
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(window_escape_key_cb), window);
 	gtk_widget_add_controller(window, controller);
 }
