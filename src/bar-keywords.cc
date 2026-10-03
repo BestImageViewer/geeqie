@@ -116,7 +116,6 @@ GType filter_keyword_column_types[] = {G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STR
 struct PaneKeywordsData
 {
 	PaneData pane;
-	GtkWidget *widget;
 
 	GtkWidget *keyword_view;
 	GtkWidget *keyword_treeview;
@@ -754,7 +753,7 @@ void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 	cdd->edit_existing = edit_existing;
 
 	cdd->gd = gd = generic_dialog_new(name ? _("Edit keyword") : _("New keyword"), "keyword_edit",
-	                                  pkd->widget, TRUE,
+	                                  pkd->pane.widget, TRUE,
 	                                  generic_dialog_dummy_cb, cdd);
 	g_signal_connect(G_OBJECT(gd->dialog), "destroy",
 			 G_CALLBACK(bar_pane_keywords_edit_destroy_cb), cdd);
@@ -1397,8 +1396,6 @@ gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, 
 GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gchar *key, gboolean expanded, gint height)
 {
 	PaneKeywordsData *pkd;
-	GtkWidget *keyword_box;
-	GtkWidget *vbox;
 	GtkTextBuffer *buffer;
 	GtkTreeModel *store;
 	GtkTreeViewColumn *column;
@@ -1418,15 +1415,15 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	pkd->expand_checked = TRUE;
 	pkd->expanded_rows = nullptr;
 
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	keyword_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gtk_widget_set_hexpand(keyword_box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
-	gtk_widget_set_vexpand(keyword_box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-	gtk_box_append(GTK_BOX(vbox), keyword_box);
+	pkd->pane.widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
-	pkd->widget = vbox;
-	g_object_set_data_full(G_OBJECT(pkd->widget), "pane_data", pkd, bar_pane_keywords_destroy);
-	gtk_widget_set_size_request(pkd->widget, -1, height);
+	GtkWidget *keyword_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	gtk_widget_set_hexpand(keyword_box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(pkd->pane.widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(keyword_box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(pkd->pane.widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(pkd->pane.widget), keyword_box);
+
+	g_object_set_data_full(G_OBJECT(pkd->pane.widget), "pane_data", pkd, bar_pane_keywords_destroy);
+	gtk_widget_set_size_request(pkd->pane.widget, -1, height);
 
 	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
@@ -1458,7 +1455,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	GtkWidget *autocomplete_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_valign(autocomplete_box, GTK_ALIGN_START);
-	gtk_box_append(GTK_BOX(vbox), autocomplete_box);
+	gtk_box_append(GTK_BOX(pkd->pane.widget), autocomplete_box);
 
 	pkd->autocomplete = gtk_entry_new();
 	gtk_widget_set_hexpand(pkd->autocomplete, TRUE);
@@ -1563,7 +1560,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	file_data_register_notify_func(bar_pane_keywords_notify_cb, pkd, NOTIFY_PRIORITY_LOW);
 
-	return pkd->widget;
+	return pkd->pane.widget;
 }
 
 /*
@@ -1731,7 +1728,7 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
 		}
 
-	bar_update_expander(pane, pkd->pane);
+	bar_pane_update_expander(pkd->pane);
 	bar_pane_keywords_update(pkd);
 }
 

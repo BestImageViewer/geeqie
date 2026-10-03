@@ -53,6 +53,7 @@ struct PaneData {
 	GtkWidget *title; /**< filled in by pane */
 	gboolean expanded; /**< filled in by pane */
 	PaneType type; /**< filled in by pane */
+	GtkWidget *widget; /**< filled in by pane */
 	FileData *fd; /**< filled in by pane */
 
 	GtkWidget *bar; /**< filled in by bar */
@@ -72,7 +73,6 @@ void bar_write_config(GtkWidget *bar, RcString &rc);
 
 void bar_populate_default(GtkWidget *bar);
 
-void bar_update_expander(GtkWidget *pane, const PaneData &pd);
 void bar_add(GtkWidget *bar, GtkWidget *pane);
 GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id);
 
@@ -85,6 +85,7 @@ gboolean bar_event(GtkWidget *bar, GdkEvent *event);
 void bar_pane_common_init(PaneData &pane, const gchar *id, const gchar *title, gboolean expanded, PaneType type);
 void bar_pane_common_free(PaneData &pane);
 void bar_pane_common_write_config(const PaneData &pane, RcString &rc);
+void bar_pane_update_expander(const PaneData &pd);
 gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title);
 gboolean bar_pane_focus_files(PaneData *pane);
 void bar_pane_text_escape_to_files(GtkWidget *widget, PaneData *pane);

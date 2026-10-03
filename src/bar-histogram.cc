@@ -50,7 +50,6 @@ struct HistMap;
 struct PaneHistogramData
 {
 	PaneData pane;
-	GtkWidget *widget;
 	GtkWidget *drawing_area;
 	Histogram histogram;
 	gint histogram_width;
@@ -329,9 +328,9 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	phd->histogram.set_channel(histogram_channel);
 	phd->histogram.set_mode(histogram_mode);
 
-	phd->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	g_object_set_data_full(G_OBJECT(phd->widget), "pane_data", phd, bar_pane_histogram_destroy);
-	gtk_widget_set_size_request(phd->widget, -1, height);
+	phd->pane.widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	g_object_set_data_full(G_OBJECT(phd->pane.widget), "pane_data", phd, bar_pane_histogram_destroy);
+	gtk_widget_set_size_request(phd->pane.widget, -1, height);
 
 	phd->drawing_area = gtk_drawing_area_new();
 	gtk_drawing_area_set_content_height(GTK_DRAWING_AREA(phd->drawing_area), height);
@@ -349,12 +348,12 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture),
 	                              GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bar_pane_histogram_press_cb), phd);
-	gtk_box_append(GTK_BOX(phd->widget), phd->drawing_area);
-	gtk_widget_add_controller(phd->widget, GTK_EVENT_CONTROLLER(gesture));
+	gtk_box_append(GTK_BOX(phd->pane.widget), phd->drawing_area);
+	gtk_widget_add_controller(phd->pane.widget, GTK_EVENT_CONTROLLER(gesture));
 
 	file_data_register_notify_func(bar_pane_histogram_notify_cb, phd, NOTIFY_PRIORITY_LOW);
 
-	return phd->widget;
+	return phd->pane.widget;
 }
 
 GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
@@ -409,7 +408,7 @@ void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attrib
 	phd->histogram.set_channel(histogram_channel);
 	phd->histogram.set_mode(histogram_mode);
 
-	bar_update_expander(pane, phd->pane);
+	bar_pane_update_expander(phd->pane);
 	bar_pane_histogram_update(phd);
 }
 

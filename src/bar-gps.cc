@@ -78,7 +78,6 @@ constexpr const gchar *DEFAULT_MAP_URL = "https://tile.openstreetmap.org/{z}/{x}
 struct PaneGPSData
 {
 	PaneData pane;
-	GtkWidget *widget;
 	gchar *map_source;
 	ShumateMapSource *shumate_map_source;
 	gint height;
@@ -278,7 +277,7 @@ gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdoubl
 		{
 		shumate_viewport_widget_coords_to_location(pgd->viewport, widget, x, y, &pgd->dest_latitude, &pgd->dest_longitude);
 		auto *drop_data = g_new(PaneGPSDndDropData, 1);
-		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->widget));
+		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->pane.widget));
 		dnd_read_file_list_async(drop, bar_pane_gps_dnd_file_received, drop_data);
 		return TRUE;
 		}
@@ -286,7 +285,7 @@ gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdoubl
 	if (gdk_content_formats_contain_mime_type(formats, "text/plain"))
 		{
 		auto *drop_data = g_new(PaneGPSDndDropData, 1);
-		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->widget));
+		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->pane.widget));
 		dnd_read_text_async(drop, bar_pane_gps_dnd_text_received, drop_data);
 		return TRUE;
 		}
@@ -301,7 +300,7 @@ void bar_pane_gps_dnd_init(gpointer data)
 	GdkContentFormats *formats = dnd_file_drop_formats(TRUE);
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 	g_signal_connect(drop_target, "drop", G_CALLBACK(bar_pane_gps_dnd_drop), pgd);
-	gtk_widget_add_controller(pgd->widget, GTK_EVENT_CONTROLLER(drop_target));
+	gtk_widget_add_controller(pgd->pane.widget, GTK_EVENT_CONTROLLER(drop_target));
 }
 
 void bar_pane_gps_widget_destroy_cb(GtkWidget *widget, gpointer)
@@ -871,9 +870,6 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
             				gboolean expanded, gint height)
 {
 	PaneGPSData *pgd;
-	GtkWidget *vbox;
-	GtkWidget *status;
-	GtkWidget *progress;
 
 	pgd = g_new0(PaneGPSData, 1);
 
@@ -884,9 +880,10 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	pgd->height = height;
 
-	GtkWidget *frame = gtk_frame_new(nullptr);
-	DEBUG_NAME(frame);
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	pgd->pane.widget = gtk_frame_new(nullptr);
+	DEBUG_NAME(pgd->pane.widget);
+
+	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
 	pgd->map = shumate_simple_map_new();
 	pgd->map_popover_parent = popover_parent_new(GTK_WIDGET(pgd->map));
@@ -897,19 +894,16 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	gtk_box_append(GTK_BOX(vbox), pgd->map_popover_parent);
 
-	gtk_frame_set_child(GTK_FRAME(frame), vbox);
+	gtk_frame_set_child(GTK_FRAME(pgd->pane.widget), vbox);
 
-	status = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkWidget *status = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-	progress = gtk_progress_bar_new();
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), "");
-	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
+	pgd->progress = gtk_progress_bar_new();
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), "");
+	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(pgd->progress), TRUE);
 
-	gtk_box_append(GTK_BOX(status), progress);
+	gtk_box_append(GTK_BOX(status), pgd->progress);
 	gtk_box_append(GTK_BOX(vbox), status);
-
-	pgd->widget = frame;
-	pgd->progress = progress;
 
 	g_autofree gchar *user_agent = g_strdup_printf("%s/%s (%s)", GQ_APPNAME, VERSION, GQ_WEBSITE);
 	shumate_set_user_agent(user_agent);
@@ -922,12 +916,11 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	shumate_viewport_set_zoom_level(pgd->viewport, zoom);
 	shumate_map_center_on(shumate_simple_map_get_map(pgd->map), latitude, longitude);
 	pgd->centre_map_checked = TRUE;
-	g_object_set_data_full(G_OBJECT(pgd->widget), "pane_data", pgd, bar_pane_gps_destroy);
-	g_signal_connect(G_OBJECT(pgd->widget), "destroy", G_CALLBACK(bar_pane_gps_widget_destroy_cb), nullptr);
+	g_object_set_data_full(G_OBJECT(pgd->pane.widget), "pane_data", pgd, bar_pane_gps_destroy);
+	g_signal_connect(G_OBJECT(pgd->pane.widget), "destroy", G_CALLBACK(bar_pane_gps_widget_destroy_cb), nullptr);
 
-	gtk_widget_add_css_class(frame, "frame");
-
-	gtk_widget_set_size_request(pgd->widget, -1, height);
+	gtk_widget_add_css_class(pgd->pane.widget, "frame");
+	gtk_widget_set_size_request(pgd->pane.widget, -1, height);
 
 	/* The licence data is in the About page
 	 */
@@ -952,7 +945,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	pgd->enable_markers_checked = TRUE;
 	pgd->centre_map_checked = TRUE;
 
-	return pgd->widget;
+	return pgd->pane.widget;
 }
 
 } // namespace
@@ -1069,8 +1062,8 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 		gtk_label_set_text(GTK_LABEL(pgd->pane.title), title);
 		}
 
-	gtk_widget_set_size_request(pgd->widget, -1, pgd->height);
-	bar_update_expander(pane, pgd->pane);
+	gtk_widget_set_size_request(pgd->pane.widget, -1, pgd->height);
+	bar_pane_update_expander(pgd->pane);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

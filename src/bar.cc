@@ -591,13 +591,6 @@ void bar_write_config(GtkWidget *bar, RcString &rc)
 	WRITE_NL(); WRITE_STRING("</bar>");
 }
 
-void bar_update_expander(GtkWidget *pane, const PaneData &pd)
-{
-	GtkWidget *expander = gtk_widget_get_parent(pane);
-
-	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd.expanded);
-}
-
 void bar_add(GtkWidget *bar, GtkWidget *pane)
 {
 	auto bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
@@ -794,6 +787,13 @@ void bar_pane_common_write_config(const PaneData &pane, RcString &rc)
 	WRITE_CHAR(pane, id);
 	WRITE_CHAR_FULL("title", gtk_label_get_text(GTK_LABEL(pane.title)));
 	WRITE_BOOL(pane, expanded);
+}
+
+void bar_pane_update_expander(const PaneData &pd)
+{
+	GtkWidget *expander = gtk_widget_get_parent(pd.widget);
+
+	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd.expanded);
 }
 
 gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title)
