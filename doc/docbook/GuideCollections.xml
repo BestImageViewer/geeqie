@@ -4,6 +4,7 @@
   <para>Geeqie provides the ability to build lists of images, regardless of the location of the files on disk.</para>
   <para>When saving a new collection, select <guilabel>Save paths relative to the collection file</guilabel> to store image paths relative to the folder containing the <filename>.gqv</filename> file. Paths begin with <filename>./</filename> or <filename>../</filename>. You can move the collection and images together while preserving their folder layout. The setting is retained when the collection is reopened or saved to another location. Absolute paths remain the default.</para>
   <para>The files pane displays and edits collections in the main window.</para>
+  <para>Collection entries are retained when their files are unavailable, including files on disconnected drives and files deleted outside Geeqie. Cached thumbnails are displayed when available; opening an unavailable image shows a broken image indicator. Saving the collection preserves these entries. Use <guimenuitem>Remove from collection</guimenuitem> to remove entries you no longer want.</para>
   <para>
     To create a new empty collection in a new default window, select
     <menuchoice>

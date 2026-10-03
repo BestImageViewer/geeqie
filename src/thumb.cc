@@ -206,7 +206,7 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 	if (rotated) g_object_unref(rotated);
 
 	/* save it ? */
-	if (tl->cache_enable && save)
+	if (tl->cache_enable && save && isfile(tl->fd->path))
 		{
 		thumb_loader_save_thumbnail(tl, FALSE);
 		}
@@ -307,7 +307,7 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 		}
 
 	g_autofree gchar *cache_path = tl->cache_enable ? cache_find_location(CacheType::THUMB, tl->fd->path) : nullptr;
-	if (cache_time_valid(cache_path, tl->fd->path))
+	if (cache_path && (cache_time_valid(cache_path, tl->fd->path) || !isfile(tl->fd->path)))
 		{
 		DEBUG_1("Found in cache:%s", tl->fd->path);
 
@@ -352,7 +352,7 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 			if (image_loader_start(tl->il)) return TRUE;
 			}
 		/* mark failed thumbnail in cache with 0 byte file */
-		if (tl->cache_enable)
+		if (tl->cache_enable && isfile(tl->fd->path))
 			{
 			thumb_loader_save_thumbnail(tl, TRUE);
 			}

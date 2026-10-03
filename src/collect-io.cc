@@ -35,12 +35,6 @@
 
 #include <config.h>
 
-#if HAVE_MNTENT_H
-#include <mntent.h>
-#else
-#include <sys/mount.h>
-#endif
-
 #include "collect.h"
 #include "filedata.h"
 #include "history-list.h"
@@ -50,17 +44,8 @@
 #include "options.h"
 #include "ui-fileops.h"
 
-#ifdef __NetBSD__
-#define statfs statvfs
-#endif
-
 namespace
 {
-
-#if HAVE_MNTENT_H
-using MFILE = FILE;
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(MFILE, endmntent)
-#endif
 
 constexpr guint GQ_COLLECTION_FAIL_MIN = 300;
 constexpr guint GQ_COLLECTION_FAIL_PERCENT = 98;
@@ -114,49 +99,6 @@ CollectManagerEntry *collect_manager_get_entry(const gchar *path)
 	GList *work = g_list_find_custom(collection_manager_entry_list, path, collect_manager_entry_compare_path);
 
 	return work ? static_cast<CollectManagerEntry *>(work->data) : nullptr;
-}
-
-bool is_file_on_mounted_drive(const gchar *filename)
-{
-	const auto is_file_in_dir = [filename](const gchar *dirname)
-	{
-		return (g_strcmp0(dirname, G_DIR_SEPARATOR_S) != 0) &&
-		       g_str_has_prefix(filename, dirname);
-	};
-
-#if HAVE_MNTENT_H
-	g_autoptr(MFILE) mount_entries = setmntent("/proc/mounts", "r");
-	if (mount_entries == nullptr)
-		{
-		/* It is assumed this will never fail */
-		perror("setmntent");
-		exit(EXIT_FAILURE);
-		}
-
-	struct mntent *mount_entry;
-	while (nullptr != (mount_entry = getmntent(mount_entries)))
-		{
-		if (is_file_in_dir(mount_entry->mnt_dir))
-			return true;
-		}
-#else
-	struct statfs* mounts;
-	int num_mounts = getmntinfo(&mounts, MNT_NOWAIT);
-
-	if (num_mounts < 0)
-		{
-		/* It is assumed this will never fail */
-		perror("getmntinfo");
-		exit(EXIT_FAILURE);
-		}
-
-	for (int i = 0; i < num_mounts; i++)
-		{
-		if (is_file_in_dir(mounts[i].f_mntonname))
-			return true;
-		}
-#endif
-	return false;
 }
 
 } // namespace
@@ -238,11 +180,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 				if (g_ascii_strncasecmp(p, GQ_COLLECTION_MARKER, GQ_COLLECTION_MARKER_LEN) == 0)
 					{
-					/* Looks like an official collection, allow unchecked input.
-					 * All this does is allow adding files that may not exist,
-					 * which is needed for the collection manager to work.
-					 * Also unofficial files abort after too many invalid entries.
-					 */
+					/* Official collections do not abort after invalid entries. */
 					has_official_header = TRUE;
 					limit_failures = FALSE;
 					}
@@ -324,7 +262,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			continue;
 			}
 
-		if (filename[0] == G_DIR_SEPARATOR && collection_add(cd, file_data_new_simple(filename), FALSE, infotext))
+		if (filename[0] == G_DIR_SEPARATOR && collection_add_unchecked(cd, file_data_new_simple(filename), FALSE, infotext))
 			{
 			g_clear_pointer(&infotext, g_free);
 			continue;
@@ -332,47 +270,6 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 		log_printf("Warning: Collection: %s Invalid file: %s", cd->name, filename);
 		DEBUG_1("collection invalid file: %s", filename);
-
-		/* If the file path has the prefix home, tmp or usr it was on the local file system and has
-		 * been deleted. Ignore it. */
-		if (!g_str_has_prefix(filename, "/home") && !g_str_has_prefix(filename, "/tmp") && !g_str_has_prefix(filename, "/usr"))
-			{
-			/* The file was on a mountable drive and either has been deleted or the drive is not
-			 * mounted.
-			 */
-			if (!is_file_on_mounted_drive(filename))
-				{
-				/* The is on a mountable drive which is not mounted.
-				 * This event can happen when the user opens a Collection, or when a
-				 * file_data_register_notify_func runs. Whenever a file move or rename happens, the
-				 * notify function runs, presumably to check if the file is in a Collection and so
-				 * modify it.
-				 * Therefore it is better to use a notification rather than a warning message that
-				 * requires the user to acknowledge it.
-				 */
-				log_printf("%s is a file on an unmounted filesystem: %s", filename, cd->path);
-				g_autofree gchar *text = g_strdup_printf(_("This Collection cannot be opened because it contains a link to a file on a drive which is not yet mounted.\n\nCollection: %s\nFile: %s\n"), cd->path, filename);
-
-				g_autoptr(GNotification) notification = g_notification_new("Geeqie");
-				auto *app = g_application_get_default();
-
-				g_notification_set_title(notification, _("Collections"));
-				g_notification_set_body(notification, _(text));
-				g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_NORMAL);
-				g_notification_set_default_action(notification, "app.null");
-
-				g_application_send_notification(G_APPLICATION(app), "collection-unmounted-drive", notification);
-
-				success = FALSE;
-				break;
-				}
-
-			log_printf("%s was a file on a mounted filesystem but has been deleted: %s", filename, cd->name);
-			}
-		else
-			{
-			log_printf("%s was a file on local filesystem but has been deleted: %s", filename, cd->name);
-			}
 
 		fail++;
 		if (limit_failures && fail > GQ_COLLECTION_FAIL_MIN && fail * 100 / total > GQ_COLLECTION_FAIL_PERCENT)

@@ -155,9 +155,11 @@ void FileData::file_data_increment_version(FileData *fd)
 
 static gboolean file_data_check_changed_single_file(FileData *fd, struct stat *st)
 {
-	if (fd->size != st->st_size ||
+	if ((fd->missing && st->st_mode != 0) ||
+	    fd->size != st->st_size ||
 	    fd->date != st->st_mtime)
 		{
+		fd->missing = st->st_mode == 0;
 		fd->size = st->st_size;
 		fd->date = st->st_mtime;
 		fd->cdate = st->st_ctime;
@@ -216,6 +218,9 @@ gboolean FileData::file_data_check_changed_files(FileData *fd)
 		GList *sidecars;
 		GList *work;
 		FileData *sfd = nullptr;
+
+		if (fd->missing && !fd->sidecar_files) return FALSE;
+		fd->missing = TRUE;
 
 		/* parent is missing, we have to rebuild whole group */
 		ret = TRUE;

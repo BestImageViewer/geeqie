@@ -49,6 +49,7 @@ struct ThumbLoaderStd
 	ImageLoader *il;
 	FileData *fd;
 
+	gboolean source_missing;
 	time_t source_mtime;
 	off_t source_size;
 	mode_t source_mode;

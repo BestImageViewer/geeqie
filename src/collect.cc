@@ -645,7 +645,6 @@ static bool collection_valid(const FileData *fd)
 	return stat_utf8(fd->path, &st) && !S_ISDIR(st.st_mode);
 }
 
-// @TODO Drop must_exist and merge with collection_add()?
 static gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean sorted, gboolean must_exist, const gchar *infotext)
 {
 	if (!fd) return FALSE;
@@ -670,6 +669,11 @@ static gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean 
 gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext)
 {
 	return collection_add_check(cd, fd, sorted, TRUE, infotext);
+}
+
+gboolean collection_add_unchecked(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext)
+{
+	return collection_add_check(cd, fd, sorted, FALSE, infotext);
 }
 
 gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert_ci, gboolean sorted)

@@ -86,6 +86,8 @@ void collection_set_sort_method(CollectionData *cd, SortType method);
 void collection_randomize(CollectionData *cd);
 
 gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext = nullptr);
+/** @brief Add a saved collection entry even when its source file is unavailable. */
+gboolean collection_add_unchecked(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext = nullptr);
 gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert_ci, gboolean sorted);
 gboolean collection_remove(CollectionData *cd, FileData *fd);
 

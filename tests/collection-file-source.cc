@@ -8,6 +8,7 @@
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 
+#include "cache.h"
 #include "collect.h"
 #include "collect-io.h"
 #include "filedata.h"
@@ -17,6 +18,7 @@
 #include "layout.h"
 #include "options.h"
 #include "sort-type.h"
+#include "thumb.h"
 #include "ui-fileops.h"
 #include "view-dir.h"
 #include "view-file.h"
@@ -266,6 +268,118 @@ TEST_F(CollectionFileSource, ManagerIgnoresNonCollectionFiles)
 	file_data_unref(renamed);
 }
 
+TEST_F(CollectionFileSource, MissingEntriesSurviveLoadDisplayAndSave)
+{
+	for (gboolean relative : {false, true})
+		{
+		g_autofree gchar *path = g_build_filename(directory, "missing.gqv", nullptr);
+		paths.emplace_back(path);
+		cd->relative_paths = relative;
+		ASSERT_TRUE(collection_save(cd, path));
+		g_remove(first->path);
+		ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_NONE));
+		EXPECT_EQ(g_list_length(cd->list), 2U);
+		EXPECT_NE(collection_list_find_fd(cd->list, first), nullptr);
+		ASSERT_TRUE(vf_read_source(&view, &files));
+		EXPECT_NE(g_list_find(files, first), nullptr);
+		file_data_list_free(files);
+		files = nullptr;
+		ASSERT_TRUE(collection_save(cd, path));
+		ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_NONE));
+		EXPECT_NE(collection_list_find_fd(cd->list, first), nullptr);
+		ASSERT_TRUE(collection_remove(cd, first));
+		ASSERT_TRUE(collection_save(cd, path));
+		ASSERT_TRUE(collection_load(cd, path, COLLECTION_LOAD_NONE));
+		EXPECT_EQ(collection_list_find_fd(cd->list, first), nullptr);
+		ASSERT_TRUE(collection_add_unchecked(cd, first, FALSE));
+		}
+}
+
+TEST_F(CollectionFileSource, MissingFileNotifiesOnlyOnAvailabilityChanges)
+{
+	gint rereads = 0;
+	const auto notify = [](FileData *, NotifyType type, gpointer data)
+		{
+		if (type & NOTIFY_REREAD) ++*static_cast<gint *>(data);
+		};
+	ASSERT_TRUE(file_data_register_notify_func(notify, &rereads, NOTIFY_PRIORITY_LOW));
+	EXPECT_FALSE(file_data_check_changed_files(first));
+	EXPECT_EQ(g_remove(first->path), 0);
+	EXPECT_TRUE(file_data_check_changed_files(first));
+	EXPECT_EQ(rereads, 1);
+	gint version = first->version;
+	for (gint i = 0; i < 3; ++i) EXPECT_FALSE(file_data_check_changed_files(first));
+	EXPECT_EQ(rereads, 1);
+	EXPECT_EQ(first->version, version);
+	EXPECT_TRUE(g_file_set_contents(first->path, "", 0, nullptr));
+	EXPECT_TRUE(file_data_check_changed_files(first));
+	EXPECT_FALSE(first->missing);
+	EXPECT_EQ(rereads, 2);
+	EXPECT_FALSE(file_data_check_changed_files(first));
+	EXPECT_EQ(g_remove(first->path), 0);
+	EXPECT_TRUE(file_data_check_changed_files(first));
+	EXPECT_EQ(rereads, 3);
+	EXPECT_FALSE(file_data_check_changed_files(first));
+	EXPECT_TRUE(file_data_unregister_notify_func(notify, &rereads));
+}
+
+TEST_F(CollectionFileSource, MissingSourceUsesCachedThumbnail)
+{
+	options->thumbnails.enable_caching = TRUE;
+	for (gboolean standard : {false, true})
+		{
+		options->thumbnails.spec_standard = standard;
+		g_autofree gchar *cache_path = nullptr;
+		g_autofree gchar *uri = g_filename_to_uri(first->path, nullptr, nullptr);
+		if (standard)
+			{
+			g_autofree gchar *hash = g_compute_checksum_for_string(G_CHECKSUM_MD5, uri, -1);
+			g_autofree gchar *name = g_strconcat(hash, ".png", nullptr);
+			cache_path = g_build_filename(get_thumbnails_standard_cache_dir(), "normal", name, nullptr);
+			}
+		else
+			{
+			cache_path = cache_get_location(CacheType::THUMB, first->path);
+			}
+		g_autofree gchar *parent = g_path_get_dirname(cache_path);
+		ASSERT_EQ(g_mkdir_with_parents(parent, 0700), 0);
+		paths.emplace_back(cache_path);
+		g_autoptr(GdkPixbuf) cached = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 128, 128);
+		gdk_pixbuf_fill(cached, 0xff0000ff);
+		ASSERT_TRUE(gdk_pixbuf_save(cached, cache_path, "png", nullptr,
+		                           "tEXt::Thumb::URI", uri, "tEXt::Thumb::MTime", "1", nullptr));
+		g_remove(first->path);
+		g_clear_object(&first->thumb_pixbuf);
+		gint completed = 0;
+		const auto done = [](ThumbLoader *, gpointer data) { *static_cast<gint *>(data) = 1; };
+		const auto error = [](ThumbLoader *, gpointer data) { *static_cast<gint *>(data) = -1; };
+		ThumbLoader *loader = thumb_loader_new(128, 128);
+		thumb_loader_set_callbacks(loader, done, error, nullptr, &completed);
+		gboolean started = thumb_loader_start(loader, first);
+		if (started)
+			{
+			gint64 deadline = g_get_monotonic_time() + 5 * G_TIME_SPAN_SECOND;
+			while (!completed && g_get_monotonic_time() < deadline)
+				{
+				g_main_context_iteration(nullptr, FALSE);
+				g_usleep(1000);
+				}
+			}
+		EXPECT_TRUE(started);
+		EXPECT_EQ(completed, 1);
+		if (first->thumb_pixbuf)
+			{
+			const guchar *pixels = gdk_pixbuf_get_pixels(first->thumb_pixbuf);
+			EXPECT_EQ(pixels[0], 255);
+			EXPECT_EQ(pixels[1], 0);
+			EXPECT_EQ(pixels[2], 0);
+			}
+		else ADD_FAILURE() << "Cached thumbnail was not loaded";
+		thumb_loader_free(loader);
+		EXPECT_TRUE(g_file_test(cache_path, G_FILE_TEST_EXISTS));
+		}
+}
+
 TEST_F(CollectionFileSource, RelativePathsRoundTripAndSaveAs)
 {
 	g_autofree gchar *path = g_build_filename(directory, "a", "relative.gqv", nullptr);
@@ -405,8 +519,9 @@ TEST_F(CollectionFileSource, MissingMemberDoesNotAddOtherFilesOrChangeMembership
 {
 	ASSERT_EQ(g_remove(first->path), 0);
 	ASSERT_TRUE(vf_read_source(&view, &files));
-	ASSERT_EQ(g_list_length(files), 1U);
-	EXPECT_EQ(files->data, second);
+	ASSERT_EQ(g_list_length(files), 2U);
+	EXPECT_NE(g_list_find(files, first), nullptr);
+	EXPECT_NE(g_list_find(files, second), nullptr);
 	EXPECT_EQ(g_list_length(cd->list), 2U);
 }
 

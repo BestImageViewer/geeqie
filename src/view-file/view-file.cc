@@ -1832,7 +1832,7 @@ gboolean vf_read_source(ViewFile *vf, GList **list)
 		file_data_register_real_time_monitor(fd);
 		vf->monitored_files = g_list_prepend(vf->monitored_files, fd);
 		file_data_check_changed_files(fd);
-		if (isfile(fd->path)) *list = g_list_prepend(*list, file_data_ref(fd));
+		*list = g_list_prepend(*list, file_data_ref(fd));
 		}
 	*list = g_list_reverse(*list);
 	return TRUE;

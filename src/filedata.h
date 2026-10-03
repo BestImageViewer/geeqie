@@ -220,6 +220,7 @@ public:
 	gchar *collate_key_name_natural;
 	gchar *collate_key_name_nocase_natural;
 	gint64 size;
+	gboolean missing; /**< last file check found the source unavailable */
 	time_t date;
 	time_t cdate;
 	mode_t mode; /**< this is needed at least for notification in view_dir because it is preserved after the file/directory is deleted */

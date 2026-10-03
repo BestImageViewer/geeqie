@@ -134,6 +134,7 @@ static void thumb_loader_std_reset(ThumbLoaderStd *tl)
 
 	tl->cache_hit = FALSE;
 
+	tl->source_missing = FALSE;
 	tl->source_mtime = 0;
 	tl->source_size = 0;
 	tl->source_mode = 0;
@@ -258,7 +259,7 @@ static gboolean thumb_loader_std_validate(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 	if (strcmp(uri, valid_uri) != 0) return FALSE;
 
 	mtime = strtol(mtime_str, nullptr, 10);
-	if (tl->source_mtime != mtime) return FALSE;
+	if (!tl->source_missing && tl->source_mtime != mtime) return FALSE;
 
 	return TRUE;
 }
@@ -267,7 +268,7 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 {
 	gboolean fail;
 
-	if (!tl->cache_enable || tl->cache_hit) return;
+	if (!tl->cache_enable || tl->cache_hit || tl->source_missing) return;
 	if (tl->thumb_path) return;
 
 	if (!pixbuf)
@@ -421,7 +422,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 	sw = gdk_pixbuf_get_width(pixbuf);
 	sh = gdk_pixbuf_get_height(pixbuf);
 
-	if (tl->cache_enable)
+	if (tl->cache_enable && !tl->source_missing)
 		{
 		if (!tl->cache_hit)
 			{
@@ -552,7 +553,7 @@ static gboolean thumb_loader_std_next_source(ThumbLoaderStd *tl, gboolean remove
 			tl->thumb_path = nullptr;
 			}
 
-		if (thumb_loader_std_setup(tl, tl->fd)) return TRUE;
+		if (!tl->source_missing && thumb_loader_std_setup(tl, tl->fd)) return TRUE;
 		}
 
 	thumb_loader_std_save(tl, nullptr);
@@ -672,7 +673,7 @@ void thumb_loader_std_set_cache(ThumbLoaderStd *tl, gboolean enable_cache, gbool
 
 gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 {
-	struct stat st;
+	struct stat st {};
 
 	if (!tl || !fd) return FALSE;
 
@@ -680,7 +681,8 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 
 
 	tl->fd = file_data_ref(fd);
-	if (!stat_utf8(fd->path, &st) || (tl->fd->format_class != FORMAT_CLASS_IMAGE && tl->fd->format_class != FORMAT_CLASS_RAWIMAGE && tl->fd->format_class != FORMAT_CLASS_VIDEO && tl->fd->format_class != FORMAT_CLASS_COLLECTION && tl->fd->format_class != FORMAT_CLASS_DOCUMENT && !options->file_filter.disable))
+	tl->source_missing = !stat_utf8(fd->path, &st);
+	if (tl->fd->format_class != FORMAT_CLASS_IMAGE && tl->fd->format_class != FORMAT_CLASS_RAWIMAGE && tl->fd->format_class != FORMAT_CLASS_VIDEO && tl->fd->format_class != FORMAT_CLASS_COLLECTION && tl->fd->format_class != FORMAT_CLASS_DOCUMENT && !options->file_filter.disable)
 		{
 		thumb_loader_std_set_fallback(tl);
 		return FALSE;
@@ -726,7 +728,7 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 		return TRUE;
 		}
 
-	if (!thumb_loader_std_setup(tl, tl->fd))
+	if (tl->source_missing || !thumb_loader_std_setup(tl, tl->fd))
 		{
 		thumb_loader_std_save(tl, nullptr);
 		thumb_loader_std_set_fallback(tl);
