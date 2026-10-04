@@ -6,11 +6,8 @@
 
 * Update `org.geeqie.Geeqie.metainfo.xml.in` with the latest released version and date
 
-* Update the desktop template if menus have changed
-
-```sh
-./build-aux/template-desktop.sh
-```
+* Keep the plugin template `data/plugins/org.geeqie.template.desktop.in` consistent
+  with supported desktop-file keys.
 
 * The command line completion file has three sections that must be updated by hand
 

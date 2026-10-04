@@ -166,56 +166,7 @@
         OnlyShowIn=X-Geeqie;
       </programlisting>
     </para>
-    <para>
-      A menu path where the plugin will appear, instead of in the default
-      <menuchoice>
-        <guimenu>Plugins</guimenu>
-      </menuchoice>
-      , can be set by including:
-      <programlisting>X-Geeqie-Menu-Path=&lt;FileMenuPath&gt;</programlisting>
-    </para>
-    <para>
-      Possible vales for
-      <emphasis>FileMenuPath</emphasis>
-      are:
-      <programlisting xml:space="preserve">
-        FileMenu
-        FileMenu/OpenSection
-        FileMenu/SearchSection
-        FileMenu/PrintSection
-        FileMenu/FileOpsSection
-        FileMenu/QuitSection
-        GoMenu
-        SelectMenu
-        SelectMenu/SelectSection
-        SelectMenu/ClipboardSection
-        SelectMenu/MarksSection
-        EditMenu/EditMenu
-        EditMenu/EditSection
-        EditMenu/OrientationMenu
-        EditMenu/RatingMenu
-        EditMenu/PropertiesSection
-        EditMenu/PreferencesSection
-        PluginsMenu
-        ViewMenu
-        ViewMenu/WindowSection
-        ViewMenu/FileDirMenu
-        ViewMenu/FileDirMenu/FolderSection
-        ViewMenu/FileDirMenu/ListSection
-        ViewMenu/DirSection
-        ViewMenu/ZoomMenu
-        ViewMenu/ZoomMenu/ConnectZoomMenu
-        ViewMenu/SplitMenu
-        ViewMenu/StereoMenu
-        ViewMenu/ColorMenu
-        ViewMenu/OverlayMenu
-        ViewMenu/ViewSection
-        ViewMenu/ToolsSection
-        ViewMenu/SlideShowSection
-        HelpMenu
-        HelpMenu/HelpSection
-      </programlisting>
-    </para>
+    <para>Plugins appear in the <guimenu>Plugins</guimenu> menu and in plugin context menus. The legacy <literal>X-Geeqie-Menu-Path</literal> key does not control menu placement in GTK4; omit it from new desktop files.</para>
     <para>
       If you want a plugin to use a user-definable path, the following entry must be made in the desktop file:
       <programlisting>X-Geeqie-Filter=true</programlisting>
