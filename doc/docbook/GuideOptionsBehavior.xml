@@ -210,7 +210,7 @@
           <guilabel>Recent collections list maximum size</guilabel>
         </term>
         <listitem>
-          <para>The maximum number of recently opened or saved collections retained between sessions and displayed in Open recent. The default is 100, and the range is 1 to 1000. This is independent of the recent folder list. Existing .gqv files in this history are also updated when images are renamed or moved within Geeqie, even if the collections are saved outside the default collections directory.</para>
+          <para>The maximum number of recently opened or saved collections retained between sessions. The default is 100, and the range is 1 to 1000. Open collection combines this history with files in the default collections directory; the limit applies only to history entries. Unavailable collections remain in history and appear grayed out in the list. Existing .gqv files in this history are also updated when images are renamed or moved within Geeqie, even if the collections are saved outside the default collections directory. This setting is independent of the recent folder list and does not control Open recent, which uses GTK's shared recent-files database.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

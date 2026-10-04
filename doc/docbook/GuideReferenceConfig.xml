@@ -40,6 +40,7 @@
     Historic data such as last several folders visited, bookmarks, and recently used collections, as well as default print settings are contained in this text file:
     <programlisting xml:space="preserve">.../history</programlisting>
   </para>
+  <para>The <literal>[collection_history]</literal> section records recently opened or saved collection files. Open collection combines these entries with files from the default collections directory. Unavailable paths are retained and shown as disabled entries. Open recent uses GTK's shared recent-files database separately. The obsolete <literal>[recent]</literal> section is discarded when the history file is loaded.</para>
   <para>
     Keyboard shortcut maps are contained in this text file:
     <programlisting xml:space="preserve">.../accels</programlisting>

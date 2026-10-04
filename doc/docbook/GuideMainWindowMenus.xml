@@ -49,7 +49,7 @@
           </menuchoice>
         </term>
         <listitem>
-          <para>Displays a dialog to open a collection stored on disk in the files pane.</para>
+          <para>Lists collection files from the default collections directory and collection history, showing each filename followed by its full path. Duplicate paths appear only once. Click an entry or press <keycap>Return</keycap> to open it in the files pane; press <keycap>Escape</keycap> to close the list. Unavailable entries are grayed out and cannot be selected. See <link linkend="GuideCollections">Collections</link>.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -58,9 +58,7 @@
         </term>
         <listitem>
           <para>
-            This menu item lists the recently active collections. Selecting one displays it in the files pane. The most recent item will appear at the top of the list. Maximum number of entries can be modified through
-            <emphasis role="underline"><link linkend="Behaviour">Recent collections list maximum size</link></emphasis>
-            option.
+            Lists existing local files from GTK's shared recent-files database, with the most recent first. The default <guilabel>Geeqie image files</guilabel> filter matches Geeqie's configured file extensions; select <guilabel>All files</guilabel> to show other recent files. Select an entry and click <guibutton>Open</guibutton> or press <keycap>Return</keycap> to open it. This list is independent of collection history and its size limit.
           </para>
         </listitem>
       </varlistentry>

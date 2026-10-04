@@ -29,24 +29,13 @@
       <guimenu>File</guimenu>
       <guimenuitem>Open collection</guimenuitem>
     </menuchoice>
-    . A dialog will appear requesting the location of the collection file. The selected collection will appear in the files pane. Recently opened or saved collections can also be opened from the Open recent submenu of the File menu.
+    . The dialog combines collection files in the default collections directory with recently opened or saved collections, including those stored elsewhere. Each entry shows its filename followed by its full path. Duplicate paths appear only once, and entries are sorted by filename, then path. Click an entry or select it and press <keycap>Return</keycap> to display the collection in the files pane. Press <keycap>Escape</keycap> to close the list.
   </para>
+  <para>Unavailable or unreadable collection files remain in the list but are grayed out and cannot be selected. Their history entries are retained between sessions, so collections on disconnected drives can be opened again when the drives are available. The <guilabel>Recent collections list maximum size</guilabel> setting in <link linkend="GuideOptionsBehavior">Behavior Options</link> controls how many collections are retained in history; it does not limit the files listed from the default collections directory.</para>
+  <para>When images are moved or renamed within Geeqie, existing collection files in the default collections directory and collection history are updated to use the new paths.</para>
+  <para><menuchoice><guimenu>File</guimenu><guimenuitem>Open recent</guimenuitem></menuchoice> uses GTK's shared recent-files list instead of collection history. Its default <guilabel>Geeqie image files</guilabel> filter matches Geeqie's configured file extensions; select <guilabel>All files</guilabel> to show other recent files.</para>
   <para>
-    To delete or rename a collection, select
-    <menuchoice>
-      <shortcut>
-        <keycombo>
-          <keycap>O</keycap>
-        </keycombo>
-      </shortcut>
-      <guimenu>File</guimenu>
-      <guimenuitem>Open collection</guimenuitem>
-    </menuchoice>
-    , right-click on the collection you wish to delete or rename, and then select
-    <emphasis role="strong">Delete</emphasis>
-    or
-    <emphasis role="strong">Rename</emphasis>
-    .
+    To delete or rename a collection file, use your file manager. The Open collection list does not provide file management actions.
   </para>
   <section id="CollectionFilesPane">
     <title>Viewing a collection in the files pane</title>
