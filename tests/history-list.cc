@@ -77,12 +77,12 @@ TEST(HistoryList, CollectionHistorySurvivesReloadWithIndependentLimit)
 	ASSERT_NE(directory, nullptr);
 	g_autofree gchar *filename = g_build_filename(directory, "history", nullptr);
 	HistoryList saved_items;
-	if (auto *items = history_list_find_by_key("recent")) saved_items = *items;
+	if (auto *items = history_list_find_by_key("collection_history")) saved_items = *items;
 	const gint folder_limit = options->open_recent_list_maxsize;
 	const gint collection_limit = options->recent_collections_list_maxsize;
 	options->open_recent_list_maxsize = 1;
 	options->recent_collections_list_maxsize = 100;
-	history_list_free_key("recent");
+	history_list_free_key("collection_history");
 	HistoryList expected;
 	for (int i = 0; i < 105; ++i)
 		{
@@ -93,24 +93,39 @@ TEST(HistoryList, CollectionHistorySurvivesReloadWithIndependentLimit)
 		}
 	expected.resize(100);
 	EXPECT_TRUE(history_list_save(filename));
-	history_list_free_key("recent");
+	history_list_free_key("collection_history");
 	EXPECT_TRUE(history_list_load(filename));
-	auto *actual = history_list_find_by_key("recent");
+	auto *actual = history_list_find_by_key("collection_history");
 	EXPECT_EQ(actual ? *actual : HistoryList{}, expected);
+
+	// Discard the obsolete recent section without changing collection history.
+	g_autofree gchar *contents = nullptr;
+	EXPECT_TRUE(g_file_get_contents(filename, &contents, nullptr, nullptr));
+	std::string legacy_contents = contents;
+	legacy_contents += "\n[recent]\n\"/obsolete/collection.gqv\"\n";
+	EXPECT_TRUE(g_file_set_contents(filename, legacy_contents.c_str(), -1, nullptr));
+	history_list_free_key("collection_history");
+	EXPECT_TRUE(history_list_load(filename));
+	actual = history_list_find_by_key("collection_history");
+	EXPECT_EQ(actual ? *actual : HistoryList{}, expected);
+	EXPECT_EQ(history_list_find_by_key("recent"), nullptr);
 
 	// Lowering the preference must also limit the history saved for the next session.
 	options->recent_collections_list_maxsize = 12;
 	expected.resize(12);
 	EXPECT_TRUE(history_list_save(filename));
-	history_list_free_key("recent");
+	g_autofree gchar *saved_contents = nullptr;
+	EXPECT_TRUE(g_file_get_contents(filename, &saved_contents, nullptr, nullptr));
+	EXPECT_EQ(std::string(saved_contents).find("[recent]"), std::string::npos);
+	history_list_free_key("collection_history");
 	EXPECT_TRUE(history_list_load(filename));
-	actual = history_list_find_by_key("recent");
+	actual = history_list_find_by_key("collection_history");
 	EXPECT_EQ(actual ? *actual : HistoryList{}, expected);
 
-	history_list_free_key("recent");
+	history_list_free_key("collection_history");
 	for (auto work = saved_items.crbegin(); work != saved_items.crend(); ++work)
 		{
-		history_list_add_to_key("recent", work->c_str(), 0);
+		history_list_add_to_key("collection_history", work->c_str(), 0);
 		}
 	options->open_recent_list_maxsize = folder_limit;
 	options->recent_collections_list_maxsize = collection_limit;

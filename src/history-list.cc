@@ -233,6 +233,12 @@ gboolean history_list_load(const gchar *path)
 
 			g_free(key);
 			key = g_strndup(ptr, c);
+			/** @FIXME Remove this obsolete-section cleanup after the next release. */
+			if (g_strcmp0(key, "recent") == 0)
+				{
+				history_list_free_key("recent");
+				g_clear_pointer(&key, g_free);
+				}
 			}
 		else
 			{
@@ -257,7 +263,7 @@ gboolean history_list_save(const gchar *path)
 		{
 		g_string_append_printf(gstring, "[%s]\n", key.c_str());
 
-		const bool is_recent = (key == "recent");
+		const bool is_recent = (key == "collection_history");
 
 		/* Keep the newest entries, but save them inverted (oldest to newest)
 		 * so that when reading they are added correctly

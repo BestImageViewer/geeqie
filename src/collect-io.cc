@@ -598,7 +598,7 @@ static void collect_manager_refresh()
 		if (file_extension_match(fd->path, GQ_COLLECTION_EXT)) paths.emplace(fd->path);
 		}
 
-	if (const HistoryList *recent = history_list_find_by_key("recent"))
+	if (const HistoryList *recent = history_list_find_by_key("collection_history"))
 		{
 		gint count = 0;
 		for (const auto &path : *recent)

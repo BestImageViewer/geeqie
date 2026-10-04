@@ -1124,7 +1124,7 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 	gtk_widget_set_vexpand(dialog_data->list, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(dialog_data->gd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(dialog_data->gd->vbox), dialog_data->list);
 
-	HistoryList *recent_items = history_list_find_by_key("recent");
+	HistoryList *recent_items = history_list_find_by_key("collection_history");
 
 	if (recent_items)
 		{
@@ -2404,7 +2404,7 @@ void layout_recent_add_path(const gchar *path)
 {
 	if (!path) return;
 
-	history_list_add_to_key("recent", path, options->recent_collections_list_maxsize);
+	history_list_add_to_key("collection_history", path, options->recent_collections_list_maxsize);
 }
 
 /*

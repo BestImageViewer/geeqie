@@ -56,7 +56,7 @@ class CollectionFileSource : public testing::Test
 protected:
 	void SetUp() override
 	{
-		if (auto *recent = history_list_find_by_key("recent")) saved_recent = *recent;
+		if (auto *recent = history_list_find_by_key("collection_history")) saved_recent = *recent;
 		if (!options) options = conf_options_new();
 		setup_default_options(options);
 		filter_add_defaults();
@@ -108,10 +108,10 @@ protected:
 			}
 		g_rmdir(directory);
 		g_free(directory);
-		history_list_free_key("recent");
+		history_list_free_key("collection_history");
 		for (auto work = saved_recent.crbegin(); work != saved_recent.crend(); ++work)
 			{
-			history_list_add_to_key("recent", work->c_str(), 0);
+			history_list_add_to_key("collection_history", work->c_str(), 0);
 			}
 	}
 
@@ -142,12 +142,12 @@ TEST_F(CollectionFileSource, ManagerUpdatesExternalCollectionsFromHistory)
 	paths.emplace_back(ignored_path);
 	g_autofree gchar *ignored_contents = g_strdup_printf("#Geeqie collection\n\"%s\"\n", first->path);
 	ASSERT_TRUE(g_file_set_contents(ignored_path, ignored_contents, -1, nullptr));
-	history_list_add_to_key("recent", ignored_path, 0);
+	history_list_add_to_key("collection_history", ignored_path, 0);
 	g_autofree gchar *missing_path = g_build_filename(directory, "missing.gqv", nullptr);
-	history_list_add_to_key("recent", missing_path, 0);
+	history_list_add_to_key("collection_history", missing_path, 0);
 	g_autofree gchar *directory_path = g_build_filename(directory, "directory.gqv", nullptr);
 	ASSERT_EQ(g_mkdir(directory_path, 0700), 0);
-	history_list_add_to_key("recent", directory_path, 0);
+	history_list_add_to_key("collection_history", directory_path, 0);
 
 	FileData *renamed = make_file("a", "renamed.svg");
 	ASSERT_NE(renamed, nullptr);
@@ -174,8 +174,8 @@ TEST_F(CollectionFileSource, ManagerUpdatesExternalCollectionsFromHistory)
 		}
 
 	// External collections are no longer maintained after they leave history.
-	history_list_item_remove("recent", path);
-	history_list_item_remove("recent", other_path);
+	history_list_item_remove("collection_history", path);
+	history_list_item_remove("collection_history", other_path);
 	FileData *later = make_file("a", "later.svg");
 	ASSERT_NE(later, nullptr);
 	ASSERT_TRUE(file_data_add_ci(moved, FILEDATA_CHANGE_MOVE, moved->path, later->path));
