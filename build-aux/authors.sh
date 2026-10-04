@@ -12,7 +12,7 @@
 
 if [ "$2" = "true" ]
 then
-	git log --pretty=format:"%aN <%aE>" | sed 's/<>//' | sort | uniq --count | sort --general-numeric-sort --reverse --stable --key 1,1 | cut  --characters 1-8 --complement > "$1"/authors
+	git log --pretty=format:"%aN <%aE>" | sed 's/<>//' | sort | uniq -c | sort -k 1,1nr -k 2 | sed 's/^[[:space:]]*[0-9][0-9]* //' > "$1"/authors
 	printf "\n\0" >> "$1"/authors
 else
 	printf "List of authors not available\n\0" > "$1"/authors
