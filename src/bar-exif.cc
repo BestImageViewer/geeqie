@@ -683,6 +683,36 @@ void bar_pane_exif_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_NL(); WRITE_STRING("</pane_exif>");
 }
 
+void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!ped) return;
+
+	g_autofree gchar *title = nullptr;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_BOOL(ped->pane, expanded)) continue;
+		if (READ_BOOL(*ped, show_all)) continue;
+		if (READ_CHAR(ped->pane, id)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	if (title)
+		{
+		bar_pane_translate_title(PANE_EXIF, ped->pane.id, &title);
+		gtk_label_set_text(GTK_LABEL(ped->pane.title), title);
+		}
+
+	bar_pane_update_expander(ped->pane);
+	bar_pane_exif_update(ped);
+}
+
 void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
@@ -727,6 +757,7 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 	ped->pane.pane_update = bar_pane_exif_update;
 	ped->pane.pane_write_config = bar_pane_exif_write_config;
+	ped->pane.pane_update_from_config = bar_pane_exif_update_from_config;
 	ped->pane.pane_entry_add_from_config = bar_pane_exif_entry_add_from_config;
 	bar_pane_common_init(ped->pane, id, title, expanded, PANE_EXIF);
 
@@ -801,37 +832,6 @@ GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gc
 	bar_pane_translate_title(PANE_EXIF, id, &title);
 
 	return bar_pane_exif_new(id, title, expanded, show_all);
-}
-
-void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	PaneExifData *ped;
-	g_autofree gchar *title = nullptr;
-
-	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!ped) return;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_BOOL(ped->pane, expanded)) continue;
-		if (READ_BOOL(*ped, show_all)) continue;
-		if (READ_CHAR(ped->pane, id)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	if (title)
-		{
-		bar_pane_translate_title(PANE_EXIF, ped->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(ped->pane.title), title);
-		}
-
-	bar_pane_update_expander(ped->pane);
-	bar_pane_exif_update(ped);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -162,6 +162,38 @@ static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("/>");
 }
 
+static void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pcd) return;
+
+	g_autofree gchar *title = nullptr;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_CHAR(*pcd, key)) continue;
+		if (READ_BOOL(pcd->pane, expanded)) continue;
+		if (READ_INT(*pcd, height)) continue;
+		if (READ_CHAR(pcd->pane, id)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	if (title)
+		{
+		bar_pane_translate_title(PANE_COMMENT, pcd->pane.id, &title);
+		gtk_label_set_text(GTK_LABEL(pcd->pane.title), title);
+		}
+
+	gtk_widget_set_size_request(pcd->pane.widget, -1, pcd->height);
+	bar_pane_update_expander(pcd->pane);
+	bar_pane_comment_update(pcd);
+}
+
 static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
@@ -228,6 +260,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 
 	pcd->pane.pane_update = bar_pane_comment_update;
 	pcd->pane.pane_write_config = bar_pane_comment_write_config;
+	pcd->pane.pane_update_from_config = bar_pane_comment_update_from_config;
 	bar_pane_common_init(pcd->pane, id, title, expanded, PANE_COMMENT);
 
 	pcd->key = g_strdup(key);
@@ -309,40 +342,6 @@ GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const
 	bar_pane_translate_title(PANE_COMMENT, id, &title);
 
 	return bar_pane_comment_new(id, title, key, expanded, height);
-}
-
-void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	PaneCommentData *pcd;
-
-	pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!pcd) return;
-
-	g_autofree gchar *title = nullptr;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR(*pcd, key)) continue;
-		if (READ_BOOL(pcd->pane, expanded)) continue;
-		if (READ_INT(*pcd, height)) continue;
-		if (READ_CHAR(pcd->pane, id)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	if (title)
-		{
-		bar_pane_translate_title(PANE_COMMENT, pcd->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(pcd->pane.title), title);
-		}
-
-	gtk_widget_set_size_request(pcd->pane.widget, -1, pcd->height);
-	bar_pane_update_expander(pcd->pane);
-	bar_pane_comment_update(pcd);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

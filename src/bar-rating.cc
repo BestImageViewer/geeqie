@@ -81,6 +81,29 @@ static void bar_pane_rating_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("/>");
 }
 
+static void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!prd) return;
+
+	g_autofree gchar *title = nullptr;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("title", title)) continue; // FIXME Is it intended to set title to GTK_LABEL(prd->pane.title) or simply avoid "unknown attribute"?
+		if (READ_CHAR(prd->pane, id)) continue;
+		if (READ_BOOL(prd->pane, expanded)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	bar_pane_update_expander(prd->pane);
+	bar_pane_rating_update(prd);
+}
+
 static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
@@ -136,6 +159,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 	prd->pane.pane_update = bar_pane_rating_update;
 	prd->pane.pane_write_config = bar_pane_rating_write_config;
+	prd->pane.pane_update_from_config = bar_pane_rating_update_from_config;
 	bar_pane_common_init(prd->pane, id, title, expanded, PANE_RATING);
 
 	prd->pane.widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
@@ -206,29 +230,5 @@ GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const 
 	bar_pane_translate_title(PANE_RATING, id, &title);
 
 	return bar_pane_rating_new(id, title, expanded);
-}
-
-void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	PaneRatingData *prd;
-	g_autofree gchar *title = nullptr;
-
-	prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!prd) return;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("title", title)) continue; // FIXME Is it intended to set title to GTK_LABEL(prd->pane.title) or simply avoid "unknown attribute"?
-		if (READ_CHAR(prd->pane, id)) continue;
-		if (READ_BOOL(prd->pane, expanded)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	bar_pane_update_expander(prd->pane);
-	bar_pane_rating_update(prd);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

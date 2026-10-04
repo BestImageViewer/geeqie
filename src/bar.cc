@@ -789,6 +789,14 @@ void bar_pane_common_write_config(const PaneData &pane, RcString &rc)
 	WRITE_BOOL(pane, expanded);
 }
 
+void bar_pane_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pd || !pd->pane_update_from_config) return;
+
+	pd->pane_update_from_config(pane, attribute_names, attribute_values);
+}
+
 void bar_pane_update_expander(const PaneData &pd)
 {
 	GtkWidget *expander = gtk_widget_get_parent(pd.widget);
