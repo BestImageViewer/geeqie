@@ -1001,27 +1001,37 @@ static void open_recent_path(const gchar *file_name)
 
 struct OpenRecentDialogData
 {
-	GenericDialog *gd;
+	GtkWidget *window;
 	GtkWidget *list;
 	GtkWidget *open_button;
+	GtkWidget *empty_label;
+	GtkFileFilter *filter;
+	gboolean all_files;
 };
 
-static void open_recent_dialog_data_free(OpenRecentDialogData *dialog_data)
+static void open_recent_dialog_destroy_cb(GtkWidget *, gpointer data)
 {
-	if (!dialog_data) return;
-
-	/* Destroying the list clears its selection and can emit row-selected after
-	 * the dialog buttons have already been destroyed. Do not let that callback
-	 * use stale widget pointers while the dialog is being torn down. */
+	auto *dialog_data = static_cast<OpenRecentDialogData *>(data);
 	if (dialog_data->list)
 		{
 		g_signal_handlers_disconnect_by_data(dialog_data->list, dialog_data);
+		g_object_remove_weak_pointer(G_OBJECT(dialog_data->list), reinterpret_cast<gpointer *>(&dialog_data->list));
 		}
-	dialog_data->list = nullptr;
-	dialog_data->open_button = nullptr;
-
-	generic_dialog_close(dialog_data->gd);
+	if (dialog_data->open_button)
+		{
+		g_object_remove_weak_pointer(G_OBJECT(dialog_data->open_button), reinterpret_cast<gpointer *>(&dialog_data->open_button));
+		}
+	if (dialog_data->empty_label)
+		{
+		g_object_remove_weak_pointer(G_OBJECT(dialog_data->empty_label), reinterpret_cast<gpointer *>(&dialog_data->empty_label));
+		}
+	g_object_unref(dialog_data->filter);
 	g_free(dialog_data);
+}
+
+static void open_recent_dialog_data_free(OpenRecentDialogData *dialog_data)
+{
+	gtk_window_destroy(GTK_WINDOW(dialog_data->window));
 }
 
 static void open_recent_dialog_update(OpenRecentDialogData *dialog_data)
@@ -1048,12 +1058,12 @@ static void open_recent_dialog_open(OpenRecentDialogData *dialog_data)
 	open_recent_dialog_data_free(dialog_data);
 }
 
-static void open_recent_dialog_cancel_cb(GenericDialog *, gpointer data)
+static void open_recent_dialog_cancel_cb(GtkButton *, gpointer data)
 {
 	open_recent_dialog_data_free(static_cast<OpenRecentDialogData *>(data));
 }
 
-static void open_recent_dialog_open_cb(GenericDialog *, gpointer data)
+static void open_recent_dialog_open_cb(GtkButton *, gpointer data)
 {
 	open_recent_dialog_open(static_cast<OpenRecentDialogData *>(data));
 }
@@ -1066,6 +1076,52 @@ static void open_recent_dialog_row_selected_cb(GtkListBox *, GtkListBoxRow *, gp
 static void open_recent_dialog_row_activated_cb(GtkListBox *, GtkListBoxRow *, gpointer data)
 {
 	open_recent_dialog_open(static_cast<OpenRecentDialogData *>(data));
+}
+
+static gboolean open_recent_dialog_close_cb(GtkWindow *, gpointer data)
+{
+	open_recent_dialog_data_free(static_cast<OpenRecentDialogData *>(data));
+	return TRUE;
+}
+
+static gboolean open_recent_dialog_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType, gpointer data)
+{
+	if (keyval != GDK_KEY_Escape) return FALSE;
+	open_recent_dialog_data_free(static_cast<OpenRecentDialogData *>(data));
+	return TRUE;
+}
+
+static gint open_recent_info_compare(gconstpointer a, gconstpointer b)
+{
+	auto *first = const_cast<GtkRecentInfo *>(static_cast<const GtkRecentInfo *>(a));
+	auto *second = const_cast<GtkRecentInfo *>(static_cast<const GtkRecentInfo *>(b));
+	return g_date_time_compare(gtk_recent_info_get_modified(second), gtk_recent_info_get_modified(first));
+}
+
+static gboolean open_recent_dialog_filter_row(GtkListBoxRow *row, gpointer data)
+{
+	auto *dialog_data = static_cast<OpenRecentDialogData *>(data);
+	return dialog_data->all_files || gtk_filter_match(GTK_FILTER(dialog_data->filter),
+	                                                g_object_get_data(G_OBJECT(row), "recent-filter-info"));
+}
+
+static void open_recent_dialog_filter_changed_cb(GtkDropDown *dropdown, GParamSpec *, gpointer data)
+{
+	auto *dialog_data = static_cast<OpenRecentDialogData *>(data);
+	dialog_data->all_files = gtk_drop_down_get_selected(dropdown) == 1;
+	gtk_list_box_invalidate_filter(GTK_LIST_BOX(dialog_data->list));
+	GtkWidget *first = nullptr;
+	for (GtkWidget *row = gtk_widget_get_first_child(dialog_data->list); row; row = gtk_widget_get_next_sibling(row))
+		{
+		if (gtk_widget_get_child_visible(row))
+			{
+			first = row;
+			break;
+			}
+		}
+	gtk_list_box_select_row(GTK_LIST_BOX(dialog_data->list), first ? GTK_LIST_BOX_ROW(first) : nullptr);
+	gtk_widget_set_visible(dialog_data->empty_label, first == nullptr);
+	open_recent_dialog_update(dialog_data);
 }
 
 static void layout_menu_open_file_cb(GSimpleAction *, GVariant *, gpointer)
@@ -1104,88 +1160,127 @@ static void layout_menu_open_file_cb(GSimpleAction *, GVariant *, gpointer)
 static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto *dialog_data = g_new0(OpenRecentDialogData, 1);
-	dialog_data->gd = generic_dialog_new(_("Open Recent File"),
-					     "open_recent_file",
-					     get_current_layout()->window,
-					     FALSE,
-					     open_recent_dialog_cancel_cb,
-					     dialog_data);
+	dialog_data->filter = gtk_file_filter_new();
+	for (GList *work = filter_get_list(); work; work = work->next)
+		{
+		auto *entry = static_cast<FilterEntry *>(work->data);
+		g_auto(GStrv) extensions = g_strsplit(entry->extensions, ";", -1);
+		for (gint i = 0; extensions[i]; ++i)
+			{
+			g_autofree gchar *pattern = g_strconcat("*", extensions[i], nullptr);
+			gtk_file_filter_add_pattern(dialog_data->filter, pattern);
+			}
+		}
+	dialog_data->window = gtk_window_new();
+	gtk_window_set_title(GTK_WINDOW(dialog_data->window), _("Open Recent File"));
+	gtk_window_set_transient_for(GTK_WINDOW(dialog_data->window), GTK_WINDOW(get_current_layout()->window));
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog_data->window), TRUE);
+	gtk_window_set_default_size(GTK_WINDOW(dialog_data->window), 700, 400);
+	g_signal_connect(dialog_data->window, "destroy", G_CALLBACK(open_recent_dialog_destroy_cb), dialog_data);
+	g_signal_connect(dialog_data->window, "close-request", G_CALLBACK(open_recent_dialog_close_cb), dialog_data);
 
-	gtk_window_set_default_size(GTK_WINDOW(dialog_data->gd->dialog), 700, 400);
+	auto *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(open_recent_dialog_key_press_cb), dialog_data);
+	gtk_widget_add_controller(dialog_data->window, controller);
+
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	gtk_widget_set_margin_start(box, PREF_PAD_SPACE);
+	gtk_widget_set_margin_end(box, PREF_PAD_SPACE);
+	gtk_widget_set_margin_top(box, PREF_PAD_SPACE);
+	gtk_widget_set_margin_bottom(box, PREF_PAD_SPACE);
+	gtk_window_set_child(GTK_WINDOW(dialog_data->window), box);
+
+	GtkWidget *scrolled = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_widget_set_vexpand(scrolled, TRUE);
+	gtk_box_append(GTK_BOX(box), scrolled);
 
 	dialog_data->list = gtk_list_box_new();
+	g_object_add_weak_pointer(G_OBJECT(dialog_data->list), reinterpret_cast<gpointer *>(&dialog_data->list));
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(dialog_data->list), GTK_SELECTION_SINGLE);
 	gtk_list_box_set_activate_on_single_click(GTK_LIST_BOX(dialog_data->list), FALSE);
 	g_signal_connect(dialog_data->list, "row-selected",
 			 G_CALLBACK(open_recent_dialog_row_selected_cb), dialog_data);
 	g_signal_connect(dialog_data->list, "row-activated",
 			 G_CALLBACK(open_recent_dialog_row_activated_cb), dialog_data);
-	gtk_widget_set_hexpand(dialog_data->list, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(dialog_data->gd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
-	gtk_widget_set_vexpand(dialog_data->list, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(dialog_data->gd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-	gtk_box_append(GTK_BOX(dialog_data->gd->vbox), dialog_data->list);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), dialog_data->list);
+	gtk_list_box_set_filter_func(GTK_LIST_BOX(dialog_data->list), open_recent_dialog_filter_row, dialog_data, nullptr);
 
-	HistoryList *recent_items = history_list_find_by_key("collection_history");
+	GList *recent_items = gtk_recent_manager_get_items(gtk_recent_manager_get_default());
+	recent_items = g_list_sort(recent_items, open_recent_info_compare);
 
-	if (recent_items)
+	for (GList *work = recent_items; work; work = work->next)
 		{
-		gint count = 0;
-		for (const auto &path : *recent_items)
-			{
-			if (!isfile(path.c_str()))
-				{
-				continue;
-				}
-			if (count >= options->recent_collections_list_maxsize) break;
-			++count;
+		auto *info = static_cast<GtkRecentInfo *>(work->data);
+		if (!gtk_recent_info_is_local(info)) continue;
+		g_autofree gchar *filename = g_filename_from_uri(gtk_recent_info_get_uri(info), nullptr, nullptr);
+		g_autofree gchar *path = filename ? path_to_utf8(filename) : nullptr;
+		if (!path || !isfile(path)) continue;
+		if (gtk_recent_info_get_private_hint(info) && !gtk_recent_info_has_application(info, GQ_APPNAME)) continue;
 
-			GtkWidget *row = gtk_list_box_row_new();
-			GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
-			g_autofree gchar *basename = g_path_get_basename(path.c_str());
+		GtkWidget *row = gtk_list_box_row_new();
+		GtkWidget *row_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+		g_autoptr(GIcon) icon = gtk_recent_info_get_gicon(info);
+		GtkWidget *image = icon ? gtk_image_new_from_gicon(icon) : ui_image_new_from_icon_name(GQ_ICON_GENERIC);
+		gtk_image_set_pixel_size(GTK_IMAGE(image), 32);
+		gtk_box_append(GTK_BOX(row_box), image);
+		GtkWidget *details = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+		gtk_widget_set_hexpand(details, TRUE);
+		gtk_box_append(GTK_BOX(row_box), details);
 
-			GtkWidget *name_label = gtk_label_new(basename);
-			gtk_label_set_xalign(GTK_LABEL(name_label), 0.0);
-			gtk_label_set_ellipsize(GTK_LABEL(name_label), PANGO_ELLIPSIZE_END);
-			gtk_widget_add_css_class(name_label, "heading");
-			gtk_box_append(GTK_BOX(box), name_label);
+		GtkWidget *name_label = gtk_label_new(gtk_recent_info_get_display_name(info));
+		gtk_label_set_xalign(GTK_LABEL(name_label), 0.0);
+		gtk_label_set_ellipsize(GTK_LABEL(name_label), PANGO_ELLIPSIZE_END);
+		gtk_widget_add_css_class(name_label, "heading");
+		gtk_box_append(GTK_BOX(details), name_label);
 
-			GtkWidget *path_label = gtk_label_new(path.c_str());
-			gtk_label_set_xalign(GTK_LABEL(path_label), 0.0);
-			gtk_label_set_wrap(GTK_LABEL(path_label), TRUE);
-			gtk_label_set_wrap_mode(GTK_LABEL(path_label), PANGO_WRAP_WORD_CHAR);
-			gtk_widget_add_css_class(path_label, "dim-label");
-			gtk_box_append(GTK_BOX(box), path_label);
+		GtkWidget *path_label = gtk_label_new(path);
+		gtk_label_set_xalign(GTK_LABEL(path_label), 0.0);
+		gtk_label_set_ellipsize(GTK_LABEL(path_label), PANGO_ELLIPSIZE_MIDDLE);
+		gtk_widget_add_css_class(path_label, "dim-label");
+		gtk_box_append(GTK_BOX(details), path_label);
 
-			gtk_widget_set_margin_top(box, 6);
-			gtk_widget_set_margin_bottom(box, 6);
-			gtk_widget_set_margin_start(box, 6);
-			gtk_widget_set_margin_end(box, 6);
-			gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row), box);
-			g_object_set_data_full(G_OBJECT(row), "recent-path", g_strdup(path.c_str()), g_free);
-			gtk_list_box_append(GTK_LIST_BOX(dialog_data->list), row);
-			}
+		gtk_widget_set_margin_top(row_box, 6);
+		gtk_widget_set_margin_bottom(row_box, 6);
+		gtk_widget_set_margin_start(row_box, 6);
+		gtk_widget_set_margin_end(row_box, 6);
+		gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row), row_box);
+		gtk_widget_set_tooltip_text(row, path);
+		g_object_set_data_full(G_OBJECT(row), "recent-path", g_strdup(path), g_free);
+		auto *filter_info = g_file_info_new();
+		g_file_info_set_display_name(filter_info, gtk_recent_info_get_display_name(info));
+		g_object_set_data_full(G_OBJECT(row), "recent-filter-info", filter_info, g_object_unref);
+		gtk_list_box_append(GTK_LIST_BOX(dialog_data->list), row);
 		}
+	g_list_free_full(recent_items, reinterpret_cast<GDestroyNotify>(gtk_recent_info_unref));
 
-	if (gtk_widget_get_first_child(dialog_data->list) == nullptr)
-		{
-		GtkWidget *label = gtk_label_new(_("No recent files available."));
-		gtk_label_set_xalign(GTK_LABEL(label), 0.0);
-		gtk_box_append(GTK_BOX(dialog_data->gd->vbox), label);
-		}
-	else
-		{
-		gtk_list_box_select_row(GTK_LIST_BOX(dialog_data->list),
-					GTK_LIST_BOX_ROW(gtk_widget_get_first_child(dialog_data->list)));
-		}
+	dialog_data->empty_label = gtk_label_new(_("No recent files available."));
+	g_object_add_weak_pointer(G_OBJECT(dialog_data->empty_label), reinterpret_cast<gpointer *>(&dialog_data->empty_label));
+	gtk_label_set_xalign(GTK_LABEL(dialog_data->empty_label), 0.0);
+	gtk_box_append(GTK_BOX(box), dialog_data->empty_label);
 
-	dialog_data->open_button = generic_dialog_add_button(dialog_data->gd,
-							     GQ_ICON_OPEN,
-							     _("_Open"),
-							     open_recent_dialog_open_cb,
-							     TRUE);
+	const gchar *filters[] = {_("Geeqie image files"), _("All files"), nullptr};
+	GtkWidget *dropdown = gtk_drop_down_new_from_strings(filters);
+	g_signal_connect(dropdown, "notify::selected", G_CALLBACK(open_recent_dialog_filter_changed_cb), dialog_data);
+
+	GtkWidget *buttons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	gtk_box_append(GTK_BOX(box), buttons);
+	gtk_box_append(GTK_BOX(buttons), dropdown);
+	GtkWidget *spacer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_hexpand(spacer, TRUE);
+	gtk_box_append(GTK_BOX(buttons), spacer);
+	GtkWidget *cancel = gtk_button_new_with_mnemonic(_("_Cancel"));
+	g_signal_connect(cancel, "clicked", G_CALLBACK(open_recent_dialog_cancel_cb), dialog_data);
+	gtk_box_append(GTK_BOX(buttons), cancel);
+	dialog_data->open_button = gtk_button_new_with_mnemonic(_("_Open"));
+	g_object_add_weak_pointer(G_OBJECT(dialog_data->open_button), reinterpret_cast<gpointer *>(&dialog_data->open_button));
+	g_signal_connect(dialog_data->open_button, "clicked", G_CALLBACK(open_recent_dialog_open_cb), dialog_data);
+	gtk_box_append(GTK_BOX(buttons), dialog_data->open_button);
+	gtk_window_set_default_widget(GTK_WINDOW(dialog_data->window), dialog_data->open_button);
 	gtk_widget_set_sensitive(dialog_data->open_button, FALSE);
-	open_recent_dialog_update(dialog_data);
+	open_recent_dialog_filter_changed_cb(GTK_DROP_DOWN(dropdown), nullptr, dialog_data);
 
-	gtk_window_present(GTK_WINDOW(dialog_data->gd->dialog));
+	gtk_window_present(GTK_WINDOW(dialog_data->window));
 	if (gtk_widget_get_first_child(dialog_data->list)) gtk_widget_grab_focus(dialog_data->list);
 }
 
@@ -2405,6 +2500,7 @@ void layout_recent_add_path(const gchar *path)
 	if (!path) return;
 
 	history_list_add_to_key("collection_history", path, options->recent_collections_list_maxsize);
+	recent_file_add(path);
 }
 
 /*

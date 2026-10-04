@@ -7,13 +7,40 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <gtk/gtk.h>
 
 #include "history-list.h"
 #include "layout-util.h"
+#include "main-defines.h"
 #include "options.h"
 
 namespace
 {
+
+TEST(HistoryList, RecentFilesUseUrisAndApplicationMetadata)
+{
+	if (!gtk_init_check()) GTEST_SKIP() << "Requires a display";
+	g_autofree gchar *directory = g_dir_make_tmp("geeqie-recent-files-XXXXXX", nullptr);
+	ASSERT_NE(directory, nullptr);
+	g_autofree gchar *filename = g_build_filename(directory, "recent file #1.txt", nullptr);
+	g_autofree gchar *uri = g_filename_to_uri(filename, nullptr, nullptr);
+	ASSERT_TRUE(g_file_set_contents(filename, "text", -1, nullptr));
+
+	auto *manager = gtk_recent_manager_get_default();
+	recent_file_add(filename);
+	GtkRecentInfo *info = gtk_recent_manager_lookup_item(manager, uri, nullptr);
+	ASSERT_NE(info, nullptr);
+	EXPECT_TRUE(gtk_recent_info_has_application(info, GQ_APPNAME));
+	EXPECT_STREQ(gtk_recent_info_get_mime_type(info), "text/plain");
+	EXPECT_STREQ(gtk_recent_info_get_uri(info), uri);
+	gtk_recent_info_unref(info);
+	EXPECT_TRUE(gtk_recent_manager_remove_item(manager, uri, nullptr));
+
+	g_unlink(filename);
+	recent_file_add(filename);
+	EXPECT_FALSE(gtk_recent_manager_has_item(manager, uri));
+	g_rmdir(directory);
+}
 
 TEST(HistoryList, SaveKeepsNewestEntriesInOrder)
 {

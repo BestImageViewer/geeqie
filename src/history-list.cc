@@ -26,6 +26,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include <gio/gio.h>
+#include <gtk/gtk.h>
+
+#include "main-defines.h"
 #include "options.h"
 #include "ui-fileops.h"
 
@@ -181,6 +185,25 @@ void image_chain_append_end(const gchar *path)
 	if (!image_chain.push_back(path)) return;
 
 	update_recent_viewed_folder_image_list(path);
+	recent_file_add(path);
+}
+
+void recent_file_add(const gchar *path)
+{
+	if (!gtk_is_initialized() || !path || !isfile(path)) return;
+	g_autofree gchar *filename = path_from_utf8(path);
+	g_autofree gchar *uri = g_filename_to_uri(filename, nullptr, nullptr);
+	if (!uri) return;
+
+	g_autofree gchar *content_type = g_content_type_guess(filename, nullptr, 0, nullptr);
+	g_autofree gchar *mime_type = g_content_type_get_mime_type(content_type);
+	gchar app_name[] = GQ_APPNAME;
+	gchar app_exec[] = GQ_APPNAME_LC " %u";
+	GtkRecentData data{};
+	data.mime_type = mime_type;
+	data.app_name = app_name;
+	data.app_exec = app_exec;
+	gtk_recent_manager_add_full(gtk_recent_manager_get_default(), uri, &data);
 }
 
 /*
