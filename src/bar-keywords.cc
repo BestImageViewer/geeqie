@@ -305,6 +305,36 @@ void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("</pane_keywords>");
 }
 
+void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pkd) return;
+
+	g_autofree gchar *title = nullptr;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_CHAR(*pkd, key)) continue;
+		if (READ_BOOL(pkd->pane, expanded)) continue;
+		if (READ_CHAR(pkd->pane, id)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	if (title)
+		{
+		bar_pane_translate_title(PANE_KEYWORDS, pkd->pane.id, &title);
+		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
+		}
+
+	bar_pane_update_expander(pkd->pane);
+	bar_pane_keywords_update(pkd);
+}
+
 void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto *pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
@@ -1406,6 +1436,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	pkd->pane.pane_update = bar_pane_keywords_update;
 	pkd->pane.pane_write_config = bar_pane_keywords_write_config;
+	pkd->pane.pane_update_from_config = bar_pane_keywords_update_from_config;
 	pkd->pane.pane_entry_add_from_config = bar_pane_keywords_entry_add_from_config;
 	bar_pane_common_init(pkd->pane, id, title, expanded, PANE_KEYWORDS);
 
@@ -1700,36 +1731,6 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 	options->info_keywords.height = height;
 	bar_pane_translate_title(PANE_KEYWORDS, id, &title);
 	return bar_pane_keywords_new(id, title, key, expanded, height);
-}
-
-void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	auto pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!pkd) return;
-
-	g_autofree gchar *title = nullptr;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR(*pkd, key)) continue;
-		if (READ_BOOL(pkd->pane, expanded)) continue;
-		if (READ_CHAR(pkd->pane, id)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	if (title)
-		{
-		bar_pane_translate_title(PANE_KEYWORDS, pkd->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
-		}
-
-	bar_pane_update_expander(pkd->pane);
-	bar_pane_keywords_update(pkd);
 }
 
 /*

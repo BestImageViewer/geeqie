@@ -1513,7 +1513,7 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		GtkWidget *pane = bar_find_pane_by_id(bar, PANE_COMMENT, options_get_id(attribute_names, attribute_values));
 		if (pane)
 			{
-			bar_pane_comment_update_from_config(pane, attribute_names, attribute_values);
+			bar_pane_update_from_config(pane, attribute_names, attribute_values);
 			}
 		else
 			{
@@ -1528,7 +1528,7 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		GtkWidget *pane = bar_find_pane_by_id(bar, PANE_GPS, options_get_id(attribute_names, attribute_values));
 		if (pane)
 			{
-			bar_pane_gps_update_from_config(pane, attribute_names, attribute_values);
+			bar_pane_update_from_config(pane, attribute_names, attribute_values);
 			}
 		else
 			{
@@ -1543,7 +1543,7 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		GtkWidget *pane = bar_find_pane_by_id(bar, PANE_EXIF, options_get_id(attribute_names, attribute_values));
 		if (pane)
 			{
-			bar_pane_exif_update_from_config(pane, attribute_names, attribute_values);
+			bar_pane_update_from_config(pane, attribute_names, attribute_values);
 			}
 		else
 			{
@@ -1557,7 +1557,7 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		GtkWidget *pane = bar_find_pane_by_id(bar, PANE_HISTOGRAM, options_get_id(attribute_names, attribute_values));
 		if (pane)
 			{
-			bar_pane_histogram_update_from_config(pane, attribute_names, attribute_values);
+			bar_pane_update_from_config(pane, attribute_names, attribute_values);
 			}
 		else
 			{
@@ -1571,7 +1571,7 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		GtkWidget *pane = bar_find_pane_by_id(bar, PANE_RATING, options_get_id(attribute_names, attribute_values));
 		if (pane)
 			{
-			bar_pane_rating_update_from_config(pane, attribute_names, attribute_values);
+			bar_pane_update_from_config(pane, attribute_names, attribute_values);
 			}
 		else
 			{
@@ -1585,7 +1585,7 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		GtkWidget *pane = bar_find_pane_by_id(bar, PANE_KEYWORDS, options_get_id(attribute_names, attribute_values));
 		if (pane)
 			{
-			bar_pane_keywords_update_from_config(pane, attribute_names, attribute_values);
+			bar_pane_update_from_config(pane, attribute_names, attribute_values);
 			}
 		else
 			{

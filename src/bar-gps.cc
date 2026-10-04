@@ -812,6 +812,61 @@ void bar_pane_gps_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("/>");
 }
 
+void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pgd) return;
+
+	g_autofree gchar *title = nullptr;
+	g_autofree gchar *map_id = nullptr;
+	gdouble latitude = shumate_location_get_latitude(SHUMATE_LOCATION(pgd->viewport));
+	gdouble longitude = shumate_location_get_longitude(SHUMATE_LOCATION(pgd->viewport));
+
+	while (*attribute_names)
+	{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_CHAR(pgd->pane, id)) continue;
+		if (READ_BOOL(pgd->pane, expanded)) continue;
+		if (READ_INT(*pgd, height)) continue;
+		if (READ_CHAR_FULL("map-id", map_id))
+			{
+			bar_pane_gps_set_map_source(pgd, map_id);
+			continue;
+			}
+		if (gint zoom = DEFAULT_ZOOM; READ_INT_CLAMP_FULL("zoom-level", zoom, 1, 8))
+			{
+			shumate_viewport_set_zoom_level(pgd->viewport, zoom);
+			continue;
+			}
+		if (gint int_longitude = 0; READ_INT_CLAMP_FULL("longitude", int_longitude, -90000000, +90000000))
+			{
+			longitude = int_longitude / 1000000.0;
+			shumate_map_center_on(shumate_simple_map_get_map(pgd->map), latitude, longitude);
+			continue;
+			}
+		if (gint int_latitude = 0; READ_INT_CLAMP_FULL("latitude", int_latitude, -90000000, +90000000))
+			{
+			latitude = int_latitude / 1000000.0;
+			shumate_map_center_on(shumate_simple_map_get_map(pgd->map), latitude, longitude);
+			continue;
+			}
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+	}
+
+	if (title)
+		{
+		bar_pane_translate_title(PANE_GPS, pgd->pane.id, &title);
+		gtk_label_set_text(GTK_LABEL(pgd->pane.title), title);
+		}
+
+	gtk_widget_set_size_request(pgd->pane.widget, -1, pgd->height);
+	bar_pane_update_expander(pgd->pane);
+}
+
 void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
@@ -876,6 +931,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	pgd->pane.pane_update = bar_pane_gps_update;
 	pgd->pane.pane_notify_selection = bar_pane_gps_notify_selection;
 	pgd->pane.pane_write_config = bar_pane_gps_write_config;
+	pgd->pane.pane_update_from_config = bar_pane_gps_update_from_config;
 	bar_pane_common_init(pgd->pane, id, title, expanded, PANE_GPS);
 
 	pgd->height = height;
@@ -996,74 +1052,6 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 	longitude = static_cast<gdouble>(int_longitude) / 1000000;
 
 	return bar_pane_gps_new(id, title, map_id, zoom, latitude, longitude, expanded, height);
-}
-
-void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_names,
-                                						const gchar **attribute_values)
-{
-	PaneGPSData *pgd;
-	gint zoom = DEFAULT_ZOOM;
-	gint int_longitude = 0;
-	gint int_latitude = 0;
-	gdouble longitude = 0;
-	gdouble latitude = 0;
-
-	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!pgd)
-		return;
-
-	g_autofree gchar *title = nullptr;
-	g_autofree gchar *map_id = nullptr;
-	latitude = shumate_location_get_latitude(SHUMATE_LOCATION(pgd->viewport));
-	longitude = shumate_location_get_longitude(SHUMATE_LOCATION(pgd->viewport));
-
-	while (*attribute_names)
-	{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("title", title))
-			continue;
-		if (READ_CHAR_FULL("map-id", map_id))
-			{
-			bar_pane_gps_set_map_source(pgd, map_id);
-			continue;
-			}
-		if (READ_BOOL(pgd->pane, expanded))
-			continue;
-		if (READ_INT(*pgd, height))
-			continue;
-		if (READ_CHAR(pgd->pane, id))
-			continue;
-		if (READ_INT_CLAMP_FULL("zoom-level", zoom, 1, 8))
-			{
-			shumate_viewport_set_zoom_level(pgd->viewport, zoom);
-			continue;
-			}
-		if (READ_INT_CLAMP_FULL("longitude", int_longitude, -90000000, +90000000))
-			{
-			longitude = int_longitude / 1000000.0;
-			shumate_map_center_on(shumate_simple_map_get_map(pgd->map), latitude, longitude);
-			continue;
-			}
-		if (READ_INT_CLAMP_FULL("latitude", int_latitude, -90000000, +90000000))
-			{
-			latitude = int_latitude / 1000000.0;
-			shumate_map_center_on(shumate_simple_map_get_map(pgd->map), latitude, longitude);
-			continue;
-			}
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-	}
-
-	if (title)
-		{
-		bar_pane_translate_title(PANE_GPS, pgd->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(pgd->pane.title), title);
-		}
-
-	gtk_widget_set_size_request(pgd->pane.widget, -1, pgd->height);
-	bar_pane_update_expander(pgd->pane);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

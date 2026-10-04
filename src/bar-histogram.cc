@@ -136,6 +136,34 @@ static void bar_pane_histogram_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("/>");
 }
 
+static void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+{
+	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!phd) return;
+
+	gint histogram_channel = phd->histogram.get_channel();
+	gint histogram_mode = phd->histogram.get_mode();
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR(phd->pane, id)) continue;
+		if (READ_BOOL(phd->pane, expanded)) continue;
+		if (READ_INT_FULL("histogram_channel", histogram_channel)) continue;
+		if (READ_INT_FULL("histogram_mode", histogram_mode)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	phd->histogram.set_channel(histogram_channel);
+	phd->histogram.set_mode(histogram_mode);
+
+	bar_pane_update_expander(phd->pane);
+	bar_pane_histogram_update(phd);
+}
+
 static void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
@@ -322,6 +350,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 
 	phd->pane.pane_update = bar_pane_histogram_update;
 	phd->pane.pane_write_config = bar_pane_histogram_write_config;
+	phd->pane.pane_update_from_config = bar_pane_histogram_update_from_config;
 	bar_pane_common_init(phd->pane, id, title, expanded, PANE_HISTOGRAM);
 
 	phd->histogram = Histogram();
@@ -382,34 +411,6 @@ GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, con
 	bar_pane_translate_title(PANE_HISTOGRAM, id, &title);
 
 	return bar_pane_histogram_new(id, title, height, expanded, histogram_channel, histogram_mode);
-}
-
-void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
-{
-	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!phd) return;
-
-	gint histogram_channel = phd->histogram.get_channel();
-	gint histogram_mode = phd->histogram.get_mode();
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR(phd->pane, id)) continue;
-		if (READ_BOOL(phd->pane, expanded)) continue;
-		if (READ_INT_FULL("histogram_channel", histogram_channel)) continue;
-		if (READ_INT_FULL("histogram_mode", histogram_mode)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	phd->histogram.set_channel(histogram_channel);
-	phd->histogram.set_mode(histogram_mode);
-
-	bar_pane_update_expander(phd->pane);
-	bar_pane_histogram_update(phd);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
