@@ -1,3 +1,16 @@
+Geeqie 3.3
+============
+
+- Collections: Open Collection combines the default collection directory with collection history, showing filenames and full paths. Unavailable collections are retained but disabled. Missing images remain in collections, and collections stored elsewhere are updated when images move or are renamed.
+- Open Recent: Replaced with a GTK4 dialog using GTK’s shared recent-files database, with “Geeqie image files” and “All files” filters. Collection history now has its own setting and `[collection_history]` section.
+- Keyboard operation: Improved Return activation, search submission and results navigation, folder-pane focus, address-bar history, and Escape handling across dialogs and editable fields.
+- File operations: Added inline folder creation. Fixed a renaming crash, empty-folder trash handling, destination selection, and unnecessary permission warnings for plugins.
+- Rendering: Cached tile textures improve zooming and panning. The bird’s-eye overview is cached, and an overlay cleanup crash was fixed. Stereo switching and cursor behavior were corrected.
+- Metadata and interface: Added smartphone-video GPS support through optional libavformat integration. Fixed GPS-related file-list updates, EXIF entry creation, histogram sizing, and initial scrolling. Bundled icons provide fallbacks when themes lack them.
+- Startup and plugins: Plugin discovery runs in a worker thread. Configuration migration prompts and missing-layout notifications were corrected.
+- Build and releases: Fixed NetBSD authors generation, preserved AppImage payloads during release preparation, added Snap CI builds, and automated source-release preparation from reviewed `NEWS`.
+- Maintenance: Expanded regression tests, updated translations and documentation, removed the obsolete desktop-template helper, and simplified sidebar and collection internals.
+
 Geeqie 3.2
 ============
 

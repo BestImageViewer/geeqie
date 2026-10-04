@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-20 16:37+0100\n"
+"POT-Creation-Date: 2026-10-04 16:35+0100\n"
 "PO-Revision-Date: 2023-10-25 17:13+0100\n"
 "Last-Translator: Colin Clark <cclark@TallTrees>\n"
 "Language-Team: Traditional Chinese <zh-l10n@linux.org.tw>\n"
@@ -115,13 +115,13 @@ msgid ""
 msgstr ""
 
 #. (itstool) path: categories/category
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:33
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:34
 msgid "Graphics"
 msgstr ""
 
 #  mm 114 x 162
 #. (itstool) path: categories/category
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:34
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:35
 #, fuzzy
 msgid "Photography"
 msgstr "Photo 6x4"
@@ -129,104 +129,104 @@ msgstr "Photo 6x4"
 #
 # src/collect-table.cc:619 src/dupe.cc:1386 src/dupe.cc:1558
 #. (itstool) path: categories/category
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:35
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:36
 #, fuzzy
 msgid "Viewer"
 msgstr "檢視"
 
 # src/preferences.cc:676
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:38
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:39
 #, fuzzy
 msgid "image"
 msgstr "影像"
 
 #  mm 114 x 162
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:39
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:40
 #, fuzzy
 msgid "photo"
 msgstr "Photo 6x4"
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:40
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:41
 msgid "photography"
 msgstr ""
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:41
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:42
 #, fuzzy
 msgid "viewer"
 msgstr "預覽"
 
 # src/menu.cc:526
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:42
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:43
 #, fuzzy
 msgid "manager"
 msgstr "排列管理員(_M)"
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:43
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:44
 msgid "gallery"
 msgstr ""
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:44
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:45
 msgid "EXIF"
 msgstr ""
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:47
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:48
 #, fuzzy
 msgid "image/jpeg"
 msgstr "影像"
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:48
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:49
 #, fuzzy
 msgid "image/png"
 msgstr "影像"
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:49
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:50
 #, fuzzy
 msgid "image/gif"
 msgstr "影像"
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:50
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:51
 #, fuzzy
 msgid "image/tiff"
 msgstr "影像"
 
 #. (itstool) path: component/url
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:52
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:53
 msgid "https://www.geeqie.org"
 msgstr ""
 
 #. (itstool) path: component/url
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:53
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:54
 msgid "https://github.com/BestImageViewer/geeqie/issues"
 msgstr ""
 
 #. (itstool) path: component/url
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:54
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:55
 msgid "https://github.com/BestImageViewer/geeqie"
 msgstr ""
 
 #. (itstool) path: component/update_contact
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:55
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:56
 msgid "geeqie@freelists.org"
 msgstr ""
 
 # src/img-view.cc:559 src/window.cc:533
 #. (itstool) path: component/translation
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:56
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:57
 #, fuzzy
 msgid "geeqie"
 msgstr "結束 Geeqie"
@@ -367,7 +367,7 @@ msgid "Copy "
 msgstr "複製"
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../data/ui/menu-bar-exif.ui:21 ../src/bar-exif.cc:524 ../src/bar-exif.cc:534
+#: ../data/ui/menu-bar-exif.ui:21 ../src/bar-exif.cc:519 ../src/bar-exif.cc:529
 #, fuzzy
 msgid "Add entry"
 msgstr "加入內容(_A)"
@@ -477,12 +477,12 @@ msgstr "根據日期排列"
 
 # src/window.cc:87
 #: ../data/ui/menu-dir-popup.ui:88 ../data/ui/menu-view-file.ui:96
-#: ../src/layout.cc:805
+#: ../src/layout.cc:803
 msgid "Ascending"
 msgstr "遞增"
 
 #: ../data/ui/menu-dir-popup.ui:92 ../data/ui/menu-view-file.ui:100
-#: ../src/layout.cc:806 ../src/view-file/view-file.cc:2579
+#: ../src/layout.cc:804 ../src/view-file/view-file.cc:2590
 msgid "Case"
 msgstr ""
 
@@ -502,7 +502,7 @@ msgstr "重新整理(_F)"
 # src/collect-table.cc:619 src/dupe.cc:1386 src/dupe.cc:1558
 #: ../data/ui/menu-dupe-main.ui:7 ../data/ui/menu-dupe-second.ui:7
 #: ../data/ui/menu-search.ui:13 ../data/ui/menu-view-file.ui:105
-#: ../src/layout-util.cc:1890 ../src/preferences.cc:3376
+#: ../src/layout-util.cc:2034 ../src/preferences.cc:3378
 msgid "View"
 msgstr "檢視"
 
@@ -616,24 +616,24 @@ msgstr "往上移動(_U)"
 # src/utilops.cc:764
 #: ../data/ui/menu-dupe-main.ui:96 ../data/ui/menu-img-view.ui:104
 #: ../data/ui/menu-layout-image.ui:83 ../data/ui/menu-pan-view.ui:69
-#: ../data/ui/menu-search.ui:82 ../src/desktop-file.cc:381
-#: ../src/desktop-file.cc:575 ../src/preferences.cc:3335 ../src/utilops.cc:1839
-#: ../src/utilops.cc:2472
+#: ../data/ui/menu-search.ui:82 ../src/desktop-file.cc:382
+#: ../src/desktop-file.cc:577 ../src/preferences.cc:3337 ../src/utilops.cc:1839
+#: ../src/utilops.cc:2474
 msgid "Delete"
 msgstr "刪除"
 
 # src/collect-table.cc:622 src/dupe.cc:1410 src/dupe.cc:1568
 #: ../data/ui/menu-dupe-main.ui:102 ../data/ui/menu-dupe-second.ui:27
-#: ../data/ui/menu-popup.ui:25 ../src/preferences.cc:2727
+#: ../data/ui/menu-popup.ui:25 ../src/preferences.cc:2729
 #, fuzzy
 msgid "Remove"
 msgstr "移除(_R)"
 
 # src/dupe.cc:1412 src/dupe.cc:1570
 #: ../data/ui/menu-dupe-main.ui:106 ../data/ui/menu-dupe-second.ui:31
-#: ../src/preferences.cc:1953 ../src/preferences.cc:2179
-#: ../src/view-file/view-file.cc:2100 ../src/view-file/view-file.cc:2547
-#: ../src/window.cc:210
+#: ../src/preferences.cc:1955 ../src/preferences.cc:2181
+#: ../src/view-file/view-file.cc:2100 ../src/view-file/view-file.cc:2558
+#: ../src/window.cc:226
 #, fuzzy
 msgid "Clear"
 msgstr "清除(_L)"
@@ -742,13 +742,13 @@ msgstr "暫停投影片(_H)"
 
 # src/img-view.cc:837 src/menu.cc:1001
 #: ../data/ui/menu-img-view.ui:131 ../data/ui/menu-layout-image.ui:110
-#: ../src/preferences.cc:2379
+#: ../src/preferences.cc:2381
 #, fuzzy
 msgid "Fullscreen"
 msgstr "全螢幕"
 
 #: ../data/ui/menu-layout-image.ui:25 ../data/ui/menu-pan-view.ui:29
-#: ../data/ui/menu-view-file.ui:8 ../src/desktop-file.cc:546
+#: ../data/ui/menu-view-file.ui:8 ../src/desktop-file.cc:547
 msgid "Plugins"
 msgstr ""
 
@@ -802,7 +802,7 @@ msgstr "隱藏檔案列表(_H)"
 
 # src/menu.cc:754
 #: ../data/ui/menu-layout-image.ui:124 ../data/ui/menu-main.ui:1112
-#: ../src/preferences.cc:2120
+#: ../src/preferences.cc:2122
 #, fuzzy
 msgid "Hide Selectable Bars"
 msgstr "隱藏工具列(_B)"
@@ -1039,7 +1039,7 @@ msgid "Show _Marks"
 msgstr "顯示隱藏檔案"
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../data/ui/menu-main.ui:211 ../src/layout-util.cc:365
+#: ../data/ui/menu-main.ui:211 ../src/layout-util.cc:380
 #, fuzzy
 msgid "Clear Marks"
 msgstr "清除垃圾桶"
@@ -1593,7 +1593,7 @@ msgstr "覆寫檔案"
 msgid "_Save metadata"
 msgstr "附屬資料"
 
-#: ../data/ui/menu-main.ui:659 ../src/bar-keywords.cc:1443
+#: ../data/ui/menu-main.ui:659 ../src/bar-keywords.cc:1494
 #, fuzzy
 msgid "Keyword autocomplete"
 msgstr "關鍵字:"
@@ -1733,7 +1733,7 @@ msgid "_Hide file list"
 msgstr "隱藏檔案列表(_H)"
 
 # src/img-view.cc:789 src/menu.cc:944 src/menu.cc:1079
-#: ../data/ui/menu-main.ui:784 ../src/osd.cc:65 ../src/preferences.cc:2201
+#: ../data/ui/menu-main.ui:784 ../src/osd.cc:65 ../src/preferences.cc:2203
 msgid "Zoom"
 msgstr "縮放"
 
@@ -1912,7 +1912,7 @@ msgstr ""
 msgid "Auto"
 msgstr ""
 
-#: ../data/ui/menu-main.ui:951 ../src/preferences.cc:1061
+#: ../data/ui/menu-main.ui:951 ../src/preferences.cc:1062
 msgid "Side by Side"
 msgstr ""
 
@@ -2114,14 +2114,14 @@ msgid "New window from current"
 msgstr "用這個目錄"
 
 # src/menu.cc:711
-#: ../data/ui/menu-main.ui:1173 ../src/layout-util.cc:2458
-#: ../src/layout-util.cc:2639
+#: ../data/ui/menu-main.ui:1173 ../src/layout-util.cc:2649
+#: ../src/layout-util.cc:2830
 #, fuzzy
 msgid "Rename window"
 msgstr "新視窗(_W)"
 
 # src/dupe.cc:1415 src/dupe.cc:1573 src/img-view.cc:841
-#: ../data/ui/menu-main.ui:1177 ../src/layout-util.cc:2712
+#: ../data/ui/menu-main.ui:1177 ../src/layout-util.cc:2903
 #, fuzzy
 msgid "Delete window"
 msgstr "關閉視窗(_L)"
@@ -2225,7 +2225,7 @@ msgstr "沒有"
 msgid "Full size"
 msgstr "全部大小"
 
-#: ../data/ui/menu-pan-view.ui:110 ../src/pan-view/pan-view.cc:1963
+#: ../data/ui/menu-pan-view.ui:110 ../src/pan-view/pan-view.cc:1946
 msgid "1:2 (50%)"
 msgstr "1:2 (50%)"
 
@@ -2234,11 +2234,11 @@ msgstr "1:2 (50%)"
 msgid "1:3 (30%)"
 msgstr "1:3 (33%)"
 
-#: ../data/ui/menu-pan-view.ui:120 ../src/pan-view/pan-view.cc:1961
+#: ../data/ui/menu-pan-view.ui:120 ../src/pan-view/pan-view.cc:1944
 msgid "1:4 (25%)"
 msgstr "1:4 (25%)"
 
-#: ../data/ui/menu-pan-view.ui:125 ../src/pan-view/pan-view.cc:1960
+#: ../data/ui/menu-pan-view.ui:125 ../src/pan-view/pan-view.cc:1943
 msgid "1:10 (10%)"
 msgstr "1:10 (10%)"
 
@@ -2328,77 +2328,77 @@ msgstr "根據日期排列"
 msgid "Refresh"
 msgstr "重新整理(_R)"
 
-#: ../data/ui/search-and-run.ui:30 ../src/search-and-run.cc:396
+#: ../data/ui/search-and-run.ui:30 ../src/search-and-run.cc:398
 msgid "Search and Run command - Geeqie"
 msgstr ""
 
 #: ../data/ui/search-and-run.ui:38 ../data/ui/search-and-run.ui:40
-#: ../src/search-and-run.cc:404
+#: ../src/search-and-run.cc:406
 msgid "Search for commands and run them"
 msgstr ""
 
-#: ../src/advanced-exif.cc:486 ../src/cache-maint.cc:1624
-#: ../src/filefilter.cc:91 ../src/preferences.cc:2754 ../src/search.cc:2430
-#: ../src/search.cc:3321
+#: ../src/advanced-exif.cc:502 ../src/cache-maint.cc:1624
+#: ../src/filefilter.cc:91 ../src/preferences.cc:2756 ../src/search.cc:2444
+#: ../src/search.cc:3335
 msgid "Metadata"
 msgstr "附屬資料"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/advanced-exif.cc:521 ../src/preferences.cc:3128
+#: ../src/advanced-exif.cc:541 ../src/preferences.cc:3130
 #, fuzzy
 msgid "Search"
 msgstr "搜尋:"
 
-#: ../src/advanced-exif.cc:548 ../src/preferences.cc:2711
-#: ../src/preferences.cc:3689
+#: ../src/advanced-exif.cc:568 ../src/preferences.cc:2713
+#: ../src/preferences.cc:3694
 msgid "Description"
 msgstr "描述"
 
-#: ../src/advanced-exif.cc:549 ../src/search.cc:3252
+#: ../src/advanced-exif.cc:569 ../src/search.cc:3266
 msgid "Value"
 msgstr "值"
 
 # src/dupe.cc:1652 src/dupe.cc:1941
-#: ../src/advanced-exif.cc:550 ../src/desktop-file.cc:604 ../src/dupe.cc:3652
+#: ../src/advanced-exif.cc:570 ../src/desktop-file.cc:606 ../src/dupe.cc:3652
 #: ../src/dupe.cc:3987 ../src/dupe.cc:4256 ../src/osd.cc:61
-#: ../src/search.cc:3369 ../src/utilops.cc:773
-#: ../src/view-file/view-file-list.cc:2039
-#: ../src/view-file/view-file-list.cc:2043
+#: ../src/search.cc:3384 ../src/utilops.cc:773
+#: ../src/view-file/view-file-list.cc:2064
+#: ../src/view-file/view-file-list.cc:2068
 msgid "Name"
 msgstr "名稱"
 
-#: ../src/advanced-exif.cc:551 ../src/search.cc:3237
+#: ../src/advanced-exif.cc:571 ../src/search.cc:3251
 msgid "Tag"
 msgstr "標籤"
 
 # src/preferences.cc:401
-#: ../src/advanced-exif.cc:552
+#: ../src/advanced-exif.cc:572
 msgid "Format"
 msgstr "格式"
 
-#: ../src/advanced-exif.cc:553
+#: ../src/advanced-exif.cc:573
 msgid "Elements"
 msgstr "元素"
 
 # src/menu.cc:771
-#: ../src/advanced-exif.cc:574 ../src/bar.cc:289 ../src/bar-sort.cc:417
-#: ../src/bar-sort.cc:676 ../src/cache-maint.cc:1563 ../src/desktop-file.cc:565
-#: ../src/dupe.cc:4438 ../src/layout.cc:2711 ../src/layout-util.cc:369
-#: ../src/preferences.cc:2450 ../src/preferences.cc:3896 ../src/search.cc:3430
-#: ../src/trash.cc:320 ../src/view-file/view-file.cc:2080 ../src/window.cc:164
+#: ../src/advanced-exif.cc:594 ../src/bar.cc:302 ../src/bar-sort.cc:417
+#: ../src/bar-sort.cc:676 ../src/cache-maint.cc:1563 ../src/desktop-file.cc:567
+#: ../src/dupe.cc:4438 ../src/layout.cc:2710 ../src/layout-util.cc:384
+#: ../src/preferences.cc:2452 ../src/preferences.cc:3902 ../src/search.cc:3445
+#: ../src/trash.cc:346 ../src/view-file/view-file.cc:2080 ../src/window.cc:180
 #, fuzzy
 msgid "Help"
 msgstr "求助(_H)"
 
-#: ../src/advanced-exif.cc:579 ../src/cache-maint.cc:401
+#: ../src/advanced-exif.cc:599 ../src/cache-maint.cc:401
 #: ../src/cache-maint.cc:789 ../src/cache-maint.cc:1052
 #: ../src/cache-maint.cc:1396 ../src/cache-maint.cc:1508
-#: ../src/cache-maint.cc:1561 ../src/desktop-file.cc:275
-#: ../src/desktop-file.cc:579 ../src/dupe.cc:2855 ../src/dupe.cc:4444
-#: ../src/editors.cc:651 ../src/preferences.cc:1691 ../src/preferences.cc:3051
-#: ../src/search.cc:3444 ../src/ui-fileops.cc:97 ../src/utilops.cc:898
-#: ../src/utilops.cc:2288 ../src/utilops.cc:2331 ../src/utilops.cc:2934
-#: ../src/utilops.cc:3308
+#: ../src/cache-maint.cc:1561 ../src/desktop-file.cc:276
+#: ../src/desktop-file.cc:581 ../src/dupe.cc:2855 ../src/dupe.cc:4444
+#: ../src/editors.cc:664 ../src/preferences.cc:1693 ../src/preferences.cc:3053
+#: ../src/search.cc:3459 ../src/ui-fileops.cc:97 ../src/utilops.cc:898
+#: ../src/utilops.cc:2290 ../src/utilops.cc:2333 ../src/utilops.cc:2936
+#: ../src/utilops.cc:3310
 msgid "Close"
 msgstr ""
 
@@ -2422,113 +2422,113 @@ msgstr ""
 msgid "Warning: libarchive not installed"
 msgstr ""
 
-#: ../src/bar.cc:205
+#: ../src/bar.cc:225
 msgid "Histogram"
 msgstr ""
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/bar.cc:206
+#: ../src/bar.cc:226
 #, fuzzy
 msgid "Title"
 msgstr "無標題"
 
-#: ../src/bar.cc:207 ../src/osd.cc:72 ../src/preferences.cc:3124
-#: ../src/search.cc:3194
+#: ../src/bar.cc:227 ../src/osd.cc:72 ../src/preferences.cc:3126
+#: ../src/search.cc:3208
 msgid "Keywords"
 msgstr "關鍵字"
 
 # src/dupe.cc:1948
-#: ../src/bar.cc:208 ../src/osd.cc:71 ../src/search.cc:3211
+#: ../src/bar.cc:228 ../src/osd.cc:71 ../src/search.cc:3225
 #, fuzzy
 msgid "Comment"
 msgstr "註解:"
 
 # src/ui-pathsel.cc:799
-#: ../src/bar.cc:209 ../src/preferences.cc:2044
+#: ../src/bar.cc:229 ../src/preferences.cc:2046
 #, fuzzy
 msgid "Star Rating"
 msgstr "列印錯誤"
 
 # src/preferences.cc:369
-#: ../src/bar.cc:210
+#: ../src/bar.cc:230
 #, fuzzy
 msgid "Headline"
 msgstr "時間線"
 
 # src/main.cc:622
-#: ../src/bar.cc:211 ../src/search.cc:3232
+#: ../src/bar.cc:231 ../src/search.cc:3246
 msgid "Exif"
 msgstr "Exif"
 
-#: ../src/bar.cc:213
+#: ../src/bar.cc:233
 #, fuzzy
 msgid "File info"
 msgstr "找不到檔案"
 
 # src/preferences.cc:897
-#: ../src/bar.cc:214
+#: ../src/bar.cc:234
 #, fuzzy
 msgid "Location and GPS"
 msgstr "位置:"
 
 # src/utilops.cc:592
-#: ../src/bar.cc:215 ../src/exif.cc:347
+#: ../src/bar.cc:235 ../src/exif.cc:347
 msgid "Copyright"
 msgstr "版權"
 
-#: ../src/bar.cc:217 ../src/bar-gps.cc:945
+#: ../src/bar.cc:237 ../src/bar-gps.cc:1011
 msgid "GPS Map"
 msgstr ""
 
-#: ../src/bar.cc:262 ../src/bar.cc:269
+#: ../src/bar.cc:275 ../src/bar.cc:282
 #, fuzzy
 msgid "Add metadata pane"
 msgstr "附屬資料"
 
-#: ../src/bar.cc:270
+#: ../src/bar.cc:283
 msgid "Enter any XMP, EXIF, or IPTC metadata key."
 msgstr ""
 
-#: ../src/bar.cc:295 ../src/bar-exif.cc:540
+#: ../src/bar.cc:308 ../src/bar-exif.cc:535
 msgid "Key:"
 msgstr ""
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/bar.cc:311
+#: ../src/bar.cc:324
 #, fuzzy
 msgid "Pane title:"
 msgstr "無標題"
 
-#: ../src/bar.cc:313
+#: ../src/bar.cc:326
 msgid "Automatic"
 msgstr ""
 
-#: ../src/bar.cc:397 ../src/bar-sort.cc:670 ../src/preferences.cc:2726
+#: ../src/bar.cc:412 ../src/bar-sort.cc:670 ../src/preferences.cc:2728
 #: ../src/shortcuts.cc:62 ../src/toolbar.cc:323
 msgid "Add"
 msgstr ""
 
-#: ../src/bar.cc:407
+#: ../src/bar.cc:422
 #, fuzzy
 msgid "Metadata key…"
 msgstr "附屬資料"
 
 # src/collect-table.cc:86
-#: ../src/bar.cc:422
+#: ../src/bar.cc:437
 #, fuzzy
 msgid "Add Pane"
 msgstr "新增圖像"
 
-#: ../src/bar.cc:597
+#: ../src/bar.cc:607
 msgid "Expand or collapse pane"
 msgstr ""
 
-#: ../src/bar-comment.cc:218
+#: ../src/bar-comment.cc:242
 #, fuzzy
 msgid "Add text to selected files"
 msgstr "在選取的檔案中加入關鍵字"
 
-#: ../src/bar-comment.cc:222
+#: ../src/bar-comment.cc:246
 #, fuzzy
 msgid "Replace existing text in selected files"
 msgstr "將已存在的檔案置掉"
@@ -2539,50 +2539,50 @@ msgstr ""
 
 #
 # src/menu.cc:1087
-#: ../src/bar-exif.cc:524 ../src/bar-exif.cc:534
+#: ../src/bar-exif.cc:519 ../src/bar-exif.cc:529
 #, fuzzy
 msgid "Configure entry"
 msgstr "設定選項"
 
-#: ../src/bar-exif.cc:548
+#: ../src/bar-exif.cc:543
 msgid "Title:"
 msgstr ""
 
-#: ../src/bar-exif.cc:556
+#: ../src/bar-exif.cc:551
 msgid "Show only if set"
 msgstr ""
 
-#: ../src/bar-exif.cc:557
+#: ../src/bar-exif.cc:552
 msgid "Editable (supported only for XMP)"
 msgstr ""
 
-#: ../src/bar-gps.cc:203
+#: ../src/bar-gps.cc:202
 #, c-format
 msgid ""
 "\n"
 "Do you want to geocode image %s?"
 msgstr ""
 
-#: ../src/bar-gps.cc:207
+#: ../src/bar-gps.cc:206
 #, c-format
 msgid ""
 "\n"
 "Do you want to geocode %i images?"
 msgstr ""
 
-#: ../src/bar-gps.cc:212
+#: ../src/bar-gps.cc:211
 msgid ""
 "\n"
 "This image is already geocoded!"
 msgstr ""
 
-#: ../src/bar-gps.cc:216
+#: ../src/bar-gps.cc:215
 msgid ""
 "\n"
 "One image is already geocoded!"
 msgstr ""
 
-#: ../src/bar-gps.cc:220
+#: ../src/bar-gps.cc:219
 #, c-format
 msgid ""
 "\n"
@@ -2590,7 +2590,7 @@ msgid ""
 msgstr ""
 
 # src/preferences.cc:897
-#: ../src/bar-gps.cc:223
+#: ../src/bar-gps.cc:222
 #, fuzzy
 msgid ""
 "\n"
@@ -2600,229 +2600,229 @@ msgstr "位置:"
 
 #
 # src/preferences.cc:660
-#: ../src/bar-gps.cc:225
+#: ../src/bar-gps.cc:224
 #, fuzzy
 msgid "Geocode images"
 msgstr "預先載入下個圖像"
 
-#: ../src/bar-gps.cc:226
+#: ../src/bar-gps.cc:225
 #, fuzzy
 msgid "Write lat/long to meta-data?"
 msgstr "附屬資料"
 
-#: ../src/bar-gps.cc:227 ../src/bar-sort.cc:513 ../src/collect-dlg.cc:106
-#: ../src/desktop-file.cc:278 ../src/dupe.cc:4143 ../src/layout.cc:1567
+#: ../src/bar-gps.cc:226 ../src/bar-sort.cc:513 ../src/collect-dlg.cc:106
+#: ../src/desktop-file.cc:279 ../src/dupe.cc:4143 ../src/layout.cc:1565
 #: ../src/view-file/view-file.cc:1281
 msgid "Save"
 msgstr ""
 
 # src/utilops.cc:539
-#: ../src/bar-gps.cc:420
+#: ../src/bar-gps.cc:419
 #, fuzzy, c-format
 msgid "Image direction: %.1f°"
 msgstr "影像描述"
 
-#: ../src/bar-gps.cc:820
+#: ../src/bar-gps.cc:892
 msgid "Enable markers"
 msgstr ""
 
-#: ../src/bar-gps.cc:825
+#: ../src/bar-gps.cc:897
 msgid "Centre map on marker"
 msgstr ""
 
-#: ../src/bar-histogram.cc:303
+#: ../src/bar-histogram.cc:323
 msgid "Histogram on _Red"
 msgstr ""
 
-#: ../src/bar-histogram.cc:304
+#: ../src/bar-histogram.cc:324
 msgid "Histogram on _Green"
 msgstr ""
 
-#: ../src/bar-histogram.cc:305
+#: ../src/bar-histogram.cc:325
 msgid "Histogram on _Blue"
 msgstr ""
 
-#: ../src/bar-histogram.cc:306
+#: ../src/bar-histogram.cc:326
 msgid "_Histogram on RGB"
 msgstr ""
 
-#: ../src/bar-histogram.cc:307
+#: ../src/bar-histogram.cc:327
 msgid "Histogram on _Value"
 msgstr ""
 
-#: ../src/bar-histogram.cc:310
+#: ../src/bar-histogram.cc:330
 msgid "Li_near Histogram"
 msgstr ""
 
-#: ../src/bar-histogram.cc:311
+#: ../src/bar-histogram.cc:331
 msgid "L_og Histogram"
 msgstr ""
 
-#: ../src/bar-keywords.cc:479
+#: ../src/bar-keywords.cc:525
 #, fuzzy
 msgid "Add selected keywords to selected files"
 msgstr "在選取的檔案中加入關鍵字"
 
-#: ../src/bar-keywords.cc:483
+#: ../src/bar-keywords.cc:529
 #, fuzzy
 msgid "Remove selected keywords from selected files"
 msgstr "在選取的檔案中加入關鍵字"
 
-#: ../src/bar-keywords.cc:487
+#: ../src/bar-keywords.cc:533
 #, fuzzy
 msgid "Replace existing keywords in selected files with selected keywords"
 msgstr "在選取的檔案中加入關鍵字"
 
 #
 # src/preferences.cc:915
-#: ../src/bar-keywords.cc:739
+#: ../src/bar-keywords.cc:785
 #, fuzzy
 msgid "Edit keyword"
 msgstr "編輯器"
 
-#: ../src/bar-keywords.cc:739 ../src/bar-keywords.cc:746
-#: ../src/bar-keywords.cc:1093
+#: ../src/bar-keywords.cc:785 ../src/bar-keywords.cc:792
+#: ../src/bar-keywords.cc:1139
 #, fuzzy
 msgid "New keyword"
 msgstr "關鍵字"
 
 #
 # src/menu.cc:1087
-#: ../src/bar-keywords.cc:746
+#: ../src/bar-keywords.cc:792
 #, fuzzy
 msgid "Configure keyword"
 msgstr "設定選項"
 
-#: ../src/bar-keywords.cc:752
+#: ../src/bar-keywords.cc:798
 #, fuzzy
 msgid "Keyword:"
 msgstr "關鍵字:"
 
-#: ../src/bar-keywords.cc:760
+#: ../src/bar-keywords.cc:806
 #, fuzzy
 msgid "Keyword type:"
 msgstr "關鍵字:"
 
-#: ../src/bar-keywords.cc:762
+#: ../src/bar-keywords.cc:808
 #, fuzzy
 msgid "Active keyword"
 msgstr "作用中的顯示器"
 
 # src/menu.cc:771
-#: ../src/bar-keywords.cc:764
+#: ../src/bar-keywords.cc:810
 #, fuzzy
 msgid "Helper"
 msgstr "求助(_H)"
 
-#: ../src/bar-keywords.cc:804
+#: ../src/bar-keywords.cc:850
 #, fuzzy
 msgid "Marks Keywords"
 msgstr "關鍵字"
 
-#: ../src/bar-keywords.cc:808
+#: ../src/bar-keywords.cc:854
 msgid "Disconnect all Marks Keywords connections?"
 msgstr ""
 
-#: ../src/bar-keywords.cc:808
+#: ../src/bar-keywords.cc:854
 msgid "This will disconnect all Marks Keywords connections"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1117
+#: ../src/bar-keywords.cc:1163
 #, fuzzy, c-format
 msgid "Add \"%s\" to all selected images"
 msgstr "在選取的檔案中加入關鍵字"
 
-#: ../src/bar-keywords.cc:1120
+#: ../src/bar-keywords.cc:1166
 #, fuzzy, c-format
 msgid "Remove \"%s\" from all selected images"
 msgstr "在選取的檔案中加入關鍵字"
 
-#: ../src/bar-keywords.cc:1125
+#: ../src/bar-keywords.cc:1171
 #, c-format
 msgid "Hide \"%s\""
 msgstr ""
 
-#: ../src/bar-keywords.cc:1130
+#: ../src/bar-keywords.cc:1176
 #, c-format
 msgid "Connect \"%s\" to mark"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1134 ../src/view-file/view-file.cc:2020
+#: ../src/bar-keywords.cc:1180 ../src/view-file/view-file.cc:2020
 #, fuzzy, c-format
 msgid "Mark %d"
 msgstr "新增書籤"
 
 #
 # src/preferences.cc:915
-#: ../src/bar-keywords.cc:1141
+#: ../src/bar-keywords.cc:1187
 #, fuzzy, c-format
 msgid "Edit \"%s\""
 msgstr "編輯器"
 
 # src/collect-table.cc:622 src/dupe.cc:1410 src/dupe.cc:1568
-#: ../src/bar-keywords.cc:1145
+#: ../src/bar-keywords.cc:1191
 #, fuzzy, c-format
 msgid "Remove \"%s\""
 msgstr "移除(_R)"
 
-#: ../src/bar-keywords.cc:1150
+#: ../src/bar-keywords.cc:1196
 #, c-format
 msgid "Disconnect \"%s\" from mark %s"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1156
+#: ../src/bar-keywords.cc:1202
 msgid "Disconnect all Mark Keyword connections"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1164 ../src/bar-keywords.cc:1175
+#: ../src/bar-keywords.cc:1210 ../src/bar-keywords.cc:1221
 msgid "Expand checked"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1165 ../src/bar-keywords.cc:1176
+#: ../src/bar-keywords.cc:1211 ../src/bar-keywords.cc:1222
 msgid "Collapse unchecked"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1166 ../src/bar-keywords.cc:1177
+#: ../src/bar-keywords.cc:1212 ../src/bar-keywords.cc:1223
 msgid "Hide unchecked"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1167
+#: ../src/bar-keywords.cc:1213
 msgid "Revert all hidden"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1169 ../src/dupe.cc:3668
+#: ../src/bar-keywords.cc:1215 ../src/dupe.cc:3668
 #, fuzzy
 msgid "Show all"
 msgstr "顯示"
 
-#: ../src/bar-keywords.cc:1170
+#: ../src/bar-keywords.cc:1216
 msgid "Collapse all"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1171
+#: ../src/bar-keywords.cc:1217
 msgid "Revert"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1174
+#: ../src/bar-keywords.cc:1220
 msgid "On any change"
 msgstr ""
 
-#: ../src/bar-keywords.cc:1793
+#: ../src/bar-keywords.cc:1790
 #, fuzzy
 msgid "Keyword Autocomplete"
 msgstr "關鍵字:"
 
-#: ../src/bar-keywords.cc:1794
+#: ../src/bar-keywords.cc:1791
 msgid "The Info Sidebar has not yet been opened"
 msgstr ""
 
 # src/utilops.cc:707
-#: ../src/bar-rating.cc:160 ../src/filefilter.cc:99
+#: ../src/bar-rating.cc:169 ../src/filefilter.cc:99
 #, fuzzy
 msgid "Rejected"
 msgstr "重設過濾器"
 
-#: ../src/bar-rating.cc:165 ../src/filefilter.cc:100
+#: ../src/bar-rating.cc:174 ../src/filefilter.cc:100
 msgid "Unrated"
 msgstr ""
 
@@ -2871,14 +2871,13 @@ msgid "Add Bookmark - Geeqie"
 msgstr "新增書籤"
 
 # src/collect-dlg.cc:194
-#: ../src/bar-sort.cc:518 ../src/collect-dlg.cc:111 ../src/layout-util.cc:1203
-#: ../src/search.cc:2996
+#: ../src/bar-sort.cc:518 ../src/collect-dlg.cc:111 ../src/search.cc:3010
 #, fuzzy
 msgid "Collection files"
 msgstr "圖像集檔案"
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/bar-sort.cc:520 ../src/collect-dlg.cc:113 ../src/layout-util.cc:1083
+#: ../src/bar-sort.cc:520 ../src/collect-dlg.cc:113 ../src/layout-util.cc:1154
 #, fuzzy
 msgid "Untitled.gqv"
 msgstr "無標題"
@@ -2897,12 +2896,12 @@ msgid "Sort Manager"
 msgstr "排列管理員"
 
 # src/preferences.cc:368
-#: ../src/bar-sort.cc:583 ../src/pan-view/pan-view.cc:1942
+#: ../src/bar-sort.cc:583 ../src/pan-view/pan-view.cc:1925
 msgid "Folders"
 msgstr "資料夾"
 
 # src/preferences.cc:897
-#: ../src/bar-sort.cc:583 ../src/collect-io.cc:352 ../src/ui-bookmark.cc:834
+#: ../src/bar-sort.cc:583 ../src/ui-bookmark.cc:834
 msgid "Collections"
 msgstr "圖像集"
 
@@ -2911,14 +2910,14 @@ msgid "See the Help file for additional functions"
 msgstr ""
 
 # src/utilops.cc:592
-#: ../src/bar-sort.cc:594 ../src/preferences.cc:814 ../src/utilops.cc:1894
-#: ../src/utilops.cc:2607
+#: ../src/bar-sort.cc:594 ../src/preferences.cc:815 ../src/utilops.cc:1894
+#: ../src/utilops.cc:2609
 msgid "Copy"
 msgstr "複製"
 
 # src/utilops.cc:601
-#: ../src/bar-sort.cc:600 ../src/preferences.cc:814 ../src/utilops.cc:1894
-#: ../src/utilops.cc:2559
+#: ../src/bar-sort.cc:600 ../src/preferences.cc:815 ../src/utilops.cc:1894
+#: ../src/utilops.cc:2561
 msgid "Move"
 msgstr "移動"
 
@@ -2965,7 +2964,7 @@ msgstr "正在清除預覽小圖..."
 # src/preferences.cc:400
 #: ../src/cache-maint.cc:223 ../src/cache-maint.cc:583
 #: ../src/cache-maint.cc:691 ../src/cache-maint.cc:881
-#: ../src/cache-maint.cc:1320 ../src/editors.cc:1280 ../src/preferences.cc:2940
+#: ../src/cache-maint.cc:1320 ../src/editors.cc:1293 ../src/preferences.cc:2942
 msgid "done"
 msgstr "完成"
 
@@ -2993,7 +2992,7 @@ msgstr "操作"
 
 #: ../src/cache-maint.cc:404 ../src/cache-maint.cc:793
 #: ../src/cache-maint.cc:1056 ../src/cache-maint.cc:1400 ../src/dupe.cc:4442
-#: ../src/preferences.cc:3055 ../src/search.cc:3439 ../src/utilops.cc:894
+#: ../src/preferences.cc:3057 ../src/search.cc:3454 ../src/utilops.cc:894
 msgid "Stop"
 msgstr ""
 
@@ -3005,12 +3004,12 @@ msgstr "由使用者停止"
 
 # src/collect-dlg.cc:59
 #: ../src/cache-maint.cc:720 ../src/cache-maint.cc:1350
-#: ../src/cache-maint.cc:1475 ../src/preferences.cc:3017
+#: ../src/cache-maint.cc:1475 ../src/preferences.cc:3019
 msgid "Invalid folder"
 msgstr "資料夾無效"
 
 #: ../src/cache-maint.cc:721 ../src/cache-maint.cc:1351
-#: ../src/cache-maint.cc:1476 ../src/preferences.cc:3018
+#: ../src/cache-maint.cc:1476 ../src/preferences.cc:3020
 msgid "The specified folder can not be found."
 msgstr "找不到指定的資料夾."
 
@@ -3022,25 +3021,25 @@ msgstr "產生預覽小圖"
 
 #: ../src/cache-maint.cc:791 ../src/cache-maint.cc:1054
 #: ../src/cache-maint.cc:1398 ../src/cache-maint.cc:1510
-#: ../src/preferences.cc:3053
+#: ../src/preferences.cc:3055
 msgid "S_tart"
 msgstr "開始 (_T)"
 
 # src/preferences.cc:368
 #: ../src/cache-maint.cc:804 ../src/cache-maint.cc:1411
-#: ../src/cache-maint.cc:1520 ../src/preferences.cc:3066
-#: ../src/preferences.cc:3358
+#: ../src/cache-maint.cc:1520 ../src/preferences.cc:3068
+#: ../src/preferences.cc:3360
 msgid "Folder:"
 msgstr "資料夾："
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
 #: ../src/cache-maint.cc:807 ../src/cache-maint.cc:1414
-#: ../src/cache-maint.cc:1523 ../src/preferences.cc:3069
+#: ../src/cache-maint.cc:1523 ../src/preferences.cc:3071
 msgid "Select folder"
 msgstr "選擇資料夾"
 
 # src/collect-dlg.cc:59
-#: ../src/cache-maint.cc:809 ../src/preferences.cc:3071
+#: ../src/cache-maint.cc:809 ../src/preferences.cc:3073
 msgid "Include subfolders"
 msgstr "包含子目錄"
 
@@ -3049,12 +3048,12 @@ msgid "Store thumbnails local to source images"
 msgstr "將產生的預覽小圖存於影像檔所在的資料夾"
 
 #: ../src/cache-maint.cc:819 ../src/cache-maint.cc:1063
-#: ../src/cache-maint.cc:1422 ../src/preferences.cc:3079
+#: ../src/cache-maint.cc:1422 ../src/preferences.cc:3081
 msgid "click start to begin"
 msgstr "擊點開始以啟動作業"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/cache-maint.cc:985 ../src/editors.cc:1207
+#: ../src/cache-maint.cc:985 ../src/editors.cc:1220
 #, fuzzy
 msgid "running…"
 msgstr "執行中..."
@@ -3209,19 +3208,19 @@ msgid "Quit"
 msgstr "結束退出(_Q)"
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/collect.cc:474 ../src/image.cc:393 ../src/image-overlay.cc:262
+#: ../src/collect.cc:452 ../src/image.cc:393 ../src/image-overlay.cc:262
 #: ../src/image-overlay.cc:340
 msgid "Untitled"
 msgstr "無標題"
 
 # src/collect.cc:333
-#: ../src/collect.cc:478
+#: ../src/collect.cc:456
 #, c-format
 msgid "Untitled (%d)"
 msgstr "無標題（%d）"
 
 # src/collect-dlg.cc:82 src/collect.cc:1011
-#: ../src/collect-dlg.cc:46 ../src/collect-dlg.cc:71 ../src/layout.cc:1534
+#: ../src/collect-dlg.cc:46 ../src/collect-dlg.cc:71 ../src/layout.cc:1532
 #: ../src/view-file/view-file.cc:1112 ../src/view-file/view-file.cc:1208
 #, c-format
 msgid ""
@@ -3232,7 +3231,7 @@ msgstr ""
 "%s"
 
 # src/collect-dlg.cc:83 src/collect.cc:1012
-#: ../src/collect-dlg.cc:47 ../src/collect-dlg.cc:72 ../src/layout.cc:1535
+#: ../src/collect-dlg.cc:47 ../src/collect-dlg.cc:72 ../src/layout.cc:1533
 #: ../src/view-file/view-file.cc:1113
 msgid "Save Failed"
 msgstr "儲存失敗"
@@ -3256,16 +3255,6 @@ msgstr "儲存圖像集"
 #, fuzzy
 msgid "Append Collection - Geeqie"
 msgstr "加入圖像集"
-
-#: ../src/collect-io.cc:347
-#, c-format
-msgid ""
-"This Collection cannot be opened because it contains a link to a file on a "
-"drive which is not yet mounted.\n"
-"\n"
-"Collection: %s\n"
-"File: %s\n"
-msgstr ""
 
 #: ../src/color-man.cc:319 ../src/exif.cc:231 ../src/exif-common.cc:446
 msgid "sRGB"
@@ -3459,8 +3448,8 @@ msgid ""
 msgstr ""
 
 # src/menu.cc:773
-#: ../src/desktop-file.cc:145 ../src/preferences.cc:1801
-#: ../src/preferences.cc:1804
+#: ../src/desktop-file.cc:145 ../src/preferences.cc:1803
+#: ../src/preferences.cc:1806
 #, fuzzy
 msgid "Shortcut conflict"
 msgstr "捷徑鍵(_K)"
@@ -3472,14 +3461,14 @@ msgid "Could not create directory"
 msgstr "無法建立資料夾"
 
 # src/utilops.cc:989
-#: ../src/desktop-file.cc:239 ../src/desktop-file.cc:613
+#: ../src/desktop-file.cc:239 ../src/desktop-file.cc:615
 #, fuzzy
 msgid "Desktop file"
 msgstr "桌面："
 
 #
 # src/ui-pathsel.cc:343 src/utilops.cc:675 src/utilops.cc:727
-#: ../src/desktop-file.cc:344
+#: ../src/desktop-file.cc:345
 #, c-format
 msgid ""
 "Unable to delete file:\n"
@@ -3489,20 +3478,20 @@ msgstr ""
 "%s"
 
 # src/ui-pathsel.cc:344 src/utilops.cc:728
-#: ../src/desktop-file.cc:345 ../src/utilops.cc:2423 ../src/utilops.cc:2475
-#: ../src/utilops.cc:2966
+#: ../src/desktop-file.cc:346 ../src/utilops.cc:2425 ../src/utilops.cc:2477
+#: ../src/utilops.cc:2968
 msgid "File deletion failed"
 msgstr "刪除檔案失敗"
 
 #
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/desktop-file.cc:377 ../src/desktop-file.cc:385
+#: ../src/desktop-file.cc:378 ../src/desktop-file.cc:386
 msgid "Delete file"
 msgstr "刪除檔案"
 
 #
 # src/ui-pathsel.cc:397 src/utilops.cc:759
-#: ../src/desktop-file.cc:383
+#: ../src/desktop-file.cc:384
 #, c-format
 msgid ""
 "About to delete the file:\n"
@@ -3512,32 +3501,32 @@ msgstr ""
 " %s"
 
 # src/utilops.cc:989
-#: ../src/desktop-file.cc:403
+#: ../src/desktop-file.cc:404
 #, fuzzy
 msgid "new.desktop"
 msgstr "桌面："
 
-#: ../src/desktop-file.cc:568
+#: ../src/desktop-file.cc:570
 msgid "New"
 msgstr ""
 
 # src/menu.cc:726
-#: ../src/desktop-file.cc:571
+#: ../src/desktop-file.cc:573
 #, fuzzy
 msgid "Edit"
 msgstr "編輯(_E)"
 
-#: ../src/desktop-file.cc:600
+#: ../src/desktop-file.cc:602
 msgid "Disabled"
 msgstr ""
 
-#: ../src/desktop-file.cc:609
+#: ../src/desktop-file.cc:611
 msgid "Hidden"
 msgstr ""
 
 # src/dupe.cc:1657 src/dupe.cc:1945
-#: ../src/desktop-file.cc:617 ../src/dupe.cc:3658 ../src/dupe.cc:3987
-#: ../src/dupe.cc:4260 ../src/osd.cc:62 ../src/search.cc:3373
+#: ../src/desktop-file.cc:619 ../src/dupe.cc:3658 ../src/dupe.cc:3987
+#: ../src/dupe.cc:4260 ../src/osd.cc:62 ../src/search.cc:3388
 #: ../src/utilops.cc:769
 msgid "Path"
 msgstr "路徑"
@@ -3564,8 +3553,8 @@ msgid "[set 1]"
 msgstr "[群集 1]"
 
 # src/collect-table.cc:100 src/dupe.cc:668 src/filelist.c:1811
-#: ../src/dupe.cc:1917 ../src/search.cc:567 ../src/view-file/view-file.cc:2744
-#: ../src/view-file/view-file.cc:2853
+#: ../src/dupe.cc:1917 ../src/search.cc:567 ../src/view-file/view-file.cc:2755
+#: ../src/view-file/view-file.cc:2864
 #, fuzzy
 msgid "Loading thumbs…"
 msgstr "正在載入預覽小圖..."
@@ -3635,22 +3624,22 @@ msgstr "排序時考慮大小寫"
 
 # src/dupe.cc:1653 src/dupe.cc:1942
 #: ../src/dupe.cc:3654 ../src/dupe.cc:3987 ../src/dupe.cc:4257 ../src/osd.cc:64
-#: ../src/preferences.cc:2366 ../src/search.cc:3370
-#: ../src/view-file/view-file-list.cc:2051
-#: ../src/view-file/view-file-list.cc:2059
+#: ../src/preferences.cc:2368 ../src/search.cc:3385
+#: ../src/view-file/view-file-list.cc:2076
+#: ../src/view-file/view-file-list.cc:2084
 msgid "Size"
 msgstr "檔案大小"
 
 # src/dupe.cc:1654 src/dupe.cc:1943
 #: ../src/dupe.cc:3655 ../src/dupe.cc:3987 ../src/dupe.cc:4258
 #: ../src/exif.cc:341 ../src/exif-common.cc:767 ../src/osd.cc:63
-#: ../src/search.cc:3371 ../src/view-file/view-file-list.cc:2055
+#: ../src/search.cc:3386 ../src/view-file/view-file-list.cc:2080
 msgid "Date"
 msgstr "日期"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
 #: ../src/dupe.cc:3656 ../src/dupe.cc:4259 ../src/osd.cc:66
-#: ../src/search.cc:3372
+#: ../src/search.cc:3387
 msgid "Dimensions"
 msgstr "圖像尺寸"
 
@@ -3709,8 +3698,8 @@ msgid "Similarity"
 msgstr "類似度"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/dupe.cc:3987 ../src/dupe.cc:4261 ../src/preferences.cc:1962
-#: ../src/preferences.cc:2357
+#: ../src/dupe.cc:3987 ../src/dupe.cc:4261 ../src/preferences.cc:1964
+#: ../src/preferences.cc:2359
 #, fuzzy
 msgid "Set"
 msgstr "搜尋:"
@@ -3721,11 +3710,11 @@ msgstr "搜尋:"
 msgid "Thumbnail"
 msgstr "預覽小圖"
 
-#: ../src/dupe.cc:3987 ../src/exif.cc:380 ../src/preferences.cc:3829
+#: ../src/dupe.cc:3987 ../src/exif.cc:380 ../src/preferences.cc:3834
 msgid "Width"
 msgstr "寬度"
 
-#: ../src/dupe.cc:3987 ../src/exif.cc:381 ../src/preferences.cc:3831
+#: ../src/dupe.cc:3987 ../src/exif.cc:381 ../src/preferences.cc:3836
 msgid "Height"
 msgstr "高度"
 
@@ -3767,12 +3756,12 @@ msgid "Find duplicates"
 msgstr "尋找重複檔案(_F)..."
 
 # src/preferences.cc:645
-#: ../src/dupe.cc:4254 ../src/search.cc:3367
+#: ../src/dupe.cc:4254 ../src/search.cc:3382
 msgid "Rank"
 msgstr "符合度"
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/dupe.cc:4255 ../src/search.cc:3368
+#: ../src/dupe.cc:4255 ../src/search.cc:3383
 #, fuzzy
 msgid "Thumb"
 msgstr "預覽小圖"
@@ -3784,7 +3773,7 @@ msgid "Compare to:"
 msgstr "和以下檔案比較："
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/dupe.cc:4333 ../src/preferences.cc:1992 ../src/search.cc:3393
+#: ../src/dupe.cc:4333 ../src/preferences.cc:1994 ../src/search.cc:3408
 msgid "Thumbnails"
 msgstr "預覽小圖"
 
@@ -3840,19 +3829,19 @@ msgid "Select how folders should be added."
 msgstr ""
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../src/dupe.cc:4578 ../src/img-view.cc:1396
+#: ../src/dupe.cc:4578 ../src/img-view.cc:1397
 #: ../src/view-file/view-file.cc:741
 msgid "_Add contents"
 msgstr "加入內容(_A)"
 
 # src/collect-table.cc:1821 src/dupe.cc:2173
-#: ../src/dupe.cc:4579 ../src/img-view.cc:1397
+#: ../src/dupe.cc:4579 ../src/img-view.cc:1398
 #: ../src/view-file/view-file.cc:742
 msgid "Add contents _recursive"
 msgstr "加入內容包含子目錄(_R)"
 
 # src/collect-table.cc:1822 src/dupe.cc:2174
-#: ../src/dupe.cc:4580 ../src/img-view.cc:1398
+#: ../src/dupe.cc:4580 ../src/img-view.cc:1399
 #: ../src/view-file/view-file.cc:743
 msgid "_Skip folders"
 msgstr "跳過目錄(_S)"
@@ -3861,38 +3850,38 @@ msgstr "跳過目錄(_S)"
 msgid "Please wait for the current file selection to be loaded."
 msgstr ""
 
-#: ../src/editors.cc:397
+#: ../src/editors.cc:385
 #, c-format
 msgid "Desktop file '%s' should not include extension in Icon key: '%s'\n"
 msgstr ""
 
 # src/utilops.cc:343
 #  flash fired (bit 0)
-#: ../src/editors.cc:450 ../src/exif.cc:224 ../src/exif-common.cc:383
+#: ../src/editors.cc:436 ../src/exif.cc:224 ../src/exif-common.cc:383
 msgid "yes"
 msgstr "是"
 
-#: ../src/editors.cc:450 ../src/exif.cc:223 ../src/exif-common.cc:383
+#: ../src/editors.cc:436 ../src/exif.cc:223 ../src/exif-common.cc:383
 msgid "no"
 msgstr "否"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/editors.cc:628
+#: ../src/editors.cc:641
 #, fuzzy
 msgid "stopping…"
 msgstr "停止中..."
 
-#: ../src/editors.cc:642
+#: ../src/editors.cc:655
 msgid "Edit command results"
 msgstr "編輯命令結果"
 
-#: ../src/editors.cc:645
+#: ../src/editors.cc:658
 #, c-format
 msgid "Output of %s"
 msgstr "%s 的輸出"
 
 # src/ui-help.cc:191
-#: ../src/editors.cc:1180
+#: ../src/editors.cc:1193
 #, c-format
 msgid ""
 "Failed to run command:\n"
@@ -3902,11 +3891,11 @@ msgstr ""
 "%s\n"
 
 # src/menu.cc:522
-#: ../src/editors.cc:1280
+#: ../src/editors.cc:1293
 msgid "stopped by user"
 msgstr "由使用者停止"
 
-#: ../src/editors.cc:1363
+#: ../src/editors.cc:1376
 #, c-format
 msgid ""
 "%s\n"
@@ -3914,40 +3903,40 @@ msgid ""
 msgstr ""
 
 # src/utilops.cc:539
-#: ../src/editors.cc:1365
+#: ../src/editors.cc:1378
 #, fuzzy
 msgid "Invalid editor command"
 msgstr "無效的目的地"
 
-#: ../src/editors.cc:1439
+#: ../src/editors.cc:1452
 msgid "Editor template is empty."
 msgstr ""
 
-#: ../src/editors.cc:1440
+#: ../src/editors.cc:1453
 msgid "Editor template has incorrect syntax."
 msgstr ""
 
-#: ../src/editors.cc:1441
+#: ../src/editors.cc:1454
 msgid "Editor template uses incompatible macros."
 msgstr ""
 
-#: ../src/editors.cc:1442
+#: ../src/editors.cc:1455
 msgid "Can't find matching file type."
 msgstr ""
 
-#: ../src/editors.cc:1443
+#: ../src/editors.cc:1456
 msgid "Can't execute external editor."
 msgstr ""
 
-#: ../src/editors.cc:1444
+#: ../src/editors.cc:1457
 msgid "External editor returned error status."
 msgstr ""
 
-#: ../src/editors.cc:1445
+#: ../src/editors.cc:1458
 msgid "File was skipped."
 msgstr ""
 
-#: ../src/editors.cc:1446
+#: ../src/editors.cc:1459
 msgid "Unknown error."
 msgstr ""
 
@@ -4611,7 +4600,7 @@ msgstr "浮動控制視窗"
 msgid "Contrast"
 msgstr "縱向"
 
-#: ../src/exif.cc:404 ../src/preferences.cc:3204
+#: ../src/exif.cc:404 ../src/preferences.cc:3206
 #, fuzzy
 msgid "Saturation"
 msgstr "瀏覽"
@@ -4820,12 +4809,12 @@ msgstr "第 %d 頁"
 msgid "Lens"
 msgstr ""
 
-#: ../src/filedata/filedata.cc:2349
+#: ../src/filedata/filedata.cc:2357
 msgid "file or directory does not exist"
 msgstr ""
 
 # src/utilops.cc:1144
-#: ../src/filedata/filedata.cc:2355
+#: ../src/filedata/filedata.cc:2363
 #, fuzzy
 msgid "destination already exists"
 msgstr ""
@@ -4833,66 +4822,66 @@ msgstr ""
 "%s\n"
 "已經存在。"
 
-#: ../src/filedata/filedata.cc:2361
+#: ../src/filedata/filedata.cc:2369
 msgid "destination can't be overwritten"
 msgstr ""
 
-#: ../src/filedata/filedata.cc:2367
+#: ../src/filedata/filedata.cc:2375
 msgid "destination directory is not writable"
 msgstr ""
 
-#: ../src/filedata/filedata.cc:2373
+#: ../src/filedata/filedata.cc:2381
 msgid "destination directory does not exist"
 msgstr ""
 
-#: ../src/filedata/filedata.cc:2379
+#: ../src/filedata/filedata.cc:2387
 msgid "source directory is not writable"
 msgstr ""
 
-#: ../src/filedata/filedata.cc:2385
+#: ../src/filedata/filedata.cc:2393
 #, fuzzy
 msgid "no read permission"
 msgstr "(無讀取權限) %s bytes"
 
-#: ../src/filedata/filedata.cc:2391
+#: ../src/filedata/filedata.cc:2399
 msgid "file is readonly"
 msgstr ""
 
-#: ../src/filedata/filedata.cc:2397
+#: ../src/filedata/filedata.cc:2405
 msgid "destination already exists and will be overwritten"
 msgstr ""
 
 #
 # src/utilops.cc:451
-#: ../src/filedata/filedata.cc:2403
+#: ../src/filedata/filedata.cc:2411
 #, fuzzy
 msgid "source and destination are the same"
 msgstr "來源地和目的地一樣，取消操作。"
 
 #
 # src/utilops.cc:451
-#: ../src/filedata/filedata.cc:2409
+#: ../src/filedata/filedata.cc:2417
 #, fuzzy
 msgid "source and destination have different extension"
 msgstr "來源地和目的地一樣，取消操作。"
 
-#: ../src/filedata/filedata.cc:2415
+#: ../src/filedata/filedata.cc:2423
 msgid "there are unsaved metadata changes for the file"
 msgstr ""
 
-#: ../src/filedata/filedata.cc:2421
+#: ../src/filedata/filedata.cc:2429
 msgid "another destination file has the same filename"
 msgstr ""
 
 # src/menu.cc:432 src/menu.cc:461
-#: ../src/filefilter.cc:88 ../src/search.cc:2438 ../src/search.cc:3323
+#: ../src/filefilter.cc:88 ../src/search.cc:2452 ../src/search.cc:3337
 #, fuzzy
 msgid "Unknown"
 msgstr "未知"
 
 # src/preferences.cc:676
 #: ../src/filefilter.cc:89 ../src/layout-config.cc:82
-#: ../src/preferences.cc:2199 ../src/search.cc:2414 ../src/search.cc:3317
+#: ../src/preferences.cc:2201 ../src/search.cc:2428 ../src/search.cc:3331
 msgid "Image"
 msgstr "影像"
 
@@ -4902,7 +4891,7 @@ msgstr "影像"
 msgid "RAW Image"
 msgstr "影像"
 
-#: ../src/filefilter.cc:92 ../src/search.cc:2422 ../src/search.cc:3319
+#: ../src/filefilter.cc:92 ../src/search.cc:2436 ../src/search.cc:3333
 msgid "Video"
 msgstr ""
 
@@ -4913,12 +4902,12 @@ msgid "Collection"
 msgstr "圖像集"
 
 # src/dupe.cc:1948
-#: ../src/filefilter.cc:94 ../src/search.cc:2426 ../src/search.cc:3320
+#: ../src/filefilter.cc:94 ../src/search.cc:2440 ../src/search.cc:3334
 #, fuzzy
 msgid "Document"
 msgstr "註解:"
 
-#: ../src/filefilter.cc:95 ../src/search.cc:2434 ../src/search.cc:3322
+#: ../src/filefilter.cc:95 ../src/search.cc:2448 ../src/search.cc:3336
 #, fuzzy
 msgid "Archive"
 msgstr "光圈"
@@ -5072,31 +5061,31 @@ msgid ""
 msgstr ""
 
 # src/utilops.cc:1151
-#: ../src/img-view.cc:511 ../src/layout-image.cc:540
-#: ../src/layout-image.cc:1918 ../src/layout-util.cc:955
+#: ../src/img-view.cc:512 ../src/layout-image.cc:540
+#: ../src/layout-image.cc:1918 ../src/layout-util.cc:970
 #: ../src/view-file/view-file.cc:914
 #, fuzzy
 msgid "Cannot open archive file"
 msgstr "無法建立資料夾"
 
 # src/preferences.cc:773
-#: ../src/img-view.cc:511 ../src/layout-image.cc:540
-#: ../src/layout-image.cc:1918 ../src/layout-util.cc:955
-#: ../src/preferences.cc:4058 ../src/preferences.cc:4065
+#: ../src/img-view.cc:512 ../src/layout-image.cc:540
+#: ../src/layout-image.cc:1918 ../src/layout-util.cc:970
+#: ../src/preferences.cc:4064 ../src/preferences.cc:4071
 #: ../src/view-file/view-file.cc:914
 #, fuzzy
 msgid "See the Log Window"
 msgstr "視窗"
 
 # src/collect-table.cc:1818 src/dupe.cc:2170
-#: ../src/img-view.cc:1393
+#: ../src/img-view.cc:1394
 msgid "Dropped list includes folders."
 msgstr "拖到這裡的檔案包括目錄。"
 
 # src/collect-table.cc:1824 src/dupe.cc:2176 src/preferences.cc:536
 # src/ui-utildlg.cc:105
-#: ../src/img-view.cc:1401 ../src/layout.cc:2717 ../src/preferences.cc:3899
-#: ../src/ui-utildlg.cc:378 ../src/view-dir.cc:465
+#: ../src/img-view.cc:1402 ../src/layout.cc:2716 ../src/preferences.cc:3905
+#: ../src/ui-utildlg.cc:383 ../src/view-dir.cc:588
 #: ../src/view-file/view-file.cc:744 ../src/view-file/view-file.cc:772
 msgid "Cancel"
 msgstr "取消"
@@ -5112,18 +5101,18 @@ msgid "Keys (%d)"
 msgstr "%d 個圖像 (%d)"
 
 # src/preferences.cc:773
-#: ../src/keyboard-shortcuts.cc:324 ../src/layout-util.cc:1823
+#: ../src/keyboard-shortcuts.cc:324 ../src/layout-util.cc:1967
 #, fuzzy
 msgid "All Windows"
 msgstr "視窗"
 
 # src/preferences.cc:773
-#: ../src/keyboard-shortcuts.cc:325 ../src/layout-util.cc:1816
+#: ../src/keyboard-shortcuts.cc:325 ../src/layout-util.cc:1960
 #, fuzzy
 msgid "Main Window"
 msgstr "視窗"
 
-#: ../src/keyboard-shortcuts.cc:326 ../src/layout-util.cc:1821
+#: ../src/keyboard-shortcuts.cc:326 ../src/layout-util.cc:1965
 #, fuzzy
 msgid "Advanced EXIF Window"
 msgstr "進階檢視"
@@ -5137,129 +5126,129 @@ msgid "Duplicates Second Window"
 msgstr ""
 
 # src/preferences.cc:676
-#: ../src/keyboard-shortcuts.cc:329 ../src/layout-util.cc:1817
+#: ../src/keyboard-shortcuts.cc:329 ../src/layout-util.cc:1961
 #, fuzzy
 msgid "Image View Window"
 msgstr "影像檔"
 
 # src/menu.cc:711
-#: ../src/keyboard-shortcuts.cc:330 ../src/layout-util.cc:1819
+#: ../src/keyboard-shortcuts.cc:330 ../src/layout-util.cc:1963
 #, fuzzy
 msgid "Pan View Window"
 msgstr "新視窗(_W)"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/keyboard-shortcuts.cc:331 ../src/layout-util.cc:1820
+#: ../src/keyboard-shortcuts.cc:331 ../src/layout-util.cc:1964
 #, fuzzy
 msgid "Search Window"
 msgstr "搜尋:"
 
 # src/ui-pathsel.cc:799
-#: ../src/keyboard-shortcuts.cc:332 ../src/layout-util.cc:1822
+#: ../src/keyboard-shortcuts.cc:332 ../src/layout-util.cc:1966
 #, fuzzy
 msgid "Files Pane"
 msgstr "檔案日期："
 
 # src/dupe.cc:1398
-#: ../src/layout.cc:488
+#: ../src/layout.cc:486
 #, fuzzy
 msgid "Unable to open collection"
 msgstr "加入至新的圖像集"
 
 # src/preferences.cc:897
-#: ../src/layout.cc:799 ../src/view-file/view-file.cc:1673
+#: ../src/layout.cc:797 ../src/view-file/view-file.cc:1673
 #, fuzzy
 msgid "Collection order"
 msgstr "圖像集"
 
 #
 # src/preferences.cc:710
-#: ../src/layout.cc:898
+#: ../src/layout.cc:896
 msgid "Zoom to original size"
 msgstr "圖像變回原來尺寸"
 
 #
 # src/img-view.cc:792 src/menu.cc:947 src/menu.cc:1083 src/preferences.cc:716
-#: ../src/layout.cc:899 ../src/preferences.cc:2219
+#: ../src/layout.cc:897 ../src/preferences.cc:2221
 msgid "Fit image to window"
 msgstr "圖像符合視窗尺寸"
 
 #
 # src/preferences.cc:722
-#: ../src/layout.cc:900
+#: ../src/layout.cc:898
 msgid "Leave Zoom at previous setting"
 msgstr "保留已儲存的縮放設定"
 
-#: ../src/layout.cc:903
+#: ../src/layout.cc:901
 msgid "Scroll to top left corner"
 msgstr ""
 
-#: ../src/layout.cc:904
+#: ../src/layout.cc:902
 msgid "Scroll to image center"
 msgstr ""
 
-#: ../src/layout.cc:905
+#: ../src/layout.cc:903
 msgid "Keep the region from previous image"
 msgstr ""
 
 #
 # src/filelist.c:76
-#: ../src/layout.cc:997
+#: ../src/layout.cc:995
 #, fuzzy
 msgid " Slideshow ["
 msgstr " 投影片"
 
 #
 # src/filelist.c:80
-#: ../src/layout.cc:1001
+#: ../src/layout.cc:999
 #, fuzzy
 msgid " Paused ["
 msgstr " 暫停"
 
 # src/filelist.c:86
-#: ../src/layout.cc:1033
+#: ../src/layout.cc:1031
 #, c-format
 msgid "%s, %d files (%s, %d)%s"
 msgstr "%s, %d 個檔案 (%s, %d)%s"
 
 # src/filelist.c:88
-#: ../src/layout.cc:1037
+#: ../src/layout.cc:1035
 #, c-format
 msgid "%s, %d files%s"
 msgstr "%s, %d 個檔案 %s"
 
-#: ../src/layout.cc:1080
+#: ../src/layout.cc:1078
 #, c-format
 msgid "(no read permission) %s bytes"
 msgstr "(無讀取權限) %s bytes"
 
 #
 # src/window.cc:379
-#: ../src/layout.cc:1084
+#: ../src/layout.cc:1082
 #, c-format
 msgid "( ? x ? ) %s bytes"
 msgstr "( ? x ? ) %s 位元組"
 
 # src/window.cc:383
-#: ../src/layout.cc:1098
+#: ../src/layout.cc:1096
 #, fuzzy, c-format
 msgid "( %d x %d ) %s bytes [%d/%d]"
 msgstr "( %d x %d ) %s 位元組"
 
 # src/window.cc:383
-#: ../src/layout.cc:1102
+#: ../src/layout.cc:1100
 #, c-format
 msgid "( %d x %d ) %s bytes"
 msgstr "( %d x %d ) %s 位元組"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/layout.cc:1191
+#: ../src/layout.cc:1189
 #, fuzzy
 msgid "Select sort order"
 msgstr "選擇資料夾"
 
 # src/collect-dlg.cc:59
-#: ../src/layout.cc:1195
+#: ../src/layout.cc:1193
 #, fuzzy
 msgid ""
 "Folder contents (files selected)\n"
@@ -5267,99 +5256,99 @@ msgid ""
 msgstr "包含子目錄"
 
 # src/utilops.cc:539
-#: ../src/layout.cc:1205
+#: ../src/layout.cc:1203
 #, fuzzy
 msgid "(Image dimensions) Image size [page n of m]"
 msgstr "影像尺寸為"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/layout.cc:1213
+#: ../src/layout.cc:1211
 #, fuzzy
 msgid "Select zoom and scroll mode"
 msgstr "選擇資料夾"
 
-#: ../src/layout.cc:1235
+#: ../src/layout.cc:1233
 msgid "[Pixel x,y coord]: (Pixel R,G,B value)"
 msgstr ""
 
 # src/collect.cc:1048
-#: ../src/layout.cc:1563
+#: ../src/layout.cc:1561
 msgid "Close collection"
 msgstr "關閉圖像集"
 
 # src/collect-dlg.cc:165 src/collect-table.cc:641
-#: ../src/layout.cc:1565
+#: ../src/layout.cc:1563
 #, fuzzy, c-format
 msgid "Save changes to collection %s?"
 msgstr "儲存圖像集"
 
 # src/main.cc:619
-#: ../src/layout.cc:1566
+#: ../src/layout.cc:1564
 #, fuzzy
 msgid "Collection has been modified"
 msgstr ""
 "圖像集已被修改.\n"
 "仍然要離開?"
 
-#: ../src/layout.cc:1568
+#: ../src/layout.cc:1566
 msgid "_Discard"
 msgstr "丟棄(_D)"
 
 # src/preferences.cc:368
-#: ../src/layout.cc:2066 ../src/layout-config.cc:82
+#: ../src/layout.cc:2064 ../src/layout-config.cc:82
 msgid "Tools"
 msgstr "工具"
 
-#: ../src/layout.cc:2689
+#: ../src/layout.cc:2687
 msgid "Window options and layout"
 msgstr ""
 
-#: ../src/layout.cc:2714
+#: ../src/layout.cc:2713
 msgid "Apply"
 msgstr ""
 
 #
 # src/preferences.cc:551
-#: ../src/layout.cc:2728
+#: ../src/layout.cc:2727
 #, fuzzy
 msgid "General options"
 msgstr "一般"
 
-#: ../src/layout.cc:2730
+#: ../src/layout.cc:2729
 msgid "Home path (empty to use your home directory)"
 msgstr ""
 
 #
 # src/preferences.cc:581
-#: ../src/layout.cc:2736
+#: ../src/layout.cc:2735
 msgid "Use current"
 msgstr "用這個目錄"
 
-#: ../src/layout.cc:2739
+#: ../src/layout.cc:2738
 msgid "Show date in directories list view"
 msgstr ""
 
-#: ../src/layout.cc:2742
+#: ../src/layout.cc:2741
 msgid "Start-up directory:"
 msgstr ""
 
-#: ../src/layout.cc:2744
+#: ../src/layout.cc:2743
 msgid "No change"
 msgstr ""
 
 # src/collect-table.cc:627 src/dupe.cc:1391 src/dupe.cc:1563
-#: ../src/layout.cc:2747
+#: ../src/layout.cc:2746
 #, fuzzy
 msgid "Restore last path"
 msgstr "選取路徑"
 
 # src/utilops.cc:592
-#: ../src/layout.cc:2750
+#: ../src/layout.cc:2749
 #, fuzzy
 msgid "Home path"
 msgstr "複製(_C)"
 
-#: ../src/layout.cc:2754
+#: ../src/layout.cc:2753
 msgid "Layout"
 msgstr "佈局"
 
@@ -5428,143 +5417,167 @@ msgid "[%*s,%*s]: RGB(---,---,---)"
 msgstr ""
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../src/layout-util.cc:367
+#: ../src/layout-util.cc:382
 #, fuzzy
 msgid "Clear all marks?"
 msgstr "清除垃圾桶"
 
-#: ../src/layout-util.cc:367
+#: ../src/layout-util.cc:382
 msgid ""
 "This will clear all marks for all images,\n"
 "including those linked to keywords"
 msgstr ""
 
 # src/ui-pathsel.cc:344 src/utilops.cc:728
-#: ../src/layout-util.cc:622
+#: ../src/layout-util.cc:637
 #, fuzzy
 msgid "Operation failed:\n"
 msgstr "刪除檔案失敗"
 
 # src/preferences.cc:823
-#: ../src/layout-util.cc:625
+#: ../src/layout-util.cc:640
 #, fuzzy
 msgid "No file extension\n"
 msgstr "關閉檔案過濾器"
 
-#: ../src/layout-util.cc:627
+#: ../src/layout-util.cc:642
 msgid "Operation not supported for filetype\n"
 msgstr ""
 
-#: ../src/layout-util.cc:629
+#: ../src/layout-util.cc:644
 msgid "File is not writable\n"
 msgstr ""
 
 # src/ui-pathsel.cc:799
-#: ../src/layout-util.cc:631
+#: ../src/layout-util.cc:646
 #, fuzzy
 msgid "Exiftran error\n"
 msgstr "列印錯誤"
 
 # src/menu.cc:581
-#: ../src/layout-util.cc:633
+#: ../src/layout-util.cc:648
 #, fuzzy
 msgid "Mogrify error\n"
 msgstr "左右翻轉(_M)"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
-#: ../src/layout-util.cc:637 ../src/layout-util.cc:638
+#: ../src/layout-util.cc:652 ../src/layout-util.cc:653
 #, fuzzy
 msgid "Image orientation"
 msgstr "方位"
 
-#: ../src/layout-util.cc:1078 ../src/layout-util.cc:1200 ../src/search.cc:2990
-#: ../src/ui-bookmark.cc:899 ../src/ui-file-chooser.cc:857
-#: ../src/ui-tabcomp.cc:893
+#: ../src/layout-util.cc:1149 ../src/search.cc:3004 ../src/ui-bookmark.cc:899
+#: ../src/ui-file-chooser.cc:944 ../src/ui-tabcomp.cc:924
 msgid "Open"
 msgstr ""
 
 # src/preferences.cc:676
-#: ../src/layout-util.cc:1081
+#: ../src/layout-util.cc:1152
 #, fuzzy
 msgid "Image files"
 msgstr "影像檔"
 
 #
 # src/main.cc:619
-#: ../src/layout-util.cc:1084
+#: ../src/layout-util.cc:1155
 #, fuzzy
 msgid "Geeqie - Open File"
 msgstr "Geeqie - 離開"
 
 # src/menu.cc:713
-#: ../src/layout-util.cc:1092
+#: ../src/layout-util.cc:1175
 #, fuzzy
 msgid "Open Recent File"
 msgstr "開啟最近的檔案(_R)"
 
-#: ../src/layout-util.cc:1152
+#: ../src/layout-util.cc:1257
 msgid "No recent files available."
 msgstr ""
 
-#: ../src/layout-util.cc:1164
+# src/preferences.cc:676
+#: ../src/layout-util.cc:1262
+#, fuzzy
+msgid "Geeqie image files"
+msgstr "影像檔"
+
+# src/ui-pathsel.cc:697
+#: ../src/layout-util.cc:1262 ../src/ui-file-chooser.cc:804
+msgid "All files"
+msgstr "所有檔案"
+
+# src/collect-table.cc:1824 src/dupe.cc:2176 src/preferences.cc:536
+# src/ui-utildlg.cc:105
+#: ../src/layout-util.cc:1272 ../src/ui-file-chooser.cc:735
+#: ../src/ui-file-chooser.cc:955
+#, fuzzy
+msgid "_Cancel"
+msgstr "取消"
+
+#: ../src/layout-util.cc:1275
 msgid "_Open"
 msgstr ""
 
 # src/collect-dlg.cc:172
-#: ../src/layout-util.cc:1206
+#: ../src/layout-util.cc:1291
 #, fuzzy
-msgid "Geeqie - Open Collection"
+msgid "Open Collection"
 msgstr "開啟圖像集(_O)"
 
+# src/collect-dlg.cc:194
+#: ../src/layout-util.cc:1349
+#, fuzzy
+msgid "No collections available."
+msgstr "圖像集檔案"
+
 # src/dupe.cc:1415 src/dupe.cc:1573 src/img-view.cc:841
-#: ../src/layout-util.cc:1818
+#: ../src/layout-util.cc:1962
 #, fuzzy
 msgid "Duplicates Window"
 msgstr "關閉視窗(_L)"
 
 # src/collect-table.cc:100 src/dupe.cc:668 src/filelist.c:1811
-#: ../src/layout-util.cc:1875 ../src/layout-util.cc:1878
+#: ../src/layout-util.cc:2019 ../src/layout-util.cc:2022
 #, fuzzy
 msgid "Keyboard Map"
 msgstr "正在載入預覽小圖..."
 
-#: ../src/layout-util.cc:1879
+#: ../src/layout-util.cc:2023
 msgid "Select the window whose shortcuts should be displayed."
 msgstr ""
 
 # src/ui-pathsel.cc:307
-#: ../src/layout-util.cc:2457
+#: ../src/layout-util.cc:2648
 #, fuzzy, c-format
 msgid "Window layout name \"%s\" already exists."
 msgstr "檔案名稱 %s 已經存在。"
 
-#: ../src/layout-util.cc:2641 ../src/layout-util.cc:2714
+#: ../src/layout-util.cc:2832 ../src/layout-util.cc:2905
 #: ../src/ui-bookmark.cc:870
 msgid "OK"
 msgstr ""
 
 # src/menu.cc:711
-#: ../src/layout-util.cc:2642
+#: ../src/layout-util.cc:2833
 #, fuzzy
 msgid "rename window"
 msgstr "新視窗(_W)"
 
-#: ../src/layout-util.cc:2715
+#: ../src/layout-util.cc:2906
 msgid "Delete window layout"
 msgstr ""
 
-#: ../src/layout-util.cc:3167
+#: ../src/layout-util.cc:3392
 #, c-format
 msgid ""
 "Image profile: %s\n"
 "Screen profile: %s"
 msgstr ""
 
-#: ../src/layout-util.cc:3174
+#: ../src/layout-util.cc:3399
 msgid "Click to enable color management"
 msgstr ""
 
-#: ../src/layout-util.cc:3179
+#: ../src/layout-util.cc:3404
 #, fuzzy
 msgid "Color profiles not supported"
 msgstr "資料夾不支援"
@@ -5573,7 +5586,7 @@ msgstr "資料夾不支援"
 msgid "Log"
 msgstr ""
 
-#: ../src/logwindow.cc:364 ../src/preferences.cc:3478
+#: ../src/logwindow.cc:364 ../src/preferences.cc:3483
 msgid "Debug level:"
 msgstr ""
 
@@ -6060,266 +6073,266 @@ msgid ""
 " Version: Geeqie "
 msgstr ""
 
-#: ../src/metadata.cc:1645
+#: ../src/metadata.cc:1646
 msgid "People"
 msgstr "People"
 
-#: ../src/metadata.cc:1646
+#: ../src/metadata.cc:1647
 msgid "Family"
 msgstr ""
 
-#: ../src/metadata.cc:1647
+#: ../src/metadata.cc:1648
 msgid "Free time"
 msgstr ""
 
-#: ../src/metadata.cc:1648
+#: ../src/metadata.cc:1649
 msgid "Children"
 msgstr ""
 
-#: ../src/metadata.cc:1649
+#: ../src/metadata.cc:1650
 #, fuzzy
 msgid "Sport"
 msgstr "縱向"
 
-#: ../src/metadata.cc:1650
+#: ../src/metadata.cc:1651
 #, fuzzy
 msgid "Culture"
 msgstr "Nature"
 
-#: ../src/metadata.cc:1651
+#: ../src/metadata.cc:1652
 msgid "Festival"
 msgstr ""
 
-#: ../src/metadata.cc:1652
+#: ../src/metadata.cc:1653
 msgid "Nature"
 msgstr "Nature"
 
-#: ../src/metadata.cc:1653
+#: ../src/metadata.cc:1654
 msgid "Animal"
 msgstr ""
 
-#: ../src/metadata.cc:1654
+#: ../src/metadata.cc:1655
 msgid "Bird"
 msgstr ""
 
-#: ../src/metadata.cc:1655
+#: ../src/metadata.cc:1656
 msgid "Insect"
 msgstr ""
 
-#: ../src/metadata.cc:1656
+#: ../src/metadata.cc:1657
 msgid "Pets"
 msgstr ""
 
-#: ../src/metadata.cc:1657
+#: ../src/metadata.cc:1658
 msgid "Wildlife"
 msgstr ""
 
 # src/img-view.cc:789 src/menu.cc:944 src/menu.cc:1079
-#: ../src/metadata.cc:1658
+#: ../src/metadata.cc:1659
 #, fuzzy
 msgid "Zoo"
 msgstr "縮放"
 
-#: ../src/metadata.cc:1659
+#: ../src/metadata.cc:1660
 msgid "Plant"
 msgstr ""
 
 # src/menu.cc:768
-#: ../src/metadata.cc:1660
+#: ../src/metadata.cc:1661
 #, fuzzy
 msgid "Tree"
 msgstr "樹狀目錄(_E)"
 
-#: ../src/metadata.cc:1661
+#: ../src/metadata.cc:1662
 msgid "Flower"
 msgstr ""
 
-#: ../src/metadata.cc:1662
+#: ../src/metadata.cc:1663
 msgid "Water"
 msgstr ""
 
-#: ../src/metadata.cc:1663
+#: ../src/metadata.cc:1664
 msgid "River"
 msgstr ""
 
-#: ../src/metadata.cc:1664
+#: ../src/metadata.cc:1665
 msgid "Lake"
 msgstr ""
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/metadata.cc:1665
+#: ../src/metadata.cc:1666
 #, fuzzy
 msgid "Sea"
 msgstr "搜尋:"
 
-#: ../src/metadata.cc:1666
+#: ../src/metadata.cc:1667
 msgid "Landscape"
 msgstr "橫向"
 
-#: ../src/metadata.cc:1667
+#: ../src/metadata.cc:1668
 msgid "Art"
 msgstr "Art"
 
-#: ../src/metadata.cc:1668
+#: ../src/metadata.cc:1669
 #, fuzzy
 msgid "Statue"
 msgstr "狀態"
 
 # src/ui-pathsel.cc:799
-#: ../src/metadata.cc:1669
+#: ../src/metadata.cc:1670
 #, fuzzy
 msgid "Painting"
 msgstr "列印錯誤"
 
-#: ../src/metadata.cc:1670 ../src/metadata.cc:1684
+#: ../src/metadata.cc:1671 ../src/metadata.cc:1685
 msgid "Historic"
 msgstr ""
 
-#: ../src/metadata.cc:1671 ../src/metadata.cc:1685
+#: ../src/metadata.cc:1672 ../src/metadata.cc:1686
 msgid "Modern"
 msgstr ""
 
-#: ../src/metadata.cc:1672
+#: ../src/metadata.cc:1673
 msgid "City"
 msgstr ""
 
-#: ../src/metadata.cc:1673
+#: ../src/metadata.cc:1674
 msgid "Park"
 msgstr ""
 
-#: ../src/metadata.cc:1674
+#: ../src/metadata.cc:1675
 msgid "Street"
 msgstr ""
 
-#: ../src/metadata.cc:1675
+#: ../src/metadata.cc:1676
 msgid "Square"
 msgstr ""
 
-#: ../src/metadata.cc:1676
+#: ../src/metadata.cc:1677
 #, fuzzy
 msgid "Architecture"
 msgstr "光圈"
 
-#: ../src/metadata.cc:1677
+#: ../src/metadata.cc:1678
 msgid "Buildings"
 msgstr ""
 
-#: ../src/metadata.cc:1678
+#: ../src/metadata.cc:1679
 msgid "House"
 msgstr ""
 
-#: ../src/metadata.cc:1679
+#: ../src/metadata.cc:1680
 msgid "Cathedral"
 msgstr ""
 
-#: ../src/metadata.cc:1680
+#: ../src/metadata.cc:1681
 #, fuzzy
 msgid "Palace"
 msgstr "Places"
 
-#: ../src/metadata.cc:1681
+#: ../src/metadata.cc:1682
 msgid "Castle"
 msgstr ""
 
-#: ../src/metadata.cc:1682
+#: ../src/metadata.cc:1683
 msgid "Bridge"
 msgstr ""
 
-#: ../src/metadata.cc:1683
+#: ../src/metadata.cc:1684
 msgid "Interior"
 msgstr ""
 
-#: ../src/metadata.cc:1686
+#: ../src/metadata.cc:1687
 msgid "Places"
 msgstr "Places"
 
 # src/preferences.cc:897
-#: ../src/metadata.cc:1687
+#: ../src/metadata.cc:1688
 #, fuzzy
 msgid "Conditions"
 msgstr "圖像集"
 
-#: ../src/metadata.cc:1688
+#: ../src/metadata.cc:1689
 #, fuzzy
 msgid "Night"
 msgstr "高度"
 
-#: ../src/metadata.cc:1689
+#: ../src/metadata.cc:1690
 #, fuzzy
 msgid "Lights"
 msgstr "光源"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/metadata.cc:1690
+#: ../src/metadata.cc:1691
 #, fuzzy
 msgid "Reflections"
 msgstr "選擇"
 
-#: ../src/metadata.cc:1691
+#: ../src/metadata.cc:1692
 msgid "Sun"
 msgstr ""
 
-#: ../src/metadata.cc:1692
+#: ../src/metadata.cc:1693
 #, fuzzy
 msgid "Weather"
 msgstr "其它"
 
-#: ../src/metadata.cc:1693
+#: ../src/metadata.cc:1694
 msgid "Fog"
 msgstr ""
 
-#: ../src/metadata.cc:1694
+#: ../src/metadata.cc:1695
 msgid "Rain"
 msgstr ""
 
-#: ../src/metadata.cc:1695
+#: ../src/metadata.cc:1696
 msgid "Clouds"
 msgstr ""
 
-#: ../src/metadata.cc:1696
+#: ../src/metadata.cc:1697
 msgid "Snow"
 msgstr ""
 
-#: ../src/metadata.cc:1697
+#: ../src/metadata.cc:1698
 msgid "Sunny weather"
 msgstr ""
 
 #  mm 114 x 162
-#: ../src/metadata.cc:1698
+#: ../src/metadata.cc:1699
 #, fuzzy
 msgid "Photo"
 msgstr "Photo 6x4"
 
 # src/menu.cc:726
-#: ../src/metadata.cc:1699
+#: ../src/metadata.cc:1700
 #, fuzzy
 msgid "Edited"
 msgstr "編輯(_E)"
 
-#: ../src/metadata.cc:1700
+#: ../src/metadata.cc:1701
 #, fuzzy
 msgid "Detail"
 msgstr "詳細內容"
 
-#: ../src/metadata.cc:1701
+#: ../src/metadata.cc:1702
 msgid "Macro"
 msgstr ""
 
-#: ../src/metadata.cc:1702
+#: ../src/metadata.cc:1703
 msgid "Portrait"
 msgstr "縱向"
 
-#: ../src/metadata.cc:1703
+#: ../src/metadata.cc:1704
 msgid "Black and White"
 msgstr ""
 
 # src/utilops.cc:1216
-#: ../src/metadata.cc:1704
+#: ../src/metadata.cc:1705
 #, fuzzy
 msgid "Perspective"
 msgstr "建立"
 
-#: ../src/options.cc:277 ../src/search.cc:506
+#: ../src/options.cc:278 ../src/search.cc:506
 #: ../src/view-file/view-file.cc:2085
 #, fuzzy
 msgid "Mark "
@@ -6384,7 +6397,7 @@ msgid "Timezone"
 msgstr "時間線"
 
 # src/ui-pathsel.cc:799
-#: ../src/osd.cc:101 ../src/view-file/view-file.cc:2587
+#: ../src/osd.cc:101 ../src/view-file/view-file.cc:2598
 #, fuzzy
 msgid "Rating"
 msgstr "列印錯誤"
@@ -6437,44 +6450,44 @@ msgid "Sorting images…"
 msgstr "排序影像中..."
 
 # src/utilops.cc:980
-#: ../src/pan-view/pan-view.cc:1120
+#: ../src/pan-view/pan-view.cc:1094
 msgid "Filename:"
 msgstr "檔案名稱："
 
 # src/preferences.cc:897
-#: ../src/pan-view/pan-view.cc:1123 ../src/pan-view/pan-view.cc:1933
-#: ../src/preferences.cc:2382
+#: ../src/pan-view/pan-view.cc:1097 ../src/pan-view/pan-view.cc:1916
+#: ../src/preferences.cc:2384
 msgid "Location:"
 msgstr "位置:"
 
 # src/dupe.cc:1654 src/dupe.cc:1943
-#: ../src/pan-view/pan-view.cc:1125 ../src/pan-view/pan-view-search.cc:326
+#: ../src/pan-view/pan-view.cc:1099 ../src/pan-view/pan-view-search.cc:326
 msgid "Date:"
 msgstr "日期:"
 
 #
 # src/preferences.cc:595
-#: ../src/pan-view/pan-view.cc:1128 ../src/preferences.cc:1995
+#: ../src/pan-view/pan-view.cc:1102 ../src/preferences.cc:1997
 msgid "Size:"
 msgstr "大小："
 
-#: ../src/pan-view/pan-view.cc:1478 ../src/search.cc:2499
+#: ../src/pan-view/pan-view.cc:1461 ../src/search.cc:2513
 msgid "Folder not found"
 msgstr "找不到資料夾"
 
-#: ../src/pan-view/pan-view.cc:1479
+#: ../src/pan-view/pan-view.cc:1462
 msgid "The entered path is not a folder"
 msgstr "輸入的路徑不是一個資料夾"
 
-#: ../src/pan-view/pan-view.cc:1565
+#: ../src/pan-view/pan-view.cc:1548
 msgid "Pan View Performance"
 msgstr "多圖檢視效能"
 
-#: ../src/pan-view/pan-view.cc:1572
+#: ../src/pan-view/pan-view.cc:1555
 msgid "Pan view performance may be poor."
 msgstr "多圖檢視效能可能很差."
 
-#: ../src/pan-view/pan-view.cc:1573
+#: ../src/pan-view/pan-view.cc:1556
 #, fuzzy
 msgid ""
 "To improve the performance of thumbnails in\n"
@@ -6485,72 +6498,72 @@ msgid ""
 msgstr "開啟以下幾個選項可增進多圖檢視的效能..."
 
 # src/preferences.cc:603
-#: ../src/pan-view/pan-view.cc:1579
+#: ../src/pan-view/pan-view.cc:1562
 msgid "Cache thumbnails"
 msgstr "將預覽小圖儲存在緩衝區"
 
-#: ../src/pan-view/pan-view.cc:1581
+#: ../src/pan-view/pan-view.cc:1564
 msgid "Use shared thumbnail cache"
 msgstr "使用共享的預覽小圖快取區"
 
-#: ../src/pan-view/pan-view.cc:1587
+#: ../src/pan-view/pan-view.cc:1570
 msgid "Do not show this dialog again"
 msgstr "不再顯示此對話框"
 
-#: ../src/pan-view/pan-view.cc:1914
+#: ../src/pan-view/pan-view.cc:1897
 #, fuzzy
 msgid "Pan View"
 msgstr "多圖檢視(_V)"
 
 # src/preferences.cc:369
-#: ../src/pan-view/pan-view.cc:1940
+#: ../src/pan-view/pan-view.cc:1923
 msgid "Timeline"
 msgstr "時間線"
 
 # src/dupe.cc:1412 src/dupe.cc:1570
-#: ../src/pan-view/pan-view.cc:1941
+#: ../src/pan-view/pan-view.cc:1924
 msgid "Calendar"
 msgstr "日曆"
 
 # src/preferences.cc:368
-#: ../src/pan-view/pan-view.cc:1943
+#: ../src/pan-view/pan-view.cc:1926
 msgid "Folders (flower)"
 msgstr "資料夾 (花)"
 
-#: ../src/pan-view/pan-view.cc:1944
+#: ../src/pan-view/pan-view.cc:1927
 msgid "Grid"
 msgstr "格點"
 
 # src/main.cc:561
-#: ../src/pan-view/pan-view.cc:1955
+#: ../src/pan-view/pan-view.cc:1938
 msgid "Dots"
 msgstr "點"
 
 # src/preferences.cc:676
-#: ../src/pan-view/pan-view.cc:1956
+#: ../src/pan-view/pan-view.cc:1939
 msgid "No Images"
 msgstr "沒有影像"
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/pan-view/pan-view.cc:1957
+#: ../src/pan-view/pan-view.cc:1940
 msgid "Small Thumbnails"
 msgstr "小尺寸預覽小圖"
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/pan-view/pan-view.cc:1958
+#: ../src/pan-view/pan-view.cc:1941
 msgid "Normal Thumbnails"
 msgstr "中等尺寸預覽小圖"
 
 # src/cache-maint.cc:252
-#: ../src/pan-view/pan-view.cc:1959
+#: ../src/pan-view/pan-view.cc:1942
 msgid "Large Thumbnails"
 msgstr "大尺寸預覽小圖"
 
-#: ../src/pan-view/pan-view.cc:1962
+#: ../src/pan-view/pan-view.cc:1945
 msgid "1:3 (33%)"
 msgstr "1:3 (33%)"
 
-#: ../src/pan-view/pan-view.cc:1964
+#: ../src/pan-view/pan-view.cc:1947
 msgid "1:1 (100%)"
 msgstr "1:1 (100%)"
 
@@ -6595,7 +6608,7 @@ msgid "Keyword Filter:"
 msgstr "關鍵字:"
 
 # src/ui-pathsel.cc:799
-#: ../src/pan-view/pan-view-filter.cc:270 ../src/preferences.cc:2710
+#: ../src/pan-view/pan-view-filter.cc:270 ../src/preferences.cc:2712
 msgid "Filter"
 msgstr "過濾器："
 
@@ -6604,7 +6617,7 @@ msgstr "過濾器："
 msgid "Find:"
 msgstr "搜尋:"
 
-#: ../src/pan-view/pan-view-search.cc:77 ../src/search.cc:3435
+#: ../src/pan-view/pan-view-search.cc:77 ../src/search.cc:3450
 msgid "Find"
 msgstr "尋找"
 
@@ -6628,147 +6641,147 @@ msgstr "沒有符合"
 
 #
 # src/preferences.cc:367
-#: ../src/preferences.cc:789
+#: ../src/preferences.cc:790
 msgid "Nearest (worst, but fastest)"
 msgstr "最近點（品質最差但最快）"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:790
+#: ../src/preferences.cc:791
 msgid "Tiles"
 msgstr "區域"
 
 #
 # src/preferences.cc:370
-#: ../src/preferences.cc:791
+#: ../src/preferences.cc:792
 #, fuzzy
 msgid "Bilinear (best, but slowest)"
 msgstr "雙曲線（品質最好但最慢）"
 
-#: ../src/preferences.cc:814
+#: ../src/preferences.cc:815
 msgid "Ask"
 msgstr ""
 
-#: ../src/preferences.cc:836
+#: ../src/preferences.cc:837
 msgid "Primary"
 msgstr ""
 
-#: ../src/preferences.cc:836
+#: ../src/preferences.cc:837
 msgid "Clipboard"
 msgstr ""
 
-#: ../src/preferences.cc:836
+#: ../src/preferences.cc:837
 msgid "Both"
 msgstr ""
 
-#: ../src/preferences.cc:874
+#: ../src/preferences.cc:875
 msgid "Geometric"
 msgstr ""
 
-#: ../src/preferences.cc:874
+#: ../src/preferences.cc:875
 msgid "Arithmetic"
 msgstr ""
 
-#: ../src/preferences.cc:972
+#: ../src/preferences.cc:973
 msgid "Custom"
 msgstr "自訂"
 
 # src/preferences.cc:660
 #  short, long                  callback,               extra, prefer,description
-#: ../src/preferences.cc:1051
+#: ../src/preferences.cc:1052
 #, fuzzy
 msgid "Single image"
 msgstr "下個圖像"
 
-#: ../src/preferences.cc:1052
+#: ../src/preferences.cc:1053
 msgid "Anaglyph Red-Cyan"
 msgstr ""
 
-#: ../src/preferences.cc:1053
+#: ../src/preferences.cc:1054
 msgid "Anaglyph Green-Magenta"
 msgstr ""
 
-#: ../src/preferences.cc:1054
+#: ../src/preferences.cc:1055
 msgid "Anaglyph Yellow-Blue"
 msgstr ""
 
-#: ../src/preferences.cc:1055
+#: ../src/preferences.cc:1056
 msgid "Anaglyph Gray Red-Cyan"
 msgstr ""
 
-#: ../src/preferences.cc:1056
+#: ../src/preferences.cc:1057
 msgid "Anaglyph Gray Green-Magenta"
 msgstr ""
 
-#: ../src/preferences.cc:1057
+#: ../src/preferences.cc:1058
 msgid "Anaglyph Gray Yellow-Blue"
 msgstr ""
 
-#: ../src/preferences.cc:1058
+#: ../src/preferences.cc:1059
 msgid "Anaglyph Dubois Red-Cyan"
 msgstr ""
 
-#: ../src/preferences.cc:1059
+#: ../src/preferences.cc:1060
 msgid "Anaglyph Dubois Green-Magenta"
 msgstr ""
 
-#: ../src/preferences.cc:1060
+#: ../src/preferences.cc:1061
 msgid "Anaglyph Dubois Yellow-Blue"
 msgstr ""
 
-#: ../src/preferences.cc:1062
+#: ../src/preferences.cc:1063
 msgid "Side by Side Half size"
 msgstr ""
 
 # src/utilops.cc:989
-#: ../src/preferences.cc:1063
+#: ../src/preferences.cc:1064
 #, fuzzy
 msgid "Top - Bottom"
 msgstr "底端:"
 
-#: ../src/preferences.cc:1064
+#: ../src/preferences.cc:1065
 msgid "Top - Bottom Half size"
 msgstr ""
 
-#: ../src/preferences.cc:1094 ../src/preferences.cc:3827
+#: ../src/preferences.cc:1095 ../src/preferences.cc:3832
 msgid "Fixed position"
 msgstr ""
 
-#: ../src/preferences.cc:1115
+#: ../src/preferences.cc:1116
 #, fuzzy
 msgid "Mirror left image"
 msgstr "第一個影像"
 
 # src/preferences.cc:660
 #  short, long                  callback,               extra, prefer,description
-#: ../src/preferences.cc:1118
+#: ../src/preferences.cc:1119
 #, fuzzy
 msgid "Flip left image"
 msgstr "下個圖像"
 
-#: ../src/preferences.cc:1121
+#: ../src/preferences.cc:1122
 #, fuzzy
 msgid "Mirror right image"
 msgstr "第一個影像"
 
-#: ../src/preferences.cc:1124
+#: ../src/preferences.cc:1125
 #, fuzzy
 msgid "Flip right image"
 msgstr "第一個影像"
 
-#: ../src/preferences.cc:1126
+#: ../src/preferences.cc:1127
 msgid "Swap left and right images"
 msgstr ""
 
-#: ../src/preferences.cc:1128
+#: ../src/preferences.cc:1129
 msgid "Disable stereo mode on single image source"
 msgstr ""
 
 # src/utilops.cc:707
-#: ../src/preferences.cc:1251 ../src/preferences.cc:1254
+#: ../src/preferences.cc:1252 ../src/preferences.cc:1255
 msgid "Reset filters"
 msgstr "重設過濾器"
 
-#: ../src/preferences.cc:1255
+#: ../src/preferences.cc:1256
 msgid ""
 "This will reset the file filters to the defaults.\n"
 "Continue?"
@@ -6777,19 +6790,19 @@ msgstr ""
 "是否繼續?"
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../src/preferences.cc:1282 ../src/preferences.cc:1285
+#: ../src/preferences.cc:1283 ../src/preferences.cc:1286
 msgid "Clear trash"
 msgstr "清除垃圾桶"
 
-#: ../src/preferences.cc:1286
+#: ../src/preferences.cc:1287
 msgid "This will remove the trash contents."
 msgstr "這樣將會移除垃圾桶中的內容。"
 
-#: ../src/preferences.cc:1320 ../src/preferences.cc:1323
+#: ../src/preferences.cc:1321 ../src/preferences.cc:1324
 msgid "Reset image overlay template string"
 msgstr ""
 
-#: ../src/preferences.cc:1324
+#: ../src/preferences.cc:1325
 #, fuzzy
 msgid ""
 "This will reset the image overlay template string to the default.\n"
@@ -6798,48 +6811,48 @@ msgstr ""
 "這樣將會重設檔案過濾器成預設值。\n"
 "是否繼續?"
 
-#: ../src/preferences.cc:1353
+#: ../src/preferences.cc:1354
 #, fuzzy
 msgid "Image Overlay Font"
 msgstr "影像搜尋 - Geeqie"
 
-#: ../src/preferences.cc:1400
+#: ../src/preferences.cc:1401
 #, fuzzy
 msgid "Image Overlay Text Color"
 msgstr "影像搜尋 - Geeqie"
 
-#: ../src/preferences.cc:1417
+#: ../src/preferences.cc:1418
 #, fuzzy
 msgid "Image Overlay Background Color"
 msgstr "黑色背景"
 
-#: ../src/preferences.cc:1641
+#: ../src/preferences.cc:1642
 msgid "No conflicting shortcuts."
 msgstr ""
 
 # src/menu.cc:773
-#: ../src/preferences.cc:1649
+#: ../src/preferences.cc:1650
 #, fuzzy
 msgid "Shortcut conflicts"
 msgstr "捷徑鍵(_K)"
 
-#: ../src/preferences.cc:1668
+#: ../src/preferences.cc:1670
 msgid "The following keyboard shortcuts have conflicting assignments:"
 msgstr ""
 
 # src/collect-dlg.cc:59
-#: ../src/preferences.cc:1778
+#: ../src/preferences.cc:1780
 #, fuzzy
 msgid "Invalid shortcut"
 msgstr "資料夾無效"
 
-#: ../src/preferences.cc:1778
+#: ../src/preferences.cc:1780
 msgid ""
 "The shortcut must use GTK accelerator syntax. Separate multiple shortcuts "
 "with semicolons."
 msgstr ""
 
-#: ../src/preferences.cc:1799
+#: ../src/preferences.cc:1801
 #, c-format
 msgid ""
 "The shortcut is already assigned to:\n"
@@ -6848,138 +6861,138 @@ msgid ""
 "Replace the existing assignment?"
 msgstr ""
 
-#: ../src/preferences.cc:1805
+#: ../src/preferences.cc:1807
 #, fuzzy
 msgid "Replace"
 msgstr "Places"
 
-#: ../src/preferences.cc:1949
+#: ../src/preferences.cc:1951
 msgid ""
 "Hexadecimal representation of a Unicode character. A list of all Unicode "
 "characters may be found on the Internet."
 msgstr ""
 
-#: ../src/preferences.cc:1957 ../src/preferences.cc:2183
+#: ../src/preferences.cc:1959 ../src/preferences.cc:2185
 #, fuzzy
 msgid "Default"
 msgstr "還原預設值"
 
-#: ../src/preferences.cc:1964
+#: ../src/preferences.cc:1966
 msgid "Display selected character"
 msgstr ""
 
 #
 # src/preferences.cc:551
-#: ../src/preferences.cc:1990
+#: ../src/preferences.cc:1992
 msgid "General"
 msgstr "一般"
 
 #
 # src/preferences.cc:597
-#: ../src/preferences.cc:1996 ../src/preferences.cc:2204
+#: ../src/preferences.cc:1998 ../src/preferences.cc:2206
 msgid "Quality:"
 msgstr "品質："
 
-#: ../src/preferences.cc:1999
+#: ../src/preferences.cc:2001
 #, fuzzy
 msgid "Custom size: "
 msgstr "自訂印表機:"
 
-#: ../src/preferences.cc:2000
+#: ../src/preferences.cc:2002
 #, fuzzy
 msgid "Width:"
 msgstr "寬度"
 
-#: ../src/preferences.cc:2001
+#: ../src/preferences.cc:2003
 #, fuzzy
 msgid "Height:"
 msgstr "高度"
 
 # src/preferences.cc:610
-#: ../src/preferences.cc:2003
+#: ../src/preferences.cc:2005
 #, fuzzy
 msgid "Cache thumbnails and sim. files"
 msgstr "將預覽小圖儲存在 .thumbnails"
 
-#: ../src/preferences.cc:2011
+#: ../src/preferences.cc:2013
 #, fuzzy
 msgid "Use Geeqie thumbnail style and cache"
 msgstr "使用共享的預覽小圖快取區"
 
-#: ../src/preferences.cc:2018
+#: ../src/preferences.cc:2020
 #, fuzzy
 msgid "Store thumbnails local to image folder (non-standard)"
 msgstr "將產生的預覽小圖存於影像檔所在的資料夾"
 
-#: ../src/preferences.cc:2025
+#: ../src/preferences.cc:2027
 msgid "Use standard thumbnail style and cache, shared with other applications"
 msgstr ""
 
-#: ../src/preferences.cc:2031
+#: ../src/preferences.cc:2033
 msgid "Use EXIF thumbnails when available (EXIF thumbnails may be outdated)"
 msgstr ""
 
 # src/menu.cc:526
-#: ../src/preferences.cc:2034
+#: ../src/preferences.cc:2036
 #, fuzzy
 msgid "Thumbnail color management"
 msgstr "排列管理員(_M)"
 
-#: ../src/preferences.cc:2038
+#: ../src/preferences.cc:2040
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr ""
 
-#: ../src/preferences.cc:2048
+#: ../src/preferences.cc:2050
 msgid "Star character: "
 msgstr ""
 
-#: ../src/preferences.cc:2050
+#: ../src/preferences.cc:2052
 msgid "Rejected character: "
 msgstr ""
 
 #
 # src/preferences.cc:615
-#: ../src/preferences.cc:2055
+#: ../src/preferences.cc:2057
 msgid "Slide show"
 msgstr "投影片"
 
 # src/preferences.cc:628
-#: ../src/preferences.cc:2066
+#: ../src/preferences.cc:2068
 #, fuzzy
 msgid "Delay between image change hrs:mins:secs.dec"
 msgstr "每次變換圖像前的停頓秒數:"
 
 #
 # src/preferences.cc:645
-#: ../src/preferences.cc:2082
+#: ../src/preferences.cc:2084
 msgid "Random"
 msgstr "隨機"
 
 #
 # src/preferences.cc:647
-#: ../src/preferences.cc:2083
+#: ../src/preferences.cc:2085
 msgid "Repeat"
 msgstr "重複"
 
-#: ../src/preferences.cc:2087
+#: ../src/preferences.cc:2089
 msgid "Image loading and caching"
 msgstr ""
 
 #
 # src/preferences.cc:735
-#: ../src/preferences.cc:2089
+#: ../src/preferences.cc:2091
 #, fuzzy
 msgid "Decoded image cache size (MiB):"
 msgstr "緩衝區大小（每個圖像佔多少 Mb）："
 
 #
 # src/preferences.cc:735
-#: ../src/preferences.cc:2091
+#: ../src/preferences.cc:2093
 #, fuzzy
 msgid "Display tile cache per image (MiB):"
 msgstr "緩衝區大小（每個圖像佔多少 Mb）："
 
-#: ../src/preferences.cc:2094
+#: ../src/preferences.cc:2096
 msgid ""
 "Maximum memory used to cache rendered image tiles for each image view. "
 "Larger values may improve panning and repaint performance, particularly on "
@@ -6988,140 +7001,140 @@ msgstr ""
 
 #
 # src/preferences.cc:660
-#: ../src/preferences.cc:2095
+#: ../src/preferences.cc:2097
 msgid "Preload next image"
 msgstr "預先載入下個圖像"
 
 # src/menu.cc:1077
-#: ../src/preferences.cc:2098
+#: ../src/preferences.cc:2100
 msgid "Refresh on file change"
 msgstr "檔案改變時，重新整理檔案列表"
 
 #
 # src/preferences.cc:930
-#: ../src/preferences.cc:2104
+#: ../src/preferences.cc:2106
 #, fuzzy
 msgid "Menu style"
 msgstr "名稱"
 
-#: ../src/preferences.cc:2106
+#: ../src/preferences.cc:2108
 msgid ""
 "☰ style menu button (NOTE! Geeqie must be restarted for change to take "
 "effect)"
 msgstr ""
 
-#: ../src/preferences.cc:2108
+#: ../src/preferences.cc:2110
 msgid ""
 "Use a ☰ style menu button instead of the classic style across the top of the "
 "frame"
 msgstr ""
 
 # src/menu.cc:754
-#: ../src/preferences.cc:2112
+#: ../src/preferences.cc:2114
 #, fuzzy
 msgid "Expand toolbar"
 msgstr "隱藏工具列(_B)"
 
-#: ../src/preferences.cc:2114
+#: ../src/preferences.cc:2116
 msgid ""
 "Expand menu/toolbar (NOTE! Geeqie must be restarted for change to take "
 "effect)"
 msgstr ""
 
-#: ../src/preferences.cc:2116
+#: ../src/preferences.cc:2118
 msgid "Expand the menu/toolbar to the full width of the window"
 msgstr ""
 
 #
 # src/preferences.cc:930
-#: ../src/preferences.cc:2122
+#: ../src/preferences.cc:2124
 #, fuzzy
 msgid "Menu bar"
 msgstr "名稱"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:2125
+#: ../src/preferences.cc:2127
 #, fuzzy
 msgid "Tool bar"
 msgstr "工具"
 
-#: ../src/preferences.cc:2128
+#: ../src/preferences.cc:2130
 #, fuzzy
 msgid "Status bar"
 msgstr "狀態"
 
-#: ../src/preferences.cc:2130
+#: ../src/preferences.cc:2132
 msgid ""
 "The Hide Selectable Bars menu item (default keystroke is control-backtick) "
 "will toggle the display of the bars selected here"
 msgstr ""
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:2142 ../src/preferences.cc:4116
+#: ../src/preferences.cc:2144 ../src/preferences.cc:4122
 #, fuzzy
 msgid "Timezone database"
 msgstr "檔案日期："
 
-#: ../src/preferences.cc:2150 ../src/preferences.cc:4127
+#: ../src/preferences.cc:2152 ../src/preferences.cc:4133
 msgid "Update"
 msgstr ""
 
-#: ../src/preferences.cc:2150
+#: ../src/preferences.cc:2152
 msgid "Install"
 msgstr ""
 
-#: ../src/preferences.cc:2156
+#: ../src/preferences.cc:2158
 msgid ""
 "No Internet connection!\n"
 "The timezone database is used to display exif time and date\n"
 "corrected for UTC offset and Daylight Saving Time"
 msgstr ""
 
-#: ../src/preferences.cc:2160
+#: ../src/preferences.cc:2162
 msgid ""
 "The timezone database is used to display exif time and date\n"
 "corrected for UTC offset and Daylight Saving Time"
 msgstr ""
 
-#: ../src/preferences.cc:2163
+#: ../src/preferences.cc:2165
 msgid "Download database from: "
 msgstr ""
 
-#: ../src/preferences.cc:2168
+#: ../src/preferences.cc:2170
 msgid "On-line help search engine"
 msgstr ""
 
-#: ../src/preferences.cc:2174
+#: ../src/preferences.cc:2176
 msgid ""
 "The format varies between search engines, e.g the format may be:\n"
 "https://www.search_engine.com/search?q=site:geeqie.org/help\n"
 "https://www.search_engine.com/?q=site:geeqie.org/help"
 msgstr ""
 
-#: ../src/preferences.cc:2206
+#: ../src/preferences.cc:2208
 msgid "Two pass rendering (apply HQ zoom and color correction in second pass)"
 msgstr ""
 
 #
 # src/preferences.cc:751
-#: ../src/preferences.cc:2210
+#: ../src/preferences.cc:2212
 msgid "Zoom increment:"
 msgstr "每步縮放比例："
 
 #
 # src/img-view.cc:790 src/menu.cc:945 src/menu.cc:1081
-#: ../src/preferences.cc:2217
+#: ../src/preferences.cc:2219
 #, fuzzy
 msgid "Zoom style:"
 msgstr "拉遠"
 
 # src/preferences.cc:729
-#: ../src/preferences.cc:2222
+#: ../src/preferences.cc:2224
 #, fuzzy
 msgid "Allow enlargement of image (max. size in %)"
 msgstr "選用「圖像符合視窗尺寸」時，圖像可超過原來尺寸"
 
-#: ../src/preferences.cc:2230
+#: ../src/preferences.cc:2232
 #, no-c-format
 msgid ""
 "Enable this to allow Geeqie to increase the image size for images that are "
@@ -7130,12 +7143,12 @@ msgid ""
 "100% is full-size."
 msgstr ""
 
-#: ../src/preferences.cc:2233
+#: ../src/preferences.cc:2235
 #, c-format
 msgid "Virtual window size (%% of actual window):"
 msgstr ""
 
-#: ../src/preferences.cc:2240
+#: ../src/preferences.cc:2242
 msgid ""
 "This value will set the virtual size of the window when 'Fit image to "
 "window' is set. Instead of using the actual size of the window, the "
@@ -7145,22 +7158,22 @@ msgid ""
 msgstr ""
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:2242
+#: ../src/preferences.cc:2244
 #, fuzzy
 msgid "Tile size"
 msgstr "檔案大小："
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:2245
+#: ../src/preferences.cc:2247
 #, fuzzy
 msgid "Pixels"
 msgstr "檔案格式:"
 
-#: ../src/preferences.cc:2245
+#: ../src/preferences.cc:2247
 msgid "(Requires restart)"
 msgstr ""
 
-#: ../src/preferences.cc:2249
+#: ../src/preferences.cc:2251
 msgid ""
 "This value changes the size of the tiles large images are split into. "
 "Increasing the size of the tiles will reduce the tiling effect seen on image "
@@ -7169,92 +7182,92 @@ msgid ""
 msgstr ""
 
 # src/collect-dlg.cc:182
-#: ../src/preferences.cc:2251
+#: ../src/preferences.cc:2253
 msgid "Appearance"
 msgstr "外觀"
 
-#: ../src/preferences.cc:2253
+#: ../src/preferences.cc:2255
 #, fuzzy
 msgid "Use custom border color in window mode"
 msgstr "自訂印表機"
 
-#: ../src/preferences.cc:2256
+#: ../src/preferences.cc:2258
 msgid "Use custom border color in fullscreen mode"
 msgstr ""
 
-#: ../src/preferences.cc:2259
+#: ../src/preferences.cc:2261
 #, fuzzy
 msgid "Border color"
 msgstr "黑色背景"
 
-#: ../src/preferences.cc:2260
+#: ../src/preferences.cc:2262
 msgid "Alpha channel color 1"
 msgstr ""
 
-#: ../src/preferences.cc:2261
+#: ../src/preferences.cc:2263
 msgid "Alpha channel color 2"
 msgstr ""
 
 # src/preferences.cc:773
-#: ../src/preferences.cc:2326
+#: ../src/preferences.cc:2328
 msgid "Windows"
 msgstr "視窗"
 
-#: ../src/preferences.cc:2328
+#: ../src/preferences.cc:2330
 msgid "State"
 msgstr "狀態"
 
 # src/preferences.cc:782
-#: ../src/preferences.cc:2330
+#: ../src/preferences.cc:2332
 #, fuzzy
 msgid "Remember session"
 msgstr "記下印表機設定"
 
-#: ../src/preferences.cc:2333
+#: ../src/preferences.cc:2335
 msgid "Use saved window positions also for new windows"
 msgstr ""
 
 # src/preferences.cc:782
-#: ../src/preferences.cc:2337
+#: ../src/preferences.cc:2339
 #, fuzzy
 msgid "Remember window workspace"
 msgstr "記下視窗位置"
 
 #
 # src/preferences.cc:784
-#: ../src/preferences.cc:2341
+#: ../src/preferences.cc:2343
 msgid "Remember tool state (float/hidden)"
 msgstr "記下工具狀態（浮動/隱藏）"
 
 # src/preferences.cc:782
-#: ../src/preferences.cc:2344
+#: ../src/preferences.cc:2346
 #, fuzzy
 msgid "Remember dialog window positions"
 msgstr "記下視窗位置"
 
 # src/preferences.cc:782
-#: ../src/preferences.cc:2347
+#: ../src/preferences.cc:2349
 #, fuzzy
 msgid "Hide window decorations"
 msgstr "記下視窗位置"
 
-#: ../src/preferences.cc:2349
+#: ../src/preferences.cc:2351
 msgid ""
 "Remove borders and title bar from windows. A restart of Geeqie is required "
 "for this feature to take effect on the main layout window"
 msgstr ""
 
 # src/menu.cc:711
-#: ../src/preferences.cc:2351
+#: ../src/preferences.cc:2353
 #, fuzzy
 msgid "Show window IDs"
 msgstr "新視窗(_W)"
 
-#: ../src/preferences.cc:2355
+#: ../src/preferences.cc:2357
 msgid "Use current layout for default: "
 msgstr ""
 
-#: ../src/preferences.cc:2362
+#: ../src/preferences.cc:2364
 msgid ""
 "Current window layout\n"
 "has been set as default"
@@ -7262,103 +7275,103 @@ msgstr ""
 
 #
 # src/preferences.cc:787
-#: ../src/preferences.cc:2368
+#: ../src/preferences.cc:2370
 msgid "Fit window to image when tools are hidden/floating"
 msgstr "當工具隱藏/浮動時令圖像符合視窗尺寸"
 
 # src/preferences.cc:794
-#: ../src/preferences.cc:2372
+#: ../src/preferences.cc:2374
 msgid "Limit size when auto-sizing window (%):"
 msgstr "自動調整視窗大小時不超過 (%)"
 
 # src/preferences.cc:676
-#: ../src/preferences.cc:2385
+#: ../src/preferences.cc:2387
 msgid "Smooth image flip"
 msgstr "平順的切換影像"
 
-#: ../src/preferences.cc:2387
+#: ../src/preferences.cc:2389
 msgid "Disable screen saver"
 msgstr "關閉螢幕保護程式"
 
-#: ../src/preferences.cc:2413
+#: ../src/preferences.cc:2415
 msgid "Image overlay template"
 msgstr ""
 
-#: ../src/preferences.cc:2431 ../src/print.cc:254
+#: ../src/preferences.cc:2433 ../src/print.cc:254
 msgid "Extensive formatting options are shown in the Help file"
 msgstr ""
 
 # src/preferences.cc:400
-#: ../src/preferences.cc:2437 ../src/print.cc:283 ../src/print.cc:345
+#: ../src/preferences.cc:2439 ../src/print.cc:283 ../src/print.cc:345
 msgid "Font"
 msgstr "字型"
 
-#: ../src/preferences.cc:2439
+#: ../src/preferences.cc:2441
 msgid "Text"
 msgstr "文字"
 
-#: ../src/preferences.cc:2442
+#: ../src/preferences.cc:2444
 #, fuzzy
 msgid "Background"
 msgstr "黑色背景"
 
-#: ../src/preferences.cc:2451 ../src/preferences.cc:2728
-#: ../src/preferences.cc:3723
+#: ../src/preferences.cc:2453 ../src/preferences.cc:2730
+#: ../src/preferences.cc:3728
 msgid "Defaults"
 msgstr "還原預設值"
 
-#: ../src/preferences.cc:2468
+#: ../src/preferences.cc:2470
 msgid "OSD"
 msgstr ""
 
-#: ../src/preferences.cc:2470
+#: ../src/preferences.cc:2472
 msgid "Overlay Screen Display"
 msgstr ""
 
-#: ../src/preferences.cc:2490
+#: ../src/preferences.cc:2492
 msgid "Exif, XMP or IPTC tags"
 msgstr ""
 
 # src/dupe.cc:1655 src/dupe.cc:1944
-#: ../src/preferences.cc:2493
+#: ../src/preferences.cc:2495
 #, fuzzy
 msgid "%Exif.Image.Orientation%"
 msgstr "方位"
 
-#: ../src/preferences.cc:2497
+#: ../src/preferences.cc:2499
 msgid "Field separators"
 msgstr ""
 
-#: ../src/preferences.cc:2500
+#: ../src/preferences.cc:2502
 msgid ""
 "Separator shown only if both fields are non-null:\n"
 "%formatted.ShutterSpeed%|%formatted.ISOSpeedRating%"
 msgstr ""
 
-#: ../src/preferences.cc:2504
+#: ../src/preferences.cc:2506
 msgid "Field maximum length"
 msgstr ""
 
-#: ../src/preferences.cc:2507
+#: ../src/preferences.cc:2509
 msgid "%path:39%"
 msgstr ""
 
-#: ../src/preferences.cc:2511
+#: ../src/preferences.cc:2513
 msgid "Pre- and post- text"
 msgstr ""
 
-#: ../src/preferences.cc:2514
+#: ../src/preferences.cc:2516
 msgid ""
 "Text shown only if the field is non-null:\n"
 "%formatted.Aperture:F no. * setting%\n"
 " %formatted.Aperture:10:F no. * setting%"
 msgstr ""
 
-#: ../src/preferences.cc:2518
+#: ../src/preferences.cc:2520
 msgid "Pango markup"
 msgstr ""
 
-#: ../src/preferences.cc:2521
+#: ../src/preferences.cc:2523
 msgid ""
 "<b>bold</b>\n"
 "<u>underline</u>\n"
@@ -7368,207 +7381,207 @@ msgstr ""
 
 #
 # src/ui-pathsel.cc:764
-#: ../src/preferences.cc:2659
+#: ../src/preferences.cc:2661
 #, fuzzy
 msgid "File Filters"
 msgstr "顯示隱藏檔案"
 
-#: ../src/preferences.cc:2663
+#: ../src/preferences.cc:2665
 msgid "Show hidden files or folders"
 msgstr ""
 
-#: ../src/preferences.cc:2665
+#: ../src/preferences.cc:2667
 msgid "Use dot prefix as hidden file indicator"
 msgstr ""
 
-#: ../src/preferences.cc:2667
+#: ../src/preferences.cc:2669
 msgid "Show parent folder (..)"
 msgstr ""
 
-#: ../src/preferences.cc:2669
+#: ../src/preferences.cc:2671
 msgid "Case sensitive sort (Search and Collection windows, and tab completion)"
 msgstr ""
 
 # src/preferences.cc:823
-#: ../src/preferences.cc:2670
+#: ../src/preferences.cc:2672
 #, fuzzy
 msgid "Disable file extension checks"
 msgstr "關閉檔案過濾器"
 
 # src/preferences.cc:823
-#: ../src/preferences.cc:2673
+#: ../src/preferences.cc:2675
 msgid "Disable File Filtering"
 msgstr "關閉檔案過濾器"
 
-#: ../src/preferences.cc:2677
+#: ../src/preferences.cc:2679
 msgid "Grouping sidecar extensions"
 msgstr ""
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:2683
+#: ../src/preferences.cc:2685
 msgid "File types"
 msgstr "檔案型式"
 
 # src/preferences.cc:823
-#: ../src/preferences.cc:2685
+#: ../src/preferences.cc:2687
 #, fuzzy
 msgid "Search file extensions"
 msgstr "關閉檔案過濾器"
 
-#: ../src/preferences.cc:2709
+#: ../src/preferences.cc:2711
 msgid "Enabled"
 msgstr ""
 
-#: ../src/preferences.cc:2712 ../src/view-file/view-file.cc:2584
+#: ../src/preferences.cc:2714 ../src/view-file/view-file.cc:2595
 msgid "Class"
 msgstr ""
 
-#: ../src/preferences.cc:2713 ../src/preferences.cc:2773
+#: ../src/preferences.cc:2715 ../src/preferences.cc:2775
 msgid "Writable"
 msgstr ""
 
-#: ../src/preferences.cc:2714
+#: ../src/preferences.cc:2716
 msgid "Sidecar is allowed"
 msgstr ""
 
-#: ../src/preferences.cc:2756
+#: ../src/preferences.cc:2758
 msgid "Metadata writing sequence"
 msgstr ""
 
-#: ../src/preferences.cc:2758
+#: ../src/preferences.cc:2760
 msgid "Warning: Geeqie is built without Exiv2. Some options are disabled."
 msgstr ""
 
-#: ../src/preferences.cc:2760
+#: ../src/preferences.cc:2762
 msgid ""
 "When writing metadata, Geeqie will follow these steps, if selected. This "
 "process will stop when the first successful write occurs."
 msgstr ""
 
-#: ../src/preferences.cc:2765
+#: ../src/preferences.cc:2767
 msgid "A flowchart of the sequence is shown in the Help file"
 msgstr ""
 
-#: ../src/preferences.cc:2769
+#: ../src/preferences.cc:2771
 msgid "Step 1"
 msgstr ""
 
-#: ../src/preferences.cc:2769
+#: ../src/preferences.cc:2771
 msgid ""
 "Save metadata in either the image file or the sidecar file, according to the "
 "XMP standard"
 msgstr ""
 
-#: ../src/preferences.cc:2772
+#: ../src/preferences.cc:2774
 msgid "The destination is dependent on the settings in the "
 msgstr ""
 
-#: ../src/preferences.cc:2773
+#: ../src/preferences.cc:2775
 msgid " and "
 msgstr ""
 
-#: ../src/preferences.cc:2773
+#: ../src/preferences.cc:2775
 msgid "Sidecar Is Allowed"
 msgstr ""
 
-#: ../src/preferences.cc:2773
+#: ../src/preferences.cc:2775
 msgid " columns of the File Filters tab)"
 msgstr ""
 
-#: ../src/preferences.cc:2782
+#: ../src/preferences.cc:2784
 msgid "Step 2"
 msgstr ""
 
-#: ../src/preferences.cc:2782
+#: ../src/preferences.cc:2784
 #, fuzzy
 msgid "Save metadata in the folder"
 msgstr "附屬資料"
 
-#: ../src/preferences.cc:2782
+#: ../src/preferences.cc:2784
 #, fuzzy
 msgid "local to the image folder (non-standard)"
 msgstr "將產生的預覽小圖存於影像檔所在的資料夾"
 
-#: ../src/preferences.cc:2786
+#: ../src/preferences.cc:2788
 msgid "Step 3"
 msgstr ""
 
-#: ../src/preferences.cc:2786
+#: ../src/preferences.cc:2788
 msgid ") Save metadata in Geeqie private directory "
 msgstr ""
 
-#: ../src/preferences.cc:2794
+#: ../src/preferences.cc:2796
 msgid "Step 1 Options:"
 msgstr ""
 
-#: ../src/preferences.cc:2802
+#: ../src/preferences.cc:2804
 msgid ""
 "Store metadata also in IPTC tags (converted according to the IPTC4XMP "
 "standard)"
 msgstr ""
 
-#: ../src/preferences.cc:2803
+#: ../src/preferences.cc:2805
 msgid "A simplified conversion list is in the Help file"
 msgstr ""
 
-#: ../src/preferences.cc:2805
+#: ../src/preferences.cc:2807
 msgid "Warn if the image or sidecar file is not writable"
 msgstr ""
 
-#: ../src/preferences.cc:2807
+#: ../src/preferences.cc:2809
 #, fuzzy
 msgid "Ask before writing to image files"
 msgstr "檔案 %s 寫入失敗"
 
-#: ../src/preferences.cc:2810
+#: ../src/preferences.cc:2812
 msgid "This file naming convention is used by Darktable"
 msgstr ""
 
 # src/utilops.cc:1151
-#: ../src/preferences.cc:2813
+#: ../src/preferences.cc:2815
 #, fuzzy
 msgid "Create sidecar files named"
 msgstr "無法建立資料夾"
 
-#: ../src/preferences.cc:2813
+#: ../src/preferences.cc:2815
 msgid "as opposed to the normal"
 msgstr ""
 
-#: ../src/preferences.cc:2817
+#: ../src/preferences.cc:2819
 msgid "Steps 2 and 3 Option:"
 msgstr ""
 
-#: ../src/preferences.cc:2822
+#: ../src/preferences.cc:2824
 msgid ""
 "Use GQview legacy metadata format instead of XMP (supports only Keywords and "
 "Comments)"
 msgstr ""
 
-#: ../src/preferences.cc:2826
+#: ../src/preferences.cc:2828
 msgid "Miscellaneous"
 msgstr "雜項"
 
-#: ../src/preferences.cc:2827
+#: ../src/preferences.cc:2829
 msgid "Write the same description tags to all grouped sidecars"
 msgstr ""
 
-#: ../src/preferences.cc:2828
+#: ../src/preferences.cc:2830
 msgid "See the Help file for a list of the tags used"
 msgstr ""
 
-#: ../src/preferences.cc:2830
+#: ../src/preferences.cc:2832
 msgid "Permit Keywords to be case-sensitive"
 msgstr ""
 
-#: ../src/preferences.cc:2831
+#: ../src/preferences.cc:2833
 msgid "When selected, 'Place' and 'place' are two different keywords"
 msgstr ""
 
-#: ../src/preferences.cc:2833
+#: ../src/preferences.cc:2835
 msgid "Write altered image orientation to the metadata"
 msgstr ""
 
-#: ../src/preferences.cc:2834
+#: ../src/preferences.cc:2836
 msgid ""
 "If checked, the results of orientation commands (Rotate, Mirror and Flip) "
 "issued on an image will be written to metadata\n"
@@ -7576,55 +7589,55 @@ msgid ""
 "will be lost when Geeqie closes"
 msgstr ""
 
-#: ../src/preferences.cc:2842
+#: ../src/preferences.cc:2844
 msgid "Auto-save options"
 msgstr ""
 
-#: ../src/preferences.cc:2844
+#: ../src/preferences.cc:2846
 msgid "Write metadata after timeout"
 msgstr ""
 
-#: ../src/preferences.cc:2849
+#: ../src/preferences.cc:2851
 #, fuzzy
 msgid "Timeout (seconds):"
 msgstr "曝光補償"
 
 # src/preferences.cc:628
-#: ../src/preferences.cc:2851
+#: ../src/preferences.cc:2853
 #, fuzzy
 msgid "Write metadata on image change"
 msgstr "每次變換圖像前的停頓秒數:"
 
-#: ../src/preferences.cc:2853
+#: ../src/preferences.cc:2855
 msgid "Write metadata on directory change"
 msgstr ""
 
 # src/dupe.cc:775
-#: ../src/preferences.cc:2858
+#: ../src/preferences.cc:2860
 #, fuzzy
 msgid "Spelling checks"
 msgstr "正在讀取加總值..."
 
-#: ../src/preferences.cc:2860
+#: ../src/preferences.cc:2862
 msgid "Check spelling - Requires restart"
 msgstr ""
 
-#: ../src/preferences.cc:2861
+#: ../src/preferences.cc:2863
 msgid ""
 "Spelling checks are performed on info sidebar panes Comment, Headline and "
 "Title"
 msgstr ""
 
-#: ../src/preferences.cc:2866
+#: ../src/preferences.cc:2868
 #, fuzzy
 msgid "Pre-load metadata"
 msgstr "附屬資料"
 
-#: ../src/preferences.cc:2868
+#: ../src/preferences.cc:2870
 msgid "Read metadata in background"
 msgstr ""
 
-#: ../src/preferences.cc:2869
+#: ../src/preferences.cc:2871
 msgid ""
 "On folder change, read DateTimeOriginal, DateTimeDigitized and Star Rating "
 "in the idle loop.\n"
@@ -7632,363 +7645,369 @@ msgid ""
 "sorting on these items will be slower"
 msgstr ""
 
-#: ../src/preferences.cc:3045 ../src/preferences.cc:3059
+#: ../src/preferences.cc:3047 ../src/preferences.cc:3061
 #, fuzzy
 msgid "Search for keywords"
 msgstr "關鍵字"
 
-#: ../src/preferences.cc:3125
+#: ../src/preferences.cc:3127
 #, fuzzy
 msgid "Edit keywords autocompletion list"
 msgstr "在選取的檔案中加入關鍵字"
 
-#: ../src/preferences.cc:3130
+#: ../src/preferences.cc:3132
 #, fuzzy
 msgid "Search for existing keywords"
 msgstr "關鍵字"
 
-#: ../src/preferences.cc:3202
+#: ../src/preferences.cc:3204
 msgid "Perceptual"
 msgstr ""
 
-#: ../src/preferences.cc:3203
+#: ../src/preferences.cc:3205
 msgid "Relative Colorimetric"
 msgstr ""
 
-#: ../src/preferences.cc:3205
+#: ../src/preferences.cc:3207
 msgid "Absolute Colorimetric"
 msgstr ""
 
-#: ../src/preferences.cc:3217
+#: ../src/preferences.cc:3219
 msgid ""
 "Refer to the lcms documentation for the defaults used when the selected "
 "Intent is not available"
 msgstr ""
 
 # src/menu.cc:526
-#: ../src/preferences.cc:3234
+#: ../src/preferences.cc:3236
 #, fuzzy
 msgid "Color management"
 msgstr "排列管理員(_M)"
 
 # src/ui-pathsel.cc:697
-#: ../src/preferences.cc:3236
+#: ../src/preferences.cc:3238
 #, fuzzy
 msgid "Input profiles"
 msgstr "所有檔案"
 
-#: ../src/preferences.cc:3244
+#: ../src/preferences.cc:3246
 msgid "Type"
 msgstr ""
 
 #
 # src/preferences.cc:930
-#: ../src/preferences.cc:3247
+#: ../src/preferences.cc:3249
 msgid "Menu name"
 msgstr "名稱"
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:3250 ../src/search.cc:3111
+#: ../src/preferences.cc:3252 ../src/search.cc:3125
 #, fuzzy
 msgid "File"
 msgstr "檔案:"
 
-#: ../src/preferences.cc:3260
+#: ../src/preferences.cc:3262
 #, c-format
 msgid "Input %d:"
 msgstr ""
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/preferences.cc:3273 ../src/preferences.cc:3290
+#: ../src/preferences.cc:3275 ../src/preferences.cc:3292
 #, fuzzy
 msgid "Select color profile"
 msgstr "選擇資料夾"
 
 # src/ui-pathsel.cc:697
-#: ../src/preferences.cc:3279
+#: ../src/preferences.cc:3281
 #, fuzzy
 msgid "Screen profile"
 msgstr "所有檔案"
 
-#: ../src/preferences.cc:3283
+#: ../src/preferences.cc:3285
 msgid "Use system display profile when available"
 msgstr ""
 
-#: ../src/preferences.cc:3288
+#: ../src/preferences.cc:3290
 #, fuzzy
 msgid "Screen:"
 msgstr "螢幕"
 
 # src/ui-pathsel.cc:437 src/ui-pathsel.cc:460 src/utilops.cc:944
 # src/utilops.cc:1095
-#: ../src/preferences.cc:3293
+#: ../src/preferences.cc:3295
 #, fuzzy
 msgid "Render Intent:"
 msgstr "產生"
 
-#: ../src/preferences.cc:3333 ../src/preferences.cc:3392
+#: ../src/preferences.cc:3335 ../src/preferences.cc:3394
 msgid "Behavior"
 msgstr "行為"
 
 #
 # src/preferences.cc:667
-#: ../src/preferences.cc:3337
+#: ../src/preferences.cc:3339
 #, fuzzy
 msgid "Confirm permanent file delete"
 msgstr "確認刪除檔案"
 
 #
 # src/preferences.cc:667
-#: ../src/preferences.cc:3339
+#: ../src/preferences.cc:3341
 #, fuzzy
 msgid "Confirm move file to Trash"
 msgstr "確認刪除檔案"
 
 #
 # src/preferences.cc:669
-#: ../src/preferences.cc:3341
+#: ../src/preferences.cc:3343
 msgid "Enable Delete key"
 msgstr "可使用刪除鍵"
 
-#: ../src/preferences.cc:3344
+#: ../src/preferences.cc:3346
 msgid "Use Geeqie trash location"
 msgstr ""
 
-#: ../src/preferences.cc:3367
+#: ../src/preferences.cc:3369
 msgid "Maximum size:"
 msgstr "最大尺寸:"
 
-#: ../src/preferences.cc:3367
+#: ../src/preferences.cc:3369
 #, fuzzy
 msgid "MiB"
 msgstr "MB"
 
-#: ../src/preferences.cc:3369
+#: ../src/preferences.cc:3371
 msgid "Set to 0 for unlimited size"
 msgstr ""
 
-#: ../src/preferences.cc:3381
+#: ../src/preferences.cc:3383
 msgid "Use system Trash bin"
 msgstr ""
 
-#: ../src/preferences.cc:3385
+#: ../src/preferences.cc:3387
 msgid "Use no trash at all"
 msgstr ""
 
-#: ../src/preferences.cc:3394
+#: ../src/preferences.cc:3396
 msgid "Descend folders in tree view"
 msgstr "在樹狀檢視中顯示下層資料夾"
 
 # src/preferences.cc:658
-#: ../src/preferences.cc:3397
+#: ../src/preferences.cc:3399
 #, fuzzy
 msgid "In-place renaming"
 msgstr "即時更改名稱"
 
-#: ../src/preferences.cc:3400
+#: ../src/preferences.cc:3402
 msgid "List directory view uses single click to enter"
 msgstr ""
 
 # src/collect-dlg.cc:206
-#: ../src/preferences.cc:3403
+#: ../src/preferences.cc:3405
 #, fuzzy
 msgid "Circular selection lists"
 msgstr "圖像集存在"
 
-#: ../src/preferences.cc:3405
+#: ../src/preferences.cc:3407
 msgid "Traverse selection lists in a circular manner"
 msgstr ""
 
-#: ../src/preferences.cc:3407
+#: ../src/preferences.cc:3409
 #, fuzzy
 msgid "Auto next folder"
 msgstr "新資料夾"
 
-#: ../src/preferences.cc:3409
+#: ../src/preferences.cc:3411
 msgid ""
 "Automatically advance to the next folder when reaching the last image in the "
 "current folder"
 msgstr ""
 
-#: ../src/preferences.cc:3411
+#: ../src/preferences.cc:3413
 msgid "Save marks on exit"
 msgstr ""
 
-#: ../src/preferences.cc:3413
+#: ../src/preferences.cc:3415
 msgid ""
 "Note that marks linked to a keyword will be saved irrespective of this "
 "setting"
 msgstr ""
 
-#: ../src/preferences.cc:3415
+#: ../src/preferences.cc:3417
 msgid "Use 'With Rename' as default for Copy/Move dialogs"
 msgstr ""
 
-#: ../src/preferences.cc:3417
+#: ../src/preferences.cc:3419
 msgid "Change the default button for Copy/Move dialogs"
 msgstr ""
 
-#: ../src/preferences.cc:3419
+#: ../src/preferences.cc:3421
 msgid "Permit duplicates in Collections"
 msgstr ""
 
-#: ../src/preferences.cc:3421
+#: ../src/preferences.cc:3423
 msgid "Allow the same image to be in a Collection more than once"
 msgstr ""
 
-#: ../src/preferences.cc:3423
+#: ../src/preferences.cc:3425
 msgid "Hide window in fullscreen"
 msgstr ""
 
-#: ../src/preferences.cc:3425
+#: ../src/preferences.cc:3427
 msgid ""
 "When alt-tabbing, prevent the normal Geeqie window from showing alongside "
 "the fullscreen window"
 msgstr ""
 
 # src/img-view.cc:833 src/menu.cc:1005
-#: ../src/preferences.cc:3427
+#: ../src/preferences.cc:3429
 #, fuzzy
 msgid "Hide OSD in fullscreen"
 msgstr "離開全螢幕模式(_F)"
 
-#: ../src/preferences.cc:3429
+#: ../src/preferences.cc:3431
 msgid "Hide Overlay Screen Display in fullscreen mode"
 msgstr ""
 
-#: ../src/preferences.cc:3431
+#: ../src/preferences.cc:3433
 msgid "Recent folder list maximum size"
 msgstr ""
 
-#: ../src/preferences.cc:3434
+# src/collect-dlg.cc:165 src/collect-table.cc:641
+#: ../src/preferences.cc:3436
+#, fuzzy
+msgid "Recent collections list maximum size"
+msgstr "新圖像集(_N)"
+
+#: ../src/preferences.cc:3439
 msgid "Recent folder-image list maximum size"
 msgstr ""
 
-#: ../src/preferences.cc:3435
+#: ../src/preferences.cc:3440
 msgid ""
 "List of the last image viewed in each recent folder.\n"
 "Re-opening a folder will set focus to the last image viewed."
 msgstr ""
 
-#: ../src/preferences.cc:3437
+#: ../src/preferences.cc:3442
 msgid "Drag-and-drop icon size"
 msgstr ""
 
-#: ../src/preferences.cc:3441
+#: ../src/preferences.cc:3446
 msgid "Drag-and-drop default action:"
 msgstr ""
 
 # src/utilops.cc:592
-#: ../src/preferences.cc:3444
+#: ../src/preferences.cc:3449
 #, fuzzy
 msgid "Copy path clipboard selection:"
 msgstr "複製(_C)"
 
-#: ../src/preferences.cc:3448
+#: ../src/preferences.cc:3453
 msgid "Navigation"
 msgstr "瀏覽"
 
 #
 # src/preferences.cc:764
-#: ../src/preferences.cc:3450
+#: ../src/preferences.cc:3455
 msgid "Progressive keyboard scrolling"
 msgstr "鍵盤連續捲動圖像"
 
-#: ../src/preferences.cc:3452
+#: ../src/preferences.cc:3457
 msgid "Keyboard scrolling step multiplier:"
 msgstr ""
 
 #
 # src/preferences.cc:766
-#: ../src/preferences.cc:3454
+#: ../src/preferences.cc:3459
 msgid "Mouse wheel scrolls image"
 msgstr "滑鼠滾軸可捲動圖像"
 
-#: ../src/preferences.cc:3456
+#: ../src/preferences.cc:3461
 msgid "Show bird's-eye view when zoomed in"
 msgstr ""
 
-#: ../src/preferences.cc:3458
+#: ../src/preferences.cc:3463
 msgid "Navigation by left or middle click on image"
 msgstr ""
 
-#: ../src/preferences.cc:3460
+#: ../src/preferences.cc:3465
 msgid "Open archive by left click on image"
 msgstr ""
 
-#: ../src/preferences.cc:3462
+#: ../src/preferences.cc:3467
 msgid "Play video by left click on image"
 msgstr ""
 
-#: ../src/preferences.cc:3465
+#: ../src/preferences.cc:3470
 msgid "Play with:"
 msgstr ""
 
-#: ../src/preferences.cc:3469
+#: ../src/preferences.cc:3474
 msgid "Mouse button Back:"
 msgstr ""
 
-#: ../src/preferences.cc:3471
+#: ../src/preferences.cc:3476
 msgid "Mouse button Forward:"
 msgstr ""
 
-#: ../src/preferences.cc:3476
+#: ../src/preferences.cc:3481
 msgid "Debugging"
 msgstr ""
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:3481
+#: ../src/preferences.cc:3486
 #, fuzzy
 msgid "Timer data"
 msgstr "檔案日期："
 
 # src/preferences.cc:773
-#: ../src/preferences.cc:3484
+#: ../src/preferences.cc:3489
 #, fuzzy
 msgid "Log Window max. lines:"
 msgstr "視窗"
 
 # src/preferences.cc:773
-#: ../src/preferences.cc:3488
+#: ../src/preferences.cc:3493
 #, fuzzy
 msgid "Log Window F1 command: "
 msgstr "視窗"
 
-#: ../src/preferences.cc:3661
+#: ../src/preferences.cc:3666
 msgid "Keyboard"
 msgstr ""
 
 # src/menu.cc:773
-#: ../src/preferences.cc:3665
+#: ../src/preferences.cc:3670
 #, fuzzy
 msgid "Keyboard Shortcuts"
 msgstr "捷徑鍵(_K)"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/preferences.cc:3667
+#: ../src/preferences.cc:3672
 #, fuzzy
 msgid "Search commands"
 msgstr "搜尋:"
 
 #
 # src/main.cc:743
-#: ../src/preferences.cc:3686
+#: ../src/preferences.cc:3691
 #, fuzzy
 msgid "Command"
 msgstr "指令列"
 
 # src/menu.cc:773
-#: ../src/preferences.cc:3687
+#: ../src/preferences.cc:3692
 #, fuzzy
 msgid "Shortcut"
 msgstr "捷徑鍵(_K)"
 
-#: ../src/preferences.cc:3688
+#: ../src/preferences.cc:3693
 #, fuzzy
 msgid "Icon"
 msgstr "圖像："
 
-#: ../src/preferences.cc:3698
+#: ../src/preferences.cc:3703
 msgid ""
 "Click here and type the required key combination \n"
 " The converted keycode is copied to the clipboard. \n"
@@ -7998,151 +8017,151 @@ msgid ""
 msgstr ""
 
 # src/utilops.cc:707
-#: ../src/preferences.cc:3722
+#: ../src/preferences.cc:3727
 #, fuzzy
 msgid "Reset selected"
 msgstr "重設過濾器"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:3729
+#: ../src/preferences.cc:3734
 #, fuzzy
 msgid "Toolbar Main"
 msgstr "工具"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:3729
+#: ../src/preferences.cc:3734
 #, fuzzy
 msgid "Toolbar Status"
 msgstr "工具"
 
-#: ../src/preferences.cc:3749
+#: ../src/preferences.cc:3754
 msgid "Advanced"
 msgstr "進階選項"
 
-#: ../src/preferences.cc:3750
+#: ../src/preferences.cc:3755
 msgid "External preview extraction"
 msgstr ""
 
-#: ../src/preferences.cc:3752
+#: ../src/preferences.cc:3757
 msgid "Use external preview extraction -  Requires restart"
 msgstr ""
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:3762
+#: ../src/preferences.cc:3767
 #, fuzzy
 msgid "Usable file types:\n"
 msgstr "檔案型式"
 
 #
 # src/utilops.cc:339 src/utilops.cc:459 src/utilops.cc:826 src/utilops.cc:1032
-#: ../src/preferences.cc:3768
+#: ../src/preferences.cc:3773
 #, fuzzy
 msgid "File identification tool"
 msgstr "覆寫檔案"
 
-#: ../src/preferences.cc:3770
+#: ../src/preferences.cc:3775
 msgid "Select file identification tool"
 msgstr ""
 
 #
 # src/utilops.cc:339 src/utilops.cc:459 src/utilops.cc:826 src/utilops.cc:1032
-#: ../src/preferences.cc:3772
+#: ../src/preferences.cc:3777
 #, fuzzy
 msgid "Preview extraction tool"
 msgstr "覆寫檔案"
 
-#: ../src/preferences.cc:3774
+#: ../src/preferences.cc:3779
 msgid "Select preview extraction tool"
 msgstr ""
 
-#: ../src/preferences.cc:3780
+#: ../src/preferences.cc:3785
 msgid "Thread pool limits"
 msgstr ""
 
-#: ../src/preferences.cc:3782
+#: ../src/preferences.cc:3787
 msgid ""
 "This option limits the number of threads (or cpu cores) that Geeqie will use "
 "when running duplicate checks.\n"
 "The value 0 means all available cores will be used."
 msgstr ""
 
-#: ../src/preferences.cc:3787
+#: ../src/preferences.cc:3792
 msgid "Duplicate check:"
 msgstr ""
 
-#: ../src/preferences.cc:3787
+#: ../src/preferences.cc:3792
 msgid "max. threads"
 msgstr ""
 
-#: ../src/preferences.cc:3788
+#: ../src/preferences.cc:3793
 msgid "Set to 0 for unlimited"
 msgstr ""
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../src/preferences.cc:3794
+#: ../src/preferences.cc:3799
 #, fuzzy
 msgid "Alternate similarity algorithm"
 msgstr "清除暫存記憶"
 
-#: ../src/preferences.cc:3796
+#: ../src/preferences.cc:3801
 msgid "Enable alternate similarity algorithm"
 msgstr ""
 
 # src/img-view.cc:813 src/menu.cc:982
-#: ../src/preferences.cc:3801
+#: ../src/preferences.cc:3806
 #, fuzzy
 msgid "Use grayscale"
 msgstr "印換投影片模式(_S)"
 
-#: ../src/preferences.cc:3802
+#: ../src/preferences.cc:3807
 msgid "Reduce fingerprint to grayscale"
 msgstr ""
 
-#: ../src/preferences.cc:3810
+#: ../src/preferences.cc:3815
 msgid "Stereo"
 msgstr ""
 
-#: ../src/preferences.cc:3812 ../src/preferences.cc:3814
+#: ../src/preferences.cc:3817 ../src/preferences.cc:3819
 msgid "Windowed stereo mode"
 msgstr ""
 
 # src/img-view.cc:837 src/menu.cc:1001
-#: ../src/preferences.cc:3817 ../src/preferences.cc:3824
+#: ../src/preferences.cc:3822 ../src/preferences.cc:3829
 #, fuzzy
 msgid "Fullscreen stereo mode"
 msgstr "全螢幕"
 
-#: ../src/preferences.cc:3819
+#: ../src/preferences.cc:3824
 msgid "Use different settings for fullscreen"
 msgstr ""
 
-#: ../src/preferences.cc:3833
+#: ../src/preferences.cc:3838
 #, fuzzy
 msgid "Left X"
 msgstr "左邊:"
 
-#: ../src/preferences.cc:3835
+#: ../src/preferences.cc:3840
 #, fuzzy
 msgid "Left Y"
 msgstr "左邊:"
 
-#: ../src/preferences.cc:3837
+#: ../src/preferences.cc:3842
 #, fuzzy
 msgid "Right X"
 msgstr "右邊:"
 
-#: ../src/preferences.cc:3839
+#: ../src/preferences.cc:3844
 #, fuzzy
 msgid "Right Y"
 msgstr "右邊:"
 
 # src/menu.cc:748
-#: ../src/preferences.cc:3846
+#: ../src/preferences.cc:3851
 #, fuzzy
 msgid "Preferences"
 msgstr "偏好設定(_R)..."
 
-#: ../src/preferences.cc:3948
+#: ../src/preferences.cc:3954
 msgid ""
 "This program comes with absolutely no warranty.\n"
 "GNU General Public License, version 2 or later.\n"
@@ -8150,7 +8169,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../src/preferences.cc:3965
+#: ../src/preferences.cc:3971
 msgid ""
 "\n"
 "\n"
@@ -8158,14 +8177,14 @@ msgid ""
 "SA 2.0"
 msgstr ""
 
-#: ../src/preferences.cc:3966
+#: ../src/preferences.cc:3972
 msgid ""
 "\n"
 "\n"
 "Some icons by https://www.flaticon.com"
 msgstr ""
 
-#: ../src/preferences.cc:3991
+#: ../src/preferences.cc:3997
 msgid ""
 "Project created by John Ellis\n"
 "GQview 1998\n"
@@ -8175,35 +8194,35 @@ msgid ""
 "Development and bug reports:\n"
 msgstr ""
 
-#: ../src/preferences.cc:3992
+#: ../src/preferences.cc:3998
 msgid ""
 "\n"
 "https://github.com/BestImageViewer/geeqie/issues"
 msgstr ""
 
 # src/img-view.cc:559 src/window.cc:533
-#: ../src/preferences.cc:4000
+#: ../src/preferences.cc:4006
 #, fuzzy
 msgid "About Geeqie"
 msgstr "關於 - Geeqie"
 
-#: ../src/preferences.cc:4007
+#: ../src/preferences.cc:4013
 msgid "Website"
 msgstr ""
 
-#: ../src/preferences.cc:4058 ../src/preferences.cc:4065
+#: ../src/preferences.cc:4064 ../src/preferences.cc:4071
 msgid "Warning: Cannot open timezone database file"
 msgstr ""
 
-#: ../src/preferences.cc:4071
+#: ../src/preferences.cc:4077
 msgid "Error: Timezone database download failed"
 msgstr ""
 
-#: ../src/preferences.cc:4108
+#: ../src/preferences.cc:4114
 msgid "Timezone database download failed"
 msgstr ""
 
-#: ../src/preferences.cc:4118
+#: ../src/preferences.cc:4124
 msgid "Downloading timezone database"
 msgstr ""
 
@@ -8414,94 +8433,94 @@ msgstr "%s, %d 個檔案"
 msgid "Searching…"
 msgstr "搜尋中..."
 
-#: ../src/search.cc:1470
+#: ../src/search.cc:1476
 #, fuzzy
 msgid "Image is not geocoded"
 msgstr "未定義"
 
-#: ../src/search.cc:2338
+#: ../src/search.cc:2352
 msgid "File not found"
 msgstr "找不到檔案"
 
 # src/utilops.cc:544
-#: ../src/search.cc:2339
+#: ../src/search.cc:2353
 msgid "Please enter an existing file for image content."
 msgstr ""
 
-#: ../src/search.cc:2360
+#: ../src/search.cc:2374
 msgid "Entry does not contain a valid lat/long value"
 msgstr ""
 
-#: ../src/search.cc:2367 ../src/search.cc:3292
+#: ../src/search.cc:2381 ../src/search.cc:3306
 msgid "km"
 msgstr ""
 
 # src/preferences.cc:368
-#: ../src/search.cc:2372 ../src/search.cc:3292
+#: ../src/search.cc:2386 ../src/search.cc:3306
 #, fuzzy
 msgid "miles"
 msgstr "檔案"
 
 # src/preferences.cc:676
-#: ../src/search.cc:2418 ../src/search.cc:3318
+#: ../src/search.cc:2432 ../src/search.cc:3332
 #, fuzzy
 msgid "Raw Image"
 msgstr "影像"
 
-#: ../src/search.cc:2457 ../src/search.cc:3337
+#: ../src/search.cc:2471 ../src/search.cc:3351
 #, fuzzy
 msgid "Any mark"
 msgstr "新增書籤"
 
 # src/utilops.cc:544
-#: ../src/search.cc:2500
+#: ../src/search.cc:2514
 msgid "Please enter an existing folder to search."
 msgstr ""
 
-#: ../src/search.cc:2544
+#: ../src/search.cc:2558
 #, fuzzy
 msgid "Collection not found"
 msgstr "找不到資料夾"
 
 # src/utilops.cc:544
-#: ../src/search.cc:2544
+#: ../src/search.cc:2558
 #, fuzzy
 msgid "Please enter an existing collection name."
 msgstr "請選擇一個已存在的目錄"
 
 # src/collect-dlg.cc:165 src/collect-table.cc:641
-#: ../src/search.cc:2998
+#: ../src/search.cc:3012
 #, fuzzy
 msgid "Select collection"
 msgstr "儲存圖像集"
 
-#: ../src/search.cc:3048
+#: ../src/search.cc:3062
 #, fuzzy
 msgid "Image search"
 msgstr "影像搜尋 - Geeqie"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/search.cc:3082
+#: ../src/search.cc:3096
 msgid "Search:"
 msgstr "搜尋:"
 
-#: ../src/search.cc:3094
+#: ../src/search.cc:3108
 msgid "Recurse"
 msgstr ""
 
-#: ../src/search.cc:3118 ../src/search.cc:3225 ../src/search.cc:3268
+#: ../src/search.cc:3132 ../src/search.cc:3239 ../src/search.cc:3282
 msgid "Match case"
 msgstr "符合大小寫"
 
 # src/ui-pathsel.cc:517 src/utilops.cc:1158
-#: ../src/search.cc:3120
+#: ../src/search.cc:3134
 #, fuzzy
 msgid "Symbolic link"
 msgstr ""
 "無法建立目錄：\n"
 "%s"
 
-#: ../src/search.cc:3122
+#: ../src/search.cc:3136
 msgid ""
 "When set to 'contains' or 'path contains', this field uses Perl Compatible "
 "Regular Expressions.\n"
@@ -8514,44 +8533,44 @@ msgid ""
 msgstr ""
 
 # src/preferences.cc:368
-#: ../src/search.cc:3127
+#: ../src/search.cc:3141
 msgid "File size is"
 msgstr "檔案大小為"
 
 # src/preferences.cc:645
-#: ../src/search.cc:3134 ../src/search.cc:3148 ../src/search.cc:3171
-#: ../src/search.cc:3279
+#: ../src/search.cc:3148 ../src/search.cc:3162 ../src/search.cc:3185
+#: ../src/search.cc:3293
 msgid "and"
 msgstr "且包含"
 
 # src/ui-pathsel.cc:799
-#: ../src/search.cc:3138
+#: ../src/search.cc:3152
 msgid "File date is"
 msgstr "檔案日期為"
 
 # src/utilops.cc:539
-#: ../src/search.cc:3164
+#: ../src/search.cc:3178
 msgid "Image dimensions are"
 msgstr "影像尺寸為"
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../src/search.cc:3177
+#: ../src/search.cc:3191
 msgid "Image content is"
 msgstr "影像內容"
 
 # src/dupe.cc:1659
-#: ../src/search.cc:3181
+#: ../src/search.cc:3195
 #, no-c-format
 msgid "% similar to"
 msgstr "% 相似於"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
-#: ../src/search.cc:3189
+#: ../src/search.cc:3203
 #, fuzzy
 msgid "Ignore rotation"
 msgstr "方位"
 
-#: ../src/search.cc:3228
+#: ../src/search.cc:3242
 msgid ""
 "This field uses Perl Compatible Regular Expressions.\n"
 "e.g. use \n"
@@ -8562,7 +8581,7 @@ msgid ""
 "See the Help file."
 msgstr ""
 
-#: ../src/search.cc:3250
+#: ../src/search.cc:3264
 msgid ""
 "e.g. Exif.Image.Model\n"
 "This always case-sensitive\n"
@@ -8572,7 +8591,7 @@ msgid ""
 "See https://exiv2.org/tags.html"
 msgstr ""
 
-#: ../src/search.cc:3266
+#: ../src/search.cc:3280
 msgid ""
 "e.g. Canon EOS\n"
 "\n"
@@ -8586,26 +8605,26 @@ msgid ""
 msgstr ""
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../src/search.cc:3271
+#: ../src/search.cc:3285
 #, fuzzy
 msgid "Image rating is"
 msgstr "影像內容"
 
 # src/preferences.cc:676
-#: ../src/search.cc:3284
+#: ../src/search.cc:3298
 #, fuzzy
 msgid "Image is"
 msgstr "影像檔"
 
-#: ../src/search.cc:3292
+#: ../src/search.cc:3306
 msgid "n.m."
 msgstr ""
 
-#: ../src/search.cc:3298
+#: ../src/search.cc:3312
 msgid "from"
 msgstr ""
 
-#: ../src/search.cc:3304
+#: ../src/search.cc:3318
 msgid ""
 "Enter a coordinate in the form:\n"
 "89.123 179.456\n"
@@ -8617,18 +8636,18 @@ msgid ""
 msgstr ""
 
 # src/preferences.cc:676
-#: ../src/search.cc:3312
+#: ../src/search.cc:3326
 #, fuzzy
 msgid "Image class"
 msgstr "影像檔"
 
-#: ../src/search.cc:3324
+#: ../src/search.cc:3338
 msgid "Broken"
 msgstr ""
 
 #
 # src/ui-pathsel.cc:764
-#: ../src/search.cc:3332 ../src/view-file/view-file.cc:1640
+#: ../src/search.cc:3346 ../src/view-file/view-file.cc:1640
 #, fuzzy
 msgid "Marks"
 msgstr "顯示隱藏檔案"
@@ -8707,17 +8726,17 @@ msgstr ""
 
 #
 # src/utilops.cc:664 src/utilops.cc:676
-#: ../src/trash.cc:112 ../src/trash.cc:247 ../src/utilops.cc:2913
-#: ../src/utilops.cc:2921 ../src/utilops.cc:2971
+#: ../src/trash.cc:121 ../src/trash.cc:262 ../src/utilops.cc:2915
+#: ../src/utilops.cc:2923 ../src/utilops.cc:2973
 msgid "Delete failed"
 msgstr "刪除失敗"
 
 # src/utilops.cc:322
-#: ../src/trash.cc:112
+#: ../src/trash.cc:121
 msgid "Unable to remove old file from trash folder"
 msgstr "無法從資源回收筒中移除舊檔"
 
-#: ../src/trash.cc:206
+#: ../src/trash.cc:215
 #, c-format
 msgid ""
 "The original location already contains a file named:\n"
@@ -8726,12 +8745,12 @@ msgstr ""
 
 #
 # src/utilops.cc:664 src/utilops.cc:676
-#: ../src/trash.cc:207 ../src/trash.cc:215 ../src/trash.cc:227
+#: ../src/trash.cc:216 ../src/trash.cc:224 ../src/trash.cc:236
 #, fuzzy
 msgid "Restore failed"
 msgstr "刪除失敗"
 
-#: ../src/trash.cc:214
+#: ../src/trash.cc:223
 #, c-format
 msgid ""
 "The original folder no longer exists:\n"
@@ -8740,7 +8759,7 @@ msgstr ""
 
 #
 # src/ui-pathsel.cc:343 src/utilops.cc:675 src/utilops.cc:727
-#: ../src/trash.cc:226
+#: ../src/trash.cc:235
 #, fuzzy, c-format
 msgid ""
 "Unable to restore file to:\n"
@@ -8750,7 +8769,7 @@ msgstr ""
 "%s"
 
 # src/utilops.cc:496
-#: ../src/trash.cc:248
+#: ../src/trash.cc:263
 #, fuzzy
 msgid "Unable to remove file"
 msgstr ""
@@ -8760,22 +8779,22 @@ msgstr ""
 "%s"
 
 # src/utilops.cc:1151
-#: ../src/trash.cc:267
+#: ../src/trash.cc:282
 msgid "Could not create folder"
 msgstr "無法建立資料夾"
 
 # src/utilops.cc:1151
-#: ../src/trash.cc:287
+#: ../src/trash.cc:313
 #, fuzzy
 msgid "Could not create trash information file"
 msgstr "無法建立資料夾"
 
-#: ../src/trash.cc:297
+#: ../src/trash.cc:323
 msgid "Permission denied"
 msgstr "權限不足遭拒決"
 
 # src/ui-pathsel.cc:517 src/utilops.cc:1158
-#: ../src/trash.cc:303
+#: ../src/trash.cc:329
 #, c-format
 msgid ""
 "Unable to access or create the trash folder.\n"
@@ -8784,43 +8803,43 @@ msgstr ""
 "無法存取或建立回收桶資料夾\n"
 "\"%s\""
 
-#: ../src/trash.cc:316
+#: ../src/trash.cc:342
 msgid "See the Help file for a possible workaround."
 msgstr ""
 
 # src/menu.cc:432 src/menu.cc:461
-#: ../src/trash.cc:316
+#: ../src/trash.cc:342
 #, fuzzy
 msgid "Unknown error"
 msgstr "未知"
 
 # src/utilops.cc:601
-#: ../src/trash.cc:318
+#: ../src/trash.cc:344
 #, fuzzy
 msgid "Move to trash failed"
 msgstr "往上移動(_U)"
 
-#: ../src/trash.cc:333
+#: ../src/trash.cc:359
 msgid "Deletion by external command"
 msgstr ""
 
-#: ../src/trash.cc:337
+#: ../src/trash.cc:363
 msgid "Deleting without trash"
 msgstr ""
 
-#: ../src/trash.cc:345
+#: ../src/trash.cc:371
 #, c-format
 msgid " (max. %d MiB)"
 msgstr ""
 
-#: ../src/trash.cc:349
+#: ../src/trash.cc:375
 #, c-format
 msgid ""
 "Using Geeqie Trash bin\n"
 "%s"
 msgstr ""
 
-#: ../src/trash.cc:353
+#: ../src/trash.cc:379
 msgid "Using system Trash bin"
 msgstr ""
 
@@ -8901,12 +8920,12 @@ msgid ""
 msgstr ""
 
 # src/menu.cc:513
-#: ../src/ui-bookmark.cc:979 ../src/ui-tabcomp.cc:746
+#: ../src/ui-bookmark.cc:979 ../src/ui-tabcomp.cc:777
 #, fuzzy
 msgid "Show history"
 msgstr "根據日期排列"
 
-#: ../src/ui-file-chooser.cc:278
+#: ../src/ui-file-chooser.cc:284
 msgid ""
 "iccdump is not installed.\n"
 "Install argyll package"
@@ -8914,53 +8933,46 @@ msgstr ""
 
 #
 # src/rcfile.cc:132
-#: ../src/ui-file-chooser.cc:301
+#: ../src/ui-file-chooser.cc:307
 #, fuzzy, c-format
 msgid "Error loading PDF: %s\n"
 msgstr "儲存設定檔錯誤：%s\n"
 
-#: ../src/ui-file-chooser.cc:308
+#: ../src/ui-file-chooser.cc:314
 msgid "Failed to get page 0\n"
 msgstr ""
 
-#: ../src/ui-file-chooser.cc:439
+#: ../src/ui-file-chooser.cc:445
 #, fuzzy
 msgid "No preview"
 msgstr "預覽"
 
+#: ../src/ui-file-chooser.cc:563
+#, fuzzy, c-format
+msgid "Destination: %s"
+msgstr "目地:"
+
 # src/ui-pathsel.cc:307
-#: ../src/ui-file-chooser.cc:651
+#: ../src/ui-file-chooser.cc:734
 #, fuzzy, c-format
 msgid "A file named \"%s\" already exists. Do you want to replace it?"
 msgstr "檔案名稱 %s 已經存在。"
 
-# src/collect-table.cc:1824 src/dupe.cc:2176 src/preferences.cc:536
-# src/ui-utildlg.cc:105
-#: ../src/ui-file-chooser.cc:652 ../src/ui-file-chooser.cc:868
-#, fuzzy
-msgid "_Cancel"
-msgstr "取消"
-
-#: ../src/ui-file-chooser.cc:652
+#: ../src/ui-file-chooser.cc:735
 msgid "_Replace"
 msgstr ""
 
-# src/ui-pathsel.cc:697
-#: ../src/ui-file-chooser.cc:717
-msgid "All files"
-msgstr "所有檔案"
-
-#: ../src/ui-file-chooser.cc:828
+#: ../src/ui-file-chooser.cc:915
 msgid "Preview"
 msgstr "預覽"
 
 # src/collect-table.cc:627 src/dupe.cc:1391 src/dupe.cc:1563
-#: ../src/ui-file-chooser.cc:856
+#: ../src/ui-file-chooser.cc:943
 msgid "Select path"
 msgstr "選取路徑"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/ui-file-chooser.cc:917
+#: ../src/ui-file-chooser.cc:1005
 #, fuzzy
 msgid "_Current folder"
 msgstr "刪除檔案?"
@@ -9055,15 +9067,15 @@ msgstr ""
 "無法載入：\n"
 "%s"
 
-#: ../src/ui-menu.cc:525
+#: ../src/ui-menu.cc:526
 msgid "Input 0: sRGB"
 msgstr ""
 
-#: ../src/ui-menu.cc:526
+#: ../src/ui-menu.cc:527
 msgid "Input 1: AdobeRGB compatible"
 msgstr ""
 
-#: ../src/ui-menu.cc:555 ../src/ui-menu.cc:559
+#: ../src/ui-menu.cc:556 ../src/ui-menu.cc:560
 #, c-format
 msgid "Input %d: %s"
 msgstr ""
@@ -9210,19 +9222,19 @@ msgstr ""
 msgid "This operation can't continue:"
 msgstr ""
 
-#: ../src/utilops.cc:1849 ../src/utilops.cc:1942 ../src/utilops.cc:2333
+#: ../src/utilops.cc:1849 ../src/utilops.cc:1944 ../src/utilops.cc:2335
 #, fuzzy
 msgid "Discard changes"
 msgstr "丟棄(_D)"
 
 # src/ui-pathsel.cc:799
-#: ../src/utilops.cc:1850 ../src/utilops.cc:1943 ../src/utilops.cc:2287
-#: ../src/utilops.cc:2302
+#: ../src/utilops.cc:1850 ../src/utilops.cc:1945 ../src/utilops.cc:2289
+#: ../src/utilops.cc:2304
 #, fuzzy
 msgid "File details"
 msgstr "檔案日期為"
 
-#: ../src/utilops.cc:1870 ../src/utilops.cc:1959
+#: ../src/utilops.cc:1870 ../src/utilops.cc:1961
 msgid "Sidecars"
 msgstr ""
 
@@ -9235,14 +9247,14 @@ msgstr "覆寫檔案"
 
 #
 # src/main.cc:619
-#: ../src/utilops.cc:1898
+#: ../src/utilops.cc:1899
 #, fuzzy
 msgid "Geeqie - Move File"
 msgstr "Geeqie - 離開"
 
 #
 # src/main.cc:619
-#: ../src/utilops.cc:1898
+#: ../src/utilops.cc:1899
 #, fuzzy
 msgid "Geeqie - Copy File"
 msgstr "Geeqie - 離開"
@@ -9250,297 +9262,297 @@ msgstr "Geeqie - 離開"
 #
 # src/ui-pathsel.cc:437 src/ui-pathsel.cc:460 src/utilops.cc:944
 # src/utilops.cc:1095
-#: ../src/utilops.cc:1904
+#: ../src/utilops.cc:1906
 #, fuzzy
 msgid "With Rename"
 msgstr "更改名稱"
 
 # src/utilops.cc:980
-#: ../src/utilops.cc:1961
+#: ../src/utilops.cc:1963
 #, fuzzy
 msgid "New name"
 msgstr "新檔名:"
 
 # src/menu.cc:559
-#: ../src/utilops.cc:1975
+#: ../src/utilops.cc:1977
 msgid "Source"
 msgstr "來源"
 
-#: ../src/utilops.cc:1975
+#: ../src/utilops.cc:1977
 #, fuzzy
 msgid "Destination"
 msgstr "目地:"
 
 #
 # src/preferences.cc:930
-#: ../src/utilops.cc:1991
+#: ../src/utilops.cc:1993
 #, fuzzy
 msgid "Manual rename"
 msgstr "名稱"
 
-#: ../src/utilops.cc:1995
+#: ../src/utilops.cc:1997
 msgid "Original name:"
 msgstr "原檔名:"
 
 # src/utilops.cc:980
-#: ../src/utilops.cc:1998
+#: ../src/utilops.cc:2000
 msgid "New name:"
 msgstr "新檔名:"
 
 # src/preferences.cc:930
-#: ../src/utilops.cc:2010
+#: ../src/utilops.cc:2012
 msgid "Auto rename"
 msgstr "自動更改名稱"
 
-#: ../src/utilops.cc:2015
+#: ../src/utilops.cc:2017
 msgid "Begin text"
 msgstr "文字開頭"
 
-#: ../src/utilops.cc:2024 ../src/utilops.cc:2057
+#: ../src/utilops.cc:2026 ../src/utilops.cc:2059
 msgid "Start #"
 msgstr "開始 #"
 
-#: ../src/utilops.cc:2030
+#: ../src/utilops.cc:2032
 msgid "End text"
 msgstr "文字結尾"
 
-#: ../src/utilops.cc:2039
+#: ../src/utilops.cc:2041
 msgid "Padding:"
 msgstr ""
 
-#: ../src/utilops.cc:2044
+#: ../src/utilops.cc:2046
 msgid "Formatted rename"
 msgstr ""
 
-#: ../src/utilops.cc:2048
+#: ../src/utilops.cc:2050
 msgid "Format (* = original name, ## = numbers)"
 msgstr ""
 
-#: ../src/utilops.cc:2197
+#: ../src/utilops.cc:2199
 msgid "Another operation in progress.\n"
 msgstr ""
 
 # src/ui-pathsel.cc:799
-#: ../src/utilops.cc:2247
+#: ../src/utilops.cc:2249
 #, fuzzy, c-format
 msgid "File: '%s'\n"
 msgstr "檔案:"
 
-#: ../src/utilops.cc:2252
+#: ../src/utilops.cc:2254
 msgid "with sidecar files:\n"
 msgstr ""
 
-#: ../src/utilops.cc:2258
+#: ../src/utilops.cc:2260
 #, c-format
 msgid " '%s'\n"
 msgstr ""
 
-#: ../src/utilops.cc:2262
+#: ../src/utilops.cc:2264
 msgid ""
 "\n"
 "Status: "
 msgstr ""
 
-#: ../src/utilops.cc:2274
+#: ../src/utilops.cc:2276
 msgid "no problem detected"
 msgstr ""
 
-#: ../src/utilops.cc:2289 ../src/utilops.cc:2332
+#: ../src/utilops.cc:2291 ../src/utilops.cc:2334
 #, fuzzy
 msgid "Exclude file"
 msgstr "排除"
 
-#: ../src/utilops.cc:2330 ../src/utilops.cc:2355
+#: ../src/utilops.cc:2332 ../src/utilops.cc:2357
 msgid "Overview of changed metadata"
 msgstr ""
 
-#: ../src/utilops.cc:2348
+#: ../src/utilops.cc:2350
 #, c-format
 msgid ""
 "The following metadata tags will be written to\n"
 "'%s'."
 msgstr ""
 
-#: ../src/utilops.cc:2352
+#: ../src/utilops.cc:2354
 msgid "The following metadata tags will be written to the image file itself."
 msgstr ""
 
-#: ../src/utilops.cc:2451
+#: ../src/utilops.cc:2453
 #, fuzzy
 msgid "⚠ This will move the following    "
 msgstr "這樣將會移除垃圾桶中的內容。"
 
-#: ../src/utilops.cc:2451
+#: ../src/utilops.cc:2453
 #, fuzzy
 msgid "    files to the Trash bin"
 msgstr "這樣將會移除垃圾桶中的內容。"
 
-#: ../src/utilops.cc:2455
+#: ../src/utilops.cc:2457
 #, fuzzy
 msgid "⚠ This will permanently delete the following    "
 msgstr "這樣將會移除垃圾桶中的內容。"
 
 # src/dupe.cc:67 src/dupe.cc:1449
-#: ../src/utilops.cc:2455
+#: ../src/utilops.cc:2457
 #, fuzzy
 msgid "    files"
 msgstr "%d 個檔案"
 
 #
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/utilops.cc:2457
+#: ../src/utilops.cc:2459
 #, fuzzy
 msgid "Delete files?"
 msgstr "刪除檔案"
 
-#: ../src/utilops.cc:2463
+#: ../src/utilops.cc:2465
 #, fuzzy
 msgid "This will move the following file to the Trash bin"
 msgstr "這樣將會移除垃圾桶中的內容。"
 
-#: ../src/utilops.cc:2467
+#: ../src/utilops.cc:2469
 #, fuzzy
 msgid "This will permanently delete the following file"
 msgstr "這樣將會移除垃圾桶中的內容。"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/utilops.cc:2469
+#: ../src/utilops.cc:2471
 msgid "Delete file?"
 msgstr "刪除檔案?"
 
-#: ../src/utilops.cc:2492
+#: ../src/utilops.cc:2494
 msgid "Can't write metadata"
 msgstr ""
 
-#: ../src/utilops.cc:2514
+#: ../src/utilops.cc:2516
 #, fuzzy
 msgid "Write metadata"
 msgstr "附屬資料"
 
-#: ../src/utilops.cc:2515
+#: ../src/utilops.cc:2517
 #, fuzzy
 msgid "Write metadata?"
 msgstr "附屬資料"
 
-#: ../src/utilops.cc:2516
+#: ../src/utilops.cc:2518
 #, fuzzy
 msgid "This will write the changed metadata into the following files"
 msgstr ""
 "這樣將會重設所有編輯命令成為預設值。\n"
 "是否繼續?"
 
-#: ../src/utilops.cc:2518
+#: ../src/utilops.cc:2520
 msgid "Metadata writing failed"
 msgstr ""
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2537 ../src/utilops.cc:2563
+#: ../src/utilops.cc:2539 ../src/utilops.cc:2565
 #, fuzzy
 msgid "Move failed"
 msgstr "移動檔案"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2560
+#: ../src/utilops.cc:2562
 #, fuzzy
 msgid "Move files?"
 msgstr "移動檔案"
 
-#: ../src/utilops.cc:2561
+#: ../src/utilops.cc:2563
 #, fuzzy
 msgid "This will move the following files"
 msgstr "這樣將會移除垃圾桶中的內容。"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2585 ../src/utilops.cc:2611
+#: ../src/utilops.cc:2587 ../src/utilops.cc:2613
 #, fuzzy
 msgid "Copy failed"
 msgstr "複製檔案"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2608
+#: ../src/utilops.cc:2610
 #, fuzzy
 msgid "Copy files?"
 msgstr "複製檔案"
 
-#: ../src/utilops.cc:2609 ../src/utilops.cc:2738
+#: ../src/utilops.cc:2611 ../src/utilops.cc:2740
 msgid "This will copy the following files"
 msgstr ""
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2630 ../src/utilops.cc:2655 ../src/utilops.cc:3089
+#: ../src/utilops.cc:2632 ../src/utilops.cc:2657 ../src/utilops.cc:3091
 msgid "Rename failed"
 msgstr "更改檔名失敗"
 
 #
 # src/ui-pathsel.cc:437 src/ui-pathsel.cc:460 src/utilops.cc:944
 # src/utilops.cc:1095
-#: ../src/utilops.cc:2651 ../src/utilops.cc:3085
+#: ../src/utilops.cc:2653 ../src/utilops.cc:3087
 msgid "Rename"
 msgstr "更改名稱"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2652
+#: ../src/utilops.cc:2654
 #, fuzzy
 msgid "Rename files?"
 msgstr "更改檔案名稱"
 
-#: ../src/utilops.cc:2653
+#: ../src/utilops.cc:2655
 #, fuzzy
 msgid "This will rename the following files"
 msgstr "這樣將會移除垃圾桶中的內容。"
 
-#: ../src/utilops.cc:2704
+#: ../src/utilops.cc:2706
 msgid "Can't run external editor"
 msgstr ""
 
 #
 # src/preferences.cc:915
-#: ../src/utilops.cc:2736
+#: ../src/utilops.cc:2738
 #, fuzzy
 msgid "Editor"
 msgstr "編輯器"
 
 # src/utilops.cc:707
-#: ../src/utilops.cc:2737
+#: ../src/utilops.cc:2739
 #, fuzzy
 msgid "Run editor?"
 msgstr "重設編輯器"
 
 #
 # src/preferences.cc:669
-#: ../src/utilops.cc:2740
+#: ../src/utilops.cc:2742
 #, fuzzy
 msgid "External command failed"
 msgstr "可使用刪除鍵"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/utilops.cc:2900 ../src/utilops.cc:2962
+#: ../src/utilops.cc:2902 ../src/utilops.cc:2964
 #, fuzzy
 msgid "Delete folder"
 msgstr "選擇資料夾"
 
 # src/ui-pathsel.cc:517 src/utilops.cc:1158
-#: ../src/utilops.cc:2901
+#: ../src/utilops.cc:2903
 #, fuzzy
 msgid "Delete symbolic link?"
 msgstr ""
 "無法建立目錄：\n"
 "%s"
 
-#: ../src/utilops.cc:2903
+#: ../src/utilops.cc:2905
 msgid ""
 "This will delete the symbolic link.\n"
 "The folder this link points to will not be deleted."
 msgstr ""
 
 # src/ui-pathsel.cc:344 src/utilops.cc:728
-#: ../src/utilops.cc:2904
+#: ../src/utilops.cc:2906
 #, fuzzy
 msgid "Link deletion failed"
 msgstr "刪除檔案失敗"
 
 # src/utilops.cc:322
-#: ../src/utilops.cc:2912
+#: ../src/utilops.cc:2914
 #, fuzzy, c-format
 msgid ""
 "Unable to remove folder %s\n"
@@ -9548,7 +9560,7 @@ msgid ""
 msgstr "無法從資源回收筒中移除舊檔"
 
 # src/ui-pathsel.cc:517 src/utilops.cc:1158
-#: ../src/utilops.cc:2920 ../src/utilops.cc:2970
+#: ../src/utilops.cc:2922 ../src/utilops.cc:2972
 #, fuzzy, c-format
 msgid "Unable to list contents of folder %s"
 msgstr ""
@@ -9556,12 +9568,12 @@ msgstr ""
 "%s"
 
 # src/collect-dlg.cc:59
-#: ../src/utilops.cc:2932 ../src/utilops.cc:2939
+#: ../src/utilops.cc:2934 ../src/utilops.cc:2941
 #, fuzzy
 msgid "Folder contains subfolders"
 msgstr "包含子目錄"
 
-#: ../src/utilops.cc:2936
+#: ../src/utilops.cc:2938
 #, c-format
 msgid ""
 "Unable to delete the folder:\n"
@@ -9572,67 +9584,78 @@ msgid ""
 msgstr ""
 
 # src/preferences.cc:368
-#: ../src/utilops.cc:2942
+#: ../src/utilops.cc:2944
 #, fuzzy
 msgid "Subfolders:"
 msgstr "資料夾"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/utilops.cc:2963
+#: ../src/utilops.cc:2965
 #, fuzzy
 msgid "Delete folder?"
 msgstr "刪除檔案?"
 
 # src/collect-dlg.cc:59
-#: ../src/utilops.cc:2964
+#: ../src/utilops.cc:2966
 #, fuzzy
 msgid "The folder contains these files:"
 msgstr "包含子目錄"
 
-#: ../src/utilops.cc:2965
+#: ../src/utilops.cc:2967
 msgid ""
 "This will delete the folder.\n"
 "The contents of this folder will also be deleted."
 msgstr ""
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:3086
+#: ../src/utilops.cc:3088
 #, fuzzy
 msgid "Rename folder?"
 msgstr "更改檔案名稱"
 
 # src/collect-dlg.cc:59
-#: ../src/utilops.cc:3087
+#: ../src/utilops.cc:3089
 #, fuzzy
 msgid "The folder contains the following files"
 msgstr "包含子目錄"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/utilops.cc:3280
+#: ../src/utilops.cc:3282
 #, fuzzy
 msgid "Create Folder"
 msgstr "選擇資料夾"
 
-#: ../src/utilops.cc:3281
+#: ../src/utilops.cc:3283
 #, fuzzy
 msgid "Folder was not created"
 msgstr "資料夾不支援"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/utilops.cc:3312
+#: ../src/utilops.cc:3314
 #, fuzzy
 msgid "Geeqie - Create Folder"
 msgstr "選擇資料夾"
 
+# src/collect-dlg.cc:59
+#: ../src/view-dir.cc:192
+#, fuzzy
+msgid "Invalid folder name"
+msgstr "檔案名稱無效"
+
 # src/utilops.cc:592
-#: ../src/view-dir.cc:450 ../src/view-file/view-file.cc:770
+#: ../src/view-dir.cc:573 ../src/view-file/view-file.cc:770
 msgid "_Copy"
 msgstr "複製(_C)"
 
 # src/utilops.cc:601
-#: ../src/view-dir.cc:451 ../src/view-file/view-file.cc:771
+#: ../src/view-dir.cc:574 ../src/view-file/view-file.cc:771
 msgid "_Move"
 msgstr "移動(_M)"
+
+#: ../src/view-dir.cc:976 ../src/view-dir.cc:1008
+#, fuzzy
+msgid "new-folder"
+msgstr "新資料夾"
 
 # src/collect-dlg.cc:172
 #: ../src/view-file/view-file.cc:1202 ../src/view-file/view-file.cc:1209
@@ -9761,36 +9784,36 @@ msgstr ""
 msgid "Ignore Rating"
 msgstr "方位"
 
-#: ../src/view-file/view-file.cc:2543
+#: ../src/view-file/view-file.cc:2554
 msgid "Use regular expressions"
 msgstr ""
 
 #
 # src/ui-pathsel.cc:764
-#: ../src/view-file/view-file.cc:2553
+#: ../src/view-file/view-file.cc:2564
 #, fuzzy
 msgid "Show filter history"
 msgstr "顯示隱藏檔案"
 
-#: ../src/view-file/view-file.cc:2581
+#: ../src/view-file/view-file.cc:2592
 #, fuzzy
 msgid "Case sensitive"
 msgstr "排序時考慮大小寫"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/view-file/view-file.cc:2584
+#: ../src/view-file/view-file.cc:2595
 #, fuzzy
 msgid "Select Class filter"
 msgstr "選擇資料夾"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/view-file/view-file.cc:2587
+#: ../src/view-file/view-file.cc:2598
 #, fuzzy
 msgid "Select Rating filter"
 msgstr "選擇資料夾"
 
 # src/collect-table.cc:100 src/dupe.cc:668 src/filelist.c:1811
-#: ../src/view-file/view-file.cc:3166 ../src/view-file/view-file.cc:3208
+#: ../src/view-file/view-file.cc:3177 ../src/view-file/view-file.cc:3219
 #, fuzzy
 msgid "Loading meta…"
 msgstr "正在載入預覽小圖..."
@@ -9827,42 +9850,47 @@ msgstr ""
 msgid "Error renaming file"
 msgstr "更改檔案名稱發生錯誤"
 
-#: ../src/view-file/view-file-list.cc:2047
+#: ../src/view-file/view-file-list.cc:2072
 #, fuzzy
 msgid "Stars"
 msgstr "開始 #"
 
-#: ../src/view-file/view-file-list.cc:2060
+#: ../src/view-file/view-file-list.cc:2085
 msgid "Date and Time"
 msgstr ""
 
-#: ../src/window.cc:215
+#: ../src/window.cc:231
 msgid "On-line help search"
 msgstr ""
 
-#: ../src/window.cc:218
+#: ../src/window.cc:234
 msgid "Search the on-line help files.\n"
 msgstr ""
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/window.cc:223
+#: ../src/window.cc:239
 #, fuzzy
 msgid "Search engine:"
 msgstr "搜尋:"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/window.cc:234
+#: ../src/window.cc:250
 #, fuzzy
 msgid "Search terms:"
 msgstr "搜尋:"
 
 # src/ui-help.cc:191
-#: ../src/window.cc:258
+#: ../src/window.cc:274
 #, fuzzy, c-format
 msgid "Warning: Failed to execute command: %s\n"
 msgstr ""
 "無法執行檔案：\n"
 "%s\n"
+
+# src/collect-dlg.cc:172
+#, fuzzy
+#~ msgid "Geeqie - Open Collection"
+#~ msgstr "開啟圖像集(_O)"
 
 # src/collect-table.cc:620 src/dupe.cc:1388 src/dupe.cc:1560 src/img-view.cc:801
 # src/menu.cc:906 src/menu.cc:964
@@ -11205,10 +11233,6 @@ msgstr ""
 #~ "%s\n"
 #~ "是一個目錄，但圖像集是檔案"
 
-# src/collect-dlg.cc:59
-#~ msgid "Invalid filename"
-#~ msgstr "檔案名稱無效"
-
 # src/collect-dlg.cc:69
 #~ msgid "Overwrite File"
 #~ msgstr "覆寫檔案"
@@ -12246,9 +12270,6 @@ msgstr ""
 #, fuzzy
 #~ msgid "Contents:"
 #~ msgstr "內容(_C)"
-
-#~ msgid "new_folder"
-#~ msgstr "新資料夾"
 
 # src/menu.cc:753
 #, fuzzy
