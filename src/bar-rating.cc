@@ -46,7 +46,6 @@
 struct PaneRatingData
 {
 	PaneData pane;
-	GtkWidget *radio_button_first;
 	GtkCheckButton *rating_buttons[7];
 	gboolean updating;
 };
@@ -153,7 +152,6 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gboolean expanded)
 {
 	PaneRatingData *prd;
-	GtkWidget *radio_rating;
 
 	prd = g_new0(PaneRatingData, 1);
 
@@ -186,7 +184,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 		{
 		const std::string i_str = std::to_string(i - 1);
 
-		radio_rating = gtk_check_button_new_with_label(i_str.c_str());
+		GtkWidget *radio_rating = gtk_check_button_new_with_label(i_str.c_str());
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_rating), GTK_CHECK_BUTTON(radio_rejected));
 		g_signal_connect(radio_rating, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 
@@ -201,8 +199,6 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 		gtk_box_append(GTK_BOX(row_2), radio_rating);
 		prd->rating_buttons[i] = GTK_CHECK_BUTTON(radio_rating);
 		}
-
-	prd->radio_button_first = radio_rating;
 
 	file_data_register_notify_func(bar_pane_rating_notify_cb, prd, NOTIFY_PRIORITY_LOW);
 
