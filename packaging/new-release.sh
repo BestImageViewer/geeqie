@@ -4,42 +4,50 @@
 set -eu
 
 ## @file
-## @brief Create a new release
+## @brief Prepare and verify a source release from reviewed NEWS.
 ##
-## new-release.sh [option]...\n
-## Where:\n
-## -v \<a.b\> is a major.minor version number\n
-## -s \<c\> is the start hash number for a new major.minor release - if omitted, HEAD is used\n
-## -p \<d\> is the patch version if a major.minor.patch release is being created\n
-## -r Push the release to the repo. If omitted a test run is made.\n
-## -h Print Help
+## Run from the repository root after updating NEWS and pushing source changes.
+## The first NEWS line must be Geeqie major.minor or Geeqie major.minor.patch.
+## With no options, the version and stable branch are inferred from NEWS.
+## Preparation takes place in a unique temporary directory; the checkout is
+## unchanged. Without -r, nothing is pushed or uploaded.
 ##
-## Will create a new release off the master branch, or will create a new
-## patch version off an existing major.minor release branch.
-##
-## It is expected that the first line of NEWS is in the form "Geeqie \<a.b[.d]\>
-##
-## 1. Ensure that the main repo. is up to date
-## 2. cd to a working directory and create or update NEWS and org.geeqie.metainfo.in for the new release data.
-## 4. Run this script
-##
-## This script will:
-## 1. Clone geeqie to a unique directory in /tmp and cd to it
-## 2. Copy NEWS and org.geeqie.Geeqie.metainfo.xml.in from the working
-## directory to the new clone dir
-## 3. Create the new release
-## 4. Rename the unique dir name to the form geeqie-<n.m>
-## 5. Create the source tar
+## -v <major.minor> Explicit version, checked against NEWS (optional).
+## -p <patch> Explicit patch number, checked against NEWS (optional).
+## -s <commit> Starting master commit for a major/minor release (optional).
+## -r Push prepared stable branch, signed tag, and master commit atomically.
+## -h Print Help.
+
+fail()
+{
+	printf '%s\n' "$*" >&2
+	exit 1
+}
+
+sign()
+{
+	if [ -n "$release_signing_key" ]
+	then
+		gpg --local-user "$release_signing_key" "$@"
+	else
+		gpg "$@"
+	fi
+}
 
 version=
 start=
 patch=
-push=
+push=false
 while getopts "v:s:p:hr" option
 do
 	case $option in
 		h)
-			printf '%s\n%s\n%s\n%s\n%s\n' "-v <a.b> release major.minor e.g 1.9" "-s <c> start hash e.g. 728172681 (optional)" "-p <d> release patch version e.g. 2 for 1.6.2" "-r push to repo." "-h help"
+			printf '%s\n' \
+				'Usage: ./packaging/new-release.sh [-v major.minor] [-p patch] [-s commit] [-r]' \
+				'Without version options, use the first line of NEWS.' \
+				'Without -r, prepare and verify locally; nothing is published.' \
+				'-s selects a master commit for a major/minor release.' \
+				'-r pushes the prepared branches and signed tag after verification.'
 			exit 0
 			;;
 		v) version="$OPTARG" ;;
@@ -49,192 +57,160 @@ do
 		*) exit 1 ;;
 	esac
 done
+shift "$((OPTIND - 1))"
+[ "$#" -eq 0 ] || fail 'Unexpected positional arguments'
 
 orig_dir=$PWD
+[ -f NEWS ] && [ -f data/org.geeqie.Geeqie.metainfo.xml.in ] || fail 'Run from the Geeqie repository root'
+news_version=$(sed -n '1s/^Geeqie //p' NEWS)
+printf '%s\n' "$news_version" | LC_ALL=C grep -E -q '^[0-9]+\.[0-9]+(\.[0-9]+)?$' || fail 'The first NEWS line must be Geeqie major.minor[.patch]'
+news_base=$(printf '%s\n' "$news_version" | cut -d . -f 1,2)
+news_patch=$(printf '%s\n' "$news_version" | cut -s -d . -f 3)
+[ -z "$version" ] || [ "$version" = "$news_base" ] || fail 'Version option does not match NEWS'
+[ -z "$patch" ] || [ "$patch" = "$news_patch" ] || fail 'Patch option does not match NEWS'
+version=$news_base
+patch=$news_patch
+revision=$news_version
+[ -z "$start" ] || [ -z "$patch" ] || fail 'Cannot combine a start commit with a patch release'
 
-if [ ! -f NEWS ]
-then
-	printf '%s\n' "File NEWS does not exist"
-	exit 1
-fi
+for tool in git gpg meson ninja python3 help2man doclifter tar xz msgfmt msgmerge xgettext itstool xvfb-run Xvfb
+do
+	command -v "$tool" > /dev/null || fail "Required tool not found: $tool"
+done
+git var GIT_COMMITTER_IDENT > /dev/null
+release_user_name=$(git config --get user.name || :)
+release_user_email=$(git config --get user.email || :)
+release_signing_key=$(git config --get user.signingkey || :)
+# Check signing availability before doing an expensive build. GPG may prompt
+# for a passphrase here and when the actual tag and archive are signed.
+printf 'Geeqie release signing check\n' | sign --armor --detach-sign > /dev/null
 
-if [ ! -f ./data/org.geeqie.Geeqie.metainfo.xml.in ]
-then
-	printf '%s\n' "File ./data/org.geeqie.Geeqie.metainfo.xml.in does not exist"
-	exit 1
-fi
-
-if ! zenity --title="NEW RELEASE" --question --text "Have the following files been updated?\n\n$orig_dir/NEWS\n$orig_dir/data/org.geeqie.Geeqie.metainfo.xml.in\n\nContinue?"
-then
-	exit 1
-fi
-
-if [ "$push" = true ]
-then
-	if ! zenity --title="NEW RELEASE" --question --text "Do you have write access to the repo.?\nDo you really want to push?\n\nContinue?"
-	then
-		exit 1
-	fi
-fi
-
-tmp_dir=${TMPDIR:-/tmp}
-working_dir=$(mktemp --directory "$tmp_dir/geeqie.XXXXXXXXXX")
-
+release_dir=$(mktemp -d "${TMPDIR:-/tmp}/geeqie-release.XXXXXXXXXX")
+working_dir="$release_dir/geeqie-$revision"
+trap 'printf "Release work directory: %s\n" "$release_dir" >&2' EXIT
+printf 'Preparing Geeqie %s in %s\n' "$revision" "$release_dir"
 git clone git://git.geeqie.org/geeqie.git "$working_dir"
-
-cd "$working_dir" || exit 1
-
-if [ -n "$start" ] && [ -n "$patch" ]
+cd "$working_dir"
+if [ -n "$release_user_name" ]
 then
-	printf '%s\n' "Cannot have start-hash and patch number together"
-	exit 1
+	git config user.name "$release_user_name"
+fi
+if [ -n "$release_user_email" ]
+then
+	git config user.email "$release_user_email"
+fi
+if [ -n "$release_signing_key" ]
+then
+	git config user.signingkey "$release_signing_key"
 fi
 
-case $version in
-	"" | *[!0123456789.]* | *.*.* | .* | *.)
-		printf '%s\n' "Version major.minor $version is not valid"
-		exit 1
-		;;
-	*.*) ;;
-	*)
-		printf '%s\n' "Version major.minor $version is not valid"
-		exit 1
-		;;
-esac
-
-if [ -n "$start" ]
+if git rev-parse --verify --quiet "refs/tags/v$revision" > /dev/null
 then
-	if ! git branch master --contains "$start" > /dev/null 2>&1
-	then
-		printf '%s\n' "Start hash is not in master branch"
-		exit 1
-	fi
+	fail "Tag v$revision already exists"
 fi
-
 if [ -n "$patch" ]
 then
-	if ! git rev-parse --verify --quiet refs/remotes/origin/stable/"$version" > /dev/null
-	then
-		printf '%s\n' "Version $version does not exist"
-		exit 1
-	fi
-
-	if ! [ "$patch" -ge 0 ] 2> /dev/null
-	then
-		printf '%s\n' "Patch $patch is not an integer"
-		exit 1
-	fi
+	git rev-parse --verify --quiet "refs/remotes/origin/stable/$version" > /dev/null || fail "Stable branch $version does not exist"
+	git checkout -b "stable/$version" --track "origin/stable/$version"
 else
-	if git rev-parse --verify --quiet refs/remotes/origin/stable/"$version" > /dev/null
+	if git rev-parse --verify --quiet "refs/remotes/origin/stable/$version" > /dev/null
 	then
-		printf '%s\n' "Version $version already exists"
-		exit 1
+		fail "Stable branch $version already exists; use a patch version in NEWS"
 	fi
-fi
-
-if [ -z "$patch" ]
-then
-	revision="$version"
-else
-	revision="$version.$patch"
-fi
-
-if git rev-parse --verify --quiet refs/tags/v"$revision" > /dev/null
-then
-	printf '%s\n' "Tag v$revision already exists"
-	exit 1
-fi
-
-if [ -z "$patch" ]
-then
-	if [ -z "$start" ]
+	if [ -n "$start" ]
 	then
-		git checkout -b stable/"$version"
+		git merge-base --is-ancestor "$start" master || fail 'Start commit is not on master'
 	else
-		git checkout -b stable/"$version" "$start"
+		start=$(git rev-parse master)
 	fi
-
-else
-	git checkout -b stable/"$version" --track origin/stable/"$version"
+	git checkout -b "stable/$version" "$start"
 fi
+printf 'Release source commit: %s\n' "$(git rev-parse HEAD)"
+cp "$orig_dir/NEWS" NEWS
+# Retain local metadata edits, but create the release entry automatically.
+cp "$orig_dir/data/org.geeqie.Geeqie.metainfo.xml.in" data/
+python3 - "$revision" <<'PY'
+import datetime
+import pathlib
+import re
+import sys
+import xml.etree.ElementTree as ET
 
-cp "$orig_dir/NEWS" "$working_dir"
-cp "$orig_dir/data/org.geeqie.Geeqie.metainfo.xml.in" "$working_dir/data/"
+path = pathlib.Path('data/org.geeqie.Geeqie.metainfo.xml.in')
+text = path.read_text(encoding='utf-8')
+root = ET.fromstring(text)
+releases = root.find('releases')
+if releases is None:
+    sys.exit('AppStream metadata has no releases element')
+version = sys.argv[1]
+if not any(entry.get('version') == version for entry in releases):
+    entry = f'\n    <release version="{version}" date="{datetime.date.today().isoformat()}" />'
+    text, count = re.subn(r'<releases\s*>', lambda match: match[0] + entry, text, count=1)
+    if count != 1:
+        sys.exit('Cannot locate AppStream releases element')
+    ET.fromstring(text)
+    path.write_text(text, encoding='utf-8')
+PY
 
-news_version=$(sed -n '1s/^Geeqie //p' NEWS)
-if [ "$news_version" != "$revision" ]
-then
-	printf '%s\n' "NEWS version $news_version does not match release $revision"
-	exit 1
-fi
-
-if ! grep -F -q "<release version=\"$revision\"" data/org.geeqie.Geeqie.metainfo.xml.in
-then
-	printf '%s\n' "Metainfo release entry for $revision does not exist"
-	exit 1
-fi
-
-# Regenerate to get the new version number in the man page
-rm --recursive --force build
-meson setup build
+meson setup -Dunit_tests=enabled build
+ninja -C build update-translations
+for translation in po/*.po
+do
+	printf 'Checking translation: %s\n' "$translation"
+	msgfmt --check --statistics -o /dev/null "$translation"
+done
 ninja -C build
-
-if ! ./build-aux/generate-man-page.sh
-then
-	printf '%s\n' "generate-man-page.sh failed"
-	exit 1
-fi
-
-git add NEWS
-git add data/org.geeqie.Geeqie.metainfo.xml.in
-git add data/man/geeqie.1
-git add doc/docbook/CommandLineOptions.xml
-git commit --message="Preparing for release v$revision"
-
-if [ "$push" = true ]
-then
-	git push git@geeqie.org:geeqie stable/"$version"
-fi
-
+xvfb-run --auto-servernum meson test -C build --print-errorlogs
+./build-aux/generate-man-page.sh
+# Include translation updates in both the release branch and master.
+git add NEWS data/org.geeqie.Geeqie.metainfo.xml.in data/man/geeqie.1 doc/docbook/CommandLineOptions.xml po/
+git diff --cached --check
+git commit --allow-empty -m "Preparing for release v$revision"
 git tag --sign "v$revision" --message="Release v$revision"
+git verify-tag "v$revision"
 
-if [ "$push" = true ]
-then
-	git push git@geeqie.org:geeqie "v$revision"
-fi
+# Export only tracked release files: no build output, VCS files, or local debris.
+archive="$release_dir/geeqie-$revision.tar.xz"
+git archive --format=tar --prefix="geeqie-$revision/" "v$revision" > "$release_dir/source.tar"
+xz -c "$release_dir/source.tar" > "$archive"
+rm "$release_dir/source.tar"
+sign --armor --detach-sign --output "$archive.asc" "$archive"
+gpg --verify "$archive.asc" "$archive"
 
-rm --recursive --force build
+# Check that the distributed source builds independently of the Git checkout.
+mkdir "$release_dir/archive-test"
+tar -xf "$archive" -C "$release_dir/archive-test"
+cd "$release_dir/archive-test/geeqie-$revision"
+[ "$(./build-aux/version.sh)" = "$revision" ] || fail 'Archive version does not match NEWS'
+meson setup -Dunit_tests=enabled build
+ninja -C build
+xvfb-run --auto-servernum meson test -C build --print-errorlogs
+cd "$working_dir"
 
-cd "$tmp_dir" || exit 1
-
-rm --recursive --force "geeqie-$revision.tar.xz"
-rm --recursive --force "geeqie-$revision.tar.xz.asc"
-rm --recursive --force "geeqie-$revision"
-
-mv "$working_dir" "geeqie-$revision"
-
-tar --create --xz --file="$tmp_dir/geeqie-$revision.tar.xz" --exclude="AppImage*" --exclude=".git*" "geeqie-$revision"
-
-gpg --armor --detach-sign --output "$tmp_dir/geeqie-$revision.tar.xz.asc" "$tmp_dir/geeqie-$revision.tar.xz"
-
-cd "geeqie-$revision" || exit 1
-
+# Prepare master too, so review and publication use the same release files.
+git diff "v$revision^" "v$revision" -- po/ > "$release_dir/translations.patch"
 git checkout master
-
-git checkout v"$revision" -- NEWS
-git checkout v"$revision" -- data/man/geeqie.1
-git checkout v"$revision" -- doc/docbook/CommandLineOptions.xml
-git checkout v"$revision" -- data/org.geeqie.Geeqie.metainfo.xml.in
-
-git add NEWS
-git add data/org.geeqie.Geeqie.metainfo.xml.in
-git add data/man/geeqie.1
-git add doc/docbook/CommandLineOptions.xml
-git commit --message="Release v$revision files"
+git checkout "v$revision" -- NEWS data/org.geeqie.Geeqie.metainfo.xml.in data/man/geeqie.1 doc/docbook/CommandLineOptions.xml
+if [ -s "$release_dir/translations.patch" ]
+then
+	# Merge the translation changes instead of replacing newer master translations
+	# with older stable-branch files during a patch release.
+	git apply --3way --index "$release_dir/translations.patch" || fail 'Translation merge needs review in the retained repository; nothing has been pushed'
+fi
+git diff --cached --check
+if ! git diff --cached --quiet
+then
+	git commit -m "Release v$revision files"
+fi
 
 if [ "$push" = true ]
 then
-	git push git@geeqie.org:geeqie master
+	git push --atomic git@geeqie.org:geeqie "stable/$version" "v$revision" master
 fi
-
-zenity --info --window-icon="info" --text="Upload files:\n\n$tmp_dir/geeqie-$revision.tar.xz\n$tmp_dir/geeqie-$revision.tar.xz.asc\n\nto https://github.com/BestImageViewer/geeqie/releases"
+printf '\nPrepared Geeqie %s\nArchive: %s\nSignature: %s.asc\nRepository: %s\n' "$revision" "$archive" "$archive" "$working_dir"
+if [ "$push" = false ]
+then
+	printf '\nAfter reviewing, publish these exact commits with:\n'
+	printf "git -C '%s' push --atomic git@geeqie.org:geeqie 'stable/%s' 'v%s' master\n" "$working_dir" "$version" "$revision"
+fi
+printf '\nUpload the archive and signature to the GitHub release after publishing the tag.\n'

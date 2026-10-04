@@ -845,6 +845,15 @@ else
     summary({'lua' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
+# Release preparation test
+release_test_python = find_program('python3', required : true)
+release_test_git = find_program('git', required : false)
+if release_test_git.found()
+    test('Release preparation', release_test_python,
+         args : [join_paths(buildauxdir, 'new-release-test.py'), meson.current_source_dir()],
+         timeout : 100, suite : 'functional')
+endif
+
 # Ancillary files test
 test_ancillary_files_sh = find_program('test-ancillary-files.sh', dirs : buildauxdir, required : true)
 test('Ancillary files', test_ancillary_files_sh, args: [meson.current_source_dir()], timeout: 100, suite : 'analysis')
