@@ -149,6 +149,17 @@ TEST(HistoryList, CollectionHistorySurvivesReloadWithIndependentLimit)
 	actual = history_list_find_by_key("collection_history");
 	EXPECT_EQ(actual ? *actual : HistoryList{}, expected);
 
+	// Unavailable collections remain in history for disconnected drives.
+	g_autofree gchar *unavailable = g_build_filename(directory, "unavailable.gqv", nullptr);
+	layout_recent_add_path(unavailable);
+	expected.emplace_front(unavailable);
+	expected.resize(12);
+	EXPECT_TRUE(history_list_save(filename));
+	history_list_free_key("collection_history");
+	EXPECT_TRUE(history_list_load(filename));
+	actual = history_list_find_by_key("collection_history");
+	EXPECT_EQ(actual ? *actual : HistoryList{}, expected);
+
 	history_list_free_key("collection_history");
 	for (auto work = saved_items.crbegin(); work != saved_items.crend(); ++work)
 		{

@@ -316,8 +316,6 @@ gboolean history_list_save(const gchar *path)
 
 		for (auto work = first; work != items.crend(); ++work)
 			{
-			if (is_recent && !isfile(work->c_str())) continue;
-
 			g_string_append_printf(gstring, "\"%s\"\n", work->c_str());
 			}
 		g_string_append(gstring, "\n");

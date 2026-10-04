@@ -2,6 +2,7 @@
 
 #include "gtest/gtest.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -125,6 +126,42 @@ protected:
 	std::vector<std::string> paths;
 	HistoryList saved_recent;
 };
+
+TEST_F(CollectionFileSource, CollectionListCombinesDefaultDirectoryAndHistory)
+{
+	const gchar *collection_directory = get_collections_dir();
+	if (!g_str_has_prefix(collection_directory, "/tmp/")) GTEST_SKIP() << "Requires an isolated home directory";
+	ASSERT_EQ(g_mkdir_with_parents(collection_directory, 0700), 0);
+	g_autofree gchar *unique = g_uuid_string_random();
+	g_autofree gchar *name = g_strconcat(unique, ".gqv", nullptr);
+	g_autofree gchar *local = g_build_filename(collection_directory, name, nullptr);
+	g_autofree gchar *external = g_build_filename(directory, name, nullptr);
+	g_autofree gchar *missing = g_build_filename(directory, "missing.gqv", nullptr);
+	for (const gchar *path : {local, external})
+		{
+		ASSERT_TRUE(g_file_set_contents(path, "#Geeqie collection\n#end\n", -1, nullptr));
+		paths.emplace_back(path);
+		}
+	history_list_free_key("collection_history");
+	history_list_add_to_key("collection_history", local, 0);
+	history_list_add_to_key("collection_history", external, 0);
+	history_list_add_to_key("collection_history", missing, 0);
+	history_list_add_to_key("collection_history", first->path, 0);
+	g_autofree gchar *folder = g_build_filename(directory, "folder.gqv", nullptr);
+	ASSERT_EQ(g_mkdir(folder, 0700), 0);
+	history_list_add_to_key("collection_history", folder, 0);
+
+	GList *list = collect_manager_list_with_history();
+	std::vector<std::string> actual;
+	for (GList *work = list; work; work = work->next) actual.emplace_back(static_cast<const gchar *>(work->data));
+	g_list_free_full(list, g_free);
+	EXPECT_EQ(std::count(actual.begin(), actual.end(), local), 1);
+	EXPECT_EQ(std::count(actual.begin(), actual.end(), external), 1);
+	EXPECT_EQ(std::count(actual.begin(), actual.end(), missing), 1);
+	EXPECT_EQ(std::count(actual.begin(), actual.end(), first->path), 0);
+	EXPECT_EQ(std::count(actual.begin(), actual.end(), folder), 1);
+	g_rmdir(folder);
+}
 
 TEST_F(CollectionFileSource, ManagerUpdatesExternalCollectionsFromHistory)
 {

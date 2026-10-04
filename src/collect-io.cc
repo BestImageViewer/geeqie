@@ -902,6 +902,41 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 		}
 }
 
+/**
+ * @brief List collections in the default directory and collection history.
+ * @return Unique collection paths sorted by filename, then full path.
+ * History paths are retained even when the files are unavailable.
+ * The caller must free the list and its strings with g_list_free_full().
+ */
+GList *collect_manager_list_with_history()
+{
+	const auto compare = [](const std::string &a, const std::string &b)
+		{
+		const gint result = g_strcmp0(filename_from_path(a.c_str()), filename_from_path(b.c_str()));
+		return result != 0 ? result < 0 : a < b;
+		};
+	std::set<std::string, decltype(compare)> paths(compare);
+	auto *dir_fd = file_data_new_dir(get_collections_dir());
+	g_autoptr(FileDataList) files = nullptr;
+	filelist_read(dir_fd, &files, nullptr);
+	file_data_unref(dir_fd);
+	for (GList *work = files; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		if (file_extension_match(fd->path, GQ_COLLECTION_EXT) && isfile(fd->path)) paths.emplace(fd->path);
+		}
+	if (const HistoryList *history = history_list_find_by_key("collection_history"))
+		{
+		for (const auto &path : *history)
+			{
+			if (file_extension_match(path.c_str(), GQ_COLLECTION_EXT)) paths.emplace(path);
+			}
+		}
+	GList *list = nullptr;
+	for (const auto &path : paths) list = g_list_prepend(list, g_strdup(path.c_str()));
+	return g_list_reverse(list);
+}
+
 gchar *collection_manager_path_by_index(gint index)
 {
 	if (index < 0) return nullptr;
