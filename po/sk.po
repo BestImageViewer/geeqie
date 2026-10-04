@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-20 16:37+0100\n"
+"POT-Creation-Date: 2026-10-04 16:35+0100\n"
 "PO-Revision-Date: 2026-04-29 23:00+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
@@ -131,105 +131,105 @@ msgstr ""
 "screenshots/Screenshot_2017-08-13_12-29-44_rescaled.png"
 
 #. (itstool) path: categories/category
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:33
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:34
 msgid "Graphics"
 msgstr "Grafika"
 
 #. (itstool) path: categories/category
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:34
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:35
 msgid "Photography"
 msgstr "Fotografia"
 
 # src/collect-table.cc:619 src/dupe.cc:1386 src/dupe.cc:1558
 #. (itstool) path: categories/category
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:35
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:36
 msgid "Viewer"
 msgstr "Prehliadač"
 
 # src/preferences.cc:676
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:38
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:39
 msgid "image"
 msgstr "obrázok"
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:39
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:40
 msgid "photo"
 msgstr "foto"
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:40
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:41
 msgid "photography"
 msgstr "fotografovanie"
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:41
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:42
 msgid "viewer"
 msgstr "prehliadač"
 
 # src/menu.cc:526
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:42
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:43
 msgid "manager"
 msgstr "správca"
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:43
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:44
 msgid "gallery"
 msgstr "galéria"
 
 #. (itstool) path: keywords/keyword
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:44
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:45
 msgid "EXIF"
 msgstr "EXIF"
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:47
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:48
 msgid "image/jpeg"
 msgstr "image/jpeg"
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:48
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:49
 msgid "image/png"
 msgstr "image/png"
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:49
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:50
 msgid "image/gif"
 msgstr "image/gif"
 
 # src/preferences.cc:676
 #. (itstool) path: provides/mime-type
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:50
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:51
 msgid "image/tiff"
 msgstr "image/tiff"
 
 #. (itstool) path: component/url
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:52
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:53
 msgid "https://www.geeqie.org"
 msgstr "https://www.geeqie.org"
 
 #. (itstool) path: component/url
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:53
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:54
 msgid "https://github.com/BestImageViewer/geeqie/issues"
 msgstr "https://github.com/BestImageViewer/geeqie/issues"
 
 #. (itstool) path: component/url
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:54
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:55
 msgid "https://github.com/BestImageViewer/geeqie"
 msgstr "https://github.com/BestImageViewer/geeqie"
 
 #. (itstool) path: component/update_contact
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:55
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:56
 msgid "geeqie@freelists.org"
 msgstr "geeqie@freelists.org"
 
 # src/img-view.cc:559 src/window.cc:533
 #. (itstool) path: component/translation
-#: ../data/org.geeqie.Geeqie.metainfo.xml.in:56
+#: ../data/org.geeqie.Geeqie.metainfo.xml.in:57
 msgid "geeqie"
 msgstr "geeqie"
 
@@ -355,7 +355,7 @@ msgid "Copy "
 msgstr "Kopírovať"
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../data/ui/menu-bar-exif.ui:21 ../src/bar-exif.cc:524 ../src/bar-exif.cc:534
+#: ../data/ui/menu-bar-exif.ui:21 ../src/bar-exif.cc:519 ../src/bar-exif.cc:529
 msgid "Add entry"
 msgstr "Pridať položku"
 
@@ -452,12 +452,12 @@ msgstr "Usporiadať podľa dátumu"
 
 # src/window.cc:87
 #: ../data/ui/menu-dir-popup.ui:88 ../data/ui/menu-view-file.ui:96
-#: ../src/layout.cc:805
+#: ../src/layout.cc:803
 msgid "Ascending"
 msgstr "Vzostupne"
 
 #: ../data/ui/menu-dir-popup.ui:92 ../data/ui/menu-view-file.ui:100
-#: ../src/layout.cc:806 ../src/view-file/view-file.cc:2579
+#: ../src/layout.cc:804 ../src/view-file/view-file.cc:2590
 msgid "Case"
 msgstr "Veľkosť písmen"
 
@@ -474,7 +474,7 @@ msgstr "_Obnoviť"
 # src/collect-table.cc:619 src/dupe.cc:1386 src/dupe.cc:1558
 #: ../data/ui/menu-dupe-main.ui:7 ../data/ui/menu-dupe-second.ui:7
 #: ../data/ui/menu-search.ui:13 ../data/ui/menu-view-file.ui:105
-#: ../src/layout-util.cc:1890 ../src/preferences.cc:3376
+#: ../src/layout-util.cc:2034 ../src/preferences.cc:3378
 msgid "View"
 msgstr "Zobraziť"
 
@@ -579,23 +579,23 @@ msgstr "Presunúť výber do koša"
 # src/utilops.cc:764
 #: ../data/ui/menu-dupe-main.ui:96 ../data/ui/menu-img-view.ui:104
 #: ../data/ui/menu-layout-image.ui:83 ../data/ui/menu-pan-view.ui:69
-#: ../data/ui/menu-search.ui:82 ../src/desktop-file.cc:381
-#: ../src/desktop-file.cc:575 ../src/preferences.cc:3335 ../src/utilops.cc:1839
-#: ../src/utilops.cc:2472
+#: ../data/ui/menu-search.ui:82 ../src/desktop-file.cc:382
+#: ../src/desktop-file.cc:577 ../src/preferences.cc:3337 ../src/utilops.cc:1839
+#: ../src/utilops.cc:2474
 msgid "Delete"
 msgstr "Odstrániť"
 
 # src/collect-table.cc:622 src/dupe.cc:1410 src/dupe.cc:1568
 #: ../data/ui/menu-dupe-main.ui:102 ../data/ui/menu-dupe-second.ui:27
-#: ../data/ui/menu-popup.ui:25 ../src/preferences.cc:2727
+#: ../data/ui/menu-popup.ui:25 ../src/preferences.cc:2729
 msgid "Remove"
 msgstr "Odstrániť"
 
 # src/dupe.cc:1412 src/dupe.cc:1570
 #: ../data/ui/menu-dupe-main.ui:106 ../data/ui/menu-dupe-second.ui:31
-#: ../src/preferences.cc:1953 ../src/preferences.cc:2179
-#: ../src/view-file/view-file.cc:2100 ../src/view-file/view-file.cc:2547
-#: ../src/window.cc:210
+#: ../src/preferences.cc:1955 ../src/preferences.cc:2181
+#: ../src/view-file/view-file.cc:2100 ../src/view-file/view-file.cc:2558
+#: ../src/window.cc:226
 msgid "Clear"
 msgstr "Vyčistiť"
 
@@ -693,12 +693,12 @@ msgstr "Pozastaviť prezentáciu"
 
 # src/img-view.cc:837 src/menu.cc:1001
 #: ../data/ui/menu-img-view.ui:131 ../data/ui/menu-layout-image.ui:110
-#: ../src/preferences.cc:2379
+#: ../src/preferences.cc:2381
 msgid "Fullscreen"
 msgstr "Celá obrazovka"
 
 #: ../data/ui/menu-layout-image.ui:25 ../data/ui/menu-pan-view.ui:29
-#: ../data/ui/menu-view-file.ui:8 ../src/desktop-file.cc:546
+#: ../data/ui/menu-view-file.ui:8 ../src/desktop-file.cc:547
 msgid "Plugins"
 msgstr "Zásuvné moduly"
 
@@ -744,7 +744,7 @@ msgstr "Skryť zoznam súborov"
 
 # src/menu.cc:754
 #: ../data/ui/menu-layout-image.ui:124 ../data/ui/menu-main.ui:1112
-#: ../src/preferences.cc:2120
+#: ../src/preferences.cc:2122
 msgid "Hide Selectable Bars"
 msgstr "Skryť vyberateľné panely"
 
@@ -961,7 +961,7 @@ msgid "Show _Marks"
 msgstr "Zobraziť _značky"
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../data/ui/menu-main.ui:211 ../src/layout-util.cc:365
+#: ../data/ui/menu-main.ui:211 ../src/layout-util.cc:380
 msgid "Clear Marks"
 msgstr "Vyčistiť značky"
 
@@ -1461,7 +1461,7 @@ msgstr "_Zapísať orientáciu do súboru"
 msgid "_Save metadata"
 msgstr "_Uložiť metadáta"
 
-#: ../data/ui/menu-main.ui:659 ../src/bar-keywords.cc:1443
+#: ../data/ui/menu-main.ui:659 ../src/bar-keywords.cc:1494
 msgid "Keyword autocomplete"
 msgstr "Dokončovanie kľúčových slov"
 
@@ -1578,7 +1578,7 @@ msgid "_Hide file list"
 msgstr "_Skryť zoznam súborov"
 
 # src/img-view.cc:789 src/menu.cc:944 src/menu.cc:1079
-#: ../data/ui/menu-main.ui:784 ../src/osd.cc:65 ../src/preferences.cc:2201
+#: ../data/ui/menu-main.ui:784 ../src/osd.cc:65 ../src/preferences.cc:2203
 msgid "Zoom"
 msgstr "Priblíženie"
 
@@ -1737,7 +1737,7 @@ msgstr "Stere_o"
 msgid "Auto"
 msgstr "_Automaticky"
 
-#: ../data/ui/menu-main.ui:951 ../src/preferences.cc:1061
+#: ../data/ui/menu-main.ui:951 ../src/preferences.cc:1062
 msgid "Side by Side"
 msgstr "Vedľa seba"
 
@@ -1925,13 +1925,13 @@ msgid "New window from current"
 msgstr "z aktuálneho"
 
 # src/menu.cc:711
-#: ../data/ui/menu-main.ui:1173 ../src/layout-util.cc:2458
-#: ../src/layout-util.cc:2639
+#: ../data/ui/menu-main.ui:1173 ../src/layout-util.cc:2649
+#: ../src/layout-util.cc:2830
 msgid "Rename window"
 msgstr "Premenovať okno"
 
 # src/dupe.cc:1415 src/dupe.cc:1573 src/img-view.cc:841
-#: ../data/ui/menu-main.ui:1177 ../src/layout-util.cc:2712
+#: ../data/ui/menu-main.ui:1177 ../src/layout-util.cc:2903
 msgid "Delete window"
 msgstr "Odstrániť okno"
 
@@ -2033,7 +2033,7 @@ msgstr "Žiad_na"
 msgid "Full size"
 msgstr "Úplná veľkosť"
 
-#: ../data/ui/menu-pan-view.ui:110 ../src/pan-view/pan-view.cc:1963
+#: ../data/ui/menu-pan-view.ui:110 ../src/pan-view/pan-view.cc:1946
 msgid "1:2 (50%)"
 msgstr "1:2 (50%)"
 
@@ -2042,11 +2042,11 @@ msgstr "1:2 (50%)"
 msgid "1:3 (30%)"
 msgstr "1:3 (33%)"
 
-#: ../data/ui/menu-pan-view.ui:120 ../src/pan-view/pan-view.cc:1961
+#: ../data/ui/menu-pan-view.ui:120 ../src/pan-view/pan-view.cc:1944
 msgid "1:4 (25%)"
 msgstr "1:4 (25%)"
 
-#: ../data/ui/menu-pan-view.ui:125 ../src/pan-view/pan-view.cc:1960
+#: ../data/ui/menu-pan-view.ui:125 ../src/pan-view/pan-view.cc:1943
 msgid "1:10 (10%)"
 msgstr "1:10 (10%)"
 
@@ -2128,76 +2128,76 @@ msgstr "Zobraziť hodnotenie hviezdičkami"
 msgid "Refresh"
 msgstr "Obnoviť"
 
-#: ../data/ui/search-and-run.ui:30 ../src/search-and-run.cc:396
+#: ../data/ui/search-and-run.ui:30 ../src/search-and-run.cc:398
 msgid "Search and Run command - Geeqie"
 msgstr "Nájsť a spustiť príkaz - Geeqie"
 
 #: ../data/ui/search-and-run.ui:38 ../data/ui/search-and-run.ui:40
-#: ../src/search-and-run.cc:404
+#: ../src/search-and-run.cc:406
 msgid "Search for commands and run them"
 msgstr "Nájdite príkazy a spustite ich"
 
-#: ../src/advanced-exif.cc:486 ../src/cache-maint.cc:1624
-#: ../src/filefilter.cc:91 ../src/preferences.cc:2754 ../src/search.cc:2430
-#: ../src/search.cc:3321
+#: ../src/advanced-exif.cc:502 ../src/cache-maint.cc:1624
+#: ../src/filefilter.cc:91 ../src/preferences.cc:2756 ../src/search.cc:2444
+#: ../src/search.cc:3335
 msgid "Metadata"
 msgstr "Metadáta"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/advanced-exif.cc:521 ../src/preferences.cc:3128
+#: ../src/advanced-exif.cc:541 ../src/preferences.cc:3130
 msgid "Search"
 msgstr "Hľadanie"
 
-#: ../src/advanced-exif.cc:548 ../src/preferences.cc:2711
-#: ../src/preferences.cc:3689
+#: ../src/advanced-exif.cc:568 ../src/preferences.cc:2713
+#: ../src/preferences.cc:3694
 msgid "Description"
 msgstr "Popis"
 
-#: ../src/advanced-exif.cc:549 ../src/search.cc:3252
+#: ../src/advanced-exif.cc:569 ../src/search.cc:3266
 msgid "Value"
 msgstr "Hodnota"
 
 # src/dupe.cc:1652 src/dupe.cc:1941
-#: ../src/advanced-exif.cc:550 ../src/desktop-file.cc:604 ../src/dupe.cc:3652
+#: ../src/advanced-exif.cc:570 ../src/desktop-file.cc:606 ../src/dupe.cc:3652
 #: ../src/dupe.cc:3987 ../src/dupe.cc:4256 ../src/osd.cc:61
-#: ../src/search.cc:3369 ../src/utilops.cc:773
-#: ../src/view-file/view-file-list.cc:2039
-#: ../src/view-file/view-file-list.cc:2043
+#: ../src/search.cc:3384 ../src/utilops.cc:773
+#: ../src/view-file/view-file-list.cc:2064
+#: ../src/view-file/view-file-list.cc:2068
 msgid "Name"
 msgstr "Meno"
 
-#: ../src/advanced-exif.cc:551 ../src/search.cc:3237
+#: ../src/advanced-exif.cc:571 ../src/search.cc:3251
 msgid "Tag"
 msgstr "Značka"
 
 # src/preferences.cc:401
-#: ../src/advanced-exif.cc:552
+#: ../src/advanced-exif.cc:572
 msgid "Format"
 msgstr "Formát"
 
-#: ../src/advanced-exif.cc:553
+#: ../src/advanced-exif.cc:573
 msgid "Elements"
 msgstr "Prvky"
 
 # src/menu.cc:771
-#: ../src/advanced-exif.cc:574 ../src/bar.cc:289 ../src/bar-sort.cc:417
-#: ../src/bar-sort.cc:676 ../src/cache-maint.cc:1563 ../src/desktop-file.cc:565
-#: ../src/dupe.cc:4438 ../src/layout.cc:2711 ../src/layout-util.cc:369
-#: ../src/preferences.cc:2450 ../src/preferences.cc:3896 ../src/search.cc:3430
-#: ../src/trash.cc:320 ../src/view-file/view-file.cc:2080 ../src/window.cc:164
+#: ../src/advanced-exif.cc:594 ../src/bar.cc:302 ../src/bar-sort.cc:417
+#: ../src/bar-sort.cc:676 ../src/cache-maint.cc:1563 ../src/desktop-file.cc:567
+#: ../src/dupe.cc:4438 ../src/layout.cc:2710 ../src/layout-util.cc:384
+#: ../src/preferences.cc:2452 ../src/preferences.cc:3902 ../src/search.cc:3445
+#: ../src/trash.cc:346 ../src/view-file/view-file.cc:2080 ../src/window.cc:180
 msgid "Help"
 msgstr "Pomocník"
 
 # src/collect.cc:1053 src/ui-help.cc:302
-#: ../src/advanced-exif.cc:579 ../src/cache-maint.cc:401
+#: ../src/advanced-exif.cc:599 ../src/cache-maint.cc:401
 #: ../src/cache-maint.cc:789 ../src/cache-maint.cc:1052
 #: ../src/cache-maint.cc:1396 ../src/cache-maint.cc:1508
-#: ../src/cache-maint.cc:1561 ../src/desktop-file.cc:275
-#: ../src/desktop-file.cc:579 ../src/dupe.cc:2855 ../src/dupe.cc:4444
-#: ../src/editors.cc:651 ../src/preferences.cc:1691 ../src/preferences.cc:3051
-#: ../src/search.cc:3444 ../src/ui-fileops.cc:97 ../src/utilops.cc:898
-#: ../src/utilops.cc:2288 ../src/utilops.cc:2331 ../src/utilops.cc:2934
-#: ../src/utilops.cc:3308
+#: ../src/cache-maint.cc:1561 ../src/desktop-file.cc:276
+#: ../src/desktop-file.cc:581 ../src/dupe.cc:2855 ../src/dupe.cc:4444
+#: ../src/editors.cc:664 ../src/preferences.cc:1693 ../src/preferences.cc:3053
+#: ../src/search.cc:3459 ../src/ui-fileops.cc:97 ../src/utilops.cc:898
+#: ../src/utilops.cc:2290 ../src/utilops.cc:2333 ../src/utilops.cc:2936
+#: ../src/utilops.cc:3310
 msgid "Close"
 msgstr "Zavrieť"
 
@@ -2222,104 +2222,104 @@ msgstr ""
 msgid "Warning: libarchive not installed"
 msgstr "Upozornenie: libarchive nie je nainštalovaný"
 
-#: ../src/bar.cc:205
+#: ../src/bar.cc:225
 msgid "Histogram"
 msgstr "Histogram"
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/bar.cc:206
+#: ../src/bar.cc:226
 msgid "Title"
 msgstr "Názov"
 
-#: ../src/bar.cc:207 ../src/osd.cc:72 ../src/preferences.cc:3124
-#: ../src/search.cc:3194
+#: ../src/bar.cc:227 ../src/osd.cc:72 ../src/preferences.cc:3126
+#: ../src/search.cc:3208
 msgid "Keywords"
 msgstr "Kľúčové slová"
 
 # src/dupe.cc:1948
-#: ../src/bar.cc:208 ../src/osd.cc:71 ../src/search.cc:3211
+#: ../src/bar.cc:228 ../src/osd.cc:71 ../src/search.cc:3225
 msgid "Comment"
 msgstr "Poznámka"
 
 # src/ui-pathsel.cc:799
-#: ../src/bar.cc:209 ../src/preferences.cc:2044
+#: ../src/bar.cc:229 ../src/preferences.cc:2046
 msgid "Star Rating"
 msgstr "Hodnotenie hviezdičkami"
 
 # src/preferences.cc:369
-#: ../src/bar.cc:210
+#: ../src/bar.cc:230
 msgid "Headline"
 msgstr "Nadpis"
 
 # src/main.cc:622
-#: ../src/bar.cc:211 ../src/search.cc:3232
+#: ../src/bar.cc:231 ../src/search.cc:3246
 msgid "Exif"
 msgstr "EXIF"
 
-#: ../src/bar.cc:213
+#: ../src/bar.cc:233
 msgid "File info"
 msgstr "Informácie o súbore"
 
-#: ../src/bar.cc:214
+#: ../src/bar.cc:234
 msgid "Location and GPS"
 msgstr "Umiestnenie a GPS súradnice"
 
 # src/utilops.cc:592
-#: ../src/bar.cc:215 ../src/exif.cc:347
+#: ../src/bar.cc:235 ../src/exif.cc:347
 msgid "Copyright"
 msgstr "Autorské práva"
 
-#: ../src/bar.cc:217 ../src/bar-gps.cc:945
+#: ../src/bar.cc:237 ../src/bar-gps.cc:1011
 msgid "GPS Map"
 msgstr "GPS mapa"
 
-#: ../src/bar.cc:262 ../src/bar.cc:269
+#: ../src/bar.cc:275 ../src/bar.cc:282
 #, fuzzy
 msgid "Add metadata pane"
 msgstr "Uložiť metadáta"
 
-#: ../src/bar.cc:270
+#: ../src/bar.cc:283
 msgid "Enter any XMP, EXIF, or IPTC metadata key."
 msgstr ""
 
-#: ../src/bar.cc:295 ../src/bar-exif.cc:540
+#: ../src/bar.cc:308 ../src/bar-exif.cc:535
 msgid "Key:"
 msgstr "Kľúč:"
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/bar.cc:311
+#: ../src/bar.cc:324
 #, fuzzy
 msgid "Pane title:"
 msgstr "Nepomenovaný"
 
-#: ../src/bar.cc:313
+#: ../src/bar.cc:326
 msgid "Automatic"
 msgstr ""
 
-#: ../src/bar.cc:397 ../src/bar-sort.cc:670 ../src/preferences.cc:2726
+#: ../src/bar.cc:412 ../src/bar-sort.cc:670 ../src/preferences.cc:2728
 #: ../src/shortcuts.cc:62 ../src/toolbar.cc:323
 msgid "Add"
 msgstr "Pridať"
 
-#: ../src/bar.cc:407
+#: ../src/bar.cc:422
 #, fuzzy
 msgid "Metadata key…"
 msgstr "Metadáta"
 
 # src/collect-table.cc:86
-#: ../src/bar.cc:422
+#: ../src/bar.cc:437
 msgid "Add Pane"
 msgstr "Pridať podokno"
 
-#: ../src/bar.cc:597
+#: ../src/bar.cc:607
 msgid "Expand or collapse pane"
 msgstr ""
 
-#: ../src/bar-comment.cc:218
+#: ../src/bar-comment.cc:242
 msgid "Add text to selected files"
 msgstr "Pridať text k vybraným súborom"
 
-#: ../src/bar-comment.cc:222
+#: ../src/bar-comment.cc:246
 msgid "Replace existing text in selected files"
 msgstr "Prepísať existujúci text vo vybraných súboroch"
 
@@ -2328,23 +2328,23 @@ msgid "<empty label, fixme>"
 msgstr "<prázdna menovka, opravma>"
 
 # src/menu.cc:1087
-#: ../src/bar-exif.cc:524 ../src/bar-exif.cc:534
+#: ../src/bar-exif.cc:519 ../src/bar-exif.cc:529
 msgid "Configure entry"
 msgstr "Upraviť položku"
 
-#: ../src/bar-exif.cc:548
+#: ../src/bar-exif.cc:543
 msgid "Title:"
 msgstr "Názov:"
 
-#: ../src/bar-exif.cc:556
+#: ../src/bar-exif.cc:551
 msgid "Show only if set"
 msgstr "Zobraziť, iba ak je nastavené"
 
-#: ../src/bar-exif.cc:557
+#: ../src/bar-exif.cc:552
 msgid "Editable (supported only for XMP)"
 msgstr "Upravovateľné (podporuje iba XMP)"
 
-#: ../src/bar-gps.cc:203
+#: ../src/bar-gps.cc:202
 #, c-format
 msgid ""
 "\n"
@@ -2353,7 +2353,7 @@ msgstr ""
 "\n"
 "Prajete si geokódovať obrázok %s?"
 
-#: ../src/bar-gps.cc:207
+#: ../src/bar-gps.cc:206
 #, c-format
 msgid ""
 "\n"
@@ -2362,7 +2362,7 @@ msgstr ""
 "\n"
 "Prajete si geokódovať %i obrázky?"
 
-#: ../src/bar-gps.cc:212
+#: ../src/bar-gps.cc:211
 msgid ""
 "\n"
 "This image is already geocoded!"
@@ -2370,7 +2370,7 @@ msgstr ""
 "\n"
 "Tento obrázok je už geokódovaný!"
 
-#: ../src/bar-gps.cc:216
+#: ../src/bar-gps.cc:215
 msgid ""
 "\n"
 "One image is already geocoded!"
@@ -2378,7 +2378,7 @@ msgstr ""
 "\n"
 "Jeden obrázok je už geokódovaný!"
 
-#: ../src/bar-gps.cc:220
+#: ../src/bar-gps.cc:219
 #, c-format
 msgid ""
 "\n"
@@ -2387,7 +2387,7 @@ msgstr ""
 "\n"
 "%i obrázky sú už geokódované!"
 
-#: ../src/bar-gps.cc:223
+#: ../src/bar-gps.cc:222
 msgid ""
 "\n"
 "\n"
@@ -2398,214 +2398,214 @@ msgstr ""
 "Poloha: %lf %lf \n"
 
 # src/preferences.cc:660
-#: ../src/bar-gps.cc:225
+#: ../src/bar-gps.cc:224
 msgid "Geocode images"
 msgstr "Geokódovať obrázky"
 
-#: ../src/bar-gps.cc:226
+#: ../src/bar-gps.cc:225
 msgid "Write lat/long to meta-data?"
 msgstr "Zapísať zem. šírku/dĺžku do metadát?"
 
 # src/collect-dlg.cc:167 src/collect.cc:1052
-#: ../src/bar-gps.cc:227 ../src/bar-sort.cc:513 ../src/collect-dlg.cc:106
-#: ../src/desktop-file.cc:278 ../src/dupe.cc:4143 ../src/layout.cc:1567
+#: ../src/bar-gps.cc:226 ../src/bar-sort.cc:513 ../src/collect-dlg.cc:106
+#: ../src/desktop-file.cc:279 ../src/dupe.cc:4143 ../src/layout.cc:1565
 #: ../src/view-file/view-file.cc:1281
 msgid "Save"
 msgstr "Uložiť"
 
 # src/utilops.cc:539
-#: ../src/bar-gps.cc:420
+#: ../src/bar-gps.cc:419
 #, fuzzy, c-format
 msgid "Image direction: %.1f°"
 msgstr "Popis obrázka"
 
-#: ../src/bar-gps.cc:820
+#: ../src/bar-gps.cc:892
 msgid "Enable markers"
 msgstr "Povoliť špendlíky"
 
-#: ../src/bar-gps.cc:825
+#: ../src/bar-gps.cc:897
 msgid "Centre map on marker"
 msgstr "Zobraziť špendlík v strede mapy"
 
-#: ../src/bar-histogram.cc:303
+#: ../src/bar-histogram.cc:323
 msgid "Histogram on _Red"
 msgstr "Histogram če_rvenej"
 
-#: ../src/bar-histogram.cc:304
+#: ../src/bar-histogram.cc:324
 msgid "Histogram on _Green"
 msgstr "Histogram _zelenej"
 
-#: ../src/bar-histogram.cc:305
+#: ../src/bar-histogram.cc:325
 msgid "Histogram on _Blue"
 msgstr "Histogram _modrej"
 
-#: ../src/bar-histogram.cc:306
+#: ../src/bar-histogram.cc:326
 msgid "_Histogram on RGB"
 msgstr "RGB _histogram"
 
-#: ../src/bar-histogram.cc:307
+#: ../src/bar-histogram.cc:327
 msgid "Histogram on _Value"
 msgstr "Histogram ho_dnôt"
 
-#: ../src/bar-histogram.cc:310
+#: ../src/bar-histogram.cc:330
 msgid "Li_near Histogram"
 msgstr "Li_neárny histogram"
 
-#: ../src/bar-histogram.cc:311
+#: ../src/bar-histogram.cc:331
 msgid "L_og Histogram"
 msgstr "L_ogaritmický histogram"
 
-#: ../src/bar-keywords.cc:479
+#: ../src/bar-keywords.cc:525
 msgid "Add selected keywords to selected files"
 msgstr "Pridať vybrané kľúčové slová do vybraných súborov"
 
-#: ../src/bar-keywords.cc:483
+#: ../src/bar-keywords.cc:529
 #, fuzzy
 msgid "Remove selected keywords from selected files"
 msgstr "Pridať vybrané kľúčové slová do vybraných súborov"
 
-#: ../src/bar-keywords.cc:487
+#: ../src/bar-keywords.cc:533
 msgid "Replace existing keywords in selected files with selected keywords"
 msgstr ""
 "Nahradiť existujúce kľúčové slová vo vybraných súboroch vybranými kľúčovými "
 "slovami"
 
 # src/preferences.cc:915
-#: ../src/bar-keywords.cc:739
+#: ../src/bar-keywords.cc:785
 msgid "Edit keyword"
 msgstr "Upraviť kľúčové slovo"
 
-#: ../src/bar-keywords.cc:739 ../src/bar-keywords.cc:746
-#: ../src/bar-keywords.cc:1093
+#: ../src/bar-keywords.cc:785 ../src/bar-keywords.cc:792
+#: ../src/bar-keywords.cc:1139
 msgid "New keyword"
 msgstr "Nové kľúčové slovo"
 
 # src/menu.cc:1087
-#: ../src/bar-keywords.cc:746
+#: ../src/bar-keywords.cc:792
 msgid "Configure keyword"
 msgstr "Nastaviť kľúčové slovo"
 
-#: ../src/bar-keywords.cc:752
+#: ../src/bar-keywords.cc:798
 msgid "Keyword:"
 msgstr "Kľúčové slovo:"
 
-#: ../src/bar-keywords.cc:760
+#: ../src/bar-keywords.cc:806
 msgid "Keyword type:"
 msgstr "Typ kľúčového slova:"
 
-#: ../src/bar-keywords.cc:762
+#: ../src/bar-keywords.cc:808
 msgid "Active keyword"
 msgstr "Aktívne kľúčové slovo"
 
 # src/menu.cc:771
-#: ../src/bar-keywords.cc:764
+#: ../src/bar-keywords.cc:810
 msgid "Helper"
 msgstr "Pomocné kľúčové slovo"
 
-#: ../src/bar-keywords.cc:804
+#: ../src/bar-keywords.cc:850
 msgid "Marks Keywords"
 msgstr "Kľúčové slová značiek"
 
-#: ../src/bar-keywords.cc:808
+#: ../src/bar-keywords.cc:854
 msgid "Disconnect all Marks Keywords connections?"
 msgstr "Odpojiť všetky prepojenia kľúčových slov so značkami?"
 
-#: ../src/bar-keywords.cc:808
+#: ../src/bar-keywords.cc:854
 msgid "This will disconnect all Marks Keywords connections"
 msgstr "Toto odpojí všetky prepojenia kľúčových slov so značkami"
 
-#: ../src/bar-keywords.cc:1117
+#: ../src/bar-keywords.cc:1163
 #, c-format
 msgid "Add \"%s\" to all selected images"
 msgstr "Pridať \"%s\" do všetkých vybraných súborov"
 
-#: ../src/bar-keywords.cc:1120
+#: ../src/bar-keywords.cc:1166
 #, fuzzy, c-format
 msgid "Remove \"%s\" from all selected images"
 msgstr "Pridať \"%s\" do všetkých vybraných súborov"
 
-#: ../src/bar-keywords.cc:1125
+#: ../src/bar-keywords.cc:1171
 #, c-format
 msgid "Hide \"%s\""
 msgstr "Skryť \"%s\""
 
-#: ../src/bar-keywords.cc:1130
+#: ../src/bar-keywords.cc:1176
 #, c-format
 msgid "Connect \"%s\" to mark"
 msgstr "Prepojiť \"%s\" so značkou"
 
-#: ../src/bar-keywords.cc:1134 ../src/view-file/view-file.cc:2020
+#: ../src/bar-keywords.cc:1180 ../src/view-file/view-file.cc:2020
 #, c-format
 msgid "Mark %d"
 msgstr "Značka %d"
 
 # src/preferences.cc:915
-#: ../src/bar-keywords.cc:1141
+#: ../src/bar-keywords.cc:1187
 #, c-format
 msgid "Edit \"%s\""
 msgstr "Upraviť \"%s\""
 
 # src/collect-table.cc:622 src/dupe.cc:1410 src/dupe.cc:1568
-#: ../src/bar-keywords.cc:1145
+#: ../src/bar-keywords.cc:1191
 #, c-format
 msgid "Remove \"%s\""
 msgstr "Odstrániť \"%s\""
 
-#: ../src/bar-keywords.cc:1150
+#: ../src/bar-keywords.cc:1196
 #, c-format
 msgid "Disconnect \"%s\" from mark %s"
 msgstr "Odpojiť \"%s\" od značky %s"
 
-#: ../src/bar-keywords.cc:1156
+#: ../src/bar-keywords.cc:1202
 msgid "Disconnect all Mark Keyword connections"
 msgstr "Odpojiť všetky prepojenia kľúčových slov so značkami"
 
-#: ../src/bar-keywords.cc:1164 ../src/bar-keywords.cc:1175
+#: ../src/bar-keywords.cc:1210 ../src/bar-keywords.cc:1221
 msgid "Expand checked"
 msgstr "Rozbaliť začiarknuté"
 
-#: ../src/bar-keywords.cc:1165 ../src/bar-keywords.cc:1176
+#: ../src/bar-keywords.cc:1211 ../src/bar-keywords.cc:1222
 msgid "Collapse unchecked"
 msgstr "Zbaliť nezačiarknuté"
 
-#: ../src/bar-keywords.cc:1166 ../src/bar-keywords.cc:1177
+#: ../src/bar-keywords.cc:1212 ../src/bar-keywords.cc:1223
 msgid "Hide unchecked"
 msgstr "Skryť nezačiarknuté"
 
-#: ../src/bar-keywords.cc:1167
+#: ../src/bar-keywords.cc:1213
 msgid "Revert all hidden"
 msgstr "Vrátiť všetky skryté"
 
-#: ../src/bar-keywords.cc:1169 ../src/dupe.cc:3668
+#: ../src/bar-keywords.cc:1215 ../src/dupe.cc:3668
 msgid "Show all"
 msgstr "Zobraziť všetko"
 
-#: ../src/bar-keywords.cc:1170
+#: ../src/bar-keywords.cc:1216
 msgid "Collapse all"
 msgstr "Zbaliť všetko"
 
-#: ../src/bar-keywords.cc:1171
+#: ../src/bar-keywords.cc:1217
 msgid "Revert"
 msgstr "Vrátiť zmeny"
 
-#: ../src/bar-keywords.cc:1174
+#: ../src/bar-keywords.cc:1220
 msgid "On any change"
 msgstr "Pri zmene"
 
-#: ../src/bar-keywords.cc:1793
+#: ../src/bar-keywords.cc:1790
 msgid "Keyword Autocomplete"
 msgstr "Dokončovanie kľúčových slov"
 
-#: ../src/bar-keywords.cc:1794
+#: ../src/bar-keywords.cc:1791
 msgid "The Info Sidebar has not yet been opened"
 msgstr "Informačný panel ešte nebol otvorený"
 
 # src/utilops.cc:707
-#: ../src/bar-rating.cc:160 ../src/filefilter.cc:99
+#: ../src/bar-rating.cc:169 ../src/filefilter.cc:99
 msgid "Rejected"
 msgstr "Odmietnuté"
 
-#: ../src/bar-rating.cc:165 ../src/filefilter.cc:100
+#: ../src/bar-rating.cc:174 ../src/filefilter.cc:100
 msgid "Unrated"
 msgstr "Nehodnotené"
 
@@ -2654,13 +2654,12 @@ msgid "Add Bookmark - Geeqie"
 msgstr "Pridať záložku – Geeqie"
 
 # src/collect-dlg.cc:194
-#: ../src/bar-sort.cc:518 ../src/collect-dlg.cc:111 ../src/layout-util.cc:1203
-#: ../src/search.cc:2996
+#: ../src/bar-sort.cc:518 ../src/collect-dlg.cc:111 ../src/search.cc:3010
 msgid "Collection files"
 msgstr "Súbory zbierok"
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/bar-sort.cc:520 ../src/collect-dlg.cc:113 ../src/layout-util.cc:1083
+#: ../src/bar-sort.cc:520 ../src/collect-dlg.cc:113 ../src/layout-util.cc:1154
 msgid "Untitled.gqv"
 msgstr "Nepomenovaný.gqv"
 
@@ -2675,12 +2674,12 @@ msgid "Sort Manager"
 msgstr "Správca triedenia"
 
 # src/preferences.cc:368
-#: ../src/bar-sort.cc:583 ../src/pan-view/pan-view.cc:1942
+#: ../src/bar-sort.cc:583 ../src/pan-view/pan-view.cc:1925
 msgid "Folders"
 msgstr "Priečinky"
 
 # src/preferences.cc:897
-#: ../src/bar-sort.cc:583 ../src/collect-io.cc:352 ../src/ui-bookmark.cc:834
+#: ../src/bar-sort.cc:583 ../src/ui-bookmark.cc:834
 msgid "Collections"
 msgstr "Zbierky"
 
@@ -2689,14 +2688,14 @@ msgid "See the Help file for additional functions"
 msgstr "Ďalšie funkcie nájdete v súbore Pomocníka"
 
 # src/utilops.cc:592
-#: ../src/bar-sort.cc:594 ../src/preferences.cc:814 ../src/utilops.cc:1894
-#: ../src/utilops.cc:2607
+#: ../src/bar-sort.cc:594 ../src/preferences.cc:815 ../src/utilops.cc:1894
+#: ../src/utilops.cc:2609
 msgid "Copy"
 msgstr "Kopírovať"
 
 # src/utilops.cc:601
-#: ../src/bar-sort.cc:600 ../src/preferences.cc:814 ../src/utilops.cc:1894
-#: ../src/utilops.cc:2559
+#: ../src/bar-sort.cc:600 ../src/preferences.cc:815 ../src/utilops.cc:1894
+#: ../src/utilops.cc:2561
 msgid "Move"
 msgstr "Presunúť"
 
@@ -2740,7 +2739,7 @@ msgstr "Čistím náhľady a súbory sim…"
 # src/preferences.cc:400
 #: ../src/cache-maint.cc:223 ../src/cache-maint.cc:583
 #: ../src/cache-maint.cc:691 ../src/cache-maint.cc:881
-#: ../src/cache-maint.cc:1320 ../src/editors.cc:1280 ../src/preferences.cc:2940
+#: ../src/cache-maint.cc:1320 ../src/editors.cc:1293 ../src/preferences.cc:2942
 msgid "done"
 msgstr "hotovo"
 
@@ -2765,7 +2764,7 @@ msgstr "Údržba"
 
 #: ../src/cache-maint.cc:404 ../src/cache-maint.cc:793
 #: ../src/cache-maint.cc:1056 ../src/cache-maint.cc:1400 ../src/dupe.cc:4442
-#: ../src/preferences.cc:3055 ../src/search.cc:3439 ../src/utilops.cc:894
+#: ../src/preferences.cc:3057 ../src/search.cc:3454 ../src/utilops.cc:894
 msgid "Stop"
 msgstr "Zastaviť"
 
@@ -2776,12 +2775,12 @@ msgstr "zastavené"
 
 # src/collect-dlg.cc:59
 #: ../src/cache-maint.cc:720 ../src/cache-maint.cc:1350
-#: ../src/cache-maint.cc:1475 ../src/preferences.cc:3017
+#: ../src/cache-maint.cc:1475 ../src/preferences.cc:3019
 msgid "Invalid folder"
 msgstr "Nesprávny priečinok"
 
 #: ../src/cache-maint.cc:721 ../src/cache-maint.cc:1351
-#: ../src/cache-maint.cc:1476 ../src/preferences.cc:3018
+#: ../src/cache-maint.cc:1476 ../src/preferences.cc:3020
 msgid "The specified folder can not be found."
 msgstr "Uvedený priečinok sa nenašiel."
 
@@ -2793,25 +2792,25 @@ msgstr "Vytvoriť náhľady"
 
 #: ../src/cache-maint.cc:791 ../src/cache-maint.cc:1054
 #: ../src/cache-maint.cc:1398 ../src/cache-maint.cc:1510
-#: ../src/preferences.cc:3053
+#: ../src/preferences.cc:3055
 msgid "S_tart"
 msgstr "Š_tart"
 
 # src/preferences.cc:368
 #: ../src/cache-maint.cc:804 ../src/cache-maint.cc:1411
-#: ../src/cache-maint.cc:1520 ../src/preferences.cc:3066
-#: ../src/preferences.cc:3358
+#: ../src/cache-maint.cc:1520 ../src/preferences.cc:3068
+#: ../src/preferences.cc:3360
 msgid "Folder:"
 msgstr "Priečinok:"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
 #: ../src/cache-maint.cc:807 ../src/cache-maint.cc:1414
-#: ../src/cache-maint.cc:1523 ../src/preferences.cc:3069
+#: ../src/cache-maint.cc:1523 ../src/preferences.cc:3071
 msgid "Select folder"
 msgstr "Vybrať priečinok"
 
 # src/collect-dlg.cc:59
-#: ../src/cache-maint.cc:809 ../src/preferences.cc:3071
+#: ../src/cache-maint.cc:809 ../src/preferences.cc:3073
 msgid "Include subfolders"
 msgstr "Vrátane podpriečinkov"
 
@@ -2820,12 +2819,12 @@ msgid "Store thumbnails local to source images"
 msgstr "Náhľady ukladať lokálne ku zdrojovým obrázkom"
 
 #: ../src/cache-maint.cc:819 ../src/cache-maint.cc:1063
-#: ../src/cache-maint.cc:1422 ../src/preferences.cc:3079
+#: ../src/cache-maint.cc:1422 ../src/preferences.cc:3081
 msgid "click start to begin"
 msgstr "spustíte kliknutím na štart"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/cache-maint.cc:985 ../src/editors.cc:1207
+#: ../src/cache-maint.cc:985 ../src/editors.cc:1220
 msgid "running…"
 msgstr "pracujem…"
 
@@ -2971,19 +2970,19 @@ msgid "Quit"
 msgstr "Koniec"
 
 # src/collect.cc:329 src/image.cc:1058
-#: ../src/collect.cc:474 ../src/image.cc:393 ../src/image-overlay.cc:262
+#: ../src/collect.cc:452 ../src/image.cc:393 ../src/image-overlay.cc:262
 #: ../src/image-overlay.cc:340
 msgid "Untitled"
 msgstr "Nepomenovaný"
 
 # src/collect.cc:333
-#: ../src/collect.cc:478
+#: ../src/collect.cc:456
 #, c-format
 msgid "Untitled (%d)"
 msgstr "Nepomenovaný (%d)"
 
 # src/collect-dlg.cc:82 src/collect.cc:1011
-#: ../src/collect-dlg.cc:46 ../src/collect-dlg.cc:71 ../src/layout.cc:1534
+#: ../src/collect-dlg.cc:46 ../src/collect-dlg.cc:71 ../src/layout.cc:1532
 #: ../src/view-file/view-file.cc:1112 ../src/view-file/view-file.cc:1208
 #, c-format
 msgid ""
@@ -2994,7 +2993,7 @@ msgstr ""
 "%s"
 
 # src/collect-dlg.cc:83 src/collect.cc:1012
-#: ../src/collect-dlg.cc:47 ../src/collect-dlg.cc:72 ../src/layout.cc:1535
+#: ../src/collect-dlg.cc:47 ../src/collect-dlg.cc:72 ../src/layout.cc:1533
 #: ../src/view-file/view-file.cc:1113
 msgid "Save Failed"
 msgstr "Nepodarilo sa uložiť"
@@ -3014,21 +3013,6 @@ msgstr "Uložiť zbierku ako – Geeqie"
 #: ../src/collect-dlg.cc:138
 msgid "Append Collection - Geeqie"
 msgstr "Pripojiť zbierku – Geeqie"
-
-#: ../src/collect-io.cc:347
-#, c-format
-msgid ""
-"This Collection cannot be opened because it contains a link to a file on a "
-"drive which is not yet mounted.\n"
-"\n"
-"Collection: %s\n"
-"File: %s\n"
-msgstr ""
-"Zbierka sa nedá otvoriť, pretože odkazuje na súbor na zariadení, ktoré ešte "
-"nie je pripojené.\n"
-"\n"
-"Zbierka: %s\n"
-"Súbor: %s\n"
 
 #: ../src/color-man.cc:319 ../src/exif.cc:231 ../src/exif-common.cc:446
 msgid "sRGB"
@@ -3209,8 +3193,8 @@ msgid ""
 msgstr ""
 
 # src/menu.cc:773
-#: ../src/desktop-file.cc:145 ../src/preferences.cc:1801
-#: ../src/preferences.cc:1804
+#: ../src/desktop-file.cc:145 ../src/preferences.cc:1803
+#: ../src/preferences.cc:1806
 #, fuzzy
 msgid "Shortcut conflict"
 msgstr "Pridať skratku"
@@ -3221,12 +3205,12 @@ msgid "Could not create directory"
 msgstr "Nemôžem vytvoriť adresár"
 
 # src/utilops.cc:989
-#: ../src/desktop-file.cc:239 ../src/desktop-file.cc:613
+#: ../src/desktop-file.cc:239 ../src/desktop-file.cc:615
 msgid "Desktop file"
 msgstr "Súbor plochy"
 
 # src/ui-pathsel.cc:343 src/utilops.cc:675 src/utilops.cc:727
-#: ../src/desktop-file.cc:344
+#: ../src/desktop-file.cc:345
 #, c-format
 msgid ""
 "Unable to delete file:\n"
@@ -3236,18 +3220,18 @@ msgstr ""
 "%s"
 
 # src/ui-pathsel.cc:344 src/utilops.cc:728
-#: ../src/desktop-file.cc:345 ../src/utilops.cc:2423 ../src/utilops.cc:2475
-#: ../src/utilops.cc:2966
+#: ../src/desktop-file.cc:346 ../src/utilops.cc:2425 ../src/utilops.cc:2477
+#: ../src/utilops.cc:2968
 msgid "File deletion failed"
 msgstr "Nepodarilo sa odstrániť súbor"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/desktop-file.cc:377 ../src/desktop-file.cc:385
+#: ../src/desktop-file.cc:378 ../src/desktop-file.cc:386
 msgid "Delete file"
 msgstr "Odstrániť súbor"
 
 # src/ui-pathsel.cc:397 src/utilops.cc:759
-#: ../src/desktop-file.cc:383
+#: ../src/desktop-file.cc:384
 #, c-format
 msgid ""
 "About to delete the file:\n"
@@ -3257,30 +3241,30 @@ msgstr ""
 " %s"
 
 # src/utilops.cc:989
-#: ../src/desktop-file.cc:403
+#: ../src/desktop-file.cc:404
 msgid "new.desktop"
 msgstr "novy.desktop"
 
-#: ../src/desktop-file.cc:568
+#: ../src/desktop-file.cc:570
 msgid "New"
 msgstr "Nový"
 
 # src/menu.cc:726
-#: ../src/desktop-file.cc:571
+#: ../src/desktop-file.cc:573
 msgid "Edit"
 msgstr "Upraviť"
 
-#: ../src/desktop-file.cc:600
+#: ../src/desktop-file.cc:602
 msgid "Disabled"
 msgstr "Vypnutý"
 
-#: ../src/desktop-file.cc:609
+#: ../src/desktop-file.cc:611
 msgid "Hidden"
 msgstr "Skryté"
 
 # src/dupe.cc:1657 src/dupe.cc:1945
-#: ../src/desktop-file.cc:617 ../src/dupe.cc:3658 ../src/dupe.cc:3987
-#: ../src/dupe.cc:4260 ../src/osd.cc:62 ../src/search.cc:3373
+#: ../src/desktop-file.cc:619 ../src/dupe.cc:3658 ../src/dupe.cc:3987
+#: ../src/dupe.cc:4260 ../src/osd.cc:62 ../src/search.cc:3388
 #: ../src/utilops.cc:769
 msgid "Path"
 msgstr "Cesta"
@@ -3307,8 +3291,8 @@ msgid "[set 1]"
 msgstr "[sada 1]"
 
 # src/collect-table.cc:100 src/dupe.cc:668 src/filelist.c:1811
-#: ../src/dupe.cc:1917 ../src/search.cc:567 ../src/view-file/view-file.cc:2744
-#: ../src/view-file/view-file.cc:2853
+#: ../src/dupe.cc:1917 ../src/search.cc:567 ../src/view-file/view-file.cc:2755
+#: ../src/view-file/view-file.cc:2864
 msgid "Loading thumbs…"
 msgstr "Načítavam náhľady…"
 
@@ -3368,22 +3352,22 @@ msgstr "Názov nerozlišujúci veľkosť znakov"
 
 # src/dupe.cc:1653 src/dupe.cc:1942
 #: ../src/dupe.cc:3654 ../src/dupe.cc:3987 ../src/dupe.cc:4257 ../src/osd.cc:64
-#: ../src/preferences.cc:2366 ../src/search.cc:3370
-#: ../src/view-file/view-file-list.cc:2051
-#: ../src/view-file/view-file-list.cc:2059
+#: ../src/preferences.cc:2368 ../src/search.cc:3385
+#: ../src/view-file/view-file-list.cc:2076
+#: ../src/view-file/view-file-list.cc:2084
 msgid "Size"
 msgstr "Veľkosť"
 
 # src/dupe.cc:1654 src/dupe.cc:1943
 #: ../src/dupe.cc:3655 ../src/dupe.cc:3987 ../src/dupe.cc:4258
 #: ../src/exif.cc:341 ../src/exif-common.cc:767 ../src/osd.cc:63
-#: ../src/search.cc:3371 ../src/view-file/view-file-list.cc:2055
+#: ../src/search.cc:3386 ../src/view-file/view-file-list.cc:2080
 msgid "Date"
 msgstr "Dátum"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
 #: ../src/dupe.cc:3656 ../src/dupe.cc:4259 ../src/osd.cc:66
-#: ../src/search.cc:3372
+#: ../src/search.cc:3387
 msgid "Dimensions"
 msgstr "Rozmery"
 
@@ -3435,8 +3419,8 @@ msgid "Similarity"
 msgstr "Podobnosť"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/dupe.cc:3987 ../src/dupe.cc:4261 ../src/preferences.cc:1962
-#: ../src/preferences.cc:2357
+#: ../src/dupe.cc:3987 ../src/dupe.cc:4261 ../src/preferences.cc:1964
+#: ../src/preferences.cc:2359
 msgid "Set"
 msgstr "Nastaviť"
 
@@ -3445,11 +3429,11 @@ msgstr "Nastaviť"
 msgid "Thumbnail"
 msgstr "Náhľad"
 
-#: ../src/dupe.cc:3987 ../src/exif.cc:380 ../src/preferences.cc:3829
+#: ../src/dupe.cc:3987 ../src/exif.cc:380 ../src/preferences.cc:3834
 msgid "Width"
 msgstr "Šírka"
 
-#: ../src/dupe.cc:3987 ../src/exif.cc:381 ../src/preferences.cc:3831
+#: ../src/dupe.cc:3987 ../src/exif.cc:381 ../src/preferences.cc:3836
 msgid "Height"
 msgstr "Výška"
 
@@ -3487,12 +3471,12 @@ msgid "Find duplicates"
 msgstr "Hľadať duplicity"
 
 # src/preferences.cc:645
-#: ../src/dupe.cc:4254 ../src/search.cc:3367
+#: ../src/dupe.cc:4254 ../src/search.cc:3382
 msgid "Rank"
 msgstr "Trieda"
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/dupe.cc:4255 ../src/search.cc:3368
+#: ../src/dupe.cc:4255 ../src/search.cc:3383
 msgid "Thumb"
 msgstr "Náhľ"
 
@@ -3502,7 +3486,7 @@ msgid "Compare to:"
 msgstr "Porovnať s:"
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/dupe.cc:4333 ../src/preferences.cc:1992 ../src/search.cc:3393
+#: ../src/dupe.cc:4333 ../src/preferences.cc:1994 ../src/search.cc:3408
 msgid "Thumbnails"
 msgstr "Náhľady"
 
@@ -3555,19 +3539,19 @@ msgid "Select how folders should be added."
 msgstr ""
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../src/dupe.cc:4578 ../src/img-view.cc:1396
+#: ../src/dupe.cc:4578 ../src/img-view.cc:1397
 #: ../src/view-file/view-file.cc:741
 msgid "_Add contents"
 msgstr "_Pridať obsah"
 
 # src/collect-table.cc:1821 src/dupe.cc:2173
-#: ../src/dupe.cc:4579 ../src/img-view.cc:1397
+#: ../src/dupe.cc:4579 ../src/img-view.cc:1398
 #: ../src/view-file/view-file.cc:742
 msgid "Add contents _recursive"
 msgstr "Pridať obsah _rekurzívne"
 
 # src/collect-table.cc:1822 src/dupe.cc:2174
-#: ../src/dupe.cc:4580 ../src/img-view.cc:1398
+#: ../src/dupe.cc:4580 ../src/img-view.cc:1399
 #: ../src/view-file/view-file.cc:743
 msgid "_Skip folders"
 msgstr "P_reskočiť priečinky"
@@ -3576,36 +3560,36 @@ msgstr "P_reskočiť priečinky"
 msgid "Please wait for the current file selection to be loaded."
 msgstr "Počkajte, prosím, kým sa načíta aktuálny výber súborov."
 
-#: ../src/editors.cc:397
+#: ../src/editors.cc:385
 #, c-format
 msgid "Desktop file '%s' should not include extension in Icon key: '%s'\n"
 msgstr "Desktop súbor '%s' by nemal obsahovať príponu v kľúči Icon: '%s'\n"
 
 # src/utilops.cc:343
-#: ../src/editors.cc:450 ../src/exif.cc:224 ../src/exif-common.cc:383
+#: ../src/editors.cc:436 ../src/exif.cc:224 ../src/exif-common.cc:383
 msgid "yes"
 msgstr "áno"
 
-#: ../src/editors.cc:450 ../src/exif.cc:223 ../src/exif-common.cc:383
+#: ../src/editors.cc:436 ../src/exif.cc:223 ../src/exif-common.cc:383
 msgid "no"
 msgstr "nie"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/editors.cc:628
+#: ../src/editors.cc:641
 msgid "stopping…"
 msgstr "zastavujem…"
 
-#: ../src/editors.cc:642
+#: ../src/editors.cc:655
 msgid "Edit command results"
 msgstr "Výsledky z príkazu na úpravu"
 
-#: ../src/editors.cc:645
+#: ../src/editors.cc:658
 #, c-format
 msgid "Output of %s"
 msgstr "Výstup z %s"
 
 # src/ui-help.cc:191
-#: ../src/editors.cc:1180
+#: ../src/editors.cc:1193
 #, c-format
 msgid ""
 "Failed to run command:\n"
@@ -3615,11 +3599,11 @@ msgstr ""
 "%s\n"
 
 # src/menu.cc:522
-#: ../src/editors.cc:1280
+#: ../src/editors.cc:1293
 msgid "stopped by user"
 msgstr "zastavené používateľom"
 
-#: ../src/editors.cc:1363
+#: ../src/editors.cc:1376
 #, c-format
 msgid ""
 "%s\n"
@@ -3629,39 +3613,39 @@ msgstr ""
 "\"%s\""
 
 # src/utilops.cc:543
-#: ../src/editors.cc:1365
+#: ../src/editors.cc:1378
 msgid "Invalid editor command"
 msgstr "Neplatný príkaz editora"
 
-#: ../src/editors.cc:1439
+#: ../src/editors.cc:1452
 msgid "Editor template is empty."
 msgstr "Šablóna editora je prázdna."
 
-#: ../src/editors.cc:1440
+#: ../src/editors.cc:1453
 msgid "Editor template has incorrect syntax."
 msgstr "Šablóna editora má nesprávnu syntax."
 
-#: ../src/editors.cc:1441
+#: ../src/editors.cc:1454
 msgid "Editor template uses incompatible macros."
 msgstr "Šablóna editora používa nekompatibilné makrá."
 
-#: ../src/editors.cc:1442
+#: ../src/editors.cc:1455
 msgid "Can't find matching file type."
 msgstr "Nepodarilo sa nájsť požadovaný typ súboru."
 
-#: ../src/editors.cc:1443
+#: ../src/editors.cc:1456
 msgid "Can't execute external editor."
 msgstr "Nepodarilo sa spustiť externý editor."
 
-#: ../src/editors.cc:1444
+#: ../src/editors.cc:1457
 msgid "External editor returned error status."
 msgstr "Externý editor vrátil chybový stav."
 
-#: ../src/editors.cc:1445
+#: ../src/editors.cc:1458
 msgid "File was skipped."
 msgstr "Súbor bol preskočený."
 
-#: ../src/editors.cc:1446
+#: ../src/editors.cc:1459
 msgid "Unknown error."
 msgstr "Neznáma chyba."
 
@@ -4258,7 +4242,7 @@ msgstr "Ovládanie zisku"
 msgid "Contrast"
 msgstr "Kontrast"
 
-#: ../src/exif.cc:404 ../src/preferences.cc:3204
+#: ../src/exif.cc:404 ../src/preferences.cc:3206
 msgid "Saturation"
 msgstr "Sýtosť"
 
@@ -4442,70 +4426,70 @@ msgstr "Strana č."
 msgid "Lens"
 msgstr "Objektív"
 
-#: ../src/filedata/filedata.cc:2349
+#: ../src/filedata/filedata.cc:2357
 msgid "file or directory does not exist"
 msgstr "súbor alebo adresár neexistuje"
 
 # src/filelist.c:814
-#: ../src/filedata/filedata.cc:2355
+#: ../src/filedata/filedata.cc:2363
 msgid "destination already exists"
 msgstr "cieľ už existuje"
 
-#: ../src/filedata/filedata.cc:2361
+#: ../src/filedata/filedata.cc:2369
 msgid "destination can't be overwritten"
 msgstr "cieľové umiestnenie sa nedá prepísať"
 
-#: ../src/filedata/filedata.cc:2367
+#: ../src/filedata/filedata.cc:2375
 msgid "destination directory is not writable"
 msgstr "do cieľového adresára nie je možné zapisovať"
 
-#: ../src/filedata/filedata.cc:2373
+#: ../src/filedata/filedata.cc:2381
 msgid "destination directory does not exist"
 msgstr "cieľový adresár neexistuje"
 
-#: ../src/filedata/filedata.cc:2379
+#: ../src/filedata/filedata.cc:2387
 msgid "source directory is not writable"
 msgstr "do zdrojového adresára nie je možné zapisovať"
 
-#: ../src/filedata/filedata.cc:2385
+#: ../src/filedata/filedata.cc:2393
 msgid "no read permission"
 msgstr "chýbajúce práva na čítanie"
 
-#: ../src/filedata/filedata.cc:2391
+#: ../src/filedata/filedata.cc:2399
 msgid "file is readonly"
 msgstr "súbor je určený len na čítanie"
 
-#: ../src/filedata/filedata.cc:2397
+#: ../src/filedata/filedata.cc:2405
 msgid "destination already exists and will be overwritten"
 msgstr "cieľ už existuje a bude prepísaný"
 
 # src/utilops.cc:451
-#: ../src/filedata/filedata.cc:2403
+#: ../src/filedata/filedata.cc:2411
 msgid "source and destination are the same"
 msgstr "zdroj a cieľ sú totožné"
 
 # src/utilops.cc:451
-#: ../src/filedata/filedata.cc:2409
+#: ../src/filedata/filedata.cc:2417
 msgid "source and destination have different extension"
 msgstr "zdroj a cieľ majú rozdielne prípony"
 
-#: ../src/filedata/filedata.cc:2415
+#: ../src/filedata/filedata.cc:2423
 msgid "there are unsaved metadata changes for the file"
 msgstr "metadáta súboru čakajú na uloženie"
 
 # src/utilops.cc:451
-#: ../src/filedata/filedata.cc:2421
+#: ../src/filedata/filedata.cc:2429
 msgid "another destination file has the same filename"
 msgstr "iný cieľový súbor má rovnaké meno"
 
 # src/menu.cc:432 src/menu.cc:461
-#: ../src/filefilter.cc:88 ../src/search.cc:2438 ../src/search.cc:3323
+#: ../src/filefilter.cc:88 ../src/search.cc:2452 ../src/search.cc:3337
 msgid "Unknown"
 msgstr "Neznáme"
 
 # src/preferences.cc:676
 #: ../src/filefilter.cc:89 ../src/layout-config.cc:82
-#: ../src/preferences.cc:2199 ../src/search.cc:2414 ../src/search.cc:3317
+#: ../src/preferences.cc:2201 ../src/search.cc:2428 ../src/search.cc:3331
 msgid "Image"
 msgstr "Obrázok"
 
@@ -4514,7 +4498,7 @@ msgstr "Obrázok"
 msgid "RAW Image"
 msgstr "Obrázok RAW"
 
-#: ../src/filefilter.cc:92 ../src/search.cc:2422 ../src/search.cc:3319
+#: ../src/filefilter.cc:92 ../src/search.cc:2436 ../src/search.cc:3333
 msgid "Video"
 msgstr "Video"
 
@@ -4524,11 +4508,11 @@ msgid "Collection"
 msgstr "Zbierka"
 
 # src/dupe.cc:1948
-#: ../src/filefilter.cc:94 ../src/search.cc:2426 ../src/search.cc:3320
+#: ../src/filefilter.cc:94 ../src/search.cc:2440 ../src/search.cc:3334
 msgid "Document"
 msgstr "Dokument"
 
-#: ../src/filefilter.cc:95 ../src/search.cc:2434 ../src/search.cc:3322
+#: ../src/filefilter.cc:95 ../src/search.cc:2448 ../src/search.cc:3336
 msgid "Archive"
 msgstr "Archív"
 
@@ -4681,29 +4665,29 @@ msgid ""
 msgstr ""
 
 # src/utilops.cc:1151
-#: ../src/img-view.cc:511 ../src/layout-image.cc:540
-#: ../src/layout-image.cc:1918 ../src/layout-util.cc:955
+#: ../src/img-view.cc:512 ../src/layout-image.cc:540
+#: ../src/layout-image.cc:1918 ../src/layout-util.cc:970
 #: ../src/view-file/view-file.cc:914
 msgid "Cannot open archive file"
 msgstr "Nemôžem otvoriť súbor s archívom"
 
 # src/preferences.cc:773
-#: ../src/img-view.cc:511 ../src/layout-image.cc:540
-#: ../src/layout-image.cc:1918 ../src/layout-util.cc:955
-#: ../src/preferences.cc:4058 ../src/preferences.cc:4065
+#: ../src/img-view.cc:512 ../src/layout-image.cc:540
+#: ../src/layout-image.cc:1918 ../src/layout-util.cc:970
+#: ../src/preferences.cc:4064 ../src/preferences.cc:4071
 #: ../src/view-file/view-file.cc:914
 msgid "See the Log Window"
 msgstr "Skontrolujte okno so záznamom"
 
 # src/collect-table.cc:1818 src/dupe.cc:2170
-#: ../src/img-view.cc:1393
+#: ../src/img-view.cc:1394
 msgid "Dropped list includes folders."
 msgstr "Umiestnený zoznam obsahuje priečinky."
 
 # src/collect-table.cc:1824 src/dupe.cc:2176 src/preferences.cc:536
 # src/ui-utildlg.cc:105
-#: ../src/img-view.cc:1401 ../src/layout.cc:2717 ../src/preferences.cc:3899
-#: ../src/ui-utildlg.cc:378 ../src/view-dir.cc:465
+#: ../src/img-view.cc:1402 ../src/layout.cc:2716 ../src/preferences.cc:3905
+#: ../src/ui-utildlg.cc:383 ../src/view-dir.cc:588
 #: ../src/view-file/view-file.cc:744 ../src/view-file/view-file.cc:772
 msgid "Cancel"
 msgstr "Zrušiť"
@@ -4719,18 +4703,18 @@ msgid "Keys (%d)"
 msgstr "%d obrázkov (%d)"
 
 # src/preferences.cc:773
-#: ../src/keyboard-shortcuts.cc:324 ../src/layout-util.cc:1823
+#: ../src/keyboard-shortcuts.cc:324 ../src/layout-util.cc:1967
 #, fuzzy
 msgid "All Windows"
 msgstr "Okná"
 
 # src/preferences.cc:773
-#: ../src/keyboard-shortcuts.cc:325 ../src/layout-util.cc:1816
+#: ../src/keyboard-shortcuts.cc:325 ../src/layout-util.cc:1960
 #, fuzzy
 msgid "Main Window"
 msgstr "Okno so záznamom"
 
-#: ../src/keyboard-shortcuts.cc:326 ../src/layout-util.cc:1821
+#: ../src/keyboard-shortcuts.cc:326 ../src/layout-util.cc:1965
 #, fuzzy
 msgid "Advanced EXIF Window"
 msgstr "Rozšírený pohľad"
@@ -4745,119 +4729,119 @@ msgstr "Nie sú otvorené žiadne duplicitné okná"
 msgid "Duplicates Second Window"
 msgstr "Nie sú otvorené žiadne duplicitné okná"
 
-#: ../src/keyboard-shortcuts.cc:329 ../src/layout-util.cc:1817
+#: ../src/keyboard-shortcuts.cc:329 ../src/layout-util.cc:1961
 #, fuzzy
 msgid "Image View Window"
 msgstr "Okno hľadania obrázkov"
 
 # src/menu.cc:711
-#: ../src/keyboard-shortcuts.cc:330 ../src/layout-util.cc:1819
+#: ../src/keyboard-shortcuts.cc:330 ../src/layout-util.cc:1963
 #, fuzzy
 msgid "Pan View Window"
 msgstr "nové okno"
 
-#: ../src/keyboard-shortcuts.cc:331 ../src/layout-util.cc:1820
+#: ../src/keyboard-shortcuts.cc:331 ../src/layout-util.cc:1964
 #, fuzzy
 msgid "Search Window"
 msgstr "Okno hľadania obrázkov"
 
 # src/ui-pathsel.cc:799
-#: ../src/keyboard-shortcuts.cc:332 ../src/layout-util.cc:1822
+#: ../src/keyboard-shortcuts.cc:332 ../src/layout-util.cc:1966
 #, fuzzy
 msgid "Files Pane"
 msgstr "Dátum súboru"
 
 # src/collect-dlg.cc:82 src/collect.cc:1011
-#: ../src/layout.cc:488
+#: ../src/layout.cc:486
 #, fuzzy
 msgid "Unable to open collection"
 msgstr "Nepodarilo sa otvoriť zbierku"
 
 # src/preferences.cc:897
-#: ../src/layout.cc:799 ../src/view-file/view-file.cc:1673
+#: ../src/layout.cc:797 ../src/view-file/view-file.cc:1673
 #, fuzzy
 msgid "Collection order"
 msgstr "Zbierka"
 
 # src/preferences.cc:710
-#: ../src/layout.cc:898
+#: ../src/layout.cc:896
 msgid "Zoom to original size"
 msgstr "Nastaviť mierku na originálny rozmer"
 
 # src/img-view.cc:792 src/menu.cc:947 src/menu.cc:1083 src/preferences.cc:716
-#: ../src/layout.cc:899 ../src/preferences.cc:2219
+#: ../src/layout.cc:897 ../src/preferences.cc:2221
 msgid "Fit image to window"
 msgstr "Prispôsobiť obrázok oknu"
 
 # src/preferences.cc:722
-#: ../src/layout.cc:900
+#: ../src/layout.cc:898
 msgid "Leave Zoom at previous setting"
 msgstr "Ponechať mierku na predchádzajúcom nastavení"
 
-#: ../src/layout.cc:903
+#: ../src/layout.cc:901
 msgid "Scroll to top left corner"
 msgstr "Posunúť do ľavého horného rohu"
 
-#: ../src/layout.cc:904
+#: ../src/layout.cc:902
 msgid "Scroll to image center"
 msgstr "Posunúť na stred"
 
-#: ../src/layout.cc:905
+#: ../src/layout.cc:903
 msgid "Keep the region from previous image"
 msgstr "Zachovať oblasť z predchádzajúceho obrázka"
 
 # src/filelist.c:76
-#: ../src/layout.cc:997
+#: ../src/layout.cc:995
 msgid " Slideshow ["
 msgstr " Prezentácia ["
 
 # src/filelist.c:80
-#: ../src/layout.cc:1001
+#: ../src/layout.cc:999
 msgid " Paused ["
 msgstr " Pozastavené ["
 
 # src/filelist.c:86
-#: ../src/layout.cc:1033
+#: ../src/layout.cc:1031
 #, c-format
 msgid "%s, %d files (%s, %d)%s"
 msgstr "%s, %d súborov (%s, %d)%s"
 
 # src/filelist.c:88
-#: ../src/layout.cc:1037
+#: ../src/layout.cc:1035
 #, c-format
 msgid "%s, %d files%s"
 msgstr "%s, %d súborov%s"
 
-#: ../src/layout.cc:1080
+#: ../src/layout.cc:1078
 #, c-format
 msgid "(no read permission) %s bytes"
 msgstr "(chýbajúce práva na čítanie) %s bajtov"
 
 # src/window.cc:379
-#: ../src/layout.cc:1084
+#: ../src/layout.cc:1082
 #, c-format
 msgid "( ? x ? ) %s bytes"
 msgstr "( ? x ? ) %s bajtov"
 
 # src/window.cc:383
-#: ../src/layout.cc:1098
+#: ../src/layout.cc:1096
 #, c-format
 msgid "( %d x %d ) %s bytes [%d/%d]"
 msgstr "( %d x %d ) %s bajtov [%d/%d]"
 
 # src/window.cc:383
-#: ../src/layout.cc:1102
+#: ../src/layout.cc:1100
 #, c-format
 msgid "( %d x %d ) %s bytes"
 msgstr "( %d x %d ) %s bajtov"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/layout.cc:1191
+#: ../src/layout.cc:1189
 msgid "Select sort order"
 msgstr "Vybrať poradie triedenia"
 
 # src/collect-dlg.cc:59
-#: ../src/layout.cc:1195
+#: ../src/layout.cc:1193
 msgid ""
 "Folder contents (files selected)\n"
 "Slideshow [time interval]"
@@ -4866,92 +4850,92 @@ msgstr ""
 "Prezentácia [časový interval]"
 
 # src/utilops.cc:539
-#: ../src/layout.cc:1205
+#: ../src/layout.cc:1203
 msgid "(Image dimensions) Image size [page n of m]"
 msgstr "(Rozmery obrázka) Veľkosť obrázka [strana n z m]"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/layout.cc:1213
+#: ../src/layout.cc:1211
 msgid "Select zoom and scroll mode"
 msgstr "Vybrať režim priblíženia a posúvania"
 
-#: ../src/layout.cc:1235
+#: ../src/layout.cc:1233
 msgid "[Pixel x,y coord]: (Pixel R,G,B value)"
 msgstr "[Pixel x,y súradn]: (Pixel R,G,B hodnota)"
 
 # src/collect.cc:1048
-#: ../src/layout.cc:1563
+#: ../src/layout.cc:1561
 msgid "Close collection"
 msgstr "Zatvoriť zbierku"
 
 # src/collect-dlg.cc:165 src/collect-table.cc:641
-#: ../src/layout.cc:1565
+#: ../src/layout.cc:1563
 #, fuzzy, c-format
 msgid "Save changes to collection %s?"
 msgstr "Uložiť zbierku ako"
 
 # src/main.cc:619
-#: ../src/layout.cc:1566
+#: ../src/layout.cc:1564
 #, fuzzy
 msgid "Collection has been modified"
 msgstr "Zbierky boli zmenené.\n"
 
-#: ../src/layout.cc:1568
+#: ../src/layout.cc:1566
 msgid "_Discard"
 msgstr "_Zahodiť"
 
 # src/preferences.cc:368
-#: ../src/layout.cc:2066 ../src/layout-config.cc:82
+#: ../src/layout.cc:2064 ../src/layout-config.cc:82
 msgid "Tools"
 msgstr "Nástroje"
 
-#: ../src/layout.cc:2689
+#: ../src/layout.cc:2687
 msgid "Window options and layout"
 msgstr "Voľby okien a rozloženie"
 
-#: ../src/layout.cc:2714
+#: ../src/layout.cc:2713
 msgid "Apply"
 msgstr "Použiť"
 
 # src/preferences.cc:551
-#: ../src/layout.cc:2728
+#: ../src/layout.cc:2727
 msgid "General options"
 msgstr "Všeobecné možnosti"
 
-#: ../src/layout.cc:2730
+#: ../src/layout.cc:2729
 msgid "Home path (empty to use your home directory)"
 msgstr ""
 "Domovský adresár (prázdne, ak chcete použiť domovský adresár používateľa)"
 
 # src/preferences.cc:581
-#: ../src/layout.cc:2736
+#: ../src/layout.cc:2735
 msgid "Use current"
 msgstr "Použiť aktuálny"
 
-#: ../src/layout.cc:2739
+#: ../src/layout.cc:2738
 msgid "Show date in directories list view"
 msgstr "Zobraziť dátum v zobrazení zoznamu adresárov"
 
 # src/preferences.cc:559
-#: ../src/layout.cc:2742
+#: ../src/layout.cc:2741
 msgid "Start-up directory:"
 msgstr "Začiatočný adresár:"
 
-#: ../src/layout.cc:2744
+#: ../src/layout.cc:2743
 msgid "No change"
 msgstr "Bez zmeny"
 
 # src/collect-table.cc:627 src/dupe.cc:1391 src/dupe.cc:1563
-#: ../src/layout.cc:2747
+#: ../src/layout.cc:2746
 msgid "Restore last path"
 msgstr "Obnoviť minulú cestu"
 
 # src/utilops.cc:592
-#: ../src/layout.cc:2750
+#: ../src/layout.cc:2749
 msgid "Home path"
 msgstr "Domovský adresár"
 
-#: ../src/layout.cc:2754
+#: ../src/layout.cc:2753
 msgid "Layout"
 msgstr "Rozloženie"
 
@@ -5014,11 +4998,11 @@ msgid "[%*s,%*s]: RGB(---,---,---)"
 msgstr "[%*s,%*s]: RGB(---,---,---)"
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../src/layout-util.cc:367
+#: ../src/layout-util.cc:382
 msgid "Clear all marks?"
 msgstr "Vyčistiť všetky značky?"
 
-#: ../src/layout-util.cc:367
+#: ../src/layout-util.cc:382
 msgid ""
 "This will clear all marks for all images,\n"
 "including those linked to keywords"
@@ -5027,110 +5011,131 @@ msgstr ""
 "vrátane tých, ktoré sú prepojené s kľúčovými slovami"
 
 # src/ui-pathsel.cc:344 src/utilops.cc:728
-#: ../src/layout-util.cc:622
+#: ../src/layout-util.cc:637
 msgid "Operation failed:\n"
 msgstr "Operácia zlyhala:\n"
 
 # src/preferences.cc:823
-#: ../src/layout-util.cc:625
+#: ../src/layout-util.cc:640
 msgid "No file extension\n"
 msgstr "Žiadna prípona súboru\n"
 
-#: ../src/layout-util.cc:627
+#: ../src/layout-util.cc:642
 msgid "Operation not supported for filetype\n"
 msgstr "Nepodporovaná operácia pre typ súboru\n"
 
-#: ../src/layout-util.cc:629
+#: ../src/layout-util.cc:644
 msgid "File is not writable\n"
 msgstr "Do súboru nie je možné zapisovať\n"
 
 # src/ui-pathsel.cc:799
-#: ../src/layout-util.cc:631
+#: ../src/layout-util.cc:646
 msgid "Exiftran error\n"
 msgstr "Chyba Exiftranu\n"
 
 # src/menu.cc:581
-#: ../src/layout-util.cc:633
+#: ../src/layout-util.cc:648
 msgid "Mogrify error\n"
 msgstr "Chyba Mogrify\n"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
-#: ../src/layout-util.cc:637 ../src/layout-util.cc:638
+#: ../src/layout-util.cc:652 ../src/layout-util.cc:653
 msgid "Image orientation"
 msgstr "Orientácia obrázka"
 
-#: ../src/layout-util.cc:1078 ../src/layout-util.cc:1200 ../src/search.cc:2990
-#: ../src/ui-bookmark.cc:899 ../src/ui-file-chooser.cc:857
-#: ../src/ui-tabcomp.cc:893
+#: ../src/layout-util.cc:1149 ../src/search.cc:3004 ../src/ui-bookmark.cc:899
+#: ../src/ui-file-chooser.cc:944 ../src/ui-tabcomp.cc:924
 msgid "Open"
 msgstr "Otvoriť"
 
 # src/preferences.cc:676
-#: ../src/layout-util.cc:1081
+#: ../src/layout-util.cc:1152
 msgid "Image files"
 msgstr "Súbory obrázkov"
 
 # src/main.cc:619
-#: ../src/layout-util.cc:1084
+#: ../src/layout-util.cc:1155
 msgid "Geeqie - Open File"
 msgstr "Geeqie – Otvoriť súbor"
 
 # src/menu.cc:713
-#: ../src/layout-util.cc:1092
+#: ../src/layout-util.cc:1175
 #, fuzzy
 msgid "Open Recent File"
 msgstr "Otvoriť nedávny súbor…"
 
-#: ../src/layout-util.cc:1152
+#: ../src/layout-util.cc:1257
 #, fuzzy
 msgid "No recent files available."
 msgstr "Použiť systémový profil monitoru, ak je k dispozícii"
 
-#: ../src/layout-util.cc:1164
+#: ../src/layout-util.cc:1262
+msgid "Geeqie image files"
+msgstr "Súbory s obrázkami Geeqie"
+
+# src/ui-pathsel.cc:697
+#: ../src/layout-util.cc:1262 ../src/ui-file-chooser.cc:804
+msgid "All files"
+msgstr "Všetky súbory"
+
+# src/collect-table.cc:1824 src/dupe.cc:2176 src/preferences.cc:536
+# src/ui-utildlg.cc:105
+#: ../src/layout-util.cc:1272 ../src/ui-file-chooser.cc:735
+#: ../src/ui-file-chooser.cc:955
+msgid "_Cancel"
+msgstr "_Zrušiť"
+
+#: ../src/layout-util.cc:1275
 msgid "_Open"
 msgstr "_Otvoriť"
 
-# src/main.cc:619
-#: ../src/layout-util.cc:1206
-msgid "Geeqie - Open Collection"
-msgstr "Geeqie – Otvoriť zbierku"
+# src/collect-dlg.cc:172
+#: ../src/layout-util.cc:1291
+#, fuzzy
+msgid "Open Collection"
+msgstr "Otvoriť zbierku…"
 
-#: ../src/layout-util.cc:1818
+#: ../src/layout-util.cc:1349
+#, fuzzy
+msgid "No collections available."
+msgstr "Použiť systémový profil monitoru, ak je k dispozícii"
+
+#: ../src/layout-util.cc:1962
 #, fuzzy
 msgid "Duplicates Window"
 msgstr "Nie sú otvorené žiadne duplicitné okná"
 
 # src/collect-table.cc:100 src/dupe.cc:668 src/filelist.c:1811
-#: ../src/layout-util.cc:1875 ../src/layout-util.cc:1878
+#: ../src/layout-util.cc:2019 ../src/layout-util.cc:2022
 #, fuzzy
 msgid "Keyboard Map"
 msgstr "Mapa klávesnice"
 
-#: ../src/layout-util.cc:1879
+#: ../src/layout-util.cc:2023
 msgid "Select the window whose shortcuts should be displayed."
 msgstr ""
 
 # src/ui-pathsel.cc:307
-#: ../src/layout-util.cc:2457
+#: ../src/layout-util.cc:2648
 #, c-format
 msgid "Window layout name \"%s\" already exists."
 msgstr "Súbor s rozložením okien s názvom \"%s\" už existuje."
 
-#: ../src/layout-util.cc:2641 ../src/layout-util.cc:2714
+#: ../src/layout-util.cc:2832 ../src/layout-util.cc:2905
 #: ../src/ui-bookmark.cc:870
 msgid "OK"
 msgstr "OK"
 
 # src/menu.cc:711
-#: ../src/layout-util.cc:2642
+#: ../src/layout-util.cc:2833
 msgid "rename window"
 msgstr "premenovať okno"
 
-#: ../src/layout-util.cc:2715
+#: ../src/layout-util.cc:2906
 msgid "Delete window layout"
 msgstr "Odstrániť rozloženie okien"
 
-#: ../src/layout-util.cc:3167
+#: ../src/layout-util.cc:3392
 #, c-format
 msgid ""
 "Image profile: %s\n"
@@ -5139,11 +5144,11 @@ msgstr ""
 "Profil obrázka: %s\n"
 "Profil monitora: %s"
 
-#: ../src/layout-util.cc:3174
+#: ../src/layout-util.cc:3399
 msgid "Click to enable color management"
 msgstr "Kliknite pre povolenie správy farieb"
 
-#: ../src/layout-util.cc:3179
+#: ../src/layout-util.cc:3404
 msgid "Color profiles not supported"
 msgstr "Farebné profily nie sú podporované"
 
@@ -5151,7 +5156,7 @@ msgstr "Farebné profily nie sú podporované"
 msgid "Log"
 msgstr "Záznam"
 
-#: ../src/logwindow.cc:364 ../src/preferences.cc:3478
+#: ../src/logwindow.cc:364 ../src/preferences.cc:3483
 msgid "Debug level:"
 msgstr "Úroveň ladenia:"
 
@@ -5642,247 +5647,247 @@ msgstr ""
 "Geeqie je prehliadač obrázkov.\n"
 " Verzia: Geeqie "
 
-#: ../src/metadata.cc:1645
+#: ../src/metadata.cc:1646
 msgid "People"
 msgstr "Ľudia"
 
-#: ../src/metadata.cc:1646
+#: ../src/metadata.cc:1647
 msgid "Family"
 msgstr "Rodina"
 
-#: ../src/metadata.cc:1647
+#: ../src/metadata.cc:1648
 msgid "Free time"
 msgstr "Voľný čas"
 
-#: ../src/metadata.cc:1648
+#: ../src/metadata.cc:1649
 msgid "Children"
 msgstr "Deti"
 
-#: ../src/metadata.cc:1649
+#: ../src/metadata.cc:1650
 msgid "Sport"
 msgstr "Šport"
 
-#: ../src/metadata.cc:1650
+#: ../src/metadata.cc:1651
 msgid "Culture"
 msgstr "Kultúra"
 
-#: ../src/metadata.cc:1651
+#: ../src/metadata.cc:1652
 msgid "Festival"
 msgstr "Festival"
 
-#: ../src/metadata.cc:1652
+#: ../src/metadata.cc:1653
 msgid "Nature"
 msgstr "Príroda"
 
-#: ../src/metadata.cc:1653
+#: ../src/metadata.cc:1654
 msgid "Animal"
 msgstr "Zviera"
 
-#: ../src/metadata.cc:1654
+#: ../src/metadata.cc:1655
 msgid "Bird"
 msgstr "Vták"
 
-#: ../src/metadata.cc:1655
+#: ../src/metadata.cc:1656
 msgid "Insect"
 msgstr "Hmyz"
 
-#: ../src/metadata.cc:1656
+#: ../src/metadata.cc:1657
 msgid "Pets"
 msgstr "Domáce zvieratá"
 
-#: ../src/metadata.cc:1657
+#: ../src/metadata.cc:1658
 msgid "Wildlife"
 msgstr "Voľne žijúce zvieratá"
 
 # src/img-view.cc:789 src/menu.cc:944 src/menu.cc:1079
-#: ../src/metadata.cc:1658
+#: ../src/metadata.cc:1659
 msgid "Zoo"
 msgstr "Zoo"
 
-#: ../src/metadata.cc:1659
+#: ../src/metadata.cc:1660
 msgid "Plant"
 msgstr "Rastlina"
 
 # src/menu.cc:768
-#: ../src/metadata.cc:1660
+#: ../src/metadata.cc:1661
 msgid "Tree"
 msgstr "Strom"
 
-#: ../src/metadata.cc:1661
+#: ../src/metadata.cc:1662
 msgid "Flower"
 msgstr "Kvet"
 
-#: ../src/metadata.cc:1662
+#: ../src/metadata.cc:1663
 msgid "Water"
 msgstr "Voda"
 
-#: ../src/metadata.cc:1663
+#: ../src/metadata.cc:1664
 msgid "River"
 msgstr "Rieka"
 
-#: ../src/metadata.cc:1664
+#: ../src/metadata.cc:1665
 msgid "Lake"
 msgstr "Jazero"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/metadata.cc:1665
+#: ../src/metadata.cc:1666
 msgid "Sea"
 msgstr "More"
 
-#: ../src/metadata.cc:1666
+#: ../src/metadata.cc:1667
 msgid "Landscape"
 msgstr "Na šírku"
 
-#: ../src/metadata.cc:1667
+#: ../src/metadata.cc:1668
 msgid "Art"
 msgstr "Umenie"
 
-#: ../src/metadata.cc:1668
+#: ../src/metadata.cc:1669
 msgid "Statue"
 msgstr "Socha"
 
 # src/ui-pathsel.cc:799
-#: ../src/metadata.cc:1669
+#: ../src/metadata.cc:1670
 msgid "Painting"
 msgstr "Obraz"
 
-#: ../src/metadata.cc:1670 ../src/metadata.cc:1684
+#: ../src/metadata.cc:1671 ../src/metadata.cc:1685
 msgid "Historic"
 msgstr "História"
 
-#: ../src/metadata.cc:1671 ../src/metadata.cc:1685
+#: ../src/metadata.cc:1672 ../src/metadata.cc:1686
 msgid "Modern"
 msgstr "Moderné"
 
-#: ../src/metadata.cc:1672
+#: ../src/metadata.cc:1673
 msgid "City"
 msgstr "Mesto"
 
-#: ../src/metadata.cc:1673
+#: ../src/metadata.cc:1674
 msgid "Park"
 msgstr "Park"
 
-#: ../src/metadata.cc:1674
+#: ../src/metadata.cc:1675
 msgid "Street"
 msgstr "Ulica"
 
-#: ../src/metadata.cc:1675
+#: ../src/metadata.cc:1676
 msgid "Square"
 msgstr "Námestie"
 
-#: ../src/metadata.cc:1676
+#: ../src/metadata.cc:1677
 msgid "Architecture"
 msgstr "Architektúra"
 
-#: ../src/metadata.cc:1677
+#: ../src/metadata.cc:1678
 msgid "Buildings"
 msgstr "Budovy"
 
-#: ../src/metadata.cc:1678
+#: ../src/metadata.cc:1679
 msgid "House"
 msgstr "Dom"
 
-#: ../src/metadata.cc:1679
+#: ../src/metadata.cc:1680
 msgid "Cathedral"
 msgstr "Katedrála"
 
-#: ../src/metadata.cc:1680
+#: ../src/metadata.cc:1681
 msgid "Palace"
 msgstr "Zámok"
 
-#: ../src/metadata.cc:1681
+#: ../src/metadata.cc:1682
 msgid "Castle"
 msgstr "Hrad"
 
-#: ../src/metadata.cc:1682
+#: ../src/metadata.cc:1683
 msgid "Bridge"
 msgstr "Most"
 
-#: ../src/metadata.cc:1683
+#: ../src/metadata.cc:1684
 msgid "Interior"
 msgstr "Interiér"
 
-#: ../src/metadata.cc:1686
+#: ../src/metadata.cc:1687
 msgid "Places"
 msgstr "Miesta"
 
 # src/preferences.cc:897
-#: ../src/metadata.cc:1687
+#: ../src/metadata.cc:1688
 msgid "Conditions"
 msgstr "Podmienky"
 
-#: ../src/metadata.cc:1688
+#: ../src/metadata.cc:1689
 msgid "Night"
 msgstr "Noc"
 
-#: ../src/metadata.cc:1689
+#: ../src/metadata.cc:1690
 msgid "Lights"
 msgstr "Svetlá"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/metadata.cc:1690
+#: ../src/metadata.cc:1691
 msgid "Reflections"
 msgstr "Odrazy"
 
-#: ../src/metadata.cc:1691
+#: ../src/metadata.cc:1692
 msgid "Sun"
 msgstr "Slnko"
 
-#: ../src/metadata.cc:1692
+#: ../src/metadata.cc:1693
 msgid "Weather"
 msgstr "Počasie"
 
-#: ../src/metadata.cc:1693
+#: ../src/metadata.cc:1694
 msgid "Fog"
 msgstr "Hmla"
 
-#: ../src/metadata.cc:1694
+#: ../src/metadata.cc:1695
 msgid "Rain"
 msgstr "Dážď"
 
-#: ../src/metadata.cc:1695
+#: ../src/metadata.cc:1696
 msgid "Clouds"
 msgstr "Oblaky"
 
-#: ../src/metadata.cc:1696
+#: ../src/metadata.cc:1697
 msgid "Snow"
 msgstr "Sneh"
 
-#: ../src/metadata.cc:1697
+#: ../src/metadata.cc:1698
 msgid "Sunny weather"
 msgstr "Slnečné počasie"
 
-#: ../src/metadata.cc:1698
+#: ../src/metadata.cc:1699
 msgid "Photo"
 msgstr "Fotka"
 
 # src/menu.cc:492
-#: ../src/metadata.cc:1699
+#: ../src/metadata.cc:1700
 msgid "Edited"
 msgstr "Upravené"
 
-#: ../src/metadata.cc:1700
+#: ../src/metadata.cc:1701
 msgid "Detail"
 msgstr "Podrobnosti"
 
-#: ../src/metadata.cc:1701
+#: ../src/metadata.cc:1702
 msgid "Macro"
 msgstr "Makro"
 
-#: ../src/metadata.cc:1702
+#: ../src/metadata.cc:1703
 msgid "Portrait"
 msgstr "Na výšku"
 
-#: ../src/metadata.cc:1703
+#: ../src/metadata.cc:1704
 msgid "Black and White"
 msgstr "Čierne a biele"
 
 # src/utilops.cc:1216
-#: ../src/metadata.cc:1704
+#: ../src/metadata.cc:1705
 msgid "Perspective"
 msgstr "Perspektíva"
 
-#: ../src/options.cc:277 ../src/search.cc:506
+#: ../src/options.cc:278 ../src/search.cc:506
 #: ../src/view-file/view-file.cc:2085
 msgid "Mark "
 msgstr "Značka "
@@ -5939,7 +5944,7 @@ msgid "Timezone"
 msgstr "Časové pásmo"
 
 # src/ui-pathsel.cc:799
-#: ../src/osd.cc:101 ../src/view-file/view-file.cc:2587
+#: ../src/osd.cc:101 ../src/view-file/view-file.cc:2598
 msgid "Rating"
 msgstr "Hodnotenie"
 
@@ -5989,42 +5994,42 @@ msgid "Sorting images…"
 msgstr "Triedim obrázky…"
 
 # src/utilops.cc:980
-#: ../src/pan-view/pan-view.cc:1120
+#: ../src/pan-view/pan-view.cc:1094
 msgid "Filename:"
 msgstr "Názov súboru:"
 
-#: ../src/pan-view/pan-view.cc:1123 ../src/pan-view/pan-view.cc:1933
-#: ../src/preferences.cc:2382
+#: ../src/pan-view/pan-view.cc:1097 ../src/pan-view/pan-view.cc:1916
+#: ../src/preferences.cc:2384
 msgid "Location:"
 msgstr "Umiestnenie:"
 
 # src/dupe.cc:1654 src/dupe.cc:1943
-#: ../src/pan-view/pan-view.cc:1125 ../src/pan-view/pan-view-search.cc:326
+#: ../src/pan-view/pan-view.cc:1099 ../src/pan-view/pan-view-search.cc:326
 msgid "Date:"
 msgstr "Dátum:"
 
 # src/preferences.cc:595
-#: ../src/pan-view/pan-view.cc:1128 ../src/preferences.cc:1995
+#: ../src/pan-view/pan-view.cc:1102 ../src/preferences.cc:1997
 msgid "Size:"
 msgstr "Rozmer:"
 
-#: ../src/pan-view/pan-view.cc:1478 ../src/search.cc:2499
+#: ../src/pan-view/pan-view.cc:1461 ../src/search.cc:2513
 msgid "Folder not found"
 msgstr "Priečinok sa nenašiel"
 
-#: ../src/pan-view/pan-view.cc:1479
+#: ../src/pan-view/pan-view.cc:1462
 msgid "The entered path is not a folder"
 msgstr "Zadaná cesta nie je priečinok"
 
-#: ../src/pan-view/pan-view.cc:1565
+#: ../src/pan-view/pan-view.cc:1548
 msgid "Pan View Performance"
 msgstr "Výkon rozšíreného pohľadu"
 
-#: ../src/pan-view/pan-view.cc:1572
+#: ../src/pan-view/pan-view.cc:1555
 msgid "Pan view performance may be poor."
 msgstr "Výkon rozšíreného pohľadu môže byť slabý."
 
-#: ../src/pan-view/pan-view.cc:1573
+#: ../src/pan-view/pan-view.cc:1556
 msgid ""
 "To improve the performance of thumbnails in\n"
 "pan view the following options can be enabled.\n"
@@ -6039,71 +6044,71 @@ msgstr ""
 "chcete pocítiť zmenu vo výkone."
 
 # src/preferences.cc:603
-#: ../src/pan-view/pan-view.cc:1579
+#: ../src/pan-view/pan-view.cc:1562
 msgid "Cache thumbnails"
 msgstr "Kešovať náhľady"
 
-#: ../src/pan-view/pan-view.cc:1581
+#: ../src/pan-view/pan-view.cc:1564
 msgid "Use shared thumbnail cache"
 msgstr "Použiť zdieľanú vyrovnávaciu pamäť pre náhľady"
 
-#: ../src/pan-view/pan-view.cc:1587
+#: ../src/pan-view/pan-view.cc:1570
 msgid "Do not show this dialog again"
 msgstr "Tento dialóg už nezobrazovať"
 
-#: ../src/pan-view/pan-view.cc:1914
+#: ../src/pan-view/pan-view.cc:1897
 msgid "Pan View"
 msgstr "Rozšírený pohľad"
 
 # src/preferences.cc:369
-#: ../src/pan-view/pan-view.cc:1940
+#: ../src/pan-view/pan-view.cc:1923
 msgid "Timeline"
 msgstr "Časová os"
 
 # src/dupe.cc:1412 src/dupe.cc:1570
-#: ../src/pan-view/pan-view.cc:1941
+#: ../src/pan-view/pan-view.cc:1924
 msgid "Calendar"
 msgstr "Kalendár"
 
 # src/preferences.cc:368
-#: ../src/pan-view/pan-view.cc:1943
+#: ../src/pan-view/pan-view.cc:1926
 msgid "Folders (flower)"
 msgstr "Priečinky (kvet)"
 
-#: ../src/pan-view/pan-view.cc:1944
+#: ../src/pan-view/pan-view.cc:1927
 msgid "Grid"
 msgstr "Mriežka"
 
 # src/main.cc:561
-#: ../src/pan-view/pan-view.cc:1955
+#: ../src/pan-view/pan-view.cc:1938
 msgid "Dots"
 msgstr "Bodky"
 
 # src/preferences.cc:676
-#: ../src/pan-view/pan-view.cc:1956
+#: ../src/pan-view/pan-view.cc:1939
 msgid "No Images"
 msgstr "Žiadne obrázky"
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/pan-view/pan-view.cc:1957
+#: ../src/pan-view/pan-view.cc:1940
 msgid "Small Thumbnails"
 msgstr "Malé náhľady"
 
 # src/dupe.cc:2054 src/preferences.cc:586
-#: ../src/pan-view/pan-view.cc:1958
+#: ../src/pan-view/pan-view.cc:1941
 msgid "Normal Thumbnails"
 msgstr "Normálne náhľady"
 
 # src/cache-maint.cc:252
-#: ../src/pan-view/pan-view.cc:1959
+#: ../src/pan-view/pan-view.cc:1942
 msgid "Large Thumbnails"
 msgstr "Veľké náhľady"
 
-#: ../src/pan-view/pan-view.cc:1962
+#: ../src/pan-view/pan-view.cc:1945
 msgid "1:3 (33%)"
 msgstr "1:3 (33%)"
 
-#: ../src/pan-view/pan-view.cc:1964
+#: ../src/pan-view/pan-view.cc:1947
 msgid "1:1 (100%)"
 msgstr "1:1 (100%)"
 
@@ -6144,7 +6149,7 @@ msgid "Keyword Filter:"
 msgstr "Filter kľúčových slov:"
 
 # src/ui-pathsel.cc:799
-#: ../src/pan-view/pan-view-filter.cc:270 ../src/preferences.cc:2710
+#: ../src/pan-view/pan-view-filter.cc:270 ../src/preferences.cc:2712
 msgid "Filter"
 msgstr "Filter"
 
@@ -6153,7 +6158,7 @@ msgstr "Filter"
 msgid "Find:"
 msgstr "Hľadať:"
 
-#: ../src/pan-view/pan-view-search.cc:77 ../src/search.cc:3435
+#: ../src/pan-view/pan-view-search.cc:77 ../src/search.cc:3450
 msgid "Find"
 msgstr "Hľadať"
 
@@ -6176,137 +6181,137 @@ msgid "no match"
 msgstr "žiadna zhoda"
 
 # src/preferences.cc:367
-#: ../src/preferences.cc:789
+#: ../src/preferences.cc:790
 msgid "Nearest (worst, but fastest)"
 msgstr "Najbližšie (najhoršie, ale najrýchlejšie)"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:790
+#: ../src/preferences.cc:791
 msgid "Tiles"
 msgstr "Dlaždice"
 
 # src/preferences.cc:370
-#: ../src/preferences.cc:791
+#: ../src/preferences.cc:792
 msgid "Bilinear (best, but slowest)"
 msgstr "Bilineárne (najlepšie, ale najpomalšie)"
 
-#: ../src/preferences.cc:814
+#: ../src/preferences.cc:815
 msgid "Ask"
 msgstr "Spýtať sa"
 
-#: ../src/preferences.cc:836
+#: ../src/preferences.cc:837
 msgid "Primary"
 msgstr "Primárny"
 
-#: ../src/preferences.cc:836
+#: ../src/preferences.cc:837
 msgid "Clipboard"
 msgstr "Schránka"
 
-#: ../src/preferences.cc:836
+#: ../src/preferences.cc:837
 msgid "Both"
 msgstr "Obe"
 
-#: ../src/preferences.cc:874
+#: ../src/preferences.cc:875
 msgid "Geometric"
 msgstr "Geometrické"
 
-#: ../src/preferences.cc:874
+#: ../src/preferences.cc:875
 msgid "Arithmetic"
 msgstr "Aritmetické"
 
-#: ../src/preferences.cc:972
+#: ../src/preferences.cc:973
 msgid "Custom"
 msgstr "Vlastné"
 
 # src/preferences.cc:660
-#: ../src/preferences.cc:1051
+#: ../src/preferences.cc:1052
 msgid "Single image"
 msgstr "Samostatný obrázok"
 
-#: ../src/preferences.cc:1052
+#: ../src/preferences.cc:1053
 msgid "Anaglyph Red-Cyan"
 msgstr "Anaglyf Červená-Zelenomodrá"
 
-#: ../src/preferences.cc:1053
+#: ../src/preferences.cc:1054
 msgid "Anaglyph Green-Magenta"
 msgstr "Anaglyf Zelená-Purpurová"
 
-#: ../src/preferences.cc:1054
+#: ../src/preferences.cc:1055
 msgid "Anaglyph Yellow-Blue"
 msgstr "Anaglyf Žltá-Modrá"
 
-#: ../src/preferences.cc:1055
+#: ../src/preferences.cc:1056
 msgid "Anaglyph Gray Red-Cyan"
 msgstr "Šedý anaglyf Červená-Zelenomodrá"
 
-#: ../src/preferences.cc:1056
+#: ../src/preferences.cc:1057
 msgid "Anaglyph Gray Green-Magenta"
 msgstr "Šedý anaglyf Zelený-Purpurová"
 
-#: ../src/preferences.cc:1057
+#: ../src/preferences.cc:1058
 msgid "Anaglyph Gray Yellow-Blue"
 msgstr "Šedý anaglyf Žltá-Modrá"
 
-#: ../src/preferences.cc:1058
+#: ../src/preferences.cc:1059
 msgid "Anaglyph Dubois Red-Cyan"
 msgstr "Duboisov anaglyf Červená-Zelenomodrá"
 
-#: ../src/preferences.cc:1059
+#: ../src/preferences.cc:1060
 msgid "Anaglyph Dubois Green-Magenta"
 msgstr "Duboisov anaglyf Zelená-Purpurová"
 
-#: ../src/preferences.cc:1060
+#: ../src/preferences.cc:1061
 msgid "Anaglyph Dubois Yellow-Blue"
 msgstr "Duboisov anaglyf Žltá-Modrá"
 
-#: ../src/preferences.cc:1062
+#: ../src/preferences.cc:1063
 msgid "Side by Side Half size"
 msgstr "Vedľa seba, polovičná veľkosť"
 
 # src/utilops.cc:989
-#: ../src/preferences.cc:1063
+#: ../src/preferences.cc:1064
 msgid "Top - Bottom"
 msgstr "Vrch – spodok"
 
-#: ../src/preferences.cc:1064
+#: ../src/preferences.cc:1065
 msgid "Top - Bottom Half size"
 msgstr "Vrch – spodok, polovičná veľkosť"
 
-#: ../src/preferences.cc:1094 ../src/preferences.cc:3827
+#: ../src/preferences.cc:1095 ../src/preferences.cc:3832
 msgid "Fixed position"
 msgstr "Fixné umiestnenie"
 
-#: ../src/preferences.cc:1115
+#: ../src/preferences.cc:1116
 msgid "Mirror left image"
 msgstr "Zrkadliť obrázok vľavo"
 
 # src/preferences.cc:660
-#: ../src/preferences.cc:1118
+#: ../src/preferences.cc:1119
 msgid "Flip left image"
 msgstr "Preklopiť obrázok vľavo"
 
-#: ../src/preferences.cc:1121
+#: ../src/preferences.cc:1122
 msgid "Mirror right image"
 msgstr "Zrkadliť obrázok vpravo"
 
-#: ../src/preferences.cc:1124
+#: ../src/preferences.cc:1125
 msgid "Flip right image"
 msgstr "Preklopiť obrázok vpravo"
 
-#: ../src/preferences.cc:1126
+#: ../src/preferences.cc:1127
 msgid "Swap left and right images"
 msgstr "Vymeniť ľavý a pravý obrázok"
 
-#: ../src/preferences.cc:1128
+#: ../src/preferences.cc:1129
 msgid "Disable stereo mode on single image source"
 msgstr "Vypnúť mód sterea pri zdroji s jedným obrázkom"
 
 # src/utilops.cc:707
-#: ../src/preferences.cc:1251 ../src/preferences.cc:1254
+#: ../src/preferences.cc:1252 ../src/preferences.cc:1255
 msgid "Reset filters"
 msgstr "Vynulovať filtre"
 
-#: ../src/preferences.cc:1255
+#: ../src/preferences.cc:1256
 msgid ""
 "This will reset the file filters to the defaults.\n"
 "Continue?"
@@ -6315,19 +6320,19 @@ msgstr ""
 "Pokračovať?"
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../src/preferences.cc:1282 ../src/preferences.cc:1285
+#: ../src/preferences.cc:1283 ../src/preferences.cc:1286
 msgid "Clear trash"
 msgstr "Vyčistiť kôš"
 
-#: ../src/preferences.cc:1286
+#: ../src/preferences.cc:1287
 msgid "This will remove the trash contents."
 msgstr "Týmto sa odstráni obsah koša."
 
-#: ../src/preferences.cc:1320 ../src/preferences.cc:1323
+#: ../src/preferences.cc:1321 ../src/preferences.cc:1324
 msgid "Reset image overlay template string"
 msgstr "Vynulovať reťazec šablóny prekrytia obrázka"
 
-#: ../src/preferences.cc:1324
+#: ../src/preferences.cc:1325
 msgid ""
 "This will reset the image overlay template string to the default.\n"
 "Continue?"
@@ -6336,45 +6341,45 @@ msgstr ""
 "hodnoty.\n"
 "Pokračovať?"
 
-#: ../src/preferences.cc:1353
+#: ../src/preferences.cc:1354
 msgid "Image Overlay Font"
 msgstr "Písmo v prekrytí obrázka"
 
-#: ../src/preferences.cc:1400
+#: ../src/preferences.cc:1401
 msgid "Image Overlay Text Color"
 msgstr "Farba textu v prekrytí obrázka"
 
-#: ../src/preferences.cc:1417
+#: ../src/preferences.cc:1418
 msgid "Image Overlay Background Color"
 msgstr "Farba pozadia v prekrytí obrázka"
 
-#: ../src/preferences.cc:1641
+#: ../src/preferences.cc:1642
 msgid "No conflicting shortcuts."
 msgstr ""
 
 # src/menu.cc:773
-#: ../src/preferences.cc:1649
+#: ../src/preferences.cc:1650
 #, fuzzy
 msgid "Shortcut conflicts"
 msgstr "Pridať skratku"
 
-#: ../src/preferences.cc:1668
+#: ../src/preferences.cc:1670
 msgid "The following keyboard shortcuts have conflicting assignments:"
 msgstr ""
 
 # src/collect-dlg.cc:59
-#: ../src/preferences.cc:1778
+#: ../src/preferences.cc:1780
 #, fuzzy
 msgid "Invalid shortcut"
 msgstr "Nesprávny priečinok"
 
-#: ../src/preferences.cc:1778
+#: ../src/preferences.cc:1780
 msgid ""
 "The shortcut must use GTK accelerator syntax. Separate multiple shortcuts "
 "with semicolons."
 msgstr ""
 
-#: ../src/preferences.cc:1799
+#: ../src/preferences.cc:1801
 #, c-format
 msgid ""
 "The shortcut is already assigned to:\n"
@@ -6383,12 +6388,12 @@ msgid ""
 "Replace the existing assignment?"
 msgstr ""
 
-#: ../src/preferences.cc:1805
+#: ../src/preferences.cc:1807
 #, fuzzy
 msgid "Replace"
 msgstr "Zámok"
 
-#: ../src/preferences.cc:1949
+#: ../src/preferences.cc:1951
 msgid ""
 "Hexadecimal representation of a Unicode character. A list of all Unicode "
 "characters may be found on the Internet."
@@ -6396,117 +6401,117 @@ msgstr ""
 "Hexadecimálna reprezentácia Unicode znaku. Zoznam znakov Unicode nájdete na "
 "Internete."
 
-#: ../src/preferences.cc:1957 ../src/preferences.cc:2183
+#: ../src/preferences.cc:1959 ../src/preferences.cc:2185
 msgid "Default"
 msgstr "Predvolené"
 
-#: ../src/preferences.cc:1964
+#: ../src/preferences.cc:1966
 msgid "Display selected character"
 msgstr "Zobraziť vybraný znak"
 
 # src/preferences.cc:551
-#: ../src/preferences.cc:1990
+#: ../src/preferences.cc:1992
 msgid "General"
 msgstr "Hlavné"
 
 # src/preferences.cc:597
-#: ../src/preferences.cc:1996 ../src/preferences.cc:2204
+#: ../src/preferences.cc:1998 ../src/preferences.cc:2206
 msgid "Quality:"
 msgstr "Kvalita:"
 
 # src/preferences.cc:875
-#: ../src/preferences.cc:1999
+#: ../src/preferences.cc:2001
 msgid "Custom size: "
 msgstr "Vlastná veľkosť: "
 
-#: ../src/preferences.cc:2000
+#: ../src/preferences.cc:2002
 msgid "Width:"
 msgstr "Šírka:"
 
-#: ../src/preferences.cc:2001
+#: ../src/preferences.cc:2003
 msgid "Height:"
 msgstr "Výška:"
 
 # src/preferences.cc:610
-#: ../src/preferences.cc:2003
+#: ../src/preferences.cc:2005
 msgid "Cache thumbnails and sim. files"
 msgstr "Kešovať náhľady a .sim súbory"
 
-#: ../src/preferences.cc:2011
+#: ../src/preferences.cc:2013
 msgid "Use Geeqie thumbnail style and cache"
 msgstr "Použiť zdieľanú vyrovnávaciu pamäť pre štýly a náhľady"
 
-#: ../src/preferences.cc:2018
+#: ../src/preferences.cc:2020
 msgid "Store thumbnails local to image folder (non-standard)"
 msgstr ""
 "Náhľady ukladať do podpriečinka v rovnakom priečinku ako obrázky "
 "(neštandardné)"
 
-#: ../src/preferences.cc:2025
+#: ../src/preferences.cc:2027
 msgid "Use standard thumbnail style and cache, shared with other applications"
 msgstr ""
 "Použiť štandardnú vyrovnávaciu pamäť náhľadov a štýlov, zdieľanú s inými "
 "aplikáciami"
 
-#: ../src/preferences.cc:2031
+#: ../src/preferences.cc:2033
 msgid "Use EXIF thumbnails when available (EXIF thumbnails may be outdated)"
 msgstr ""
 "Používať náhľady z EXIFu, ak sú dostupné (náhľady z EXIFu nemusia byť "
 "aktuálne)"
 
 # src/menu.cc:526
-#: ../src/preferences.cc:2034
+#: ../src/preferences.cc:2036
 msgid "Thumbnail color management"
 msgstr "Správa farieb náhľadov"
 
-#: ../src/preferences.cc:2038
+#: ../src/preferences.cc:2040
 msgid "Use embedded metadata in video files as thumbnails when available"
 msgstr "Použiť vstavané metadáta vo video súboroch ako náhľady, ak sú dostupné"
 
-#: ../src/preferences.cc:2048
+#: ../src/preferences.cc:2050
 msgid "Star character: "
 msgstr "Znak hviezdičky: "
 
-#: ../src/preferences.cc:2050
+#: ../src/preferences.cc:2052
 msgid "Rejected character: "
 msgstr "Znak odmietnutia: "
 
 # src/preferences.cc:615
-#: ../src/preferences.cc:2055
+#: ../src/preferences.cc:2057
 msgid "Slide show"
 msgstr "Prezentácia"
 
 # src/preferences.cc:628
-#: ../src/preferences.cc:2066
+#: ../src/preferences.cc:2068
 msgid "Delay between image change hrs:mins:secs.dec"
 msgstr "Oneskorenie pri zmene obrázka hod:min:sek.milisek"
 
 # src/preferences.cc:645
-#: ../src/preferences.cc:2082
+#: ../src/preferences.cc:2084
 msgid "Random"
 msgstr "Náhodne"
 
 # src/preferences.cc:647
-#: ../src/preferences.cc:2083
+#: ../src/preferences.cc:2085
 msgid "Repeat"
 msgstr "Opakovane"
 
-#: ../src/preferences.cc:2087
+#: ../src/preferences.cc:2089
 msgid "Image loading and caching"
 msgstr "Načítavanie a kešovanie obrázkov"
 
 # src/preferences.cc:735
-#: ../src/preferences.cc:2089
+#: ../src/preferences.cc:2091
 msgid "Decoded image cache size (MiB):"
 msgstr "Veľkosť vyrovnávacej pamäte dekódovaného obrázka (MiB):"
 
 # src/preferences.cc:735
-#: ../src/preferences.cc:2091
+#: ../src/preferences.cc:2093
 #, fuzzy
 msgid "Display tile cache per image (MiB):"
 msgstr "Veľkosť vyrovnávacej pamäte dekódovaného obrázka (MiB):"
 
-#: ../src/preferences.cc:2094
+#: ../src/preferences.cc:2096
 msgid ""
 "Maximum memory used to cache rendered image tiles for each image view. "
 "Larger values may improve panning and repaint performance, particularly on "
@@ -6514,21 +6519,21 @@ msgid ""
 msgstr ""
 
 # src/preferences.cc:660
-#: ../src/preferences.cc:2095
+#: ../src/preferences.cc:2097
 msgid "Preload next image"
 msgstr "Predčítať nasledujúci obrázok"
 
 # src/menu.cc:1077
-#: ../src/preferences.cc:2098
+#: ../src/preferences.cc:2100
 msgid "Refresh on file change"
 msgstr "Obnoviť pri zmene súboru"
 
 # src/preferences.cc:930
-#: ../src/preferences.cc:2104
+#: ../src/preferences.cc:2106
 msgid "Menu style"
 msgstr "Štýl ponuky"
 
-#: ../src/preferences.cc:2106
+#: ../src/preferences.cc:2108
 msgid ""
 "☰ style menu button (NOTE! Geeqie must be restarted for change to take "
 "effect)"
@@ -6536,18 +6541,18 @@ msgstr ""
 "Štýl tlačidla ponuky ☰ (POZNÁMKA! Na použitie zmien musíte reštartovať "
 "Geeqie)"
 
-#: ../src/preferences.cc:2108
+#: ../src/preferences.cc:2110
 msgid ""
 "Use a ☰ style menu button instead of the classic style across the top of the "
 "frame"
 msgstr ""
 "Použiť hamburgerovú ponuku (☰) miesto klasickej ponuky v hornej časti okna"
 
-#: ../src/preferences.cc:2112
+#: ../src/preferences.cc:2114
 msgid "Expand toolbar"
 msgstr "Roztiahnuť nástrojovú lištu"
 
-#: ../src/preferences.cc:2114
+#: ../src/preferences.cc:2116
 msgid ""
 "Expand menu/toolbar (NOTE! Geeqie must be restarted for change to take "
 "effect)"
@@ -6555,25 +6560,25 @@ msgstr ""
 "Roztiahnuť ponuku/nástrojovú lištu (POZNÁMKA! Na použitie zmien musíte "
 "reštartovať Geeqie)"
 
-#: ../src/preferences.cc:2116
+#: ../src/preferences.cc:2118
 msgid "Expand the menu/toolbar to the full width of the window"
 msgstr "Roztiahnuť ponuku/nástrojovú lištu na celú šírku okna"
 
 # src/preferences.cc:930
-#: ../src/preferences.cc:2122
+#: ../src/preferences.cc:2124
 msgid "Menu bar"
 msgstr "Lišta ponuky"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:2125
+#: ../src/preferences.cc:2127
 msgid "Tool bar"
 msgstr "Nástrojová lišta"
 
-#: ../src/preferences.cc:2128
+#: ../src/preferences.cc:2130
 msgid "Status bar"
 msgstr "Stavová lišta"
 
-#: ../src/preferences.cc:2130
+#: ../src/preferences.cc:2132
 msgid ""
 "The Hide Selectable Bars menu item (default keystroke is control-backtick) "
 "will toggle the display of the bars selected here"
@@ -6582,19 +6587,19 @@ msgstr ""
 "prepne zobrazenie tu vybraných pruhov"
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:2142 ../src/preferences.cc:4116
+#: ../src/preferences.cc:2144 ../src/preferences.cc:4122
 msgid "Timezone database"
 msgstr "Databáza časových pásiem"
 
-#: ../src/preferences.cc:2150 ../src/preferences.cc:4127
+#: ../src/preferences.cc:2152 ../src/preferences.cc:4133
 msgid "Update"
 msgstr "Aktualizovať"
 
-#: ../src/preferences.cc:2150
+#: ../src/preferences.cc:2152
 msgid "Install"
 msgstr "Nainštalovať"
 
-#: ../src/preferences.cc:2156
+#: ../src/preferences.cc:2158
 msgid ""
 "No Internet connection!\n"
 "The timezone database is used to display exif time and date\n"
@@ -6604,7 +6609,7 @@ msgstr ""
 "Databáza časových pásiem sa používa na zobrazenie exif času a dátumu\n"
 "upraveného o posun UTC a letný čas"
 
-#: ../src/preferences.cc:2160
+#: ../src/preferences.cc:2162
 msgid ""
 "The timezone database is used to display exif time and date\n"
 "corrected for UTC offset and Daylight Saving Time"
@@ -6612,15 +6617,15 @@ msgstr ""
 "Databáza časových pásiem sa používa na zobrazenie exif času a dátumu\n"
 "upraveného o posun UTC a letný čas"
 
-#: ../src/preferences.cc:2163
+#: ../src/preferences.cc:2165
 msgid "Download database from: "
 msgstr "Stiahnuť databázu z: "
 
-#: ../src/preferences.cc:2168
+#: ../src/preferences.cc:2170
 msgid "On-line help search engine"
 msgstr "Online vyhľadávač pomoci"
 
-#: ../src/preferences.cc:2174
+#: ../src/preferences.cc:2176
 msgid ""
 "The format varies between search engines, e.g the format may be:\n"
 "https://www.search_engine.com/search?q=site:geeqie.org/help\n"
@@ -6630,28 +6635,28 @@ msgstr ""
 "https://www.vyhladavac.com/search?q=site:geeqie.org/help\n"
 "https://www.vyhladavac.com/?q=site:geeqie.org/help"
 
-#: ../src/preferences.cc:2206
+#: ../src/preferences.cc:2208
 msgid "Two pass rendering (apply HQ zoom and color correction in second pass)"
 msgstr ""
 "Dvojprechodové vykresľovanie (kvalitný zoom a korekcia farieb bude "
 "aplikovaná pri druhom prechode)"
 
 # src/preferences.cc:751
-#: ../src/preferences.cc:2210
+#: ../src/preferences.cc:2212
 msgid "Zoom increment:"
 msgstr "Krok zväčšenia/zmenšenia:"
 
 # src/img-view.cc:790 src/menu.cc:945 src/menu.cc:1081
-#: ../src/preferences.cc:2217
+#: ../src/preferences.cc:2219
 msgid "Zoom style:"
 msgstr "Štýl priblíženia:"
 
 # src/preferences.cc:729
-#: ../src/preferences.cc:2222
+#: ../src/preferences.cc:2224
 msgid "Allow enlargement of image (max. size in %)"
 msgstr "Povoliť zväčšenie obrázka (max. veľkosť v %)"
 
-#: ../src/preferences.cc:2230
+#: ../src/preferences.cc:2232
 #, no-c-format
 msgid ""
 "Enable this to allow Geeqie to increase the image size for images that are "
@@ -6664,12 +6669,12 @@ msgstr ""
 "Táto voľba nastavuje maximálne povolené zväčšenie v percentách, to znamená, "
 "že 100% je plná veľkosť."
 
-#: ../src/preferences.cc:2233
+#: ../src/preferences.cc:2235
 #, c-format
 msgid "Virtual window size (%% of actual window):"
 msgstr "Virtuálna veľkosť okna (vyjadrená v %% aktuálneho okna):"
 
-#: ../src/preferences.cc:2240
+#: ../src/preferences.cc:2242
 msgid ""
 "This value will set the virtual size of the window when 'Fit image to "
 "window' is set. Instead of using the actual size of the window, the "
@@ -6684,20 +6689,20 @@ msgstr ""
 "100%). Nastavenie sa použije aj pri zobrazení na celú obrazovku."
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:2242
+#: ../src/preferences.cc:2244
 msgid "Tile size"
 msgstr "Veľkosť dlaždice"
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:2245
+#: ../src/preferences.cc:2247
 msgid "Pixels"
 msgstr "Pixely"
 
-#: ../src/preferences.cc:2245
+#: ../src/preferences.cc:2247
 msgid "(Requires restart)"
 msgstr "(Vyžaduje reštart)"
 
-#: ../src/preferences.cc:2249
+#: ../src/preferences.cc:2251
 msgid ""
 "This value changes the size of the tiles large images are split into. "
 "Increasing the size of the tiles will reduce the tiling effect seen on image "
@@ -6710,69 +6715,69 @@ msgstr ""
 "časť veľkého obrázka."
 
 # src/collect-dlg.cc:182
-#: ../src/preferences.cc:2251
+#: ../src/preferences.cc:2253
 msgid "Appearance"
 msgstr "Vzhľad"
 
 # src/preferences.cc:875
-#: ../src/preferences.cc:2253
+#: ../src/preferences.cc:2255
 msgid "Use custom border color in window mode"
 msgstr "Použiť vlastnú farbu okraja v režime okna"
 
-#: ../src/preferences.cc:2256
+#: ../src/preferences.cc:2258
 msgid "Use custom border color in fullscreen mode"
 msgstr "Použiť vlastnú farbu okraja v režime celej obrazovky"
 
-#: ../src/preferences.cc:2259
+#: ../src/preferences.cc:2261
 msgid "Border color"
 msgstr "Farba okraja"
 
-#: ../src/preferences.cc:2260
+#: ../src/preferences.cc:2262
 msgid "Alpha channel color 1"
 msgstr "Farba alfa kanálu 1"
 
-#: ../src/preferences.cc:2261
+#: ../src/preferences.cc:2263
 msgid "Alpha channel color 2"
 msgstr "Farba alfa kanálu 2"
 
 # src/preferences.cc:773
-#: ../src/preferences.cc:2326
+#: ../src/preferences.cc:2328
 msgid "Windows"
 msgstr "Okná"
 
-#: ../src/preferences.cc:2328
+#: ../src/preferences.cc:2330
 msgid "State"
 msgstr "Stav"
 
 # src/preferences.cc:782
-#: ../src/preferences.cc:2330
+#: ../src/preferences.cc:2332
 msgid "Remember session"
 msgstr "Zapamätať si sedenie"
 
-#: ../src/preferences.cc:2333
+#: ../src/preferences.cc:2335
 msgid "Use saved window positions also for new windows"
 msgstr "Použiť uložené pozície okien aj pre nové okná"
 
 # src/preferences.cc:782
-#: ../src/preferences.cc:2337
+#: ../src/preferences.cc:2339
 msgid "Remember window workspace"
 msgstr "Pamätať si plochu"
 
 # src/preferences.cc:784
-#: ../src/preferences.cc:2341
+#: ../src/preferences.cc:2343
 msgid "Remember tool state (float/hidden)"
 msgstr "Pamätať si stav nástrojov (plávajúce/skryté)"
 
 # src/preferences.cc:782
-#: ../src/preferences.cc:2344
+#: ../src/preferences.cc:2346
 msgid "Remember dialog window positions"
 msgstr "Pamätať si pozície dialógových okien"
 
-#: ../src/preferences.cc:2347
+#: ../src/preferences.cc:2349
 msgid "Hide window decorations"
 msgstr "Skryť dekorácie okien"
 
-#: ../src/preferences.cc:2349
+#: ../src/preferences.cc:2351
 msgid ""
 "Remove borders and title bar from windows. A restart of Geeqie is required "
 "for this feature to take effect on the main layout window"
@@ -6781,15 +6786,15 @@ msgstr ""
 "v hlavnom okne Geeqie je potrebné aplikáciu reštartovať"
 
 # src/menu.cc:711
-#: ../src/preferences.cc:2351
+#: ../src/preferences.cc:2353
 msgid "Show window IDs"
 msgstr "Zobraziť ID okien"
 
-#: ../src/preferences.cc:2355
+#: ../src/preferences.cc:2357
 msgid "Use current layout for default: "
 msgstr "Použiť aktuálne rozdelenie ako predvolené: "
 
-#: ../src/preferences.cc:2362
+#: ../src/preferences.cc:2364
 msgid ""
 "Current window layout\n"
 "has been set as default"
@@ -6798,72 +6803,72 @@ msgstr ""
 "bolo nastavené ako predvolené"
 
 # src/preferences.cc:787
-#: ../src/preferences.cc:2368
+#: ../src/preferences.cc:2370
 msgid "Fit window to image when tools are hidden/floating"
 msgstr "Prispôsobiť okno veľkosti obrázka, ak sú nástroje skryté/plávajúce"
 
 # src/preferences.cc:794
-#: ../src/preferences.cc:2372
+#: ../src/preferences.cc:2374
 msgid "Limit size when auto-sizing window (%):"
 msgstr "Obmedziť veľkosť pri automatickej úprave veľkosti okna (%):"
 
 # src/preferences.cc:676
-#: ../src/preferences.cc:2385
+#: ../src/preferences.cc:2387
 msgid "Smooth image flip"
 msgstr "Plynulé preklopenie obrázka"
 
-#: ../src/preferences.cc:2387
+#: ../src/preferences.cc:2389
 msgid "Disable screen saver"
 msgstr "Vypnúť šetrič obrazovky"
 
-#: ../src/preferences.cc:2413
+#: ../src/preferences.cc:2415
 msgid "Image overlay template"
 msgstr "Šablóna prekrytia obrázka"
 
-#: ../src/preferences.cc:2431 ../src/print.cc:254
+#: ../src/preferences.cc:2433 ../src/print.cc:254
 msgid "Extensive formatting options are shown in the Help file"
 msgstr "Podrobnejšie možnosti formátovania nájdete v súbore Pomocníka"
 
 # src/preferences.cc:400
-#: ../src/preferences.cc:2437 ../src/print.cc:283 ../src/print.cc:345
+#: ../src/preferences.cc:2439 ../src/print.cc:283 ../src/print.cc:345
 msgid "Font"
 msgstr "Písmo"
 
-#: ../src/preferences.cc:2439
+#: ../src/preferences.cc:2441
 msgid "Text"
 msgstr "Text"
 
-#: ../src/preferences.cc:2442
+#: ../src/preferences.cc:2444
 msgid "Background"
 msgstr "Pozadie"
 
-#: ../src/preferences.cc:2451 ../src/preferences.cc:2728
-#: ../src/preferences.cc:3723
+#: ../src/preferences.cc:2453 ../src/preferences.cc:2730
+#: ../src/preferences.cc:3728
 msgid "Defaults"
 msgstr "Predvolené"
 
-#: ../src/preferences.cc:2468
+#: ../src/preferences.cc:2470
 msgid "OSD"
 msgstr "OSD"
 
-#: ../src/preferences.cc:2470
+#: ../src/preferences.cc:2472
 msgid "Overlay Screen Display"
 msgstr "Informácie v okne obrázka (OSD)"
 
-#: ../src/preferences.cc:2490
+#: ../src/preferences.cc:2492
 msgid "Exif, XMP or IPTC tags"
 msgstr "Exif, XMP alebo IPTC značky"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
-#: ../src/preferences.cc:2493
+#: ../src/preferences.cc:2495
 msgid "%Exif.Image.Orientation%"
 msgstr "%Exif.Image.Orientation%"
 
-#: ../src/preferences.cc:2497
+#: ../src/preferences.cc:2499
 msgid "Field separators"
 msgstr "Oddeľovač polí"
 
-#: ../src/preferences.cc:2500
+#: ../src/preferences.cc:2502
 msgid ""
 "Separator shown only if both fields are non-null:\n"
 "%formatted.ShutterSpeed%|%formatted.ISOSpeedRating%"
@@ -6871,20 +6876,20 @@ msgstr ""
 "Oddeľovač zobrazený iba vtedy, ak obe polia obsahujú hodnoty:\n"
 "%formatted.ShutterSpeed%|%formatted.ISOSpeedRating%"
 
-#: ../src/preferences.cc:2504
+#: ../src/preferences.cc:2506
 msgid "Field maximum length"
 msgstr "Maximálna dĺžka poľa"
 
 # src/dupe.cc:1657 src/dupe.cc:1945
-#: ../src/preferences.cc:2507
+#: ../src/preferences.cc:2509
 msgid "%path:39%"
 msgstr "%path:39%"
 
-#: ../src/preferences.cc:2511
+#: ../src/preferences.cc:2513
 msgid "Pre- and post- text"
 msgstr "Text pred a za"
 
-#: ../src/preferences.cc:2514
+#: ../src/preferences.cc:2516
 msgid ""
 "Text shown only if the field is non-null:\n"
 "%formatted.Aperture:F no. * setting%\n"
@@ -6894,11 +6899,11 @@ msgstr ""
 "%formatted.Aperture:F no. * setting%\n"
 " %formatted.Aperture:10:F no. * setting%"
 
-#: ../src/preferences.cc:2518
+#: ../src/preferences.cc:2520
 msgid "Pango markup"
 msgstr "Značkovací jazyk Pango"
 
-#: ../src/preferences.cc:2521
+#: ../src/preferences.cc:2523
 msgid ""
 "<b>bold</b>\n"
 "<u>underline</u>\n"
@@ -6911,79 +6916,79 @@ msgstr ""
 "<s>prečiarknuté</s>"
 
 # src/ui-pathsel.cc:764
-#: ../src/preferences.cc:2659
+#: ../src/preferences.cc:2661
 msgid "File Filters"
 msgstr "Filtre súborov"
 
-#: ../src/preferences.cc:2663
+#: ../src/preferences.cc:2665
 msgid "Show hidden files or folders"
 msgstr "Zobraziť skryté súbory alebo priečinky"
 
-#: ../src/preferences.cc:2665
+#: ../src/preferences.cc:2667
 msgid "Use dot prefix as hidden file indicator"
 msgstr "Použiť bodku ako prefix pre skryté súbory"
 
-#: ../src/preferences.cc:2667
+#: ../src/preferences.cc:2669
 msgid "Show parent folder (..)"
 msgstr "Zobraziť nadradený priečinok (..)"
 
-#: ../src/preferences.cc:2669
+#: ../src/preferences.cc:2671
 msgid "Case sensitive sort (Search and Collection windows, and tab completion)"
 msgstr ""
 "Triedenie so zohľadením veľkosti písmen (okná hľadania a zbierok a dopĺňanie "
 "tabulátorom)"
 
 # src/preferences.cc:823
-#: ../src/preferences.cc:2670
+#: ../src/preferences.cc:2672
 msgid "Disable file extension checks"
 msgstr "Vypnúť kontrolu prípon súborov"
 
 # src/preferences.cc:823
-#: ../src/preferences.cc:2673
+#: ../src/preferences.cc:2675
 msgid "Disable File Filtering"
 msgstr "Vypnúť filtrovanie súborov"
 
-#: ../src/preferences.cc:2677
+#: ../src/preferences.cc:2679
 msgid "Grouping sidecar extensions"
 msgstr "Zoskupovanie prípon pomocných súborov"
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:2683
+#: ../src/preferences.cc:2685
 msgid "File types"
 msgstr "Typy súborov"
 
 # src/preferences.cc:823
-#: ../src/preferences.cc:2685
+#: ../src/preferences.cc:2687
 #, fuzzy
 msgid "Search file extensions"
 msgstr "Žiadna prípona súboru\n"
 
-#: ../src/preferences.cc:2709
+#: ../src/preferences.cc:2711
 msgid "Enabled"
 msgstr "Zapnuté"
 
-#: ../src/preferences.cc:2712 ../src/view-file/view-file.cc:2584
+#: ../src/preferences.cc:2714 ../src/view-file/view-file.cc:2595
 msgid "Class"
 msgstr "Trieda"
 
-#: ../src/preferences.cc:2713 ../src/preferences.cc:2773
+#: ../src/preferences.cc:2715 ../src/preferences.cc:2775
 msgid "Writable"
 msgstr "Zapisovateľný"
 
-#: ../src/preferences.cc:2714
+#: ../src/preferences.cc:2716
 msgid "Sidecar is allowed"
 msgstr "Pomocný súbor je povolený"
 
-#: ../src/preferences.cc:2756
+#: ../src/preferences.cc:2758
 msgid "Metadata writing sequence"
 msgstr "Postup zápisu metadát"
 
-#: ../src/preferences.cc:2758
+#: ../src/preferences.cc:2760
 msgid "Warning: Geeqie is built without Exiv2. Some options are disabled."
 msgstr ""
 "Varovanie: Geeqie je zostavené bez Exiv2. Niektoré možnosti sú vypnuté."
 
-#: ../src/preferences.cc:2760
+#: ../src/preferences.cc:2762
 msgid ""
 "When writing metadata, Geeqie will follow these steps, if selected. This "
 "process will stop when the first successful write occurs."
@@ -6991,15 +6996,15 @@ msgstr ""
 "Ak túto možnosť aktivujete bude Geeqie pri zapisovaní metadát postupovať "
 "podľa týchto krokov. Tento proces skončí pri prvom úspešnom zápise."
 
-#: ../src/preferences.cc:2765
+#: ../src/preferences.cc:2767
 msgid "A flowchart of the sequence is shown in the Help file"
 msgstr "Diagram postupnosti sa nachádza v súbore Pomocníka"
 
-#: ../src/preferences.cc:2769
+#: ../src/preferences.cc:2771
 msgid "Step 1"
 msgstr "Krok č. 1"
 
-#: ../src/preferences.cc:2769
+#: ../src/preferences.cc:2771
 #, fuzzy
 msgid ""
 "Save metadata in either the image file or the sidecar file, according to the "
@@ -7008,87 +7013,87 @@ msgstr ""
 "1) Ukladať metadáta buď do súboru obrázka alebo pomocného súboru, podľa "
 "štandardu XMP"
 
-#: ../src/preferences.cc:2772
+#: ../src/preferences.cc:2774
 msgid "The destination is dependent on the settings in the "
 msgstr "Cieľ závisí na nastaveniach v "
 
-#: ../src/preferences.cc:2773
+#: ../src/preferences.cc:2775
 msgid " and "
 msgstr " a "
 
-#: ../src/preferences.cc:2773
+#: ../src/preferences.cc:2775
 msgid "Sidecar Is Allowed"
 msgstr "Pomocný súbor je povolený"
 
-#: ../src/preferences.cc:2773
+#: ../src/preferences.cc:2775
 msgid " columns of the File Filters tab)"
 msgstr " stĺpce na karte Filtre súborov)"
 
-#: ../src/preferences.cc:2782
+#: ../src/preferences.cc:2784
 msgid "Step 2"
 msgstr "Krok č. 2"
 
-#: ../src/preferences.cc:2782
+#: ../src/preferences.cc:2784
 #, fuzzy
 msgid "Save metadata in the folder"
 msgstr ") Uložiť metadáta do priečinka "
 
-#: ../src/preferences.cc:2782
+#: ../src/preferences.cc:2784
 #, fuzzy
 msgid "local to the image folder (non-standard)"
 msgstr " do priečinka obrázka (nie podľa štandardu)"
 
-#: ../src/preferences.cc:2786
+#: ../src/preferences.cc:2788
 msgid "Step 3"
 msgstr "Krok č. 3"
 
-#: ../src/preferences.cc:2786
+#: ../src/preferences.cc:2788
 msgid ") Save metadata in Geeqie private directory "
 msgstr ") Uložiť metadáta do súkromného adresára Geeqie "
 
-#: ../src/preferences.cc:2794
+#: ../src/preferences.cc:2796
 msgid "Step 1 Options:"
 msgstr "Možnosti pre krok č. 1:"
 
-#: ../src/preferences.cc:2802
+#: ../src/preferences.cc:2804
 msgid ""
 "Store metadata also in IPTC tags (converted according to the IPTC4XMP "
 "standard)"
 msgstr ""
 "Uložiť metadáta aj do IPTC značiek (konvertované podľa štandardu IPTC4XMP)"
 
-#: ../src/preferences.cc:2803
+#: ../src/preferences.cc:2805
 msgid "A simplified conversion list is in the Help file"
 msgstr "Zjednodušený zoznam konverzií nájdete v súbore Pomocníka"
 
-#: ../src/preferences.cc:2805
+#: ../src/preferences.cc:2807
 msgid "Warn if the image or sidecar file is not writable"
 msgstr "Upozorniť, ak nie je možné zapísať do obrázka alebo pomocného súboru"
 
-#: ../src/preferences.cc:2807
+#: ../src/preferences.cc:2809
 msgid "Ask before writing to image files"
 msgstr "Spýtať sa pred zápisom do súborov s obrázkami"
 
-#: ../src/preferences.cc:2810
+#: ../src/preferences.cc:2812
 msgid "This file naming convention is used by Darktable"
 msgstr "Tento spôsob pomenovania súborov používa program Darktable"
 
 # src/utilops.cc:1151
-#: ../src/preferences.cc:2813
+#: ../src/preferences.cc:2815
 #, fuzzy
 msgid "Create sidecar files named"
 msgstr "Vytvoriť pomocné súbory s menom "
 
-#: ../src/preferences.cc:2813
+#: ../src/preferences.cc:2815
 #, fuzzy
 msgid "as opposed to the normal"
 msgstr " (na rozdiel od bežného "
 
-#: ../src/preferences.cc:2817
+#: ../src/preferences.cc:2819
 msgid "Steps 2 and 3 Option:"
 msgstr "Možnosti pre krok č. 2 a 3:"
 
-#: ../src/preferences.cc:2822
+#: ../src/preferences.cc:2824
 msgid ""
 "Use GQview legacy metadata format instead of XMP (supports only Keywords and "
 "Comments)"
@@ -7096,33 +7101,33 @@ msgstr ""
 "Použiť starý formát metadát GQview (podporuje iba kľúčové slová a komentáre) "
 "miesto XMP"
 
-#: ../src/preferences.cc:2826
+#: ../src/preferences.cc:2828
 msgid "Miscellaneous"
 msgstr "Rôzne"
 
-#: ../src/preferences.cc:2827
+#: ../src/preferences.cc:2829
 msgid "Write the same description tags to all grouped sidecars"
 msgstr ""
 "Zapisovať rovnaké popisné značky do všetkých združených pomocných súborov"
 
-#: ../src/preferences.cc:2828
+#: ../src/preferences.cc:2830
 msgid "See the Help file for a list of the tags used"
 msgstr "Zoznam použitých značiek nájdete v súbore Pomocníka"
 
-#: ../src/preferences.cc:2830
+#: ../src/preferences.cc:2832
 msgid "Permit Keywords to be case-sensitive"
 msgstr "Povoliť rozlišovanie veľkosti písmen v kľúčových slovách"
 
-#: ../src/preferences.cc:2831
+#: ../src/preferences.cc:2833
 msgid "When selected, 'Place' and 'place' are two different keywords"
 msgstr ""
 "Ak je zapnuté, 'Miesto' a 'miesto' budú považované za rozdielne kľúčové slová"
 
-#: ../src/preferences.cc:2833
+#: ../src/preferences.cc:2835
 msgid "Write altered image orientation to the metadata"
 msgstr "Zapisovať zmenenú orientáciu obrázka do metadát"
 
-#: ../src/preferences.cc:2834
+#: ../src/preferences.cc:2836
 msgid ""
 "If checked, the results of orientation commands (Rotate, Mirror and Flip) "
 "issued on an image will be written to metadata\n"
@@ -7134,37 +7139,37 @@ msgstr ""
 "Poznámka: ak táto možnosť nie je povolená, výsledky príkazov na zmenu "
 "orientácie sa stratia, keď Geeqie zatvoríte"
 
-#: ../src/preferences.cc:2842
+#: ../src/preferences.cc:2844
 msgid "Auto-save options"
 msgstr "Voľby pre automatické ukladanie"
 
-#: ../src/preferences.cc:2844
+#: ../src/preferences.cc:2846
 msgid "Write metadata after timeout"
 msgstr "Zapísať metadáta po uplynutí času"
 
-#: ../src/preferences.cc:2849
+#: ../src/preferences.cc:2851
 msgid "Timeout (seconds):"
 msgstr "Čas (sekundy)"
 
 # src/preferences.cc:628
-#: ../src/preferences.cc:2851
+#: ../src/preferences.cc:2853
 msgid "Write metadata on image change"
 msgstr "Zapísať metadáta pri prechode na iný obrázok"
 
-#: ../src/preferences.cc:2853
+#: ../src/preferences.cc:2855
 msgid "Write metadata on directory change"
 msgstr "Zapísať metadáta pri zmene adresára"
 
 # src/dupe.cc:775
-#: ../src/preferences.cc:2858
+#: ../src/preferences.cc:2860
 msgid "Spelling checks"
 msgstr "Kontroly pravopisu"
 
-#: ../src/preferences.cc:2860
+#: ../src/preferences.cc:2862
 msgid "Check spelling - Requires restart"
 msgstr "Kontroly pravopisu – vyžaduje reštart"
 
-#: ../src/preferences.cc:2861
+#: ../src/preferences.cc:2863
 msgid ""
 "Spelling checks are performed on info sidebar panes Comment, Headline and "
 "Title"
@@ -7172,15 +7177,15 @@ msgstr ""
 "Kontrola pravopisu sa vykonáva v informačných podoknách bočného panela "
 "Poznámka, Nadpis a Názov"
 
-#: ../src/preferences.cc:2866
+#: ../src/preferences.cc:2868
 msgid "Pre-load metadata"
 msgstr "Predčítať metadáta"
 
-#: ../src/preferences.cc:2868
+#: ../src/preferences.cc:2870
 msgid "Read metadata in background"
 msgstr "Čítať metadáta na pozadí"
 
-#: ../src/preferences.cc:2869
+#: ../src/preferences.cc:2871
 msgid ""
 "On folder change, read DateTimeOriginal, DateTimeDigitized and Star Rating "
 "in the idle loop.\n"
@@ -7192,31 +7197,31 @@ msgstr ""
 "Ak táto možnosť nie je aktivovaná, počiatočné načítanie priečinka bude "
 "rýchlejšie, ale triedenie jeho položiek bude pomalšie"
 
-#: ../src/preferences.cc:3045 ../src/preferences.cc:3059
+#: ../src/preferences.cc:3047 ../src/preferences.cc:3061
 msgid "Search for keywords"
 msgstr "Hľadať kľúčové slová"
 
-#: ../src/preferences.cc:3125
+#: ../src/preferences.cc:3127
 msgid "Edit keywords autocompletion list"
 msgstr "Upraviť zoznam na automatické dokončovanie kľúčových slov"
 
-#: ../src/preferences.cc:3130
+#: ../src/preferences.cc:3132
 msgid "Search for existing keywords"
 msgstr "Hľadať existujúce kľúčové slová"
 
-#: ../src/preferences.cc:3202
+#: ../src/preferences.cc:3204
 msgid "Perceptual"
 msgstr "Perceptuálny"
 
-#: ../src/preferences.cc:3203
+#: ../src/preferences.cc:3205
 msgid "Relative Colorimetric"
 msgstr "Relatívny kolorimetrický"
 
-#: ../src/preferences.cc:3205
+#: ../src/preferences.cc:3207
 msgid "Absolute Colorimetric"
 msgstr "Absolútny kolorimetrický"
 
-#: ../src/preferences.cc:3217
+#: ../src/preferences.cc:3219
 msgid ""
 "Refer to the lcms documentation for the defaults used when the selected "
 "Intent is not available"
@@ -7225,141 +7230,141 @@ msgstr ""
 "nájdete v dokumentácií lcms"
 
 # src/menu.cc:526
-#: ../src/preferences.cc:3234
+#: ../src/preferences.cc:3236
 msgid "Color management"
 msgstr "Správa farieb"
 
 # src/ui-pathsel.cc:697
-#: ../src/preferences.cc:3236
+#: ../src/preferences.cc:3238
 msgid "Input profiles"
 msgstr "Vstupné profily"
 
-#: ../src/preferences.cc:3244
+#: ../src/preferences.cc:3246
 msgid "Type"
 msgstr "Typ"
 
 # src/preferences.cc:930
-#: ../src/preferences.cc:3247
+#: ../src/preferences.cc:3249
 msgid "Menu name"
 msgstr "Názov ponuky"
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:3250 ../src/search.cc:3111
+#: ../src/preferences.cc:3252 ../src/search.cc:3125
 msgid "File"
 msgstr "Súbor"
 
-#: ../src/preferences.cc:3260
+#: ../src/preferences.cc:3262
 #, c-format
 msgid "Input %d:"
 msgstr "Vstup %d:"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/preferences.cc:3273 ../src/preferences.cc:3290
+#: ../src/preferences.cc:3275 ../src/preferences.cc:3292
 msgid "Select color profile"
 msgstr "Vybrať farebný profil"
 
-#: ../src/preferences.cc:3279
+#: ../src/preferences.cc:3281
 msgid "Screen profile"
 msgstr "Profil zobrazenia"
 
-#: ../src/preferences.cc:3283
+#: ../src/preferences.cc:3285
 #, fuzzy
 msgid "Use system display profile when available"
 msgstr "Použiť systémový profil monitoru, ak je k dispozícii"
 
-#: ../src/preferences.cc:3288
+#: ../src/preferences.cc:3290
 msgid "Screen:"
 msgstr "Obrazovka:"
 
 # src/ui-pathsel.cc:437 src/ui-pathsel.cc:460 src/utilops.cc:944
 # src/utilops.cc:1095
-#: ../src/preferences.cc:3293
+#: ../src/preferences.cc:3295
 msgid "Render Intent:"
 msgstr "Zámer pri vykresľovaní:"
 
-#: ../src/preferences.cc:3333 ../src/preferences.cc:3392
+#: ../src/preferences.cc:3335 ../src/preferences.cc:3394
 msgid "Behavior"
 msgstr "Správanie"
 
 # src/preferences.cc:667
-#: ../src/preferences.cc:3337
+#: ../src/preferences.cc:3339
 msgid "Confirm permanent file delete"
 msgstr "Potvrdiť nevratné odstránenie súboru"
 
 # src/preferences.cc:667
-#: ../src/preferences.cc:3339
+#: ../src/preferences.cc:3341
 msgid "Confirm move file to Trash"
 msgstr "Potvrdiť presun súboru do koša"
 
 # src/preferences.cc:669
-#: ../src/preferences.cc:3341
+#: ../src/preferences.cc:3343
 msgid "Enable Delete key"
 msgstr "Povoliť klávesu Delete"
 
-#: ../src/preferences.cc:3344
+#: ../src/preferences.cc:3346
 msgid "Use Geeqie trash location"
 msgstr "Použiť umiestnenie koša Geeqie"
 
-#: ../src/preferences.cc:3367
+#: ../src/preferences.cc:3369
 msgid "Maximum size:"
 msgstr "Maximálna veľkosť:"
 
-#: ../src/preferences.cc:3367
+#: ../src/preferences.cc:3369
 msgid "MiB"
 msgstr "MiB"
 
-#: ../src/preferences.cc:3369
+#: ../src/preferences.cc:3371
 msgid "Set to 0 for unlimited size"
 msgstr "Ak chcete neobmedzenú veľkosť, nastavte na 0"
 
-#: ../src/preferences.cc:3381
+#: ../src/preferences.cc:3383
 msgid "Use system Trash bin"
 msgstr "Použiť systémový kôš"
 
-#: ../src/preferences.cc:3385
+#: ../src/preferences.cc:3387
 msgid "Use no trash at all"
 msgstr "Vôbec nepoužívať kôš"
 
-#: ../src/preferences.cc:3394
+#: ../src/preferences.cc:3396
 msgid "Descend folders in tree view"
 msgstr "Zobraziť priečinky v stromovom pohľade"
 
 # src/preferences.cc:658
-#: ../src/preferences.cc:3397
+#: ../src/preferences.cc:3399
 #, fuzzy
 msgid "In-place renaming"
 msgstr "Premenovanie na mieste"
 
-#: ../src/preferences.cc:3400
+#: ../src/preferences.cc:3402
 msgid "List directory view uses single click to enter"
 msgstr ""
 "Používať jednoduché kliknutie na zmenu adresára v zobrazení zoznamu adresárov"
 
 # src/collect-dlg.cc:206
-#: ../src/preferences.cc:3403
+#: ../src/preferences.cc:3405
 msgid "Circular selection lists"
 msgstr "Výbery v nekonečnej slučke"
 
-#: ../src/preferences.cc:3405
+#: ../src/preferences.cc:3407
 msgid "Traverse selection lists in a circular manner"
 msgstr "Prechádzať zoznamy s výberom v nekonečnej slučke"
 
-#: ../src/preferences.cc:3407
+#: ../src/preferences.cc:3409
 #, fuzzy
 msgid "Auto next folder"
 msgstr "O priečinok vyššie"
 
-#: ../src/preferences.cc:3409
+#: ../src/preferences.cc:3411
 msgid ""
 "Automatically advance to the next folder when reaching the last image in the "
 "current folder"
 msgstr ""
 
-#: ../src/preferences.cc:3411
+#: ../src/preferences.cc:3413
 msgid "Save marks on exit"
 msgstr "Uložiť značky pri ukončení"
 
-#: ../src/preferences.cc:3413
+#: ../src/preferences.cc:3415
 msgid ""
 "Note that marks linked to a keyword will be saved irrespective of this "
 "setting"
@@ -7367,51 +7372,56 @@ msgstr ""
 "Upozorňujeme, že značky spojené s kľúčovým slovom budú uložené bez ohľadu na "
 "toto nastavenie"
 
-#: ../src/preferences.cc:3415
+#: ../src/preferences.cc:3417
 msgid "Use 'With Rename' as default for Copy/Move dialogs"
 msgstr ""
 "Použiť „S premenovaním“ ako predvolené pre dialógové okná Kopírovať/Presunúť"
 
-#: ../src/preferences.cc:3417
+#: ../src/preferences.cc:3419
 msgid "Change the default button for Copy/Move dialogs"
 msgstr "Zmeniť predvolené tlačidlo pre dialógové okná Kopírovať/Presunúť"
 
-#: ../src/preferences.cc:3419
+#: ../src/preferences.cc:3421
 msgid "Permit duplicates in Collections"
 msgstr "Povoliť duplicity v zbierkach"
 
-#: ../src/preferences.cc:3421
+#: ../src/preferences.cc:3423
 msgid "Allow the same image to be in a Collection more than once"
 msgstr "Povoliť uloženie toho istého obrázka v zbierke viac ako raz"
 
-#: ../src/preferences.cc:3423
+#: ../src/preferences.cc:3425
 msgid "Hide window in fullscreen"
 msgstr "Skryť okno pri zobrazení na celú obrazovku"
 
-#: ../src/preferences.cc:3425
+#: ../src/preferences.cc:3427
 #, fuzzy
 msgid ""
 "When alt-tabbing, prevent the normal Geeqie window from showing alongside "
 "the fullscreen window"
 msgstr "Zabrániť dvojitému zobrazeniu okna Geeqie pri použití alt-tab"
 
-#: ../src/preferences.cc:3427
+#: ../src/preferences.cc:3429
 msgid "Hide OSD in fullscreen"
 msgstr "Skryť OSD pri zobrazení na celú obrazovku"
 
-#: ../src/preferences.cc:3429
+#: ../src/preferences.cc:3431
 msgid "Hide Overlay Screen Display in fullscreen mode"
 msgstr "Skryť informácie v okne obrázka pri zobrazení na celú obrazovku"
 
-#: ../src/preferences.cc:3431
+#: ../src/preferences.cc:3433
 msgid "Recent folder list maximum size"
 msgstr "Maximálna veľkosť zoznamu naposledy otvorených priečinkov"
 
-#: ../src/preferences.cc:3434
+#: ../src/preferences.cc:3436
+#, fuzzy
+msgid "Recent collections list maximum size"
+msgstr "Maximálna veľkosť zoznamu naposledy otvorených priečinkov"
+
+#: ../src/preferences.cc:3439
 msgid "Recent folder-image list maximum size"
 msgstr "Maximálna veľkosť zoznamu nedávnych priečinkov s obrázkami"
 
-#: ../src/preferences.cc:3435
+#: ../src/preferences.cc:3440
 msgid ""
 "List of the last image viewed in each recent folder.\n"
 "Re-opening a folder will set focus to the last image viewed."
@@ -7419,119 +7429,119 @@ msgstr ""
 "Zoznam naposledy zobrazených obrázkov v každom nedávnom priečinku.\n"
 "Opätovné otvorenie priečinka nastaví kurzor na naposledy zobrazený obrázok."
 
-#: ../src/preferences.cc:3437
+#: ../src/preferences.cc:3442
 #, fuzzy
 msgid "Drag-and-drop icon size"
 msgstr "Veľkosť ikony pre ťahaj-a-pusť"
 
-#: ../src/preferences.cc:3441
+#: ../src/preferences.cc:3446
 #, fuzzy
 msgid "Drag-and-drop default action:"
 msgstr "Predvolená operácia pri pretiahnutí myši:"
 
 # src/utilops.cc:592
-#: ../src/preferences.cc:3444
+#: ../src/preferences.cc:3449
 msgid "Copy path clipboard selection:"
 msgstr "Kopírovať výber cesty do schránky:"
 
-#: ../src/preferences.cc:3448
+#: ../src/preferences.cc:3453
 msgid "Navigation"
 msgstr "Navigácia"
 
 # src/preferences.cc:764
-#: ../src/preferences.cc:3450
+#: ../src/preferences.cc:3455
 msgid "Progressive keyboard scrolling"
 msgstr "Postupné posúvanie klávesnicou"
 
-#: ../src/preferences.cc:3452
+#: ../src/preferences.cc:3457
 msgid "Keyboard scrolling step multiplier:"
 msgstr "Faktor násobenia kroku pri skrolovaní klávesnicou:"
 
 # src/preferences.cc:766
-#: ../src/preferences.cc:3454
+#: ../src/preferences.cc:3459
 msgid "Mouse wheel scrolls image"
 msgstr "Obrázok posúvať kolieskom myši"
 
-#: ../src/preferences.cc:3456
+#: ../src/preferences.cc:3461
 msgid "Show bird's-eye view when zoomed in"
 msgstr ""
 
-#: ../src/preferences.cc:3458
+#: ../src/preferences.cc:3463
 msgid "Navigation by left or middle click on image"
 msgstr "Navigácia kliknutím na obrázok ľavým alebo stredným tlačidlom"
 
-#: ../src/preferences.cc:3460
+#: ../src/preferences.cc:3465
 msgid "Open archive by left click on image"
 msgstr "Otvoriť archív kliknutím ľavým tlačidlom na obrázok"
 
-#: ../src/preferences.cc:3462
+#: ../src/preferences.cc:3467
 msgid "Play video by left click on image"
 msgstr "Prehratie videa ľavým kliknutím na obrázok"
 
-#: ../src/preferences.cc:3465
+#: ../src/preferences.cc:3470
 msgid "Play with:"
 msgstr "Prehrať s:"
 
-#: ../src/preferences.cc:3469
+#: ../src/preferences.cc:3474
 msgid "Mouse button Back:"
 msgstr "Tlačidlo myši Späť:"
 
-#: ../src/preferences.cc:3471
+#: ../src/preferences.cc:3476
 msgid "Mouse button Forward:"
 msgstr "Tlačidlo myši Vpred:"
 
-#: ../src/preferences.cc:3476
+#: ../src/preferences.cc:3481
 msgid "Debugging"
 msgstr "Ladenie"
 
 # src/ui-pathsel.cc:799
-#: ../src/preferences.cc:3481
+#: ../src/preferences.cc:3486
 msgid "Timer data"
 msgstr "Časový údaj"
 
 # src/preferences.cc:773
-#: ../src/preferences.cc:3484
+#: ../src/preferences.cc:3489
 msgid "Log Window max. lines:"
 msgstr "Max. počet riadkov okna so záznamom:"
 
 # src/preferences.cc:773
-#: ../src/preferences.cc:3488
+#: ../src/preferences.cc:3493
 msgid "Log Window F1 command: "
 msgstr "Príkaz F1 okna so záznamom: "
 
-#: ../src/preferences.cc:3661
+#: ../src/preferences.cc:3666
 msgid "Keyboard"
 msgstr "Klávesnica"
 
 # src/menu.cc:773
-#: ../src/preferences.cc:3665
+#: ../src/preferences.cc:3670
 #, fuzzy
 msgid "Keyboard Shortcuts"
 msgstr "Klávesové skratky"
 
-#: ../src/preferences.cc:3667
+#: ../src/preferences.cc:3672
 #, fuzzy
 msgid "Search commands"
 msgstr "Nájsť a spustiť príkaz"
 
 # src/main.cc:743
-#: ../src/preferences.cc:3686
+#: ../src/preferences.cc:3691
 #, fuzzy
 msgid "Command"
 msgstr "Príkazový riadok"
 
 # src/menu.cc:773
-#: ../src/preferences.cc:3687
+#: ../src/preferences.cc:3692
 #, fuzzy
 msgid "Shortcut"
 msgstr "Pridať skratku"
 
-#: ../src/preferences.cc:3688
+#: ../src/preferences.cc:3693
 #, fuzzy
 msgid "Icon"
 msgstr "Ikona:"
 
-#: ../src/preferences.cc:3698
+#: ../src/preferences.cc:3703
 msgid ""
 "Click here and type the required key combination \n"
 " The converted keycode is copied to the clipboard. \n"
@@ -7541,60 +7551,60 @@ msgid ""
 msgstr ""
 
 # src/utilops.cc:707
-#: ../src/preferences.cc:3722
+#: ../src/preferences.cc:3727
 msgid "Reset selected"
 msgstr "Vynulovať vybrané"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:3729
+#: ../src/preferences.cc:3734
 msgid "Toolbar Main"
 msgstr "Hlavná nástrojová lišta"
 
 # src/preferences.cc:368
-#: ../src/preferences.cc:3729
+#: ../src/preferences.cc:3734
 msgid "Toolbar Status"
 msgstr "Stavová lišta"
 
-#: ../src/preferences.cc:3749
+#: ../src/preferences.cc:3754
 msgid "Advanced"
 msgstr "Pokročilé"
 
-#: ../src/preferences.cc:3750
+#: ../src/preferences.cc:3755
 msgid "External preview extraction"
 msgstr "Externý príkaz na extrakciu"
 
-#: ../src/preferences.cc:3752
+#: ../src/preferences.cc:3757
 msgid "Use external preview extraction -  Requires restart"
 msgstr "Použiť externý extraktor náhľadov – vyžaduje reštart"
 
 # src/preferences.cc:825
-#: ../src/preferences.cc:3762
+#: ../src/preferences.cc:3767
 msgid "Usable file types:\n"
 msgstr "Použiteľné typy súborov:\n"
 
 # src/utilops.cc:339 src/utilops.cc:459 src/utilops.cc:826 src/utilops.cc:1032
-#: ../src/preferences.cc:3768
+#: ../src/preferences.cc:3773
 msgid "File identification tool"
 msgstr "Nástroj na identifikáciu súborov"
 
-#: ../src/preferences.cc:3770
+#: ../src/preferences.cc:3775
 msgid "Select file identification tool"
 msgstr "Vyberte nástroj na identifikáciu súborov"
 
 # src/utilops.cc:339 src/utilops.cc:459 src/utilops.cc:826 src/utilops.cc:1032
-#: ../src/preferences.cc:3772
+#: ../src/preferences.cc:3777
 msgid "Preview extraction tool"
 msgstr "Nástroj na extrakciu náhľadov"
 
-#: ../src/preferences.cc:3774
+#: ../src/preferences.cc:3779
 msgid "Select preview extraction tool"
 msgstr "Vyberte nástroj na extrakciu náhľadov"
 
-#: ../src/preferences.cc:3780
+#: ../src/preferences.cc:3785
 msgid "Thread pool limits"
 msgstr "Limit veľkosti zásoby vlákien"
 
-#: ../src/preferences.cc:3782
+#: ../src/preferences.cc:3787
 msgid ""
 "This option limits the number of threads (or cpu cores) that Geeqie will use "
 "when running duplicate checks.\n"
@@ -7604,75 +7614,75 @@ msgstr ""
 "Geeqie použije pri vykonávaní kontrol na duplicity.\n"
 "Hodnota 0 znamená, že sa použijú všetky dostupné jadrá."
 
-#: ../src/preferences.cc:3787
+#: ../src/preferences.cc:3792
 msgid "Duplicate check:"
 msgstr "Kontrola duplicít:"
 
-#: ../src/preferences.cc:3787
+#: ../src/preferences.cc:3792
 msgid "max. threads"
 msgstr "max. vlákien"
 
-#: ../src/preferences.cc:3788
+#: ../src/preferences.cc:3793
 msgid "Set to 0 for unlimited"
 msgstr "Nastavte 0 pre neobmedzené"
 
 # src/preferences.cc:163 src/preferences.cc:604
-#: ../src/preferences.cc:3794
+#: ../src/preferences.cc:3799
 msgid "Alternate similarity algorithm"
 msgstr "Alternatívny algoritmus hľadania podobnosti"
 
-#: ../src/preferences.cc:3796
+#: ../src/preferences.cc:3801
 msgid "Enable alternate similarity algorithm"
 msgstr "Povoliť alternatívny algoritmus podobnosti"
 
 # src/img-view.cc:813 src/menu.cc:982
-#: ../src/preferences.cc:3801
+#: ../src/preferences.cc:3806
 msgid "Use grayscale"
 msgstr "Použiť šedotón"
 
-#: ../src/preferences.cc:3802
+#: ../src/preferences.cc:3807
 msgid "Reduce fingerprint to grayscale"
 msgstr "Previesť odtlačok na šedotón"
 
-#: ../src/preferences.cc:3810
+#: ../src/preferences.cc:3815
 msgid "Stereo"
 msgstr "Stereo"
 
-#: ../src/preferences.cc:3812 ../src/preferences.cc:3814
+#: ../src/preferences.cc:3817 ../src/preferences.cc:3819
 msgid "Windowed stereo mode"
 msgstr "Stereo mód v okne"
 
 # src/img-view.cc:837 src/menu.cc:1001
-#: ../src/preferences.cc:3817 ../src/preferences.cc:3824
+#: ../src/preferences.cc:3822 ../src/preferences.cc:3829
 msgid "Fullscreen stereo mode"
 msgstr "Celooobrazovkový stereo mód"
 
-#: ../src/preferences.cc:3819
+#: ../src/preferences.cc:3824
 msgid "Use different settings for fullscreen"
 msgstr "Použiť rozličné nastavenia pre celú obrazovku"
 
-#: ../src/preferences.cc:3833
+#: ../src/preferences.cc:3838
 msgid "Left X"
 msgstr "Vľavo X"
 
-#: ../src/preferences.cc:3835
+#: ../src/preferences.cc:3840
 msgid "Left Y"
 msgstr "Vľavo Y"
 
-#: ../src/preferences.cc:3837
+#: ../src/preferences.cc:3842
 msgid "Right X"
 msgstr "Vpravo X"
 
-#: ../src/preferences.cc:3839
+#: ../src/preferences.cc:3844
 msgid "Right Y"
 msgstr "Vpravo Y"
 
 # src/menu.cc:748
-#: ../src/preferences.cc:3846
+#: ../src/preferences.cc:3851
 msgid "Preferences"
 msgstr "Predvoľby"
 
-#: ../src/preferences.cc:3948
+#: ../src/preferences.cc:3954
 msgid ""
 "This program comes with absolutely no warranty.\n"
 "GNU General Public License, version 2 or later.\n"
@@ -7684,7 +7694,7 @@ msgstr ""
 "Pozri https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n"
 "\n"
 
-#: ../src/preferences.cc:3965
+#: ../src/preferences.cc:3971
 msgid ""
 "\n"
 "\n"
@@ -7692,7 +7702,7 @@ msgid ""
 "SA 2.0"
 msgstr ""
 
-#: ../src/preferences.cc:3966
+#: ../src/preferences.cc:3972
 msgid ""
 "\n"
 "\n"
@@ -7702,7 +7712,7 @@ msgstr ""
 "\n"
 "Niektoré ikony z https://www.flaticon.com"
 
-#: ../src/preferences.cc:3991
+#: ../src/preferences.cc:3997
 msgid ""
 "Project created by John Ellis\n"
 "GQview 1998\n"
@@ -7718,7 +7728,7 @@ msgstr ""
 "\n"
 "Vývoj a hlásenia chýb:\n"
 
-#: ../src/preferences.cc:3992
+#: ../src/preferences.cc:3998
 msgid ""
 "\n"
 "https://github.com/BestImageViewer/geeqie/issues"
@@ -7727,27 +7737,27 @@ msgstr ""
 "https://github.com/BestImageViewer/geeqie/issues"
 
 # src/img-view.cc:559 src/window.cc:533
-#: ../src/preferences.cc:4000
+#: ../src/preferences.cc:4006
 msgid "About Geeqie"
 msgstr "O Geeqie"
 
-#: ../src/preferences.cc:4007
+#: ../src/preferences.cc:4013
 msgid "Website"
 msgstr "Webová stránka"
 
-#: ../src/preferences.cc:4058 ../src/preferences.cc:4065
+#: ../src/preferences.cc:4064 ../src/preferences.cc:4071
 msgid "Warning: Cannot open timezone database file"
 msgstr "Upozornenie: Nemôžem otvoriť súbor s databázou časových pásiem"
 
-#: ../src/preferences.cc:4071
+#: ../src/preferences.cc:4077
 msgid "Error: Timezone database download failed"
 msgstr "Chyba: Zlyhalo sťahovanie databázy časových pásiem"
 
-#: ../src/preferences.cc:4108
+#: ../src/preferences.cc:4114
 msgid "Timezone database download failed"
 msgstr "Zlyhalo sťahovanie databázy časových pásiem"
 
-#: ../src/preferences.cc:4118
+#: ../src/preferences.cc:4124
 msgid "Downloading timezone database"
 msgstr "Sťahujem databázu časových pásiem"
 
@@ -7936,82 +7946,82 @@ msgstr "%s, %d súborov"
 msgid "Searching…"
 msgstr "Hľadám…"
 
-#: ../src/search.cc:1470
+#: ../src/search.cc:1476
 msgid "Image is not geocoded"
 msgstr "Obrázok nie je geokódovaný"
 
-#: ../src/search.cc:2338
+#: ../src/search.cc:2352
 msgid "File not found"
 msgstr "Súbor sa nenašiel"
 
 # src/utilops.cc:544
-#: ../src/search.cc:2339
+#: ../src/search.cc:2353
 msgid "Please enter an existing file for image content."
 msgstr "Prosím zadajte existujúci súbor pre obsah obrázka."
 
-#: ../src/search.cc:2360
+#: ../src/search.cc:2374
 msgid "Entry does not contain a valid lat/long value"
 msgstr "Položka neobsahuje platnú hodnotu zem. šírky/dĺžky"
 
-#: ../src/search.cc:2367 ../src/search.cc:3292
+#: ../src/search.cc:2381 ../src/search.cc:3306
 msgid "km"
 msgstr "km"
 
 # src/preferences.cc:368
-#: ../src/search.cc:2372 ../src/search.cc:3292
+#: ../src/search.cc:2386 ../src/search.cc:3306
 msgid "miles"
 msgstr "míle"
 
 # src/preferences.cc:676
-#: ../src/search.cc:2418 ../src/search.cc:3318
+#: ../src/search.cc:2432 ../src/search.cc:3332
 msgid "Raw Image"
 msgstr "Obrázok RAW"
 
-#: ../src/search.cc:2457 ../src/search.cc:3337
+#: ../src/search.cc:2471 ../src/search.cc:3351
 msgid "Any mark"
 msgstr "Ľubovoľná značka"
 
 # src/utilops.cc:544
-#: ../src/search.cc:2500
+#: ../src/search.cc:2514
 msgid "Please enter an existing folder to search."
 msgstr "Prosím zadajte existujúci priečinok pre vyhľadávanie."
 
-#: ../src/search.cc:2544
+#: ../src/search.cc:2558
 msgid "Collection not found"
 msgstr "Zbierka nebola nájdená"
 
 # src/utilops.cc:544
-#: ../src/search.cc:2544
+#: ../src/search.cc:2558
 msgid "Please enter an existing collection name."
 msgstr "Prosím zadajte existujúci názov zbierky."
 
 # src/collect-dlg.cc:165 src/collect-table.cc:641
-#: ../src/search.cc:2998
+#: ../src/search.cc:3012
 msgid "Select collection"
 msgstr "Vybrať zbierku"
 
-#: ../src/search.cc:3048
+#: ../src/search.cc:3062
 msgid "Image search"
 msgstr "Hľadať obrázok"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/search.cc:3082
+#: ../src/search.cc:3096
 msgid "Search:"
 msgstr "Hľadať:"
 
-#: ../src/search.cc:3094
+#: ../src/search.cc:3108
 msgid "Recurse"
 msgstr "Rekurzívne"
 
-#: ../src/search.cc:3118 ../src/search.cc:3225 ../src/search.cc:3268
+#: ../src/search.cc:3132 ../src/search.cc:3239 ../src/search.cc:3282
 msgid "Match case"
 msgstr "Citlivé na veľkosť písmen"
 
-#: ../src/search.cc:3120
+#: ../src/search.cc:3134
 msgid "Symbolic link"
 msgstr "Symbolický odkaz"
 
-#: ../src/search.cc:3122
+#: ../src/search.cc:3136
 msgid ""
 "When set to 'contains' or 'path contains', this field uses Perl Compatible "
 "Regular Expressions.\n"
@@ -8032,43 +8042,43 @@ msgstr ""
 "Viac nájdete v súbore Pomocníka."
 
 # src/preferences.cc:368
-#: ../src/search.cc:3127
+#: ../src/search.cc:3141
 msgid "File size is"
 msgstr "Veľkosť súboru je"
 
 # src/preferences.cc:645
-#: ../src/search.cc:3134 ../src/search.cc:3148 ../src/search.cc:3171
-#: ../src/search.cc:3279
+#: ../src/search.cc:3148 ../src/search.cc:3162 ../src/search.cc:3185
+#: ../src/search.cc:3293
 msgid "and"
 msgstr "a"
 
 # src/ui-pathsel.cc:799
-#: ../src/search.cc:3138
+#: ../src/search.cc:3152
 msgid "File date is"
 msgstr "Dátum súboru je"
 
 # src/utilops.cc:539
-#: ../src/search.cc:3164
+#: ../src/search.cc:3178
 msgid "Image dimensions are"
 msgstr "Rozmery obrázka sú"
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../src/search.cc:3177
+#: ../src/search.cc:3191
 msgid "Image content is"
 msgstr "Obsah obrázka je"
 
 # src/dupe.cc:1659
-#: ../src/search.cc:3181
+#: ../src/search.cc:3195
 #, no-c-format
 msgid "% similar to"
 msgstr "% podobnosť s"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
-#: ../src/search.cc:3189
+#: ../src/search.cc:3203
 msgid "Ignore rotation"
 msgstr "Ignorovať orientáciu"
 
-#: ../src/search.cc:3228
+#: ../src/search.cc:3242
 msgid ""
 "This field uses Perl Compatible Regular Expressions.\n"
 "e.g. use \n"
@@ -8086,7 +8096,7 @@ msgstr ""
 "\n"
 "Viac nájdete v súbore Pomocníka."
 
-#: ../src/search.cc:3250
+#: ../src/search.cc:3264
 msgid ""
 "e.g. Exif.Image.Model\n"
 "This always case-sensitive\n"
@@ -8102,7 +8112,7 @@ msgstr ""
 "\n"
 "Viac nájdete na https://exiv2.org/tags.html"
 
-#: ../src/search.cc:3266
+#: ../src/search.cc:3280
 msgid ""
 "e.g. Canon EOS\n"
 "\n"
@@ -8125,24 +8135,24 @@ msgstr ""
 "Viac nájdete v súbore Pomocníka."
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
-#: ../src/search.cc:3271
+#: ../src/search.cc:3285
 msgid "Image rating is"
 msgstr "Hodnotenie obrázka je"
 
 # src/preferences.cc:676
-#: ../src/search.cc:3284
+#: ../src/search.cc:3298
 msgid "Image is"
 msgstr "Obrázok je"
 
-#: ../src/search.cc:3292
+#: ../src/search.cc:3306
 msgid "n.m."
 msgstr "n. m."
 
-#: ../src/search.cc:3298
+#: ../src/search.cc:3312
 msgid "from"
 msgstr "od"
 
-#: ../src/search.cc:3304
+#: ../src/search.cc:3318
 msgid ""
 "Enter a coordinate in the form:\n"
 "89.123 179.456\n"
@@ -8161,16 +8171,16 @@ msgstr ""
 "Pre viac pozrite Pomocníka"
 
 # src/preferences.cc:676
-#: ../src/search.cc:3312
+#: ../src/search.cc:3326
 msgid "Image class"
 msgstr "Trieda obrázka"
 
-#: ../src/search.cc:3324
+#: ../src/search.cc:3338
 msgid "Broken"
 msgstr "Rozbitý"
 
 # src/ui-pathsel.cc:764
-#: ../src/search.cc:3332 ../src/view-file/view-file.cc:1640
+#: ../src/search.cc:3346 ../src/view-file/view-file.cc:1640
 msgid "Marks"
 msgstr "Značky"
 
@@ -8242,17 +8252,17 @@ msgid "Add Toolbar Item"
 msgstr "Pridať položku nástrojovej lišty"
 
 # src/utilops.cc:664 src/utilops.cc:676
-#: ../src/trash.cc:112 ../src/trash.cc:247 ../src/utilops.cc:2913
-#: ../src/utilops.cc:2921 ../src/utilops.cc:2971
+#: ../src/trash.cc:121 ../src/trash.cc:262 ../src/utilops.cc:2915
+#: ../src/utilops.cc:2923 ../src/utilops.cc:2973
 msgid "Delete failed"
 msgstr "Odstraňovanie sa nepodarilo"
 
 # src/utilops.cc:322
-#: ../src/trash.cc:112
+#: ../src/trash.cc:121
 msgid "Unable to remove old file from trash folder"
 msgstr "Nemožno vybrať starý súbor z koša"
 
-#: ../src/trash.cc:206
+#: ../src/trash.cc:215
 #, c-format
 msgid ""
 "The original location already contains a file named:\n"
@@ -8260,12 +8270,12 @@ msgid ""
 msgstr ""
 
 # src/utilops.cc:664 src/utilops.cc:676
-#: ../src/trash.cc:207 ../src/trash.cc:215 ../src/trash.cc:227
+#: ../src/trash.cc:216 ../src/trash.cc:224 ../src/trash.cc:236
 #, fuzzy
 msgid "Restore failed"
 msgstr "Odstraňovanie sa nepodarilo"
 
-#: ../src/trash.cc:214
+#: ../src/trash.cc:223
 #, c-format
 msgid ""
 "The original folder no longer exists:\n"
@@ -8273,7 +8283,7 @@ msgid ""
 msgstr ""
 
 # src/ui-pathsel.cc:343 src/utilops.cc:675 src/utilops.cc:727
-#: ../src/trash.cc:226
+#: ../src/trash.cc:235
 #, fuzzy, c-format
 msgid ""
 "Unable to restore file to:\n"
@@ -8283,27 +8293,27 @@ msgstr ""
 "%s"
 
 # src/utilops.cc:496
-#: ../src/trash.cc:248
+#: ../src/trash.cc:263
 msgid "Unable to remove file"
 msgstr "Nie je možné odstrániť súbor"
 
 # src/utilops.cc:1151
-#: ../src/trash.cc:267
+#: ../src/trash.cc:282
 msgid "Could not create folder"
 msgstr "Nemôžem vytvoriť priečinok"
 
 # src/utilops.cc:1151
-#: ../src/trash.cc:287
+#: ../src/trash.cc:313
 #, fuzzy
 msgid "Could not create trash information file"
 msgstr "Nemôžem vytvoriť priečinok"
 
-#: ../src/trash.cc:297
+#: ../src/trash.cc:323
 msgid "Permission denied"
 msgstr "Prístup odmietnutý"
 
 # src/ui-pathsel.cc:517 src/utilops.cc:1158
-#: ../src/trash.cc:303
+#: ../src/trash.cc:329
 #, c-format
 msgid ""
 "Unable to access or create the trash folder.\n"
@@ -8312,40 +8322,40 @@ msgstr ""
 "Nemožno pristupovať alebo vytvoriť priečinok koša.\n"
 "\"%s\""
 
-#: ../src/trash.cc:316
+#: ../src/trash.cc:342
 #, fuzzy
 msgid "See the Help file for a possible workaround."
 msgstr ""
 "Alternatívne riešenie nájdete v súbore Pomocníka.\n"
 "\n"
 
-#: ../src/trash.cc:316
+#: ../src/trash.cc:342
 #, fuzzy
 msgid "Unknown error"
 msgstr "Neznáma chyba."
 
 # src/utilops.cc:601
-#: ../src/trash.cc:318
+#: ../src/trash.cc:344
 #, fuzzy
 msgid "Move to trash failed"
 msgstr ""
 "Presun do koša zlyhal\n"
 "\n"
 
-#: ../src/trash.cc:333
+#: ../src/trash.cc:359
 msgid "Deletion by external command"
 msgstr "Odstránenie pomocou externého príkazu"
 
-#: ../src/trash.cc:337
+#: ../src/trash.cc:363
 msgid "Deleting without trash"
 msgstr "Odstraňujem bez koša"
 
-#: ../src/trash.cc:345
+#: ../src/trash.cc:371
 #, c-format
 msgid " (max. %d MiB)"
 msgstr " (max. %d MiB)"
 
-#: ../src/trash.cc:349
+#: ../src/trash.cc:375
 #, c-format
 msgid ""
 "Using Geeqie Trash bin\n"
@@ -8354,7 +8364,7 @@ msgstr ""
 "Používam kôš Geeqie\n"
 "%s"
 
-#: ../src/trash.cc:353
+#: ../src/trash.cc:379
 msgid "Using system Trash bin"
 msgstr "Používa sa systémový kôš"
 
@@ -8435,66 +8445,60 @@ msgstr ""
 "Môžete ho opraviť alebo pridať v podokne správcu triedenia.\n"
 "Ak nič nezadáte, použije sa meno priečinka"
 
-#: ../src/ui-bookmark.cc:979 ../src/ui-tabcomp.cc:746
+#: ../src/ui-bookmark.cc:979 ../src/ui-tabcomp.cc:777
 #, fuzzy
 msgid "Show history"
 msgstr "Zobraziť histogram"
 
-#: ../src/ui-file-chooser.cc:278
+#: ../src/ui-file-chooser.cc:284
 msgid ""
 "iccdump is not installed.\n"
 "Install argyll package"
 msgstr ""
 
 # src/rcfile.cc:132
-#: ../src/ui-file-chooser.cc:301
+#: ../src/ui-file-chooser.cc:307
 #, c-format
 msgid "Error loading PDF: %s\n"
 msgstr "Chyba pri načítaní PDF: %s\n"
 
-#: ../src/ui-file-chooser.cc:308
+#: ../src/ui-file-chooser.cc:314
 msgid "Failed to get page 0\n"
 msgstr "Zlyhalo načítanie strany 0\n"
 
 # src/collect-dlg.cc:194
-#: ../src/ui-file-chooser.cc:439
+#: ../src/ui-file-chooser.cc:445
 #, fuzzy
 msgid "No preview"
 msgstr "Náhľad zbierky:"
 
+#: ../src/ui-file-chooser.cc:563
+#, fuzzy, c-format
+msgid "Destination: %s"
+msgstr "Cieľ"
+
 # src/ui-pathsel.cc:307
-#: ../src/ui-file-chooser.cc:651
+#: ../src/ui-file-chooser.cc:734
 #, fuzzy, c-format
 msgid "A file named \"%s\" already exists. Do you want to replace it?"
 msgstr "Súbor s názvom %s už existuje."
 
-# src/collect-table.cc:1824 src/dupe.cc:2176 src/preferences.cc:536
-# src/ui-utildlg.cc:105
-#: ../src/ui-file-chooser.cc:652 ../src/ui-file-chooser.cc:868
-msgid "_Cancel"
-msgstr "_Zrušiť"
-
-#: ../src/ui-file-chooser.cc:652
+#: ../src/ui-file-chooser.cc:735
 msgid "_Replace"
 msgstr ""
 
-# src/ui-pathsel.cc:697
-#: ../src/ui-file-chooser.cc:717
-msgid "All files"
-msgstr "Všetky súbory"
-
-#: ../src/ui-file-chooser.cc:828
+#: ../src/ui-file-chooser.cc:915
 #, fuzzy
 msgid "Preview"
 msgstr "Predchádzajúci"
 
 # src/collect-table.cc:627 src/dupe.cc:1391 src/dupe.cc:1563
-#: ../src/ui-file-chooser.cc:856
+#: ../src/ui-file-chooser.cc:943
 msgid "Select path"
 msgstr "Vyberte cestu"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/ui-file-chooser.cc:917
+#: ../src/ui-file-chooser.cc:1005
 #, fuzzy
 msgid "_Current folder"
 msgstr "Vytvoriť priečinok?"
@@ -8594,15 +8598,15 @@ msgstr ""
 "Nemožno načítať súbor:\n"
 "%s"
 
-#: ../src/ui-menu.cc:525
+#: ../src/ui-menu.cc:526
 msgid "Input 0: sRGB"
 msgstr "Vstup 0: sRGB"
 
-#: ../src/ui-menu.cc:526
+#: ../src/ui-menu.cc:527
 msgid "Input 1: AdobeRGB compatible"
 msgstr "Vstup 1: Kompatibilné s AdobeRGB"
 
-#: ../src/ui-menu.cc:555 ../src/ui-menu.cc:559
+#: ../src/ui-menu.cc:556 ../src/ui-menu.cc:560
 #, fuzzy, c-format
 msgid "Input %d: %s"
 msgstr "Vstup _%d: %s"
@@ -8735,17 +8739,17 @@ msgstr "Naozaj pokračovať?"
 msgid "This operation can't continue:"
 msgstr "Táto akcia nemôže pokračovať:"
 
-#: ../src/utilops.cc:1849 ../src/utilops.cc:1942 ../src/utilops.cc:2333
+#: ../src/utilops.cc:1849 ../src/utilops.cc:1944 ../src/utilops.cc:2335
 msgid "Discard changes"
 msgstr "Zahodiť zmeny"
 
 # src/ui-pathsel.cc:799
-#: ../src/utilops.cc:1850 ../src/utilops.cc:1943 ../src/utilops.cc:2287
-#: ../src/utilops.cc:2302
+#: ../src/utilops.cc:1850 ../src/utilops.cc:1945 ../src/utilops.cc:2289
+#: ../src/utilops.cc:2304
 msgid "File details"
 msgstr "Podrobnosti o súbore"
 
-#: ../src/utilops.cc:1870 ../src/utilops.cc:1959
+#: ../src/utilops.cc:1870 ../src/utilops.cc:1961
 msgid "Sidecars"
 msgstr "Postranné súbory"
 
@@ -8755,98 +8759,98 @@ msgid "Write to file"
 msgstr "Zapísať do súboru"
 
 # src/main.cc:619
-#: ../src/utilops.cc:1898
+#: ../src/utilops.cc:1899
 msgid "Geeqie - Move File"
 msgstr "Geeqie – Presunúť súbor"
 
 # src/main.cc:619
-#: ../src/utilops.cc:1898
+#: ../src/utilops.cc:1899
 msgid "Geeqie - Copy File"
 msgstr "Geeqie – Kopírovať súbor"
 
 # src/ui-pathsel.cc:437 src/ui-pathsel.cc:460 src/utilops.cc:944
 # src/utilops.cc:1095
-#: ../src/utilops.cc:1904
+#: ../src/utilops.cc:1906
 msgid "With Rename"
 msgstr "S premenovaním"
 
 # src/utilops.cc:980
-#: ../src/utilops.cc:1961
+#: ../src/utilops.cc:1963
 msgid "New name"
 msgstr "Nový názov"
 
 # src/menu.cc:559
-#: ../src/utilops.cc:1975
+#: ../src/utilops.cc:1977
 msgid "Source"
 msgstr "Zdroj"
 
-#: ../src/utilops.cc:1975
+#: ../src/utilops.cc:1977
 msgid "Destination"
 msgstr "Cieľ"
 
 # src/preferences.cc:930
-#: ../src/utilops.cc:1991
+#: ../src/utilops.cc:1993
 msgid "Manual rename"
 msgstr "Ručné premenovanie"
 
-#: ../src/utilops.cc:1995
+#: ../src/utilops.cc:1997
 msgid "Original name:"
 msgstr "Pôvodný názov:"
 
 # src/utilops.cc:980
-#: ../src/utilops.cc:1998
+#: ../src/utilops.cc:2000
 msgid "New name:"
 msgstr "Nový názov:"
 
 # src/preferences.cc:930
-#: ../src/utilops.cc:2010
+#: ../src/utilops.cc:2012
 msgid "Auto rename"
 msgstr "Automatické premenovanie"
 
-#: ../src/utilops.cc:2015
+#: ../src/utilops.cc:2017
 msgid "Begin text"
 msgstr "Úvodný text"
 
-#: ../src/utilops.cc:2024 ../src/utilops.cc:2057
+#: ../src/utilops.cc:2026 ../src/utilops.cc:2059
 msgid "Start #"
 msgstr "Štart #"
 
-#: ../src/utilops.cc:2030
+#: ../src/utilops.cc:2032
 msgid "End text"
 msgstr "Text na konci"
 
-#: ../src/utilops.cc:2039
+#: ../src/utilops.cc:2041
 msgid "Padding:"
 msgstr "Výplň:"
 
-#: ../src/utilops.cc:2044
+#: ../src/utilops.cc:2046
 msgid "Formatted rename"
 msgstr "Premenovanie podľa formátu"
 
-#: ../src/utilops.cc:2048
+#: ../src/utilops.cc:2050
 msgid "Format (* = original name, ## = numbers)"
 msgstr "Formát (* = pôvodné meno, ## = čísla)"
 
-#: ../src/utilops.cc:2197
+#: ../src/utilops.cc:2199
 msgid "Another operation in progress.\n"
 msgstr "Momentálne prebieha iná operácia.\n"
 
 # src/ui-pathsel.cc:799
-#: ../src/utilops.cc:2247
+#: ../src/utilops.cc:2249
 #, c-format
 msgid "File: '%s'\n"
 msgstr "Súbor: '%s'\n"
 
-#: ../src/utilops.cc:2252
+#: ../src/utilops.cc:2254
 msgid "with sidecar files:\n"
 msgstr "s pomocnými súbormi:\n"
 
-#: ../src/utilops.cc:2258
+#: ../src/utilops.cc:2260
 #, c-format
 msgid " '%s'\n"
 msgstr " '%s'\n"
 
-#: ../src/utilops.cc:2262
+#: ../src/utilops.cc:2264
 msgid ""
 "\n"
 "Status: "
@@ -8854,19 +8858,19 @@ msgstr ""
 "\n"
 "Stav: "
 
-#: ../src/utilops.cc:2274
+#: ../src/utilops.cc:2276
 msgid "no problem detected"
 msgstr "nezistený žiaden problém"
 
-#: ../src/utilops.cc:2289 ../src/utilops.cc:2332
+#: ../src/utilops.cc:2291 ../src/utilops.cc:2334
 msgid "Exclude file"
 msgstr "Vynechať súbor"
 
-#: ../src/utilops.cc:2330 ../src/utilops.cc:2355
+#: ../src/utilops.cc:2332 ../src/utilops.cc:2357
 msgid "Overview of changed metadata"
 msgstr "Prehľad zmenených metadát"
 
-#: ../src/utilops.cc:2348
+#: ../src/utilops.cc:2350
 #, c-format
 msgid ""
 "The following metadata tags will be written to\n"
@@ -8875,141 +8879,141 @@ msgstr ""
 "Nasledujúce položky metadát budú zapísané do\n"
 "'%s'."
 
-#: ../src/utilops.cc:2352
+#: ../src/utilops.cc:2354
 msgid "The following metadata tags will be written to the image file itself."
 msgstr "Nasledujúce položky metadát budú zapísané priamo do súboru s obrázkom."
 
-#: ../src/utilops.cc:2451
+#: ../src/utilops.cc:2453
 msgid "⚠ This will move the following    "
 msgstr "⚠ Týmto presuniete nasledujúce    "
 
-#: ../src/utilops.cc:2451
+#: ../src/utilops.cc:2453
 msgid "    files to the Trash bin"
 msgstr "    súbory do koša"
 
-#: ../src/utilops.cc:2455
+#: ../src/utilops.cc:2457
 msgid "⚠ This will permanently delete the following    "
 msgstr "⚠ Týmto nenávratne odstránite nasledujúce    "
 
 # src/dupe.cc:67 src/dupe.cc:1449
-#: ../src/utilops.cc:2455
+#: ../src/utilops.cc:2457
 msgid "    files"
 msgstr "    súbory"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/utilops.cc:2457
+#: ../src/utilops.cc:2459
 msgid "Delete files?"
 msgstr "Odstrániť súbory?"
 
-#: ../src/utilops.cc:2463
+#: ../src/utilops.cc:2465
 msgid "This will move the following file to the Trash bin"
 msgstr "Týmto presuniete nasledujúci súbor do koša"
 
-#: ../src/utilops.cc:2467
+#: ../src/utilops.cc:2469
 msgid "This will permanently delete the following file"
 msgstr "Týmto nenávratne odstránite nasledujúci súbor"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/utilops.cc:2469
+#: ../src/utilops.cc:2471
 msgid "Delete file?"
 msgstr "Odstrániť súbor?"
 
-#: ../src/utilops.cc:2492
+#: ../src/utilops.cc:2494
 msgid "Can't write metadata"
 msgstr "Nepodarilo sa zapísať metadáta"
 
-#: ../src/utilops.cc:2514
+#: ../src/utilops.cc:2516
 msgid "Write metadata"
 msgstr "Zapísať metadáta"
 
-#: ../src/utilops.cc:2515
+#: ../src/utilops.cc:2517
 msgid "Write metadata?"
 msgstr "Zapísať metadáta?"
 
-#: ../src/utilops.cc:2516
+#: ../src/utilops.cc:2518
 msgid "This will write the changed metadata into the following files"
 msgstr "Týmto zapíšete zmenené metadáta do nasledujúcich súborov"
 
-#: ../src/utilops.cc:2518
+#: ../src/utilops.cc:2520
 msgid "Metadata writing failed"
 msgstr "Chyba pri zápise metadát"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2537 ../src/utilops.cc:2563
+#: ../src/utilops.cc:2539 ../src/utilops.cc:2565
 msgid "Move failed"
 msgstr "Presun zlyhal"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2560
+#: ../src/utilops.cc:2562
 msgid "Move files?"
 msgstr "Presunúť súbory?"
 
-#: ../src/utilops.cc:2561
+#: ../src/utilops.cc:2563
 msgid "This will move the following files"
 msgstr "Týmto presuniete nasledujúce súbory"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2585 ../src/utilops.cc:2611
+#: ../src/utilops.cc:2587 ../src/utilops.cc:2613
 msgid "Copy failed"
 msgstr "Kopírovanie zlyhalo"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2608
+#: ../src/utilops.cc:2610
 msgid "Copy files?"
 msgstr "Kopírovať súbory?"
 
-#: ../src/utilops.cc:2609 ../src/utilops.cc:2738
+#: ../src/utilops.cc:2611 ../src/utilops.cc:2740
 msgid "This will copy the following files"
 msgstr "Týmto skopírujete nasledujúce súbory"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2630 ../src/utilops.cc:2655 ../src/utilops.cc:3089
+#: ../src/utilops.cc:2632 ../src/utilops.cc:2657 ../src/utilops.cc:3091
 msgid "Rename failed"
 msgstr "Premenovanie skončilo s chybou"
 
 # src/ui-pathsel.cc:437 src/ui-pathsel.cc:460 src/utilops.cc:944
 # src/utilops.cc:1095
-#: ../src/utilops.cc:2651 ../src/utilops.cc:3085
+#: ../src/utilops.cc:2653 ../src/utilops.cc:3087
 msgid "Rename"
 msgstr "Premenovať"
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:2652
+#: ../src/utilops.cc:2654
 msgid "Rename files?"
 msgstr "Premenovať súbory?"
 
-#: ../src/utilops.cc:2653
+#: ../src/utilops.cc:2655
 msgid "This will rename the following files"
 msgstr "Týmto sa premenujú nasledujúce súbory"
 
-#: ../src/utilops.cc:2704
+#: ../src/utilops.cc:2706
 msgid "Can't run external editor"
 msgstr "Nepodarilo sa spustiť externý editor"
 
 # src/preferences.cc:915
-#: ../src/utilops.cc:2736
+#: ../src/utilops.cc:2738
 msgid "Editor"
 msgstr "Editor"
 
 # src/utilops.cc:707
-#: ../src/utilops.cc:2737
+#: ../src/utilops.cc:2739
 msgid "Run editor?"
 msgstr "Spustiť editor?"
 
-#: ../src/utilops.cc:2740
+#: ../src/utilops.cc:2742
 msgid "External command failed"
 msgstr "Externý príkaz zlyhal"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/utilops.cc:2900 ../src/utilops.cc:2962
+#: ../src/utilops.cc:2902 ../src/utilops.cc:2964
 msgid "Delete folder"
 msgstr "Odstrániť priečinok"
 
-#: ../src/utilops.cc:2901
+#: ../src/utilops.cc:2903
 msgid "Delete symbolic link?"
 msgstr "Odstrániť symbolický odkaz?"
 
-#: ../src/utilops.cc:2903
+#: ../src/utilops.cc:2905
 msgid ""
 "This will delete the symbolic link.\n"
 "The folder this link points to will not be deleted."
@@ -9018,12 +9022,12 @@ msgstr ""
 "Priečinok, na ktorý odkaz smeruje, nebude odstránený."
 
 # src/ui-pathsel.cc:344 src/utilops.cc:728
-#: ../src/utilops.cc:2904
+#: ../src/utilops.cc:2906
 msgid "Link deletion failed"
 msgstr "Zlyhalo odstraňovanie odkazu"
 
 # src/utilops.cc:322
-#: ../src/utilops.cc:2912
+#: ../src/utilops.cc:2914
 #, c-format
 msgid ""
 "Unable to remove folder %s\n"
@@ -9033,17 +9037,17 @@ msgstr ""
 "Práva prístupu neumožňujú zápis do tohto priečinka."
 
 # src/ui-pathsel.cc:517 src/utilops.cc:1158
-#: ../src/utilops.cc:2920 ../src/utilops.cc:2970
+#: ../src/utilops.cc:2922 ../src/utilops.cc:2972
 #, c-format
 msgid "Unable to list contents of folder %s"
 msgstr "Nemožno zobraziť obsah priečinka %s"
 
 # src/collect-dlg.cc:59
-#: ../src/utilops.cc:2932 ../src/utilops.cc:2939
+#: ../src/utilops.cc:2934 ../src/utilops.cc:2941
 msgid "Folder contains subfolders"
 msgstr "Priečinok obsahuje podpriečinky"
 
-#: ../src/utilops.cc:2936
+#: ../src/utilops.cc:2938
 #, c-format
 msgid ""
 "Unable to delete the folder:\n"
@@ -9060,21 +9064,21 @@ msgstr ""
 "potom ho bude možné odstrániť."
 
 # src/preferences.cc:368
-#: ../src/utilops.cc:2942
+#: ../src/utilops.cc:2944
 msgid "Subfolders:"
 msgstr "Podpriečinky:"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
-#: ../src/utilops.cc:2963
+#: ../src/utilops.cc:2965
 msgid "Delete folder?"
 msgstr "Odstrániť priečinok?"
 
 # src/collect-dlg.cc:59
-#: ../src/utilops.cc:2964
+#: ../src/utilops.cc:2966
 msgid "The folder contains these files:"
 msgstr "Priečinok obsahuje tieto súbory:"
 
-#: ../src/utilops.cc:2965
+#: ../src/utilops.cc:2967
 msgid ""
 "This will delete the folder.\n"
 "The contents of this folder will also be deleted."
@@ -9084,38 +9088,49 @@ msgstr ""
 "Obsah priečinka bude odstránený tiež."
 
 # src/utilops.cc:1090
-#: ../src/utilops.cc:3086
+#: ../src/utilops.cc:3088
 msgid "Rename folder?"
 msgstr "Premenovať priečinok?"
 
 # src/collect-dlg.cc:59
-#: ../src/utilops.cc:3087
+#: ../src/utilops.cc:3089
 msgid "The folder contains the following files"
 msgstr "Priečinok obsahuje nasledujúce súbory"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/utilops.cc:3280
+#: ../src/utilops.cc:3282
 msgid "Create Folder"
 msgstr "Vytvoriť priečinok"
 
-#: ../src/utilops.cc:3281
+#: ../src/utilops.cc:3283
 msgid "Folder was not created"
 msgstr "Priečinok nebol vytvorený"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/utilops.cc:3312
+#: ../src/utilops.cc:3314
 msgid "Geeqie - Create Folder"
 msgstr "Geeqie – Vytvoriť priečinok"
 
+# src/collect-dlg.cc:59
+#: ../src/view-dir.cc:192
+#, fuzzy
+msgid "Invalid folder name"
+msgstr "Nesprávne meno súboru"
+
 # src/utilops.cc:592
-#: ../src/view-dir.cc:450 ../src/view-file/view-file.cc:770
+#: ../src/view-dir.cc:573 ../src/view-file/view-file.cc:770
 msgid "_Copy"
 msgstr "_Kopírovať"
 
 # src/utilops.cc:601
-#: ../src/view-dir.cc:451 ../src/view-file/view-file.cc:771
+#: ../src/view-dir.cc:574 ../src/view-file/view-file.cc:771
 msgid "_Move"
 msgstr "_Presunúť"
+
+#: ../src/view-dir.cc:976 ../src/view-dir.cc:1008
+#, fuzzy
+msgid "new-folder"
+msgstr "nový_priečinok"
 
 # src/collect-dlg.cc:172
 #: ../src/view-file/view-file.cc:1202 ../src/view-file/view-file.cc:1209
@@ -9231,32 +9246,32 @@ msgstr ""
 msgid "Ignore Rating"
 msgstr "Ignorovať hodnotenie"
 
-#: ../src/view-file/view-file.cc:2543
+#: ../src/view-file/view-file.cc:2554
 msgid "Use regular expressions"
 msgstr "Použiť regulárne výrazy"
 
 # src/ui-pathsel.cc:764
-#: ../src/view-file/view-file.cc:2553
+#: ../src/view-file/view-file.cc:2564
 #, fuzzy
 msgid "Show filter history"
 msgstr "Zobraziť filter súborov"
 
-#: ../src/view-file/view-file.cc:2581
+#: ../src/view-file/view-file.cc:2592
 msgid "Case sensitive"
 msgstr "Citlivé na veľkosť písmen"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/view-file/view-file.cc:2584
+#: ../src/view-file/view-file.cc:2595
 msgid "Select Class filter"
 msgstr "Vybrať filter triedy"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
-#: ../src/view-file/view-file.cc:2587
+#: ../src/view-file/view-file.cc:2598
 msgid "Select Rating filter"
 msgstr "Vybrať filter hodnotenia"
 
 # src/collect-table.cc:100 src/dupe.cc:668 src/filelist.c:1811
-#: ../src/view-file/view-file.cc:3166 ../src/view-file/view-file.cc:3208
+#: ../src/view-file/view-file.cc:3177 ../src/view-file/view-file.cc:3219
 msgid "Loading meta…"
 msgstr "Načítavam meta…"
 
@@ -9291,38 +9306,56 @@ msgstr ""
 msgid "Error renaming file"
 msgstr "Chyba pri premenovaní súboru"
 
-#: ../src/view-file/view-file-list.cc:2047
+#: ../src/view-file/view-file-list.cc:2072
 msgid "Stars"
 msgstr "Hviezdičky"
 
-#: ../src/view-file/view-file-list.cc:2060
+#: ../src/view-file/view-file-list.cc:2085
 #, fuzzy
 msgid "Date and Time"
 msgstr "Zmenšiť veľkosť obrázka"
 
-#: ../src/window.cc:215
+#: ../src/window.cc:231
 msgid "On-line help search"
 msgstr "Prehľadávať pomocníka online"
 
-#: ../src/window.cc:218
+#: ../src/window.cc:234
 msgid "Search the on-line help files.\n"
 msgstr "Prehľadávať súbory pomocníka online.\n"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/window.cc:223
+#: ../src/window.cc:239
 msgid "Search engine:"
 msgstr "Vyhľadávač:"
 
 # src/dupe.cc:871 src/dupe.cc:892
-#: ../src/window.cc:234
+#: ../src/window.cc:250
 msgid "Search terms:"
 msgstr "Vyhľadávací reťazec:"
 
 # src/ui-help.cc:191
-#: ../src/window.cc:258
+#: ../src/window.cc:274
 #, c-format
 msgid "Warning: Failed to execute command: %s\n"
 msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
+
+#, c-format
+#~ msgid ""
+#~ "This Collection cannot be opened because it contains a link to a file on "
+#~ "a drive which is not yet mounted.\n"
+#~ "\n"
+#~ "Collection: %s\n"
+#~ "File: %s\n"
+#~ msgstr ""
+#~ "Zbierka sa nedá otvoriť, pretože odkazuje na súbor na zariadení, ktoré "
+#~ "ešte nie je pripojené.\n"
+#~ "\n"
+#~ "Zbierka: %s\n"
+#~ "Súbor: %s\n"
+
+# src/main.cc:619
+#~ msgid "Geeqie - Open Collection"
+#~ msgstr "Geeqie – Otvoriť zbierku"
 
 # src/collect-table.cc:620 src/dupe.cc:1388 src/dupe.cc:1560 src/img-view.cc:801
 # src/menu.cc:906 src/menu.cc:964
@@ -9622,9 +9655,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 #~ msgid "Open Recent File - Geeqie"
 #~ msgstr "Otvoriť nedávny súbor – Geeqie"
 
-#~ msgid "Geeqie image files"
-#~ msgstr "Súbory s obrázkami Geeqie"
-
 #, c-format
 #~ msgid "Error: window layout name: %s does not exist\n"
 #~ msgstr "Chyba: rozloženie okien s názvom: %s neexistuje\n"
@@ -9796,10 +9826,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 
 #~ msgid "Next Page of multi-page image"
 #~ msgstr "Ďalšia strana viacstranového obrázka"
-
-# src/collect-dlg.cc:172
-#~ msgid "Open collection…"
-#~ msgstr "Otvoriť zbierku…"
 
 #~ msgid "☰"
 #~ msgstr "☰"
@@ -10972,10 +10998,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 #~ "Zadaná cesta:\n"
 #~ "%s\n"
 #~ "je priečinok, ale zbierky sú súbory"
-
-# src/collect-dlg.cc:59
-#~ msgid "Invalid filename"
-#~ msgstr "Nesprávne meno súboru"
 
 # src/collect-dlg.cc:69
 #~ msgid "Overwrite File"
@@ -12218,9 +12240,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 # src/menu.cc:776
 #~ msgid "Contents:"
 #~ msgstr "Obsah:"
-
-#~ msgid "new_folder"
-#~ msgstr "nový_priečinok"
 
 # src/menu.cc:753
 #~ msgid "_View as"
