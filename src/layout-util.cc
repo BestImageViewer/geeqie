@@ -502,7 +502,14 @@ static void layout_menu_delete_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();
 
-		file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), safe_delete);
+	if (lw && lw->vf && lw->vf->refresh_idle_id)
+		{
+		/* Key repeat can arrive before the refresh queued by the last deletion. */
+		vf_refresh_idle_cancel(lw->vf);
+		vf_refresh(lw->vf);
+		}
+
+	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), safe_delete);
 }
 
 template<gboolean disable>
