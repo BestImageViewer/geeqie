@@ -168,22 +168,25 @@
     </para>
     <para>Plugins appear in the <guimenu>Plugins</guimenu> menu and in plugin context menus. The legacy <literal>X-Geeqie-Menu-Path</literal> key does not control menu placement in GTK4; omit it from new desktop files.</para>
     <para>
-      If you want a plugin to use a user-definable path, the following entry must be made in the desktop file:
+      To let the user choose a destination folder for a plugin, add this entry to its desktop file:
       <programlisting>X-Geeqie-Filter=true</programlisting>
     </para>
     <para>
-      Desktop files containing this entry will be displayed in the Folder action list of the
+      The plugin will appear in the Folder action list of the
       <emphasis role="underline"><link linkend="CopyMoveandLink" endterm="titleGuideSidebarsSortManager" /></emphasis>
-      . The path of the bookmark clicked will be used by the desktop file.
-      <para />
-      If the desktop file is called from the menu, when the plugin is executed you are presented with a dialogue which enables a path to be selected. The path selected, appended by the filename currently being processed, is made available to the shell script either as an environment variable or via a call to geeqie. The following code demonstrates the use of both methods:
+      . Clicking a bookmark uses that folder as the destination. When you run the plugin from the Plugins menu, Geeqie asks you to choose a destination folder.
+    </para>
+    <para>
+      In the plugin script, use <literal>geeqie --get-destination="$file"</literal> to get the destination folder with the file's name appended. For example, if the file is <filename>/photos/image.jpg</filename> and you choose <filename>/backup</filename>, the command returns <filename>/backup/image.jpg</filename>. It only returns the path; the script must perform the operation.
       <programlisting xml:space="preserve">
       for file in "$@"; do
         destination=$(geeqie --get-destination="$file")
-
-        echo "$destination"
-        echo $GEEQIE_DESTINATION
+        printf '%s\n' "$destination"
       done
+      </programlisting>
+      The same path is available as <literal>$GEEQIE_DESTINATION</literal> for the file currently being processed:
+      <programlisting xml:space="preserve">
+      printf '%s\n' "$GEEQIE_DESTINATION"
       </programlisting>
       <note>A restart of Geeqie is required for this plugin to be registered</note>
     </para>
