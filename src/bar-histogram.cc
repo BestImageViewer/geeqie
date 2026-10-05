@@ -141,6 +141,7 @@ static void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar *
 	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!phd) return;
 
+	g_autofree gchar *title = nullptr;
 	gint histogram_channel = phd->histogram.get_channel();
 	gint histogram_mode = phd->histogram.get_mode();
 
@@ -149,8 +150,7 @@ static void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar *
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR(phd->pane, id)) continue;
-		if (READ_BOOL(phd->pane, expanded)) continue;
+		if (bar_pane_common_update_from_config(phd->pane, option, value, &title)) continue;
 		if (READ_INT_FULL("histogram_channel", histogram_channel)) continue;
 		if (READ_INT_FULL("histogram_mode", histogram_mode)) continue;
 
@@ -399,9 +399,7 @@ GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, con
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("id", id)) continue;
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_BOOL_FULL("expanded", expanded)) continue;
+		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded)) continue;
 		if (READ_INT_FULL("histogram_channel", histogram_channel)) continue;
 		if (READ_INT_FULL("histogram_mode", histogram_mode)) continue;
 

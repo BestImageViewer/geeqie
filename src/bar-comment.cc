@@ -174,11 +174,9 @@ static void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **a
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("title", title)) continue;
+		if (bar_pane_common_update_from_config(pcd->pane, option, value, &title)) continue;
 		if (READ_CHAR(*pcd, key)) continue;
-		if (READ_BOOL(pcd->pane, expanded)) continue;
 		if (READ_INT(*pcd, height)) continue;
-		if (READ_CHAR(pcd->pane, id)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
@@ -302,22 +300,20 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 
 GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	g_autofree gchar *title = nullptr;
-	g_autofree gchar *key = g_strdup(COMMENT_KEY);
-	gboolean expanded = TRUE;
-	gint height = 50;
 	g_autofree gchar *id = g_strdup("comment");
+	g_autofree gchar *title = nullptr;
+	gboolean expanded = TRUE;
+	g_autofree gchar *key = g_strdup(COMMENT_KEY);
+	gint height = 50;
 
 	while (*attribute_names)
 		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("title", title)) continue;
+		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded)) continue;
 		if (READ_CHAR_FULL("key", key)) continue;
-		if (READ_BOOL_FULL("expanded", expanded)) continue;
 		if (READ_INT_FULL("height", height)) continue;
-		if (READ_CHAR_FULL("id", id)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
