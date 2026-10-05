@@ -2110,6 +2110,7 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 		}
 
 	lw->tools_pane = gtk_paned_new(vertical ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
+	gtk_paned_set_wide_handle(GTK_PANED(lw->tools_pane), TRUE);
 	DEBUG_NAME(lw->tools_pane);
 	gtk_widget_set_hexpand(lw->tools_pane, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(lw->tools_pane, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
@@ -2330,6 +2331,9 @@ static void layout_grid_setup(LayoutWindow *lw)
 	DEBUG_NAME(v);
 	h = lw->h_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(h);
+	/* Narrow handles extend their drag area into the first file row. */
+	gtk_paned_set_wide_handle(GTK_PANED(v), TRUE);
+	gtk_paned_set_wide_handle(GTK_PANED(h), TRUE);
 
 	if (!layout_location_vertical(static_cast<LayoutLocation>(priority_location)))
 		{
