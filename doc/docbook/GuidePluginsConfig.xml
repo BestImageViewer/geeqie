@@ -178,13 +178,12 @@
       <para />
       If the desktop file is called from the menu, when the plugin is executed you are presented with a dialogue which enables a path to be selected. The path selected, appended by the filename currently being processed, is made available to the shell script either as an environment variable or via a call to geeqie. The following code demonstrates the use of both methods:
       <programlisting xml:space="preserve">
-        for file in "$@"
-        do
-        destination=$(geeqie --get-destination:"$file")
-        
+      for file in "$@"; do
+        destination=$(geeqie --get-destination="$file")
+
         echo "$destination"
         echo $GEEQIE_DESTINATION
-        done
+      done
       </programlisting>
       <note>A restart of Geeqie is required for this plugin to be registered</note>
     </para>
