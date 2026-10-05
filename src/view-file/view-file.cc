@@ -338,6 +338,17 @@ void vf_select_list(ViewFile *vf, const FileDataList *list)
 	}
 }
 
+void vf_scroll_to_file(ViewFile *vf, FileData *fd)
+{
+	if (!fd) return;
+
+	switch (vf->type)
+		{
+		case FILEVIEW_LIST: vflist_scroll_to_file(vf, fd); break;
+		case FILEVIEW_ICON: vficon_scroll_to_file(vf, fd); break;
+		}
+}
+
 void vf_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 {
 	switch (vf->type)

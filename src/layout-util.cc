@@ -1550,6 +1550,12 @@ static void layout_menu_histogram_mode_cb(GSimpleAction *action, GVariant *state
 	image_osd_histogram_set_mode(lw->image, mode);
 }
 
+static void layout_menu_show_current_image_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	auto *lw = get_current_layout();
+	if (lw && lw->vf) vf_scroll_to_file(lw->vf, layout_image_get_fd(lw));
+}
+
 static void layout_menu_refresh_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();

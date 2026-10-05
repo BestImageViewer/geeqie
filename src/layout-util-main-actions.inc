@@ -2391,6 +2391,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-show-current-image",
+		nullptr,
+		N_("Show current image"),
+		layout_menu_show_current_image_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-show-file-filter",
 		GQ_ICON_FILE_FILTER,
 		N_("Show File Filter"),

@@ -1508,6 +1508,17 @@ static gboolean vflist_startup_scroll_cb(GtkWidget *widget, GdkFrameClock *, gpo
 	return G_SOURCE_REMOVE;
 }
 
+void vflist_scroll_to_file(ViewFile *vf, FileData *fd)
+{
+	GtkTreeIter iter;
+	if (!vflist_find_row(vf, fd, &iter)) return;
+
+	auto *view = GTK_TREE_VIEW(vf->listview);
+	g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(gtk_tree_view_get_model(view), &iter);
+	if (gtk_tree_path_up(path)) gtk_tree_view_expand_to_path(view, path);
+	tree_view_row_make_visible(view, &iter, TRUE);
+}
+
 void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 {
 	GtkTreeIter iter;

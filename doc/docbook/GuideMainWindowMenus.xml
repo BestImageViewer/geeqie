@@ -318,6 +318,16 @@
       <varlistentry>
         <term>
           <menuchoice>
+            <guimenu>Show current image</guimenu>
+          </menuchoice>
+        </term>
+        <listitem>
+          <para>Scrolls the files pane to bring the currently displayed image into view. The selection and keyboard focus stay unchanged. You can assign a keyboard shortcut in Preferences.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <menuchoice>
             <guimenu>Image Back</guimenu>
           </menuchoice>
         </term>

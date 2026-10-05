@@ -88,6 +88,7 @@ void vflist_select_all(ViewFile *vf);
 void vflist_select_none(ViewFile *vf);
 void vflist_select_invert(ViewFile *vf);
 void vflist_select_by_fd(ViewFile *vf, FileData *fd);
+void vflist_scroll_to_file(ViewFile *vf, FileData *fd);
 void vflist_select_list(ViewFile *vf, const FileDataList *list);
 
 void vflist_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode);

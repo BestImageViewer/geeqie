@@ -112,6 +112,10 @@
           <attribute name="label" translatable="yes">_Last image</attribute>
         </item>
         <item>
+          <attribute name="action">win.main-win-show-current-image</attribute>
+          <attribute name="label" translatable="yes">_Show current image</attribute>
+        </item>
+        <item>
           <attribute name="action">win.main-win-image-back</attribute>
           <attribute name="label" translatable="yes">Image _Back</attribute>
         </item>

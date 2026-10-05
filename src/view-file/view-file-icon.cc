@@ -554,6 +554,16 @@ void vficon_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &f
 		}
 }
 
+void vficon_scroll_to_file(ViewFile *vf, FileData *fd)
+{
+	const gint position = vficon_index_by_fd(vf, fd);
+	if (position < 0) return;
+
+	auto *scroll = gtk_scroll_info_new();
+	gtk_scroll_info_set_enable_horizontal(scroll, FALSE);
+	gtk_grid_view_scroll_to(GTK_GRID_VIEW(vf->listview), position, GTK_LIST_SCROLL_NONE, scroll);
+}
+
 void vficon_select_by_fd(ViewFile *vf, FileData *fd)
 {
 	if (!fd) return;

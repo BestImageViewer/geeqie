@@ -17,6 +17,7 @@
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-file.h"
+#include "view-file/view-file-icon.h"
 #include "view-file/view-file-list.h"
 
 namespace
@@ -185,5 +186,136 @@ TEST_P(RepeatedDelete, RefreshesSelectionBeforeTheNextDelete)
 
 INSTANTIATE_TEST_SUITE_P(FileViews, RepeatedDelete,
                         testing::Combine(testing::Values(FILEVIEW_LIST, FILEVIEW_ICON), testing::Bool()));
+
+GtkWidget *find_file_widget(GtkWidget *widget, FileData *fd)
+{
+	if (g_object_get_data(G_OBJECT(widget), "view-file-fd") == fd) return widget;
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		{
+		if (auto *found = find_file_widget(child, fd)) return found;
+		}
+	return nullptr;
+}
+
+class RevealFile : public testing::TestWithParam<std::tuple<FileViewType, bool>>
+{
+protected:
+	void SetUp() override
+	{
+		if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+		if (!options) options = conf_options_new();
+		setup_default_options(options);
+		saved_thumbnail_size = options->thumbnails.size;
+		options->thumbnails.size = {128, 96};
+		g_object_get(gtk_settings_get_default(), "gtk-enable-animations", &saved_animations, nullptr);
+		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", FALSE, nullptr);
+		filter_add_defaults();
+		filter_rebuild();
+		directory = g_dir_make_tmp("geeqie-reveal-file-XXXXXX", nullptr);
+		ASSERT_NE(directory, nullptr);
+		for (int i = 0; i < 150; ++i)
+			{
+			g_autofree gchar *name = g_strdup_printf("%03d.svg", i);
+			g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+			ASSERT_TRUE(g_file_set_contents(path, "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'/>", -1, nullptr));
+			}
+		auto *dir_fd = file_data_new_dir(directory);
+		vf = vf_new(std::get<0>(GetParam()), dir_fd);
+		file_data_unref(dir_fd);
+		if (vf->type == FILEVIEW_LIST) gtk_widget_set_visible(VFLIST(vf)->details_scrolled, std::get<1>(GetParam()));
+		window = gtk_window_new();
+		auto *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+		entry = gtk_entry_new();
+		gtk_box_append(GTK_BOX(box), entry);
+		gtk_box_append(GTK_BOX(box), vf->widget);
+		gtk_window_set_child(GTK_WINDOW(window), box);
+		gtk_window_set_default_size(GTK_WINDOW(window), 600, 300);
+		gtk_window_present(GTK_WINDOW(window));
+		settle();
+	}
+
+	void TearDown() override
+	{
+		if (window) gtk_window_destroy(GTK_WINDOW(window));
+		if (!directory) return;
+		options->thumbnails.size = saved_thumbnail_size;
+		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", saved_animations, nullptr);
+		for (int i = 0; i < 150; ++i)
+			{
+			g_autofree gchar *name = g_strdup_printf("%03d.svg", i);
+			g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+			g_remove(path);
+			}
+		g_rmdir(directory);
+		g_free(directory);
+	}
+
+	void settle()
+	{
+		const gint64 deadline = g_get_monotonic_time() + 350 * G_TIME_SPAN_MILLISECOND;
+		while (g_get_monotonic_time() < deadline)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+	}
+
+	ViewFile *vf = nullptr;
+	GtkWidget *window = nullptr;
+	GtkWidget *entry = nullptr;
+	GqSize saved_thumbnail_size{};
+	gboolean saved_animations = TRUE;
+	gchar *directory = nullptr;
+};
+
+TEST_P(RevealFile, ScrollsWithoutChangingSelectionOrFocus)
+{
+	auto *first = vf_index_get_data(vf, 0);
+	auto *second = vf_index_get_data(vf, 1);
+	auto *target = vf_index_get_data(vf, 120);
+	ASSERT_NE(target, nullptr);
+	vf_select_none(vf);
+	g_autoptr(FileDataList) selection = g_list_append(nullptr, file_data_ref(first));
+	selection = g_list_append(selection, file_data_ref(second));
+	vf_select_list(vf, selection);
+	gtk_widget_grab_focus(entry);
+	settle();
+	auto *focus = gtk_window_get_focus(GTK_WINDOW(window));
+	auto *scrolled = vf->type == FILEVIEW_LIST ? VFLIST(vf)->name_scrolled : vf->scrolled;
+	auto *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scrolled));
+	gtk_adjustment_set_value(adjustment, 0);
+	settle();
+	EXPECT_EQ(gtk_adjustment_get_value(adjustment), 0);
+	vf_scroll_to_file(vf, target);
+	settle();
+	EXPECT_GT(gtk_adjustment_get_value(adjustment), 0);
+	EXPECT_EQ(gtk_window_get_focus(GTK_WINDOW(window)), focus);
+	g_autoptr(FileDataList) after = vf_selection_get_list(vf);
+	EXPECT_EQ(g_list_length(after), 2U);
+	EXPECT_NE(g_list_find(after, first), nullptr);
+	EXPECT_NE(g_list_find(after, second), nullptr);
+	EXPECT_EQ(g_list_find(after, target), nullptr);
+	if (vf->type == FILEVIEW_LIST)
+		{
+		auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+		GtkTreeIter iter;
+		ASSERT_TRUE(gtk_tree_model_iter_nth_child(model, &iter, nullptr, 120));
+		EXPECT_TRUE(tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, TRUE));
+		}
+	else
+		{
+		auto *item = find_file_widget(vf->listview, target);
+		ASSERT_NE(item, nullptr);
+		graphene_rect_t bounds;
+		ASSERT_TRUE(gtk_widget_compute_bounds(item, vf->scrolled, &bounds));
+		EXPECT_GE(bounds.origin.y, 0);
+		EXPECT_LE(bounds.origin.y + bounds.size.height, gtk_widget_get_height(vf->scrolled));
+		}
+}
+
+INSTANTIATE_TEST_SUITE_P(FileViews, RevealFile,
+                        testing::Values(std::make_tuple(FILEVIEW_LIST, false),
+                                        std::make_tuple(FILEVIEW_LIST, true),
+                                        std::make_tuple(FILEVIEW_ICON, false)));
 
 } // namespace
