@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <vector>
 
 #include <cairo.h>
 
@@ -35,7 +36,7 @@ TEST(RendererTilesBirdseye, FinalizeWithActiveOverlay)
 	EXPECT_EQ(G_OBJECT(overview)->ref_count, 1U);
 }
 
-TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
+void check_texture_reuse_and_pixels(double display_scale)
 {
 	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
 	if (!options) options = conf_options_new();
@@ -70,10 +71,10 @@ TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
 		return false;
 		};
 	ASSERT_TRUE(finish_rendering());
-	auto viewport_texture = [pr]()
+	auto viewport_texture = [pr, display_scale]()
 		{
 		auto *snapshot = gtk_snapshot_new();
-		pr->renderer->snapshot(pr->renderer, snapshot);
+		renderer_tiles_snapshot(pr->renderer, snapshot, display_scale);
 		auto *node = gtk_snapshot_free_to_node(snapshot);
 		if (!node) return static_cast<GdkTexture *>(nullptr);
 		std::function<GdkTexture *(GskRenderNode *)> find_texture;
@@ -115,10 +116,10 @@ TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
 
 	// Verify tile placement and viewport clipping against the source pixels.
 	// The visible tile footprint exceeds the configured cache limit.
-	auto verify_pixels = [pr, &image]()
+	auto verify_pixels = [pr, &image, display_scale]()
 		{
 		auto *snapshot = gtk_snapshot_new();
-		pr->renderer->snapshot(pr->renderer, snapshot);
+		renderer_tiles_snapshot(pr->renderer, snapshot, display_scale);
 		auto *node = gtk_snapshot_free_to_node(snapshot);
 		ASSERT_NE(node, nullptr);
 		auto *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
@@ -193,6 +194,16 @@ TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
 	gtk_window_destroy(window);
 }
 
+TEST(RendererTilesTexture, ReusesTilesAndPreservesPixelsAcrossPanningAndZoom)
+{
+	check_texture_reuse_and_pixels(1.0);
+}
+
+TEST(RendererTilesTexture, FractionalScaleReusesTextureAndPreservesPixelsAcrossPanningAndZoom)
+{
+	check_texture_reuse_and_pixels(1.25);
+}
+
 TEST(RendererTilesTexture, StereoModes)
 {
 	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
@@ -243,6 +254,97 @@ TEST(RendererTilesTexture, StereoModes)
 			}
 		cairo_surface_destroy(surface);
 		gsk_render_node_unref(node);
+		}
+	gtk_window_destroy(window);
+}
+
+TEST(RendererTilesTexture, FractionalDisplayScaleHasNoTileSeams)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	gtk_window_set_default_size(window, 600, 400);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 800, 600);
+	for (int y = 0; y < 600; ++y)
+		{
+		for (int x = 0; x < 800; ++x)
+			{
+			auto *pixel = gdk_pixbuf_get_pixels(image) + y * gdk_pixbuf_get_rowstride(image) + x * 3;
+			pixel[0] = 0x20 + x / 4;
+			pixel[1] = 0x40 + y / 4;
+			pixel[2] = 0x60;
+			}
+		}
+	g_autoptr(GBytes) bytes = g_bytes_new(gdk_pixbuf_read_pixels(image), gdk_pixbuf_get_byte_length(image));
+	g_autoptr(GdkTexture) reference = gdk_memory_texture_new(800, 600, GDK_MEMORY_R8G8B8, bytes, gdk_pixbuf_get_rowstride(image));
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	gtk_window_present(window);
+	auto finish_rendering = [pr]()
+		{
+		for (int i = 0; i < 1000; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (pr->complete && gtk_widget_get_mapped(GTK_WIDGET(pr))) return true;
+			g_usleep(1000);
+			}
+		return false;
+		};
+	ASSERT_TRUE(finish_rendering());
+	auto *renderer = gtk_native_get_renderer(GTK_NATIVE(window));
+	for (const double scale : {1.0, 1.25, 1.5, 1.75, 2.0})
+		{
+		SCOPED_TRACE(scale);
+		for (const int scroll : {0, 31, -17})
+			{
+			SCOPED_TRACE(scroll);
+			pixbuf_renderer_scroll(pr, scroll, scroll);
+			ASSERT_TRUE(finish_rendering());
+			auto *snapshot = gtk_snapshot_new();
+			gtk_snapshot_scale(snapshot, scale, scale);
+			// An odd widget position puts tile boundaries between device pixels.
+			graphene_point_t position{1, 1};
+			gtk_snapshot_translate(snapshot, &position);
+			renderer_tiles_snapshot(pr->renderer, snapshot, scale);
+			auto *node = gtk_snapshot_free_to_node(snapshot);
+			ASSERT_NE(node, nullptr);
+			graphene_rect_t viewport;
+			graphene_rect_init(&viewport, 0, 0, (pr->viewport_width + 2) * scale, (pr->viewport_height + 2) * scale);
+			g_autoptr(GdkTexture) texture = gsk_renderer_render_texture(renderer, node, &viewport);
+			gsk_render_node_unref(node);
+			ASSERT_NE(texture, nullptr);
+			// Compare with the same image drawn as one texture, including panning.
+			snapshot = gtk_snapshot_new();
+			gtk_snapshot_scale(snapshot, scale, scale);
+			gtk_snapshot_translate(snapshot, &position);
+			graphene_rect_t image_bounds;
+			graphene_rect_init(&image_bounds, pr->x_offset - pr->x_scroll, pr->y_offset - pr->y_scroll, 800, 600);
+			gtk_snapshot_append_texture(snapshot, reference, &image_bounds);
+			node = gtk_snapshot_free_to_node(snapshot);
+			g_autoptr(GdkTexture) expected = gsk_renderer_render_texture(renderer, node, &viewport);
+			gsk_render_node_unref(node);
+			ASSERT_NE(expected, nullptr);
+			const int width = gdk_texture_get_width(texture);
+			const int height = gdk_texture_get_height(texture);
+			std::vector<unsigned char> pixels(static_cast<size_t>(width) * height * 4);
+			std::vector<unsigned char> expected_pixels(pixels.size());
+			gdk_texture_download(texture, pixels.data(), width * 4);
+			gdk_texture_download(expected, expected_pixels.data(), width * 4);
+			int mismatches = 0;
+			for (int y = 10; y < height - 10; ++y)
+				{
+				for (int x = 10; x < width - 10; ++x)
+					{
+					const size_t offset = (y * width + x) * 4;
+					for (int channel = 0; channel < 4; ++channel)
+						{
+						if (std::abs(pixels[offset + channel] - expected_pixels[offset + channel]) > 1) ++mismatches;
+						}
+					}
+				}
+			EXPECT_EQ(mismatches, 0);
+			}
 		}
 	gtk_window_destroy(window);
 }

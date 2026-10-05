@@ -24,6 +24,7 @@
 
 #include <cairo.h>
 #include <gdk/gdk.h>
+#include <gtk/gtk.h>
 
 struct PixbufRenderer;
 struct RendererFuncs;
@@ -31,6 +32,8 @@ struct RendererFuncs;
 RendererFuncs *renderer_tiles_new(PixbufRenderer *pr);
 /** @brief Create an immutable, opaque texture copy of an RGB24 image surface. */
 GdkTexture *renderer_tiles_surface_to_texture(cairo_surface_t *surface);
+/** @brief Snapshot the image tiles for the given display scale. */
+void renderer_tiles_snapshot(RendererFuncs *renderer, GtkSnapshot *snapshot, double display_scale);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
