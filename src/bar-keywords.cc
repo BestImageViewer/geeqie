@@ -317,10 +317,8 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("title", title)) continue;
+		if (bar_pane_common_update_from_config(pkd->pane, option, value, &title)) continue;
 		if (READ_CHAR(*pkd, key)) continue;
-		if (READ_BOOL(pkd->pane, expanded)) continue;
-		if (READ_CHAR(pkd->pane, id)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
@@ -1719,10 +1717,8 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("id", id)) continue;
-		if (READ_CHAR_FULL("title", title)) continue;
+		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded)) continue;
 		if (READ_CHAR_FULL("key", key)) continue;
-		if (READ_BOOL_FULL("expanded", expanded)) continue;
 		if (READ_INT_FULL("height", height)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());

@@ -827,9 +827,7 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR(pgd->pane, id)) continue;
-		if (READ_BOOL(pgd->pane, expanded)) continue;
+		if (bar_pane_common_update_from_config(pgd->pane, option, value, &title)) continue;
 		if (READ_INT(*pgd, height)) continue;
 		if (READ_CHAR_FULL("map-id", map_id))
 			{
@@ -1008,9 +1006,10 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
+	g_autofree gchar *id = g_strdup("gps");
 	g_autofree gchar *title = g_strdup(_("GPS Map"));
-	g_autofree gchar *map_id = nullptr;
 	gboolean expanded = TRUE;
+	g_autofree gchar *map_id = nullptr;
 	gint height = 350;
 	gint zoom = 7;
 	gdouble latitude;
@@ -1020,14 +1019,13 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 	 */
 	gint int_latitude = 54000000;
 	gint int_longitude = -4000000;
-	g_autofree gchar *id = g_strdup("gps");
 
 	while (*attribute_names)
 		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("title", title))
+		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded))
 			continue;
 		if (READ_CHAR_FULL("map-id", map_id))
 			continue;
@@ -1037,11 +1035,7 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 			continue;
 		if (READ_INT_CLAMP_FULL("longitude", int_longitude, -90000000, +90000000))
 			continue;
-		if (READ_BOOL_FULL("expanded", expanded))
-			continue;
 		if (READ_INT_FULL("height", height))
-			continue;
-		if (READ_CHAR_FULL("id", id))
 			continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());

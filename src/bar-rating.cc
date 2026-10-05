@@ -92,9 +92,8 @@ static void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **at
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("title", title)) continue; // FIXME Is it intended to set title to GTK_LABEL(prd->pane.title) or simply avoid "unknown attribute"?
-		if (READ_CHAR(prd->pane, id)) continue;
-		if (READ_BOOL(prd->pane, expanded)) continue;
+		// FIXME Is it intended to set title to GTK_LABEL(prd->pane.title) or simply avoid "unknown attribute"?
+		if (bar_pane_common_update_from_config(prd->pane, option, value, &title)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
@@ -216,9 +215,7 @@ GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const 
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("id", id)) continue;
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_BOOL_FULL("expanded", expanded)) continue;
+		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}

@@ -789,6 +789,18 @@ void bar_pane_common_write_config(const PaneData &pane, RcString &rc)
 	WRITE_BOOL(pane, expanded);
 }
 
+bool bar_pane_common_update_from_config(PaneData &pd, const gchar *option, const gchar *value, gchar **title)
+{
+	return bar_pane_common_read_from_config(option, value, &pd.id, title, pd.expanded);
+}
+
+bool bar_pane_common_read_from_config(const gchar *option, const gchar *value, gchar **id, gchar **title, gboolean &expanded)
+{
+	return READ_CHAR_FULL("id", *id)
+	    || READ_CHAR_FULL("title", *title)
+	    || READ_BOOL_FULL("expanded", expanded);
+}
+
 void bar_pane_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
