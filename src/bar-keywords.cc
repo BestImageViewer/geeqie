@@ -438,39 +438,22 @@ gboolean bar_pane_keywords_filter_visible(GtkTreeModel *keyword_tree, GtkTreeIte
 	return !keyword_is_hidden_in(keyword_tree, iter, filter);
 }
 
-template<gboolean append>
-void bar_pane_keywords_set_selection_cb(GSimpleAction *, GVariant *, gpointer data)
+using MetadataListFunc = gboolean(*)(FileData *fd, const gchar *key, const GList *values);
+
+template<MetadataListFunc metadata_func>
+void bar_pane_keywords_selection_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *pkd = static_cast<PaneKeywordsData *>(data);
 	GList *keywords = keyword_list_pull_selected(pkd->keyword_view);
 
 	g_autoptr(FileDataList) list = layout_selection_list(pkd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
-
-	const auto metadata_func = append ? metadata_append_list : metadata_write_list;
 
 	for (GList *work = list; work; work = work->next)
 		{
 		auto *fd = static_cast<FileData *>(work->data);
 
 		metadata_func(fd, KEYWORD_KEY, keywords);
-		}
-
-	g_list_free_full(keywords, g_free);
-}
-
-void bar_pane_keywords_remove_selection_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	auto *pkd = static_cast<PaneKeywordsData *>(data);
-	GList *keywords = keyword_list_pull_selected(pkd->keyword_view);
-
-	g_autoptr(FileDataList) list = layout_selection_list(pkd->pane.lw);
-	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
-
-	for (GList *work = list; work; work = work->next)
-		{
-		auto *fd = static_cast<FileData *>(work->data);
-		metadata_remove_list(fd, KEYWORD_KEY, keywords);
 		}
 
 	g_list_free_full(keywords, g_free);
@@ -509,9 +492,9 @@ void bar_pane_keywords_changed(GtkTextBuffer *, gpointer data)
 void bar_pane_keywords_set_extra_menu(PaneKeywordsData *pkd)
 {
 	static const GActionEntry keyword_actions[] = {
-		{ "append-to-selection",  bar_pane_keywords_set_selection_cb<TRUE>,  nullptr, nullptr, nullptr, {} },
-		{ "remove-from-selection", bar_pane_keywords_remove_selection_cb,    nullptr, nullptr, nullptr, {} },
-		{ "replace-in-selection", bar_pane_keywords_set_selection_cb<FALSE>, nullptr, nullptr, nullptr, {} },
+		{ "append-to-selection",   bar_pane_keywords_selection_cb<metadata_append_list>, nullptr, nullptr, nullptr, {} },
+		{ "remove-from-selection", bar_pane_keywords_selection_cb<metadata_remove_list>, nullptr, nullptr, nullptr, {} },
+		{ "replace-in-selection",  bar_pane_keywords_selection_cb<metadata_write_list>,  nullptr, nullptr, nullptr, {} },
 	};
 
 	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
