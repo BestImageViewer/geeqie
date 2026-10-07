@@ -233,10 +233,22 @@ LayoutOptions init_layout_options(const gchar **attribute_names, const gchar **a
 	lop.float_window.vdivider_pos = 200;
 	lop.home_path = nullptr;
 	lop.id = g_strdup("null");
-	lop.main_window.hdivider_pos = 300;
 	lop.main_window.maximized = FALSE;
-	lop.main_window.rect = {0, 0, 720, 540};
-	lop.main_window.vdivider_pos = 200;
+	lop.main_window.rect = {0, 0, 1200, 800};
+	if (auto *display = gdk_display_get_default())
+		{
+		auto *monitors = gdk_display_get_monitors(display);
+		g_autoptr(GdkMonitor) monitor = GDK_MONITOR(g_list_model_get_item(monitors, 0));
+		if (monitor)
+			{
+			GdkRectangle geometry;
+			gdk_monitor_get_geometry(monitor, &geometry);
+			lop.main_window.rect.width = std::min(1200, geometry.width * 9 / 10);
+			lop.main_window.rect.height = std::min(800, geometry.height * 9 / 10);
+			}
+		}
+	lop.main_window.hdivider_pos = std::min(480, lop.main_window.rect.width / 2);
+	lop.main_window.vdivider_pos = lop.main_window.rect.height * 2 / 5;
 	lop.search_window = {100, 100, 700, 650};
 	lop.dupe_window.rect = {100, 100, 800, 400};
 	lop.advanced_exif_window = {0, 0, 900, 600};
