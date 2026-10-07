@@ -23,8 +23,6 @@
 
 #include <algorithm>
 #include <cstdio>
-#include <string>
-#include <vector>
 
 #include <gdk/gdk.h>
 #include <gio/gio.h>
@@ -48,7 +46,7 @@
 namespace
 {
 
-std::vector<std::string> keyword_store;
+KeywordList keyword_store;
 gboolean keyword_store_loaded = FALSE;
 
 void bar_pane_keywords_changed(GtkTextBuffer *buffer, gpointer data);
@@ -95,6 +93,10 @@ void keyword_list_push(GtkWidget *textview, GList *list)
 		}
 }
 
+bool keywords_compare(const std::string &keyword_a, const std::string &keyword_b)
+{
+	return g_utf8_collate(keyword_a.c_str(), keyword_b.c_str()) < 0;
+}
 
 /*
  *-------------------------------------------------------------------
@@ -1611,10 +1613,7 @@ gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 	    std::find(keyword_store.begin(), keyword_store.end(), entry_text) == keyword_store.end())
 		{
 		keyword_store.emplace_back(entry_text);
-		std::sort(keyword_store.begin(), keyword_store.end(), [](const std::string &a, const std::string &b)
-			{
-			return g_utf8_collate(a.c_str(), b.c_str()) < 0;
-			});
+		std::sort(keyword_store.begin(), keyword_store.end(), keywords_compare);
 		}
 
 	return FALSE;
@@ -1657,10 +1656,7 @@ void autocomplete_keywords_list_load(const gchar *path)
 		keyword_store.emplace_back(s_buf);
 		}
 
-	std::sort(keyword_store.begin(), keyword_store.end(), [](const std::string &a, const std::string &b)
-		{
-		return g_utf8_collate(a.c_str(), b.c_str()) < 0;
-		});
+	std::sort(keyword_store.begin(), keyword_store.end(), keywords_compare);
 }
 
 gboolean autocomplete_keywords_list_save(const gchar *path)
@@ -1737,24 +1733,14 @@ GList *keyword_list_get()
 	return ret_list;
 }
 
-void keyword_list_set(GList *keyword_list)
+void keyword_list_set(KeywordList keyword_list)
 {
-	if (!keyword_list) return;
+	if (keyword_list.empty()) return;
 
-	keyword_store.clear();
+	keyword_store = std::move(keyword_list);
 	keyword_store_loaded = TRUE;
 
-	while (keyword_list)
-		{
-		keyword_store.emplace_back(static_cast<const gchar *>(keyword_list->data));
-
-		keyword_list = keyword_list->next;
-		}
-
-	std::sort(keyword_store.begin(), keyword_store.end(), [](const std::string &a, const std::string &b)
-		{
-		return g_utf8_collate(a.c_str(), b.c_str()) < 0;
-		});
+	std::sort(keyword_store.begin(), keyword_store.end(), keywords_compare);
 }
 
 gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)

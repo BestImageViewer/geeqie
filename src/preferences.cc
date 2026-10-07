@@ -3103,24 +3103,21 @@ static void keywords_find_cb(GtkWidget *widget, gpointer)
 
 static void config_tab_keywords_save()
 {
-	GList *kw_list = nullptr;
-	gchar *kw_split;
+	KeywordList kw_list;
 
 	g_autofree gchar *buffer_text = text_widget_text_pull(keyword_text);
 
-	kw_split = strtok(buffer_text, "\n");
+	char *kw_split = strtok(buffer_text, "\n");
 	while (kw_split != nullptr)
 		{
-		if (!g_list_find_custom(kw_list, kw_split, reinterpret_cast<GCompareFunc>(g_strcmp0)))
+		if (std::find(kw_list.cbegin(), kw_list.cend(), kw_split) == kw_list.cend())
 			{
-			kw_list = g_list_append(kw_list, g_strdup(kw_split));
+			kw_list.emplace_back(kw_split);
 			}
 		kw_split = strtok(nullptr, "\n");
 		}
 
-	keyword_list_set(kw_list);
-
-	g_list_free_full(kw_list, g_free);
+	keyword_list_set(std::move(kw_list));
 }
 
 static void config_tab_keywords(GtkWidget *notebook)

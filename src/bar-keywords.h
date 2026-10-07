@@ -22,6 +22,9 @@
 #ifndef BAR_KEYWORDS_H
 #define BAR_KEYWORDS_H
 
+#include <string>
+#include <vector>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -31,8 +34,10 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 
 GList *keyword_list_pull(GtkWidget *text_widget); /**< used in search.cc */
 
+using KeywordList = std::vector<std::string>;
+
 GList *keyword_list_get();
-void keyword_list_set(GList *keyword_list);
+void keyword_list_set(KeywordList keyword_list);
 gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
