@@ -547,7 +547,7 @@ static void vd_drop_menu_append_item(GMenu *menu, const gchar *label, const gcha
 	g_menu_append_item(menu, item);
 }
 
-GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
+GtkWidget *vd_drop_menu(ViewDir *vd, gint active, gdouble x, gdouble y)
 {
 	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
 	g_autoptr(GMenu) menu = g_menu_new();
@@ -592,7 +592,14 @@ GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
 	gtk_widget_insert_action_group(popover, "dir-drop", G_ACTION_GROUP(action_group));
 	popover_set_parent(popover, vd->widget);
+	GdkRectangle pointing_to{static_cast<int>(x), static_cast<int>(y), 1, 1};
+	gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
 	g_signal_connect(G_OBJECT(popover), "destroy", G_CALLBACK(vd_popup_destroy_cb), vd);
+	gint natural_width;
+	gint natural_height;
+	gtk_widget_measure(popover, GTK_ORIENTATION_HORIZONTAL, -1, nullptr, &natural_width, nullptr, nullptr);
+	gtk_widget_measure(popover, GTK_ORIENTATION_VERTICAL, natural_width, nullptr, &natural_height, nullptr, nullptr);
+	gtk_widget_set_size_request(popover, natural_width, natural_height);
 	popover_popup(popover);
 
 	return popover;
@@ -1280,6 +1287,7 @@ struct VdDropReadData
 	GtkWidget *view;
 	FileData *drop_fd;
 	DnDAction action;
+	graphene_point_t position;
 };
 
 static void vd_dnd_drop_data_free(VdDropReadData *drop_data)
@@ -1322,7 +1330,7 @@ static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
 			}
 		else
 			{
-			vd_drop_menu(vd, writable);
+			vd_drop_menu(vd, writable, drop_data->position.x, drop_data->position.y);
 			/* The menu owns the eventual operation, so the source must not
 			 * remove its data before the user chooses an action. */
 			action = (gdk_drop_get_actions(drop) & GDK_ACTION_COPY) ? GDK_ACTION_COPY : GDK_ACTION_NONE;
@@ -1352,6 +1360,11 @@ static gboolean vd_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x
 	drop_data->view = GTK_WIDGET(g_object_ref(vd->view));
 	drop_data->drop_fd = file_data_ref(vd->drop_fd);
 	drop_data->action = vd_dnd_requested_action(target);
+	graphene_point_t position{static_cast<float>(x), static_cast<float>(y)};
+	if (!gtk_widget_compute_point(vd->view, vd->widget, &position, &drop_data->position))
+		{
+		drop_data->position = position;
+		}
 
 	dnd_read_file_list_async(drop, vd_dnd_drop_file_received, drop_data);
 
