@@ -195,6 +195,8 @@ struct ConfOptions
 
 		gboolean confirm_delete;
 		gboolean confirm_move_to_trash;
+		gboolean confirm_delete_dir;
+		gboolean confirm_move_dir_to_trash;
 		gboolean enable_delete_key;
 		gboolean safe_delete_enable;
 		gboolean use_system_trash;

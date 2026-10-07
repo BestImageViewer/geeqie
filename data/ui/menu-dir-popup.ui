@@ -27,7 +27,7 @@
         <attribute name="action">win.dir-win-find-duplicates-recursive</attribute>
       </item>
     </section>
-    <section>
+    <section id="folder-actions-section">
       <item>
         <attribute name="label" translatable="yes">_New folder…</attribute>
         <attribute name="action">win.dir-win-new-folder</attribute>
@@ -49,10 +49,15 @@
         <attribute name="action">win.dir-win-rename</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">_Delete…</attribute>
-        <attribute name="action">win.dir-win-delete</attribute>
+        <attribute name="label" translatable="yes">_Move to Trash…</attribute>
+        <attribute name="action">win.dir-win-trash</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Permanently Delete…</attribute>
+        <attribute name="action">win.dir-win-delete-permanent</attribute>
       </item>
     </section>
+    <section id="trash-restore-section"/>
     <section>
       <item>
         <attribute name="label" translatable="yes">View as _List</attribute>

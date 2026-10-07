@@ -46,6 +46,7 @@
 #include "main-defines.h"
 #include "misc.h"
 #include "options.h"
+#include "trash.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
@@ -663,12 +664,34 @@ static void vd_pop_menu_dupe_cb(GSimpleAction *, GVariant *, gpointer data)
 	dupe_window_add_files(dw, list, recursive);
 }
 
+static void vd_pop_menu_delete_default_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+	if (vd->click_fd) file_util_delete_dir(vd->click_fd, vd->widget);
+}
+
+template<gboolean trash>
 static void vd_pop_menu_delete_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
 	if (!vd->click_fd) return;
-	file_util_delete_dir(vd->click_fd, vd->widget);
+	file_util_delete_dir(vd->click_fd, vd->widget, trash);
+}
+
+template<gboolean move>
+static void vd_pop_menu_restore_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+	if (!vd->click_fd) return;
+	file_util_safe_trash_restore_async(vd->click_fd->path, move, vd->widget);
+	vd_refresh(vd);
+}
+
+static void vd_pop_menu_restore_elsewhere_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+	if (vd->click_fd) file_util_safe_trash_restore_choose(vd->click_fd->path, TRUE, vd->widget);
 }
 
 template<gboolean quoted>
@@ -848,6 +871,35 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dir-popup.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-dir-popup"));
+	auto *folder_actions = G_MENU(gtk_builder_get_object(builder, "folder-actions-section"));
+	for (gint i = 0; i < g_menu_model_get_n_items(G_MENU_MODEL(folder_actions)); i++)
+		{
+		g_autofree gchar *name = nullptr;
+		g_menu_model_get_item_attribute(G_MENU_MODEL(folder_actions), i, G_MENU_ATTRIBUTE_ACTION, "s", &name);
+		const gchar *label;
+		if (g_strcmp0(name, "win.dir-win-trash") == 0)
+			{
+			label = options->file_ops.confirm_move_dir_to_trash ? _("_Move to Trash…") : _("_Move to Trash");
+			}
+		else if (g_strcmp0(name, "win.dir-win-delete-permanent") == 0)
+			{
+			label = options->file_ops.confirm_delete_dir ? _("_Permanently Delete…") : _("_Permanently Delete");
+			}
+		else continue;
+		g_autoptr(GMenuItem) item = g_menu_item_new_from_model(G_MENU_MODEL(folder_actions), i);
+		g_menu_item_set_label(item, label);
+		g_menu_remove(folder_actions, i);
+		g_menu_insert_item(folder_actions, i, item);
+		}
+	g_autofree gchar *original_path = fd ? file_util_safe_trash_original_path(fd->path) : nullptr;
+	if (original_path)
+		{
+		auto *restore_section = G_MENU(gtk_builder_get_object(builder, "trash-restore-section"));
+		g_menu_append(restore_section, _("Copy back to original location"), "win.dir-win-restore-copy");
+		g_menu_append(restore_section, _("Move back to original location"), "win.dir-win-restore-move");
+		g_menu_append(restore_section, _("Restore to another folder…"), "win.dir-win-restore-elsewhere");
+		}
+
 
 	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-up");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (vd->dir_fd && strcmp(vd->dir_fd->path, G_DIR_SEPARATOR_S) != 0));
@@ -868,6 +920,12 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), new_folder_active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-rename");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), rename_delete_active);
+
+	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-trash");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), rename_delete_active);
+
+	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-delete-permanent");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), rename_delete_active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-delete");

@@ -56,7 +56,7 @@
       </item>
       <item>
         <attribute name="action">win.view-file-delete-permanent</attribute>
-        <attribute name="label" translatable="yes">Delete selection</attribute>
+        <attribute name="label" translatable="yes">Permanently Delete</attribute>
       </item>
     </section>
     <section>

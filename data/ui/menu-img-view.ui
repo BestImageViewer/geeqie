@@ -101,7 +101,7 @@
       </item>
       <item>
         <attribute name="action">win.image-win-delete-permanent</attribute>
-        <attribute name="label" translatable="yes">Delete</attribute>
+        <attribute name="label" translatable="yes">Permanently Delete</attribute>
       </item>
     </section>
     <section>

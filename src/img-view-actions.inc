@@ -96,7 +96,7 @@ static const ActionDef image_actions[] =
 		{
 		"win.image-win-delete-permanent",
 		nullptr,
-		N_("Delete"),
+		N_("Permanently Delete"),
 		view_delete_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,

@@ -83,7 +83,7 @@ static const ActionDef search_actions[] =
 		{
 		"win.search-win-delete-permanent",
 		nullptr,
-		N_("Delete"),
+		N_("Permanently Delete"),
 		sr_menu_delete_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,

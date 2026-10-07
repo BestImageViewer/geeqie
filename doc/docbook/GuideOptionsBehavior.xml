@@ -22,6 +22,19 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><guilabel>Confirm permanent folder delete</guilabel></term>
+        <listitem>
+          <para>Enabled by default. Prompts before permanently deleting a folder and all its contents, including subfolders. The folder context menu offers both Move to Trash and Permanently Delete, each using its own confirmation setting. Disabling this option starts permanent deletion without confirmation; errors are still reported.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Confirm move folder to Trash</guilabel></term>
+        <listitem>
+          <para>Enabled by default. Prompts before moving a complete folder tree to Trash as one item. The confirmation shows the number of descendant folders and all files, including hidden files, sidecars, symbolic links, and files excluded by display filters. Symbolic link targets are never traversed. If contents cannot be counted reliably, an error is shown and deletion stops.</para>
+          <para>Built-in counting and recursive operations run in the background with a progress dialog and a Cancel button. Cancellation stops further work; files already removed are not restored. Failure messages distinguish incomplete copying from a completed copy followed by failed source removal. They identify the source and destination paths, say whether an incomplete copy was removed or remains, and report how many source entries were removed. A completed copy is retained when source removal fails. Built-in deletion refuses folder trees containing mount points, including bind mounts, before deleting any contents; symbolic links are not followed. Sources that change while being copied are checked before removal and the operation stops if a change is detected. Disabling this option starts trashing without confirmation. Failed trashing never falls back to permanent deletion.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term>
           <guilabel>
             Enable
@@ -55,14 +68,14 @@
           <guilabel>Use Geeqie trash location</guilabel>
         </term>
         <listitem>
-          <para>Moves deleted files to a temporary folder, for easy retrieval of deleted files. Files in the temporary folder are retained until the maximum size is reached, at which point deleting additional files will result in the removal of the oldest files to reclaim the space needed for the new files.</para>
+          <para>Moves deleted files to a temporary folder, for easy retrieval of deleted files. Items in the temporary folder are retained until the maximum size is reached, at which point deleting additional items will result in removal of the oldest trash entries to reclaim space. Folder sizes include their descendants, and a folder tree is removed as a whole item. Automatic removal displays a desktop notification showing the number of entries permanently deleted and the space reclaimed. An incoming item larger than the limit is refused with an error before removing any existing trash entries. The original item and existing trash entries are preserved.</para>
           <note>
             <para>
               Deleted files retain their original names in the <literal>files</literal> subfolder. If a name is already present, Geeqie adds a numeric suffix before the file extension, for example <literal>image.2.jpg</literal>, to make it unique without preventing the file type from being recognized.
               <para />
-              For each file, the <literal>info</literal> subfolder contains a freedesktop.org-compatible <literal>.trashinfo</literal> file recording its original path and deletion date. This information can be used to restore the file manually.
+              For each file, the <literal>info</literal> subfolder contains a freedesktop.org-compatible <literal>.trashinfo</literal> file recording its original path and deletion date. A folder tree has one information file for the top-level folder, preserving the names of all its contents.
               <para />
-              When viewing the <literal>files</literal> subfolder in Geeqie, right-click a file to copy or move it back to its recorded original location. Copying leaves the trash entry intact; moving removes it after a successful restore.
+              When viewing the <literal>files</literal> subfolder in Geeqie, right-click a file or folder to copy or move it back to its recorded original location. Copying leaves the trash entry intact; moving removes it after a successful restore. Existing destinations are not overwritten. If the original parent no longer exists, use Restore to another folder to choose a destination.
               <para />
               Files created by older versions, with a six-digit prefix, remain in the Safe Delete folder and are still included when enforcing the maximum size or clearing the trash.
             </para>
@@ -78,6 +91,12 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><guilabel>Use no trash at all</guilabel></term>
+        <listitem>
+          <para>Selects permanent deletion as the default. The folder context menu still offers Move to Trash; that explicit action uses the last selected trash location without changing this default.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term>
           <guilabel>Folder</guilabel>
         </term>
@@ -90,7 +109,7 @@
           <guilabel>Maximum size</guilabel>
         </term>
         <listitem>
-          <para>The size to use for the Safe Delete folder, in megabytes. Note that setting this value to 0 (zero) will disable any limit.</para>
+          <para>The size limit for Geeqie trash, in MiB. The default for new configurations is 5120 MiB (5 GiB). The control accepts limits up to 102400 MiB (100 GiB). Existing saved limits are preserved. Setting this value to 0 (zero) disables the limit.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

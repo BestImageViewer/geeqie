@@ -992,10 +992,16 @@ static void vf_pop_menu_restore_cb(GtkWidget *, gpointer data)
 	for (GList *work = list; work; work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
-		file_util_safe_trash_restore(fd->path, move, vf->listview);
+		file_util_safe_trash_restore_async(fd->path, move, vf->listview);
 		}
 
 	if (move) vf_refresh_idle(vf);
+}
+
+static void vf_pop_menu_restore_elsewhere_cb(GtkWidget *, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+	if (vf->click_fd) file_util_safe_trash_restore_choose(vf->click_fd->path, TRUE, vf->listview);
 }
 
 static void vf_pop_menu_rename_cb(GtkWidget *, gpointer data)
@@ -1344,6 +1350,11 @@ static void vf_pop_menu_restore_action_cb(GSimpleAction *, GVariant *, gpointer 
 	vf_pop_menu_restore_cb<move>(nullptr, vf_from_action_data(data));
 }
 
+static void vf_pop_menu_restore_elsewhere_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_restore_elsewhere_cb(nullptr, vf_from_action_data(data));
+}
+
 static void vf_pop_menu_rename_action_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	vf_pop_menu_rename_cb(nullptr, vf_from_action_data(data));
@@ -1664,6 +1675,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 		{
 		gmenu_append_action_item(trash_restore_section, _("Copy back to original location"), "win.view-file-restore-copy");
 		gmenu_append_action_item(trash_restore_section, _("Move back to original location"), "win.view-file-restore-move");
+		gmenu_append_action_item(trash_restore_section, _("Restore to another folder…"), "win.view-file-restore-elsewhere");
 		}
 	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(builder, "plugins-submenu"));
 	plugins_menu_populate(plugins_menu, "win.view-file-plugin-run", vf->editmenu_fd_list);

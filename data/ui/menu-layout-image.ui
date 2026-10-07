@@ -80,7 +80,7 @@
       </item>
       <item>
         <attribute name="action">win.layout-image-delete-permanent</attribute>
-        <attribute name="label" translatable="yes">Delete</attribute>
+        <attribute name="label" translatable="yes">Permanently Delete</attribute>
       </item>
     </section>
     <section>

@@ -472,6 +472,8 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_BOOL(*options, file_ops.enable_in_place_rename);
 	WRITE_NL(); WRITE_BOOL(*options, file_ops.confirm_delete);
 	WRITE_NL(); WRITE_BOOL(*options, file_ops.confirm_move_to_trash);
+	WRITE_NL(); WRITE_BOOL(*options, file_ops.confirm_delete_dir);
+	WRITE_NL(); WRITE_BOOL(*options, file_ops.confirm_move_dir_to_trash);
 	WRITE_NL(); WRITE_BOOL(*options, file_ops.enable_delete_key);
 	WRITE_NL(); WRITE_BOOL(*options, file_ops.use_system_trash);
 	WRITE_NL(); WRITE_BOOL(*options, file_ops.safe_delete_enable);
@@ -981,6 +983,8 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, file_ops.enable_in_place_rename)) continue;
 		if (READ_BOOL(*options, file_ops.confirm_delete)) continue;
 		if (READ_BOOL(*options, file_ops.confirm_move_to_trash)) continue;
+		if (READ_BOOL(*options, file_ops.confirm_delete_dir)) continue;
+		if (READ_BOOL(*options, file_ops.confirm_move_dir_to_trash)) continue;
 		if (READ_BOOL(*options, file_ops.enable_delete_key)) continue;
 		if (READ_BOOL(*options, file_ops.use_system_trash)) continue;
 		if (READ_BOOL(*options, file_ops.safe_delete_enable)) continue;

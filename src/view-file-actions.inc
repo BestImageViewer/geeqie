@@ -130,6 +130,19 @@ static const ActionDef view_file_actions[] =
 		},
 
 		{
+		"win.view-file-restore-elsewhere",
+		nullptr,
+		N_("Restore to another folder…"),
+		vf_pop_menu_restore_elsewhere_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.view-file-copy-path",
 		nullptr,
 		N_("Copy path"),
@@ -184,7 +197,7 @@ static const ActionDef view_file_actions[] =
 		{
 		"win.view-file-delete-permanent",
 		GQ_ICON_DELETE_SHRED,
-		N_("Delete selection"),
+		N_("Permanently Delete"),
 		vf_pop_menu_delete_action_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,

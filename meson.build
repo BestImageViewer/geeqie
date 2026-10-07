@@ -66,6 +66,7 @@ configuration_inc = include_directories('.')
 # Main library dependencies
 gtk_dep = dependency('gtk4', version : '>=4.18', required : true)
 glib_dep = dependency('glib-2.0', version : '>=2.66', required: true)
+gio_unix_dep = dependency('gio-unix-2.0', version : '>=2.66', required: true)
 pango_dep = dependency('pango', version : '>=1.46', required: true)
 
 option = get_option('git')

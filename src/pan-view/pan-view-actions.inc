@@ -107,7 +107,7 @@ static const ActionDef pan_actions[] =
 		{
 		"win.pan-win-delete-permanent",
 		nullptr,
-		N_("Delete"),
+		N_("Permanently Delete"),
 		pan_delete_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,

@@ -30,7 +30,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
+#include <gio/gunixmounts.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
@@ -947,25 +952,339 @@ gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	return g_file_get_path(web->tmp_g_file);
 }
 
-gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)
+namespace
 {
-	g_autoptr(GFileEnumerator) enumerator = nullptr;
 
-	enumerator = g_file_enumerate_children(file, G_FILE_ATTRIBUTE_STANDARD_NAME, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, cancellable, nullptr);
+constexpr auto TREE_ATTRIBUTES = G_FILE_ATTRIBUTE_STANDARD_TYPE "," G_FILE_ATTRIBUTE_STANDARD_SIZE ","
+    G_FILE_ATTRIBUTE_UNIX_DEVICE "," G_FILE_ATTRIBUTE_UNIX_INODE ","
+    G_FILE_ATTRIBUTE_TIME_MODIFIED "," G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC ",time::modified-nsec,"
+    G_FILE_ATTRIBUTE_TIME_CHANGED "," G_FILE_ATTRIBUTE_TIME_CHANGED_USEC ",time::changed-nsec";
 
-	while (enumerator != nullptr)
+struct TreeEntry
+{
+	std::string uri;
+	GFileType type;
+	guint32 device;
+	guint64 inode;
+	guint64 size;
+	guint64 modified;
+	guint32 modified_usec;
+	guint32 modified_nsec;
+	guint64 changed;
+	guint32 changed_usec;
+	guint32 changed_nsec;
+};
+
+using TreePlan = std::vector<TreeEntry>;
+
+TreeEntry tree_entry(GFile *file, GFileInfo *info)
+{
+	g_autofree gchar *uri = g_file_get_uri(file);
+	return {uri, g_file_info_get_file_type(info),
+	        g_file_info_get_attribute_uint32(info, G_FILE_ATTRIBUTE_UNIX_DEVICE),
+	        g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_UNIX_INODE),
+	        static_cast<guint64>(g_file_info_get_size(info)),
+	        g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED),
+	        g_file_info_get_attribute_uint32(info, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC),
+	        g_file_info_get_attribute_uint32(info, "time::modified-nsec"),
+	        g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_CHANGED),
+	        g_file_info_get_attribute_uint32(info, G_FILE_ATTRIBUTE_TIME_CHANGED_USEC),
+	        g_file_info_get_attribute_uint32(info, "time::changed-nsec")};
+}
+
+bool tree_entry_matches(const TreeEntry &before, const TreeEntry &after, bool identity_only = false, bool ignore_changed = false)
+{
+	return before.type == after.type && before.device == after.device && before.inode == after.inode &&
+	       (identity_only || (before.size == after.size && before.modified == after.modified &&
+	                          before.modified_usec == after.modified_usec && before.modified_nsec == after.modified_nsec &&
+	                          (ignore_changed || (before.changed == after.changed && before.changed_usec == after.changed_usec &&
+	                                              before.changed_nsec == after.changed_nsec))));
+}
+
+GCancellable *tree_cancellable(FileTreeOperation *operation)
+{
+	return operation ? operation->cancellable : nullptr;
+}
+
+gboolean tree_progress(GFile *file, FileTreeOperation *operation, GError **error)
+{
+	if (operation && operation->progress) operation->progress(file, operation->data);
+	return !g_cancellable_set_error_if_cancelled(tree_cancellable(operation), error);
+}
+
+gboolean tree_mount_check(GFile *file, GFileInfo *info, guint32 root_device, GError **error)
+{
+	if (g_file_info_get_file_type(info) == G_FILE_TYPE_SYMBOLIC_LINK) return TRUE;
+	g_autofree gchar *path = g_file_get_path(file);
+	g_autofree gchar *resolved = path ? realpath(path, nullptr) : nullptr;
+	// Cache the mount table per thread, refreshing it when the OS reports a change.
+	// Checking device numbers alone misses bind mounts on the same filesystem.
+	thread_local guint64 mounts_read = 0;
+	thread_local std::unordered_set<std::string> mount_paths;
+	if (!mounts_read || g_unix_mounts_changed_since(mounts_read))
 		{
-		 GFile *child;
-
-		if (!g_file_enumerator_iterate(enumerator, nullptr, &child, cancellable, error))
-			return FALSE;
-		if (child == nullptr)
-			break;
-		if (!rmdir_recursive(child, cancellable, error))
-			return FALSE;
+		mount_paths.clear();
+		GList *mounts = g_unix_mounts_get(&mounts_read);
+		for (GList *item = mounts; item; item = item->next)
+			mount_paths.emplace(g_unix_mount_get_mount_path(static_cast<GUnixMountEntry *>(item->data)));
+		g_list_free_full(mounts, reinterpret_cast<GDestroyNotify>(g_unix_mount_free));
 		}
+	const bool boundary = (resolved && mount_paths.count(resolved) > 0) ||
+	                      g_file_info_get_attribute_uint32(info, G_FILE_ATTRIBUTE_UNIX_DEVICE) != root_device;
+	if (!boundary) return TRUE;
+	g_autofree gchar *display = g_file_get_parse_name(file);
+	g_set_error(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, _("Refusing to cross or remove a mount point:\n%s"), display);
+	return FALSE;
+}
 
-	return g_file_delete(file, cancellable, error);
+gboolean tree_scan(GFile *file, FileTreeStats &stats, TreePlan *plan, guint32 root_device,
+                   FileTreeOperation *operation, GError **error)
+{
+	if (!tree_progress(file, operation, error)) return FALSE;
+	g_autoptr(GFileInfo) info = g_file_query_info(file, TREE_ATTRIBUTES, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                                          tree_cancellable(operation), error);
+	if (!info || !tree_mount_check(file, info, root_device, error)) return FALSE;
+	const auto entry = tree_entry(file, info);
+	if (entry.type == G_FILE_TYPE_DIRECTORY)
+		{
+		g_autoptr(GFileEnumerator) enumerator = g_file_enumerate_children(file,
+		                            G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE,
+		                            G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, tree_cancellable(operation), error);
+		if (!enumerator) return FALSE;
+		while (TRUE)
+			{
+			GFileInfo *child_info;
+			GFile *child;
+			if (!g_file_enumerator_iterate(enumerator, &child_info, &child, tree_cancellable(operation), error)) return FALSE;
+			if (!child) break;
+			if (g_file_info_get_file_type(child_info) == G_FILE_TYPE_DIRECTORY) stats.directories++;
+			else stats.files++;
+			if (!tree_scan(child, stats, plan, root_device, operation, error)) return FALSE;
+			}
+		// Detect changes to a directory while its contents were enumerated.
+		g_autoptr(GFileInfo) after = g_file_query_info(file, TREE_ATTRIBUTES, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                                            tree_cancellable(operation), error);
+		if (!after) return FALSE;
+		if (!tree_entry_matches(entry, tree_entry(file, after)))
+			{
+			g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_BUSY, _("Folder contents changed while being scanned. Please try again."));
+			return FALSE;
+			}
+		}
+	else stats.bytes += entry.size;
+	if (plan) plan->push_back(entry);
+	return TRUE;
+}
+
+gboolean tree_prepare(GFile *file, FileTreeStats &stats, TreePlan *plan, FileTreeOperation *operation, GError **error)
+{
+	if (operation) operation->phase = FileTreePhase::SCAN;
+	g_autoptr(GFileInfo) info = g_file_query_info(file, G_FILE_ATTRIBUTE_UNIX_DEVICE,
+	                                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, tree_cancellable(operation), error);
+	return info && tree_scan(file, stats, plan, g_file_info_get_attribute_uint32(info, G_FILE_ATTRIBUTE_UNIX_DEVICE), operation, error);
+}
+
+gboolean tree_verify(const TreeEntry &entry, FileTreeOperation *operation, GError **error, bool identity_only = false, bool ignore_changed = false)
+{
+	g_autoptr(GFile) file = g_file_new_for_uri(entry.uri.c_str());
+	g_autoptr(GFileInfo) info = g_file_query_info(file, TREE_ATTRIBUTES, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                                          tree_cancellable(operation), error);
+	if (!info || !tree_mount_check(file, info, entry.device, error)) return FALSE;
+	if (tree_entry_matches(entry, tree_entry(file, info), identity_only, ignore_changed)) return TRUE;
+	g_autofree gchar *display = g_file_get_parse_name(file);
+	g_set_error(error, G_IO_ERROR, G_IO_ERROR_BUSY, _("Source changed; it has been left in place:\n%s"), display);
+	return FALSE;
+}
+
+gboolean tree_verify_ancestors(GFile *file, const std::unordered_map<std::string, const TreeEntry *> &directories,
+                               FileTreeOperation *operation, GError **error)
+{
+	g_autoptr(GFile) parent = g_file_get_parent(file);
+	while (parent)
+		{
+		g_autofree gchar *uri = g_file_get_uri(parent);
+		const auto found = directories.find(uri);
+		if (found == directories.end()) break;
+		if (!tree_verify(*found->second, operation, error, true)) return FALSE;
+		auto *next = g_file_get_parent(parent);
+		g_object_unref(g_steal_pointer(&parent));
+		parent = next;
+		}
+	return TRUE;
+}
+
+std::unordered_map<std::string, const TreeEntry *> tree_directories(const TreePlan &plan)
+{
+	std::unordered_map<std::string, const TreeEntry *> directories;
+	for (const auto &entry : plan)
+		if (entry.type == G_FILE_TYPE_DIRECTORY) directories.emplace(entry.uri, &entry);
+	return directories;
+}
+
+gboolean tree_remove_plan(const TreePlan &plan, FileTreeOperation *operation, GError **error, guint64 *removed = nullptr)
+{
+	if (operation) operation->phase = FileTreePhase::REMOVE;
+	// Validate the complete copy before deleting any source entries.
+	const auto directories = tree_directories(plan);
+	std::unordered_map<guint32, std::unordered_set<guint64>> removed_inodes;
+	for (const auto &entry : plan)
+		if (!tree_verify(entry, operation, error)) return FALSE;
+	for (const auto &entry : plan)
+		{
+		g_autoptr(GFile) file = g_file_new_for_uri(entry.uri.c_str());
+		if (!tree_progress(file, operation, error) ||
+		    !tree_verify_ancestors(file, directories, operation, error) ||
+		    !tree_verify(entry, operation, error, entry.type == G_FILE_TYPE_DIRECTORY,
+		                 removed_inodes[entry.device].count(entry.inode) > 0)) return FALSE;
+		if (!g_file_delete(file, tree_cancellable(operation), error)) return FALSE;
+		if (removed) (*removed)++;
+		// Unlinking one hard link changes ctime on its remaining links. Their identities,
+		// sizes and modification times must still match the original snapshot.
+		if (entry.type != G_FILE_TYPE_DIRECTORY) removed_inodes[entry.device].insert(entry.inode);
+		}
+	return TRUE;
+}
+
+struct TreeCopyProgress
+{
+	GFile *file;
+	FileTreeOperation *operation;
+};
+
+void tree_copy_progress(goffset, goffset, gpointer data)
+{
+	auto *progress = static_cast<TreeCopyProgress *>(data);
+	if (progress->operation && progress->operation->progress)
+		progress->operation->progress(progress->file, progress->operation->data);
+}
+
+gboolean tree_copy_plan(GFile *source, GFile *dest, const TreePlan &plan, FileTreeOperation *operation, GError **error)
+{
+	if (operation) operation->phase = FileTreePhase::COPY;
+	g_autofree gchar *source_path = g_file_get_path(source);
+	g_autoptr(GFile) parent = g_file_get_parent(dest);
+	g_autofree gchar *parent_path = parent ? g_file_get_path(parent) : nullptr;
+	g_autofree gchar *real_source = source_path ? realpath(source_path, nullptr) : nullptr;
+	g_autofree gchar *real_parent = parent_path ? realpath(parent_path, nullptr) : nullptr;
+	if (plan.back().type == G_FILE_TYPE_DIRECTORY && real_source && real_parent)
+		{
+		g_autoptr(GFile) resolved_source = g_file_new_for_path(real_source);
+		g_autoptr(GFile) resolved_parent = g_file_new_for_path(real_parent);
+		if (g_file_equal(resolved_parent, resolved_source) || g_file_has_prefix(resolved_parent, resolved_source))
+			{
+			g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, _("Cannot copy a folder into itself"));
+			return FALSE;
+			}
+		}
+	bool created = false;
+	const auto directories = tree_directories(plan);
+	for (auto it = plan.rbegin(); it != plan.rend(); ++it)
+		{
+		g_autoptr(GFile) file = g_file_new_for_uri(it->uri.c_str());
+		g_autofree gchar *relative = g_file_get_relative_path(source, file);
+		g_autoptr(GFile) destination = relative ? g_file_resolve_relative_path(dest, relative) : G_FILE(g_object_ref(dest));
+		if (!tree_progress(file, operation, error) || !tree_verify_ancestors(file, directories, operation, error) ||
+		    !tree_verify(*it, operation, error)) goto fail;
+		if (it->type == G_FILE_TYPE_DIRECTORY)
+			{
+			if (!g_file_make_directory(destination, tree_cancellable(operation), error)) goto fail;
+			}
+		else
+			{
+			TreeCopyProgress progress{file, operation};
+			if (!g_file_copy(file, destination, G_FILE_COPY_NOFOLLOW_SYMLINKS, tree_cancellable(operation), tree_copy_progress, &progress, error)) goto fail;
+			}
+		if (g_file_equal(file, source)) created = true;
+		if (!tree_verify(*it, operation, error)) goto fail;
+		}
+	for (const auto &entry : plan)
+		{
+		if (entry.type != G_FILE_TYPE_DIRECTORY) continue;
+		g_autoptr(GFile) file = g_file_new_for_uri(entry.uri.c_str());
+		g_autofree gchar *relative = g_file_get_relative_path(source, file);
+		g_autoptr(GFile) destination = relative ? g_file_resolve_relative_path(dest, relative) : G_FILE(g_object_ref(dest));
+		g_autoptr(GFileInfo) attributes = g_file_query_info(file,
+		                     G_FILE_ATTRIBUTE_UNIX_MODE "," G_FILE_ATTRIBUTE_TIME_MODIFIED ","
+		                     G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC "," G_FILE_ATTRIBUTE_TIME_ACCESS ","
+		                     G_FILE_ATTRIBUTE_TIME_ACCESS_USEC ",xattr::*",
+		                     G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, tree_cancellable(operation), error);
+		if (!attributes || !g_file_set_attributes_from_info(destination, attributes, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                                                  tree_cancellable(operation), error)) goto fail;
+		}
+	for (const auto &entry : plan)
+		if (!tree_verify(entry, operation, error)) goto fail;
+	return TRUE;
+
+fail:
+	{
+	// Cancellation during copying leaves the source intact. Remove only our destination.
+	g_autofree gchar *source_display = g_file_get_parse_name(source);
+	g_autofree gchar *dest_display = g_file_get_parse_name(dest);
+	g_autoptr(GError) cleanup_error = nullptr;
+	if (created && !rmdir_recursive(dest, nullptr, &cleanup_error))
+		{
+		g_prefix_error(error, _("Copying did not complete. Source contents were not removed:\n%s\n\nAn incomplete copy remains at:\n%s\n\nCould not remove the incomplete copy: %s\n\n"),
+		               source_display, dest_display, cleanup_error ? cleanup_error->message : _("Unknown error"));
+		}
+	else
+		{
+		g_prefix_error(error, _("Copying did not complete. Source contents were not removed:\n%s\n\nDestination: %s\n%s\n\n"),
+		               source_display, dest_display, created ? _("The incomplete copy was removed.") : _("No completed copy was created by this operation."));
+		}
+	return FALSE;
+	}
+}
+
+} // namespace
+
+gboolean file_tree_stats(GFile *file, FileTreeStats &stats, GError **error, FileTreeOperation *operation)
+{
+	return tree_prepare(file, stats, nullptr, operation, error);
+}
+
+gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error, FileTreeOperation *operation)
+{
+	FileTreeOperation local = operation ? *operation : FileTreeOperation{};
+	auto *effective = operation ? operation : &local;
+	if (cancellable) effective->cancellable = cancellable;
+	FileTreeStats stats;
+	TreePlan plan;
+	if (!tree_prepare(file, stats, &plan, effective, error)) return FALSE;
+	guint64 removed = 0;
+	if (tree_remove_plan(plan, effective, error, &removed)) return TRUE;
+	g_autofree gchar *path = g_file_get_parse_name(file);
+	g_prefix_error(error, _("Deletion did not finish. Entries permanently deleted: %" G_GUINT64_FORMAT "\nAny remaining contents are at:\n%s\n\n"), removed, path);
+	return FALSE;
+}
+
+gboolean file_tree_copy(GFile *source, GFile *dest, GError **error, FileTreeOperation *operation)
+{
+	FileTreeStats stats;
+	TreePlan plan;
+	return tree_prepare(source, stats, &plan, operation, error) && tree_copy_plan(source, dest, plan, operation, error);
+}
+
+gboolean file_tree_move(GFile *source, GFile *dest, GError **error, FileTreeOperation *operation)
+{
+	FileTreeStats stats;
+	TreePlan plan;
+	if (!tree_prepare(source, stats, &plan, operation, error) || !tree_progress(source, operation, error) ||
+	    !tree_verify(plan.back(), operation, error)) return FALSE;
+	g_autoptr(GError) move_error = nullptr;
+	if (g_file_move(source, dest, static_cast<GFileCopyFlags>(G_FILE_COPY_NOFOLLOW_SYMLINKS | G_FILE_COPY_NO_FALLBACK_FOR_MOVE),
+	                tree_cancellable(operation), nullptr, nullptr, &move_error)) return TRUE;
+	if (!g_error_matches(move_error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED))
+		{
+		g_propagate_error(error, g_steal_pointer(&move_error));
+		return FALSE;
+		}
+	if (!tree_copy_plan(source, dest, plan, operation, error)) return FALSE;
+	guint64 removed = 0;
+	if (tree_remove_plan(plan, operation, error, &removed)) return TRUE;
+	g_autofree gchar *source_display = g_file_get_parse_name(source);
+	g_autofree gchar *dest_display = g_file_get_parse_name(dest);
+	g_prefix_error(error, _("Copying completed, but source removal did not finish.\nThe completed copy remains at:\n%s\n\nSource entries removed: %" G_GUINT64_FORMAT "\nAny remaining source contents are at:\n%s\n\n"), dest_display, removed, source_display);
+	return FALSE;
 }
 
 guchar *map_file(const gchar *path, gsize &map_len)

@@ -79,7 +79,7 @@
         </item>
         <item>
           <attribute name="action">win.main-win-delete-permanent</attribute>
-          <attribute name="label" translatable="yes">Delete selection…</attribute>
+          <attribute name="label" translatable="yes">Permanently Delete…</attribute>
         </item>
       </section>
       <section>

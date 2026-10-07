@@ -104,7 +104,30 @@ std::string md5_text_from_file_utf8(const gchar *path);
 gboolean md5_get_digest_from_file_utf8(const gchar *path, Md5Digest &digest);
 
 gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data);
-gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error);
+/** Counts all entries without following symbolic links. The root is excluded from the counts. */
+struct FileTreeStats
+{
+	guint64 files = 0; /**< All nondirectory entries, including symbolic links */
+	guint64 directories = 0;
+	guint64 bytes = 0; /**< Sum of nondirectory entry sizes */
+};
+
+enum class FileTreePhase { SCAN, COPY, REMOVE };
+
+/** Callback runs on the operation's thread; it must not access GTK. */
+struct FileTreeOperation
+{
+	GCancellable *cancellable = nullptr;
+	void (*progress)(GFile *file, gpointer data) = nullptr;
+	gpointer data = nullptr;
+	FileTreePhase phase = FileTreePhase::SCAN;
+};
+
+gboolean file_tree_stats(GFile *file, FileTreeStats &stats, GError **error, FileTreeOperation *operation = nullptr);
+gboolean file_tree_copy(GFile *source, GFile *dest, GError **error, FileTreeOperation *operation = nullptr);
+gboolean file_tree_move(GFile *source, GFile *dest, GError **error, FileTreeOperation *operation = nullptr);
+
+gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error, FileTreeOperation *operation = nullptr);
 
 guchar *map_file(const gchar *path, gsize &map_len);
 

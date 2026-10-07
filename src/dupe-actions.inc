@@ -135,7 +135,7 @@ static const ActionDef dupe_main_actions[] =
 		{
 		"win.dupe-win-delete-permanent",
 		GQ_ICON_DELETE,
-		N_("Delete"),
+		N_("Permanently Delete"),
 		dupe_menu_delete_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,

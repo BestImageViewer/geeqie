@@ -443,6 +443,8 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->file_ops.confirm_delete = c_options->file_ops.confirm_delete;
 	options->file_ops.enable_delete_key = c_options->file_ops.enable_delete_key;
 	options->file_ops.confirm_move_to_trash = c_options->file_ops.confirm_move_to_trash;
+	options->file_ops.confirm_delete_dir = c_options->file_ops.confirm_delete_dir;
+	options->file_ops.confirm_move_dir_to_trash = c_options->file_ops.confirm_move_dir_to_trash;
 	options->file_ops.use_system_trash = c_options->file_ops.use_system_trash;
 	options->file_ops.no_trash = c_options->file_ops.no_trash;
 	options->file_ops.safe_delete_folder_maxsize = c_options->file_ops.safe_delete_folder_maxsize;
@@ -1275,7 +1277,7 @@ static void safe_delete_view_cb(GtkWidget *, gpointer)
 
 static void safe_delete_clear_ok_cb(GenericDialog *, gpointer)
 {
-	file_util_trash_clear();
+	file_util_trash_clear_async(nullptr);
 }
 
 static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
@@ -3340,6 +3342,10 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 			      options->file_ops.confirm_delete, &c_options->file_ops.confirm_delete);
 	pref_checkbox_new_int(group, _("Confirm move file to Trash"),
 			      options->file_ops.confirm_move_to_trash, &c_options->file_ops.confirm_move_to_trash);
+	pref_checkbox_new_int(group, _("Confirm permanent folder delete"),
+			      options->file_ops.confirm_delete_dir, &c_options->file_ops.confirm_delete_dir);
+	pref_checkbox_new_int(group, _("Confirm move folder to Trash"),
+			      options->file_ops.confirm_move_dir_to_trash, &c_options->file_ops.confirm_move_dir_to_trash);
 	pref_checkbox_new_int(group, _("Enable Delete key"),
 			      options->file_ops.enable_delete_key, &c_options->file_ops.enable_delete_key);
 
@@ -3367,7 +3373,7 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 
 	pref_spacer(hbox, PREF_PAD_INDENT - PREF_PAD_GAP);
 	spin = pref_spin_new_int(hbox, _("Maximum size:"), _("MiB"),
-				 0, 2048, 1, options->file_ops.safe_delete_folder_maxsize, &c_options->file_ops.safe_delete_folder_maxsize);
+				 0, 102400, 1, options->file_ops.safe_delete_folder_maxsize, &c_options->file_ops.safe_delete_folder_maxsize);
 	gtk_widget_set_tooltip_markup(spin, _("Set to 0 for unlimited size"));
 	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_hexpand(end_box, TRUE);

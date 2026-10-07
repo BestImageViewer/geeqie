@@ -93,11 +93,13 @@ ConfOptions *conf_options_new()
 
 	options->file_ops.confirm_delete = TRUE;
 	options->file_ops.confirm_move_to_trash = TRUE;
+	options->file_ops.confirm_delete_dir = TRUE;
+	options->file_ops.confirm_move_dir_to_trash = TRUE;
 	options->file_ops.enable_delete_key = TRUE;
 	options->file_ops.use_system_trash = TRUE;
 	options->file_ops.enable_in_place_rename = TRUE;
 	options->file_ops.safe_delete_enable = TRUE;
-	options->file_ops.safe_delete_folder_maxsize = 128;
+	options->file_ops.safe_delete_folder_maxsize = 5120;
 	options->file_ops.safe_delete_path = nullptr;
 	options->file_ops.no_trash = FALSE;
 

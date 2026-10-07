@@ -122,7 +122,7 @@ static const ActionDef layout_image_actions[] =
 		{
 		"win.layout-image-delete-permanent",
 		GQ_ICON_DELETE_SHRED,
-		N_("Delete"),
+		N_("Permanently Delete"),
 		layout_image_pop_menu_delete_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,

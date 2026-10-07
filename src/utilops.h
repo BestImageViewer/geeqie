@@ -75,6 +75,7 @@ void file_util_start_editor_from_filelist(const gchar *key, GList *list, const g
 void file_util_start_filter_from_filelist(const gchar *key, GList *list, const gchar *dest_path, GtkWidget *parent);
 
 void file_util_delete_dir(FileData *source_fd, GtkWidget *parent);
+void file_util_delete_dir(FileData *source_fd, GtkWidget *parent, gboolean trash);
 
 void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, ClipboardAction action);
 void file_util_path_list_to_clipboard(GList *list, gboolean quoted, ClipboardAction action);

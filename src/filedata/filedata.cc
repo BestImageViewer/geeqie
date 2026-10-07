@@ -2107,7 +2107,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		return ret;
 		}
 
-	if (!isname(fd->path))
+	if (!isname(fd->path) && (fd->change->type != FILEDATA_CHANGE_DELETE || !islink(fd->path)))
 		{
 		/* this probably should not happen */
 		ret |= CHANGE_NO_SRC;
@@ -2525,18 +2525,17 @@ static gboolean file_data_perform_delete(FileData *fd)
 		return file_util_safe_unlink(fd->path);
 
 	if (isdir(fd->path) && !islink(fd->path))
-		return rmdir_utf8(fd->path);
+		{
+		g_autofree gchar *path_fs = path_from_utf8(fd->path);
+		g_autoptr(GFile) directory = g_file_new_for_path(path_fs);
+		return rmdir_recursive(directory, nullptr, nullptr);
+		}
 
 	return unlink_file(fd->path);
 }
 
 gboolean FileData::file_data_perform_ci(FileData *fd)
 {
-	/** @FIXME When a directory that is a symbolic link is deleted,
-	 * at this point fd->change is null because no FileDataChangeInfo
-	 * has been set up. Therefore there is a seg. fault.
-	 * This code simply aborts the delete.
-	 */
 	if (!fd->change)
 		{
 		return FALSE;

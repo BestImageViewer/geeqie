@@ -690,7 +690,7 @@ const ActionDef main_actions[] =
 		{
 		"win.main-win-delete-permanent",
 		GQ_ICON_DELETE,
-		N_("Delete selection…"),
+		N_("Permanently Delete…"),
 		layout_menu_delete_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,
