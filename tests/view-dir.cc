@@ -69,6 +69,7 @@ protected:
 
 	void TearDown() override
 	{
+		if (!directory) return;
 		if (layout.window) gtk_window_destroy(GTK_WINDOW(layout.window));
 		drain_events();
 		if (layout.dir_fd) file_data_unref(layout.dir_fd);

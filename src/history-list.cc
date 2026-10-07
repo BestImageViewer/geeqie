@@ -190,7 +190,7 @@ void image_chain_append_end(const gchar *path)
 
 void recent_file_add(const gchar *path)
 {
-	if (!gtk_is_initialized() || !path || !isfile(path)) return;
+	if (!gtk_is_initialized() || !gdk_display_get_default() || !path || !isfile(path)) return;
 	g_autofree gchar *filename = path_from_utf8(path);
 	g_autofree gchar *uri = g_filename_to_uri(filename, nullptr, nullptr);
 	if (!uri) return;
