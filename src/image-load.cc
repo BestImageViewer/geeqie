@@ -1229,6 +1229,26 @@ gboolean image_loader_start(ImageLoader *il)
 	return image_loader_start_thread(il);
 }
 
+static gboolean image_loader_start_deferred_cb(gpointer data)
+{
+	auto *il = static_cast<ImageLoader *>(data);
+	il->idle_id = 0;
+	if (!image_loader_start(il)) image_loader_emit_error(il);
+	return G_SOURCE_REMOVE;
+}
+
+/**
+ * @brief Let pending input supersede a selection before reading its metadata.
+ *
+ * Freeing the loader cancels the pending start through image_loader_stop().
+ */
+gboolean image_loader_start_deferred(ImageLoader *il)
+{
+	if (!il || !il->fd || il->idle_id || il->thread) return FALSE;
+	il->idle_id = g_idle_add_full(il->idle_priority, image_loader_start_deferred_cb, il, nullptr);
+	return TRUE;
+}
+
 
 /* don't forget to gdk_pixbuf_ref() it if you want to use it after image_loader_free() */
 GdkPixbuf *image_loader_get_pixbuf(ImageLoader *il)

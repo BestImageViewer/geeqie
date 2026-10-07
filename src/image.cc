@@ -804,7 +804,7 @@ static void image_read_ahead_start(ImageWindow *imd)
 	g_signal_connect(G_OBJECT(imd->read_ahead_il), "error", (GCallback)image_read_ahead_error_cb, imd);
 	g_signal_connect(G_OBJECT(imd->read_ahead_il), "done", (GCallback)image_read_ahead_done_cb, imd);
 
-	if (!image_loader_start(imd->read_ahead_il))
+	if (!image_loader_start_deferred(imd->read_ahead_il))
 		{
 		image_read_ahead_cancel(imd);
 		image_complete_util(imd, TRUE);
@@ -1062,7 +1062,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 
 	image_load_set_signals(imd, FALSE);
 
-	if (!image_loader_start(imd->il))
+	if (!image_loader_start_deferred(imd->il))
 		{
 		DEBUG_1("image start error");
 

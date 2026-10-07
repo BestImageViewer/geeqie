@@ -134,6 +134,8 @@ void image_loader_set_priority(ImageLoader *il, gint priority);
 
 gboolean image_loader_start(ImageLoader *il);
 
+gboolean image_loader_start_deferred(ImageLoader *il);
+
 
 GdkPixbuf *image_loader_get_pixbuf(ImageLoader *il);
 gdouble image_loader_get_percent(ImageLoader *il);
