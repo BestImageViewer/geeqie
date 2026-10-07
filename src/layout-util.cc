@@ -389,7 +389,9 @@ static void layout_menu_clear_marks_cb(GSimpleAction *, GVariant *, gpointer)
 
 static void layout_menu_new_collection_cb(GSimpleAction *, GVariant *, gpointer)
 {
+	g_autofree gchar *current_path = g_strdup(layout_get_path(get_current_layout()));
 	LayoutWindow *lw = layout_new_from_default();
+	if (current_path) layout_set_path(lw, current_path);
 	CollectionData *collection = collection_new(nullptr);
 	collection->changed = TRUE;
 	layout_set_collection(lw, collection);
