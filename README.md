@@ -82,6 +82,8 @@ Geeqie is a graphics file viewer. Basic features:
 
 * Tags, both predefined and custom, can be assigned to images, and stored either as image metadata (where the file format allows), sidecar files, or in directory metadata files. Keywords and descriptions can also be assigned.
 
+* Reusable metadata templates apply descriptions, headlines, keywords, copyright, and custom fields to selected images, with options to replace, append, or clear values.
+
 * Basic editing in the form of lossless 90/180-degree rotation and flipping is supported; external programs such as GIMP, Inkscape, and custom scripts using ImageMagick can be linked to allow further processing.
 
 * Advanced searching is available using criteria such as filename, file size, age, image dimensions, similarity to a specified image, or by keywords or descriptions. If images have GPS coordinates embedded, you may also search for images within a radius of a geographical point.

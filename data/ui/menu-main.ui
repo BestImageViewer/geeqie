@@ -655,6 +655,10 @@
       </submenu>
       <section>
         <item>
+          <attribute name="action">win.main-win-metadata-templates</attribute>
+          <attribute name="label" translatable="yes">Metadata Templates…</attribute>
+        </item>
+        <item>
           <attribute name="action">win.main-win-save-metadata</attribute>
           <attribute name="label" translatable="yes">_Save metadata</attribute>
         </item>

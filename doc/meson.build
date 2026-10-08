@@ -90,7 +90,7 @@ if not option.disabled()
             )
 
         # Convert the text ToC to the format needed by pdfoutline
-        toc_awk = join_paths(buildauxdir, 'toc.awk')
+        toc_awk = files('../build-aux/toc.awk')
         toc_as_text = custom_target(
             'create toc layout as text file',
             input : [toc_awk, pdf_as_text],

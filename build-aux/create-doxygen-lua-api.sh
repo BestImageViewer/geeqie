@@ -24,10 +24,12 @@ VERSION=$(git tag --list v[1-9]* | tail -1)
 export VERSION
 export SRCDIR="$1"
 export DOCDIR="$2"
+mkdir -p "$DOCDIR" || exit 1
 export INLINE_SOURCES=NO
 export STRIP_CODE_COMMENTS=YES
 
 TMPFILE=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX") || exit 1
+trap 'rm -f "$TMPFILE"' EXIT
 
 # Modify the Geeqie doxygen.conf file to produce
 # only the data needed for the lua API document
@@ -46,6 +48,7 @@ BEGIN {
 		else
 			{
 			file_patterns_found = "FALSE"
+			next
 			}
 		}
 	if (NF > 0 && $1 == "SHOW_INCLUDE_FILES")
@@ -85,5 +88,4 @@ BEGIN {
 ' "$SRCDIR"/doc/doxygen.conf > "$TMPFILE"
 
 doxygen "$TMPFILE"
-
-rm "$TMPFILE"
+exit $?

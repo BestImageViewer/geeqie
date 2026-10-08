@@ -64,6 +64,7 @@
 #include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
+#include "metadata-template.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
@@ -2446,6 +2447,12 @@ static void layout_menu_up_cb(GSimpleAction *, GVariant *, gpointer)
 
 
 
+
+static void layout_menu_metadata_templates_cb(GSimpleAction *, GVariant *, gpointer user_data)
+{
+	auto *lw = static_cast<LayoutWindow *>(user_data);
+	metadata_template_dialog(lw->window, lw->vf ? vf_selection_get_list(lw->vf) : nullptr);
+}
 
 static void layout_menu_metadata_write_cb(GSimpleAction *, GVariant *, gpointer)
 {

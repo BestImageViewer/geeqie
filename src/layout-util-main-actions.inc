@@ -2053,6 +2053,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-metadata-templates",
+		GQ_ICON_EDIT,
+		N_("Metadata Templates…"),
+		layout_menu_metadata_templates_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-save-metadata",
 		GQ_ICON_SAVE,
 		N_("Save metadata"),

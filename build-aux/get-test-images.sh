@@ -25,7 +25,7 @@ else
 	exceptions=""
 fi
 
-if [ ! -d "$1" ]
+if [ ! -d "$1/images" ]
 then
 	mkdir -p "$1"
 
