@@ -11,6 +11,7 @@ unit_test_sources = files(
 'image-load.cc',
 'keyboard-shortcuts.cc',
 'layout-image-navigation.cc',
+'metadata-description.cc',
 'pixbuf-util.cc',
 'renderer-tiles.cc',
 'trash.cc',

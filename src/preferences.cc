@@ -2823,7 +2823,7 @@ static void config_tab_metadata(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_widget_set_sensitive(group, FALSE);
 #endif
 
-	pref_checkbox_new_int(group, _("Use GQview legacy metadata format instead of XMP (supports only Keywords and Comments)"), options->metadata.save_legacy_format, &c_options->metadata.save_legacy_format);
+	pref_checkbox_new_int(group, _("Use GQview legacy metadata format instead of XMP (supports only Keywords and Descriptions)"), options->metadata.save_legacy_format, &c_options->metadata.save_legacy_format);
 
 	pref_spacer(group, PREF_PAD_GROUP);
 
@@ -2862,7 +2862,7 @@ static void config_tab_metadata(GtkWidget *notebook, ConfOptions *c_options)
 	group = pref_group_new(vbox, FALSE, _("Spelling checks"), GTK_ORIENTATION_VERTICAL);
 
 	ct_button = pref_checkbox_new_int(group, _("Check spelling - Requires restart"), options->metadata.check_spelling, &c_options->metadata.check_spelling);
-	gtk_widget_set_tooltip_text(ct_button, _("Spelling checks are performed on info sidebar panes Comment, Headline and Title"));
+	gtk_widget_set_tooltip_text(ct_button, _("Spelling checks are performed on info sidebar panes Description, Headline and Title"));
 #endif
 
 	pref_spacer(group, PREF_PAD_GROUP);

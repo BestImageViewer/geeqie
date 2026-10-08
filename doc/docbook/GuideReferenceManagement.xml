@@ -154,7 +154,7 @@
           <guilabel>Clean up</guilabel>
         </term>
         <listitem>
-          <para>Removes keywords and comments for which the source image is no longer present.</para>
+          <para>Removes keywords and descriptions for which the source image is no longer present.</para>
           <para />
           <para />
         </listitem>

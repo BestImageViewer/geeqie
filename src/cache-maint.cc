@@ -1630,7 +1630,7 @@ void cache_manager_show()
 	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
 				   G_CALLBACK(cache_manager_metadata_clean_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 0, _("Remove orphaned keywords and comments."), GTK_ALIGN_START);
+	pref_table_label(table, 1, 0, _("Remove orphaned keywords and descriptions."), GTK_ALIGN_START);
 
 	group = pref_group_new(gd->vbox, FALSE, _("Background cache maintenance"), GTK_ORIENTATION_VERTICAL);
 

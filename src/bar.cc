@@ -225,7 +225,7 @@ static const KnownPanes known_panes[] = {
 	{PANE_HISTOGRAM,	"histogram",	N_("Histogram"),	default_config_histogram},
 	{PANE_COMMENT,		"title",	N_("Title"),		default_config_title},
 	{PANE_KEYWORDS,		"keywords",	N_("Keywords"),		default_config_keywords},
-	{PANE_COMMENT,		"comment",	N_("Comment"),		default_config_comment},
+	{PANE_COMMENT,		"comment",	N_("Description"),		default_config_comment},
 	{PANE_RATING,		"rating",	N_("Star Rating"),	default_config_rating},
 	{PANE_COMMENT,		"headline",	N_("Headline"),		default_config_headline},
 	{PANE_EXIF,		"exif",		N_("Exif"),		default_config_exif},
@@ -824,7 +824,10 @@ gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title)
 	                               [type, id](const KnownPanes &pane){ return pane.type == type && strcmp(pane.id, id) == 0; });
 	if (pane == std::cend(known_panes)) return FALSE;
 
-	if (*title && **title && strcmp(pane->title, *title) != 0) return FALSE;
+	// Saved default titles from before the Description label was introduced.
+	const bool legacy_description_title = type == PANE_COMMENT && strcmp(id, "comment") == 0 &&
+	                                      (g_strcmp0(*title, "Comment") == 0 || g_strcmp0(*title, _("Comment")) == 0);
+	if (*title && **title && strcmp(pane->title, *title) != 0 && !legacy_description_title) return FALSE;
 
 	g_free(*title);
 	*title = g_strdup(_(pane->title));

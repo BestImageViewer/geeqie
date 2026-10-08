@@ -74,17 +74,17 @@ Geeqie is a graphics file viewer. Basic features:
 * Images can be displayed singly in normal or fullscreen mode; static or slideshow mode; in sets of two or four per page for comparison; or as thumbnails of various sizes. Synchronised zoom when multi images are displayed.
 
 * Pan(orama) view displays image thumbnails in calendar, grid, folder and other layouts.
-* All available metadata and Exif/IPTC/XMP data can be displayed, as well as colour histograms and assigned tags, keywords and comments.
+* All available metadata and Exif/IPTC/XMP data can be displayed, as well as colour histograms and assigned tags, keywords and descriptions.
 
 * Selectable image overlay display box - can contain any text or meta-data.
 
 * Panels can be docked or floating.
 
-* Tags, both predefined and custom, can be assigned to images, and stored either as image metadata (where the file format allows), sidecar files, or in directory metadata files. Keywords and comments can also be assigned.
+* Tags, both predefined and custom, can be assigned to images, and stored either as image metadata (where the file format allows), sidecar files, or in directory metadata files. Keywords and descriptions can also be assigned.
 
 * Basic editing in the form of lossless 90/180-degree rotation and flipping is supported; external programs such as GIMP, Inkscape, and custom scripts using ImageMagick can be linked to allow further processing.
 
-* Advanced searching is available using criteria such as filename, file size, age, image dimensions, similarity to a specified image, or by keywords or comments. If images have GPS coordinates embedded, you may also search for images within a radius of a geographical point.
+* Advanced searching is available using criteria such as filename, file size, age, image dimensions, similarity to a specified image, or by keywords or descriptions. If images have GPS coordinates embedded, you may also search for images within a radius of a geographical point.
 
 * Geeqie supports applying the colour profile embedded in an image along with the system monitor profile (or a user-specified monitor profile).
 

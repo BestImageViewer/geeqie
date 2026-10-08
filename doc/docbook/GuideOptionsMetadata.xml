@@ -89,7 +89,7 @@
     <itemizedlist>
       <listitem>
         <para>
-          <guilabel>Use GQview legacy metadata format (supports only keywords and comments) instead of XMP</guilabel>
+          <guilabel>Use GQview legacy metadata format (supports only keywords and descriptions) instead of XMP</guilabel>
           <para />
           If checked, Geeqie will write metadata in GQview legacy files (file extension .meta) format
         </para>
@@ -199,7 +199,7 @@
       </listitem>
       <listitem>
         <para>
-          <guilabel>Comment</guilabel>
+          <guilabel>Description</guilabel>
         </para>
       </listitem>
       <listitem>

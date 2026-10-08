@@ -49,13 +49,13 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Comments</guilabel>
+          <guilabel>Descriptions</guilabel>
         </term>
         <listitem>
           This option is only for use with GqView legacy metadata.
           <para />
-          The search will include all files that have a keyword or comment associated to it.
-          <note>Only keyword and comment associations stored in the user's home folder are included in this search type.</note>
+          The search will include all files that have a keyword or description associated to it.
+          <note>Only keyword and description associations stored in the user's home folder are included in this search type.</note>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -157,10 +157,10 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Comment</guilabel>
+          <guilabel>Description</guilabel>
         </term>
         <listitem>
-          The search will match if the file's Comments field contains the entered pattern.
+          The search will match if the file's Description field contains the entered pattern.
           <emphasis role="underline"><link linkend="GuideReferencePCRE">Perl Compatible Regular Expressions</link></emphasis>
           are used.
         </listitem>

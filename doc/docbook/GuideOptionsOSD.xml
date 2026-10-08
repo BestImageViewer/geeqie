@@ -72,8 +72,8 @@
             <entry>Image keywords from metadata</entry>
           </row>
           <row>
-            <entry>comment</entry>
-            <entry>Image comment from XMP metadata</entry>
+            <entry>description</entry>
+            <entry>Image description from XMP metadata (Xmp.dc.description). The legacy name comment is also recognized.</entry>
           </row>
           <row>
             <entry>imagecomment</entry>

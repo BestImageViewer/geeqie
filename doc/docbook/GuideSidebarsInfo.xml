@@ -53,10 +53,10 @@
     <para />
   </section>
   <section id="TextpaneComment">
-    <title>Comment</title>
+    <title>Description</title>
     <note>
       <para>
-        Comment text is stored in the
+        Description text is stored in the
         <emphasis>Xmp.dc.description</emphasis>
         tag.
       </para>

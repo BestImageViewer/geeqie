@@ -526,7 +526,7 @@ gboolean metadata_write_int(FileData *fd, const gchar *key, guint64 value)
 
 static gboolean metadata_file_write(gchar *path, const GList *keywords, const gchar *comment)
 {
-	g_autoptr(GString) gstring = g_string_new("#" GQ_APPNAME " comment (" VERSION ")\n\n[keywords]\n");
+	g_autoptr(GString) gstring = g_string_new("#" GQ_APPNAME " description (" VERSION ")\n\n[keywords]\n");
 
 	for (; keywords; keywords = keywords->next)
 		{
@@ -551,7 +551,7 @@ static gboolean metadata_legacy_write(FileData *fd)
 
 	g_assert(fd->change && fd->change->dest);
 
-	DEBUG_1("Saving comment: %s", fd->change->dest);
+	DEBUG_1("Saving description: %s", fd->change->dest);
 
 	if (!fd->modified_xmp) return TRUE;
 

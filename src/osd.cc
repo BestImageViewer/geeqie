@@ -68,7 +68,7 @@ constexpr struct OsdTag
 	{"%collection_info%",				N_("Collection info text")},
 	{"%number%",						N_("Image index")},
 	{"%total%",							N_("Images total")},
-	{"%comment%",						N_("Comment")},
+	{"%description%",					N_("Description")},
 	{"%keywords%",						N_("Keywords")},
 	{"%file.ctime%",					N_("File ctime")},
 	{"%file.mode%",						N_("File mode")},
@@ -135,7 +135,7 @@ GtkWidget *osd_tag_button_new(const OsdTag &tag, GtkWidget *template_view)
 	td->key = g_strdup(tag.key);
 	td->image_overlay_template_view = template_view;
 
-	GtkWidget *tag_button = gtk_button_new_with_label(tag.title);
+	GtkWidget *tag_button = gtk_button_new_with_label(_(tag.title));
 	g_signal_connect_swapped(G_OBJECT(tag_button), "clicked", G_CALLBACK(tag_data_add_key_to_template), td);
 	g_signal_connect_swapped(G_OBJECT(tag_button), "destroy", G_CALLBACK(tag_data_free), td);
 
@@ -197,7 +197,7 @@ gchar *get_osd_data(gchar *name, FileData *fd, const OsdTemplate &vars)
 		return g_string_free(kwstr, FALSE);
 		}
 
-	if (strcmp(name, "comment") == 0)
+	if (strcmp(name, "description") == 0 || strcmp(name, "comment") == 0)
 		{
 		return metadata_read_string(fd, COMMENT_KEY, METADATA_PLAIN);
 		}

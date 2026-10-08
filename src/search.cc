@@ -391,7 +391,7 @@ struct MatchList
 
 constexpr std::array<MatchList, 4> text_search_menu_path{{
 	{ N_("folder"),		SEARCH_MATCH_NONE },
-	{ N_("comments"),	SEARCH_MATCH_ALL },
+	{ N_("descriptions"),	SEARCH_MATCH_ALL },
 	{ N_("results"),	SEARCH_MATCH_CONTAINS },
 	{ N_("collection"),	SEARCH_MATCH_COLLECTION }
 }};
@@ -3222,7 +3222,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for image comment */
 	GtkWidget *check_comment = nullptr;
-	hbox = menu_choice(sd->ui.box_search, _("Comment"), &sd->match_comment_enable,
+	hbox = menu_choice(sd->ui.box_search, _("Description"), &sd->match_comment_enable,
 	                   &check_comment);
 	sd->ui.menu_comment = menu_choice_menu(hbox, text_search_menu_comment,
 	                                       nullptr, nullptr);

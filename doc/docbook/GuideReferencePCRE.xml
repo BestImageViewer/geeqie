@@ -2,7 +2,7 @@
 <section id="GuideReferencePCRE">
   <title id="titleGuideReferencePCRE">Perl Compatible Regular Expressions</title>
   <para>
-    The Filename and Comment sections on the search window use
+    The Filename and Description sections on the search window use
     <ulink url="https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions">Perl Compatible Regular Expressions</ulink>
     . In general use there are a number of differences to the wildcard expansion used on the command line:
     <itemizedlist>

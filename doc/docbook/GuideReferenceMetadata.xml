@@ -57,7 +57,7 @@
           </para>
         </listitem>
         <listitem>
-          <para>Modifying the keywords, comment, orientation, etc. does not ask for confirmation, but immediately modifies the metadata in memory and adds the file to "write queue"</para>
+          <para>Modifying the keywords, description, orientation, etc. does not ask for confirmation, but immediately modifies the metadata in memory and adds the file to "write queue"</para>
         </listitem>
         <listitem>
           <para>
