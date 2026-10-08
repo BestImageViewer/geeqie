@@ -2801,16 +2801,17 @@ static void layout_menu_window_from_current_cb(GSimpleAction *, GVariant *, gpoi
 		}
 
 	auto *lw = static_cast<LayoutWindow *>(data);
+	g_autofree gchar *path = g_strdup(layout_get_path(lw));
 	CollectionData *collection = lw->vf ? lw->vf->collection : nullptr;
 	std::vector<LayoutWindow *> existing_windows;
+	layout_window_foreach([&existing_windows](LayoutWindow *window) { existing_windows.push_back(window); });
 	if (collection)
 		{
 		collection_ref(collection);
-		layout_window_foreach([&existing_windows](LayoutWindow *window) { existing_windows.push_back(window); });
 		}
 	save_config_to_file(tmp_file_in, options, lw);
 	change_window_id(tmp_file_in, tmp_file_out);
-	if (load_config_from_file(tmp_file_out, FALSE) && collection)
+	if (load_config_from_file(tmp_file_out, FALSE))
 		{
 			LayoutWindow *new_window = nullptr;
 			layout_window_foreach([&](LayoutWindow *window)
@@ -2818,7 +2819,11 @@ static void layout_menu_window_from_current_cb(GSimpleAction *, GVariant *, gpoi
 				if (!new_window && std::find(existing_windows.begin(), existing_windows.end(), window) == existing_windows.end())
 					new_window = window;
 				});
-			if (new_window) layout_set_collection(new_window, collection);
+			if (new_window)
+				{
+				layout_set_path(new_window, path);
+				if (collection) layout_set_collection(new_window, collection);
+				}
 		}
 	if (collection) collection_unref(collection);
 
