@@ -767,13 +767,15 @@ void bar_pane_common_init(PaneData &pane, const gchar *id, const gchar *title, g
 {
 	pane.pane_event = bar_pane_common_event;
 
-	pane.title = gtk_label_new(title);
+	pane.title = gtk_label_new(nullptr);
 	pref_label_bold(pane.title, TRUE, FALSE);
 	gtk_label_set_ellipsize(GTK_LABEL(pane.title), PANGO_ELLIPSIZE_END);
 
 	pane.expanded = expanded;
 	pane.id = g_strdup(id);
 	pane.type = type;
+
+	bar_pane_set_title(pane, title);
 }
 
 void bar_pane_common_free(PaneData &pane)
@@ -816,22 +818,25 @@ void bar_pane_update_expander(const PaneData &pd)
 	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd.expanded);
 }
 
-gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title)
+const gchar *bar_pane_translate_title(PaneType type, const gchar *id, const gchar *title)
 {
-	if (!title) return FALSE;
-
 	const auto pane = std::find_if(std::cbegin(known_panes), std::cend(known_panes),
 	                               [type, id](const KnownPanes &pane){ return pane.type == type && strcmp(pane.id, id) == 0; });
-	if (pane == std::cend(known_panes)) return FALSE;
+	if (pane == std::cend(known_panes)) return title;
 
 	// Saved default titles from before the Description label was introduced.
 	const bool legacy_description_title = type == PANE_COMMENT && strcmp(id, "comment") == 0 &&
-	                                      (g_strcmp0(*title, "Comment") == 0 || g_strcmp0(*title, _("Comment")) == 0);
-	if (*title && **title && strcmp(pane->title, *title) != 0 && !legacy_description_title) return FALSE;
+	                                      (g_strcmp0(title, "Comment") == 0 || g_strcmp0(title, _("Comment")) == 0);
+	if (title && *title && strcmp(pane->title, title) != 0 && !legacy_description_title) return title;
 
-	g_free(*title);
-	*title = g_strdup(_(pane->title));
-	return TRUE;
+	return _(pane->title);
+}
+
+void bar_pane_set_title(PaneData &pd, const gchar *title)
+{
+	const gchar *tr_title = bar_pane_translate_title(pd.type, pd.id, title);
+
+	gtk_label_set_text(GTK_LABEL(pd.title), tr_title);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

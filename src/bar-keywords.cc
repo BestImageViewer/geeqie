@@ -327,8 +327,7 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 
 	if (title)
 		{
-		bar_pane_translate_title(PANE_KEYWORDS, pkd->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
+		bar_pane_set_title(pkd->pane, title);
 		}
 
 	bar_pane_update_expander(pkd->pane);
@@ -1704,7 +1703,7 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 		}
 
 	options->info_keywords.height = height;
-	bar_pane_translate_title(PANE_KEYWORDS, id, &title);
+
 	return bar_pane_keywords_new(id, title, key, expanded, height);
 }
 

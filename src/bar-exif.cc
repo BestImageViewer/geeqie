@@ -703,8 +703,7 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 
 	if (title)
 		{
-		bar_pane_translate_title(PANE_EXIF, ped->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(ped->pane.title), title);
+		bar_pane_set_title(ped->pane, title);
 		}
 
 	bar_pane_update_expander(ped->pane);
@@ -824,8 +823,6 @@ GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gc
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
-
-	bar_pane_translate_title(PANE_EXIF, id, &title);
 
 	return bar_pane_exif_new(id, title, expanded, show_all);
 }

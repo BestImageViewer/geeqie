@@ -406,8 +406,6 @@ GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, con
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	bar_pane_translate_title(PANE_HISTOGRAM, id, &title);
-
 	return bar_pane_histogram_new(id, title, height, expanded, histogram_channel, histogram_mode);
 }
 

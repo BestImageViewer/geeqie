@@ -183,8 +183,7 @@ static void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **a
 
 	if (title)
 		{
-		bar_pane_translate_title(PANE_COMMENT, pcd->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(pcd->pane.title), title);
+		bar_pane_set_title(pcd->pane, title);
 		}
 
 	gtk_widget_set_size_request(pcd->pane.widget, -1, pcd->height);
@@ -334,8 +333,6 @@ GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const
 		{
 		options->info_headline.height = height;
 		}
-
-	bar_pane_translate_title(PANE_COMMENT, id, &title);
 
 	return bar_pane_comment_new(id, title, key, expanded, height);
 }

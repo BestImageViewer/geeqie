@@ -823,7 +823,7 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 	gdouble longitude = shumate_location_get_longitude(SHUMATE_LOCATION(pgd->viewport));
 
 	while (*attribute_names)
-	{
+		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
@@ -853,12 +853,11 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 			}
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-	}
+		}
 
 	if (title)
 		{
-		bar_pane_translate_title(PANE_GPS, pgd->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(pgd->pane.title), title);
+		bar_pane_set_title(pgd->pane, title);
 		}
 
 	gtk_widget_set_size_request(pgd->pane.widget, -1, pgd->height);
@@ -1041,7 +1040,6 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	bar_pane_translate_title(PANE_GPS, id, &title);
 	latitude = static_cast<gdouble>(int_latitude) / 1000000;
 	longitude = static_cast<gdouble>(int_longitude) / 1000000;
 
