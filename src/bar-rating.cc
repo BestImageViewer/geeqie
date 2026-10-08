@@ -220,8 +220,6 @@ GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	bar_pane_translate_title(PANE_RATING, id, &title);
-
 	return bar_pane_rating_new(id, title, expanded);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

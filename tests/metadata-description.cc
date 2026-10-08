@@ -17,14 +17,9 @@ namespace
 
 TEST(MetadataDescription, SavedSidebarTitles)
 {
-	g_autofree gchar *title = g_strdup("Comment");
-	EXPECT_TRUE(bar_pane_translate_title(PANE_COMMENT, "comment", &title));
-	EXPECT_STREQ(title, _("Description"));
+	EXPECT_STREQ(bar_pane_translate_title(PANE_COMMENT, "comment", "Comment"), _("Description"));
 
-	g_free(title);
-	title = g_strdup("Field notes");
-	EXPECT_FALSE(bar_pane_translate_title(PANE_COMMENT, "comment", &title));
-	EXPECT_STREQ(title, "Field notes");
+	EXPECT_STREQ(bar_pane_translate_title(PANE_COMMENT, "comment", "Field notes"), "Field notes");
 }
 
 TEST(MetadataDescription, LegacyOsdAlias)
