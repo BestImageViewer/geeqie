@@ -3682,7 +3682,25 @@ static GtkWidget *dupe_menu_setup(DupeWindow *dw)
  *-------------------------------------------------------------------
  */
 
-static void dupe_listview_add_column(DupeWindow *, GtkWidget *listview, gint n, const gchar *title, gboolean image, gboolean right_justify)
+static void dupe_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
+                                 GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
+{
+	auto *dw = static_cast<DupeWindow *>(data);
+	gboolean set;
+	gtk_tree_model_get(tree_model, iter, DUPE_COLUMN_COLOR, &set, -1);
+
+	GdkRGBA color_bg;
+	gtk_widget_get_color(dw->listview, &color_bg);
+	color_bg.alpha = 0.15;
+	shift_color(color_bg);
+
+	g_object_set(cell,
+	             "cell-background-rgba", &color_bg,
+	             "cell-background-set", set,
+	             nullptr);
+}
+
+static void dupe_listview_add_column(DupeWindow *dw, GtkWidget *listview, gint n, const gchar *title, gboolean image, gboolean right_justify)
 {
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
@@ -3715,6 +3733,11 @@ static void dupe_listview_add_column(DupeWindow *, GtkWidget *listview, gint n, 
 		renderer = gqv_cell_renderer_icon_new();
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
 		gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", n);
+		}
+
+	if (listview == dw->listview)
+		{
+		gtk_tree_view_column_set_cell_data_func(column, renderer, dupe_listview_color_cb, dw, nullptr);
 		}
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(listview), column);
