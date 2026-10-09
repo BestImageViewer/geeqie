@@ -149,46 +149,6 @@ struct ConfOptions
 
 	gchar *help_search_engine;
 
-	/**
-	 * @struct info_comment
-	 * info sidebar component height
-	 */
-	struct {
-		gint height;
-	} info_comment;
-
-	/**
-	 * @struct info_keywords
-	 * info sidebar component height
-	 */
-	struct {
-		gint height;
-	} info_keywords;
-
-	/**
-	 * @struct info_title
-	 * info sidebar component height
-	 */
-	struct {
-		gint height;
-	} info_title;
-
-	/**
-	 * @struct info_rating
-	 * info sidebar component height
-	 */
-	struct {
-		gint height;
-	} info_rating;
-
-	/**
-	 * @struct info_headline
-	 * info sidebar component height
-	 */
-	struct {
-		gint height;
-	} info_headline;
-
 	/* file ops */
 	struct {
 		gboolean enable_in_place_rename;

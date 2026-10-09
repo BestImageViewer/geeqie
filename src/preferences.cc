@@ -576,11 +576,6 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->stereo.fixed_left = c_options->stereo.fixed_left;
 	options->stereo.fixed_right = c_options->stereo.fixed_right;
 
-	options->info_keywords.height = c_options->info_keywords.height;
-	options->info_title.height = c_options->info_title.height;
-	options->info_comment.height = c_options->info_comment.height;
-	options->info_rating.height = c_options->info_rating.height;
-
 	options->show_predefined_keyword_tree = c_options->show_predefined_keyword_tree;
 	options->expand_menu_toolbar = c_options->expand_menu_toolbar;
 	options->hamburger_menu = c_options->hamburger_menu;
