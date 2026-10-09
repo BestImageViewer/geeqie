@@ -879,3 +879,12 @@ if unit_tests_enabled
 else
     summary({'unit_tests' : ['Tests run:', false]}, section : 'Testing', bool_yn : true)
 endif
+
+# Integration tests (combined with unit test suite, but require X)
+if unit_tests_enabled and xvfb.found()
+    test_args = [xvfb.full_path(), '--auto-servernum', geeqie_exe.full_path(), '--run-unit-tests']
+    test('Integration tests', isolate_test_sh, args: test_args, timeout: 100, suite : 'integration')
+    summary({'integration_tests' : ['Tests run:', true]}, section : 'Testing', bool_yn : true)
+else
+    summary({'integration_tests' : ['Tests run:', false]}, section : 'Testing', bool_yn : true)
+endif
