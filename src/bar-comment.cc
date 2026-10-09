@@ -317,23 +317,6 @@ GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	if (!g_strcmp0(id, "title"))
-		{
-		options->info_title.height = height;
-		}
-	if (!g_strcmp0(id, "comment"))
-		{
-		options->info_comment.height = height;
-		}
-	if (!g_strcmp0(id, "rating"))
-		{
-		options->info_rating.height = height;
-		}
-	if (!g_strcmp0(id, "headline"))
-		{
-		options->info_headline.height = height;
-		}
-
 	return bar_pane_comment_new(id, title, key, expanded, height);
 }
 

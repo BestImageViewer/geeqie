@@ -1702,8 +1702,6 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	options->info_keywords.height = height;
-
 	return bar_pane_keywords_new(id, title, key, expanded, height);
 }
 
