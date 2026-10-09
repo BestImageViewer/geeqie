@@ -35,6 +35,7 @@
 #include "menu.h"
 #include "metadata.h"
 #include "rcfile.h"
+#include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"
 #include "view-file.h"
@@ -248,6 +249,33 @@ struct BarData
 	LayoutWindow *lw;
 	gint width;
 };
+
+static void bar_panes_set_expanded(BarData *bd, gboolean expanded)
+{
+	for (GtkWidget *expander = gtk_widget_get_first_child(bd->vbox);
+	     expander;
+	     expander = gtk_widget_get_next_sibling(expander))
+		{
+		gtk_expander_set_expanded(GTK_EXPANDER(expander), expanded);
+		}
+}
+
+static void bar_file_name_menu_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
+{
+	auto *bd = static_cast<BarData *>(data);
+	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	GtkWidget *menu = popover_box_new(widget, x, y);
+	popover_item_add(menu, _("Expand all panes"), G_CALLBACK(+[](GtkWidget *, gpointer data)
+		{
+		bar_panes_set_expanded(static_cast<BarData *>(data), TRUE);
+		}), bd);
+	popover_item_add(menu, _("Collapse all panes"), G_CALLBACK(+[](GtkWidget *, gpointer data)
+		{
+		bar_panes_set_expanded(static_cast<BarData *>(data), FALSE);
+		}), bd);
+	popover_box_popup(menu);
+}
 
 static const gchar *bar_pane_get_default_config(const gchar *id)
 {
@@ -698,6 +726,12 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	gtk_widget_set_hexpand(bd->label_file_name, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(bd->label_file_name, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(box), bd->label_file_name);
+
+	GtkGesture *gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(bar_file_name_menu_cb), bd);
+	gtk_widget_add_controller(box, GTK_EVENT_CONTROLLER(gesture));
 
 	gtk_box_append(GTK_BOX(bd->widget), box);
 
