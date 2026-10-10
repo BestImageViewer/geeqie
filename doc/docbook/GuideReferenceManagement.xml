@@ -171,8 +171,56 @@
     <title>Command line program</title>
     <para>
       Geeqie can be run as a command line program: <code>GQ_CACHE_MAINTENANCE=y[es] geeqie --cache-maintenance=&lt;path to images&gt;</code>. It will recursively remove orphaned thumbnails and .sim files, and create thumbnails and similarity data for all images found.
-    <para/>
+    </para>
+    <para>
       It may also be called from <code>cron</code> or <code>anacron</code> thus enabling automatic updating of the cached data for all your images.
     </para>
+    <section id="SchedulingCacheMaintenance">
+      <title>Scheduling cache maintenance</title>
+      <para>
+        Run scheduled maintenance as the same user who normally runs Geeqie. Start Geeqie normally at least once and save its configuration before scheduling maintenance. Thumbnail caching must be enabled in Preferences. If you use custom <code>XDG_CONFIG_HOME</code>, <code>XDG_CACHE_HOME</code>, or <code>XDG_DATA_HOME</code> values, set the same values in the maintenance script.
+      </para>
+      <para>
+        Although maintenance does not open a viewer window, the current GTK4 implementation requires a display connection. For jobs without a desktop session, install <code>Xvfb</code>, <code>xvfb-run</code> (including its <code>xauth</code> dependency), and <code>dbus-run-session</code> using your distribution's package manager. The following wrapper supplies a virtual display and a private D-Bus session.
+      </para>
+      <para>
+        Save this script as <code>$HOME/.local/bin/geeqie-cache-maintenance</code>, creating the directory if necessary. Replace <code>/usr/bin/geeqie</code> with the absolute path reported by <code>command -v geeqie</code>, and replace the image folder with your own. Check the paths to the wrapper programs too. Quoting the image folder allows spaces in its name.
+      </para>
+      <programlisting xml:space="preserve">#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+export GQ_CACHE_MAINTENANCE=y
+exec /usr/bin/xvfb-run --auto-servernum /usr/bin/dbus-run-session -- /usr/bin/geeqie --cache-maintenance="$HOME/Pictures"</programlisting>
+      <para>
+        Make the script executable, create the log directory, and test it manually before adding a schedule:
+      </para>
+      <programlisting xml:space="preserve">chmod +x "$HOME/.local/bin/geeqie-cache-maintenance"
+mkdir -p "$HOME/.local/state/geeqie"
+"$HOME/.local/bin/geeqie-cache-maintenance" &gt;&gt; "$HOME/.local/state/geeqie/cache-maintenance.log" 2&gt;&amp;1</programlisting>
+      <para>
+        Check the log for configuration errors or a <code>Caching not enabled</code> message. The examples below append both standard output and errors to this log; remove or rotate it periodically. Ensure the image folder, including any external or network drive, is available when the job runs.
+      </para>
+      <section id="CacheMaintenanceCron">
+        <title>Using cron</title>
+        <para>
+          Run <code>crontab -e</code> as your normal user and add the following entry to run maintenance daily at 03:00. The cron service must be enabled, and the computer must be running at the scheduled time.
+        </para>
+        <programlisting xml:space="preserve">0 3 * * * "$HOME/.local/bin/geeqie-cache-maintenance" &gt;&gt; "$HOME/.local/state/geeqie/cache-maintenance.log" 2&gt;&amp;1</programlisting>
+      </section>
+      <section id="CacheMaintenanceAnacron">
+        <title>Using anacron</title>
+        <para>
+          Anacron can run a daily job that was missed while the computer was switched off. To keep maintenance under your own account, create a personal configuration and timestamp directory:
+        </para>
+        <programlisting xml:space="preserve">mkdir -p "$HOME/.config" "$HOME/.local/state/geeqie/anacron"</programlisting>
+        <para>
+          Save the following line in <code>$HOME/.config/geeqie-anacrontab</code>. The first two fields specify a one-day interval and a five-minute delay; the third is the job identifier.
+        </para>
+        <programlisting xml:space="preserve">1 5 geeqie-cache-maintenance "$HOME/.local/bin/geeqie-cache-maintenance" &gt;&gt; "$HOME/.local/state/geeqie/cache-maintenance.log" 2&gt;&amp;1</programlisting>
+        <para>
+          Anacron must itself be started periodically. For example, add this entry with <code>crontab -e</code> to check hourly for a due job. Replace <code>/usr/sbin/anacron</code> with the path reported by <code>command -v anacron</code>. Use this entry instead of the daily cron entry above.
+        </para>
+        <programlisting xml:space="preserve">0 * * * * /usr/sbin/anacron -s -t "$HOME/.config/geeqie-anacrontab" -S "$HOME/.local/state/geeqie/anacron" &gt;&gt; "$HOME/.local/state/geeqie/cache-maintenance.log" 2&gt;&amp;1</programlisting>
+      </section>
+    </section>
   </section>
 </section>
