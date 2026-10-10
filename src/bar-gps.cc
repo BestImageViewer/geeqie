@@ -754,6 +754,23 @@ void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *button, gpointer data)
 	bar_pane_gps_fit_markers(pgd);
 }
 
+void bar_pane_gps_map_centering_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer data)
+{
+	auto *pgd = static_cast<PaneGPSData *>(data);
+
+	pgd->centre_map_checked = !pgd->centre_map_checked;
+	bar_pane_gps_fit_markers(pgd);
+	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+
+	const gchar *message = pgd->centre_map_checked
+	    ? _("Move map centre to marker\n is enabled")
+	    : _("Move map centre to marker\n is disabled");
+	auto *gd = generic_dialog_new(_("Map centering"), "map_centering", pgd->pane.widget, TRUE, nullptr, nullptr);
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO, _("Map Centering"), message, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, _("OK"), nullptr, TRUE);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
+}
+
 void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
 {
 	(void)count;
@@ -997,6 +1014,12 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	        gdk_clipboard_set_text(clipboard, geo_coords);
 	        }), pgd);
 	gtk_widget_add_controller(GTK_WIDGET(shumate_simple_map_get_map(pgd->map)), GTK_EVENT_CONTROLLER(coordinate_click));
+
+	auto *centering_click = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(centering_click), GDK_BUTTON_MIDDLE);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(centering_click), GTK_PHASE_CAPTURE);
+	g_signal_connect(centering_click, "pressed", G_CALLBACK(bar_pane_gps_map_centering_cb), pgd);
+	gtk_widget_add_controller(GTK_WIDGET(shumate_simple_map_get_map(pgd->map)), GTK_EVENT_CONTROLLER(centering_click));
 
 	auto *click = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), GDK_BUTTON_SECONDARY);
