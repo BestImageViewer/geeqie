@@ -980,6 +980,24 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	ShumateLicense *license = shumate_simple_map_get_license(SHUMATE_SIMPLE_MAP(pgd->map));
 	gtk_widget_add_css_class(GTK_WIDGET(license), "hidden-license");
 
+	auto *coordinate_click = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(coordinate_click), GDK_BUTTON_PRIMARY);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(coordinate_click), GTK_PHASE_CAPTURE);
+	g_signal_connect(coordinate_click, "pressed",
+	    G_CALLBACK(+[](GtkGestureClick *, int, double x, double y, gpointer data)
+	        {
+	        auto *pgd = static_cast<PaneGPSData *>(data);
+	        gdouble latitude;
+	        gdouble longitude;
+	        auto *map_widget = GTK_WIDGET(shumate_simple_map_get_map(pgd->map));
+	        shumate_viewport_widget_coords_to_location(pgd->viewport, map_widget,
+	                                                  x, y, &latitude, &longitude);
+	        g_autofree gchar *geo_coords = g_strdup_printf("%f %f", latitude, longitude);
+	        auto *clipboard = gdk_display_get_primary_clipboard(gtk_widget_get_display(GTK_WIDGET(pgd->map)));
+	        gdk_clipboard_set_text(clipboard, geo_coords);
+	        }), pgd);
+	gtk_widget_add_controller(GTK_WIDGET(shumate_simple_map_get_map(pgd->map)), GTK_EVENT_CONTROLLER(coordinate_click));
+
 	auto *click = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), GDK_BUTTON_SECONDARY);
 
