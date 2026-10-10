@@ -164,7 +164,10 @@
   <section id="BackgroundCacheMaintenance">
     <title>Background Cache Maintenance</title>
     <para>
-      This facility will run the command line program described below as a stand-alone background job.
+      Select <guilabel>Select</guilabel> in the Background cache maintenance section, enter or choose a folder, and select <guilabel>Start</guilabel>. Geeqie launches the command line program described below as a separate background job, creating thumbnails and similarity data for the selected folder and all its subfolders. The initial cleanup removes orphaned entries from Geeqie's cache, not just entries for the selected folder.
+    </para>
+    <para>
+      Thumbnail caching must be enabled in the saved Preferences. Desktop notifications report the maintenance stage and provide a Quit button while maintenance is running. The viewer remains available during the background job.
     </para>
   </section>
   <section id="CacheMaintenance">

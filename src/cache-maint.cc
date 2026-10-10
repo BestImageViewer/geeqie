@@ -1483,9 +1483,18 @@ static void cache_manager_cache_maintenance_start_cb(GenericDialog *, gpointer d
 		}
 	else
 		{
-		g_autofree gchar *cmd_line = g_strdup_printf("%s --cache-maintenance=\"%s\"", gq_executable_path, path);
+		g_autofree gchar *maintenance_option = g_strconcat("--cache-maintenance=", path, nullptr);
+		gchar *argv[] = {gq_executable_path, maintenance_option, nullptr};
+		g_auto(GStrv) environment = g_get_environ();
+		environment = g_environ_setenv(environment, "GQ_CACHE_MAINTENANCE", "y", TRUE);
+		g_autoptr(GError) error = nullptr;
 
-		g_spawn_command_line_async(cmd_line, nullptr);
+		if (!g_spawn_async(nullptr, argv, environment, G_SPAWN_DEFAULT, nullptr, nullptr, nullptr, &error))
+			{
+			warning_dialog(_("Unable to start cache maintenance"), error->message,
+			               GQ_ICON_DIALOG_WARNING, cd->gd->dialog);
+			return;
+			}
 
 		generic_dialog_close(cd->gd);
 		cache_manager_sim_reset(cd);
@@ -1641,10 +1650,6 @@ void cache_manager_show()
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Run cache maintenance as a background job."), GTK_ALIGN_START);
 	gtk_widget_set_sensitive(group, options->thumbnails.enable_caching);
-
-	/* @FIXME This feature does not work. The command line option must be used */
-	gtk_widget_set_sensitive(group, FALSE);
-	gtk_widget_set_tooltip_text(button, _("Feature disabled in this version.\nUse command line:\nGQ_CACHE_MAINTENANCE=  geeqie --cache-maintenance=<FOLDER>"));
 
 	gtk_window_present(GTK_WINDOW(cache_manager->dialog->dialog));
 }
