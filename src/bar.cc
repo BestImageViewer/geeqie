@@ -385,12 +385,7 @@ static void bar_menu_popup(GtkWidget *widget)
 		GtkWidget *pane = gtk_expander_get_child(GTK_EXPANDER(expander));
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 
-		display_height_option = pd && (pd->type == PANE_COMMENT ||
-#if HAVE_LIBSHUMATE
-		                               pd->type == PANE_GPS ||
-#endif
-		                               pd->type == PANE_KEYWORDS ||
-		                               pd->type == PANE_RATING);
+		display_height_option = pd && pd->pane_set_height;
 		}
 
 	popup_menu_bar(expander, display_height_option);
@@ -610,6 +605,9 @@ void bar_write_config(GtkWidget *bar, RcString &rc)
 		if (!pd) continue;
 
 		pd->expanded = gtk_expander_get_expanded(GTK_EXPANDER(expander));
+
+		if (pd->pane_set_height)
+			pd->pane_set_height(widget);
 
 		if (pd->pane_write_config)
 			pd->pane_write_config(widget, rc);

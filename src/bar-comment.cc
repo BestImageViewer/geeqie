@@ -129,31 +129,25 @@ static void bar_pane_comment_update(GtkWidget *pane)
 	bar_pane_comment_update(pcd);
 }
 
-static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
+static void bar_pane_comment_set_height(GtkWidget *pane)
 {
 	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
 
-	gint w;
-	gint h;
-	gtk_widget_get_size_request(pane, &w, &h);
+	if (g_strcmp0(pcd->pane.id, "title") == 0 ||
+	    g_strcmp0(pcd->pane.id, "comment") == 0 ||
+	    g_strcmp0(pcd->pane.id, "rating") == 0 ||
+	    g_strcmp0(pcd->pane.id, "headline") == 0)
+		{
+		gint w;
+		gtk_widget_get_size_request(pane, &w, &pcd->height);
+		}
+}
 
-	if (!g_strcmp0(pcd->pane.id, "title"))
-		{
-		pcd->height = h;
-		}
-	if (!g_strcmp0(pcd->pane.id, "comment"))
-		{
-		pcd->height = h;
-		}
-	if (!g_strcmp0(pcd->pane.id, "rating"))
-		{
-		pcd->height = h;
-		}
-	if (!g_strcmp0(pcd->pane.id, "headline"))
-		{
-		pcd->height = h;
-		}
+static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
+{
+	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pcd) return;
 
 	WRITE_NL(); WRITE_STRING("<pane_comment ");
 	bar_pane_common_write_config(pcd->pane, rc);
@@ -256,6 +250,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd = g_new0(PaneCommentData, 1);
 
 	pcd->pane.pane_update = bar_pane_comment_update;
+	pcd->pane.pane_set_height = bar_pane_comment_set_height;
 	pcd->pane.pane_write_config = bar_pane_comment_write_config;
 	pcd->pane.pane_update_from_config = bar_pane_comment_update_from_config;
 	bar_pane_common_init(pcd->pane, id, title, expanded, PANE_COMMENT);
