@@ -75,6 +75,34 @@ TEST(PixbufFromCairoSurface, ConvertsPremultipliedArgbToRgba)
 	EXPECT_NEAR(pixels[3], 128, 1);
 }
 
+TEST(PixbufDrawLayout, DrawsFileInformationOnRgbBackground)
+{
+	PangoContext *context = pango_font_map_create_context(pango_cairo_font_map_get_default());
+	g_autoptr(PangoLayout) layout = pango_layout_new(context);
+	g_object_unref(context);
+	pango_layout_set_markup(layout, "<span font_desc='Sans 16'>Filename: image.jpg</span>", -1);
+	g_autoptr(GdkPixbuf) pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 300, 60);
+	gdk_pixbuf_fill(pixbuf, 0xffffe1ff);
+
+	pixbuf_draw_layout(pixbuf, layout, 2, 2, {0, 0, 0, 225});
+
+	bool found_text = false;
+	const guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
+	const gint stride = gdk_pixbuf_get_rowstride(pixbuf);
+	for (gint y = 0; y < 60; y++)
+		{
+		for (gint x = 0; x < 300; x++)
+			{
+			const guchar *pixel = pixels + y * stride + x * 3;
+			if (pixel[0] < 100 && pixel[1] < 100 && pixel[2] < 100) found_text = true;
+			}
+		}
+	EXPECT_TRUE(found_text);
+	EXPECT_EQ(pixels[0], 255);
+	EXPECT_EQ(pixels[1], 255);
+	EXPECT_EQ(pixels[2], 225);
+}
+
 TEST(PixbufDrawLayout, KeepsAntialiasedTextColorOnTransparentBackground)
 {
 	PangoContext *context = pango_font_map_create_context(pango_cairo_font_map_get_default());

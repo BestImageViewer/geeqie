@@ -712,7 +712,19 @@ void pixbuf_draw_layout(GdkPixbuf *dest_pixbuf, PangoLayout *layout,
 
 	g_autoptr(GdkPixbuf) src_pixbuf = pixbuf_from_cairo_surface(surface);
 	cairo_surface_destroy(surface);
-	if (src_pixbuf) gdk_pixbuf_copy_area(src_pixbuf, 0, 0, width, height, dest_pixbuf, 0, 0);
+	if (src_pixbuf)
+		{
+		if (gdk_pixbuf_get_has_alpha(dest_pixbuf))
+			{
+			gdk_pixbuf_copy_area(src_pixbuf, 0, 0, width, height, dest_pixbuf, 0, 0);
+			}
+		else
+			{
+			// Cairo returns RGBA; copying its alpha channel into an RGB tile is invalid.
+			gdk_pixbuf_composite(src_pixbuf, dest_pixbuf, 0, 0, width, height,
+			                     0, 0, 1, 1, GDK_INTERP_NEAREST, 255);
+			}
+		}
 }
 
 /*
