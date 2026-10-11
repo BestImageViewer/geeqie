@@ -185,7 +185,7 @@ bool CacheData::write_date(GString *gstring) const
 {
 	if (!date) return false;
 
-	g_string_append_printf(gstring, "DateTimeOriginal=[%ld]\n", *date);
+	g_string_append_printf(gstring, "DateTimeOriginal=[%lld]\n", static_cast<long long int>(*date));
 
 	return true;
 }

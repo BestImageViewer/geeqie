@@ -317,7 +317,7 @@ void decompress_line(const guchar* src, guint line_length, guchar* dest)
 	int k;
 	while (bytes_read < line_length)
 		{
-		gchar byte = src[bytes_read];
+		signed char byte = src[bytes_read];
 		++bytes_read;
 
 		if (byte == -128)
