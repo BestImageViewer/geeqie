@@ -250,8 +250,11 @@ struct BarData
 	gint width;
 };
 
-static void bar_panes_set_expanded(BarData *bd, gboolean expanded)
+template<gboolean expanded>
+static void bar_panes_set_expanded_cb(GtkWidget *, gpointer data)
 {
+	auto *bd = static_cast<BarData *>(data);
+
 	for (GtkWidget *expander = gtk_widget_get_first_child(bd->vbox);
 	     expander;
 	     expander = gtk_widget_get_next_sibling(expander))
@@ -266,14 +269,8 @@ static void bar_file_name_menu_cb(GtkGestureClick *gesture, gint, gdouble x, gdo
 	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 	GtkWidget *menu = popover_box_new(widget, x, y);
-	popover_item_add(menu, _("Expand all panes"), G_CALLBACK(+[](GtkWidget *, gpointer data)
-		{
-		bar_panes_set_expanded(static_cast<BarData *>(data), TRUE);
-		}), bd);
-	popover_item_add(menu, _("Collapse all panes"), G_CALLBACK(+[](GtkWidget *, gpointer data)
-		{
-		bar_panes_set_expanded(static_cast<BarData *>(data), FALSE);
-		}), bd);
+	popover_item_add(menu, _("Expand all panes"), G_CALLBACK(bar_panes_set_expanded_cb<TRUE>), bd);
+	popover_item_add(menu, _("Collapse all panes"), G_CALLBACK(bar_panes_set_expanded_cb<FALSE>), bd);
 	popover_box_popup(menu);
 }
 
