@@ -104,6 +104,14 @@ static gboolean cache_loader_phase2_process(gpointer data)
 
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_SIMILARITY);
 		}
+	else if ((cl->todo_mask & CACHE_LOADER_SIMILARITY) &&
+	         options->alternate_similarity_algorithm.enabled &&
+	         cl->cd->similarity && cl->cd->similarity->ensure_perceptual_hashes())
+		{
+		// Upgrade a cached grid without decoding the source image again.
+		cl->done_mask = static_cast<CacheDataType>(cl->done_mask | CACHE_LOADER_SIMILARITY);
+		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_SIMILARITY);
+		}
 	else if ((cl->todo_mask & CACHE_LOADER_DIMENSIONS) &&
 	         !cl->cd->dimensions)
 		{

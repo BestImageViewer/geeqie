@@ -52,6 +52,7 @@
  * DateTimeOriginal=[<value in time_t format, or -1 if no original date>] \n
  * MD5sum=[<32 character ascii text digest>] \n
  * SimilarityGrid[32 x 32]=<3072 bytes of data (1024 pixels in RGB format, 1 pixel is 24bits)>
+ * PerceptualHashV1=[<eight 16-digit hexadecimal hashes separated by spaces>] \n
  *
  * The first line (9 bytes) indicates it is a SIMcache format file. (new line char must exist) \n
  * Comment lines starting with a # are ignored up to a new line. \n
@@ -212,6 +213,28 @@ bool CacheData::write_similarity(GString *gstring) const
 	return true;
 }
 
+bool CacheData::write_perceptual_hashes(GString *gstring) const
+{
+	if (!image_sim_filled(similarity.get())) return false;
+
+	auto hashes = similarity->perceptual_hashes;
+	if (!hashes && options->alternate_similarity_algorithm.enabled)
+		{
+		ImageSimilarityData sim = *similarity;
+		sim.ensure_perceptual_hashes();
+		hashes = sim.perceptual_hashes;
+		}
+	if (!hashes) return false;
+
+	g_string_append(gstring, "PerceptualHashV1=[");
+	for (guint i = 0; i < hashes->size(); i++)
+		{
+		g_string_append_printf(gstring, "%s%016" G_GINT64_MODIFIER "x", i == 0 ? "" : " ", (*hashes)[i]);
+		}
+	g_string_append(gstring, "]\n");
+	return true;
+}
+
 void CacheData::save(const gchar *source) const
 {
 	g_autofree gchar *base = cache_create_location(CacheType::SIM, source);
@@ -228,6 +251,7 @@ void CacheData::save(const gchar *source) const
 	write_date(gstring);
 	write_md5sum(gstring);
 	write_similarity(gstring);
+	write_perceptual_hashes(gstring);
 
 	secure_save(pathl, gstring->str, gstring->len);
 
@@ -372,8 +396,47 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		if (b != '\n') fseek(f, -1, SEEK_CUR);
 		}
 
-	set_similarity(*sd);
+	similarity.swap(sd);
 
+	return true;
+}
+
+bool CacheData::read_perceptual_hashes(FILE *f, const gchar *buffer, gint s)
+{
+	constexpr gchar prefix[] = "PerceptualHashV1=[";
+	if (!f || !buffer || s < static_cast<gint>(sizeof(prefix) - 1) ||
+	    strncmp(prefix, buffer, sizeof(prefix) - 1) != 0) return false;
+
+	// Read only this text line so a malformed optional field cannot consume the grid.
+	if (fseek(f, -s, SEEK_CUR) != 0) return false;
+	gchar buf[256];
+	if (!fgets(buf, sizeof(buf), f)) return true;
+	if (!strchr(buf, '\n'))
+		{
+		gint c;
+		while ((c = fgetc(f)) != EOF && c != '\n')
+			{
+			}
+		}
+
+	ImageSimilarityData::PerceptualHashes hashes{};
+	const gchar *p = buf + sizeof(prefix) - 1;
+	for (guint i = 0; i < hashes.size(); i++)
+		{
+		// Ignore invalid optional hashes after consuming their line.
+		// Require exactly eight fixed-width values, with no partial hashes accepted.
+		for (guint digit = 0; digit < 16; digit++)
+			{
+			if (!g_ascii_isxdigit(*p)) return true;
+			hashes[i] = (hashes[i] << 4) | g_ascii_xdigit_value(*p++);
+			}
+		if (hashes[i] & 1) return true; // The unused DC bit must be clear.
+		if (*p++ != (i + 1 == hashes.size() ? ']' : ' ')) return true;
+		}
+	if (*p != '\0' && (*p != '\n' || p[1] != '\0')) return true;
+
+	if (!similarity) similarity = std::make_unique<ImageSimilarityData>();
+	similarity->perceptual_hashes = hashes;
 	return true;
 }
 
@@ -406,7 +469,8 @@ bool CacheData::load(const gchar *source)
 		    !read_dimensions(f, buf, s) &&
 		    !read_date(f, buf, s) &&
 		    !read_md5sum(f, buf, s) &&
-		    !read_similarity(f, buf, s))
+		    !read_similarity(f, buf, s) &&
+		    !read_perceptual_hashes(f, buf, s))
 			{
 			if (!cache_sim_read_skipline(f, s)) break;
 
@@ -417,6 +481,8 @@ bool CacheData::load(const gchar *source)
 			success = CACHE_LOAD_LINE_NOISE;
 			}
 		}
+
+	if (!image_sim_filled(similarity.get())) similarity.reset();
 
 	return dimensions
 	    || date

@@ -60,6 +60,8 @@ ConfOptions *conf_options_new()
 
 	auto *options = g_new0(ConfOptions, 1);
 
+	options->alternate_similarity_algorithm.enabled = FALSE;
+
 	options->collections.rectangular_selection = FALSE;
 
 	options->color_profile.enabled = TRUE;

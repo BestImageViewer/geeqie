@@ -137,7 +137,7 @@
         </term>
         <listitem>
           <para>
-            The percentage value to used to consider two images a match is configured in the spin box at the bottom of the window. Setting a value to less than 85 is not likely to be useful.
+            The percentage value used to consider two images a match is configured in the spin box at the bottom of the window. With the standard algorithm, setting a value below 85 is not likely to be useful. When pHash is selected in the Duplicates window, percentages measure matching hash bits instead of RGB similarity; see <link linkend="GuideReferenceSimilarityAlgorithms">Similarity Algorithms</link> for threshold details.
           </para>
         </listitem>
       </varlistentry>

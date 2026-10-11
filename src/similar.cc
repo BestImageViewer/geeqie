@@ -25,7 +25,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <functional>
-#include <vector>
 
 #include "options.h"
 
@@ -53,38 +52,17 @@
  *  0.0 for exact opposite images (compare an all black to an all white image) \n
  * generally only a match of > 0.85 are significant at all, and >.95 is useful to
  * find images that have been re-saved to other formats, dimensions, or compression.
+ *
+ * The alternate algorithm uses grayscale DCT perceptual hashes. Eight hashes
+ * represent all right-angle rotations and reflections of the same RGB grid.
+ * The DC bit is unused; similarity is 1 minus the Hamming distance divided by 63.
+ * Hashes must be prepared before comparisons, which may run in worker threads.
  */
 
 namespace
 {
 
 using ImageSimilarityCheckAbort = std::function<bool(gdouble)>;
-
-void image_sim_channel_equal(ImageSimilarityData::Avg &pix)
-{
-	struct IndexedPix
-	{
-		gsize index;
-		guint8 pix;
-	};
-
-	std::vector<IndexedPix> buf;
-	buf.reserve(pix.size());
-
-	for (gsize i = 0; i < pix.size(); i++)
-		{
-		buf.push_back({i, pix[i]});
-		}
-
-	std::sort(buf.begin(), buf.end(), [](const IndexedPix &a, const IndexedPix &b){ return a.pix < b.pix; });
-
-	for (gsize i = 0; i < pix.size(); i++)
-		{
-		gint n = buf[i].index;
-
-		pix[n] = static_cast<guint8>(255 * i / pix.size());
-		}
-}
 
 /*
  * 4 rotations (0, 90, 180, 270) combined with two mirrors (0, H)
@@ -135,56 +113,101 @@ gdouble image_sim_data_compare(const ImageSimilarityData *a, const ImageSimilari
 
 } // namespace
 
-static void image_sim_channel_norm(ImageSimilarityData::Avg &pix)
-{
-	const auto [l, h] = std::minmax_element(pix.cbegin(), pix.cend());
-	const guint8 delta = *h - *l;
-	const gdouble scale = (delta != 0) ? 255.0 / static_cast<gdouble>(delta) : 1.0;
-
-	for (guint8 &n : pix)
-		{
-		n = static_cast<guint8>(static_cast<gdouble>(n - *l) * scale);
-		}
-}
-
 ImageSimilarityData::ImageSimilarityData(const GdkPixbuf *pixbuf)
 	: ImageSimilarityData()
 {
 	fill_data(pixbuf);
 }
 
-/*
- * The Alternate algorithm is only for testing of new techniques to
- * improve the result, and hopes to reduce false positives.
- */
-void ImageSimilarityData::alternate_processing()
+bool ImageSimilarityData::ensure_perceptual_hashes()
 {
-	if (!options->alternate_similarity_algorithm.enabled)
+	if (!filled || perceptual_hashes) return false;
+
+	// Orthonormal DCT-II basis for the low-frequency 8 x 8 block.
+	static const auto basis = []()
 		{
-		return;
-		}
-
-	image_sim_channel_norm(avg_r);
-	image_sim_channel_norm(avg_g);
-	image_sim_channel_norm(avg_b);
-
-	image_sim_channel_equal(avg_r);
-	image_sim_channel_equal(avg_g);
-	image_sim_channel_equal(avg_b);
-
-	if (options->alternate_similarity_algorithm.grayscale)
-		{
-		for (size_t i = 0; i < std::tuple_size_v<Avg>; i++)
+		std::array<std::array<gdouble, 32>, 8> result{};
+		for (guint frequency = 0; frequency < 8; frequency++)
 			{
-			guint8 n = static_cast<gint>(avg_r[i] + avg_g[i] + avg_b[i]) / 3;
+			const gdouble scale = std::sqrt((frequency == 0 ? 1.0 : 2.0) / 32.0);
+			for (guint position = 0; position < 32; position++)
+				{
+				result[frequency][position] = scale * std::cos(G_PI * (2 * position + 1) * frequency / 64.0);
+				}
+			}
+		return result;
+		}();
 
-			avg_r[i] = avg_g[i] = avg_b[i] = n;
+	std::array<gdouble, 1024> grayscale{};
+	gdouble mean = 0;
+	for (guint i = 0; i < grayscale.size(); i++)
+		{
+		grayscale[i] = (299.0 * avg_r[i] + 587.0 * avg_g[i] + 114.0 * avg_b[i]) / 1000.0;
+		mean += grayscale[i];
+		}
+	mean /= grayscale.size();
+
+	// Subtract the mean to make uniform images and brightness changes stable.
+	std::array<std::array<gdouble, 8>, 32> rows{};
+	for (guint y = 0; y < 32; y++)
+		{
+		for (guint u = 0; u < 8; u++)
+			{
+			for (guint x = 0; x < 32; x++)
+				{
+				rows[y][u] += (grayscale[(y * 32) + x] - mean) * basis[u][x];
+				}
 			}
 		}
+
+	std::array<gdouble, 64> coefficients{};
+	for (guint v = 0; v < 8; v++)
+		{
+		for (guint u = 0; u < 8; u++)
+			{
+			gdouble value = 0;
+			for (guint y = 0; y < 32; y++) value += rows[y][u] * basis[v][y];
+			// Discard floating-point noise around mathematically zero coefficients.
+			coefficients[(v * 8) + u] = std::abs(value) < 1e-7 ? 0.0 : value;
+			}
+		}
+
+	PerceptualHashes hashes{};
+	for (guint orientation = 0; orientation < hashes.size(); orientation++)
+		{
+		std::array<gdouble, 64> transformed{};
+		for (guint v = 0; v < 8; v++)
+			{
+			for (guint u = 0; u < 8; u++)
+				{
+				// A transpose swaps frequencies; reflections negate odd frequencies.
+				gdouble value = coefficients[(orientation & 1) ? (u * 8) + v : (v * 8) + u];
+				if ((orientation & 2) && (v & 1)) value = -value;
+				if ((orientation & 4) && (u & 1)) value = -value;
+				transformed[(v * 8) + u] = value;
+				}
+			}
+
+		// The DC coefficient is excluded. Bit zero stays clear, leaving 63 meaningful bits.
+		std::array<gdouble, 63> ranked{};
+		std::copy(transformed.begin() + 1, transformed.end(), ranked.begin());
+		std::nth_element(ranked.begin(), ranked.begin() + 31, ranked.end());
+		const gdouble median = ranked[31];
+		for (guint bit = 1; bit < transformed.size(); bit++)
+			{
+			// Treat near-equal coefficients as ties, including after a transpose.
+			if (transformed[bit] - median > 1e-7) hashes[orientation] |= guint64{1} << bit;
+			}
+		}
+
+	perceptual_hashes = hashes;
+	return true;
 }
 
 void ImageSimilarityData::fill_data(const GdkPixbuf *pixbuf)
 {
+	filled = false;
+	perceptual_hashes.reset();
 	if (!pixbuf) return;
 
 	const gint w = gdk_pixbuf_get_width(pixbuf);
@@ -263,6 +286,7 @@ void ImageSimilarityData::fill_data(const GdkPixbuf *pixbuf)
 		}
 
 	filled = true;
+	if (options->alternate_similarity_algorithm.enabled) ensure_perceptual_hashes();
 }
 
 GdkPixbuf *ImageSimilarityData::to_pixbuf() const
@@ -329,44 +353,31 @@ void ImageSimilarityData::to_string(GString *str) const
 		}
 }
 
-static gdouble alternate_image_sim_compare_fast(const ImageSimilarityData *a, const ImageSimilarityData *b, gdouble min)
+static gdouble image_sim_compare_perceptual_hash(const ImageSimilarityData *a, const ImageSimilarityData *b)
 {
-	gint sim;
-	gint i;
-	gint j;
-	gint ld;
+	if (!image_sim_filled(a) || !image_sim_filled(b) || !a->perceptual_hashes || !b->perceptual_hashes) return 0.0;
 
-	if (!image_sim_filled(a) || !image_sim_filled(b)) return 0.0;
-
-	sim = 0.0;
-	ld = 0;
-
-	for (j = 0; j < 1024; j += 32)
+	guint distance = 63;
+	const guint orientations = options->rot_invariant_sim ? 8 : 1;
+	// Median thresholds change under reflection. Compare both sets so the score
+	// is symmetric and does not depend on either image's initial orientation.
+	for (guint orientation_a = 0; orientation_a < orientations; orientation_a++)
 		{
-		for (i = j; i < j + 32; i++)
+		for (guint orientation_b = 0; orientation_b < orientations; orientation_b++)
 			{
-			gint cr;
-			gint cg;
-			gint cb;
-			gint cd;
-
-			cr = abs(a->avg_r[i] - b->avg_r[i]);
-			cg = abs(a->avg_g[i] - b->avg_g[i]);
-			cb = abs(a->avg_b[i] - b->avg_b[i]);
-
-			cd = cr + cg + cb;
-			sim += cd + abs(cd - ld);
-			ld = cd / 3;
+			const guint64 difference = (*a->perceptual_hashes)[orientation_a] ^ (*b->perceptual_hashes)[orientation_b];
+			distance = std::min(distance, static_cast<guint>(__builtin_popcountll(difference)));
+			if (distance == 0) return 1.0;
 			}
-		/* check for abort, if so return 0.0 */
-		if ((gdouble)sim / (255.0 * 1024.0 * 4.0) > min) return 0.0;
 		}
 
-	return (1.0 - ((gdouble)sim / (255.0 * 1024.0 * 4.0)) );
+	return 1.0 - (distance / 63.0);
 }
 
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b)
 {
+	if (options->alternate_similarity_algorithm.enabled) return image_sim_compare_perceptual_hash(a, b);
+
 	return image_sim_data_compare(a, b, [](gdouble){ return false; });
 }
 
@@ -375,13 +386,13 @@ gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b)
  */
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min)
 {
-	min = 1.0 - min;
-
 	if (options->alternate_similarity_algorithm.enabled)
 		{
-		return alternate_image_sim_compare_fast(a, b, min);
+		const gdouble score = image_sim_compare_perceptual_hash(a, b);
+		return score >= min ? score : 0.0;
 		}
 
+	min = 1.0 - min;
 	return image_sim_data_compare(a, b, [min](gdouble sim){ return (sim / (255.0 * 1024.0 * 3.0)) > min; });
 }
 

@@ -1657,6 +1657,13 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			}
 		}
 
+	if (sd->match_similarity_enable && options->alternate_similarity_algorithm.enabled &&
+	    sd->img_cd->similarity && sd->img_cd->similarity->ensure_perceptual_hashes() &&
+	    options->thumbnails.enable_caching)
+		{
+		sd->img_cd->save(mfd.fd->path);
+		}
+
 	const auto &dimensions = sd->img_cd->dimensions; // prevent clang-tidy bugprone-unchecked-optional-access
 
 	if (sd->match_broken_enable && dimensions)
@@ -2286,6 +2293,11 @@ static void search_start(SearchData *sd)
 	    isfile(sd->search_similarity_path))
 		{
 		sd->search_similarity_cd = std::make_unique<CacheData>(sd->search_similarity_path);
+		if (options->alternate_similarity_algorithm.enabled && sd->search_similarity_cd->similarity &&
+		    sd->search_similarity_cd->similarity->ensure_perceptual_hashes() && options->thumbnails.enable_caching)
+			{
+			sd->search_similarity_cd->save(sd->search_similarity_path);
+			}
 
 		if (!sd->search_similarity_cd->similarity)
 			{

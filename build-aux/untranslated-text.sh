@@ -122,6 +122,7 @@ website-label
 write_char_option
 
 ##cache.cc
+\"PerceptualHashV1=[\"
 \"SimilarityGrid[32 x 32]=\"
 
 ##cellrendericon.cc

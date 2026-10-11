@@ -76,10 +76,4 @@
       means use all available threads. This will give the fastest processing time, but will slow other processes including user input response time.
     </para>
   </section>
-  <section id="AlternateAlgorithm">
-    <title>Alternate Algorithm</title>
-    <para>
-      <emphasis role="underline"><link linkend="GuideReferenceSimilarityAlgorithms">Alternate Similarity Algorithm</link></emphasis>
-    </para>
-  </section>
 </section>

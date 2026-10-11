@@ -631,7 +631,6 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 
 	/* Alternate similarity algorithm */
 	WRITE_NL(); WRITE_BOOL(*options, alternate_similarity_algorithm.enabled);
-	WRITE_NL(); WRITE_BOOL(*options, alternate_similarity_algorithm.grayscale);
 	WRITE_SEPARATOR();
 }
 
@@ -1092,7 +1091,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 
 		/* Alternative similarity algorithm */
 		if (READ_BOOL(*options, alternate_similarity_algorithm.enabled)) continue;
-		if (READ_BOOL(*options, alternate_similarity_algorithm.grayscale)) continue;
+		if (READ_DUMMY(*options, alternate_similarity_algorithm.grayscale, "replaced by grayscale pHash")) continue;
 
 		/* Dummy options */
 		if (READ_DUMMY(*options, image.dither_quality, "deprecated since 2012-08-13")) continue;

@@ -102,6 +102,7 @@
       and
       <emphasis role="underline"><link linkend="GuideImageSearchFindingDuplicates">find duplicates</link></emphasis>
       , are speeded up if similarity data files for the images have been created. This utility will create sim. files recursively under the specified folder.
+      When <guilabel>Perceptual hash algorithm</guilabel> is selected in the Duplicates window, it also creates all eight orientation hashes. Existing RGB grids are reused when adding missing hashes.
       <para />
       The sim. files contain some or all of the following fields:
       <variablelist>
@@ -135,6 +136,14 @@
           </term>
           <listitem>
             <para>[32 x 32] = 3072 bytes of data (1024 pixels in RGB format, 1 pixel is 24bits)</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <guilabel>PerceptualHashV1</guilabel>
+          </term>
+          <listitem>
+            <para>Eight 64-bit DCT perceptual hashes, stored as 16-digit hexadecimal values separated by spaces. These cover all right-angle rotations and reflections. This optional field is added when pHash is enabled; the RGB grid is also retained.</para>
           </listitem>
         </varlistentry>
       </variablelist>

@@ -8,7 +8,7 @@
     <para />
     For each array element, the average value of all the red and the green and the blue pixels is computed and stored in the array. Therefore the array represents the average color of each corresponding part of the image.
     <para />
-    This data is stored in a file with the same name is the image and with the extension .sim. It is stored in the same location as thumbnails. If many images are to be compered, run-time is reduced by having these .sim files already created. This can be done via Edit/Cache Maintenance or by the command line instruction:
+    This data is stored in a file with the same name as the image and with the extension .sim. It is stored in the same location as thumbnails. If many images are to be compared, run-time is reduced by having these .sim files already created. This can be done via Edit/Cache Maintenance or by the command line instruction:
     <code>GQ_CACHE_MAINTENANCE=y geeqie --cache-maintenance=&lt;path&gt;</code>
   </para>
   <section id="standard">
@@ -26,15 +26,24 @@
     <para>If the Ignore Orientation checkbox on the Duplicates window is selected, images are also checked for 90°, 180°, 270°, rotations and mirror and flip. This will increase run-time.</para>
   </section>
   <section id="alternate">
-    <title>Alternate Algorithm</title>
+    <title>Alternate Algorithm: Perceptual Hash (pHash)</title>
     <para>
-      The alternate algorithm can be enabled on the Advanced tab of Preferences.
-      <para />
-      It does not check for rotations, mirror or flip.
-      <para />
-      After comparing two array elements of two images, the difference from the preceding element comparison is included in the computation.
-      <para />
-      There is an additional option to reduce the fingerprint to grayscale before comparisons are made.
+      Select <guilabel>Perceptual hash algorithm</guilabel> from the algorithm dropdown in the Duplicates window. The button shows <guilabel>Perceptual</guilabel> or <guilabel>Standard</guilabel>, and changing the selection restarts comparisons in open Duplicates windows. The selection also applies to image searches and similarity cache creation. This replaces the previous alternate algorithm.
+    </para>
+    <para>
+      Geeqie converts the 32 x 32 RGB grid to grayscale and computes a discrete cosine transform (DCT). The low-frequency 8 x 8 block describes coarse image structure. The constant brightness (DC) coefficient is excluded, and the remaining 63 coefficients are compared with their median to produce a 64-bit hash with one unused bit. This is a Geeqie-specific DCT pHash; hashes from other applications may use different preprocessing and are not interchangeable.
+    </para>
+    <para>
+      When pHash is selected, similarity cache creation stores eight hashes in each .sim file: one for every combination of right-angle rotation and reflection. These are derived from one DCT using coefficient transposition and sign changes. The RGB grid is retained, so switching back to the standard algorithm does not require rebuilding it. Existing caches without hashes are upgraded from their grids during cache maintenance or a similarity search, without decoding the source images again. Hashes already in a cache are retained when pHash is disabled.
+    </para>
+    <para>
+      Two images are compared by counting differing hash bits (Hamming distance). The similarity percentage is <code>100 x (1 - distance / 63)</code>. When <guilabel>Ignore Orientation</guilabel> is selected in the Duplicates window, the best match between both images' eight orientations is used; otherwise only the original orientation is compared. Considering both sets makes the score independent of image order and initial orientation, and requires up to 64 short hash comparisons per image pair. Exact hash matches score 100%, but this does not imply identical files or pixels.
+    </para>
+    <para>
+      The high (95%), medium (90%), and low (85%) thresholds allow at most 3, 6, and 9 differing bits respectively. These scores are not equivalent to the standard algorithm's percentages. Use the custom threshold to adjust results for your images. pHash ignores color and is tolerant of uniform brightness and contrast changes; unrelated images with similar coarse structure, including uniformly colored images, can match. Cropping and arbitrary-angle rotations are not explicitly handled.
+    </para>
+    <para>
+      Cached hashes make each comparison much cheaper than comparing RGB grids. Searches still compare image pairs, so large collections can take significant time. Enable pHash before an overnight cache-maintenance run to prepare all eight hashes in advance. The command line cache-maintenance program uses the saved algorithm selection, so save the configuration before starting it.
     </para>
   </section>
 </section>

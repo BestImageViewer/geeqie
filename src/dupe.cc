@@ -465,7 +465,7 @@ static void dupe_item_write_cache(DupeItem *di)
 {
 	if (!di) return;
 
-	CacheData cd{};
+	CacheData cd{di->fd->path};
 
 	if (!di->dimensions.empty()) cd.set_dimensions(di->dimensions);
 	if (di->md5sum)
@@ -2023,7 +2023,6 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 			dupe_item_write_cache(di);
 			}
 
-		di->simd->alternate_processing();
 		}
 
 	image_loader_free(dw->img_loader);
@@ -2207,7 +2206,6 @@ static gboolean dupe_check_cb(gpointer data)
 						dupe_item_read_cache(di);
 						if (image_sim_filled(di->simd.get()))
 							{
-							di->simd->alternate_processing();
 							return G_SOURCE_CONTINUE;
 							}
 						}
@@ -2226,6 +2224,12 @@ static gboolean dupe_check_cb(gpointer data)
 						}
 					dw->idle_id = 0;
 					return G_SOURCE_REMOVE;
+					}
+
+				if (options->alternate_similarity_algorithm.enabled && di->simd &&
+				    di->simd->ensure_perceptual_hashes() && options->thumbnails.enable_caching)
+					{
+					dupe_item_write_cache(di);
 					}
 
 				dw->setup_point = dupe_setup_point_step(dw, dw->setup_point);
@@ -3817,6 +3821,42 @@ static void dupe_window_show_thumb_cb(GtkWidget *widget, gpointer data)
 	dupe_listview_set_height(dw->listview, dw->show_thumbs);
 }
 
+static void dupe_algorithm_label_setup(GtkSignalListItemFactory *, GtkListItem *item, gpointer)
+{
+	gtk_list_item_set_child(item, gtk_label_new(nullptr));
+}
+
+static void dupe_algorithm_label_bind(GtkSignalListItemFactory *, GtkListItem *item, gpointer)
+{
+	const gboolean perceptual = gtk_list_item_get_position(item) == 1;
+	gtk_label_set_text(GTK_LABEL(gtk_list_item_get_child(item)), perceptual ? _("Perceptual") : _("Standard"));
+}
+
+static void dupe_algorithm_list_label_bind(GtkSignalListItemFactory *, GtkListItem *item, gpointer)
+{
+	auto *algorithm = GTK_STRING_OBJECT(gtk_list_item_get_item(item));
+	gtk_label_set_text(GTK_LABEL(gtk_list_item_get_child(item)), gtk_string_object_get_string(algorithm));
+}
+
+static void dupe_window_algorithm_cb(GtkDropDown *drop_down, GParamSpec *, gpointer)
+{
+	const gboolean perceptual = gtk_drop_down_get_selected(drop_down) == 1;
+	if (options->alternate_similarity_algorithm.enabled == perceptual) return;
+
+	// Drain comparisons before changing the algorithm shared by all windows.
+	for (GList *work = dupe_window_list; work; work = work->next)
+		{
+		dupe_check_stop(static_cast<DupeWindow *>(work->data));
+		}
+	options->alternate_similarity_algorithm.enabled = perceptual;
+	for (GList *work = dupe_window_list; work; work = work->next)
+		{
+		auto *dw = static_cast<DupeWindow *>(work->data);
+		gtk_drop_down_set_selected(GTK_DROP_DOWN(dw->algorithm_drop_down), perceptual ? 1 : 0);
+		dupe_window_recompare(dw);
+		}
+}
+
 static void dupe_window_rotation_invariant_cb(GtkWidget *widget, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
@@ -4383,6 +4423,25 @@ DupeWindow *dupe_window_new()
 
 	dw->drop_down = dupe_menu_setup(dw);
 	gtk_box_append(GTK_BOX(controls_box), dw->drop_down);
+
+	const gchar *algorithms[] = {_("Standard similarity algorithm"), _("Perceptual hash algorithm"), nullptr};
+	dw->algorithm_drop_down = gtk_drop_down_new_from_strings(algorithms);
+	auto *algorithm_factory = gtk_signal_list_item_factory_new();
+	g_signal_connect(algorithm_factory, "setup", G_CALLBACK(dupe_algorithm_label_setup), nullptr);
+	g_signal_connect(algorithm_factory, "bind", G_CALLBACK(dupe_algorithm_label_bind), nullptr);
+	gtk_drop_down_set_factory(GTK_DROP_DOWN(dw->algorithm_drop_down), algorithm_factory);
+	g_object_unref(algorithm_factory);
+	// Keep full algorithm names in the popup and short names on the button.
+	auto *algorithm_list_factory = gtk_signal_list_item_factory_new();
+	g_signal_connect(algorithm_list_factory, "setup", G_CALLBACK(dupe_algorithm_label_setup), nullptr);
+	g_signal_connect(algorithm_list_factory, "bind", G_CALLBACK(dupe_algorithm_list_label_bind), nullptr);
+	gtk_drop_down_set_list_factory(GTK_DROP_DOWN(dw->algorithm_drop_down), algorithm_list_factory);
+	g_object_unref(algorithm_list_factory);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(dw->algorithm_drop_down), options->alternate_similarity_algorithm.enabled ? 1 : 0);
+	gtk_widget_set_tooltip_text(dw->algorithm_drop_down, _("Perceptual hash can be significantly faster than the standard algorithm. Similarity percentages differ between algorithms; verify the threshold with your images before relying on the results."));
+	g_signal_connect(dw->algorithm_drop_down, "notify::selected", G_CALLBACK(dupe_window_algorithm_cb), nullptr);
+	gtk_widget_set_margin_end(dw->algorithm_drop_down, PREF_PAD_SPACE);
+	gtk_box_append(GTK_BOX(controls_box), dw->algorithm_drop_down);
 
 	label = gtk_label_new(_("Custom Threshold"));
 	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)

@@ -23,6 +23,8 @@
 #define SIMILAR_H
 
 #include <array>
+#include <cstdio>
+#include <optional>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
@@ -32,7 +34,10 @@ struct ImageSimilarityData
 	ImageSimilarityData() = default;
 	ImageSimilarityData(const GdkPixbuf *pixbuf);
 
-	void alternate_processing();
+	/** @brief Compute all eight orientation hashes if a grid is present and hashes are missing.
+	 * @return True if hashes were added.
+	 */
+	bool ensure_perceptual_hashes();
 
 	void fill_data(const GdkPixbuf *pixbuf);
 	GdkPixbuf *to_pixbuf() const;
@@ -41,11 +46,15 @@ struct ImageSimilarityData
 	void to_string(GString *str) const;
 
 	using Avg = std::array<guint8, 1024>;
-	Avg avg_r;
-	Avg avg_g;
-	Avg avg_b;
+	Avg avg_r{};
+	Avg avg_g{};
+	Avg avg_b{};
 
-	bool filled;
+	using PerceptualHashes = std::array<guint64, 8>;
+	// Orientation bits: transpose = 1, reflect vertically = 2, reflect horizontally = 4.
+	std::optional<PerceptualHashes> perceptual_hashes;
+
+	bool filled = false;
 };
 
 

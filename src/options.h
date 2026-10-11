@@ -385,7 +385,6 @@ struct ConfOptions
 	/* Alternate similarity algorithm */
 	struct {
 		gboolean enabled;
-		gboolean grayscale; /**< convert fingerprint to greyscale */
 	} alternate_similarity_algorithm;
 
 	gchar *mouse_button_8; /**< user-definable mouse buttons */

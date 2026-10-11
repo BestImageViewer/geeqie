@@ -11,7 +11,7 @@
       <para />
       If the
       <emphasis role="underline"><link linkend="PreferencesThumbnails">Cache Thumbnails</link></emphasis>
-      option is selected in Preferences/General, the similarity matrix, checksum, image size and Exif Date may also be cached. This will reduce the time needed for future searches.
+      option is selected in Preferences/General, the similarity matrix, checksum, image size and Exif original date may also be cached. If Perceptual hash algorithm is selected in the Duplicates window, all eight orientation hashes are also cached. This will reduce the time needed for future searches.
       <note>
         If you frequently search on similarity and your images are in a tree arrangement under a single point, the
         <emphasis role="underline"><link linkend="CreateSimFiles">Create file similarity cache</link></emphasis>
