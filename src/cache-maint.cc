@@ -1517,7 +1517,7 @@ static void cache_manager_cache_maintenance_load_dialog(GtkWidget *widget, const
 	cd->remote = FALSE;
 	cd->recurse = TRUE;
 
-	cd->gd = generic_dialog_new(_("Background cache maintenance"), "background_cache_maintenance", widget, FALSE, nullptr, cd);
+	cd->gd = generic_dialog_new(_("Clean and update caches"), "background_cache_maintenance", widget, FALSE, nullptr, cd);
 	gtk_window_set_default_size(GTK_WINDOW(cd->gd->dialog), PURGE_DIALOG_WIDTH, -1);
 	cd->gd->cancel_cb = cache_manager_cache_maintenance_close_cb;
 	cd->button_close = generic_dialog_add_button(cd->gd, GQ_ICON_CLOSE, _("Close"),
@@ -1647,14 +1647,15 @@ void cache_manager_show()
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Remove orphaned keywords and descriptions."), GTK_ALIGN_START);
 
-	group = pref_group_new(gd->vbox, FALSE, _("Background cache maintenance"), GTK_ORIENTATION_VERTICAL);
+	group = pref_group_new(gd->vbox, FALSE, _("Clean and update caches"), GTK_ORIENTATION_VERTICAL);
 
 	table = pref_table_new(group, 3, 2, FALSE, FALSE);
 
 	button = pref_table_button(table, 0, 0, GQ_ICON_RUN, _("Select"),
 				   G_CALLBACK(cache_manager_cache_maintenance_load_cb), cache_manager);
+	gtk_widget_set_tooltip_text(button, _("Removes orphaned and outdated files from Geeqie's central cache, then creates or updates thumbnails and similarity data for the selected folder and all subfolders. Uses saved settings, including the similarity algorithm, and reuses valid cache data. Runs in a separate process and continues if you close Geeqie. To stop the job, use the Quit button in its desktop notification."));
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 0, _("Run cache maintenance as a background job."), GTK_ALIGN_START);
+	pref_table_label(table, 1, 0, _("Remove stale cache files, then create thumbnails and similarity data in the background."), GTK_ALIGN_START);
 	gtk_widget_set_sensitive(group, options->thumbnails.enable_caching);
 
 	gtk_window_present(GTK_WINDOW(cache_manager->dialog->dialog));
