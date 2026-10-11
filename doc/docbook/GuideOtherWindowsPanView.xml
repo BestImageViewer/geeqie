@@ -29,6 +29,7 @@
   <note>
     <para>Pan view recursively visits each folder under the specified folder. This can consume considerable computer resources.</para>
   </note>
+  <para>Enable thumbnail caching to reuse thumbnails in Pan View. Both Geeqie's own cache and the shared thumbnail cache are supported. With Geeqie's own cache, new thumbnails are saved at the size configured in Preferences and scaled to the selected Pan View size. Changing the Pan View size does not regenerate valid cached thumbnails.</para>
   <para />
   <section id="Selectafolder">
     <title>Select a folder</title>

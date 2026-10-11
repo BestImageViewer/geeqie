@@ -10,6 +10,7 @@
 #include "cache-loader.h"
 #include "filedata.h"
 #include "options.h"
+#include "thumb.h"
 #include "ui-fileops.h"
 
 namespace
@@ -21,6 +22,8 @@ protected:
 	void SetUp() override
 	{
 		if (!options) options = conf_options_new();
+		saved_size = options->thumbnails.size;
+		saved_standard = options->thumbnails.spec_standard;
 		saved_local = options->thumbnails.cache_into_dirs;
 		saved_caching = options->thumbnails.enable_caching;
 		saved_alternate = options->alternate_similarity_algorithm.enabled;
@@ -46,6 +49,8 @@ protected:
 		g_free(base);
 		g_free(source);
 		g_free(directory);
+		options->thumbnails.size = saved_size;
+		options->thumbnails.spec_standard = saved_standard;
 		options->thumbnails.cache_into_dirs = saved_local;
 		options->thumbnails.enable_caching = saved_caching;
 		options->alternate_similarity_algorithm.enabled = saved_alternate;
@@ -55,10 +60,81 @@ protected:
 	gchar *source = nullptr;
 	gchar *base = nullptr;
 	gchar *path = nullptr;
+	GqSize saved_size;
+	gboolean saved_standard;
 	gboolean saved_local;
 	gboolean saved_caching;
 	gboolean saved_alternate;
 };
+
+TEST_F(SimCache, PrivateThumbnailsAreCachedAtPreferenceSizeAndReusedForPanView)
+{
+	options->thumbnails.spec_standard = FALSE;
+	options->thumbnails.size = {96, 96};
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 320, 160);
+	gdk_pixbuf_fill(image, 0x804020ff);
+	ASSERT_TRUE(gdk_pixbuf_save(image, source, "png", nullptr, nullptr));
+	g_autofree gchar *thumbnail_path = cache_get_location(CacheType::THUMB, source);
+
+	struct Completion
+	{
+		bool done = false;
+		bool failed = false;
+	};
+	const auto load = [&](gint size)
+		{
+		Completion completion;
+		auto *loader = thumb_loader_new(size, size);
+		thumb_loader_set_reuse_cached_size(loader, TRUE);
+		thumb_loader_set_callbacks(loader,
+			[](ThumbLoader *, gpointer data) { static_cast<Completion *>(data)->done = true; },
+			[](ThumbLoader *, gpointer data)
+				{
+				auto *result = static_cast<Completion *>(data);
+				result->done = true;
+				result->failed = true;
+				}, nullptr, &completion);
+		auto *fd = file_data_new_no_grouping(source);
+		fd->format_class = FORMAT_CLASS_IMAGE;
+		const bool started = thumb_loader_start(loader, fd);
+		const gint64 deadline = g_get_monotonic_time() + 10 * G_TIME_SPAN_SECOND;
+		while (started && !completion.done && g_get_monotonic_time() < deadline)
+			{
+			g_main_context_iteration(nullptr, FALSE);
+			g_usleep(1000);
+			}
+		EXPECT_TRUE(started);
+		EXPECT_TRUE(completion.done);
+		EXPECT_FALSE(completion.failed);
+		if (completion.done && !completion.failed)
+			{
+			EXPECT_EQ(gdk_pixbuf_get_width(fd->thumb_pixbuf), size);
+			EXPECT_EQ(gdk_pixbuf_get_height(fd->thumb_pixbuf), size / 2);
+			}
+		thumb_loader_free(loader);
+		file_data_unref(fd);
+		};
+
+	load(48);
+	g_autoptr(GdkPixbuf) cached = gdk_pixbuf_new_from_file(thumbnail_path, nullptr);
+	ASSERT_NE(cached, nullptr);
+	EXPECT_EQ(gdk_pixbuf_get_width(cached), 96);
+	EXPECT_EQ(gdk_pixbuf_get_height(cached), 48);
+	g_autofree gchar *contents = nullptr;
+	gsize length = 0;
+	ASSERT_TRUE(g_file_get_contents(thumbnail_path, &contents, &length, nullptr));
+
+	// An undecodable source with an unchanged timestamp proves that the cache is reused.
+	const time_t original_time = filetime(source);
+	ASSERT_TRUE(g_file_set_contents(source, "invalid", -1, nullptr));
+	filetime_set(source, original_time);
+	load(192);
+	g_autofree gchar *reloaded = nullptr;
+	gsize reloaded_length = 0;
+	ASSERT_TRUE(g_file_get_contents(thumbnail_path, &reloaded, &reloaded_length, nullptr));
+	EXPECT_EQ(std::string(contents, length), std::string(reloaded, reloaded_length));
+	g_remove(thumbnail_path);
+}
 
 TEST_F(SimCache, OriginalDateMigrationPreservesOtherData)
 {

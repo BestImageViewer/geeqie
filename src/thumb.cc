@@ -157,6 +157,32 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 	pw = gdk_pixbuf_get_width(pixbuf);
 	ph = gdk_pixbuf_get_height(pixbuf);
 
+	if (tl->reuse_cached_size && tl->cache_enable)
+		{
+		gint w = pw;
+		gint h = ph;
+		if (!tl->cache_hit && (pw > options->thumbnails.size.width || ph > options->thumbnails.size.height))
+			{
+			pixbuf_scale_aspect(options->thumbnails.size.width, options->thumbnails.size.height, pw, ph, w, h);
+			}
+		g_clear_object(&tl->fd->thumb_pixbuf);
+		tl->fd->thumb_pixbuf = (w != pw || h != ph) ?
+		                          gdk_pixbuf_scale_simple(pixbuf, w, h, options->thumbnails.quality) :
+		                          GDK_PIXBUF(g_object_ref(pixbuf));
+		if (!tl->cache_hit && isfile(tl->fd->path)) thumb_loader_save_thumbnail(tl, FALSE);
+
+		pixbuf_scale_aspect(tl->max_w, tl->max_h, w, h, pw, ph);
+		if (pw != w || ph != h)
+			{
+			auto *scaled = gdk_pixbuf_scale_simple(tl->fd->thumb_pixbuf, pw, ph, options->thumbnails.quality);
+			g_object_unref(tl->fd->thumb_pixbuf);
+			tl->fd->thumb_pixbuf = scaled;
+			}
+		if (rotated) g_object_unref(rotated);
+		if (tl->func_done) tl->func_done(tl, tl->data);
+		return;
+		}
+
 	if (tl->cache_hit && pw != tl->max_w && ph != tl->max_h)
 		{
 		/* requested thumbnail size may have changed, load original */
@@ -242,7 +268,9 @@ static void thumb_loader_setup(ThumbLoader *tl, FileData *fd)
 	image_loader_set_priority(tl->il, G_PRIORITY_LOW);
 
 	/* this will speed up jpegs by up to 3x in some cases */
-	image_loader_set_requested_size(tl->il, tl->max_w, tl->max_h);
+	image_loader_set_requested_size(tl->il,
+	                                tl->reuse_cached_size && tl->cache_enable ? options->thumbnails.size.width : tl->max_w,
+	                                tl->reuse_cached_size && tl->cache_enable ? options->thumbnails.size.height : tl->max_h);
 
 	g_signal_connect(G_OBJECT(tl->il), "error", (GCallback)thumb_loader_error_cb, tl);
 	if (tl->func_progress) g_signal_connect(G_OBJECT(tl->il), "percent", (GCallback)thumb_loader_percent_cb, tl);
@@ -271,6 +299,11 @@ void thumb_loader_set_callbacks(ThumbLoader *tl,
 	tl->func_progress = func_progress;
 
 	tl->data = data;
+}
+
+void thumb_loader_set_reuse_cached_size(ThumbLoader *tl, gboolean reuse)
+{
+	if (tl && !tl->standard_loader) tl->reuse_cached_size = reuse;
 }
 
 void thumb_loader_set_cache(ThumbLoader *tl, gboolean enable_cache, gboolean local, gboolean retry_failed)

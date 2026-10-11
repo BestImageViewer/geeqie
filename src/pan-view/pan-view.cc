@@ -260,14 +260,7 @@ static gboolean pan_queue_step(PanWindow *pw)
 		{
 		pw->tl = thumb_loader_new(pw->thumb_size, pw->thumb_size);
 
-		if (!pw->tl->standard_loader)
-			{
-			/* The classic loader will recreate a thumbnail any time we
-			 * request a different size than what exists. This view will
-			 * almost never use the user configured sizes so disable cache.
-			 */
-			thumb_loader_set_cache(pw->tl, FALSE, FALSE, FALSE);
-			}
+		thumb_loader_set_reuse_cached_size(pw->tl, TRUE);
 
 		thumb_loader_set_callbacks(pw->tl,
 					   pan_queue_thumb_done_cb,
@@ -1539,8 +1532,7 @@ static gboolean pan_warning(FileData *dir_fd)
 		return TRUE;
 		}
 
-	if (options->thumbnails.enable_caching &&
-	    options->thumbnails.spec_standard) return FALSE;
+	if (options->thumbnails.enable_caching) return FALSE;
 
 	gboolean hide_dlg = pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, FALSE);
 	if (hide_dlg) return FALSE;
@@ -1553,7 +1545,7 @@ static gboolean pan_warning(FileData *dir_fd)
 
 	box = generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO,
 					 _("Pan view performance may be poor."),
-					 _("To improve the performance of thumbnails in\npan view the following options can be enabled.\n\nNote that both options must be enabled to\nnotice a change in performance."), TRUE);
+					 _("Enable thumbnail caching to reuse thumbnails in Pan View.\nEither Geeqie's own cache or the shared thumbnail cache can be used.\nThe first visit may still take time while thumbnails are created."), TRUE);
 
 	group = pref_box_new(box, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 	pref_spacer(group, PREF_PAD_INDENT);

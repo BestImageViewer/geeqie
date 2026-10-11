@@ -39,6 +39,7 @@ struct ThumbLoader
 
 	gboolean cache_enable;
 	gboolean cache_hit;
+	gboolean reuse_cached_size; /**< Scale private cache thumbnails without regenerating for display size. */
 	gdouble percent_done;
 
 	gint max_w;
@@ -62,6 +63,7 @@ void thumb_loader_set_callbacks(ThumbLoader *tl,
 				ThumbLoader::Func func_progress,
 				gpointer data);
 void thumb_loader_set_cache(ThumbLoader *tl, gboolean enable_cache, gboolean local, gboolean retry_failed);
+void thumb_loader_set_reuse_cached_size(ThumbLoader *tl, gboolean reuse);
 
 gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd);
 void thumb_loader_free(ThumbLoader *tl);
