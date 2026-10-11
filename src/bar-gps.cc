@@ -795,6 +795,15 @@ const gchar *bar_pane_gps_get_map_id(const PaneGPSData *pgd)
 	return pgd->map_source ? pgd->map_source : DEFAULT_MAP_ID;
 }
 
+void bar_pane_gps_set_height(GtkWidget *pane)
+{
+	auto *pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pgd) return;
+
+	gint w;
+	gtk_widget_get_size_request(pane, &w, &pgd->height);
+}
+
 void bar_pane_gps_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
@@ -804,8 +813,6 @@ void bar_pane_gps_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("<pane_gps ");
 	bar_pane_common_write_config(pgd->pane, rc);
 
-	gint w;
-	gtk_widget_get_size_request(pane, &w, &pgd->height);
 	WRITE_INT(*pgd, height);
 	rc.indent++;
 
@@ -944,6 +951,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	pgd->pane.pane_update = bar_pane_gps_update;
 	pgd->pane.pane_notify_selection = bar_pane_gps_notify_selection;
+	pgd->pane.pane_set_height = bar_pane_gps_set_height;
 	pgd->pane.pane_write_config = bar_pane_gps_write_config;
 	pgd->pane.pane_update_from_config = bar_pane_gps_update_from_config;
 	bar_pane_common_init(pgd->pane, id, title, expanded, PANE_GPS);

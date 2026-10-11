@@ -47,6 +47,7 @@ struct PaneData {
 	void (*pane_update)(GtkWidget *pane); /**< filled in by pane */
 	void (*pane_notify_selection)(GtkWidget *pane, gint count); /**< filled in by pane */
 	bool (*pane_event)(GtkWidget *pane, GdkEvent *event); /**< filled in by pane */
+	void (*pane_set_height)(GtkWidget *pane); /**< filled in by pane */
 	void (*pane_write_config)(GtkWidget *pane, RcString &rc); /**< filled in by pane */
 	void (*pane_update_from_config)(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values); /**< filled in by pane */
 	void (*pane_entry_add_from_config)(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values); /**< filled in by pane */

@@ -273,15 +273,19 @@ void bar_keyword_tree_get_expanded_cb(GtkTreeView *keyword_treeview, GtkTreePath
 	*expanded = g_list_append(*expanded, path_string);
 }
 
-void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
+void bar_pane_keywords_set_height(GtkWidget *pane)
 {
 	auto *pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pkd) return;
 
 	gint w;
-	gint h;
-	gtk_widget_get_size_request(pane, &w, &h);
-	pkd->height = h;
+	gtk_widget_get_size_request(pane, &w, &pkd->height);
+}
+
+void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
+{
+	auto *pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pkd) return;
 
 	WRITE_NL(); WRITE_STRING("<pane_keywords ");
 	bar_pane_common_write_config(pkd->pane, rc);
@@ -1417,6 +1421,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	pkd = g_new0(PaneKeywordsData, 1);
 
 	pkd->pane.pane_update = bar_pane_keywords_update;
+	pkd->pane.pane_set_height = bar_pane_keywords_set_height;
 	pkd->pane.pane_write_config = bar_pane_keywords_write_config;
 	pkd->pane.pane_update_from_config = bar_pane_keywords_update_from_config;
 	pkd->pane.pane_entry_add_from_config = bar_pane_keywords_entry_add_from_config;
