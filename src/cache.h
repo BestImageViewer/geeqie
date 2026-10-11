@@ -66,7 +66,7 @@ struct CacheData
 	void set_similarity(const ImageSimilarityData &sd);
 
 	std::optional<GqSize> dimensions;
-	std::optional<time_t> date;
+	std::optional<time_t> date; /**< Exif.Photo.DateTimeOriginal, or -1 if unavailable */
 	std::optional<Md5Digest> md5sum;
 	std::unique_ptr<ImageSimilarityData> similarity;
 

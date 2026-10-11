@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 unit_test_sources = files(
+'cache.cc',
 'collection-file-source.cc',
 'editors.cc',
 'filecache.cc',

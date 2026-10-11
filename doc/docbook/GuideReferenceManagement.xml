@@ -115,10 +115,10 @@
         </varlistentry>
         <varlistentry>
           <term>
-            <guilabel>Date</guilabel>
+            <guilabel>DateTimeOriginal</guilabel>
           </term>
           <listitem>
-            <para>Exif date in time_t format</para>
+            <para>Exif.Photo.DateTimeOriginal in time_t format, or -1 if unavailable. Legacy Date fields are ignored and removed when the cache is rewritten.</para>
           </listitem>
         </varlistentry>
         <varlistentry>

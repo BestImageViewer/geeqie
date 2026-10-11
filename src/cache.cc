@@ -49,7 +49,7 @@
  * SIMcache \n
  * #comment \n
  * Dimensions=[<width> x <height>] \n
- * Date=[<value in time_t format, or -1 if no embedded date>] \n
+ * DateTimeOriginal=[<value in time_t format, or -1 if no original date>] \n
  * MD5sum=[<32 character ascii text digest>] \n
  * SimilarityGrid[32 x 32]=<3072 bytes of data (1024 pixels in RGB format, 1 pixel is 24bits)>
  *
@@ -58,6 +58,7 @@
  * All data lines should end with a new line char. \n
  * Format is very strict, data must begin with the char immediately following '='. \n
  * Currently SimilarityGrid is always assumed to be 32 x 32 RGB. \n
+ * Legacy Date fields from Exif.Image.DateTime are ignored and omitted when saving. \n
  */
 
 namespace
@@ -184,7 +185,7 @@ bool CacheData::write_date(GString *gstring) const
 {
 	if (!date) return false;
 
-	g_string_append_printf(gstring, "Date=[%ld]\n", *date);
+	g_string_append_printf(gstring, "DateTimeOriginal=[%ld]\n", *date);
 
 	return true;
 }
@@ -312,7 +313,7 @@ bool CacheData::read_date(FILE *f, const gchar *buffer, gint s)
 {
 	if (!f || !buffer) return false;
 
-	if (s < 4 || strncmp("Date", buffer, 4) != 0) return false;
+	if (s < 18 || strncmp("DateTimeOriginal=[", buffer, 18) != 0) return false;
 
 	gchar buf[1024];
 	if (!cache_sim_read_buf(f, s, buf, sizeof(buf))) return false;

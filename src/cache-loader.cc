@@ -141,7 +141,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 		{
 		static const auto get_date = [](FileData *fd) -> time_t
 		{
-			g_autofree gchar *text = metadata_read_string(fd, "Exif.Image.DateTime", METADATA_FORMATTED);
+			g_autofree gchar *text = metadata_read_string(fd, "Exif.Photo.DateTimeOriginal", METADATA_FORMATTED);
 			if (!text) return -1;
 
 			std::tm t{};
