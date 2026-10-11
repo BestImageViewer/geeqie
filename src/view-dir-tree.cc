@@ -524,7 +524,10 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 			cnd = vdtree_find_iter_by_fd(vd, iter, fd, &child);
 			if (cnd)
 				{
-				if (cnd->expanded && cnd->version != fd->version)
+				g_autoptr(GtkTreePath) parent_path = gtk_tree_model_get_path(store, iter);
+				const gboolean check_subfolders = options->tree_descend_subdirs && !cnd->expanded &&
+				                                  gtk_tree_view_row_expanded(GTK_TREE_VIEW(vd->view), parent_path);
+				if (check_subfolders || (cnd->expanded && cnd->version != fd->version))
 					{
 					vdtree_populate_path_by_iter(vd, &child, FALSE, target_fd);
 					}
@@ -872,7 +875,8 @@ bool vdtree_press_cb(ViewDir *vd, GtkWidget *widget, guint button, gdouble x, gd
 
 static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GIcon *icon)
 {
-	vdtree_populate_path_by_iter(vd, iter, FALSE, nullptr);
+	const gboolean check_subfolders = options->tree_descend_subdirs && gtk_tree_view_row_expanded(treeview, tpath);
+	vdtree_populate_path_by_iter(vd, iter, check_subfolders, nullptr);
 
 	GtkTreeModel *store = gtk_tree_view_get_model(treeview);
 	gtk_tree_model_get_iter(store, iter, tpath);

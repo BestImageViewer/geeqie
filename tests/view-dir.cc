@@ -41,6 +41,8 @@ protected:
 	{
 		if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
 		if (!options) options = conf_options_new();
+		saved_descend = options->tree_descend_subdirs;
+		options->tree_descend_subdirs = FALSE;
 		setup_default_options(options);
 		filter_add_defaults();
 		filter_rebuild();
@@ -70,6 +72,7 @@ protected:
 	void TearDown() override
 	{
 		if (!directory) return;
+		options->tree_descend_subdirs = saved_descend;
 		if (layout.window) gtk_window_destroy(GTK_WINDOW(layout.window));
 		drain_events();
 		if (layout.dir_fd) file_data_unref(layout.dir_fd);
@@ -102,7 +105,35 @@ protected:
 	GtkApplication *app = nullptr;
 	GApplication *previous_app = nullptr;
 	gchar *directory = nullptr;
+	gboolean saved_descend = FALSE;
 };
+
+TEST_P(ViewDirNewFolder, DescendChecksExistingUnexpandedSubfolders)
+{
+	if (GetParam() != DIRVIEW_TREE) GTEST_SKIP() << "Requires the folder tree";
+	vd_set_fd(vd, layout.dir_fd);
+	drain_events();
+	g_autofree gchar *path = g_build_filename(directory, "created", nullptr);
+	ASSERT_EQ(g_mkdir(path, 0700), 0);
+	vd_refresh(vd);
+	drain_events();
+	auto *fd = file_data_new_dir(path);
+	GtkTreeIter iter;
+	ASSERT_TRUE(vd_find_row(vd, fd, &iter));
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
+	GtkTreeIter parent;
+	ASSERT_TRUE(vd_find_row(vd, layout.dir_fd, &parent));
+	g_autoptr(GtkTreePath) parent_path = gtk_tree_model_get_path(model, &parent);
+	gtk_tree_view_expand_row(GTK_TREE_VIEW(vd->view), parent_path, FALSE);
+	EXPECT_TRUE(gtk_tree_model_iter_has_child(model, &iter));
+
+	options->tree_descend_subdirs = TRUE;
+	vd_refresh(vd);
+	drain_events();
+	ASSERT_TRUE(vd_find_row(vd, fd, &iter));
+	EXPECT_FALSE(gtk_tree_model_iter_has_child(model, &iter));
+	file_data_unref(fd);
+}
 
 TEST_P(ViewDirNewFolder, CreatesOnlyAfterReturnAndRetainsInvalidNames)
 {

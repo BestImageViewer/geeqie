@@ -544,6 +544,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->duplicates_similarity_threshold = c_options->duplicates_similarity_threshold;
 	options->rot_invariant_sim = c_options->rot_invariant_sim;
 
+	if (options->tree_descend_subdirs != c_options->tree_descend_subdirs) refresh = TRUE;
 	options->tree_descend_subdirs = c_options->tree_descend_subdirs;
 
 	options->view_dir_list_single_click_enter = c_options->view_dir_list_single_click_enter;
@@ -3390,7 +3391,7 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 
 	group = pref_group_new(vbox, FALSE, _("Behavior"), GTK_ORIENTATION_VERTICAL);
 
-	pref_checkbox_new_int(group, _("Descend folders in tree view"),
+	pref_checkbox_new_int(group, _("Check subfolders for expansion arrows"),
 			      options->tree_descend_subdirs, &c_options->tree_descend_subdirs);
 
 	pref_checkbox_new_int(group, _("In-place renaming"),

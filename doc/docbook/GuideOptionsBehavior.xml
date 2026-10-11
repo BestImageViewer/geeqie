@@ -135,7 +135,7 @@
     <variablelist>
       <varlistentry>
         <term>
-          <guilabel>Descend folders in tree view</guilabel>
+          <guilabel>Check subfolders for expansion arrows</guilabel>
         </term>
         <listitem>
           <para>This will allow Geeqie to read sub folder content to determine if it should display expander indicators in the folder tree view.</para>
