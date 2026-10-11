@@ -288,10 +288,16 @@ static gboolean cache_maintain_home_cb(gpointer data)
 				g_autofree gchar *path_buf = g_strdup(fd_list->path);
 
 				gchar *dot = strrchr(path_buf, '.');
+				const gboolean similarity = dot && strcmp(dot, ".sim") == 0;
 
 				if (dot) *dot = '\0';
+				const gchar *source = strlen(path_buf) > base_length ? path_buf + base_length : nullptr;
+				// Similarity caches require equal timestamps; thumbnails also use the permission workaround.
+				const gboolean outdated = !cm->metadata && !cm->clear && source && isfile(source) &&
+				                          (similarity ? filetime(fd_list->path) != filetime(source) :
+				                                        !cache_time_valid(fd_list->path, source));
 				if ((!cm->metadata && cm->clear) ||
-				    (strlen(path_buf) > base_length && !isfile(path_buf + base_length)) )
+				    (source && !isfile(source)) || outdated)
 					{
 					if (dot) *dot = '.';
 					if (!unlink_file(path_buf)) log_printf("failed to delete:%s\n", path_buf);
@@ -437,7 +443,7 @@ static void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *pa
 /**
  * @brief Clears or culls cached data
  * @param metadata TRUE - work on metadata cache, FALSE - work on thumbnail cache
- * @param clear TRUE - clear cache, FALSE - delete orphaned cached items
+ * @param clear TRUE - clear cache, FALSE - delete orphaned and outdated cached items
  * @param func Function called when idle loop function terminates
  *
  *

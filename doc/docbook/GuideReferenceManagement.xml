@@ -25,7 +25,7 @@
           <guilabel>Clean up</guilabel>
         </term>
         <listitem>
-          <para>Removes thumbnails, sim. files, and data for which the source image is no longer present, or has been modified since the thumbnail was generated.</para>
+          <para>Removes thumbnails, sim. files, and data for which the source image is no longer present, or has been modified since the cached data was generated. Valid similarity grids without perceptual hashes are retained and can be upgraded during similarity-cache creation.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -47,7 +47,7 @@
           <guilabel>Clean up</guilabel>
         </term>
         <listitem>
-          <para>Removes thumbnails for which the source image is no longer present, or has been modified since the thumbnail was generated.</para>
+          <para>Removes thumbnails for which the source image is no longer present, or has been modified since the cached data was generated. Valid similarity grids without perceptual hashes are retained and can be upgraded during similarity-cache creation.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -173,7 +173,7 @@
   <section id="BackgroundCacheMaintenance">
     <title>Background Cache Maintenance</title>
     <para>
-      Select <guilabel>Select</guilabel> in the Background cache maintenance section, enter or choose a folder, and select <guilabel>Start</guilabel>. Geeqie launches the command line program described below as a separate background job, creating thumbnails and similarity data for the selected folder and all its subfolders. The initial cleanup removes orphaned entries from Geeqie's cache, not just entries for the selected folder.
+      Select <guilabel>Select</guilabel> in the Background cache maintenance section, enter or choose a folder, and select <guilabel>Start</guilabel>. Geeqie launches the command line program described below as a separate background job, creating thumbnails and similarity data for the selected folder and all its subfolders. The initial cleanup removes orphaned and outdated entries from Geeqie's cache, not just entries for the selected folder.
     </para>
     <para>
       Thumbnail caching must be enabled in the saved Preferences. Desktop notifications report the maintenance stage and provide a Quit button while maintenance is running. The viewer remains available during the background job.
@@ -182,7 +182,7 @@
   <section id="CacheMaintenance">
     <title>Command line program</title>
     <para>
-      Geeqie can be run as a command line program: <code>GQ_CACHE_MAINTENANCE=y[es] geeqie --cache-maintenance=&lt;path to images&gt;</code>. It will recursively remove orphaned thumbnails and .sim files, and create thumbnails and similarity data for all images found.
+      Geeqie can be run as a command line program: <code>GQ_CACHE_MAINTENANCE=y[es] geeqie --cache-maintenance=&lt;path to images&gt;</code>. It will recursively remove orphaned and outdated thumbnails and .sim files, and create thumbnails and similarity data for all images found.
     </para>
     <para>
       It may also be called from <code>cron</code> or <code>anacron</code> thus enabling automatic updating of the cached data for all your images.
