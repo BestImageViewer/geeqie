@@ -386,7 +386,12 @@ gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b)
  */
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min)
 {
-	if (options->alternate_similarity_algorithm.enabled)
+	return image_sim_compare_fast(a, b, min, options->alternate_similarity_algorithm.enabled);
+}
+
+gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min, gboolean perceptual)
+{
+	if (perceptual)
 		{
 		const gdouble score = image_sim_compare_perceptual_hash(a, b);
 		return score >= min ? score : 0.0;

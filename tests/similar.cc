@@ -209,6 +209,20 @@ TEST_F(PerceptualHash, ScoreUsesHammingDistanceAndInclusiveThreshold)
 	EXPECT_DOUBLE_EQ(image_sim_compare_fast(&a, &b, 0.95), 0.0);
 }
 
+TEST_F(PerceptualHash, ExplicitAlgorithmOverridesGlobalSelection)
+{
+	auto a = make_pattern();
+	auto b = a;
+	a.perceptual_hashes = ImageSimilarityData::PerceptualHashes{};
+	b.perceptual_hashes = ImageSimilarityData::PerceptualHashes{};
+	(*b.perceptual_hashes)[0] = 0x0e;
+
+	EXPECT_DOUBLE_EQ(image_sim_compare_fast(&a, &b, 0.95, FALSE), 1.0);
+	options->alternate_similarity_algorithm.enabled = FALSE;
+	EXPECT_DOUBLE_EQ(image_sim_compare_fast(&a, &b, 0.95, TRUE), 1.0 - 3.0 / 63.0);
+	EXPECT_DOUBLE_EQ(image_sim_compare_fast(&a, &b, 0.96, TRUE), 0.0);
+}
+
 TEST_F(PerceptualHash, StandardGridRemainsUnmodifiedAndHashesAreOptional)
 {
 	auto image = make_pattern();

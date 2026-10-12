@@ -60,6 +60,7 @@ struct ImageSimilarityData
 
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b);
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min);
+gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min, gboolean perceptual);
 
 bool image_sim_filled(const ImageSimilarityData *sd);
 

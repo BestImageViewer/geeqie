@@ -146,7 +146,7 @@
         <listitem>
           The search will match if the image contents are similar within the percentage value, inclusive. This uses the same test and data that is used to determine image similarity when
           <emphasis role="underline"><link linkend="GuideImageSearchFindingDuplicates">Finding Duplicates</link></emphasis>
-          . The entry is for entering the path for the image to use in this test.
+          . The entry is for entering the path for the image to use in this test. Choose Standard similarity algorithm or Perceptual hash algorithm from the drop down menu. The selection applies to this search window. Similarity percentages differ between algorithms; see <link linkend="GuideReferenceSimilarityAlgorithms">Similarity Algorithms</link> for threshold details.
         </listitem>
       </varlistentry>
       <varlistentry>

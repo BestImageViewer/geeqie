@@ -183,6 +183,7 @@ struct SearchUi
 
 	// "Image content" row
 	GtkWidget *spin_similarity;
+	GtkWidget *algorithm_similarity;
 	GtkWidget *entry_similarity;
 
 	// "Keywords" row
@@ -307,6 +308,7 @@ struct SearchData
 	GqSize search_dimensions;
 	GqSize search_dimensions_end;
 	gint   search_similarity;
+	gboolean search_perceptual;
 	gchar *search_similarity_path;
 	std::unique_ptr<CacheData> search_similarity_cd;
 	GList *search_keyword_list;
@@ -1606,6 +1608,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 		if (sd->match_similarity_enable && !cd->similarity)
 			{
 			ImageSimilarityData sim{ pixbuf };
+			if (sd->search_perceptual) sim.ensure_perceptual_hashes();
 
 			cd->set_similarity(sim);
 			}
@@ -1657,7 +1660,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			}
 		}
 
-	if (sd->match_similarity_enable && options->alternate_similarity_algorithm.enabled &&
+	if (sd->match_similarity_enable && sd->search_perceptual &&
 	    sd->img_cd->similarity && sd->img_cd->similarity->ensure_perceptual_hashes() &&
 	    options->thumbnails.enable_caching)
 		{
@@ -1715,7 +1718,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			gdouble result;
 
 			result = image_sim_compare_fast(sd->search_similarity_cd->similarity.get(), sd->img_cd->similarity.get(),
-			                                static_cast<gdouble>(sd->search_similarity) / 100.0);
+			                                static_cast<gdouble>(sd->search_similarity) / 100.0, sd->search_perceptual);
 			result *= 100.0;
 			if (result >= static_cast<gdouble>(sd->search_similarity))
 				{
@@ -2282,6 +2285,8 @@ static void search_start(SearchData *sd)
 	sd->search_count = 0;
 	sd->search_total = 0;
 
+	sd->search_perceptual = gtk_drop_down_get_selected(GTK_DROP_DOWN(sd->ui.algorithm_similarity)) == 1;
+
 	gtk_widget_set_sensitive(sd->ui.box_search, FALSE);
 	gtk_spinner_start(GTK_SPINNER(sd->ui.spinner));
 	gtk_widget_set_sensitive(sd->ui.button_start, FALSE);
@@ -2293,7 +2298,7 @@ static void search_start(SearchData *sd)
 	    isfile(sd->search_similarity_path))
 		{
 		sd->search_similarity_cd = std::make_unique<CacheData>(sd->search_similarity_path);
-		if (options->alternate_similarity_algorithm.enabled && sd->search_similarity_cd->similarity &&
+		if (sd->search_perceptual && sd->search_similarity_cd->similarity &&
 		    sd->search_similarity_cd->similarity->ensure_perceptual_hashes() && options->thumbnails.enable_caching)
 			{
 			sd->search_similarity_cd->save(sd->search_similarity_path);
@@ -2823,6 +2828,23 @@ static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gpointer d
 	return spin;
 }
 
+static void search_algorithm_label_setup(GtkSignalListItemFactory *, GtkListItem *item, gpointer)
+{
+	gtk_list_item_set_child(item, gtk_label_new(nullptr));
+}
+
+static void search_algorithm_label_bind(GtkSignalListItemFactory *, GtkListItem *item, gpointer)
+{
+	const gboolean perceptual = gtk_list_item_get_position(item) == 1;
+	gtk_label_set_text(GTK_LABEL(gtk_list_item_get_child(item)), perceptual ? _("Perceptual") : _("Standard"));
+}
+
+static void search_algorithm_list_label_bind(GtkSignalListItemFactory *, GtkListItem *item, gpointer)
+{
+	auto *algorithm = GTK_STRING_OBJECT(gtk_list_item_get_item(item));
+	gtk_label_set_text(GTK_LABEL(gtk_list_item_get_child(item)), gtk_string_object_get_string(algorithm));
+}
+
 static void menu_dimensions_spin(GtkWidget *box, GqSize &dimensions)
 {
 	constexpr std::size_t dimension_max = 1000000;
@@ -3214,6 +3236,23 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	tab_completion_add_select_button(sd->ui.entry_similarity, nullptr, FALSE, nullptr, nullptr, nullptr);
 	pref_checkbox_new_int(hbox, _("Ignore rotation"),
 				options->rot_invariant_sim, &options->rot_invariant_sim);
+
+	const gchar *algorithms[] = {_("Standard similarity algorithm"), _("Perceptual hash algorithm"), nullptr};
+	sd->ui.algorithm_similarity = gtk_drop_down_new_from_strings(algorithms);
+	auto *algorithm_factory = gtk_signal_list_item_factory_new();
+	g_signal_connect(algorithm_factory, "setup", G_CALLBACK(search_algorithm_label_setup), nullptr);
+	g_signal_connect(algorithm_factory, "bind", G_CALLBACK(search_algorithm_label_bind), nullptr);
+	gtk_drop_down_set_factory(GTK_DROP_DOWN(sd->ui.algorithm_similarity), algorithm_factory);
+	g_object_unref(algorithm_factory);
+	// Keep full algorithm names in the popup and short names on the button.
+	auto *algorithm_list_factory = gtk_signal_list_item_factory_new();
+	g_signal_connect(algorithm_list_factory, "setup", G_CALLBACK(search_algorithm_label_setup), nullptr);
+	g_signal_connect(algorithm_list_factory, "bind", G_CALLBACK(search_algorithm_list_label_bind), nullptr);
+	gtk_drop_down_set_list_factory(GTK_DROP_DOWN(sd->ui.algorithm_similarity), algorithm_list_factory);
+	g_object_unref(algorithm_list_factory);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.algorithm_similarity), options->alternate_similarity_algorithm.enabled ? 1 : 0);
+	gtk_widget_set_tooltip_text(sd->ui.algorithm_similarity, _("Perceptual hash can be significantly faster than the standard algorithm. Similarity percentages differ between algorithms; verify the threshold with your images before relying on the results."));
+	gtk_box_append(GTK_BOX(hbox), sd->ui.algorithm_similarity);
 
 	/* Search for image keywords */
 	GtkWidget *check_keywords = nullptr;
