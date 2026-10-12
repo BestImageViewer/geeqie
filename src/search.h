@@ -24,6 +24,9 @@
 
 class FileData;
 
+bool search_gps_within_range(double origin_latitude, double origin_longitude,
+                            double latitude, double longitude, double limit_squared);
+
 void search_new(FileData *dir_fd, FileData *example_file);
 
 #endif

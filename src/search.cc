@@ -324,7 +324,7 @@ struct SearchData
 	gint search_gps;
 	gdouble search_lat;
 	gdouble search_lon;
-	gdouble search_earth_radius;
+	gdouble search_gps_limit_squared;
 	FileFormatClass search_class;
 	gint search_marks;
 
@@ -470,28 +470,6 @@ double to_radians(gdouble deg)
 	return deg * M_PI / 180.0;
 }
 
-/**
- * @brief Get distance between two lat/long points
- * @param sd @ref SearchData
- * @param latitude Degrees
- * @param longitude Degrees
- * @returns Distance in km/miles/nautical miles
- * 
- * Equirectangular approximation. \n
- * Error is probably insignificant for this application: \n
- * < 10 km       0.1% \n
- * 10 – 100 km   0.1%–0.5% \n
- * 100 – 1000 km 0.5%–2% \n
- * \> 1000 km     ≥ 2–5% \n
- */
-gdouble get_gps_range(const SearchData *sd, gdouble latitude, gdouble longitude)
-{
-	gdouble x = to_radians(sd->search_lon - longitude) * std::cos(to_radians((latitude + sd->search_lat) / 2));
-	gdouble y = to_radians(sd->search_lat - latitude);
-
-	return std::sqrt((x * x) + (y * y)) * sd->search_earth_radius;
-}
-
 #define MATCH_TYPE_KEY "match_type"
 
 bool menu_choice_get_match_type(GtkWidget *drop_down, MatchType &type)
@@ -517,6 +495,29 @@ GString *get_marks_string(gint mark_num)
 }
 
 } // namespace
+
+/**
+ * @brief Check whether a point is within a GPS search radius.
+ * @param origin_latitude Origin latitude in degrees
+ * @param origin_longitude Origin longitude in degrees
+ * @param latitude Image latitude in degrees
+ * @param longitude Image longitude in degrees
+ * @param limit_squared Squared angular radius, in radians squared
+ * @return True when the equirectangular approximation is within the radius, inclusive
+ */
+bool search_gps_within_range(double origin_latitude, double origin_longitude,
+                            double latitude, double longitude, double limit_squared)
+{
+	const double y = to_radians(origin_latitude - latitude);
+	const double y_squared = y * y;
+	if (y_squared > limit_squared) return false;
+
+	double longitude_difference = origin_longitude - longitude;
+	if (longitude_difference > 180.0) longitude_difference -= 360.0;
+	else if (longitude_difference < -180.0) longitude_difference += 360.0;
+	const double x = to_radians(longitude_difference) * std::cos(to_radians((latitude + origin_latitude) / 2));
+	return x * x + y_squared <= limit_squared;
+}
 
 static gint search_result_selection_count(SearchData *sd, gint64 *bytes = nullptr);
 static gint search_result_count(SearchData *sd, gint64 *bytes = nullptr);
@@ -2047,9 +2048,7 @@ static gboolean search_file_next(SearchData *sd)
 
 	if (match && sd->match_gps_enable)
 		{
-		/* Calculate the distance the image is from the specified origin.
-		* This is a standard algorithm. A simplified one may be faster.
-		*/
+		/* Check whether the image is within the specified radius. */
 		tested = TRUE;
 		match = FALSE;
 
@@ -2063,9 +2062,10 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		else if (image_has_gps)
 			{
-			const gdouble range = get_gps_range(sd, *latitude, *longitude);
-			match = (sd->match_gps == SEARCH_MATCH_UNDER && range <= sd->search_gps) ||
-			        (sd->match_gps == SEARCH_MATCH_OVER && range > sd->search_gps);
+			const bool within_range = search_gps_within_range(sd->search_lat, sd->search_lon,
+			                                                *latitude, *longitude, sd->search_gps_limit_squared);
+			match = (sd->match_gps == SEARCH_MATCH_UNDER && within_range) ||
+			        (sd->match_gps == SEARCH_MATCH_OVER && !within_range);
 			}
 		}
 
@@ -2395,21 +2395,25 @@ static void search_start_do(SearchData *sd)
 		GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.units_gps)));
 		const char *units_gps = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 
+		gdouble earth_radius;
 		if (g_strcmp0(units_gps, _("km")) == 0)
 			{
 			constexpr gdouble KM_EARTH_RADIUS = 6371;
-			sd->search_earth_radius = KM_EARTH_RADIUS;
+			earth_radius = KM_EARTH_RADIUS;
 			}
 		else if (g_strcmp0(units_gps, _("miles")) == 0)
 			{
 			constexpr gdouble MILES_EARTH_RADIUS = 3959;
-			sd->search_earth_radius = MILES_EARTH_RADIUS;
+			earth_radius = MILES_EARTH_RADIUS;
 			}
 		else
 			{
 			constexpr gdouble NAUTICAL_MILES_EARTH_RADIUS = 3440;
-			sd->search_earth_radius = NAUTICAL_MILES_EARTH_RADIUS;
+			earth_radius = NAUTICAL_MILES_EARTH_RADIUS;
 			}
+
+		const gdouble angular_radius = sd->search_gps / earth_radius;
+		sd->search_gps_limit_squared = angular_radius * angular_radius;
 		}
 
 	if (sd->match_keywords_enable)
