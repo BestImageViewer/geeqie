@@ -516,7 +516,7 @@ bool search_gps_within_range(double origin_latitude, double origin_longitude,
 	if (longitude_difference > 180.0) longitude_difference -= 360.0;
 	else if (longitude_difference < -180.0) longitude_difference += 360.0;
 	const double x = to_radians(longitude_difference) * std::cos(to_radians((latitude + origin_latitude) / 2));
-	return x * x + y_squared <= limit_squared;
+	return (x * x) + y_squared <= limit_squared;
 }
 
 static gint search_result_selection_count(SearchData *sd, gint64 *bytes = nullptr);
