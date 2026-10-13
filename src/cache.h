@@ -86,6 +86,8 @@ private:
 
 gboolean cache_time_valid(const gchar *cache, const gchar *path);
 
+bool cache_source_is_thumbnail(const gchar *source);
+
 gchar *cache_create_location(CacheType cache_type, const gchar *source);
 gchar *cache_get_location(CacheType cache_type, const gchar *source);
 gchar *cache_find_location(CacheType type, const gchar *source);

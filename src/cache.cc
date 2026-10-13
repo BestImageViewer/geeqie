@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <initializer_list>
 
 #include <config.h>
 
@@ -119,6 +120,31 @@ struct CachePathParts
 	const gchar *ext = nullptr;
 	gboolean use_local_dir = FALSE;
 };
+
+bool path_is_in_thumbnail_cache(const gchar *path)
+{
+	for (const gchar *root : {get_thumbnails_cache_dir(), get_thumbnails_standard_cache_dir()})
+		{
+		g_autofree gchar *canonical_root = g_canonicalize_filename(root, nullptr);
+		g_autofree gchar *root_path = path_from_utf8(canonical_root);
+		g_autofree gchar *resolved_root = realpath(root_path, nullptr);
+		g_autofree gchar *resolved_root_utf8 = resolved_root ? path_to_utf8(resolved_root) : nullptr;
+		for (const gchar *cache_root : {canonical_root, resolved_root_utf8})
+			{
+			if (!cache_root) continue;
+			const gsize length = strlen(cache_root);
+			if (g_str_has_prefix(path, cache_root) && (path[length] == G_DIR_SEPARATOR || path[length] == '\0')) return true;
+			}
+		}
+
+	g_auto(GStrv) components = g_strsplit(path, G_DIR_SEPARATOR_S, -1);
+	for (gchar **component = components; *component; ++component)
+		{
+		if (g_strcmp0(*component, GQ_CACHE_LOCAL_THUMB) == 0 ||
+		    g_strcmp0(*component, THUMB_FOLDER_LOCAL) == 0) return true;
+		}
+	return false;
+}
 
 constexpr gint CACHE_LOAD_LINE_NOISE = 8;
 
@@ -513,6 +539,23 @@ void CacheData::set_similarity(const ImageSimilarityData &sd)
 	similarity = std::make_unique<ImageSimilarityData>(sd);
 }
 
+/**
+ * @brief Identify source paths inside global or local thumbnail caches.
+ * Checks directory boundaries and resolves existing symbolic links.
+ */
+bool cache_source_is_thumbnail(const gchar *source)
+{
+	if (!source) return false;
+	g_autofree gchar *canonical = g_canonicalize_filename(source, nullptr);
+	if (path_is_in_thumbnail_cache(canonical)) return true;
+
+	g_autofree gchar *source_path = path_from_utf8(source);
+	g_autofree gchar *resolved = realpath(source_path, nullptr);
+	if (!resolved) return false;
+	g_autofree gchar *resolved_utf8 = path_to_utf8(resolved);
+	return path_is_in_thumbnail_cache(resolved_utf8);
+}
+
 /*
  *-------------------------------------------------------------------
  * cache path location utils
@@ -521,6 +564,8 @@ void CacheData::set_similarity(const ImageSimilarityData &sd)
 
 gchar *cache_create_location(CacheType cache_type, const gchar *source)
 {
+	if ((cache_type == CacheType::THUMB || cache_type == CacheType::SIM) && cache_source_is_thumbnail(source)) return nullptr;
+
 	mode_t mode = 0755;
 	g_autofree gchar *path = cache_get_location(cache_type, source, FALSE, &mode);
 

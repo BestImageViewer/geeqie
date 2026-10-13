@@ -2,6 +2,9 @@
 
 #include "gtest/gtest.h"
 
+#include <unistd.h>
+
+#include <initializer_list>
 #include <string>
 
 #include <glib/gstdio.h>
@@ -344,6 +347,53 @@ TEST_F(SimCache, CacheLoaderCreatesAllHashesForNewImage)
 	EXPECT_EQ(created.similarity->avg_r, expected.avg_r);
 	EXPECT_EQ(created.similarity->avg_g, expected.avg_g);
 	EXPECT_EQ(created.similarity->avg_b, expected.avg_b);
+}
+
+TEST(ThumbnailCacheSource, ExcludesAllCacheLocationsWithDirectoryBoundaries)
+{
+	for (const gchar *root : {get_thumbnails_cache_dir(), get_thumbnails_standard_cache_dir()})
+		{
+		g_autofree gchar *source = g_build_filename(root, "nested", "image.png", nullptr);
+		EXPECT_TRUE(cache_source_is_thumbnail(source));
+		EXPECT_EQ(cache_create_location(CacheType::THUMB, source), nullptr);
+		EXPECT_EQ(cache_create_location(CacheType::SIM, source), nullptr);
+		g_autofree gchar *neighbor = g_strconcat(root, "-images/image.png", nullptr);
+		EXPECT_FALSE(cache_source_is_thumbnail(neighbor));
+		}
+	EXPECT_TRUE(cache_source_is_thumbnail("/photos/.thumbnails/image.png"));
+	EXPECT_TRUE(cache_source_is_thumbnail("/photos/.thumbnails/nested/image.png"));
+	EXPECT_TRUE(cache_source_is_thumbnail("/photos/.thumblocal/normal/image.png"));
+	EXPECT_FALSE(cache_source_is_thumbnail("/photos/.thumbnails-extra/image.png"));
+	EXPECT_FALSE(cache_source_is_thumbnail("/photos/image.png"));
+}
+
+TEST_F(SimCache, DoesNotSaveSimilarityForLocalCacheSourcesOrAliases)
+{
+	g_autofree gchar *cached_source = g_build_filename(base, "cached.png", nullptr);
+	ASSERT_TRUE(g_file_set_contents(cached_source, "", 0, nullptr));
+	g_autofree gchar *alias = g_build_filename(directory, "alias.png", nullptr);
+	ASSERT_EQ(symlink(cached_source, alias), 0);
+	EXPECT_TRUE(cache_source_is_thumbnail(alias));
+
+	CacheData data;
+	data.set_dimensions({32, 32});
+	data.save(cached_source);
+	data.save(alias);
+	g_autofree gchar *nested_cache = g_build_filename(base, ".thumbnails", nullptr);
+	g_autofree gchar *alias_cache = cache_get_location(CacheType::SIM, alias);
+	EXPECT_FALSE(isdir(nested_cache));
+	EXPECT_FALSE(isfile(alias_cache));
+	g_remove(alias);
+	g_remove(cached_source);
+}
+
+TEST_F(SimCache, StandardThumbnailsKeepSimilarityDataInGeeqieCache)
+{
+	options->thumbnails.spec_standard = TRUE;
+	options->thumbnails.cache_into_dirs = FALSE;
+	g_autofree gchar *sim_path = cache_get_location(CacheType::SIM, source);
+	g_autofree gchar *prefix = g_strconcat(get_thumbnails_cache_dir(), G_DIR_SEPARATOR_S, nullptr);
+	EXPECT_TRUE(g_str_has_prefix(sim_path, prefix));
 }
 
 } // namespace

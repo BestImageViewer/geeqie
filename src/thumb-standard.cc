@@ -269,6 +269,7 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 	gboolean fail;
 
 	if (!tl->cache_enable || tl->cache_hit || tl->source_missing) return;
+	if (cache_source_is_thumbnail(tl->fd->path)) return;
 	if (tl->thumb_path) return;
 
 	if (!pixbuf)
@@ -691,9 +692,7 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 	tl->source_size = st.st_size;
 	tl->source_mode = st.st_mode;
 
-	static const gchar *thumb_cache = get_thumbnails_standard_cache_dir();
-
-	if (strncmp(tl->fd->path, thumb_cache, strlen(thumb_cache)) != 0)
+	if (!cache_source_is_thumbnail(tl->fd->path))
 		{
 		g_autofree gchar *pathl = path_from_utf8(fd->path);
 		tl->thumb_uri = g_filename_to_uri(pathl, nullptr, nullptr);
