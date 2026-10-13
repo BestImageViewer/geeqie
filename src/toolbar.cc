@@ -195,7 +195,12 @@ gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 	toolbar_menu_add_actions(main_submenu, get_app_actions(), bar);
 	toolbar_menu_add_actions(main_submenu, get_main_actions(), bar);
 
-	popup_menu(menu_model, get_config_window());
+	auto *window = get_config_window();
+	auto *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
+	popover_set_parent(popover, window);
+	// Opening beside the window lets the long list use the monitor's height.
+	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_RIGHT);
+	popover_popup(popover);
 
 	return TRUE;
 }
