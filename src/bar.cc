@@ -781,12 +781,6 @@ GtkWidget *bar_update_from_config(GtkWidget *bar, const gchar **attribute_names,
 	return bar;
 }
 
-GtkWidget *bar_new_from_config(LayoutWindow *lw, const gchar **attribute_names, const gchar **attribute_values)
-{
-	GtkWidget *bar = bar_new(lw);
-	return bar_update_from_config(bar, attribute_names, attribute_values, lw, TRUE);
-}
-
 static bool bar_pane_common_event(GtkWidget *, GdkEvent *)
 {
 	return false;
