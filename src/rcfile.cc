@@ -1651,7 +1651,8 @@ static void options_parse_layout(GQParserData *parser_data, const gchar *element
 		{
 		if (!lw->bar)
 			{
-			GtkWidget *bar = bar_new_from_config(lw, attribute_names, attribute_values);
+			GtkWidget *bar = bar_new(lw);
+			bar_update_from_config(bar, attribute_names, attribute_values, lw, TRUE);
 			layout_bar_set(lw, bar);
 			}
 		else
