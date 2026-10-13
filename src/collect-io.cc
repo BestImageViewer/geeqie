@@ -679,14 +679,10 @@ static void collect_manager_process_actions(gint max)
 
 static gboolean collect_manager_process_entry(CollectManagerEntry *entry)
 {
-	CollectionData *cd;
-
 	if (entry->empty) return FALSE;
 
-	cd = collection_new(entry->path);
+	g_autoptr(CollectionData) cd = collection_new(entry->path);
 	(void) collection_load_private(cd, entry->path, COLLECTION_LOAD_NONE);
-
-	collection_unref(cd);
 
 	return TRUE;
 }

@@ -35,7 +35,7 @@
 
 static void collection_save_cb(GFile *file, gpointer data)
 {
-	auto cd = static_cast<CollectionData *>(data);
+	g_autoptr(CollectionData) cd = static_cast<CollectionData *>(data);
 
 	if (file)
 		{
@@ -46,9 +46,7 @@ static void collection_save_cb(GFile *file, gpointer data)
 			g_autofree gchar *buf = g_strdup_printf(_("Failed to save the collection:\n%s"), filename);
 			file_util_warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, nullptr);
 			}
-
 		}
-	collection_unref(cd);
 }
 
 struct CollectionSaveData
@@ -79,20 +77,14 @@ static void collection_save_with_callback_cb(GFile *file, gpointer data)
 
 static void collection_append_cb(GFile *file, gpointer data)
 {
-	auto cd = static_cast<CollectionData *>(data);
+	g_autoptr(CollectionData) cd = static_cast<CollectionData *>(data);
 
 	if (file)
 		{
 		g_autofree gchar *filename = g_file_get_path(file);
 
-		if (!collection_load(cd, filename, COLLECTION_LOAD_APPEND))
-			{
-			collection_unref(cd);
-			return;
-			}
+		collection_load(cd, filename, COLLECTION_LOAD_APPEND);
 		}
-
-	collection_unref(cd);
 }
 
 static void collection_dialog_new(CollectionData *cd, const gchar *title, FileDialogAction action, FileDialogCallback callback, gpointer callback_data = nullptr)

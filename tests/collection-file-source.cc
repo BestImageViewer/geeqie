@@ -171,8 +171,7 @@ TEST_F(CollectionFileSource, ManagerUpdatesExternalCollectionsFromHistory)
 	paths.emplace_back(other_path);
 	ASSERT_TRUE(collection_save(cd, path));
 	ASSERT_TRUE(collection_save(cd, other_path));
-	collection_unref(cd);
-	cd = nullptr;
+	g_clear_pointer(&cd, collection_unref);
 
 	// History entries that are missing, directories, or not .gqv files are ignored.
 	g_autofree gchar *ignored_path = g_build_filename(directory, "ignored.txt", nullptr);
@@ -259,8 +258,7 @@ TEST_F(CollectionFileSource, ManagerRenamesToLongerPathAndRemovesFile)
 	EXPECT_EQ(std::string(contents).find(first->path), std::string::npos);
 	EXPECT_NE(std::string(contents).find(second->path), std::string::npos);
 
-	collection_unref(cd);
-	cd = nullptr;
+	g_clear_pointer(&cd, collection_unref);
 	collect_manager_remove(renamed, path);
 	collect_manager_flush();
 	g_clear_pointer(&contents, g_free);

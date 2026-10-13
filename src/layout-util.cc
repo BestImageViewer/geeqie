@@ -393,10 +393,9 @@ static void layout_menu_new_collection_cb(GSimpleAction *, GVariant *, gpointer)
 	g_autofree gchar *current_path = g_strdup(layout_get_path(get_current_layout()));
 	LayoutWindow *lw = layout_new_from_default();
 	if (current_path) layout_set_path(lw, current_path);
-	CollectionData *collection = collection_new(nullptr);
+	g_autoptr(CollectionData) collection = collection_new(nullptr);
 	collection->changed = TRUE;
 	layout_set_collection(lw, collection);
-	collection_unref(collection);
 }
 
 static void layout_menu_search_cb(GSimpleAction *, GVariant *, gpointer)
@@ -2809,7 +2808,7 @@ static void layout_menu_window_from_current_cb(GSimpleAction *, GVariant *, gpoi
 
 	auto *lw = static_cast<LayoutWindow *>(data);
 	g_autofree gchar *path = g_strdup(layout_get_path(lw));
-	CollectionData *collection = lw->vf ? lw->vf->collection : nullptr;
+	g_autoptr(CollectionData) collection = lw->vf ? lw->vf->collection : nullptr;
 	std::vector<LayoutWindow *> existing_windows;
 	layout_window_foreach([&existing_windows](LayoutWindow *window) { existing_windows.push_back(window); });
 	if (collection)
@@ -2832,7 +2831,6 @@ static void layout_menu_window_from_current_cb(GSimpleAction *, GVariant *, gpoi
 				if (collection) layout_set_collection(new_window, collection);
 				}
 		}
-	if (collection) collection_unref(collection);
 
 	unlink_file(tmp_file_in);
 	unlink_file(tmp_file_out);
