@@ -1812,8 +1812,7 @@ static void vf_collection_release(ViewFile *vf)
 		}
 	g_clear_pointer(&vf->monitored_files, g_list_free);
 	g_clear_pointer(&vf->collection_order, g_hash_table_destroy);
-	collection_unref(vf->collection);
-	vf->collection = nullptr;
+	g_clear_pointer(&vf->collection, collection_unref);
 	vf->source = FileViewSource::DIRECTORY;
 }
 

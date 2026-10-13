@@ -1340,7 +1340,7 @@ void process_files(GList *file_list)
 
 		if (multiple_dirs)
 			{
-			CollectionData *cd = collection_new(nullptr);
+			g_autoptr(CollectionData) cd = collection_new(nullptr);
 
 			for (GList *work = file_list; work; work = work->next)
 				{
@@ -1350,7 +1350,6 @@ void process_files(GList *file_list)
 				}
 			cd->changed = TRUE;
 			layout_set_collection(lw_id, cd);
-			collection_unref(cd);
 			}
 		else
 			{

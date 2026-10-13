@@ -67,6 +67,7 @@ CollectionData *collection_new(const gchar *path);
 
 CollectionData *collection_ref(CollectionData *cd);
 void collection_unref(CollectionData *cd);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(CollectionData, collection_unref)
 
 void collection_path_changed(CollectionData *cd);
 

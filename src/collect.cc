@@ -314,26 +314,18 @@ GString *collection_contents(const gchar *name, GString *contents)
  */
 GList *collection_contents_fd(const gchar *name)
 {
-	CollectionData *cd;
-	CollectInfo *ci;
-	GList *work;
-	GList *list = nullptr;
-
 	if (!is_collection(name)) return nullptr;
 
+	g_autoptr(CollectionData) cd = collection_new("");
 	g_autofree gchar *path = collection_path(name);
-	cd = collection_new("");
 	collection_load(cd, path, COLLECTION_LOAD_APPEND);
-	work = cd->list;
-	while (work)
+
+	GList *list = nullptr;
+	for (GList *work = cd->list; work; work = work->next)
 		{
-		ci = static_cast<CollectInfo *>(work->data);
+		auto *ci = static_cast<CollectInfo *>(work->data);
 		list = g_list_append(list, file_data_ref(ci->fd));
-
-		work = work->next;
 		}
-
-	collection_unref(cd);
 
 	return list;
 }
@@ -349,13 +341,12 @@ void collection_by_index_add_filelist(gint index, GList *list)
 	if (!list) return;
 	if (index < 0)
 		{
-			LayoutWindow *lw = layout_new_from_default();
-			CollectionData *cd = collection_new(nullptr);
-			if (layout_set_collection(lw, cd))
-				for (GList *work = list; work; work = work->next)
-					collection_add(cd, static_cast<FileData *>(work->data), FALSE);
-			collection_unref(cd);
-			return;
+		LayoutWindow *lw = layout_new_from_default();
+		g_autoptr(CollectionData) cd = collection_new(nullptr);
+		if (layout_set_collection(lw, cd))
+			for (GList *work = list; work; work = work->next)
+				collection_add(cd, static_cast<FileData *>(work->data), FALSE);
+		return;
 		}
 	LayoutWindow *lw = get_current_layout();
 	if (!lw) return;
@@ -366,7 +357,7 @@ void collection_by_index_add_filelist(gint index, GList *list)
 			auto files = std::shared_ptr<GList>(filelist_copy(list), [](GList *items) { file_data_list_free(items); });
 			if (!layout_confirm_collection_leave(lw, [index, files]() { collection_by_index_add_filelist(index, files.get()); }, FALSE)) return;
 		}
-	CollectionData *cd = path ? collection_find(path) : nullptr;
+	g_autoptr(CollectionData) cd = path ? collection_find(path) : nullptr;
 	if (cd)
 		collection_ref(cd);
 	else
@@ -374,14 +365,13 @@ void collection_by_index_add_filelist(gint index, GList *list)
 		cd = collection_new(path);
 		if (path && isfile(path) && !collection_load(cd, path, COLLECTION_LOAD_NONE))
 			{
-			collection_unref(cd);
 			return;
 			}
 		}
+
 	if (layout_set_collection(lw, cd))
 		for (GList *work = list; work; work = work->next)
 			collection_add(cd, static_cast<FileData *>(work->data), FALSE);
-	collection_unref(cd);
 }
 
 /*

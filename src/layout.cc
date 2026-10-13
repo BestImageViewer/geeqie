@@ -487,7 +487,7 @@ static void layout_path_entry_cb(LayoutWindow *lw, const gchar *path)
 
 static gboolean layout_open_collection(LayoutWindow *lw, FileData *fd)
 {
-	CollectionData *cd = collection_find(fd->path);
+	g_autoptr(CollectionData) cd = collection_find(fd->path);
 	if (cd)
 		collection_ref(cd);
 	else
@@ -496,13 +496,11 @@ static gboolean layout_open_collection(LayoutWindow *lw, FileData *fd)
 		if (!collection_load(cd, fd->path, COLLECTION_LOAD_NONE))
 			{
 			warning_dialog(_("Unable to open collection"), fd->path, GQ_ICON_DIALOG_ERROR, lw->window);
-			collection_unref(cd);
 			return FALSE;
 			}
 		}
-	const gboolean result = layout_set_collection(lw, cd);
-	collection_unref(cd);
-	return result;
+
+	return layout_set_collection(lw, cd);
 }
 
 static void layout_vd_select_cb(ViewDir *, FileData *fd, gpointer data)
@@ -1613,8 +1611,8 @@ gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 	if (!layout_valid(&lw) || !lw->vf || !cd) return FALSE;
 	if (lw->vf->collection && lw->vf->collection != cd)
 		{
-			auto next = std::shared_ptr<CollectionData>(collection_ref(cd), [](CollectionData *item) { collection_unref(item); });
-			if (!layout_confirm_collection_leave(lw, [lw, next]() { layout_set_collection(lw, next.get()); }, FALSE)) return FALSE;
+		auto next = std::shared_ptr<CollectionData>(collection_ref(cd), collection_unref);
+		if (!layout_confirm_collection_leave(lw, [lw, next]() { layout_set_collection(lw, next.get()); }, FALSE)) return FALSE;
 		}
 	collection_ref(cd);
 	FileDataRef current(layout_image_get_fd(lw));
@@ -2417,7 +2415,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 
 	/* remember state */
 	FileDataRef current_file(layout_image_get_fd(lw));
-	CollectionData *collection = lw->vf && lw->vf->collection ? collection_ref(lw->vf->collection) : nullptr;
+	g_autoptr(CollectionData) collection = lw->vf && lw->vf->collection ? collection_ref(lw->vf->collection) : nullptr;
 
 	/* layout_image_slideshow_stop(lw); slideshow should survive */
 	layout_image_full_screen_stop(lw);
@@ -2485,7 +2483,6 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 		layout_set_fd(lw, dir_fd);
 		layout_set_collection(lw, collection);
 		if (current_file && g_list_find(lw->vf->list, current_file)) layout_image_set_fd(lw, current_file);
-		collection_unref(collection);
 		}
 	else if (image_get_fd(lw->image))
 		{

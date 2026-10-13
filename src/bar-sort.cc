@@ -450,19 +450,12 @@ static void bar_sort_set_selection_cb(GtkWidget *button, gpointer data)
 
 static gboolean save_new_collection(GFile *file, gpointer data)
 {
-	auto sd = static_cast<SortData *>(data);
-	CollectionData *cd;
-	gboolean ret;
+	auto *sd = static_cast<SortData *>(data);
 
 	g_autofree gchar *path = g_file_get_path(file);
+	g_autoptr(CollectionData) cd = collection_new(path);
 
-	cd = collection_new(path);
-	if (collection_save(cd, path))
-		{
-		bar_sort_collection_list_build(sd->bookmarks);
-		ret = TRUE;
-		}
-	else
+	if (!collection_save(cd, path))
 		{
 		g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", _("File save failed."));
 		g_autofree gchar *detail = g_strdup_printf(_("File \"%s\" was not saved."), path);
@@ -470,12 +463,11 @@ static gboolean save_new_collection(GFile *file, gpointer data)
 		gtk_alert_dialog_set_modal(dialog, TRUE);
 		gtk_alert_dialog_show(dialog, GTK_WINDOW(sd->lw->window));
 
-		ret = FALSE;
+		return FALSE;
 		}
 
-	collection_unref(cd);
-
-	return ret;
+	bar_sort_collection_list_build(sd->bookmarks);
+	return TRUE;
 }
 
 static void new_collection_file_response_cb(GFile *file, gpointer data)
