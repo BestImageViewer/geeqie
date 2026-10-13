@@ -317,7 +317,7 @@ void config_file_error_notification_clicked_cb(GSimpleAction *, GVariant *, gpoi
 }
 
 /**
- * @brief Notification Quit button pressed
+ * @brief Quit the cache maintenance process
  * @param action
  * @param parameter
  * @param app
@@ -936,7 +936,7 @@ Version: Geeqie "), VERSION, nullptr);
 		g_signal_connect(app, "command-line", G_CALLBACK(process_command_line_cache_maintenance), nullptr);
 		g_signal_connect(app, "shutdown", G_CALLBACK(shutdown_cache_maintenance_cb), nullptr);
 
-		/* The quit action is linked to the Quit button on the notifications */
+		/* Allow the maintenance process to be stopped through its application action. */
 		GSimpleAction *quit_action = g_simple_action_new("quit", nullptr);
 		g_signal_connect(quit_action, "activate", G_CALLBACK(quit_activated_cb), app);
 		g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(quit_action));

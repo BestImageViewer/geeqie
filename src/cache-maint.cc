@@ -155,14 +155,66 @@ void cache_maintain_home_close(CMData *cm)
  *-----------------------------------------------------------------------------
  */
 static gchar *cache_maintenance_path = nullptr;
+static GtkWidget *cache_maintenance_window = nullptr;
+static GtkWidget *cache_maintenance_stage = nullptr;
+static GtkWidget *cache_maintenance_file = nullptr;
+
+static void cache_maintenance_stop_cb(GtkButton *, gpointer data)
+{
+	g_application_quit(G_APPLICATION(data));
+}
+
+static gboolean cache_maintenance_close_cb(GtkWindow *, gpointer data)
+{
+	g_application_quit(G_APPLICATION(data));
+	return TRUE;
+}
+
+static void cache_maintenance_update_file(const gchar *path)
+{
+	if (cache_maintenance_file) gtk_label_set_text(GTK_LABEL(cache_maintenance_file), path);
+}
+
+static void cache_maintenance_update_stage(const gchar *message)
+{
+	gtk_label_set_text(GTK_LABEL(cache_maintenance_stage), message);
+	cache_maintenance_update_file(cache_maintenance_path);
+}
+
+static void cache_maintenance_show_window(GtkApplication *app)
+{
+	cache_maintenance_window = gtk_application_window_new(app);
+	gtk_window_set_title(GTK_WINDOW(cache_maintenance_window), _("Cache Maintenance"));
+	gtk_window_set_default_size(GTK_WINDOW(cache_maintenance_window), 500, -1);
+	g_signal_connect(cache_maintenance_window, "close-request", G_CALLBACK(cache_maintenance_close_cb), app);
+
+	auto *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	gtk_widget_set_margin_start(box, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(box, PREF_PAD_BORDER);
+	gtk_widget_set_margin_top(box, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(box, PREF_PAD_BORDER);
+	gtk_window_set_child(GTK_WINDOW(cache_maintenance_window), box);
+
+	cache_maintenance_stage = gtk_label_new(nullptr);
+	gtk_box_append(GTK_BOX(box), cache_maintenance_stage);
+	auto *spinner = gtk_spinner_new();
+	gtk_spinner_start(GTK_SPINNER(spinner));
+	gtk_box_append(GTK_BOX(box), spinner);
+	cache_maintenance_file = gtk_label_new(cache_maintenance_path);
+	gtk_label_set_ellipsize(GTK_LABEL(cache_maintenance_file), PANGO_ELLIPSIZE_MIDDLE);
+	gtk_label_set_selectable(GTK_LABEL(cache_maintenance_file), TRUE);
+	gtk_box_append(GTK_BOX(box), cache_maintenance_file);
+	auto *stop = gtk_button_new_with_mnemonic(_("_Stop"));
+	g_signal_connect(stop, "clicked", G_CALLBACK(cache_maintenance_stop_cb), app);
+	gtk_box_append(GTK_BOX(box), stop);
+	gtk_window_present(GTK_WINDOW(cache_maintenance_window));
+}
 
 static void cache_manager_sim_remote(GtkApplication *app, const gchar *path, gboolean recurse, GSourceFunc destroy_func);
 
 static gboolean cache_maintenance_sim_stop_cb(gpointer data)
 {
-	auto *cd = static_cast<CacheOpsData *>(data);
-
-	g_application_withdraw_notification(G_APPLICATION(cd->app), "cache_maintenance");
+	gtk_window_destroy(GTK_WINDOW(cache_maintenance_window));
 
 	g_free(data);
 
@@ -173,7 +225,7 @@ static gboolean cache_maintenance_render_stop_cb(gpointer data)
 {
 	auto *cd = static_cast<CacheOpsData *>(data);
 
-	cache_maintenance_notification(cd->app, _("Creating sim data…"), TRUE);
+	cache_maintenance_update_stage(_("Creating sim data…"));
 
 	cache_manager_sim_remote(cd->app, cache_maintenance_path, TRUE, cache_maintenance_sim_stop_cb);
 
@@ -185,7 +237,7 @@ static void cache_maintenance_clean_stop_cb(gpointer data)
 	auto *cm = static_cast<CMData *>(data);
 
 
-	cache_maintenance_notification(cm->app,  _("Creating thumbs…"), TRUE);
+	cache_maintenance_update_stage(_("Creating thumbs…"));
 	cache_manager_render_remote(cm->app, cache_maintenance_path, TRUE, options->thumbnails.cache_into_dirs, cache_maintenance_render_stop_cb);
 }
 
@@ -193,7 +245,8 @@ void cache_maintenance(GtkApplication *app, const gchar *path)
 {
 	cache_maintenance_path = g_strdup(path);
 
-	cache_maintenance_notification(app, _("Cleaning thumbs and sims…"), TRUE);
+	cache_maintenance_show_window(app);
+	cache_maintenance_update_stage(_("Cleaning thumbs and sims…"));
 
 	cache_maintain_home_remote(app, FALSE, FALSE, cache_maintenance_clean_stop_cb);
 }
@@ -260,6 +313,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 		}
 
 	fd = static_cast<FileData *>(cm->list->data);
+	if (cm->app) cache_maintenance_update_file(fd->path);
 
 	DEBUG_1("purge chk (%d) \"%s\"", (cm->clear && !cm->metadata), fd->path);
 
@@ -650,6 +704,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 		gint success;
 
 		fd = static_cast<FileData *>(cd->list->data);
+		if (cd->app) cache_maintenance_update_file(fd->path);
 		cd->list = g_list_remove(cd->list, fd);
 
 		cd->tl = reinterpret_cast<ThumbLoaderStd *>(thumb_loader_new(options->thumbnails.size.width, options->thumbnails.size.height));
@@ -1289,6 +1344,7 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 		{
 		FileData *fd;
 		fd = static_cast<FileData *>(cd->list->data);
+		if (cd->app) cache_maintenance_update_file(fd->path);
 		cd->list = g_list_remove(cd->list, fd);
 
 		load_mask = static_cast<CacheDataType>(CACHE_LOADER_DIMENSIONS | CACHE_LOADER_DATE | CACHE_LOADER_MD5SUM | CACHE_LOADER_SIMILARITY);
@@ -1659,28 +1715,6 @@ void cache_manager_show()
 	gtk_widget_set_sensitive(group, options->thumbnails.enable_caching);
 
 	gtk_window_present(GTK_WINDOW(cache_manager->dialog->dialog));
-}
-
-void cache_maintenance_notification(GtkApplication *app, const gchar *message, gboolean show_quit_button)
-{
-	GIcon *geeqie_icon;
-	GNotification *notification;
-
-	notification = g_notification_new("Geeqie");
-	geeqie_icon = ui_icon_new(PIXBUF_INLINE_ICON);
-
-	g_notification_set_body(notification, message);
-	g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_NORMAL);
-	g_notification_set_title(notification, _("Cache Maintenance"));
-
-	if (show_quit_button)
-		{
-		g_notification_add_button(notification, _("Quit"), "app.quit");
-		}
-
-	g_application_send_notification(G_APPLICATION(app), "cache_maintenance", notification);
-
-	g_object_unref(geeqie_icon);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -444,7 +444,7 @@ void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_
 }
 
 template<gboolean recurse>
-void gq_dupes(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+void gq_dupes(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
 	const gchar *path;
 	g_variant_dict_lookup(command_line_options_dict, recurse ? "dupes-recurse" : "dupes", "&s", &path);
@@ -453,7 +453,6 @@ void gq_dupes(GtkApplication *app, GApplicationCommandLine *app_command_line, GV
 	if (!isdir(folder_path))
 		{
 		g_autofree gchar *notification_message = g_strdup_printf("\"%s\"%s", folder_path, _(" is not a folder"));
-		cache_maintenance_notification(app, notification_message, FALSE);
 		g_application_command_line_print(app_command_line, "%s\n", notification_message);
 
 		exit(EXIT_FAILURE);
@@ -1468,7 +1467,6 @@ void gq_cm_dir(GtkApplication *app, GApplicationCommandLine *app_command_line, G
 	if (!isdir(folder_path))
 		{
 		g_autofree gchar *notification_message = g_strdup_printf("\"%s\"%s", folder_path, _(" is not a folder"));
-		cache_maintenance_notification(app, notification_message, FALSE);
 		g_application_command_line_print(app_command_line, "%s\n", notification_message);
 
 		exit(EXIT_FAILURE);
@@ -1478,7 +1476,6 @@ void gq_cm_dir(GtkApplication *app, GApplicationCommandLine *app_command_line, G
 	if (!isfile(rc_path))
 		{
 		g_autofree gchar *notification_message = g_strconcat(_("Configuration file path "), rc_path, _(" is not a file"), nullptr);
-		cache_maintenance_notification(app, notification_message, FALSE);
 		g_application_command_line_print(app_command_line, "%s\n", notification_message);
 
 		exit(EXIT_FAILURE);
@@ -1488,7 +1485,6 @@ void gq_cm_dir(GtkApplication *app, GApplicationCommandLine *app_command_line, G
 	if (!g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
 		{
 		g_autofree gchar *notification_message = g_strconcat(_("Cannot load "), rc_path, nullptr);
-		cache_maintenance_notification(app, notification_message, FALSE);
 		g_application_command_line_print(app_command_line, "%s\n", notification_message);
 
 		exit(EXIT_FAILURE);
@@ -1509,7 +1505,6 @@ void gq_cm_dir(GtkApplication *app, GApplicationCommandLine *app_command_line, G
 	if (!options->thumbnails.enable_caching)
 		{
 		const gchar *notification_message = _("Caching not enabled");
-		cache_maintenance_notification(app, notification_message, FALSE);
 		g_application_command_line_print(app_command_line, "%s\n", notification_message);
 
 		exit(EXIT_FAILURE);
@@ -1645,7 +1640,6 @@ gint process_command_line_cache_maintenance(GtkApplication *app, GApplicationCom
 	if (!option_found)
 		{
 		g_application_command_line_print(app_command_line, "%s", _("No option specified\n"));
-		cache_maintenance_notification(app, _("No option specified"), FALSE);
 
 		g_application_quit(G_APPLICATION(app));
 		}

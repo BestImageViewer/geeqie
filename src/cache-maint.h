@@ -37,7 +37,6 @@ void cache_manager_standard_process_remote(gboolean clear);
 void cache_manager_render_remote(GtkApplication *app, const gchar *path, gboolean recurse, gboolean local, GSourceFunc destroy_func);
 void cache_maintenance(GtkApplication *app, const gchar *path);
 
-void cache_maintenance_notification(GtkApplication *app, const gchar *message, gboolean show_quit_button);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

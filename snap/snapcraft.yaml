@@ -25,6 +25,7 @@ apps:
       - bin/env-imagemagick.sh
       - bin/set-xdg-vars.sh
     command: usr/bin/geeqie
+    slots: [geeqie-dbus, cache-maintenance-dbus]
     environment:
       GIO_USE_NETWORK_MONITOR: base
       GIO_USE_PROXY_RESOLVER: dummy
@@ -49,6 +50,7 @@ apps:
       - bin/force-wayland.sh
       - bin/env-imagemagick.sh
     command: usr/bin/geeqie
+    slots: [geeqie-dbus, cache-maintenance-dbus]
     environment:
       GIO_USE_NETWORK_MONITOR: base
       GIO_USE_PROXY_RESOLVER: dummy
@@ -73,6 +75,7 @@ apps:
       - bin/force-x11.sh
       - bin/env-imagemagick.sh
     command: usr/bin/geeqie
+    slots: [geeqie-dbus, cache-maintenance-dbus]
     environment:
       GIO_USE_NETWORK_MONITOR: base
       GIO_USE_PROXY_RESOLVER: dummy
@@ -94,6 +97,11 @@ slots:
     interface: dbus
     bus: session
     name: org.geeqie.Geeqie
+
+  cache-maintenance-dbus:
+    interface: dbus
+    bus: session
+    name: org.geeqie.cache-maintenance
 
 parts:
   geeqie:
