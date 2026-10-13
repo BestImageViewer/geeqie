@@ -93,6 +93,9 @@ gchar *cache_get_location(CacheType cache_type, const gchar *source);
 gchar *cache_find_location(CacheType type, const gchar *source);
 
 const gchar *get_thumbnails_cache_dir();
+const gchar *get_default_thumbnails_cache_dir();
+bool cache_prepare_thumbnail_directory(const gchar *root, bool create);
+bool cache_is_thumbnail_directory_marker(const gchar *root, const gchar *path);
 const gchar *get_thumbnails_standard_cache_dir();
 const gchar *get_metadata_cache_dir();
 

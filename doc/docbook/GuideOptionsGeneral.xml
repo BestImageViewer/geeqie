@@ -95,7 +95,7 @@
                   The resulting location is the source image's folder, in a sub folder with the name
                   <code>.thumbnails</code>
                   <para />
-                  When the image source folder cannot be written, Geeqie falls back to saving the thumbnail in the user's home folder.
+                  When the image source folder cannot be written, Geeqie falls back to saving the thumbnail in the configured Geeqie cache folder.
                 </para>
               </listitem>
             </varlistentry>
@@ -119,6 +119,14 @@
                     for additional details.
                   </para>
                 </para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+          <variablelist>
+            <varlistentry>
+              <term><guilabel>Use Geeqie thumbnail style and custom folder</guilabel></term>
+              <listitem>
+                <para>The folder field selects a parent folder. Geeqie creates a dedicated geeqie-cache subfolder for its thumbnails and .sim files, and marks it as a Geeqie cache. Existing nonempty folders without this marker are not adopted. Select Use Geeqie thumbnail style and cache to restore the default location. A dedicated folder on a larger local or network drive can reduce local disk usage. Existing cache files are not moved. Shared-style thumbnails remain in their standard location, while their .sim files use the configured Geeqie cache folder.</para>
               </listitem>
             </varlistentry>
           </variablelist>

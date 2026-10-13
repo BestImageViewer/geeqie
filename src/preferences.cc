@@ -325,6 +325,9 @@ guint accel_reload_idle_id = 0;
 bool accel_reloading = false;
 
 GtkWidget *safe_delete_path_entry;
+GtkWidget *thumbnail_cache_path_entry;
+GtkWidget *thumbnail_cache_default_button;
+GtkWidget *thumbnail_cache_custom_button;
 
 GtkWidget *color_profile_input_file_entry[COLOR_PROFILE_INPUTS];
 GtkWidget *color_profile_input_name_entry[COLOR_PROFILE_INPUTS];
@@ -426,6 +429,12 @@ void config_entry_to_option(GtkWidget *entry, gchar **option, gchar *(*func)(con
 		}
 }
 
+static gchar *thumbnail_cache_parent_normalize(const gchar *text)
+{
+	g_autofree gchar *expanded = expand_tilde(text);
+	return g_canonicalize_filename(expanded, nullptr);
+}
+
 static void config_window_apply(const ConfOptions *c_options)
 {
 	gboolean refresh = FALSE;
@@ -474,7 +483,17 @@ static void config_window_apply(const ConfOptions *c_options)
 		thumb_format_changed = TRUE;
 		refresh = TRUE;
 		}
+	gchar *cache_dir = options->thumbnails.cache_dir;
 	options->thumbnails = c_options->thumbnails;
+	options->thumbnails.cache_dir = cache_dir;
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(thumbnail_cache_default_button)))
+		{
+		g_clear_pointer(&options->thumbnails.cache_dir, g_free);
+		}
+	else
+		{
+		config_entry_to_option(thumbnail_cache_path_entry, &options->thumbnails.cache_dir, thumbnail_cache_parent_normalize);
+		}
 
 	options->file_filter = c_options->file_filter;
 
@@ -708,6 +727,26 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 
 	lw->options.preferences_window.rect = widget_get_root_origin_geometry(widget);
 	lw->options.preferences_window.page_number = gtk_notebook_get_current_page(notebook);
+
+	const gchar *cache_parent = gtk_editable_get_text(GTK_EDITABLE(thumbnail_cache_path_entry));
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(thumbnail_cache_custom_button)) && !*cache_parent)
+		{
+		warning_dialog(_("Choose a cache parent folder"), _("Please select a parent folder for the custom Geeqie cache."),
+		               GQ_ICON_DIALOG_WARNING, configwindow);
+		return;
+		}
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(thumbnail_cache_default_button)) && *cache_parent)
+		{
+		g_autofree gchar *parent = thumbnail_cache_parent_normalize(cache_parent);
+		g_autofree gchar *root = g_build_filename(parent, "geeqie-cache", nullptr);
+		if (!cache_prepare_thumbnail_directory(root, true))
+			{
+			warning_dialog(_("Unable to use cache folder"),
+			               _("Geeqie could not create its cache folder, or an existing geeqie-cache folder is not identified as a Geeqie cache. Choose another parent folder."),
+			               GQ_ICON_DIALOG_WARNING, configwindow);
+			return;
+			}
+		}
 
 	config_window_apply(c_options);
 	layout_util_sync(lw);
@@ -2008,10 +2047,12 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	c_options->thumbnails.spec_standard = options->thumbnails.spec_standard;
 	c_options->thumbnails.cache_into_dirs = options->thumbnails.cache_into_dirs;
 	group_frame = pref_frame_new(subgroup, TRUE, _("Use Geeqie thumbnail style and cache"),
-										GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	button = pref_radiobutton_new(group_frame, nullptr,  get_thumbnails_cache_dir(),
-	                              !options->thumbnails.spec_standard && !options->thumbnails.cache_into_dirs,
+	                             GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	const gboolean custom_cache = options->thumbnails.cache_dir && *options->thumbnails.cache_dir;
+	button = pref_radiobutton_new(group_frame, nullptr, get_default_thumbnails_cache_dir(),
+	                              !options->thumbnails.spec_standard && !options->thumbnails.cache_into_dirs && !custom_cache,
 	                              G_CALLBACK(cache_geeqie_cb), c_options);
+	thumbnail_cache_default_button = button;
 
 	group_frame = pref_frame_new(subgroup, TRUE,
 							_("Store thumbnails local to image folder (non-standard)"),
@@ -2026,6 +2067,19 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	pref_radiobutton_new(group_frame, button, get_thumbnails_standard_cache_dir(),
 	                     options->thumbnails.spec_standard && !options->thumbnails.cache_into_dirs,
 	                     G_CALLBACK(cache_standard_cb), c_options);
+
+	group_frame = pref_frame_new(subgroup, TRUE, _("Use Geeqie thumbnail style and custom folder"),
+										GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	hbox = pref_box_new(group_frame, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	thumbnail_cache_custom_button = pref_radiobutton_new(hbox, button, nullptr,
+	                              !options->thumbnails.spec_standard && !options->thumbnails.cache_into_dirs && custom_cache,
+	                              G_CALLBACK(cache_geeqie_cb), c_options);
+	gtk_accessible_update_property(GTK_ACCESSIBLE(thumbnail_cache_custom_button), GTK_ACCESSIBLE_PROPERTY_LABEL,
+	                               _("Use Geeqie thumbnail style and custom folder"), -1);
+	thumbnail_cache_path_entry = tab_completion_new(hbox, options->thumbnails.cache_dir);
+	gtk_entry_set_placeholder_text(GTK_ENTRY(thumbnail_cache_path_entry), _("Parent folder"));
+	gtk_widget_set_tooltip_text(thumbnail_cache_path_entry, _("Choose a parent folder. Geeqie creates a dedicated geeqie-cache subfolder for thumbnails and similarity data. Shared thumbnails keep their standard location. Existing cache files are not moved."));
+	tab_completion_add_select_button(thumbnail_cache_path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
 
 	pref_checkbox_new_int(group, _("Use EXIF thumbnails when available (EXIF thumbnails may be outdated)"),
 			      options->thumbnails.use_exif, &c_options->thumbnails.use_exif);

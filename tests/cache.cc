@@ -4,6 +4,7 @@
 
 #include <unistd.h>
 
+#include <filesystem>
 #include <initializer_list>
 #include <string>
 
@@ -25,6 +26,7 @@ protected:
 	void SetUp() override
 	{
 		if (!options) options = conf_options_new();
+		saved_cache_dir = options->thumbnails.cache_dir;
 		saved_size = options->thumbnails.size;
 		saved_standard = options->thumbnails.spec_standard;
 		saved_local = options->thumbnails.cache_into_dirs;
@@ -44,6 +46,12 @@ protected:
 
 	void TearDown() override
 	{
+		if (options->thumbnails.cache_dir != saved_cache_dir)
+			{
+			g_free(options->thumbnails.cache_dir);
+			options->thumbnails.cache_dir = saved_cache_dir;
+			}
+		if (!custom_cache.empty()) std::filesystem::remove_all(std::filesystem::path(custom_cache).parent_path());
 		if (path) g_remove(path);
 		if (base) g_rmdir(base);
 		if (source) g_remove(source);
@@ -59,6 +67,8 @@ protected:
 		options->alternate_similarity_algorithm.enabled = saved_alternate;
 	}
 
+	gchar *saved_cache_dir = nullptr;
+	std::string custom_cache;
 	gchar *directory = nullptr;
 	gchar *source = nullptr;
 	gchar *base = nullptr;
@@ -394,6 +404,76 @@ TEST_F(SimCache, StandardThumbnailsKeepSimilarityDataInGeeqieCache)
 	g_autofree gchar *sim_path = cache_get_location(CacheType::SIM, source);
 	g_autofree gchar *prefix = g_strconcat(get_thumbnails_cache_dir(), G_DIR_SEPARATOR_S, nullptr);
 	EXPECT_TRUE(g_str_has_prefix(sim_path, prefix));
+}
+
+TEST_F(SimCache, CustomFolderStoresSimilarityDataWithSharedThumbnails)
+{
+	custom_cache = std::string(directory) + "/parent/geeqie-cache";
+	g_autofree gchar *parent = g_build_filename(directory, "parent", nullptr);
+	options->thumbnails.cache_dir = g_strdup(parent);
+	options->thumbnails.cache_into_dirs = FALSE;
+	options->thumbnails.spec_standard = TRUE;
+	EXPECT_STREQ(get_thumbnails_cache_dir(), custom_cache.c_str());
+	g_autofree gchar *sim_path = cache_get_location(CacheType::SIM, source);
+	g_autofree gchar *prefix = g_strconcat(custom_cache.c_str(), G_DIR_SEPARATOR_S, nullptr);
+	EXPECT_TRUE(g_str_has_prefix(sim_path, prefix));
+	EXPECT_FALSE(g_str_has_prefix(sim_path, get_thumbnails_standard_cache_dir()));
+
+	CacheData data;
+	data.set_dimensions({320, 240});
+	data.save(source);
+	EXPECT_TRUE(isfile(sim_path));
+	CacheData reloaded{source};
+	ASSERT_TRUE(reloaded.dimensions.has_value());
+	EXPECT_EQ(reloaded.dimensions->width, 320);
+	EXPECT_TRUE(cache_source_is_thumbnail(sim_path));
+	g_autofree gchar *default_source = g_build_filename(get_default_thumbnails_cache_dir(), "image.png", nullptr);
+	EXPECT_TRUE(cache_source_is_thumbnail(default_source));
+}
+
+TEST_F(SimCache, CustomFolderNormalizesPathsAndEmptyRestoresDefault)
+{
+	custom_cache = std::string(directory) + "/parent/geeqie-cache";
+	options->thumbnails.cache_dir = g_build_filename(directory, "parent", "..", "parent", nullptr);
+	const gchar *previous_root = get_thumbnails_cache_dir();
+	EXPECT_STREQ(previous_root, custom_cache.c_str());
+	g_free(options->thumbnails.cache_dir);
+	options->thumbnails.cache_dir = g_strdup("");
+	EXPECT_STREQ(get_thumbnails_cache_dir(), get_default_thumbnails_cache_dir());
+	// A maintenance operation can retain its original root during a preference change.
+	EXPECT_STREQ(previous_root, custom_cache.c_str());
+}
+
+TEST_F(SimCache, DedicatedCacheRejectsUnmarkedNonemptyDirectories)
+{
+	custom_cache = std::string(directory) + "/parent/geeqie-cache";
+	g_autofree gchar *parent = g_build_filename(directory, "parent", nullptr);
+	options->thumbnails.cache_dir = g_strdup(parent);
+	ASSERT_EQ(g_mkdir_with_parents(custom_cache.c_str(), 0755), 0);
+	g_autofree gchar *original = g_build_filename(custom_cache.c_str(), "original.png", nullptr);
+	ASSERT_TRUE(g_file_set_contents(original, "original", -1, nullptr));
+	EXPECT_FALSE(cache_prepare_thumbnail_directory(custom_cache.c_str(), true));
+	EXPECT_FALSE(cache_prepare_thumbnail_directory(custom_cache.c_str(), false));
+	options->thumbnails.cache_into_dirs = FALSE;
+	CacheData data;
+	data.set_dimensions({32, 32});
+	data.save(source);
+	g_autofree gchar *cache_path = cache_get_location(CacheType::SIM, source);
+	EXPECT_FALSE(isfile(cache_path));
+	EXPECT_TRUE(isfile(original));
+}
+
+TEST_F(SimCache, DedicatedCacheMarkerIsRequiredAndValidated)
+{
+	custom_cache = std::string(directory) + "/parent/geeqie-cache";
+	EXPECT_FALSE(cache_prepare_thumbnail_directory(custom_cache.c_str(), false));
+	ASSERT_TRUE(cache_prepare_thumbnail_directory(custom_cache.c_str(), true));
+	EXPECT_TRUE(cache_prepare_thumbnail_directory(custom_cache.c_str(), false));
+	g_autofree gchar *marker = g_build_filename(custom_cache.c_str(), ".geeqie-cache", nullptr);
+	EXPECT_TRUE(cache_is_thumbnail_directory_marker(custom_cache.c_str(), marker));
+	ASSERT_TRUE(g_file_set_contents(marker, "unrecognized", -1, nullptr));
+	EXPECT_FALSE(cache_prepare_thumbnail_directory(custom_cache.c_str(), false));
+	EXPECT_FALSE(cache_prepare_thumbnail_directory(custom_cache.c_str(), true));
 }
 
 } // namespace

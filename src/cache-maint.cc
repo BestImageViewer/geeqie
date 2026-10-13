@@ -62,6 +62,7 @@ struct CMData
 	gboolean metadata;
 	gboolean remote;
 	GtkApplication *app;
+	gchar *cache_root;
 };
 
 struct CacheManager
@@ -117,6 +118,7 @@ constexpr gint PURGE_DIALOG_WIDTH = 400;
 CMData *cache_maintain_data_new(gboolean clear, gboolean metadata, gboolean remote)
 {
 	const gchar *cache_folder = metadata ? get_metadata_cache_dir() : get_thumbnails_cache_dir();
+	if (!metadata && !cache_prepare_thumbnail_directory(cache_folder, false)) return nullptr;
 	FileData *dir_fd = file_data_new_dir(cache_folder);
 
 	GList *dlist;
@@ -129,6 +131,7 @@ CMData *cache_maintain_data_new(gboolean clear, gboolean metadata, gboolean remo
 	dlist = g_list_append(dlist, dir_fd);
 
 	auto *cm = g_new0(CMData, 1);
+	cm->cache_root = g_strdup(cache_folder);
 	cm->list = dlist;
 	cm->done_list = nullptr;
 	cm->clear = clear;
@@ -144,6 +147,7 @@ void cache_maintain_home_close(CMData *cm)
 	if (cm->gd) generic_dialog_close(cm->gd);
 	file_data_list_free(cm->list);
 	g_list_free(cm->done_list);
+	g_free(cm->cache_root);
 	g_free(cm);
 }
 
@@ -243,6 +247,12 @@ static void cache_maintenance_clean_stop_cb(gpointer data)
 
 void cache_maintenance(GtkApplication *app, const gchar *path)
 {
+	if (!cache_prepare_thumbnail_directory(get_thumbnails_cache_dir(), true))
+		{
+		log_printf("Unable to use thumbnail cache directory: %s\n", get_thumbnails_cache_dir());
+		g_application_quit(G_APPLICATION(app));
+		return;
+		}
 	cache_maintenance_path = g_strdup(path);
 
 	cache_maintenance_show_window(app);
@@ -293,13 +303,11 @@ static gboolean cache_maintain_home_cb(gpointer data)
 	const gchar *cache_folder;
 	gboolean filter_disable;
 
-	if (cm->metadata)
+	cache_folder = cm->cache_root;
+	if (!cm->metadata && !cache_prepare_thumbnail_directory(cache_folder, false))
 		{
-		cache_folder = get_metadata_cache_dir();
-		}
-	else
-		{
-		cache_folder = get_thumbnails_cache_dir();
+		cache_maintain_home_stop(cm);
+		return G_SOURCE_REMOVE;
 		}
 
 	base_length = strlen(cache_folder);
@@ -339,6 +347,12 @@ static gboolean cache_maintain_home_cb(gpointer data)
 			while (work)
 				{
 				auto fd_list = static_cast<FileData *>(work->data);
+				if (!cm->metadata && cache_is_thumbnail_directory_marker(cache_folder, fd_list->path))
+					{
+					still_have_a_file = TRUE;
+					work = work->next;
+					continue;
+					}
 				g_autofree gchar *path_buf = g_strdup(fd_list->path);
 
 				gchar *dot = strrchr(path_buf, '.');

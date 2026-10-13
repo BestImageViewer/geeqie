@@ -201,6 +201,7 @@ struct ConfOptions
 		GqSize size;
 		gboolean enable_caching;
 		gboolean cache_into_dirs;
+		gchar *cache_dir;
 		gboolean spec_standard;
 		GdkInterpType quality;
 		gboolean use_exif;

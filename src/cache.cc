@@ -32,9 +32,11 @@
 #include <initializer_list>
 
 #include <config.h>
+#include <glib/gstdio.h>
 
 #include "main-defines.h"
 #include "md5-util.h"
+#include "misc.h"
 #include "options.h"
 #include "similar.h"
 #include "thumb-standard.h"
@@ -123,7 +125,7 @@ struct CachePathParts
 
 bool path_is_in_thumbnail_cache(const gchar *path)
 {
-	for (const gchar *root : {get_thumbnails_cache_dir(), get_thumbnails_standard_cache_dir()})
+	for (const gchar *root : {get_thumbnails_cache_dir(), get_default_thumbnails_cache_dir(), get_thumbnails_standard_cache_dir()})
 		{
 		g_autofree gchar *canonical_root = g_canonicalize_filename(root, nullptr);
 		g_autofree gchar *root_path = path_from_utf8(canonical_root);
@@ -568,6 +570,14 @@ gchar *cache_create_location(CacheType cache_type, const gchar *source)
 
 	mode_t mode = 0755;
 	g_autofree gchar *path = cache_get_location(cache_type, source, FALSE, &mode);
+	if (!path) return nullptr;
+	const gchar *root = get_thumbnails_cache_dir();
+	if ((cache_type == CacheType::THUMB || cache_type == CacheType::SIM) &&
+	    g_str_has_prefix(path, root) && !cache_prepare_thumbnail_directory(root, true))
+		{
+		log_printf("Refusing to use an unrecognized thumbnail cache directory: %s\n", root);
+		return nullptr;
+		}
 
 	if (!recursive_mkdir_if_not_exists(path, mode))
 		{
@@ -659,7 +669,7 @@ gboolean cache_time_valid(const gchar *cache, const gchar *path)
 	return ret;
 }
 
-const gchar *get_thumbnails_cache_dir()
+const gchar *get_default_thumbnails_cache_dir()
 {
 #if USE_XDG
 	static gchar *thumbnails_cache_dir = g_build_filename(xdg_cache_home_get(), GQ_APPNAME_LC, GQ_CACHE_THUMB, NULL);
@@ -668,6 +678,54 @@ const gchar *get_thumbnails_cache_dir()
 #endif
 
 	return thumbnails_cache_dir;
+}
+
+const gchar *get_thumbnails_cache_dir()
+{
+	if (options && options->thumbnails.cache_dir && *options->thumbnails.cache_dir)
+		{
+		g_autofree gchar *expanded = expand_tilde(options->thumbnails.cache_dir);
+		g_autofree gchar *canonical = g_canonicalize_filename(expanded, nullptr);
+		// Cache maintenance may keep a borrowed path while Preferences changes it.
+		g_autofree gchar *root = g_build_filename(canonical, "geeqie-cache", nullptr);
+		return g_intern_string(root);
+		}
+	return get_default_thumbnails_cache_dir();
+}
+
+namespace {
+
+constexpr const gchar *thumbnail_cache_marker = ".geeqie-cache";
+constexpr const gchar *thumbnail_cache_marker_contents = "GEEQIE_CACHE_V1\n";
+
+} // namespace
+
+bool cache_is_thumbnail_directory_marker(const gchar *root, const gchar *path)
+{
+	g_autofree gchar *marker = g_build_filename(root, thumbnail_cache_marker, nullptr);
+	return g_strcmp0(marker, path) == 0;
+}
+
+/** @brief Verify ownership of a custom cache directory, optionally creating it. */
+bool cache_prepare_thumbnail_directory(const gchar *root, bool create)
+{
+	if (g_strcmp0(root, get_default_thumbnails_cache_dir()) == 0) return true;
+	if (g_file_test(root, G_FILE_TEST_IS_SYMLINK)) return false;
+	g_autofree gchar *marker = g_build_filename(root, thumbnail_cache_marker, nullptr);
+	g_autofree gchar *contents = nullptr;
+	g_autofree gchar *marker_path = path_from_utf8(marker);
+	if (g_file_test(marker_path, G_FILE_TEST_IS_SYMLINK)) return false;
+	if (g_file_get_contents(marker_path, &contents, nullptr, nullptr))
+		{
+		return g_strcmp0(contents, thumbnail_cache_marker_contents) == 0;
+		}
+	if (!create) return false;
+
+	g_autofree gchar *root_path = path_from_utf8(root);
+	if (g_mkdir_with_parents(root_path, 0755) != 0) return false;
+	g_autoptr(GDir) directory = g_dir_open(root_path, 0, nullptr);
+	if (!directory || g_dir_read_name(directory)) return false;
+	return g_file_set_contents(marker_path, thumbnail_cache_marker_contents, -1, nullptr);
 }
 
 const gchar *get_thumbnails_standard_cache_dir()
