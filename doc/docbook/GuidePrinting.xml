@@ -15,9 +15,12 @@
     </menuchoice>
     .
   </para>
-  <para>Printing is provided by the standard Gtk printer services. The Options tab provides Geeqie-specific features.</para>
+  <para>Geeqie first opens a Print options window for image layout and text settings. Select Continue to open the standard desktop print dialog for printer and paper settings. This also works when the desktop print portal is used.</para>
   <section id="Optionstab">
-    <title>Options tab</title>
+    <title>Print options</title>
+    <para>Printing uses the current selection in the invoking window. To print every image, use Select All before opening Print.</para>
+    <para>Choose One image per page or Proof sheet. Image size sets the percentage of the available image area for a single image. Proof width and Height set the proof cell dimensions in points (72 points equal one inch). Proof sheets fit as many cells as possible inside the paper margins and continue on additional pages as needed. Oversized cells are reduced to the printable area.</para>
+    <para>GTK's standard controls provide paper size, orientation, margins, preview, printer selection, and printing to a PDF file. Layout settings are remembered for future print jobs.</para>
     <variablelist>
       <varlistentry>
         <term>
@@ -35,9 +38,9 @@
         </term>
         <listitem>
           <para>
-            This text will also be attached to each image printed. It may contain only plain text.
+            This text is printed once per page, including on proof sheets. It may contain only plain text.
             <para />
-            It is probably of value only when one image per page is printed.
+            On proof sheets it appears above or below the grid.
           </para>
         </listitem>
       </varlistentry>
@@ -46,7 +49,7 @@
           <guilabel>Header 1/2 Footer 1/2</guilabel>
         </term>
         <listitem>
-          <para>These checkboxes define the layout for Image Text and Page Text. Image and Page Text may be printed above or below each image and in the order defined by these checkboxes.</para>
+          <para>These checkboxes define the layout for Image Text and Page Text. Image text may be printed above or below each image, and page text above or below the page content. When both apply to a single image, their order is defined by these checkboxes.</para>
         </listitem>
       </varlistentry>
     </variablelist>

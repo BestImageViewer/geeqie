@@ -369,6 +369,10 @@ struct ConfOptions
 		TextPosition image_text_position;
 		TextPosition page_text_position;
 		gchar *template_string;
+		gboolean proof_sheet;
+		gint image_scale;
+		gint proof_width;
+		gint proof_height;
 	} printer;
 
 	/* Threads */

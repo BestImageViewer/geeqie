@@ -15,6 +15,7 @@ unit_test_sources = files(
 'metadata-description.cc',
 'metadata-template.cc',
 'pixbuf-util.cc',
+'print.cc',
 'renderer-tiles.cc',
 'search.cc',
 'similar.cc',

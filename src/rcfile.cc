@@ -612,6 +612,10 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 
 	/* Print Text */
 	WRITE_NL(); WRITE_CHAR(*options, printer.template_string);
+	WRITE_NL(); WRITE_BOOL(*options, printer.proof_sheet);
+	WRITE_NL(); WRITE_INT(*options, printer.image_scale);
+	WRITE_NL(); WRITE_INT(*options, printer.proof_width);
+	WRITE_NL(); WRITE_INT(*options, printer.proof_height);
 	WRITE_NL(); WRITE_CHAR(*options, printer.image_font);
 	WRITE_NL(); WRITE_CHAR(*options, printer.page_font);
 	WRITE_NL(); WRITE_CHAR(*options, printer.page_text);
@@ -1076,6 +1080,10 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 
 		/* Printer text */
 		if (READ_CHAR(*options, printer.template_string)) continue;
+		if (READ_BOOL(*options, printer.proof_sheet)) continue;
+		if (READ_INT_CLAMP(*options, printer.image_scale, 5, 100)) continue;
+		if (READ_INT_CLAMP(*options, printer.proof_width, 8, 720)) continue;
+		if (READ_INT_CLAMP(*options, printer.proof_height, 8, 720)) continue;
 		if (READ_CHAR(*options, printer.image_font)) continue;
 		if (READ_CHAR(*options, printer.page_font)) continue;
 		if (READ_CHAR(*options, printer.page_text)) continue;

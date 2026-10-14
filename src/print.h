@@ -33,6 +33,17 @@ enum TextPosition : gint {
 	HEADER_1,
 };
 
+struct PrintProofLayout
+{
+	gint columns;
+	gint rows;
+	gdouble cell_width;
+	gdouble cell_height;
+};
+
+PrintProofLayout print_proof_layout(gdouble width, gdouble height, gdouble proof_width, gdouble proof_height);
+gint print_proof_page_count(gint image_count, const PrintProofLayout &layout);
+
 void print_window_new(GList *selection, GtkWidget *parent);
 
 #endif

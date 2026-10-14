@@ -20,7 +20,9 @@
 
 #include "print.h"
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstring>
 
@@ -52,6 +54,25 @@
 /* method to use when scaling down image data */
 #define PRINT_MAX_INTERP GDK_INTERP_BILINEAR
 
+constexpr gdouble PRINT_PROOF_GAP = 5.0;
+
+PrintProofLayout print_proof_layout(gdouble width, gdouble height, gdouble proof_width, gdouble proof_height)
+{
+	width = std::max(1.0, width);
+	height = std::max(1.0, height);
+	const gdouble cell_width = std::clamp(proof_width, 1.0, width);
+	const gdouble cell_height = std::clamp(proof_height, 1.0, height);
+	return {std::max(1, static_cast<gint>((width + PRINT_PROOF_GAP) / (cell_width + PRINT_PROOF_GAP))),
+	        std::max(1, static_cast<gint>((height + PRINT_PROOF_GAP) / (cell_height + PRINT_PROOF_GAP))),
+	        cell_width, cell_height};
+}
+
+gint print_proof_page_count(gint image_count, const PrintProofLayout &layout)
+{
+	const gint per_page = layout.columns * layout.rows;
+	return (image_count / per_page) + (image_count % per_page != 0);
+}
+
 namespace
 {
 
@@ -62,7 +83,14 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoFontDescription, pango_font_description_free)
 struct PrintWindow
 {
 	GtkWidget *vbox;
+	GtkWidget *options_window;
 	GList *source_selection;
+	GtkWidget *proof_controls;
+	GtkWidget *scale_control;
+	PrintProofLayout proof_layout;
+	gdouble page_text_height;
+	gdouble page_width;
+	gdouble page_height;
 
 	gint job_page;
 	GtkTextBuffer *page_text;
@@ -79,7 +107,8 @@ constexpr gint PRE_FORMATTED_COLUMNS = 4;
 
 gint print_layout_page_count(const PrintWindow *pw)
 {
-	return g_list_length(pw->source_selection);
+	const gint images = g_list_length(pw->source_selection);
+	return options->printer.proof_sheet ? print_proof_page_count(images, pw->proof_layout) : images;
 }
 
 gboolean print_job_render_image(PrintWindow *pw);
@@ -91,7 +120,23 @@ void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 
 	pixbuf = image_loader_get_pixbuf(il);
 
-	pw->print_pixbuf_queue = g_list_append(pw->print_pixbuf_queue, g_object_ref(pixbuf));
+	GdkPixbuf *queued = pixbuf ? GDK_PIXBUF(g_object_ref(pixbuf)) : nullptr;
+	if (queued && options->printer.proof_sheet)
+		{
+		// Proof sheets need only enough pixels for their small cells at 300 DPI.
+		const gdouble limit = std::max(pw->proof_layout.cell_width, pw->proof_layout.cell_height) * 300.0 / 72.0;
+		const gint width = gdk_pixbuf_get_width(queued);
+		const gint height = gdk_pixbuf_get_height(queued);
+		const gdouble scale = std::min(1.0, limit / std::max(width, height));
+		if (scale < 1.0)
+			{
+			auto *scaled = gdk_pixbuf_scale_simple(queued, std::max(1, static_cast<gint>(width * scale)),
+			                                       std::max(1, static_cast<gint>(height * scale)), PRINT_MAX_INTERP);
+			g_object_unref(queued);
+			queued = scaled;
+			}
+		}
+	pw->print_pixbuf_queue = g_list_append(pw->print_pixbuf_queue, queued);
 
 	g_clear_pointer(&pw->job_loader, image_loader_free);
 
@@ -105,22 +150,17 @@ void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 
 gboolean print_job_render_image(PrintWindow *pw)
 {
-	FileData *fd = nullptr;
-
-	fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, pw->job_page));
-	if (!fd) return FALSE;
-
-	g_clear_pointer(&pw->job_loader, image_loader_free);
-	pw->job_loader = image_loader_new(fd);
-	g_signal_connect(G_OBJECT(pw->job_loader), "done",
-						(GCallback)print_job_render_image_loader_done, pw);
-
-	if (!image_loader_start(pw->job_loader))
+	while (auto *fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, pw->job_page)))
 		{
+		pw->job_loader = image_loader_new(fd);
+		g_signal_connect(pw->job_loader, "done", G_CALLBACK(print_job_render_image_loader_done), pw);
+		g_signal_connect(pw->job_loader, "error", G_CALLBACK(print_job_render_image_loader_done), pw);
+		if (image_loader_start(pw->job_loader)) return TRUE;
 		g_clear_pointer(&pw->job_loader, image_loader_free);
+		pw->print_pixbuf_queue = g_list_append(pw->print_pixbuf_queue, nullptr);
+		pw->job_page++;
 		}
-
-	return TRUE;
+	return FALSE;
 }
 
 void font_dialog_done(GObject *source, GAsyncResult *result, gpointer option)
@@ -128,8 +168,9 @@ void font_dialog_done(GObject *source, GAsyncResult *result, gpointer option)
 	g_autoptr(PangoFontDescription) desc = gtk_font_dialog_choose_font_finish(GTK_FONT_DIALOG(source), result, nullptr);
 	if (desc)
 		{
-		g_free(option);
-		option = pango_font_description_to_string(desc);
+		auto **font = static_cast<gchar **>(option);
+		g_free(*font);
+		*font = pango_font_description_to_string(desc);
 		}
 }
 
@@ -140,7 +181,7 @@ void print_set_font_cb(GtkWidget *widget, gpointer data)
 	gtk_font_dialog_set_title(dialog, title);
 	gtk_font_dialog_set_modal(dialog, TRUE);
 
-	const auto *font = static_cast<const char *>(data);
+	const gchar *font = *static_cast<gchar **>(data);
 	g_autoptr(PangoFontDescription) desc = pango_font_description_from_string(font);
 
 	gtk_font_dialog_choose_font(dialog, GTK_WINDOW(widget_get_toplevel(widget)),
@@ -281,7 +322,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	static constexpr gchar image_text_font_title[] = "Image text font";
 	pref_button_new(hbox, GQ_ICON_SELECT_FONT, _("Font"),
-	                G_CALLBACK(print_set_font_cb<image_text_font_title>), options->printer.image_font);
+	                G_CALLBACK(print_set_font_cb<image_text_font_title>), &options->printer.image_font);
 
 	pref_spacer(group, PREF_PAD_GAP);
 
@@ -343,7 +384,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	static constexpr gchar page_text_font_title[] = "Page text font";
 	pref_button_new(hbox, GQ_ICON_SELECT_FONT, _("Font"),
-	                G_CALLBACK(print_set_font_cb<page_text_font_title>), options->printer.page_font);
+	                G_CALLBACK(print_set_font_cb<page_text_font_title>), &options->printer.page_font);
 }
 
 gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
@@ -403,199 +444,156 @@ gchar *print_get_page_text(const PrintWindow *pw)
 	return text_buffer_get_text(pw->page_text, FALSE);
 }
 
-void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpointer data)
+PangoLayout *print_create_text_layout(cairo_t *cr, const gchar *text, const gchar *font, gdouble width, gdouble &height)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	FileData *fd;
-	cairo_t *cr;
-	gdouble context_width;
-	gdouble context_height;
-	gdouble pixbuf_image_width;
-	gdouble pixbuf_image_height;
-	gdouble width_offset;
-	gdouble height_offset;
-	GdkPixbuf *pixbuf;
-	GdkPixbuf *rotated = nullptr;
-	PangoLayout *layout_image = nullptr;
-	PangoLayout *layout_page = nullptr;
-	gdouble w;
-	gdouble h;
-	gdouble scale;
-	gdouble image_text_width;
-	gdouble page_text_width;
-	gint image_y;
-	gdouble pango_height;
-	gdouble pango_image_height;
-	gdouble pango_page_height;
+	height = 0;
+	if (!text || !*text) return nullptr;
+	auto *layout = pango_cairo_create_layout(cr);
+	pango_cairo_context_set_resolution(pango_layout_get_context(layout), 72.0);
+	g_autoptr(PangoFontDescription) desc = pango_font_description_from_string(font);
+	pango_layout_set_font_description(layout, desc);
+	pango_layout_set_text(layout, text, -1);
+	pango_layout_set_width(layout, static_cast<gint>(width * PANGO_SCALE));
+	pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
+	pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+	gint text_height;
+	pango_layout_get_pixel_size(layout, nullptr, &text_height);
+	height = text_height + (PRINT_TEXT_PADDING * 2);
+	return layout;
+}
 
-	fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, page_nr));
-
-	pixbuf = static_cast<GdkPixbuf *>(g_list_nth_data(pw->print_pixbuf_queue, page_nr));
-	if (fd->exif_orientation != EXIF_ORIENTATION_TOP_LEFT)
+void print_draw_image(PrintWindow *pw, cairo_t *cr, gint index, gint page_nr,
+                      gdouble x, gdouble y, gdouble width, gdouble height, bool page_text)
+{
+	auto *fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, index));
+	auto *pixbuf = static_cast<GdkPixbuf *>(g_list_nth_data(pw->print_pixbuf_queue, index));
+	g_autoptr(GdkPixbuf) rotated = nullptr;
+	if (pixbuf && fd->exif_orientation != EXIF_ORIENTATION_TOP_LEFT)
 		{
 		rotated = pixbuf_apply_orientation(pixbuf, fd->exif_orientation);
 		pixbuf = rotated;
 		}
+	gdouble image_text_height = 0;
+	gdouble page_text_height = 0;
+	g_autofree gchar *image_caption = options->printer.show_image_text ? form_image_text(options->printer.template_string, fd, pw, page_nr) : nullptr;
+	g_autofree gchar *page_caption = page_text && options->printer.show_page_text ? print_get_page_text(pw) : nullptr;
+	g_autoptr(PangoLayout) image_layout = print_create_text_layout(cr, image_caption, options->printer.image_font, width, image_text_height);
+	g_autoptr(PangoLayout) page_layout = print_create_text_layout(cr, page_caption, options->printer.page_font, width, page_text_height);
 
-	pixbuf_image_width = gdk_pixbuf_get_width(pixbuf);
-	pixbuf_image_height = gdk_pixbuf_get_height(pixbuf);
-
-	cr = gtk_print_context_get_cairo_context(context);
-	context_width = gtk_print_context_get_width(context);
-	context_height = gtk_print_context_get_height(context);
-
-	const auto create_layout = [cr](const gchar *text, const gchar *font, gdouble &text_width, gdouble &pango_height) -> PangoLayout *
-	{
-		if (!text) return nullptr;
-
-		size_t text_len = strlen(text);
-		if (text_len == 0) return nullptr;
-
-		PangoLayout *layout = pango_cairo_create_layout(cr);
-
-		pango_layout_set_text(layout, text, text_len);
-
-		g_autoptr(PangoFontDescription) desc = pango_font_description_from_string(font);
-		pango_layout_set_font_description(layout, desc);
-
-		PangoRectangle ink_rect;
-		PangoRectangle logical_rect;
-		pango_layout_get_extents(layout, &ink_rect, &logical_rect);
-		text_width = static_cast<gdouble>(logical_rect.width) / PANGO_SCALE;
-		pango_height = (static_cast<gdouble>(logical_rect.height) / PANGO_SCALE) + (PRINT_TEXT_PADDING * 2);
-
-		pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
-		pango_layout_set_text(layout, text, text_len);
-
-		return layout;
-	};
-
-	pango_image_height = 0;
-	pango_page_height = 0;
-	image_text_width = 0;
-	page_text_width = 0;
-
-	if (options->printer.show_image_text)
+	cairo_save(cr);
+	cairo_rectangle(cr, x, y, width, height);
+	cairo_clip(cr);
+	gdouble top = y;
+	gdouble bottom = y + height;
+	const auto draw_caption = [cr, x, width, &top, &bottom](PangoLayout *layout, gdouble caption_height, TextPosition position)
 		{
-		g_autofree gchar *image_text = form_image_text(options->printer.template_string, fd, pw, page_nr);
+		if (!layout) return;
+		const bool header = position >= HEADER_2;
+		if (!header) bottom -= caption_height;
+		cairo_move_to(cr, x, (header ? top : bottom) + PRINT_TEXT_PADDING);
+		pango_cairo_show_layout(cr, layout);
+		if (header) top += caption_height;
+		};
+	// Draw the outer header/footer first, then reserve the inner caption.
+	const auto outer = [](TextPosition position) { return position == HEADER_1 || position == FOOTER_2; };
+	if (outer(options->printer.page_text_position)) draw_caption(page_layout, page_text_height, options->printer.page_text_position);
+	draw_caption(image_layout, image_text_height, options->printer.image_text_position);
+	if (!outer(options->printer.page_text_position)) draw_caption(page_layout, page_text_height, options->printer.page_text_position);
 
-		layout_image = create_layout(image_text, options->printer.image_font, image_text_width, pango_image_height);
-		}
-
-	if (options->printer.show_page_text)
+	if (pixbuf && bottom > top)
 		{
-		g_autofree gchar *page_text = print_get_page_text(pw);
-
-		layout_page = create_layout(page_text, options->printer.page_font, page_text_width, pango_page_height);
+		const gdouble image_width = gdk_pixbuf_get_width(pixbuf);
+		const gdouble image_height = gdk_pixbuf_get_height(pixbuf);
+		const gdouble scale = std::min(width / image_width, (bottom - top) / image_height) * (options->printer.proof_sheet ? 1.0 : options->printer.image_scale / 100.0);
+		cairo_translate(cr, x + ((width - (image_width * scale)) / 2), top + ((bottom - top - (image_height * scale)) / 2));
+		cairo_scale(cr, scale, scale);
+		cairo_surface_t *surface = pixbuf_to_cairo_surface(pixbuf);
+		if (surface)
+			{
+			cairo_set_source_surface(cr, surface, 0, 0);
+			cairo_paint(cr);
+			cairo_surface_destroy(surface);
+			}
 		}
-
-	pango_height = pango_image_height + pango_page_height;
-
-	if ((context_width / pixbuf_image_width) < ((context_height - pango_height) / pixbuf_image_height))
-		{
-		w = context_width;
-		scale = context_width / pixbuf_image_width;
-		h = pixbuf_image_height * scale;
-		height_offset = (context_height - (h + pango_height)) / 2;
-		width_offset = 0;
-		}
-	else
-		{
-		h = context_height - pango_height ;
-		scale = (context_height - pango_height) / pixbuf_image_height;
-		w = pixbuf_image_width * scale;
-		height_offset = 0;
-		width_offset = (context_width - (pixbuf_image_width * scale)) / 2;
-		}
-
-	image_y = height_offset;
-
-	if (layout_page)
-		{
-		gint incr_y = height_offset;
-
-		if (layout_image && options->printer.page_text_position < options->printer.image_text_position)
-			{
-			incr_y += pango_image_height;
-			}
-
-		if (options->printer.page_text_position < HEADER_2)
-			{
-			incr_y += h;
-			}
-		else
-			{
-			image_y += pango_page_height;
-			}
-
-		if (options->printer.page_text_position == FOOTER_1)
-			{
-			incr_y += PRINT_TEXT_PADDING;
-			}
-
-		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y);
-		pango_cairo_show_layout(cr, layout_page);
-		}
-
-	if (layout_image)
-		{
-		gint incr_y = height_offset;
-
-		if (layout_page && options->printer.image_text_position <= options->printer.page_text_position)
-			{
-			incr_y += pango_page_height;
-			}
-
-		if (options->printer.image_text_position < HEADER_2)
-			{
-			incr_y += h;
-			}
-		else
-			{
-			image_y += pango_image_height;
-			}
-
-		if (options->printer.image_text_position == HEADER_1)
-			{
-			incr_y += PRINT_TEXT_PADDING;
-			}
-
-		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y);
-		pango_cairo_show_layout(cr, layout_image);
-		}
-
-	cairo_scale(cr, scale, scale);
-
-	cairo_surface_t *surface = pixbuf_to_cairo_surface(pixbuf);
-	if (surface)
-		{
-		cairo_rectangle(cr,  width_offset * scale , image_y, pixbuf_image_width / scale, pixbuf_image_height / scale);
-		cairo_set_source_surface(cr, surface, width_offset / scale, image_y / scale);
-		cairo_fill(cr);
-		cairo_surface_destroy(surface);
-		}
-
-	if (layout_image) g_object_unref(layout_image);
-	if (layout_page) g_object_unref(layout_page);
-	if (rotated) g_object_unref(rotated);
+	cairo_restore(cr);
 }
 
-void begin_print(GtkPrintOperation *operation, GtkPrintContext *, gpointer user_data)
+void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpointer data)
+{
+	auto *pw = static_cast<PrintWindow *>(data);
+	auto *cr = gtk_print_context_get_cairo_context(context);
+	const gdouble width = gtk_print_context_get_width(context);
+	const gdouble height = gtk_print_context_get_height(context);
+	if (!options->printer.proof_sheet)
+		{
+		print_draw_image(pw, cr, page_nr, page_nr, 0, 0, width, height, true);
+		return;
+		}
+
+	gdouble caption_height = 0;
+	g_autofree gchar *caption = options->printer.show_page_text ? print_get_page_text(pw) : nullptr;
+	g_autoptr(PangoLayout) caption_layout = print_create_text_layout(cr, caption, options->printer.page_font, width, caption_height);
+	const bool header = options->printer.page_text_position >= HEADER_2;
+	if (caption_layout)
+		{
+		cairo_move_to(cr, 0, (header ? 0 : height - caption_height) + PRINT_TEXT_PADDING);
+		pango_cairo_show_layout(cr, caption_layout);
+		}
+	const auto &grid = pw->proof_layout;
+	const gint per_page = grid.columns * grid.rows;
+	const gint count = g_list_length(pw->source_selection);
+	const gdouble offset_x = (width - grid.columns * grid.cell_width - (grid.columns - 1) * PRINT_PROOF_GAP) / 2;
+	const gdouble offset_y = (header ? caption_height : 0) + ((height - caption_height - (grid.rows * grid.cell_height) - ((grid.rows - 1) * PRINT_PROOF_GAP)) / 2);
+	for (gint slot = 0; slot < per_page && (page_nr * per_page) + slot < count; ++slot)
+		{
+		const gint row = slot / grid.columns;
+		print_draw_image(pw, cr, (page_nr * per_page) + slot, page_nr,
+		                 offset_x + ((slot % grid.columns) * (grid.cell_width + PRINT_PROOF_GAP)),
+		                 offset_y + (row * (grid.cell_height + PRINT_PROOF_GAP)),
+		                 grid.cell_width, grid.cell_height, false);
+		}
+}
+
+void begin_print(GtkPrintOperation *operation, GtkPrintContext *context, gpointer user_data)
 {
 	auto *pw = static_cast<PrintWindow *>(user_data);
-
+	pw->page_width = gtk_print_context_get_width(context);
+	pw->page_height = gtk_print_context_get_height(context);
+	g_autofree gchar *caption = options->printer.show_page_text ? print_get_page_text(pw) : nullptr;
+	g_autoptr(PangoLayout) caption_layout = print_create_text_layout(gtk_print_context_get_cairo_context(context), caption,
+	                                                              options->printer.page_font, pw->page_width, pw->page_text_height);
+	pw->proof_layout = print_proof_layout(pw->page_width, pw->page_height - pw->page_text_height,
+	                                     options->printer.proof_width, options->printer.proof_height);
 	gtk_print_operation_set_n_pages(operation, print_layout_page_count(pw));
-
-	print_job_render_image(pw);
+	pw->job_render_finished = !print_job_render_image(pw);
 }
 
-
-GObject *option_tab_cb(GtkPrintOperation *, gpointer user_data)
+void print_layout_changed_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(user_data);
-
-	return G_OBJECT(pw->vbox);
+	auto *pw = static_cast<PrintWindow *>(data);
+	options->printer.proof_sheet = gtk_drop_down_get_selected(drop_down) == 1;
+	gtk_widget_set_sensitive(pw->proof_controls, options->printer.proof_sheet);
+	gtk_widget_set_sensitive(pw->scale_control, !options->printer.proof_sheet);
 }
+
+void print_layout_menu(GtkWidget *box, PrintWindow *pw)
+{
+	auto *group = pref_group_new(box, FALSE, _("Layout"), GTK_ORIENTATION_VERTICAL);
+	auto *row = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	pref_label_new(row, _("Layout:"));
+	const gchar *layouts[] = {_("One image per page"), _("Proof sheet"), nullptr};
+	auto *layout_menu = gtk_drop_down_new_from_strings(layouts);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(layout_menu), options->printer.proof_sheet ? 1 : 0);
+	gtk_box_append(GTK_BOX(row), layout_menu);
+	pw->scale_control = pref_spin_new_int(group, _("Image size:"), "%", 5, 100, 1, options->printer.image_scale, &options->printer.image_scale);
+	gtk_widget_set_sensitive(pw->scale_control, !options->printer.proof_sheet);
+	pw->proof_controls = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	pref_spin_new_int(pw->proof_controls, _("Proof width:"), _("points"), 8, 720, 1, options->printer.proof_width, &options->printer.proof_width);
+	pref_spin_new_int(pw->proof_controls, _("Height:"), _("points"), 8, 720, 1, options->printer.proof_height, &options->printer.proof_height);
+	gtk_widget_set_sensitive(pw->proof_controls, options->printer.proof_sheet);
+	g_signal_connect(layout_menu, "notify::selected", G_CALLBACK(print_layout_changed_cb), pw);
+}
+
 
 GtkPrintSettings *load_print_settings()
 {
@@ -622,7 +620,7 @@ GtkPrintSettings *load_print_settings()
 
 void save_print_settings(GtkPrintOperation *operation)
 {
-	g_autoptr(GtkPrintSettings) print_settings = gtk_print_operation_get_print_settings(operation);
+	GtkPrintSettings *print_settings = gtk_print_operation_get_print_settings(operation);
 	g_autofree gchar *print_settings_path = g_build_filename(get_rc_dir(), PRINT_SETTINGS, NULL);
 
 	g_autoptr(GError) error = nullptr;
@@ -650,7 +648,7 @@ GtkPageSetup *load_page_setup()
 
 void save_page_setup(GtkPrintOperation *operation)
 {
-	g_autoptr(GtkPageSetup) page_setup = gtk_print_operation_get_default_page_setup(operation);
+	GtkPageSetup *page_setup = gtk_print_operation_get_default_page_setup(operation);
 	g_autofree gchar *page_setup_path = g_build_filename(get_rc_dir(), PAGE_SETUP, NULL);
 
 	g_autoptr(GError) error = nullptr;
@@ -675,6 +673,11 @@ void print_window_free(PrintWindow *pw)
 		}
 
 	g_list_free(pw->print_pixbuf_queue);
+	g_clear_pointer(&pw->job_loader, image_loader_free);
+	file_data_list_free(pw->source_selection);
+	if (pw->options_window) gtk_window_destroy(GTK_WINDOW(pw->options_window));
+	g_clear_object(&pw->vbox);
+	g_clear_object(&pw->parent);
 	g_object_unref(pw->page_text);
 	g_free(pw);
 }
@@ -689,40 +692,51 @@ void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpointer data
 	g_free(options->printer.page_text);
 	options->printer.page_text = print_get_page_text(pw);
 
-	print_window_free(pw);
 }
 
-} // namespace
-
-/**
- * @brief Do not free selection, the print window takes control of it
- */
-void print_window_new(GList *selection, GtkWidget *parent)
+void print_done_cb(GtkPrintOperation *operation, GtkPrintOperationResult result, gpointer data)
 {
-	selection = file_data_process_groups_in_selection(selection, FALSE, nullptr);
-	if (g_list_length(selection) == 0) return;
+	auto *pw = static_cast<PrintWindow *>(data);
+	if (result == GTK_PRINT_OPERATION_RESULT_ERROR)
+		{
+		g_autoptr(GError) error = nullptr;
+		gtk_print_operation_get_error(operation, &error);
+		if (error)
+			{
+			g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", error->message);
+			gtk_alert_dialog_show(dialog, GTK_WINDOW(pw->parent));
+			}
+		}
+	print_window_free(pw);
+	g_object_unref(operation);
+}
 
-	auto *pw = g_new0(PrintWindow, 1);
-	pw->source_selection = selection;
-	pw->parent = parent;
+void print_options_cancel_cb(GtkButton *, gpointer data)
+{
+	print_window_free(static_cast<PrintWindow *>(data));
+}
 
-	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_widget_set_margin_top(vbox, PREF_PAD_BORDER);
-	gtk_widget_set_margin_bottom(vbox, PREF_PAD_BORDER);
-	gtk_widget_set_margin_start(vbox, PREF_PAD_BORDER);
-	gtk_widget_set_margin_end(vbox, PREF_PAD_BORDER);
+gboolean print_options_close_cb(GtkWindow *, gpointer data)
+{
+	print_window_free(static_cast<PrintWindow *>(data));
+	return TRUE;
+}
 
-	print_text_menu(vbox, pw);
-	pw->vbox = vbox;
+gboolean print_options_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType, gpointer data)
+{
+	if (keyval != GDK_KEY_Escape) return FALSE;
 
-	pw->print_pixbuf_queue = nullptr;
-	pw->job_render_finished = FALSE;
-	pw->job_page = 0;
+	print_options_cancel_cb(nullptr, data);
+	return TRUE;
+}
 
+void print_options_continue_cb(GtkButton *, gpointer data)
+{
+	auto *pw = static_cast<PrintWindow *>(data);
+	gtk_widget_set_visible(pw->options_window, FALSE);
 	GtkPrintOperation *operation = gtk_print_operation_new();
 
-	gtk_print_operation_set_custom_tab_label(operation, _("Options"));
-	gtk_print_operation_set_use_full_page(operation, TRUE);
+	gtk_print_operation_set_use_full_page(operation, FALSE);
 	gtk_print_operation_set_unit(operation, GTK_UNIT_POINTS);
 	gtk_print_operation_set_embed_page_setup(operation, TRUE);
 	gtk_print_operation_set_allow_async (operation, TRUE);
@@ -739,22 +753,78 @@ void print_window_new(GList *selection, GtkWidget *parent)
 					G_CALLBACK (draw_page), pw);
 	g_signal_connect (G_OBJECT (operation), "end-print",
 					G_CALLBACK (end_print_cb), pw);
-	g_signal_connect (G_OBJECT (operation), "create-custom-widget",
-					G_CALLBACK (option_tab_cb), pw);
 	g_signal_connect (G_OBJECT (operation), "paginate",
 					G_CALLBACK (paginate_cb), pw);
 
-	gtk_print_operation_set_n_pages(operation, print_layout_page_count(pw));
+	g_signal_connect(operation, "done", G_CALLBACK(print_done_cb), pw);
 
 	g_autoptr(GError) error = nullptr;
 	gtk_print_operation_run(operation, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-												GTK_WINDOW (parent), &error);
+												GTK_WINDOW (pw->parent), &error);
 
-	if (error)
-		{
-		g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", error->message);
-		gtk_alert_dialog_set_modal(dialog, TRUE);
-		gtk_alert_dialog_show(dialog, GTK_WINDOW(parent));
-		}
+}
+
+} // namespace
+
+/**
+ * @brief Print the supplied selection.
+ * Takes ownership of the selection.
+ */
+void print_window_new(GList *selection, GtkWidget *parent)
+{
+	selection = file_data_process_groups_in_selection(selection, FALSE, nullptr);
+	if (!selection) return;
+
+	auto *pw = g_new0(PrintWindow, 1);
+	pw->source_selection = selection;
+	pw->parent = GTK_WIDGET(g_object_ref(parent));
+
+	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_widget_set_margin_top(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(vbox, PREF_PAD_BORDER);
+
+	print_layout_menu(vbox, pw);
+	print_text_menu(vbox, pw);
+	auto *scrolled = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(scrolled), 400);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(scrolled), 600);
+	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), vbox);
+	pw->vbox = GTK_WIDGET(g_object_ref_sink(scrolled));
+
+	pw->print_pixbuf_queue = nullptr;
+	pw->job_render_finished = FALSE;
+	pw->job_page = 0;
+
+	pw->options_window = gtk_window_new();
+	gtk_window_set_title(GTK_WINDOW(pw->options_window), _("Print options"));
+	gtk_window_set_transient_for(GTK_WINDOW(pw->options_window), GTK_WINDOW(parent));
+	gtk_window_set_modal(GTK_WINDOW(pw->options_window), TRUE);
+	gtk_window_set_default_size(GTK_WINDOW(pw->options_window), 700, 600);
+	g_signal_connect(pw->options_window, "close-request", G_CALLBACK(print_options_close_cb), pw);
+	auto *key_controller = gtk_event_controller_key_new();
+	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(print_options_key_press_cb), pw);
+	gtk_widget_add_controller(pw->options_window, key_controller);
+	auto *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	gtk_window_set_child(GTK_WINDOW(pw->options_window), box);
+	gtk_widget_set_vexpand(pw->vbox, TRUE);
+	gtk_box_append(GTK_BOX(box), pw->vbox);
+	auto *buttons = pref_box_new(box, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	gtk_widget_set_halign(buttons, GTK_ALIGN_END);
+	gtk_widget_set_margin_end(buttons, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(buttons, PREF_PAD_BORDER);
+	auto *cancel = gtk_button_new_with_mnemonic(_("_Cancel"));
+	g_signal_connect(cancel, "clicked", G_CALLBACK(print_options_cancel_cb), pw);
+	gtk_box_append(GTK_BOX(buttons), cancel);
+	auto *continue_button = gtk_button_new_with_mnemonic(_("_Continue"));
+	g_signal_connect(continue_button, "clicked", G_CALLBACK(print_options_continue_cb), pw);
+	gtk_box_append(GTK_BOX(buttons), continue_button);
+	gtk_window_set_default_widget(GTK_WINDOW(pw->options_window), continue_button);
+	gtk_window_set_focus(GTK_WINDOW(pw->options_window), continue_button);
+	gtk_window_present(GTK_WINDOW(pw->options_window));
+
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -232,6 +232,9 @@ ConfOptions *conf_options_new()
 	options->star_rating.rejected = STAR_RATING_REJECTED;
 
 	options->printer.template_string = nullptr;
+	options->printer.image_scale = 100;
+	options->printer.proof_width = 144;
+	options->printer.proof_height = 144;
 	options->printer.image_font = g_strdup("Serif 10");
 	options->printer.page_font = g_strdup("Serif 10");
 	options->printer.page_text = g_strdup("");
