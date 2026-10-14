@@ -485,7 +485,7 @@ void print_draw_image(PrintWindow *pw, cairo_t *cr, gint index, gint page_nr,
 	cairo_clip(cr);
 	gdouble top = y;
 	gdouble bottom = y + height;
-	const auto draw_caption = [cr, x, width, &top, &bottom](PangoLayout *layout, gdouble caption_height, TextPosition position)
+	const auto draw_caption = [cr, x, &top, &bottom](PangoLayout *layout, gdouble caption_height, TextPosition position)
 		{
 		if (!layout) return;
 		const bool header = position >= HEADER_2;
