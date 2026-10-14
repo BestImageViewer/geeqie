@@ -10,6 +10,7 @@ unit_test_sources = files(
 'filedata/ref.cc',
 'history-list.cc',
 'image-load.cc',
+'image-crop.cc',
 'keyboard-shortcuts.cc',
 'layout-image-navigation.cc',
 'metadata-description.cc',

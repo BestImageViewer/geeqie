@@ -651,7 +651,7 @@ const ActionDef main_actions[] =
 		{
 		"win.main-win-crop-rectangle",
 		nullptr,
-		N_("Crop Rectangle"),
+		N_("Save Cropped Copy…"),
 		layout_menu_crop_selection_cb,
 		nullptr,
 		ActionStateType::NONE,

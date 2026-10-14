@@ -1024,7 +1024,7 @@
           </menuchoice>
         </term>
         <listitem>
-          <para>Press and drag the mouse left button to draw a rectangle.</para>
+          <para>Entering rectangle mode selects the whole image, or the largest rectangle matching the selected aspect ratio. Drag inside the rectangle to move it, or drag an edge or corner to resize it. A single click leaves the rectangle unchanged. Drag outside the rectangle to replace it. Press Escape to leave rectangle mode without changing the image.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -1040,11 +1040,12 @@
       <varlistentry>
         <term>
           <menuchoice>
-            <guimenu>Crop rectangle</guimenu>
+            <guimenu>Save Cropped Copy…</guimenu>
           </menuchoice>
         </term>
         <listitem>
-          <para>Crop the image rectangle set above. See also <emphasis role="underline"><link linkend="Imagecrop">Image Crop plugin</link></emphasis>.</para>
+          <para>Save the selected rectangle as a new JPEG or PNG image. The original file is preserved. The copy uses the loaded image pixels at their available resolution and applies the displayed orientation. For RAW files, these pixels may be an embedded preview rather than full sensor data; the output dialog shows the available crop dimensions.</para>
+          <para>JPEG quality defaults to 90. PNG preserves transparency; JPEG replaces transparency with white. Embedded color profiles are preserved when available. With Exiv2 support, Preserve metadata copies descriptive, camera, exposure, and GPS metadata and updates orientation and dimensions. Embedded thumbnails and source editing instructions are omitted.</para>
         </listitem>
       </varlistentry>
     </variablelist>

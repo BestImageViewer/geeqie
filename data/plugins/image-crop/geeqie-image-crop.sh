@@ -1,1 +1,0 @@
-geeqie-image-crop

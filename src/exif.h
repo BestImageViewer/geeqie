@@ -76,6 +76,7 @@ ExifData *exif_get_original(ExifData *exif);
 
 gboolean exif_write(ExifData *exif);
 gboolean exif_write_sidecar(ExifData *exif, gchar *path);
+gboolean exif_copy_crop_metadata(FileData *source, const gchar *destination, gint width, gint height, GError **error);
 
 void exif_free(ExifData *exif);
 

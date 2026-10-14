@@ -60,23 +60,6 @@
       menu.
     </para>
   </section>
-  <section id="Imagecrop">
-    <title>Image crop</title>
-    <para>
-      If rectangle coordinates have been set by
-      <emphasis role="strong">Edit/Draw Rectangle</emphasis>
-      , a cropped image will be stored in the
-      <code>/tmp</code>
-      folder. If you wish to to keep this image, it must be copied or moved.
-    </para>
-    <para>
-      This item is displayed in the
-      <emphasis role="strong">Plugins</emphasis>
-      and
-      <emphasis role="strong">Edit</emphasis>
-      menus.
-    </para>
-  </section>
   <section id="OpenWith">
     <title>Open With</title>
     <para>Call the standard GTK application chooser for a single file.</para>

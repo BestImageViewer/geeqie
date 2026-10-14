@@ -54,6 +54,7 @@
 #include "fullscreen.h"
 #include "histogram.h"
 #include "history-list.h"
+#include "image-crop.h"
 #include "image-overlay.h"
 #include "image.h"
 #include "img-view.h"
@@ -292,8 +293,22 @@ static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint key
 	return layout_key_press_common(widget, keyval, state, data);
 }
 
+static gboolean layout_rectangle_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	if (!options->draw_rectangle || keyval != GDK_KEY_Escape || (state & gtk_accelerator_get_default_mod_mask())) return FALSE;
+
+	auto *lw = static_cast<LayoutWindow *>(data);
+	g_action_group_change_action_state(G_ACTION_GROUP(lw->window), "main-win-draw-rectangle", g_variant_new_boolean(FALSE));
+	return TRUE;
+}
+
 void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 {
+	auto *rectangle_controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(rectangle_controller, GTK_PHASE_CAPTURE);
+	g_signal_connect(rectangle_controller, "key-pressed", G_CALLBACK(layout_rectangle_key_press_cb), lw);
+	gtk_widget_add_controller(window, rectangle_controller);
+
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(layout_key_press_cb), lw);
 	gtk_widget_add_controller(window, controller);
@@ -597,6 +612,8 @@ static void layout_menu_select_rectangle_cb(GSimpleAction *action, GVariant *val
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
 
 	options->draw_rectangle = active;
+	auto *lw = get_current_layout();
+	image_select_rectangle(lw ? lw->image : nullptr, active);
 }
 
 static void layout_menu_split_pane_sync_cb(GSimpleAction *action, GVariant *, gpointer       data)
@@ -2063,7 +2080,7 @@ static void layout_menu_crop_selection_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();
 
-	start_editor_from_file("org.geeqie.image-crop.desktop", lw->image->image_fd);
+	if (lw) image_crop_dialog_show(lw->image, lw->window);
 }
 
 static void layout_menu_log_window_cb(GSimpleAction *, GVariant *, gpointer)

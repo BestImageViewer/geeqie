@@ -1559,6 +1559,11 @@ gboolean exif_write_sidecar(ExifData *, gchar *)
 	return FALSE;
 }
 
+gboolean exif_copy_crop_metadata(FileData *, const gchar *, gint, gint, GError **)
+{
+	return TRUE;
+}
+
 
 gint exif_update_metadata(ExifData *, const gchar *, const GList *)
 {

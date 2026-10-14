@@ -702,7 +702,7 @@
         </submenu>
         <item>
           <attribute name="action">win.main-win-crop-rectangle</attribute>
-          <attribute name="label" translatable="yes">Crop Rectangle</attribute>
+          <attribute name="label" translatable="yes">Save Cropped Copy…</attribute>
         </item>
       </section>
       <section>

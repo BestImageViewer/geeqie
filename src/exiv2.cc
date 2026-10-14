@@ -500,6 +500,66 @@ gboolean exif_write_sidecar(ExifData *exif, gchar *path)
 
 }
 
+gboolean exif_copy_crop_metadata(FileData *source, const gchar *destination, gint width, gint height, GError **error)
+{
+	ExifData *metadata = exif_read_fd(source);
+	if (!metadata) return TRUE;
+	try
+		{
+		g_autofree gchar *path = path_from_utf8(destination);
+		auto output = Exiv2::ImageFactory::open(path);
+		output->readMetadata();
+		Exiv2::ExifData exif;
+		// Camera, exposure, and GPS information are useful; source file layout and thumbnails are not.
+		const gchar *image_keys[] = {
+		    "Exif.Image.Make", "Exif.Image.Model", "Exif.Image.DateTime", "Exif.Image.Artist",
+		    "Exif.Image.Copyright", "Exif.Image.ImageDescription", "Exif.Image.Software",
+		    "Exif.Image.XPTitle", "Exif.Image.XPComment", "Exif.Image.XPAuthor", "Exif.Image.XPKeywords",
+		    "Exif.Image.XPSubject", "Exif.Image.XResolution", "Exif.Image.YResolution", "Exif.Image.ResolutionUnit"
+		};
+		for (const auto &item : metadata->exifData())
+			{
+			const auto key = item.key();
+			if ((key.compare(0, 11, "Exif.Photo.") == 0 && key != "Exif.Photo.MakerNote") ||
+			    key.compare(0, 13, "Exif.GPSInfo.") == 0 ||
+			    std::any_of(std::begin(image_keys), std::end(image_keys), [&key](const gchar *name) { return key == name; }))
+				{
+				exif.add(item);
+				}
+			}
+		exif["Exif.Image.Orientation"] = static_cast<uint16_t>(1);
+		exif["Exif.Image.ImageWidth"] = static_cast<uint32_t>(width);
+		exif["Exif.Image.ImageLength"] = static_cast<uint32_t>(height);
+		exif["Exif.Photo.PixelXDimension"] = static_cast<uint32_t>(width);
+		exif["Exif.Photo.PixelYDimension"] = static_cast<uint32_t>(height);
+		auto xmp = metadata->xmpData();
+		for (auto item = xmp.begin(); item != xmp.end();)
+			{
+			const auto key = item->key();
+			if (key.compare(0, 8, "Xmp.crs.") == 0 || key == "Xmp.xmp.Thumbnails")
+				item = xmp.erase(item);
+			else
+				++item;
+			}
+		xmp["Xmp.tiff.Orientation"] = "1";
+		xmp["Xmp.tiff.ImageWidth"] = std::to_string(width);
+		xmp["Xmp.tiff.ImageLength"] = std::to_string(height);
+		xmp["Xmp.exif.PixelXDimension"] = std::to_string(width);
+		xmp["Xmp.exif.PixelYDimension"] = std::to_string(height);
+		output->setExifData(exif);
+		output->setIptcData(metadata->iptcData());
+		output->setXmpData(xmp);
+		output->setComment(metadata->image_comment());
+		output->writeMetadata();
+		return TRUE;
+		}
+	catch (const Exiv2::AnyError &exception)
+		{
+		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_FAILED, "%s", exception.what());
+		return FALSE;
+		}
+}
+
 
 void exif_free(ExifData *exif)
 {

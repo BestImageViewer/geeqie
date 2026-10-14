@@ -21,6 +21,7 @@
 
 #include "image.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -70,6 +71,8 @@ struct SelectionRectangle
 	SelectionRectangle(gint origin_x = 0, gint origin_y = 0,
 	                   RectangleDrawAspectRatio rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE);
 	void set_cursor(gint cursor_x, gint cursor_y);
+	[[nodiscard]] guint hit_test(gint cursor_x, gint cursor_y) const;
+	void resize(gint cursor_x, gint cursor_y, guint edges, const SelectionRectangle &original);
 
 private:
 	gint origin_x;
@@ -78,7 +81,9 @@ private:
 };
 
 SelectionRectangle::SelectionRectangle(gint origin_x, gint origin_y, RectangleDrawAspectRatio rectangle_draw_aspect_ratio)
-    : aspect_ratio(aspect_ratios[static_cast<gint>(rectangle_draw_aspect_ratio)])
+    : x(origin_x)
+    , y(origin_y)
+    , aspect_ratio(aspect_ratios[static_cast<gint>(rectangle_draw_aspect_ratio)])
     , origin_x(origin_x)
     , origin_y(origin_y)
     , rectangle_draw_aspect_ratio(rectangle_draw_aspect_ratio)
@@ -93,8 +98,8 @@ void SelectionRectangle::set_cursor(gint cursor_x, gint cursor_y)
 
 	if (rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_NONE) return;
 
-	if (width < height)
-		width = height / aspect_ratio;
+	if (width < height * aspect_ratio)
+		width = height * aspect_ratio;
 	else
 		height = width / aspect_ratio;
 
@@ -107,11 +112,93 @@ void SelectionRectangle::set_cursor(gint cursor_x, gint cursor_y)
 		y = origin_y - height;
 }
 
+enum RectangleEdge : guint
+{
+	RECTANGLE_LEFT = 1,
+	RECTANGLE_RIGHT = 2,
+	RECTANGLE_TOP = 4,
+	RECTANGLE_BOTTOM = 8
+};
+
+constexpr gint RECTANGLE_HANDLE_SIZE = 8;
+
+guint SelectionRectangle::hit_test(gint cursor_x, gint cursor_y) const
+{
+	if (width < 1 || height < 1 || cursor_x < x - RECTANGLE_HANDLE_SIZE ||
+	    cursor_x > x + width + RECTANGLE_HANDLE_SIZE || cursor_y < y - RECTANGLE_HANDLE_SIZE ||
+	    cursor_y > y + height + RECTANGLE_HANDLE_SIZE) return 0;
+
+	guint edges = 0;
+	if (std::abs(cursor_x - x) <= RECTANGLE_HANDLE_SIZE) edges |= RECTANGLE_LEFT;
+	else if (std::abs(cursor_x - x - width) <= RECTANGLE_HANDLE_SIZE) edges |= RECTANGLE_RIGHT;
+	if (std::abs(cursor_y - y) <= RECTANGLE_HANDLE_SIZE) edges |= RECTANGLE_TOP;
+	else if (std::abs(cursor_y - y - height) <= RECTANGLE_HANDLE_SIZE) edges |= RECTANGLE_BOTTOM;
+	return edges;
+}
+
+void SelectionRectangle::resize(gint cursor_x, gint cursor_y, guint edges, const SelectionRectangle &original)
+{
+	gint left = original.x;
+	gint right = original.x + original.width;
+	gint top = original.y;
+	gint bottom = original.y + original.height;
+	if (edges & RECTANGLE_LEFT) left = std::min(cursor_x, right - 1);
+	if (edges & RECTANGLE_RIGHT) right = std::max(cursor_x, left + 1);
+	if (edges & RECTANGLE_TOP) top = std::min(cursor_y, bottom - 1);
+	if (edges & RECTANGLE_BOTTOM) bottom = std::max(cursor_y, top + 1);
+
+	width = right - left;
+	height = bottom - top;
+	if (aspect_ratio > 0)
+		{
+		const bool horizontal = edges & (RECTANGLE_LEFT | RECTANGLE_RIGHT);
+		const bool vertical = edges & (RECTANGLE_TOP | RECTANGLE_BOTTOM);
+		if (horizontal && (!vertical || width >= height * aspect_ratio))
+			height = std::max(1, static_cast<gint>(std::round(width / aspect_ratio)));
+		else
+			width = std::max(1, static_cast<gint>(std::round(height * aspect_ratio)));
+
+		if (edges & RECTANGLE_LEFT) left = right - width;
+		else if (!horizontal) left = original.x + ((original.width - width) / 2);
+		if (edges & RECTANGLE_TOP) top = bottom - height;
+		else if (!vertical) top = original.y + ((original.height - height) / 2);
+		}
+	x = left;
+	y = top;
+}
+
+const gchar *rectangle_cursor(guint edges)
+{
+	if (edges == (RECTANGLE_LEFT | RECTANGLE_TOP) || edges == (RECTANGLE_RIGHT | RECTANGLE_BOTTOM)) return "nwse-resize";
+	if (edges == (RECTANGLE_RIGHT | RECTANGLE_TOP) || edges == (RECTANGLE_LEFT | RECTANGLE_BOTTOM)) return "nesw-resize";
+	if (edges & (RECTANGLE_LEFT | RECTANGLE_RIGHT)) return "ew-resize";
+	if (edges & (RECTANGLE_TOP | RECTANGLE_BOTTOM)) return "ns-resize";
+	return "crosshair";
+}
+
 // For draw rectangle function
 GqPoint image_start;
 gint rect_x1, rect_x2, rect_y1, rect_y2;
 gint rect_id = 0;
 SelectionRectangle selection_rectangle;
+SelectionRectangle rectangle_before_drag;
+ImageWindow *rectangle_owner = nullptr;
+guint rectangle_resize_edges = 0;
+gboolean rectangle_dragging = FALSE;
+gboolean rectangle_moving = FALSE;
+gboolean rectangle_pending = FALSE;
+GqPoint rectangle_press;
+
+void image_rectangle_clear(ImageWindow *imd)
+{
+	if (rectangle_owner != imd) return;
+	if (rect_id) pixbuf_renderer_overlay_remove(PIXBUF_RENDERER(imd->pr), rect_id);
+	rect_id = 0;
+	rectangle_owner = nullptr;
+	rectangle_dragging = FALSE;
+	selection_rectangle = SelectionRectangle();
+	rect_x1 = rect_x2 = rect_y1 = rect_y2 = 0;
+}
 
 } // namespace
 
@@ -129,6 +216,8 @@ static void image_cache_set(ImageWindow *imd, FileData *fd);
 static void image_click_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
+	if (options->draw_rectangle && event->button == GDK_BUTTON_PRIMARY) return;
+
 	if (!options->image_lm_click_nav && event->button == GDK_BUTTON_MIDDLE)
 		{
 		imd->mouse_wheel_mode = !imd->mouse_wheel_mode;
@@ -192,23 +281,97 @@ static void switch_coords_orientation(ImageWindow *imd, gint x, gint y, gint wid
 		}
 }
 
-static void image_press_cb(PixbufRenderer *pr, GqMouseButtonEvent *event, gpointer data)
+static void image_rectangle_draw(ImageWindow *imd)
+{
+	auto *pr = PIXBUF_RENDERER(imd->pr);
+	gint width;
+	gint height;
+	if (!pixbuf_renderer_get_image_size(pr, width, height) || pr->scale <= 0) return;
+	const gint left = pr->x_offset - pr->x_scroll;
+	const gint top = pr->y_offset - pr->y_scroll;
+	const gint right = left + static_cast<gint>(width * pr->scale);
+	const gint bottom = top + static_cast<gint>(height * pr->scale * pr->aspect_ratio);
+	image_start.x = std::clamp(static_cast<gint>((selection_rectangle.x - left) / pr->scale), 0, width);
+	image_start.y = std::clamp(static_cast<gint>((selection_rectangle.y - top) / (pr->scale * pr->aspect_ratio)), 0, height);
+	const gint end_x = std::clamp(static_cast<gint>((selection_rectangle.x + selection_rectangle.width - left) / pr->scale), 0, width);
+	const gint end_y = std::clamp(static_cast<gint>((selection_rectangle.y + selection_rectangle.height - top) / (pr->scale * pr->aspect_ratio)), 0, height);
+	switch_coords_orientation(imd, end_x, end_y, width, height);
+
+	if (rect_id) pixbuf_renderer_overlay_remove(pr, rect_id);
+	const gint overlay_width = gtk_widget_get_width(GTK_WIDGET(pr));
+	const gint overlay_height = gtk_widget_get_height(GTK_WIDGET(pr));
+	if (overlay_width < 1 || overlay_height < 1) return;
+	g_autoptr(GdkPixbuf) rect_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, overlay_width, overlay_height);
+	gdk_pixbuf_fill(rect_pixbuf, 0);
+	pixbuf_set_rect_fill(rect_pixbuf, left, top, right - left, bottom - top, {0, 0, 0, 48});
+	const auto &rect = selection_rectangle;
+	pixbuf_set_rect_fill(rect_pixbuf, rect.x, rect.y, rect.width, rect.height, {0, 0, 0, 0});
+	// A one-pixel white outline and black inner line remain visible on any image.
+	pixbuf_set_rect(rect_pixbuf, rect.x, rect.y, rect.width, rect.height, {255, 255, 255, 255}, 1, 1, 1, 1);
+	if (rect.width > 2 && rect.height > 2)
+		{
+		pixbuf_set_rect(rect_pixbuf, rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2, {0, 0, 0, 255}, 1, 1, 1, 1);
+		}
+	constexpr gint handle_size = 7;
+	for (gint row = 0; row < 3; ++row)
+		{
+		for (gint column = 0; column < 3; ++column)
+			{
+			if (row == 1 && column == 1) continue;
+			const gint handle_x = rect.x + ((column * (rect.width - 1)) / 2) - (handle_size / 2);
+			const gint handle_y = rect.y + ((row * (rect.height - 1)) / 2) - (handle_size / 2);
+			pixbuf_set_rect_fill(rect_pixbuf, handle_x, handle_y, handle_size, handle_size, {255, 255, 255, 255});
+			pixbuf_set_rect(rect_pixbuf, handle_x, handle_y, handle_size, handle_size, {0, 0, 0, 255}, 1, 1, 1, 1);
+			}
+		}
+	rect_id = pixbuf_renderer_overlay_add(pr, rect_pixbuf, 0, 0, OVL_NORMAL);
+}
+
+void image_select_rectangle(ImageWindow *imd, gboolean active)
+{
+	if (rectangle_owner) image_rectangle_clear(rectangle_owner);
+	if (!active || !imd) return;
+	auto *pr = PIXBUF_RENDERER(imd->pr);
+	if (!pr->pixbuf || pr->scale <= 0) return;
+	rectangle_owner = imd;
+	selection_rectangle = SelectionRectangle(pr->x_offset - pr->x_scroll, pr->y_offset - pr->y_scroll,
+	                                         options->rectangle_draw_aspect_ratio);
+	selection_rectangle.width = std::max(1, static_cast<gint>(pr->image_width * pr->scale));
+	selection_rectangle.height = std::max(1, static_cast<gint>(pr->image_height * pr->scale * pr->aspect_ratio));
+	if (selection_rectangle.aspect_ratio > 0)
+		{
+		const gint old_width = selection_rectangle.width;
+		const gint old_height = selection_rectangle.height;
+		selection_rectangle.width = std::min(old_width, static_cast<gint>(old_height * selection_rectangle.aspect_ratio));
+		selection_rectangle.height = std::max(1, static_cast<gint>(selection_rectangle.width / selection_rectangle.aspect_ratio));
+		selection_rectangle.x += (old_width - selection_rectangle.width) / 2;
+		selection_rectangle.y += (old_height - selection_rectangle.height) / 2;
+		}
+	image_rectangle_draw(imd);
+}
+
+static void image_press_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	LayoutWindow *lw;
 
-	if(options->draw_rectangle)
+	if (options->draw_rectangle)
 		{
-		GqPoint pixel;
-		pixbuf_renderer_get_mouse_position(pr, pixel);
-		selection_rectangle = SelectionRectangle(std::max(0, gint(event->x)), std::max(0, gint(event->y)), options->rectangle_draw_aspect_ratio);
-		image_start.x = std::max(0, pixel.x);
-		image_start.y = std::max(0, pixel.y);
+		if (event->button != GDK_BUTTON_PRIMARY) return;
+		if (rectangle_owner && rectangle_owner != imd) image_rectangle_clear(rectangle_owner);
+		rectangle_resize_edges = rect_id ? selection_rectangle.hit_test(event->x, event->y) : 0;
+		rectangle_before_drag = selection_rectangle;
+		rectangle_dragging = TRUE;
+		rectangle_owner = imd;
+		rectangle_press = {static_cast<gint>(event->x), static_cast<gint>(event->y)};
+		rectangle_moving = rect_id && !rectangle_resize_edges &&
+		    event->x >= selection_rectangle.x && event->x < selection_rectangle.x + selection_rectangle.width &&
+		    event->y >= selection_rectangle.y && event->y < selection_rectangle.y + selection_rectangle.height;
+		rectangle_pending = !rectangle_resize_edges && !rectangle_moving;
+		selection_rectangle.aspect_ratio = aspect_ratios[static_cast<gint>(options->rectangle_draw_aspect_ratio)];
+		return;
 		}
-	if (rect_id)
-		{
-		pixbuf_renderer_overlay_remove(PIXBUF_RENDERER(imd->pr), rect_id);
-		}
+	image_rectangle_clear(imd);
 
 	lw = layout_find_by_image(imd);
 	if (!lw)
@@ -228,6 +391,12 @@ static void image_release_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpoint
 	auto imd = static_cast<ImageWindow *>(data);
 	LayoutWindow *lw;
 
+	if (options->draw_rectangle && event->button == GDK_BUTTON_PRIMARY)
+		{
+		rectangle_dragging = FALSE;
+		return;
+		}
+
 	lw = layout_find_by_image(imd);
 	if (!lw)
 		{
@@ -241,54 +410,75 @@ static void image_drag_cb(PixbufRenderer *pr, GqPointerMotionEvent *event, gpoin
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
-	selection_rectangle.set_cursor(event->x, event->y);
-
-	if (options->draw_rectangle)
+	if (options->draw_rectangle && rectangle_owner == imd && rectangle_dragging)
 		{
 		gint width;
 		gint height;
-		pixbuf_renderer_get_image_size(pr, width, height);
-
-		GqPoint pixel;
-		pixbuf_renderer_get_mouse_position(pr, pixel);
-
-		if (pixel.x == -1) pixel.x = width;
-		if (pixel.y == -1) pixel.y = height;
-
-		if (options->rectangle_draw_aspect_ratio != RECTANGLE_DRAW_ASPECT_RATIO_NONE)
+		if (!pixbuf_renderer_get_image_size(pr, width, height) || pr->scale <= 0) return;
+		const gint left = pr->x_offset - pr->x_scroll;
+		const gint top = pr->y_offset - pr->y_scroll;
+		const gint right = left + static_cast<gint>(width * pr->scale);
+		const gint bottom = top + static_cast<gint>(height * pr->scale * pr->aspect_ratio);
+		if (right <= left || bottom <= top) return;
+		const gint cursor_x = std::clamp(static_cast<gint>(event->x), left, right);
+		const gint cursor_y = std::clamp(static_cast<gint>(event->y), top, bottom);
+		if (rectangle_pending)
 			{
-			if (gdouble(pixel.x - image_start.x) / (pixel.y - image_start.y) < selection_rectangle.aspect_ratio)
+			constexpr gint drag_threshold = 4;
+			if (std::abs(event->x - rectangle_press.x) < drag_threshold &&
+			    std::abs(event->y - rectangle_press.y) < drag_threshold) return;
+			selection_rectangle = SelectionRectangle(std::clamp(rectangle_press.x, left, right),
+			                                         std::clamp(rectangle_press.y, top, bottom),
+			                                         options->rectangle_draw_aspect_ratio);
+			rectangle_before_drag = selection_rectangle;
+			rectangle_pending = FALSE;
+			}
+		if (rectangle_moving)
+			{
+			selection_rectangle.x = std::clamp(rectangle_before_drag.x + static_cast<gint>(event->x - rectangle_press.x),
+			                                   left, right - selection_rectangle.width);
+			selection_rectangle.y = std::clamp(rectangle_before_drag.y + static_cast<gint>(event->y - rectangle_press.y),
+			                                   top, bottom - selection_rectangle.height);
+			}
+		else if (rectangle_resize_edges)
+			selection_rectangle.resize(cursor_x, cursor_y, rectangle_resize_edges, rectangle_before_drag);
+		else
+			selection_rectangle.set_cursor(cursor_x, cursor_y);
+		// Fit fixed-ratio rectangles to the image without changing the fixed edge or corner.
+		if (selection_rectangle.aspect_ratio > 0 && !rectangle_moving)
+			{
+			guint edges = rectangle_resize_edges;
+			if (!edges)
 				{
-				pixel.x = image_start.x + ((pixel.y - image_start.y) * selection_rectangle.aspect_ratio);
+				edges = cursor_x < rectangle_before_drag.x ? RECTANGLE_LEFT : RECTANGLE_RIGHT;
+				edges |= cursor_y < rectangle_before_drag.y ? RECTANGLE_TOP : RECTANGLE_BOTTOM;
 				}
-			else
-				{
-				pixel.y = image_start.y + ((pixel.x - image_start.x) / selection_rectangle.aspect_ratio);
-				}
+			const gdouble anchor_x = (edges & RECTANGLE_LEFT) ? rectangle_before_drag.x + rectangle_before_drag.width
+			    : (edges & RECTANGLE_RIGHT) ? rectangle_before_drag.x
+			    : rectangle_before_drag.x + (rectangle_before_drag.width / 2.0);
+			const gdouble anchor_y = (edges & RECTANGLE_TOP) ? rectangle_before_drag.y + rectangle_before_drag.height
+			    : (edges & RECTANGLE_BOTTOM) ? rectangle_before_drag.y
+			    : rectangle_before_drag.y + (rectangle_before_drag.height / 2.0);
+			const gdouble max_width = (edges & RECTANGLE_LEFT) ? anchor_x - left
+			    : (edges & RECTANGLE_RIGHT) ? right - anchor_x : 2 * std::min(anchor_x - left, right - anchor_x);
+			const gdouble max_height = (edges & RECTANGLE_TOP) ? anchor_y - top
+			    : (edges & RECTANGLE_BOTTOM) ? bottom - anchor_y : 2 * std::min(anchor_y - top, bottom - anchor_y);
+			const gdouble ratio = selection_rectangle.aspect_ratio;
+			selection_rectangle.width = std::max(1, static_cast<gint>(std::min({static_cast<gdouble>(selection_rectangle.width), max_width, max_height * ratio})));
+			selection_rectangle.height = std::max(1, static_cast<gint>(std::round(selection_rectangle.width / ratio)));
+			selection_rectangle.x = anchor_x - ((edges & RECTANGLE_LEFT) ? selection_rectangle.width
+			    : (edges & RECTANGLE_RIGHT) ? 0 : selection_rectangle.width / 2.0);
+			selection_rectangle.y = anchor_y - ((edges & RECTANGLE_TOP) ? selection_rectangle.height
+			    : (edges & RECTANGLE_BOTTOM) ? 0 : selection_rectangle.height / 2.0);
 			}
+		selection_rectangle.x = std::clamp(selection_rectangle.x, left, right - 1);
+		selection_rectangle.y = std::clamp(selection_rectangle.y, top, bottom - 1);
+		selection_rectangle.width = std::clamp(selection_rectangle.width, 1, right - selection_rectangle.x);
+		selection_rectangle.height = std::clamp(selection_rectangle.height, 1, bottom - selection_rectangle.y);
 
-		switch_coords_orientation(imd, pixel.x, pixel.y, width, height);
-
-		if (rect_id)
-			{
-			pixbuf_renderer_overlay_remove(PIXBUF_RENDERER(imd->pr), rect_id);
-			}
-
-		if (selection_rectangle.height <= 0)
-			{
-			selection_rectangle.height = 1;
-			}
-		if (selection_rectangle.width <= 0)
-			{
-			selection_rectangle.width = 1;
-			}
-
-		g_autoptr(GdkPixbuf) rect_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, selection_rectangle.width, selection_rectangle.height);
-		pixbuf_set_rect_fill(rect_pixbuf, 0, 0, selection_rectangle.width, selection_rectangle.height, {255, 255, 255, 0});
-		pixbuf_set_rect(rect_pixbuf, 1, 1, selection_rectangle.width-2, selection_rectangle.height - 2, {0, 0, 0, 255}, 1, 1, 1, 1);
-		pixbuf_set_rect(rect_pixbuf, 0, 0, selection_rectangle.width, selection_rectangle.height, {255, 255, 255, 255}, 1, 1, 1, 1);
-
-		rect_id = pixbuf_renderer_overlay_add(PIXBUF_RENDERER(imd->pr), rect_pixbuf, selection_rectangle.x, selection_rectangle.y, OVL_NORMAL);
+		image_rectangle_draw(imd);
+		gtk_widget_set_cursor_from_name(GTK_WIDGET(pr), rectangle_moving ? "move" : rectangle_cursor(rectangle_resize_edges));
+		return;
 		}
 
 	if (imd->func_drag)
@@ -1172,6 +1362,7 @@ static void image_change_real(ImageWindow *imd, FileData *fd,
 			      CollectionData *cd, CollectInfo *info, gdouble zoom)
 {
 
+	image_rectangle_clear(imd);
 	imd->collection = cd;
 	imd->collection_info = info;
 
@@ -1213,6 +1404,14 @@ static void image_motion_cb(GtkEventControllerMotion *, gdouble x, gdouble y, gp
 	imd->pointer_x = x;
 	imd->pointer_y = y;
 	imd->pointer_position_valid = TRUE;
+	if (options->draw_rectangle)
+		{
+		const guint edges = rectangle_owner == imd && rect_id ? selection_rectangle.hit_test(x, y) : 0;
+		const bool inside = rectangle_owner == imd && rect_id && x >= selection_rectangle.x &&
+		    x < selection_rectangle.x + selection_rectangle.width && y >= selection_rectangle.y &&
+		    y < selection_rectangle.y + selection_rectangle.height;
+		gtk_widget_set_cursor_from_name(imd->pr, inside && !edges ? "move" : rectangle_cursor(edges));
+		}
 }
 
 static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble dx, gdouble dy, gpointer data)
@@ -2152,6 +2351,7 @@ void image_options_sync()
 
 static void image_free(ImageWindow *imd)
 {
+	image_rectangle_clear(imd);
 	image_list = g_list_remove(image_list, imd);
 
 	if (imd->auto_refresh && imd->image_fd)
@@ -2280,6 +2480,14 @@ ImageWindow *image_new(gboolean frame)
 std::tuple<int, int, int, int> image_get_rectangle()
 {
 	return { rect_x1, rect_y1, rect_x2, rect_y2 };
+}
+
+gboolean image_get_selected_rectangle(ImageWindow *imd, GdkRectangle &rectangle)
+{
+	if (!options->draw_rectangle || rectangle_owner != imd || !rect_id) return FALSE;
+	rectangle = {std::min(rect_x1, rect_x2), std::min(rect_y1, rect_y2),
+	             std::abs(rect_x2 - rect_x1), std::abs(rect_y2 - rect_y1)};
+	return rectangle.width > 0 && rectangle.height > 0;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
