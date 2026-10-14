@@ -1333,7 +1333,7 @@ static void file_util_check_resume_cb(GenericDialog *, gpointer data)
 static void file_util_check_abort_cb(GenericDialog *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
-	ud->phase = UtilityPhase::START;
+	ud->phase = UtilityPhase::CANCEL;
 	file_util_dialog_run(ud);
 }
 
