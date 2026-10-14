@@ -460,7 +460,7 @@
         <para>
           Image location display
           <para />
-          All geocoded images in the currently displayed folder will show as small icons on the map. Clicking the icon will expand the icon to show an image thumbnail, plus other pre-defined image data.
+          Selected geocoded images will show as small icons on the map. Clicking an icon expands or collapses its image thumbnail and details. Ctrl-clicking an icon displays that image in the main window while preserving the selection.
         </para>
         <para>Right-click on the map will show other map options.</para>
         <para>Middle-click controls the map-centering function.</para>

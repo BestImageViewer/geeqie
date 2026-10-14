@@ -46,6 +46,7 @@ extern "C" {
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"
+#include "layout-image.h"
 #include "layout.h"
 #include "main-defines.h"
 #include "metadata.h"
@@ -106,6 +107,7 @@ struct PaneGPSDndDropData
 struct GPSMarkerData
 {
 	FileData *fd;
+	PaneGPSData *pgd;
 	GtkWidget *summary;
 	GtkWidget *details;
 	GtkWidget *picture;
@@ -424,11 +426,21 @@ GtkWidget *gps_marker_details_new(GPSMarkerData *marker_data)
 	return box;
 }
 
-void gps_marker_click_cb(GtkGestureClick *, gint, gdouble, gdouble, gpointer data)
+void gps_marker_click_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer data)
 {
 	auto *marker = SHUMATE_MARKER(data);
 	auto *marker_data = static_cast<GPSMarkerData *>(g_object_get_data(G_OBJECT(marker), GPS_MARKER_DATA_KEY));
 	if (!marker_data) return;
+
+	const auto modifiers = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+	if (modifiers & GDK_CONTROL_MASK)
+		{
+		// Updating the displayed image can rebuild the markers.
+		auto *fd = file_data_ref(marker_data->fd);
+		layout_image_set_fd(marker_data->pgd->pane.lw, fd);
+		file_data_unref(fd);
+		return;
+		}
 
 	marker_data->expanded = !marker_data->expanded;
 	gtk_widget_set_visible(marker_data->summary, !marker_data->expanded);
@@ -458,6 +470,7 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	ShumateMarker *marker = shumate_marker_new();
 	auto *marker_data = g_new0(GPSMarkerData, 1);
 	marker_data->fd = file_data_ref(fd);
+	marker_data->pgd = pgd;
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_widget_add_css_class(box, "gps-marker");
@@ -480,7 +493,8 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	g_signal_connect(click, "released", G_CALLBACK(gps_marker_click_cb), marker);
 	gtk_widget_add_controller(GTK_WIDGET(marker), GTK_EVENT_CONTROLLER(click));
 
-	gtk_widget_set_tooltip_text(GTK_WIDGET(marker), fd->name);
+	g_autofree gchar *tooltip = g_strdup_printf("%s\n%s", fd->name, _("Click to show details; Ctrl-click to view image"));
+	gtk_widget_set_tooltip_text(GTK_WIDGET(marker), tooltip);
 	shumate_marker_layer_add_marker(pgd->marker_layer, marker);
 }
 
