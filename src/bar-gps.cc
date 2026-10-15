@@ -481,6 +481,7 @@ void gps_marker_data_free(gpointer data)
 void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, gdouble longitude)
 {
 	ShumateMarker *marker = shumate_marker_new();
+	gtk_widget_set_cursor_from_name(GTK_WIDGET(marker), "default");
 	auto *marker_data = g_new0(GPSMarkerData, 1);
 	marker_data->fd = file_data_ref(fd);
 	marker_data->pgd = pgd;
@@ -489,6 +490,7 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	gtk_widget_add_css_class(box, "gps-marker");
 
 	marker_data->summary = GTK_WIDGET(shumate_point_new());
+	gtk_widget_set_cursor_from_name(marker_data->summary, "default");
 	gtk_widget_add_css_class(marker_data->summary, "gps-marker-summary");
 	gtk_box_append(GTK_BOX(box), marker_data->summary);
 
