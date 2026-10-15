@@ -159,6 +159,7 @@ GtkBuilder *builder;
 	GtkWidget *main_box;
 
 	GtkWidget *group_box;
+	guint views_idle_id;
 	GtkWidget *h_pane;
 	GtkWidget *v_pane;
 	GtkWidget *scrolled_window;

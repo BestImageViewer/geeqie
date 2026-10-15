@@ -36,6 +36,8 @@ struct ViewFileInfoIcon
 	GListStore *store;
 	gint columns;
 	gint rows;
+	guint resize_idle_id;
+	GtkAdjustment *resize_adjustment;
 
 	GList *selection;
 	FileData *prev_selection;

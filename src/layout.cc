@@ -1888,6 +1888,16 @@ gboolean layout_geometry_get_dividers(LayoutWindow *lw, gint *h, gint *v)
 	return TRUE;
 }
 
+static gboolean layout_views_update_cb(gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	lw->views_idle_id = 0;
+	layout_style_set(lw, -1, nullptr);
+	gtk_widget_queue_resize(lw->group_box);
+	gtk_widget_queue_draw(lw->window);
+	return G_SOURCE_REMOVE;
+}
+
 void layout_views_set(LayoutWindow *lw, DirViewType dir_view_type, FileViewType file_view_type)
 {
 	if (!layout_valid(&lw)) return;
@@ -1901,7 +1911,8 @@ void layout_views_set(LayoutWindow *lw, DirViewType dir_view_type, FileViewType 
 	lw->options.dir_view_type = dir_view_type;
 	lw->options.file_view_type = file_view_type;
 
-	layout_style_set(lw, -1, nullptr);
+	// Let menu activation and popdown finish before replacing their parent widgets.
+	if (!lw->views_idle_id) lw->views_idle_id = g_idle_add(layout_views_update_cb, lw);
 }
 
 void layout_views_set_sort_dir(LayoutWindow *lw, FileData::FileList::SortSettings settings)
@@ -2395,6 +2406,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 	gint i;
 
 	if (!layout_valid(&lw)) return;
+	g_clear_handle_id(&lw->views_idle_id, g_source_remove);
 
 	if (style != -1)
 		{
@@ -2412,6 +2424,10 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 		lw->file_location = f;
 		lw->image_location = i;
 		}
+
+	// Release the context menu and focus while the old file view is still alive.
+	gtk_window_set_focus(GTK_WINDOW(lw->window), nullptr);
+	vf_pop_menu_close(lw->vf);
 
 	/* remember state */
 	FileDataRef current_file(layout_image_get_fd(lw));
@@ -2852,6 +2868,8 @@ void layout_free(LayoutWindow *lw)
 {
 	gint i;
 	if (!lw) return;
+	g_clear_handle_id(&lw->views_idle_id, g_source_remove);
+	vf_pop_menu_close(lw->vf);
 
 	layout_window_list.erase(std::remove(layout_window_list.begin(), layout_window_list.end(), lw),
 	                         layout_window_list.end());

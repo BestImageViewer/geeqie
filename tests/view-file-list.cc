@@ -184,6 +184,61 @@ TEST_P(RepeatedDelete, RefreshesSelectionBeforeTheNextDelete)
 	EXPECT_EQ(layout->vf->refresh_idle_id, 0U);
 }
 
+TEST_P(RepeatedDelete, ViewSwitchWaitsForMenuActionToReturn)
+{
+	auto *previous = layout->vf;
+	const auto target = previous->type == FILEVIEW_LIST ? FILEVIEW_ICON : FILEVIEW_LIST;
+	layout_views_set(layout, layout->options.dir_view_type, target);
+	EXPECT_EQ(layout->vf, previous);
+	EXPECT_NE(layout->views_idle_id, 0U);
+	const gint64 deadline = g_get_monotonic_time() + G_TIME_SPAN_SECOND;
+	while (layout->views_idle_id && g_get_monotonic_time() < deadline)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		g_usleep(1000);
+		}
+	ASSERT_EQ(layout->views_idle_id, 0U);
+	EXPECT_EQ(layout->vf->type, target);
+	EXPECT_EQ(vf_count(layout->vf), 3U);
+}
+
+TEST_P(RepeatedDelete, ViewSwitchClosesContextMenu)
+{
+	gtk_window_present(GTK_WINDOW(layout->window));
+	const gint64 map_deadline = g_get_monotonic_time() + (5 * G_TIME_SPAN_SECOND);
+	while (!gtk_widget_get_mapped(layout->vf->listview) && g_get_monotonic_time() < map_deadline)
+		g_main_context_iteration(nullptr, FALSE);
+	ASSERT_TRUE(gtk_widget_get_mapped(layout->vf->listview));
+
+	auto *previous_view = layout->vf->listview;
+	g_object_add_weak_pointer(G_OBJECT(previous_view), reinterpret_cast<gpointer *>(&previous_view));
+	layout->vf->popup = vf_pop_menu(layout->vf, previous_view, 10, 10);
+	g_autoptr(GtkWidget) menu = GTK_WIDGET(g_object_ref(layout->vf->popup));
+	gtk_popover_popdown(GTK_POPOVER(menu));
+	const auto target = layout->vf->type == FILEVIEW_LIST ? FILEVIEW_ICON : FILEVIEW_LIST;
+	layout_views_set(layout, layout->options.dir_view_type, target);
+	const gint64 deadline = g_get_monotonic_time() + (5 * G_TIME_SPAN_SECOND);
+	while (layout->views_idle_id && g_get_monotonic_time() < deadline)
+		g_main_context_iteration(nullptr, FALSE);
+	EXPECT_EQ(layout->views_idle_id, 0U);
+	EXPECT_EQ(gtk_widget_get_parent(menu), nullptr);
+	EXPECT_EQ(previous_view, nullptr);
+	if (previous_view) g_object_remove_weak_pointer(G_OBJECT(previous_view), reinterpret_cast<gpointer *>(&previous_view));
+	EXPECT_EQ(layout->vf->type, target);
+	EXPECT_EQ(vf_count(layout->vf), 3U);
+}
+
+TEST_P(RepeatedDelete, ClosingWindowCancelsPendingViewSwitch)
+{
+	const auto target = layout->vf->type == FILEVIEW_LIST ? FILEVIEW_ICON : FILEVIEW_LIST;
+	layout_views_set(layout, layout->options.dir_view_type, target);
+	const guint source_id = layout->views_idle_id;
+	ASSERT_NE(source_id, 0U);
+	layout_free(layout);
+	layout = nullptr;
+	EXPECT_EQ(g_main_context_find_source_by_id(nullptr, source_id), nullptr);
+}
+
 INSTANTIATE_TEST_SUITE_P(FileViews, RepeatedDelete,
                         testing::Combine(testing::Values(FILEVIEW_LIST, FILEVIEW_ICON), testing::Bool()));
 
@@ -250,9 +305,9 @@ protected:
 		g_free(directory);
 	}
 
-	void settle()
+	static void settle()
 	{
-		const gint64 deadline = g_get_monotonic_time() + 350 * G_TIME_SPAN_MILLISECOND;
+		const gint64 deadline = g_get_monotonic_time() + (350 * G_TIME_SPAN_MILLISECOND);
 		while (g_get_monotonic_time() < deadline)
 			{
 			while (g_main_context_iteration(nullptr, FALSE)) {}
@@ -311,6 +366,24 @@ TEST_P(RevealFile, ScrollsWithoutChangingSelectionOrFocus)
 		EXPECT_GE(bounds.origin.y, 0);
 		EXPECT_LE(bounds.origin.y + bounds.size.height, gtk_widget_get_height(vf->scrolled));
 		}
+}
+
+TEST_P(RevealFile, IconResizeKeepsModelItemsAndDisplaysFiles)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	g_autoptr(GObject) first = static_cast<GObject *>(g_list_model_get_item(G_LIST_MODEL(VFICON(vf)->store), 0));
+	ASSERT_NE(first, nullptr);
+	const gint old_columns = VFICON(vf)->columns;
+	gtk_window_set_default_size(GTK_WINDOW(window), 250, 300);
+	settle();
+	EXPECT_NE(VFICON(vf)->columns, old_columns);
+	EXPECT_EQ(g_list_model_get_n_items(G_LIST_MODEL(VFICON(vf)->store)), 150U);
+	g_autoptr(GObject) after = static_cast<GObject *>(g_list_model_get_item(G_LIST_MODEL(VFICON(vf)->store), 0));
+	EXPECT_EQ(first, after);
+	auto *visible = find_file_widget(vf->listview, vf_index_get_data(vf, 0));
+	ASSERT_NE(visible, nullptr);
+	EXPECT_GT(gtk_widget_get_width(visible), 0);
+	EXPECT_GT(gtk_widget_get_height(visible), 0);
 }
 
 INSTANTIATE_TEST_SUITE_P(FileViews, RevealFile,

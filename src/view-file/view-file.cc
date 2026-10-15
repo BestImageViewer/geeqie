@@ -1086,6 +1086,19 @@ static void vf_popup_destroy_cb(GtkWidget *, gpointer data)
 	vf->editmenu_fd_list = nullptr;
 }
 
+void vf_pop_menu_close(ViewFile *vf)
+{
+	if (!vf || !vf->popup) return;
+
+	g_autoptr(GtkWidget) popup = GTK_WIDGET(g_object_ref(vf->popup));
+	g_signal_handlers_disconnect_by_data(popup, vf);
+	// A closed popover can survive until its deferred detach runs.
+	// Clear its ViewFile callback before the view is destroyed.
+	vf_popup_destroy_cb(nullptr, vf);
+	gtk_popover_popdown(GTK_POPOVER(popup));
+	if (gtk_widget_get_parent(popup)) gtk_widget_unparent(popup);
+}
+
 static ViewFile *vf_from_action_data(gpointer data)
 {
 	auto *layout = static_cast<LayoutWindow *>(data);
@@ -1598,6 +1611,17 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 {
 	gboolean active = FALSE;
 	gboolean class_archive = FALSE;
+	vf_pop_menu_close(vf);
+
+	// GtkTreeView owns its internal children; attach the popover to the window.
+	GtkWidget *origin = parent ? parent : vf->listview;
+	GtkWidget *menu_parent = GTK_WIDGET(gtk_widget_get_root(origin));
+	if (!menu_parent) menu_parent = vf->widget;
+	graphene_point_t point = {static_cast<float>(parent ? x : gtk_widget_get_width(origin) / 2.0),
+	                         static_cast<float>(parent ? y : gtk_widget_get_height(origin) / 2.0)};
+	graphene_point_t translated;
+	if (gtk_widget_compute_point(origin, menu_parent, &point, &translated)) point = translated;
+	GdkRectangle pointing_to{static_cast<gint>(point.x), static_cast<gint>(point.y), 1, 1};
 
 	if (vf->type == FILEVIEW_LIST)
 		{
@@ -1637,13 +1661,8 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 		/* Sliding submenus avoid focus and input-grab problems caused by nested popovers. */
 		GtkWidget *menu = gtk_popover_menu_new_from_model_full(G_MENU_MODEL(mark_menu), GTK_POPOVER_MENU_SLIDING);
 		gtk_widget_set_size_request(menu, -1, 300);
-		GtkWidget *menu_parent = parent ? parent : vf->listview;
 		popover_set_parent(menu, menu_parent);
-		if (parent)
-			{
-			GdkRectangle pointing_to{static_cast<gint>(x), static_cast<gint>(y), 1, 1};
-			gtk_popover_set_pointing_to(GTK_POPOVER(menu), &pointing_to);
-			}
+		gtk_popover_set_pointing_to(GTK_POPOVER(menu), &pointing_to);
 		popover_popup(menu);
 		g_signal_connect(G_OBJECT(menu), "destroy", G_CALLBACK(vf_popup_destroy_cb), vf);
 		return menu;
@@ -1766,7 +1785,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	vf_pop_menu_set_int32_state(vf, "view-file-view-type", vf->type);
 	vf_pop_menu_set_boolean_state(vf, "view-file-show-star-rating", options->show_star_rating);
 
-	GtkWidget *menu = parent ? popup_menu_at(menu_model, parent, x, y) : popup_menu(menu_model, vf->listview);
+	GtkWidget *menu = popup_menu_at(menu_model, menu_parent, point.x, point.y);
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(vf_popup_destroy_cb), vf);
 

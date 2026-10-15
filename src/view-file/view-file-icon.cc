@@ -32,8 +32,8 @@
 #include "filedata.h"
 #include "intl.h"
 #include "layout-image.h"
-#include "layout.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "options.h"
@@ -229,7 +229,7 @@ static FileData *vficon_find_data(ViewFile *vf, gint row, gint col, GtkTreeIter 
 {
 	if (row < 0 || col < 0) return nullptr;
 	if (iter) *iter = {};
-	return static_cast<FileData *>(g_list_nth_data(vf->list, row * VFICON(vf)->columns + col));
+	return static_cast<FileData *>(g_list_nth_data(vf->list, (row * VFICON(vf)->columns) + col));
 }
 
 FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
@@ -1128,11 +1128,31 @@ static gint vficon_viewport_width(ViewFile *vf)
 	return gtk_widget_get_width(vf->listview);
 }
 
+static gboolean vficon_resize_idle_cb(gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+	VFICON(vf)->resize_idle_id = 0;
+	const gint width = vficon_viewport_width(vf);
+	if (width <= 0) return G_SOURCE_REMOVE;
+
+	const gint columns = std::clamp(width / (vficon_get_icon_width(vf) + (THUMB_BORDER_PADDING * 6)), 1, VFICON_MAX_COLUMNS);
+	if (columns != VFICON(vf)->columns)
+		{
+		VFICON(vf)->columns = columns;
+		VFICON(vf)->rows = (g_list_length(vf->list) + columns - 1) / columns;
+		gtk_grid_view_set_max_columns(GTK_GRID_VIEW(vf->listview), columns);
+		vficon_set_focus(vf, VFICON(vf)->focus_fd);
+		}
+	gtk_widget_queue_draw(vf->listview);
+	return G_SOURCE_REMOVE;
+}
+
 static void vficon_sized_cb(GObject *, GParamSpec *, gpointer data)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
-	vficon_populate_at_new_size(vf, vficon_viewport_width(vf), gtk_widget_get_height(vf->scrolled), FALSE);
+	auto *vf = static_cast<ViewFile *>(data);
+	// Adjustment notifications run during allocation; leave the model and bound items intact.
+	if (!VFICON(vf)->resize_idle_id)
+		VFICON(vf)->resize_idle_id = g_idle_add(vficon_resize_idle_cb, vf);
 }
 
 /*
@@ -1600,6 +1620,9 @@ gboolean vficon_set_fd(ViewFile *vf, FileData *dir_fd)
 
 void vficon_destroy_cb(ViewFile *vf)
 {
+	g_clear_handle_id(&VFICON(vf)->resize_idle_id, g_source_remove);
+	g_signal_handlers_disconnect_by_data(VFICON(vf)->resize_adjustment, vf);
+	g_clear_object(&VFICON(vf)->resize_adjustment);
 	vf_refresh_idle_cancel(vf);
 
 	file_data_unregister_notify_func(vf_notify_cb, vf);
@@ -1630,7 +1653,8 @@ ViewFile *vficon_new(ViewFile *vf)
 	gtk_grid_view_set_max_columns(GTK_GRID_VIEW(vf->listview), 1);
 	g_signal_connect(vf->listview, "notify::has-focus", G_CALLBACK(vficon_focus_changed_cb), vf);
 
-	g_signal_connect(G_OBJECT(gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(vf->scrolled))), "notify::page-size",
+	VFICON(vf)->resize_adjustment = GTK_ADJUSTMENT(g_object_ref(gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(vf->scrolled))));
+	g_signal_connect(VFICON(vf)->resize_adjustment, "notify::page-size",
 			 G_CALLBACK(vficon_sized_cb), vf);
 
 	/* force VFICON(vf)->columns to be at least 1 (sane) - this will be corrected in the size_cb */
