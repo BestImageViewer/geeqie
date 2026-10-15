@@ -386,6 +386,18 @@ void gps_marker_direction_draw_cb(GtkDrawingArea *drawing_area, cairo_t *cr, gin
 	cairo_restore(cr);
 }
 
+void gps_marker_show_image(GPSMarkerData *marker_data)
+{
+	// Updating the displayed image can rebuild the markers.
+	FileDataRef fd_ref(marker_data->fd);
+	layout_image_set_fd(marker_data->pgd->pane.lw, fd_ref);
+}
+
+void gps_marker_show_image_cb(GtkButton *, gpointer data)
+{
+	gps_marker_show_image(static_cast<GPSMarkerData *>(data));
+}
+
 GtkWidget *gps_marker_details_new(GPSMarkerData *marker_data)
 {
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
@@ -423,6 +435,10 @@ GtkWidget *gps_marker_details_new(GPSMarkerData *marker_data)
 		gtk_box_append(GTK_BOX(box), direction);
 		}
 
+	GtkWidget *show_image = gtk_button_new_with_label(_("Show image"));
+	g_signal_connect(show_image, "clicked", G_CALLBACK(gps_marker_show_image_cb), marker_data);
+	gtk_box_append(GTK_BOX(box), show_image);
+
 	return box;
 }
 
@@ -435,9 +451,7 @@ void gps_marker_click_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpoin
 	const auto modifiers = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
 	if (modifiers & GDK_CONTROL_MASK)
 		{
-		// Updating the displayed image can rebuild the markers.
-		FileDataRef fd_ref(marker_data->fd);
-		layout_image_set_fd(marker_data->pgd->pane.lw, fd_ref);
+		gps_marker_show_image(marker_data);
 		return;
 		}
 
