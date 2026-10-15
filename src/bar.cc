@@ -614,6 +614,19 @@ void bar_write_config(GtkWidget *bar, RcString &rc)
 	WRITE_NL(); WRITE_STRING("</bar>");
 }
 
+static gboolean bar_expander_tooltip_cb(GtkWidget *expander, gint, gint y, gboolean keyboard_mode, GtkTooltip *tooltip, gpointer)
+{
+	GtkWidget *title = gtk_expander_get_label_widget(GTK_EXPANDER(expander));
+	graphene_rect_t bounds;
+	if (keyboard_mode || !title || !gtk_widget_compute_bounds(title, expander, &bounds)) return FALSE;
+	if (y < bounds.origin.y || y >= (bounds.origin.y + bounds.size.height)) return FALSE;
+
+	GdkRectangle area = {0, static_cast<gint>(bounds.origin.y), gtk_widget_get_width(expander), static_cast<gint>(bounds.size.height)};
+	gtk_tooltip_set_tip_area(tooltip, &area);
+	gtk_tooltip_set_text(tooltip, _("Expand or collapse pane"));
+	return TRUE;
+}
+
 void bar_add(GtkWidget *bar, GtkWidget *pane)
 {
 	auto bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
@@ -627,7 +640,8 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 
 	GtkWidget *expander = gtk_expander_new(nullptr);
 	DEBUG_NAME(expander);
-	gtk_widget_set_tooltip_text(expander, _("Expand or collapse pane"));
+	gtk_widget_set_has_tooltip(expander, TRUE);
+	g_signal_connect(expander, "query-tooltip", G_CALLBACK(bar_expander_tooltip_cb), nullptr);
 	if (pd && pd->title)
 		{
 		gtk_widget_set_hexpand(pd->title, TRUE);
