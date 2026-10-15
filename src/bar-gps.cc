@@ -436,9 +436,8 @@ void gps_marker_click_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpoin
 	if (modifiers & GDK_CONTROL_MASK)
 		{
 		// Updating the displayed image can rebuild the markers.
-		auto *fd = file_data_ref(marker_data->fd);
-		layout_image_set_fd(marker_data->pgd->pane.lw, fd);
-		file_data_unref(fd);
+		FileDataRef fd_ref(marker_data->fd);
+		layout_image_set_fd(marker_data->pgd->pane.lw, fd_ref);
 		return;
 		}
 
