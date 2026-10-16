@@ -8,6 +8,7 @@ unit_test_sources = files(
 'filedata/filedata.cc',
 'filedata/filelist.cc',
 'filedata/ref.cc',
+'geocode.cc',
 'history-list.cc',
 'image-load.cc',
 'image-crop.cc',

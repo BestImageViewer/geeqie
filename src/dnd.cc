@@ -48,6 +48,11 @@ struct DndTextReadData
 {
 	DndTextCallback callback;
 	gpointer data;
+	GdkDrop *drop;
+	GInputStream *stream;
+	GString *text;
+	guint mime_index;
+	const gchar *mime_types[2];
 };
 
 GList *dnd_file_list_from_uri_text(const gchar *text)
@@ -96,7 +101,12 @@ GdkContentFormats *dnd_file_drop_formats(gboolean include_text)
 	GdkContentFormatsBuilder *builder = gdk_content_formats_builder_new();
 	gdk_content_formats_builder_add_gtype(builder, GDK_TYPE_FILE_LIST);
 	gdk_content_formats_builder_add_mime_type(builder, "text/uri-list");
-	if (include_text) gdk_content_formats_builder_add_mime_type(builder, "text/plain");
+	if (include_text)
+		{
+		gdk_content_formats_builder_add_mime_type(builder, "text/plain;charset=utf-8");
+		gdk_content_formats_builder_add_mime_type(builder, "text/plain; charset=utf-8");
+		gdk_content_formats_builder_add_mime_type(builder, "text/plain");
+		}
 
 	return gdk_content_formats_builder_free_to_formats(builder);
 }
@@ -272,13 +282,97 @@ static void dnd_read_text_cb(GObject *source_object, GAsyncResult *result, gpoin
 	read_data->callback(drop, dropped_text, read_data->data);
 }
 
-void dnd_read_text_async(GdkDrop *drop, DndTextCallback callback, gpointer data)
+static void dnd_read_text_mime_cb(GObject *source_object, GAsyncResult *result, gpointer data);
+
+static gboolean dnd_read_text_next_mime(DndTextReadData *read_data)
 {
-	auto *read_data = g_new(DndTextReadData, 1);
+	static const gchar *mime_types[] = {"text/uri-list", "text/plain; charset=utf-8", "text/plain", "text/plain;charset=utf-8"};
+	GdkContentFormats *formats = gdk_drop_get_formats(read_data->drop);
+	while (read_data->mime_index < G_N_ELEMENTS(mime_types))
+		{
+		const gchar *mime_type = mime_types[read_data->mime_index++];
+		if (!gdk_content_formats_contain_mime_type(formats, mime_type)) continue;
+		read_data->mime_types[0] = mime_type;
+		gdk_drop_read_async(read_data->drop, read_data->mime_types, G_PRIORITY_DEFAULT, nullptr,
+		                    dnd_read_text_mime_cb, read_data);
+		return TRUE;
+		}
+	return FALSE;
+}
+
+static void dnd_read_text_stream_cb(GObject *source_object, GAsyncResult *result, gpointer data)
+{
+	auto *read_data = static_cast<DndTextReadData *>(data);
+	g_autoptr(GError) error = nullptr;
+	g_autoptr(GBytes) bytes = g_input_stream_read_bytes_finish(G_INPUT_STREAM(source_object), result, &error);
+	if (bytes && g_bytes_get_size(bytes) > 0)
+		{
+		g_string_append_len(read_data->text,
+		                    static_cast<const gchar *>(g_bytes_get_data(bytes, nullptr)),
+		                    g_bytes_get_size(bytes));
+		g_input_stream_read_bytes_async(read_data->stream, 4096, G_PRIORITY_DEFAULT, nullptr,
+		                                dnd_read_text_stream_cb, read_data);
+		return;
+		}
+
+	if (error) DEBUG_1("Text drop read failed: %s", error->message);
+	if ((error || read_data->text->len == 0) && dnd_read_text_next_mime(read_data))
+		{
+		g_clear_object(&read_data->stream);
+		g_string_free(read_data->text, TRUE);
+		read_data->text = nullptr;
+		return;
+		}
+	read_data->callback(read_data->drop, error ? nullptr : read_data->text->str, read_data->data);
+	g_object_unref(read_data->stream);
+	g_object_unref(read_data->drop);
+	g_string_free(read_data->text, TRUE);
+	g_free(read_data);
+}
+
+static void dnd_read_text_mime_cb(GObject *source_object, GAsyncResult *result, gpointer data)
+{
+	auto *read_data = static_cast<DndTextReadData *>(data);
+	auto *drop = GDK_DROP(source_object);
+	const gchar *mime_type = nullptr;
+	g_autoptr(GError) error = nullptr;
+	g_autoptr(GInputStream) stream = gdk_drop_read_finish(drop, result, &mime_type, &error);
+	if (!stream || error)
+		{
+		if (error) DEBUG_1("Text drop start failed: %s", error->message);
+		if (dnd_read_text_next_mime(read_data)) return;
+		read_data->callback(drop, nullptr, read_data->data);
+		g_object_unref(read_data->drop);
+		g_free(read_data);
+		return;
+		}
+
+	read_data->stream = g_steal_pointer(&stream);
+	read_data->text = g_string_new(nullptr);
+	g_input_stream_read_bytes_async(read_data->stream, 4096, G_PRIORITY_DEFAULT, nullptr,
+	                                dnd_read_text_stream_cb, read_data);
+}
+
+void dnd_read_text_async(GdkDrop *drop, DndTextCallback callback, gpointer data, gboolean prefer_uri_list)
+{
+	auto *read_data = g_new0(DndTextReadData, 1);
 	read_data->callback = callback;
 	read_data->data = data;
+	read_data->mime_index = prefer_uri_list ? 0 : 1;
 
-	gdk_drop_read_value_async(drop, G_TYPE_STRING, G_PRIORITY_DEFAULT, nullptr, dnd_read_text_cb, read_data);
+	GdkContentFormats *formats = gdk_drop_get_formats(drop);
+	if ((prefer_uri_list && gdk_content_formats_contain_mime_type(formats, "text/uri-list")) ||
+	    gdk_content_formats_contain_mime_type(formats, "text/plain;charset=utf-8") ||
+	    gdk_content_formats_contain_mime_type(formats, "text/plain; charset=utf-8") ||
+	    gdk_content_formats_contain_mime_type(formats, "text/plain"))
+		{
+		read_data->drop = GDK_DROP(g_object_ref(drop));
+		dnd_read_text_next_mime(read_data);
+		}
+	else
+		{
+		gdk_drop_read_value_async(drop, G_TYPE_STRING, G_PRIORITY_DEFAULT, nullptr, dnd_read_text_cb, read_data);
+		}
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

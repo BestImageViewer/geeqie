@@ -30,17 +30,17 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <gio/gio.h>
 #include <glib-object.h>
 #include <pwd.h>
 
+#include "main-defines.h"
 #include "main.h"
 #include "options.h"
 #include "ui-fileops.h"
 
 namespace
 {
-
-constexpr int BUFSIZE = 128;
 
 /**
  * @def STYLE_SHIFT_STANDARD
@@ -153,49 +153,58 @@ gchar *expand_tilde(const gchar *filename)
 
 #define GEOCODE_NAME "geocode-parameters.awk"
 
+static gchar *decode_geo_script_contents(const gchar *script, const gchar *input_text)
+{
+	g_autoptr(GError) error = nullptr;
+	g_autoptr(GSubprocess) process = g_subprocess_new(static_cast<GSubprocessFlags>(G_SUBPROCESS_FLAGS_STDIN_PIPE |
+	                                                                             G_SUBPROCESS_FLAGS_STDOUT_PIPE |
+	                                                                             G_SUBPROCESS_FLAGS_STDERR_PIPE),
+	                                               &error, "awk", "-W", "posix", script, nullptr);
+	if (!process) return g_strdup_printf("Error: %s", error->message);
+
+	g_autofree gchar *input = g_strconcat(input_text, "\n", nullptr);
+	gchar *output = nullptr;
+	if (!g_subprocess_communicate_utf8(process, input, nullptr, &output, nullptr, &error))
+		{
+		g_free(output);
+		return g_strdup_printf("Error: %s", error->message);
+		}
+	if (!g_subprocess_get_successful(process) || !output || !*g_strstrip(output))
+		{
+		g_free(output);
+		return g_strdup("Error: Unable to decode geographic coordinates");
+		}
+	return output;
+}
+
 static gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 {
-	g_autofree gchar *path = g_build_filename(path_dir, GEOCODE_NAME, NULL);
-	if (!g_file_test(path, G_FILE_TEST_EXISTS))
-		{
-		return g_strconcat(input_text, NULL);
-		}
-
-	g_autofree gchar *cmd = g_strconcat("echo \'", input_text, "\'  | awk -W posix -f ", path, NULL);
-
-	FILE *fp = popen(cmd, "r");
-	if (!fp)
-		{
-		return g_strconcat("Error: opening pipe\n", input_text, NULL);
-		}
-
-	gchar buf[BUFSIZE];
-	while (fgets(buf, BUFSIZE, fp))
-		{
-		DEBUG_1("Output: %s", buf);
-		}
-
-	if(pclose(fp))
-		{
-		return g_strconcat("Error: Command not found or exited with error status\n", input_text, NULL);
-		}
-
-	return g_strconcat(buf, NULL);
+	if (!path_dir) return nullptr;
+	g_autofree gchar *path = g_build_filename(path_dir, GEOCODE_NAME, nullptr);
+	g_autofree gchar *script = nullptr;
+	if (!g_file_get_contents(path, &script, nullptr, nullptr)) return nullptr;
+	return decode_geo_script_contents(script, input_text);
 }
 
 gchar *decode_geo_parameters(const gchar *input_text)
 {
-	gchar *message;
+	if (!input_text || !*input_text) return g_strdup("Error: Empty geographic coordinates");
 
-	message = decode_geo_script(gq_bindir, input_text);
-	if (strstr(message, "Error"))
-		{
-		g_free(message);
-		g_autofree gchar *dir = g_build_filename(get_rc_dir(), "applications", NULL);
-		message = decode_geo_script(dir, input_text);
-		}
+	gchar *message = decode_geo_script(gq_bindir, input_text);
+	if (message && !strstr(message, "Error")) return message;
+	g_free(message);
 
-	return message;
+	g_autofree gchar *dir = g_build_filename(get_rc_dir(), "applications", nullptr);
+	message = decode_geo_script(dir, input_text);
+	if (message && !strstr(message, "Error")) return message;
+	g_free(message);
+
+	// Keep the decoder available when running from the build tree.
+	g_autoptr(GBytes) bytes = g_resources_lookup_data(GQ_RESOURCE_PATH_DATA "/geocode-parameters.awk",
+	                                               G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
+	if (!bytes) return g_strdup("Error: Geographic coordinate decoder is unavailable");
+	g_autofree gchar *script = g_strndup(static_cast<const gchar *>(g_bytes_get_data(bytes, nullptr)), g_bytes_get_size(bytes));
+	return decode_geo_script_contents(script, input_text);
 }
 
 /* Run a command like system() but may output debug messages. */

@@ -57,6 +57,7 @@ extern "C" {
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
+#include "uri-utils.h"
 
 namespace
 {
@@ -248,7 +249,7 @@ void bar_pane_gps_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer d
 
 	auto action = GDK_ACTION_NONE;
 
-	if (text)
+	if (text && *text)
 		{
 		g_autofree gchar *location = decode_geo_parameters(text);
 		if (location && !g_strstr_len(location, -1, "Error"))
@@ -268,14 +269,40 @@ void bar_pane_gps_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer d
 	bar_pane_gps_dnd_drop_data_free(drop_data);
 }
 
+void bar_pane_gps_dnd_uri_received(GdkDrop *drop, const gchar *text, gpointer data)
+{
+	g_auto(GStrv) uris = text ? g_uri_list_extract_uris(text) : nullptr;
+	if (uris && uris[0])
+		{
+		g_autofree gchar *path = g_filename_from_uri(uris[0], nullptr, nullptr);
+		if (path)
+			{
+			g_autoptr(FileDataList) list = uri_filelist_from_text(text);
+			bar_pane_gps_dnd_file_received(drop, list, data);
+			return;
+			}
+		// A browser URL is a geographic location, rather than a local file.
+		bar_pane_gps_dnd_text_received(drop, uris[0], data);
+		return;
+		}
+	bar_pane_gps_dnd_text_received(drop, nullptr, data);
+}
+
 gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto *pgd = static_cast<PaneGPSData *>(data);
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
 
 	GdkContentFormats *formats = gdk_drop_get_formats(drop);
-	if (gdk_content_formats_contain_gtype(formats, GDK_TYPE_FILE_LIST) ||
-	    gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
+	if (gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
+		{
+		shumate_viewport_widget_coords_to_location(pgd->viewport, widget, x, y, &pgd->dest_latitude, &pgd->dest_longitude);
+		auto *drop_data = g_new(PaneGPSDndDropData, 1);
+		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->pane.widget));
+		dnd_read_text_async(drop, bar_pane_gps_dnd_uri_received, drop_data, TRUE);
+		return TRUE;
+		}
+	if (gdk_content_formats_contain_gtype(formats, GDK_TYPE_FILE_LIST))
 		{
 		shumate_viewport_widget_coords_to_location(pgd->viewport, widget, x, y, &pgd->dest_latitude, &pgd->dest_longitude);
 		auto *drop_data = g_new(PaneGPSDndDropData, 1);
@@ -284,7 +311,9 @@ gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdoubl
 		return TRUE;
 		}
 
-	if (gdk_content_formats_contain_mime_type(formats, "text/plain"))
+	if (gdk_content_formats_contain_mime_type(formats, "text/plain;charset=utf-8") ||
+	    gdk_content_formats_contain_mime_type(formats, "text/plain; charset=utf-8") ||
+	    gdk_content_formats_contain_mime_type(formats, "text/plain"))
 		{
 		auto *drop_data = g_new(PaneGPSDndDropData, 1);
 		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->pane.widget));

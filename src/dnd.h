@@ -34,7 +34,7 @@ GdkContentProvider *dnd_file_list_content_provider(GList *list);
 GdkContentFormats *dnd_file_drop_formats(gboolean include_text = FALSE);
 void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items, FileData *fd = nullptr);
 void dnd_read_file_list_async(GdkDrop *drop, DndFileListCallback callback, gpointer data);
-void dnd_read_text_async(GdkDrop *drop, DndTextCallback callback, gpointer data);
+void dnd_read_text_async(GdkDrop *drop, DndTextCallback callback, gpointer data, gboolean prefer_uri_list = FALSE);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
