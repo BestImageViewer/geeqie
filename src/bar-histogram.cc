@@ -159,9 +159,6 @@ static void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar *
 
 	phd->histogram.set_channel(histogram_channel);
 	phd->histogram.set_mode(histogram_mode);
-
-	bar_pane_update_expander(phd->pane);
-	bar_pane_histogram_update(phd);
 }
 
 static void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer data)

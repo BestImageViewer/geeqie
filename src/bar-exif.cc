@@ -705,9 +705,6 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 		{
 		bar_pane_set_title(ped->pane, title);
 		}
-
-	bar_pane_update_expander(ped->pane);
-	bar_pane_exif_update(ped);
 }
 
 void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)

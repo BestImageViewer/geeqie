@@ -97,9 +97,6 @@ static void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **at
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
-
-	bar_pane_update_expander(prd->pane);
-	bar_pane_rating_update(prd);
 }
 
 static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer data)

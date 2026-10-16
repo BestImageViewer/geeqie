@@ -333,9 +333,6 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		{
 		bar_pane_set_title(pkd->pane, title);
 		}
-
-	bar_pane_update_expander(pkd->pane);
-	bar_pane_keywords_update(pkd);
 }
 
 void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)

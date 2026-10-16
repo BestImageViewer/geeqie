@@ -943,7 +943,6 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 		}
 
 	gtk_widget_set_size_request(pgd->pane.widget, -1, pgd->height);
-	bar_pane_update_expander(pgd->pane);
 }
 
 void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)

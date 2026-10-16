@@ -89,7 +89,6 @@ void bar_pane_common_write_config(const PaneData &pane, RcString &rc);
 bool bar_pane_common_update_from_config(PaneData &pd, const gchar *option, const gchar *value, gchar **title);
 bool bar_pane_common_read_from_config(const gchar *option, const gchar *value, gchar **id, gchar **title, gboolean &expanded);
 void bar_pane_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
-void bar_pane_update_expander(const PaneData &pd);
 const gchar *bar_pane_translate_title(PaneType type, const gchar *id, const gchar *title); // for test purposes
 void bar_pane_set_title(PaneData &pd, const gchar *title);
 gboolean bar_pane_focus_files(PaneData *pane);

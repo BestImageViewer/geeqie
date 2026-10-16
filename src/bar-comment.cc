@@ -181,8 +181,6 @@ static void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **a
 		}
 
 	gtk_widget_set_size_request(pcd->pane.widget, -1, pcd->height);
-	bar_pane_update_expander(pcd->pane);
-	bar_pane_comment_update(pcd);
 }
 
 static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer data)
