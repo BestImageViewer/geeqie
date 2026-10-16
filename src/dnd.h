@@ -30,6 +30,8 @@ class FileData;
 using DndFileListCallback = void (*)(GdkDrop *drop, GList *list, gpointer data);
 using DndTextCallback = void (*)(GdkDrop *drop, const gchar *text, gpointer data);
 
+GList *dnd_file_list_from_uri_text(const gchar *text);
+GList *dnd_file_list_from_files(GdkFileList *files);
 GdkContentProvider *dnd_file_list_content_provider(GList *list);
 GdkContentFormats *dnd_file_drop_formats(gboolean include_text = FALSE);
 void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items, FileData *fd = nullptr);

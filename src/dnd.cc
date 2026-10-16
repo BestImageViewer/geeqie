@@ -55,6 +55,8 @@ struct DndTextReadData
 	const gchar *mime_types[2];
 };
 
+} // namespace
+
 GList *dnd_file_list_from_uri_text(const gchar *text)
 {
 	GList *path_list = uri_pathlist_from_text(text);
@@ -63,7 +65,7 @@ GList *dnd_file_list_from_uri_text(const gchar *text)
 	for (GList *work = path_list; work; work = work->next)
 		{
 		const auto *path = static_cast<const gchar *>(work->data);
-		list = g_list_prepend(list, file_data_new_no_grouping(path));
+		list = g_list_prepend(list, file_data_new_simple(path));
 		}
 
 	g_list_free_full(path_list, g_free);
@@ -71,7 +73,16 @@ GList *dnd_file_list_from_uri_text(const gchar *text)
 	return g_list_reverse(list);
 }
 
-} // namespace name
+GList *dnd_file_list_from_files(GdkFileList *files)
+{
+	GList *list = nullptr;
+	for (GSList *work = gdk_file_list_get_files(files); work; work = work->next)
+		{
+		g_autofree gchar *path = g_file_get_path(G_FILE(work->data));
+		if (path) list = g_list_prepend(list, file_data_new_simple(path));
+		}
+	return g_list_reverse(list);
+}
 
 GdkContentProvider *dnd_file_list_content_provider(GList *list)
 {
@@ -235,12 +246,7 @@ static void dnd_read_file_list_value_cb(GObject *source_object, GAsyncResult *re
 	if (value && G_VALUE_HOLDS(value, GDK_TYPE_FILE_LIST))
 		{
 		auto *file_list = static_cast<GdkFileList *>(g_value_get_boxed(value));
-		for (GSList *work = gdk_file_list_get_files(file_list); work; work = work->next)
-			{
-			g_autofree gchar *path = g_file_get_path(G_FILE(work->data));
-			if (path) list = g_list_prepend(list, file_data_new_no_grouping(path));
-			}
-		list = g_list_reverse(list);
+		list = dnd_file_list_from_files(file_list);
 		}
 
 	read_data->callback(drop, list, read_data->data);

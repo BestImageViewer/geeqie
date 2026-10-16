@@ -3,6 +3,7 @@
 unit_test_sources = files(
 'cache.cc',
 'collection-file-source.cc',
+'dnd.cc',
 'editors.cc',
 'filecache.cc',
 'filedata/filedata.cc',
