@@ -846,13 +846,11 @@ void bar_pane_update_from_config(GtkWidget *pane, const gchar **attribute_names,
 	if (!pd || !pd->pane_update_from_config) return;
 
 	pd->pane_update_from_config(pane, attribute_names, attribute_values);
-}
 
-void bar_pane_update_expander(const PaneData &pd)
-{
-	GtkWidget *expander = gtk_widget_get_parent(pd.widget);
+	GtkWidget *expander = gtk_widget_get_parent(pd->widget);
+	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd->expanded);
 
-	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd.expanded);
+	pd->pane_update(pane);
 }
 
 const gchar *bar_pane_translate_title(PaneType type, const gchar *id, const gchar *title)
