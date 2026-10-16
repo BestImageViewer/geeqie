@@ -5,12 +5,15 @@
 #include <algorithm>
 #include <future>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <glib.h>
 #include <glib/gstdio.h>
 
 #include "editors.h"
+#include "filedata.h"
+#include "filefilter.h"
 #include "layout-util.h"
 #include "main.h"
 #include "options.h"
@@ -118,6 +121,59 @@ TEST_F(PluginDiscovery, ExecutableChecksAndDisabledPluginsArePreserved)
 	EXPECT_EQ(get_editor_by_command("missing.desktop"), nullptr);
 	EXPECT_TRUE(editor_list_get().empty());
 	EXPECT_EQ(g_list_model_get_n_items(G_LIST_MODEL(desktop_file_list)), 2U);
+}
+
+TEST_F(PluginDiscovery, MimeTypesUseSharedDatabaseExtensionsAndAliases)
+{
+	filter_add_defaults();
+	filter_rebuild();
+	write_plugin("jpeg.desktop", "MimeType=image/jpeg;\n");
+	write_plugin("bitmap.desktop", "MimeType=image/x-bmp;\n");
+	write_plugin("pdf.desktop", "MimeType=application/pdf;\n");
+	install(editor_load_desktop_files({folder()}, nullptr));
+	for (const auto &entry : {std::make_pair("jpeg.desktop", ".jpe"),
+	                          std::make_pair("bitmap.desktop", ".bmp"),
+	                          std::make_pair("pdf.desktop", ".pdf")})
+		{
+		const auto *editor = get_editor_by_command(entry.first);
+		ASSERT_NE(editor, nullptr);
+		EXPECT_FALSE(editor->hidden);
+		EXPECT_NE(g_list_find_custom(editor->ext_list, entry.second,
+		                            reinterpret_cast<GCompareFunc>(g_strcmp0)), nullptr);
+		}
+}
+
+TEST_F(PluginDiscovery, MimeWildcardDoesNotAcceptUnrelatedFiles)
+{
+	filter_add_defaults();
+	filter_rebuild();
+	write_plugin("images.desktop", "MimeType=image/*;\n");
+	install(editor_load_desktop_files({folder()}, nullptr));
+	const auto *editor = get_editor_by_command("images.desktop");
+	ASSERT_NE(editor, nullptr);
+	EXPECT_FALSE(editor->hidden);
+	for (const auto &entry : {std::make_pair("/nonexistent/test.jpg", true),
+	                          std::make_pair("/nonexistent/test.pdf", false)})
+		{
+		auto *fd = file_data_new_simple(entry.first);
+		GList *files = g_list_append(nullptr, fd);
+		const auto flags = editor_command_parse(editor, files, FALSE, nullptr);
+		EXPECT_EQ(editor_errors(flags) == 0, entry.second);
+		g_list_free(files);
+		file_data_unref(fd);
+		}
+}
+
+TEST_F(PluginDiscovery, ExplicitExtensionsOverrideMimeTypes)
+{
+	write_plugin("override-mime.desktop", "MimeType=image/jpeg;\nX-Geeqie-File-Extensions=.png\n");
+	write_plugin("unknown-mime.desktop", "MimeType=application/x-geeqie-nonexistent-type;\n");
+	install(editor_load_desktop_files({folder()}, nullptr));
+	const auto *editor = get_editor_by_command("override-mime.desktop");
+	ASSERT_NE(editor, nullptr);
+	ASSERT_EQ(g_list_length(editor->ext_list), 1U);
+	EXPECT_STREQ(static_cast<const gchar *>(editor->ext_list->data), ".png");
+	EXPECT_EQ(get_editor_by_command("unknown-mime.desktop"), nullptr);
 }
 
 TEST_F(PluginDiscovery, EmptyAndCancelledDiscovery)

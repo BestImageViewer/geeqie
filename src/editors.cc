@@ -29,6 +29,7 @@
 #include <cstring>
 #include <utility>
 
+#include <gio/gio.h>
 #include <glib-object.h>
 
 #include "accelerators.h"
@@ -217,79 +218,34 @@ static void editor_description_free(EditorDescription *editor)
 
 static GList *editor_mime_types_to_extensions(gchar **mime_types)
 {
-	/** @FIXME this should be rewritten to use the shared mime database, as soon as we switch to gio */
-
-	static constexpr struct
-	{
-		const gchar *mime_type;
-		const gchar *extensions;
-	} conv_table[] = {
-		{"image/*",		"*"},
-		{"image/bmp",		".bmp"},
-		{"image/gif",		".gif"},
-		{"image/heic",		".heic"},
-		{"image/jpeg",		".jpeg;.jpg;.mpo"},
-		{"image/jpg",		".jpg;.jpeg"},
-		{"image/jxl",		".jxl"},
-		{"image/webp",		".webp"},
-		{"image/pcx",		".pcx"},
-		{"image/png",		".png"},
-		{"image/svg",		".svg"},
-		{"image/svg+xml",	".svg"},
-		{"image/svg+xml-compressed", 	".svg"},
-		{"image/tiff",		".tiff;.tif;.mef"},
-		{"image/vnd-ms.dds",	".dds"},
-		{"image/x-adobe-dng",	".dng"},
-		{"image/x-bmp",		".bmp"},
-		{"image/x-canon-crw",	".crw"},
-		{"image/x-canon-cr2",	".cr2"},
-		{"image/x-canon-cr3",	".cr3"},
-		{"image/x-cr2",		".cr2"},
-		{"image/x-dcraw",	"%raw;.mos"},
-		{"image/x-epson-erf",	"%erf"},
-		{"image/x-exr",		".exr"},
-		{"image/x-ico",		".ico"},
-		{"image/x-kodak-kdc",	".kdc"},
-		{"image/x-mrw",		".mrw"},
-		{"image/x-minolta-mrw",	".mrw"},
-		{"image/x-MS-bmp",	".bmp"},
-		{"image/x-nef",		".nef"},
-		{"image/x-nikon-nef",	".nef"},
-		{"image/x-nikon-nrw",	".nrw"},
-		{"image/x-panasonic-raw",	".raw"},
-		{"image/x-panasonic-rw2",	".rw2"},
-		{"image/x-pentax-pef",	".pef"},
-		{"image/x-orf",		".orf"},
-		{"image/x-olympus-orf",	".orf"},
-		{"image/x-pcx",		".pcx"},
-		{"image/xpm",		".xpm"},
-		{"image/x-png",		".png"},
-		{"image/x-portable-anymap",	".pam"},
-		{"image/x-portable-bitmap",	".pbm"},
-		{"image/x-portable-graymap",	".pgm"},
-		{"image/x-portable-pixmap",	".ppm"},
-		{"image/x-psd",		".psd"},
-		{"image/x-raf",		".raf"},
-		{"image/x-fuji-raf",	".raf"},
-		{"image/x-sgi",		".sgi"},
-		{"image/x-sony-arw",	".arw"},
-		{"image/x-sony-sr2",	".sr2"},
-		{"image/x-sony-srf",	".srf"},
-		{"image/x-tga",		".tga"},
-		{"image/x-xbitmap",	".xbm"},
-		{"image/x-xcf",		".xcf"},
-		{"image/x-xpixmap",	".xpm"},
-		{"application/x-navi-animation",		".ani"},
-		{"application/x-ptoptimizer-script",	".pto"},
-	};
-
-	gint i;
 	GList *list = nullptr;
 
-	for (i = 0; mime_types[i]; i++)
-		for (const auto& c : conv_table)
-			if (strcmp(mime_types[i], c.mime_type) == 0)
-				list = g_list_concat(list, filter_to_list(c.extensions));
+	// Resolve registered extensions through the MIME database without reading files.
+	for (GList *work = filter_get_list(); work; work = work->next)
+		{
+		const auto *filter = static_cast<const FilterEntry *>(work->data);
+		GList *extensions = filter_to_list(filter->extensions);
+		for (GList *extension = extensions; extension; extension = extension->next)
+			{
+			const auto *ext = static_cast<const gchar *>(extension->data);
+			g_autofree gchar *filename = g_strconcat("file", ext, nullptr);
+			g_autofree gchar *content_type = g_content_type_guess(filename, nullptr, 0, nullptr);
+			if (!content_type || g_content_type_is_unknown(content_type)) continue;
+
+			for (gchar **mime_type = mime_types; *mime_type; ++mime_type)
+				{
+				if (g_content_type_is_mime_type(content_type, *mime_type))
+					{
+					if (!g_list_find_custom(list, ext, reinterpret_cast<GCompareFunc>(g_ascii_strcasecmp)))
+						{
+						list = g_list_append(list, g_strdup(ext));
+						}
+					break;
+					}
+				}
+			}
+		g_list_free_full(extensions, g_free);
+		}
 
 	return list;
 }
