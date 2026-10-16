@@ -23,8 +23,10 @@
 
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 #include <glib-object.h>
 #include <graphene.h>
@@ -34,6 +36,7 @@
 #include "main-defines.h"
 #include "options.h"
 #include "ui-fileops.h"
+#include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "utilops.h"
@@ -58,7 +61,6 @@ constexpr gchar VDLIST_FD_DATA[] = "vdlist-fd";
 
 } // namespace
 
-static void vdlist_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer data);
 static GtkWidget *vdlist_icon_widget_new(const gchar *icon_name, const gchar *emblem_name, GIcon *icon)
 {
 	GtkWidget *image = icon ? gtk_image_new_from_gicon(icon) : ui_image_new_from_icon_name(icon_name);
@@ -232,7 +234,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		GtkWidget *button = gtk_button_new();
 		GtkWidget *row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 		GtkWidget *icon_widget = vdlist_icon_widget_new(icon_name, emblem_name, vd_is_collection(fd) ? vd->pf->collection : nullptr);
-		GtkWidget *name = gtk_editable_label_new(fd->name);
+		GtkWidget *name = gtk_label_new(fd->name);
 		GtkWidget *date_label = gtk_label_new(date);
 
 		gtk_widget_set_hexpand(button, TRUE);
@@ -241,6 +243,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		gtk_widget_set_focusable(button, TRUE);
 		gtk_widget_set_hexpand(name, TRUE);
 		gtk_widget_set_can_target(name, FALSE);
+		gtk_label_set_xalign(GTK_LABEL(name), 0.0);
 		gtk_label_set_xalign(GTK_LABEL(date_label), 0.0);
 		gtk_widget_set_tooltip_text(button, link);
 
@@ -258,10 +261,6 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		g_hash_table_insert(VDLIST(vd)->buttons, fd, button);
 		g_hash_table_insert(VDLIST(vd)->labels, fd, name);
 
-		if (vd_is_collection(fd))
-			gtk_editable_set_editable(GTK_EDITABLE(name), FALSE);
-		else
-			g_signal_connect(name, "notify::editing", G_CALLBACK(vdlist_editing_changed), vd);
 		gtk_box_append(GTK_BOX(VDLIST(vd)->box), button);
 		work = work->next;
 		}
@@ -461,33 +460,92 @@ void vdlist_color_set(ViewDir *vd, FileData *fd, gboolean set)
 		}
 }
 
-static void vdlist_editing_changed(GtkEditableLabel *label, GParamSpec *, gpointer data)
+struct DirectoryRenameData
 {
-	if (gtk_editable_label_get_editing(label)) return;
-	gtk_widget_set_can_target(GTK_WIDGET(label), FALSE);
+	ViewDir *vd;
+	gchar *path;
+};
+
+static gboolean vdlist_rename_focus_after_layout(GtkWidget *widget, GdkFrameClock *clock, gpointer data)
+{
 	auto *vd = static_cast<ViewDir *>(data);
-	auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(label), VDLIST_FD_DATA));
+	auto *button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, VDLIST(vd)->selected_fd));
+	if (button && gtk_widget_get_height(button) > 0) gtk_widget_grab_focus(button);
+	return vdlist_scroll_after_layout(widget, clock, data);
+}
+
+static void vdlist_rename_focus(ViewDir *vd, const gchar *path)
+{
+	FileData *fd = vdlist_row_by_path(vd, path, nullptr);
 	if (!fd) return;
 
-	const gchar *new_name = gtk_editable_get_text(GTK_EDITABLE(label));
-	if (g_strcmp0(new_name, fd->name) == 0) return;
-	g_autofree gchar *base = remove_level_from_path(fd->path);
-	g_autofree gchar *new_path = g_build_filename(base, new_name, NULL);
-	file_util_rename_dir(fd, new_path, vd->view, [vd](gboolean success, const gchar *path)
+	vdlist_scroll_to_fd(vd, fd, 0.5);
+	if (VDLIST(vd)->scroll_id) gtk_widget_remove_tick_callback(vd->view, VDLIST(vd)->scroll_id);
+	VDLIST(vd)->scroll_id = gtk_widget_add_tick_callback(vd->view, vdlist_rename_focus_after_layout, vd, nullptr);
+}
+
+static void vdlist_rename_activate(GtkEntry *entry, gpointer data)
+{
+	auto *rename = static_cast<DirectoryRenameData *>(data);
+	auto *vd = rename->vd;
+	g_autofree gchar *base = remove_level_from_path(rename->path);
+	g_autofree gchar *new_path = g_build_filename(base, gtk_editable_get_text(GTK_EDITABLE(entry)), nullptr);
+	auto fd = FileData::new_dir(rename->path);
+	GtkWidget *popover = gtk_widget_get_ancestor(GTK_WIDGET(entry), GTK_TYPE_POPOVER);
+	gtk_popover_popdown(GTK_POPOVER(popover));
+	if (g_strcmp0(new_path, fd->path) == 0) return;
+
+	file_util_rename_dir(fd, new_path, vd->view, [vd, old_path = std::string(fd->path)](gboolean success, const gchar *path)
 	{
-		if (!success) return;
-		vd_refresh(vd);
-		FileData *fd = vdlist_row_by_path(vd, path, nullptr);
-		if (fd) vdlist_scroll_to_fd(vd, fd, 0.5);
+		if (success) vd_refresh(vd);
+		vdlist_rename_focus(vd, success ? path : old_path.c_str());
 	});
 }
 
 void vdlist_rename_by_data(ViewDir *vd, FileData *fd)
 {
 	auto *label = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->labels, fd));
-	if (!label) return;
-	gtk_widget_set_can_target(label, TRUE);
-	gtk_editable_label_start_editing(GTK_EDITABLE_LABEL(label));
+	if (!label || vd_is_collection(fd)) return;
+
+	GtkWidget *popover = gtk_popover_new();
+	GtkWidget *entry = gtk_entry_new();
+	gtk_editable_set_text(GTK_EDITABLE(entry), fd->name);
+	gtk_editable_select_region(GTK_EDITABLE(entry), 0, -1);
+	g_autoptr(PangoLayout) text = gtk_widget_create_pango_layout(entry, fd->name);
+	gint width;
+	pango_layout_get_pixel_size(text, &width, nullptr);
+	GtkRoot *root = gtk_widget_get_root(vd->widget);
+	const gint available = root ? gtk_widget_get_width(GTK_WIDGET(root)) : 800;
+	gtk_widget_set_size_request(entry, std::min(width + 40, std::max(200, available - 40)), -1);
+
+	gtk_widget_set_parent(popover, vd->widget);
+	gtk_popover_set_has_arrow(GTK_POPOVER(popover), FALSE);
+	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
+	gtk_widget_set_halign(popover, GTK_ALIGN_START);
+	graphene_rect_t bounds;
+	if (gtk_widget_compute_bounds(label, vd->widget, &bounds))
+		{
+		GdkRectangle rect{static_cast<int>(bounds.origin.x), static_cast<int>(bounds.origin.y),
+		                  static_cast<int>(bounds.size.width), static_cast<int>(bounds.size.height)};
+		gtk_popover_set_pointing_to(GTK_POPOVER(popover), &rect);
+		}
+	gtk_popover_set_child(GTK_POPOVER(popover), entry);
+	auto *rename = new DirectoryRenameData{vd, g_strdup(fd->path)};
+	g_object_set_data_full(G_OBJECT(popover), "directory-rename", rename, [](gpointer data)
+	{
+		auto *rename = static_cast<DirectoryRenameData *>(data);
+		g_free(rename->path);
+		delete rename;
+	});
+	g_signal_connect(entry, "activate", G_CALLBACK(vdlist_rename_activate), rename);
+	g_signal_connect(popover, "closed", G_CALLBACK(+[](GtkPopover *popover, gpointer data)
+	{
+		auto *rename = static_cast<DirectoryRenameData *>(data);
+		vdlist_rename_focus(rename->vd, rename->path);
+		gtk_widget_unparent(GTK_WIDGET(popover));
+	}), rename);
+	popover_popup(popover);
+	gtk_widget_grab_focus(entry);
 }
 
 ViewDir *vdlist_new(ViewDir *vd)
