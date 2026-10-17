@@ -723,11 +723,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 {
 	if (!pgd) return;
 
-	if (pgd->create_markers_id != 0)
-		{
-		g_source_remove(pgd->create_markers_id);
-		pgd->create_markers_id = 0;
-		}
+	g_clear_handle_id(&pgd->create_markers_id, g_source_remove);
 
 	bar_pane_gps_clear_marker_queue(pgd);
 	file_data_list_free(pgd->selection_list);

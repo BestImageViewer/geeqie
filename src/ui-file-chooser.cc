@@ -697,11 +697,7 @@ void finish_file_dialog(PendingFileDialog *pending, gint response_id)
 		}
 
 	pending->finished = TRUE;
-	if (pending->preview_timer_id != 0)
-		{
-		g_source_remove(pending->preview_timer_id);
-		pending->preview_timer_id = 0;
-		}
+	g_clear_handle_id(&pending->preview_timer_id, g_source_remove);
 
 	g_autoptr(GFile) file = nullptr;
 	if (response_id == GTK_RESPONSE_ACCEPT || response_id == FILE_DIALOG_RESPONSE_ALTERNATE)
@@ -782,10 +778,7 @@ void file_dialog_destroy_cb(GtkWidget *, gpointer data)
 		pending->callback(nullptr, pending->data);
 		}
 
-	if (pending->preview_timer_id != 0)
-		{
-		g_source_remove(pending->preview_timer_id);
-		}
+	if (pending->preview_timer_id) g_source_remove(pending->preview_timer_id);
 
 	g_free(pending->preview_path);
 	g_clear_object(&pending->navigation_child);

@@ -112,7 +112,7 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(WindowNames, window_names_free)
 
 struct LayoutEditors
 {
-	gint reload_idle_id = -1;
+	guint reload_idle_id = 0;
 	GTask *discovery_task = nullptr;
 	EditorDesktopFiles desktop_files;
 	std::size_t next_file = 0;
@@ -3005,7 +3005,7 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 	if (cur_lw) layout_window_foreach(layout_toolbars_apply);
 
 	layout_editors->desktop_files.clear();
-	layout_editors->reload_idle_id = -1;
+	layout_editors->reload_idle_id = 0;
 	return G_SOURCE_REMOVE;
 }
 
@@ -3041,11 +3041,7 @@ void layout_editors_reload_start()
 	// The plugin dialog can be opened before the first discovery completes.
 	if (!desktop_file_list) editor_table_clear();
 
-	if (layout_editors.reload_idle_id != -1)
-		{
-		g_source_remove(layout_editors.reload_idle_id);
-		layout_editors.reload_idle_id = -1;
-		}
+	g_clear_handle_id(&layout_editors.reload_idle_id, g_source_remove);
 	layout_editors.desktop_files.clear();
 	if (layout_editors.discovery_task)
 		{
@@ -3064,12 +3060,12 @@ void layout_editors_reload_start()
 void layout_editors_reload_finish()
 {
 	if (layout_editors.discovery_task) layout_editors_take_discovery();
-	if (layout_editors.reload_idle_id == -1) return;
+	if (layout_editors.reload_idle_id == 0) return;
 
 	DEBUG_1("%s layout_editors_reload_finish", get_exec_time());
 
 	g_source_remove(layout_editors.reload_idle_id);
-	while (layout_editors.reload_idle_id != -1)
+	while (layout_editors.reload_idle_id != 0)
 		{
 		layout_editors_reload_idle_cb(&layout_editors);
 		}
