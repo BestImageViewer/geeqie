@@ -41,6 +41,9 @@
 
 struct HistMap;
 
+namespace
+{
+
 /*
  *-------------------------------------------------------------------
  * keyword / comment utils
@@ -59,35 +62,8 @@ struct PaneHistogramData
 	guint idle_id; /* event source id */
 };
 
-static gboolean bar_pane_histogram_update_cb(gpointer data);
 
-
-static void bar_pane_histogram_update(PaneHistogramData *phd)
-{
-	if (phd->pixbuf) g_object_unref(phd->pixbuf);
-	phd->pixbuf = nullptr;
-
-	gtk_label_set_text(GTK_LABEL(phd->pane.title), phd->histogram.label());
-
-	if (!phd->histogram_width || !phd->histogram_height || !phd->pane.fd) return;
-
-	/** histmap_get is relatively expensive, run it only when we really need it
-	   and with lower priority than pixbuf_renderer
-	   @FIXME this does not work for fullscreen */
-	if (gtk_widget_get_mapped(phd->drawing_area))
-		{
-		if (!phd->idle_id)
-			{
-			phd->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, bar_pane_histogram_update_cb, phd, nullptr);
-			}
-		}
-	else
-		{
-		phd->need_update = TRUE;
-		}
-}
-
-static gboolean bar_pane_histogram_update_cb(gpointer data)
+gboolean bar_pane_histogram_update_cb(gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 
@@ -115,8 +91,31 @@ static gboolean bar_pane_histogram_update_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
+void bar_pane_histogram_update(PaneHistogramData *phd)
+{
+	g_clear_object(&phd->pixbuf);
 
-static void bar_pane_histogram_update(GtkWidget *pane)
+	gtk_label_set_text(GTK_LABEL(phd->pane.title), phd->histogram.label());
+
+	if (!phd->histogram_width || !phd->histogram_height || !phd->pane.fd) return;
+
+	/** histmap_get is relatively expensive, run it only when we really need it
+	   and with lower priority than pixbuf_renderer
+	   @FIXME this does not work for fullscreen */
+	if (gtk_widget_get_mapped(phd->drawing_area))
+		{
+		if (!phd->idle_id)
+			{
+			phd->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, bar_pane_histogram_update_cb, phd, nullptr);
+			}
+		}
+	else
+		{
+		phd->need_update = TRUE;
+		}
+}
+
+void bar_pane_histogram_update(GtkWidget *pane)
 {
 	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!phd) return;
@@ -124,7 +123,7 @@ static void bar_pane_histogram_update(GtkWidget *pane)
 	bar_pane_histogram_update(phd);
 }
 
-static void bar_pane_histogram_write_config(GtkWidget *pane, RcString &rc)
+void bar_pane_histogram_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!phd) return;
@@ -136,7 +135,7 @@ static void bar_pane_histogram_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("/>");
 }
 
-static void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto *phd = static_cast<PaneHistogramData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!phd) return;
@@ -161,7 +160,7 @@ static void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar *
 	phd->histogram.set_mode(histogram_mode);
 }
 
-static void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer data)
+void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_PIXBUF)) && fd == phd->pane.fd)
@@ -171,7 +170,7 @@ static void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer
 		}
 }
 
-static void bar_pane_histogram_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint, gpointer data)
+void bar_pane_histogram_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return;
@@ -191,7 +190,7 @@ static void bar_pane_histogram_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint
 	cairo_surface_destroy(surface);
 }
 
-static void bar_pane_histogram_resize_cb(GtkWidget *, gint width, gint height, gpointer data)
+void bar_pane_histogram_resize_cb(GtkWidget *, gint width, gint height, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 
@@ -200,7 +199,7 @@ static void bar_pane_histogram_resize_cb(GtkWidget *, gint width, gint height, g
 	bar_pane_histogram_update(phd);
 }
 
-static void bar_pane_histogram_destroy(gpointer data)
+void bar_pane_histogram_destroy(gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 
@@ -213,7 +212,7 @@ static void bar_pane_histogram_destroy(gpointer data)
 	g_free(phd);
 }
 
-static const gchar *histogram_channel_action_value(HistogramChannel channel)
+const gchar *histogram_channel_action_value(HistogramChannel channel)
 {
 	switch (channel)
 		{
@@ -232,7 +231,7 @@ static const gchar *histogram_channel_action_value(HistogramChannel channel)
 		}
 }
 
-static HistogramChannel histogram_channel_from_action_value(const gchar *value)
+HistogramChannel histogram_channel_from_action_value(const gchar *value)
 {
 	if (g_str_equal(value, "red")) return HCHAN_R;
 	if (g_str_equal(value, "green")) return HCHAN_G;
@@ -243,7 +242,7 @@ static HistogramChannel histogram_channel_from_action_value(const gchar *value)
 	return HCHAN_RGB;
 }
 
-static const gchar *histogram_mode_action_value(HistogramMode mode)
+const gchar *histogram_mode_action_value(HistogramMode mode)
 {
 	switch (mode)
 		{
@@ -256,7 +255,7 @@ static const gchar *histogram_mode_action_value(HistogramMode mode)
 		}
 }
 
-static HistogramMode histogram_mode_from_action_value(const gchar *value)
+HistogramMode histogram_mode_from_action_value(const gchar *value)
 {
 	if (g_str_equal(value, "linear")) return HMODE_LINEAR;
 	if (g_str_equal(value, "log")) return HMODE_LOG;
@@ -264,7 +263,7 @@ static HistogramMode histogram_mode_from_action_value(const gchar *value)
 	return HMODE_LINEAR;
 }
 
-static void bar_pane_histogram_channel_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
+void bar_pane_histogram_channel_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return;
@@ -277,7 +276,7 @@ static void bar_pane_histogram_channel_change_state_cb(GSimpleAction *action, GV
 	bar_pane_histogram_update(phd);
 }
 
-static void bar_pane_histogram_mode_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
+void bar_pane_histogram_mode_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return;
@@ -290,7 +289,7 @@ static void bar_pane_histogram_mode_change_state_cb(GSimpleAction *action, GVari
 	bar_pane_histogram_update(phd);
 }
 
-static void bar_pane_histogram_append_radio_item(GMenu *menu, const gchar *label, const gchar *action_name, const gchar *target)
+void bar_pane_histogram_append_radio_item(GMenu *menu, const gchar *label, const gchar *action_name, const gchar *target)
 {
 	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
 
@@ -298,7 +297,7 @@ static void bar_pane_histogram_append_radio_item(GMenu *menu, const gchar *label
 	g_menu_append_item(menu, item);
 }
 
-static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd, GtkWidget *parent, gdouble x, gdouble y)
+GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd, GtkWidget *parent, gdouble x, gdouble y)
 {
 	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
 	g_autoptr(GSimpleAction) channel_action = g_simple_action_new_stateful("channel", G_VARIANT_TYPE_STRING,
@@ -331,7 +330,7 @@ static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd, GtkWidget *par
 	return popup_menu_at(menu, parent, x, y);
 }
 
-static void bar_pane_histogram_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
+void bar_pane_histogram_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	GtkWidget *menu;
@@ -340,8 +339,7 @@ static void bar_pane_histogram_press_cb(GtkGestureClick *gesture, gint, gdouble 
 	(void)menu;
 }
 
-
-static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gint height, gboolean expanded, gint histogram_channel, gint histogram_mode)
+GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gint height, gboolean expanded, gint histogram_channel, gint histogram_mode)
 {
 	auto *phd = g_new0(PaneHistogramData, 1);
 
@@ -381,6 +379,8 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 
 	return phd->pane.widget;
 }
+
+} // namespace name
 
 GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {

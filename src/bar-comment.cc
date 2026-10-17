@@ -42,15 +42,14 @@
 #endif
 #include "ui-misc.h"
 
-static void bar_pane_comment_changed(GtkTextBuffer *buffer, gpointer data);
+namespace
+{
 
 /*
  *-------------------------------------------------------------------
  * keyword / comment utils
  *-------------------------------------------------------------------
  */
-
-
 
 struct PaneCommentData
 {
@@ -61,7 +60,7 @@ struct PaneCommentData
 };
 
 
-static void bar_pane_comment_write(PaneCommentData *pcd)
+void bar_pane_comment_write(PaneCommentData *pcd)
 {
 	if (!pcd->pane.fd) return;
 
@@ -70,8 +69,14 @@ static void bar_pane_comment_write(PaneCommentData *pcd)
 	metadata_write_string(pcd->pane.fd, pcd->key, comment);
 }
 
+void bar_pane_comment_changed_cb(GtkTextBuffer *, gpointer data)
+{
+	auto *pcd = static_cast<PaneCommentData *>(data);
 
-static void bar_pane_comment_update(PaneCommentData *pcd)
+	bar_pane_comment_write(pcd);
+}
+
+void bar_pane_comment_update(PaneCommentData *pcd)
 {
 	g_autofree gchar *comment = nullptr;
 	const gchar *comment_not_null;
@@ -92,16 +97,16 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 
 	if (strcmp(orig_comment, comment_not_null) != 0)
 		{
-		g_signal_handlers_block_by_func(comment_buffer, (gpointer)bar_pane_comment_changed, pcd);
+		g_signal_handlers_block_by_func(comment_buffer, (gpointer)bar_pane_comment_changed_cb, pcd);
 		gtk_text_buffer_set_text(comment_buffer, comment_not_null, -1);
-		g_signal_handlers_unblock_by_func(comment_buffer, (gpointer)bar_pane_comment_changed, pcd);
+		g_signal_handlers_unblock_by_func(comment_buffer, (gpointer)bar_pane_comment_changed_cb, pcd);
 		}
 
 	gtk_widget_set_sensitive(pcd->comment_view, (pcd->pane.fd != nullptr));
 }
 
 template<gboolean append>
-static void bar_pane_comment_set_selection_cb(GSimpleAction *, GVariant *, gpointer data)
+void bar_pane_comment_set_selection_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *pcd = static_cast<PaneCommentData *>(data);
 	g_autofree gchar *comment = text_widget_text_pull(pcd->comment_view);
@@ -120,8 +125,7 @@ static void bar_pane_comment_set_selection_cb(GSimpleAction *, GVariant *, gpoin
 		}
 }
 
-
-static void bar_pane_comment_update(GtkWidget *pane)
+void bar_pane_comment_update(GtkWidget *pane)
 {
 	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
@@ -129,7 +133,7 @@ static void bar_pane_comment_update(GtkWidget *pane)
 	bar_pane_comment_update(pcd);
 }
 
-static void bar_pane_comment_set_height(GtkWidget *pane)
+void bar_pane_comment_set_height(GtkWidget *pane)
 {
 	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
@@ -144,7 +148,7 @@ static void bar_pane_comment_set_height(GtkWidget *pane)
 		}
 }
 
-static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
+void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
@@ -156,7 +160,7 @@ static void bar_pane_comment_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("/>");
 }
 
-static void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto *pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
@@ -183,7 +187,7 @@ static void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **a
 	gtk_widget_set_size_request(pcd->pane.widget, -1, pcd->height);
 }
 
-static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer data)
+void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pcd->pane.fd)
@@ -194,15 +198,7 @@ static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer d
 		}
 }
 
-static void bar_pane_comment_changed(GtkTextBuffer *, gpointer data)
-{
-	auto pcd = static_cast<PaneCommentData *>(data);
-
-	bar_pane_comment_write(pcd);
-}
-
-
-static void bar_pane_comment_destroy(gpointer data)
+void bar_pane_comment_destroy(gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
@@ -215,7 +211,7 @@ static void bar_pane_comment_destroy(gpointer data)
 	g_free(pcd);
 }
 
-static void bar_pane_comment_set_extra_menu(PaneCommentData *pcd)
+void bar_pane_comment_set_extra_menu(PaneCommentData *pcd)
 {
 	static const GActionEntry comment_actions[] = {
 		{ "append-to-selection",  bar_pane_comment_set_selection_cb<TRUE>,  nullptr, nullptr, nullptr, {} },
@@ -239,8 +235,7 @@ static void bar_pane_comment_set_extra_menu(PaneCommentData *pcd)
 	gtk_text_view_set_extra_menu(GTK_TEXT_VIEW(pcd->comment_view), G_MENU_MODEL(menu));
 }
 
-
-static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, const gchar *key, gboolean expanded, gint height)
+GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, const gchar *key, gboolean expanded, gint height)
 {
 	PaneCommentData *pcd;
 	GtkTextBuffer *buffer;
@@ -283,12 +278,14 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pcd->comment_view));
 	g_signal_connect(G_OBJECT(buffer), "changed",
-			 G_CALLBACK(bar_pane_comment_changed), pcd);
+	                 G_CALLBACK(bar_pane_comment_changed_cb), pcd);
 
 	file_data_register_notify_func(bar_pane_comment_notify_cb, pcd, NOTIFY_PRIORITY_LOW);
 
 	return pcd->pane.widget;
 }
+
+} // namespace
 
 GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {

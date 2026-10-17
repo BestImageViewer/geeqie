@@ -34,6 +34,8 @@
 #include "rcfile.h"
 #include "ui-misc.h"
 
+namespace {
+
 /**
  * @file
  * Rating values as specified by: \n
@@ -50,7 +52,7 @@ struct PaneRatingData
 	gboolean updating;
 };
 
-static void bar_pane_rating_update(PaneRatingData *prd)
+void bar_pane_rating_update(PaneRatingData *prd)
 {
 	guint64 rating;
 
@@ -61,7 +63,7 @@ static void bar_pane_rating_update(PaneRatingData *prd)
 	prd->updating = FALSE;
 }
 
-static void bar_pane_rating_update(GtkWidget *pane)
+void bar_pane_rating_update(GtkWidget *pane)
 {
 	auto *prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!prd) return;
@@ -69,7 +71,7 @@ static void bar_pane_rating_update(GtkWidget *pane)
 	bar_pane_rating_update(prd);
 }
 
-static void bar_pane_rating_write_config(GtkWidget *pane, RcString &rc)
+void bar_pane_rating_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!prd) return;
@@ -80,7 +82,7 @@ static void bar_pane_rating_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_STRING("/>");
 }
 
-static void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto *prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!prd) return;
@@ -99,7 +101,7 @@ static void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **at
 		}
 }
 
-static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer data)
+void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
 
@@ -110,7 +112,7 @@ static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer da
 		}
 }
 
-static void bar_pane_rating_destroy(gpointer data)
+void bar_pane_rating_destroy(gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
 
@@ -119,7 +121,7 @@ static void bar_pane_rating_destroy(gpointer data)
 	g_free(prd);
 }
 
-static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer data)
+void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
 	if (prd->updating || !gtk_check_button_get_active(checkbutton)) return;
@@ -145,7 +147,7 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 	metadata_write_string(prd->pane.fd, RATING_KEY, rating);
 }
 
-static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gboolean expanded)
+GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gboolean expanded)
 {
 	PaneRatingData *prd;
 
@@ -200,6 +202,8 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 	return prd->pane.widget;
 }
+
+} // namespace
 
 GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
