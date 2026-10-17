@@ -669,11 +669,7 @@ static void accel_conflicts_window_update();
 
 static void config_window_close_cb(GtkWidget *, gpointer)
 {
-	if (accel_reload_idle_id)
-		{
-		g_source_remove(accel_reload_idle_id);
-		accel_reload_idle_id = 0;
-		}
+	g_clear_handle_id(&accel_reload_idle_id, g_source_remove);
 	if (accel_conflicts_window)
 		{
 		gtk_window_destroy(GTK_WINDOW(accel_conflicts_window));
