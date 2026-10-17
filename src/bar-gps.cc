@@ -90,7 +90,7 @@ struct PaneGPSData
 	gboolean show_direction;
 	GtkWidget *map_popover_parent;
 	GList *selection_list;
-	GList *not_added;
+	GList *marker_queue;
 	guint num_added;
 	guint create_markers_id;
 	GList *geocode_list;
@@ -645,26 +645,24 @@ void bar_pane_gps_set_status(PaneGPSData *pgd)
 
 void bar_pane_gps_clear_marker_queue(PaneGPSData *pgd)
 {
-	g_list_free(pgd->not_added);
-	pgd->not_added = nullptr;
+	g_clear_list(&pgd->marker_queue, NULL);
 }
 
 gboolean bar_pane_gps_create_markers_cb(gpointer data)
 {
 	auto *pgd = static_cast<PaneGPSData *>(data);
 
-	if (!pgd || !pgd->not_added)
+	if (!pgd) return G_SOURCE_REMOVE;
+
+	if (!pgd->marker_queue)
 		{
-		if (pgd)
-			{
-			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), 0);
-			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
-			pgd->create_markers_id = 0;
-			}
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), 0);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
+		pgd->create_markers_id = 0;
 		return G_SOURCE_REMOVE;
 		}
 
-	const gint selection_added = pgd->selection_count - g_list_length(pgd->not_added);
+	const gint selection_added = pgd->selection_count - g_list_length(pgd->marker_queue);
 	if (pgd->selection_count > 0)
 		{
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), static_cast<gdouble>(selection_added) / static_cast<gdouble>(pgd->selection_count));
@@ -672,16 +670,14 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 	g_autofree gchar *message = g_strdup_printf("%u/%i", selection_added, pgd->selection_count);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), message);
 
-	GList *work = pgd->not_added;
-	auto *fd = static_cast<FileData *>(work->data);
-	pgd->not_added = work->next;
-	g_list_free_1(work);
+	auto *fd = static_cast<FileData *>(pgd->marker_queue->data);
+	pgd->marker_queue = g_list_delete_link(pgd->marker_queue, pgd->marker_queue);
 
 	bar_pane_gps_add_file_marker(pgd, fd);
 
 	bar_pane_gps_set_status(pgd);
 
-	if (pgd->not_added)
+	if (pgd->marker_queue)
 		{
 		pgd->create_markers_id = g_idle_add(bar_pane_gps_create_markers_cb, pgd);
 		}
@@ -689,7 +685,6 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 		{
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), 0);
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
-		bar_pane_gps_clear_marker_queue(pgd);
 		pgd->create_markers_id = 0;
 		bar_pane_gps_fit_markers(pgd);
 		}
@@ -755,7 +750,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 			}
 		else
 			{
-			pgd->not_added = g_list_copy(pgd->selection_list);
+			pgd->marker_queue = g_list_copy(pgd->selection_list);
 			pgd->create_markers_id = g_idle_add(bar_pane_gps_create_markers_cb, pgd);
 			}
 		}
