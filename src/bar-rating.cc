@@ -126,22 +126,15 @@ void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer data)
 	auto prd = static_cast<PaneRatingData *>(data);
 	if (prd->updating || !gtk_check_button_get_active(checkbutton)) return;
 
-	const gchar *rating_label;
+	const char *rating = gtk_check_button_get_label(checkbutton);
 
-	rating_label = gtk_check_button_get_label(checkbutton);
-
-	g_autofree gchar *rating = nullptr;
-	if (g_strcmp0(rating_label, "Rejected") == 0)
+	if (g_strcmp0(rating, "Rejected") == 0)
 		{
-		rating = g_strdup("-1");
+		rating = "-1";
 		}
-	else if (g_strcmp0(rating_label, "Unrated") == 0)
+	else if (g_strcmp0(rating, "Unrated") == 0)
 		{
-		rating = g_strdup("0");
-		}
-	else
-		{
-		rating = g_strdup(rating_label);
+		rating = "0";
 		}
 
 	metadata_write_string(prd->pane.fd, RATING_KEY, rating);
