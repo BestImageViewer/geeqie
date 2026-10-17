@@ -22,6 +22,7 @@
 #include "bar-gps.h"
 
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -63,7 +64,6 @@ namespace
 {
 
 constexpr gint DEFAULT_ZOOM = 7;
-constexpr gint GPS_MARKER_DIRECTION_SIZE = 36;
 constexpr gint GPS_MARKER_THUMB_SIZE = 128;
 constexpr const gchar *DEFAULT_MAP_ID = SHUMATE_MAP_SOURCE_OSM_MAPNIK;
 constexpr const gchar *DEFAULT_MAP_NAME = "OpenStreetMap";
@@ -86,6 +86,8 @@ struct PaneGPSData
 	ShumateSimpleMap *map;
 	ShumateMarkerLayer *marker_layer;
 	ShumateViewport *viewport;
+	GtkWidget *direction_overlay;
+	gboolean show_direction;
 	GtkWidget *map_popover_parent;
 	GList *selection_list;
 	GList *not_added;
@@ -391,28 +393,41 @@ void gps_marker_ensure_thumbnail(GPSMarkerData *marker_data)
 
 void gps_marker_direction_draw_cb(GtkDrawingArea *drawing_area, cairo_t *cr, gint width, gint height, gpointer data)
 {
-	auto *marker_data = static_cast<GPSMarkerData *>(data);
-	GdkRGBA color;
-	gtk_widget_get_color(GTK_WIDGET(drawing_area), &color);
+	auto *pgd = static_cast<PaneGPSData *>(data);
+	if (!pgd->show_direction || !pgd->enable_markers_checked || !pgd->shumate_map_source) return;
 
-	cairo_save(cr);
-	cairo_translate(cr, width / 2.0, height / 2.0);
-	cairo_rotate(cr, marker_data->direction * G_PI / 180.0);
-	cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
+	cairo_rectangle(cr, 0, 0, width, height);
+	cairo_clip(cr);
+
+	cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
 	cairo_set_line_width(cr, 2.0);
 	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-	cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
 
-	const gdouble arrow_length = MIN(width, height) * 0.35;
-	const gdouble arrow_head = arrow_length * 0.35;
+	g_autoptr(GList) markers = shumate_marker_layer_get_markers(pgd->marker_layer);
+	for (GList *work = markers; work; work = work->next)
+		{
+		auto *marker = SHUMATE_MARKER(work->data);
+		auto *marker_data = static_cast<GPSMarkerData *>(g_object_get_data(G_OBJECT(marker), GPS_MARKER_DATA_KEY));
+		if (!marker_data || marker_data->direction == 1000) continue;
 
-	cairo_move_to(cr, 0, arrow_length);
-	cairo_line_to(cr, 0, -arrow_length);
-	cairo_line_to(cr, -arrow_head, -arrow_length + arrow_head);
-	cairo_move_to(cr, 0, -arrow_length);
-	cairo_line_to(cr, arrow_head, -arrow_length + arrow_head);
-	cairo_stroke(cr);
-	cairo_restore(cr);
+		gdouble x;
+		gdouble y;
+		shumate_viewport_location_to_widget_coords(pgd->viewport, GTK_WIDGET(drawing_area),
+		                                         shumate_location_get_latitude(SHUMATE_LOCATION(marker)),
+		                                         shumate_location_get_longitude(SHUMATE_LOCATION(marker)), &x, &y);
+		const gdouble angle = (marker_data->direction * G_PI / 180.0) + shumate_viewport_get_rotation(pgd->viewport);
+		const gdouble meters_per_pixel = shumate_map_source_get_meters_per_pixel(pgd->shumate_map_source,
+		                                                                      shumate_viewport_get_zoom_level(pgd->viewport),
+		                                                                      shumate_location_get_latitude(SHUMATE_LOCATION(marker)),
+		                                                                      shumate_location_get_longitude(SHUMATE_LOCATION(marker)));
+		if (meters_per_pixel <= 0) continue;
+
+		// Limit the line to approximately 5 km; clip it at the visible map edge.
+		const gdouble length = 5000.0 / meters_per_pixel;
+		cairo_move_to(cr, x, y);
+		cairo_line_to(cr, x + (std::sin(angle) * length), y - (std::cos(angle) * length));
+		cairo_stroke(cr);
+		}
 }
 
 void gps_marker_show_image(GPSMarkerData *marker_data)
@@ -451,18 +466,6 @@ GtkWidget *gps_marker_details_new(GPSMarkerData *marker_data)
 		gtk_box_append(GTK_BOX(box), gtk_label_new(altitude));
 		}
 
-	marker_data->direction = metadata_read_GPS_direction(marker_data->fd, "Xmp.exif.GPSImgDirection", 1000);
-	if (marker_data->direction != 1000)
-		{
-		GtkWidget *direction = gtk_drawing_area_new();
-		gtk_widget_set_size_request(direction, GPS_MARKER_DIRECTION_SIZE, GPS_MARKER_DIRECTION_SIZE);
-		gtk_widget_set_halign(direction, GTK_ALIGN_CENTER);
-		gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(direction), gps_marker_direction_draw_cb, marker_data, nullptr);
-
-		g_autofree gchar *tooltip = g_strdup_printf(_("Image direction: %.1f°"), marker_data->direction);
-		gtk_widget_set_tooltip_text(direction, tooltip);
-		gtk_box_append(GTK_BOX(box), direction);
-		}
 
 	GtkWidget *show_image = gtk_button_new_with_label(_("Show image"));
 	g_signal_connect(show_image, "clicked", G_CALLBACK(gps_marker_show_image_cb), marker_data);
@@ -515,6 +518,8 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	marker_data->fd = file_data_ref(fd);
 	marker_data->pgd = pgd;
 
+	marker_data->direction = metadata_read_GPS_direction(fd, "Xmp.exif.GPSImgDirection", 1000);
+
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_widget_add_css_class(box, "gps-marker");
 
@@ -540,6 +545,7 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	g_autofree gchar *tooltip = g_strdup_printf("%s\n%s", fd->name, _("Click to show details; Ctrl-click to view image"));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(marker), tooltip);
 	shumate_marker_layer_add_marker(pgd->marker_layer, marker);
+	gtk_widget_queue_draw(pgd->direction_overlay);
 }
 
 gboolean bar_pane_gps_add_file_marker(PaneGPSData *pgd, FileData *fd)
@@ -736,6 +742,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 	pgd->num_added = 0;
 
 	shumate_marker_layer_remove_all(pgd->marker_layer);
+	gtk_widget_queue_draw(pgd->direction_overlay);
 	if (!pgd->enable_markers_checked)
 		{
 		return;
@@ -872,6 +879,7 @@ void bar_pane_gps_write_config(GtkWidget *pane, RcString &rc)
 	bar_pane_common_write_config(pgd->pane, rc);
 
 	WRITE_INT(*pgd, height);
+	WRITE_BOOL(*pgd, show_direction);
 	rc.indent++;
 
 	const gchar *map_id = bar_pane_gps_get_map_id(pgd);
@@ -911,6 +919,11 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 
 		if (bar_pane_common_update_from_config(pgd->pane, option, value, &title)) continue;
 		if (READ_INT(*pgd, height)) continue;
+		if (READ_BOOL(*pgd, show_direction))
+			{
+			gtk_widget_queue_draw(pgd->direction_overlay);
+			continue;
+			}
 		if (READ_CHAR_FULL("map-id", map_id))
 			{
 			bar_pane_gps_set_map_source(pgd, map_id);
@@ -967,6 +980,16 @@ GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
 	menu_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_popover_set_child(GTK_POPOVER(popover), menu_box);
 
+	GtkWidget *show_direction = gtk_check_button_new_with_label(_("Show direction"));
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(show_direction), pgd->show_direction);
+	g_signal_connect(show_direction, "toggled", G_CALLBACK(+[](GtkCheckButton *button, gpointer data)
+		{
+		auto *pgd = static_cast<PaneGPSData *>(data);
+		pgd->show_direction = gtk_check_button_get_active(button);
+		gtk_widget_queue_draw(pgd->direction_overlay);
+		}), pgd);
+	gtk_box_append(GTK_BOX(menu_box), show_direction);
+
 	GtkWidget *enable_markers = gtk_check_button_new_with_label(_("Enable markers"));
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(enable_markers), pgd->enable_markers_checked);
 	g_signal_connect(enable_markers, "toggled", G_CALLBACK(bar_pane_gps_enable_markers_checked_toggle_cb), pgd);
@@ -1000,7 +1023,7 @@ void bar_pane_gps_destroy(gpointer data)
 
 GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *map_id,
          					const gint zoom, const gdouble latitude, const gdouble longitude,
-            				gboolean expanded, gint height)
+					gboolean expanded, gint height, gboolean show_direction)
 {
 	PaneGPSData *pgd;
 
@@ -1014,6 +1037,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	bar_pane_common_init(pgd->pane, id, title, expanded, PANE_GPS);
 
 	pgd->height = height;
+	pgd->show_direction = show_direction;
 
 	pgd->pane.widget = gtk_frame_new(nullptr);
 	DEBUG_NAME(pgd->pane.widget);
@@ -1021,8 +1045,15 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
 	pgd->map = shumate_simple_map_new();
-	pgd->map_popover_parent = popover_parent_new(GTK_WIDGET(pgd->map));
+	GtkWidget *overlay = gtk_overlay_new();
+	gtk_overlay_set_child(GTK_OVERLAY(overlay), GTK_WIDGET(pgd->map));
+	pgd->direction_overlay = gtk_drawing_area_new();
+	gtk_widget_set_can_target(pgd->direction_overlay, FALSE);
+	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(pgd->direction_overlay), gps_marker_direction_draw_cb, pgd, nullptr);
+	gtk_overlay_add_overlay(GTK_OVERLAY(overlay), pgd->direction_overlay);
+	pgd->map_popover_parent = popover_parent_new(overlay);
 	pgd->viewport = shumate_simple_map_get_viewport(pgd->map);
+	g_signal_connect_object(pgd->viewport, "notify", G_CALLBACK(gtk_widget_queue_draw), pgd->direction_overlay, G_CONNECT_SWAPPED);
 
 	gtk_widget_set_hexpand(pgd->map_popover_parent, TRUE);
 	gtk_widget_set_vexpand(pgd->map_popover_parent, TRUE);
@@ -1114,6 +1145,7 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 	g_autofree gchar *id = g_strdup("gps");
 	g_autofree gchar *title = g_strdup(_("GPS Map"));
 	gboolean expanded = TRUE;
+	gboolean show_direction = TRUE;
 	g_autofree gchar *map_id = nullptr;
 	gint height = 350;
 	gint zoom = 7;
@@ -1132,6 +1164,7 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 
 		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded))
 			continue;
+		if (READ_BOOL_FULL("show_direction", show_direction)) continue;
 		if (READ_CHAR_FULL("map-id", map_id))
 			continue;
 		if (READ_INT_CLAMP_FULL("zoom-level", zoom, 1, 20))
@@ -1149,7 +1182,7 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 	latitude = static_cast<gdouble>(int_latitude) / 1000000;
 	longitude = static_cast<gdouble>(int_longitude) / 1000000;
 
-	return bar_pane_gps_new(id, title, map_id, zoom, latitude, longitude, expanded, height);
+	return bar_pane_gps_new(id, title, map_id, zoom, latitude, longitude, expanded, height, show_direction);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
