@@ -473,6 +473,8 @@ static void vf_dnd_drop_leave(GtkDropTargetAsync *, GdkDrop *, gpointer data)
 static void vf_dnd_end(GtkDragSource *, GdkDrag *, gboolean, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
+	// A drag takes over the pointer sequence, so the release callback may not run.
+	vf->preserve_selection = FALSE;
 	vf_dnd_clear_marker(vf);
 	file_data_list_free(vf->drag_selection);
 	vf->drag_selection = nullptr;

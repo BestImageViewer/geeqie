@@ -323,6 +323,47 @@ protected:
 	gchar *directory = nullptr;
 };
 
+TEST_P(RevealFile, NavigationAfterDragMoveReplacesSelection)
+{
+	if (vf->type != FILEVIEW_LIST) GTEST_SKIP() << "Requires list view";
+	vf_select_by_fd(vf, vf_index_get_data(vf, 0));
+	g_autoptr(FileDataList) selected = nullptr;
+	selected = g_list_append(selected, file_data_ref(vf_index_get_data(vf, 0)));
+	selected = g_list_append(selected, file_data_ref(vf_index_get_data(vf, 1)));
+	vf_select_list(vf, selected);
+	// Pressing a selected row preserves the group until the drag finishes.
+	vf->preserve_selection = TRUE;
+	vf->drag_started = TRUE;
+	vf->drag_selection = filelist_copy(selected);
+
+	g_autoptr(GListModel) controllers = gtk_widget_observe_controllers(vf->listview);
+	bool drag_ended = false;
+	for (guint i = 0; i < g_list_model_get_n_items(controllers); ++i)
+		{
+		g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
+		if (!GTK_IS_DRAG_SOURCE(controller)) continue;
+		g_signal_emit_by_name(controller, "drag-end", nullptr, FALSE);
+		drag_ended = true;
+		}
+	ASSERT_TRUE(drag_ended);
+
+	// Source rows disappear after the move; the following file is selected.
+	for (GList *work = selected; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		ASSERT_EQ(g_remove(fd->path), 0);
+		}
+	vf_refresh(vf);
+	ASSERT_EQ(vf_selection_count(vf, nullptr), 1U);
+	ASSERT_TRUE(vflist_is_selected(vf, vf_index_get_data(vf, 0)));
+
+	// Image-navigation shortcuts select the next file through this API.
+	auto *next = vf_index_get_data(vf, 1);
+	vf_select_by_fd(vf, next);
+	EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+	EXPECT_TRUE(vflist_is_selected(vf, next));
+}
+
 TEST_P(RevealFile, ScrollsWithoutChangingSelectionOrFocus)
 {
 	auto *first = vf_index_get_data(vf, 0);
