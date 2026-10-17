@@ -105,16 +105,16 @@ void bar_pane_comment_update(PaneCommentData *pcd)
 	gtk_widget_set_sensitive(pcd->comment_view, (pcd->pane.fd != nullptr));
 }
 
-template<gboolean append>
-void bar_pane_comment_set_selection_cb(GSimpleAction *, GVariant *, gpointer data)
+using MetadataStringFunc = gboolean(*)(FileData *fd, const gchar *key, const char *value);
+
+template<MetadataStringFunc metadata_func>
+void bar_pane_comment_selection_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *pcd = static_cast<PaneCommentData *>(data);
 	g_autofree gchar *comment = text_widget_text_pull(pcd->comment_view);
 
 	g_autoptr(FileDataList) list = layout_selection_list(pcd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
-
-	const auto metadata_func = append ? metadata_append_string : metadata_write_string;
 
 	for (GList *work = list; work; work = work->next)
 		{
@@ -214,8 +214,8 @@ void bar_pane_comment_destroy(gpointer data)
 void bar_pane_comment_set_extra_menu(PaneCommentData *pcd)
 {
 	static const GActionEntry comment_actions[] = {
-		{ "append-to-selection",  bar_pane_comment_set_selection_cb<TRUE>,  nullptr, nullptr, nullptr, {} },
-		{ "replace-in-selection", bar_pane_comment_set_selection_cb<FALSE>, nullptr, nullptr, nullptr, {} },
+		{ "append-to-selection",  bar_pane_comment_selection_cb<metadata_append_string>, nullptr, nullptr, nullptr, {} },
+		{ "replace-in-selection", bar_pane_comment_selection_cb<metadata_write_string>,  nullptr, nullptr, nullptr, {} },
 	};
 
 	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
