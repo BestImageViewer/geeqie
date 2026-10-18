@@ -156,6 +156,7 @@ struct RendererTiles
 
 	GskRenderNode *image_node; /* Last complete image, retained during a zoom first pass. */
 	GdkTexture *composite_texture; /* Visible tiles joined before fractional display scaling. */
+	GdkTexture *source_texture; /* Immutable source pixels reused across magnification changes. */
 	gboolean preserve_image;
 	gint preview_width;
 	gint preview_height;
@@ -181,6 +182,43 @@ struct RendererTiles
 
 constexpr size_t COLOR_BYTES = 3; /* rgb */
 
+
+gboolean rt_texture_scaling_available(const RendererTiles *rt)
+{
+	const PixbufRenderer *pr = rt->pr;
+	if (!pr->pixbuf || pr->loading || pr->source_tiles_enabled || pr->func_post_process ||
+	    pr->orientation != EXIF_ORIENTATION_TOP_LEFT || rt->stereo_mode != PR_STEREO_NONE ||
+	    (pr->stereo_data == STEREO_PIXBUF_SBS || pr->stereo_data == STEREO_PIXBUF_CROSS) ||
+	    gdk_pixbuf_get_has_alpha(pr->pixbuf) ||
+	    (pr->zoom_quality != GDK_INTERP_NEAREST && pr->zoom_quality != GDK_INTERP_BILINEAR)) return FALSE;
+
+	GtkNative *native = gtk_widget_get_native(GTK_WIDGET(pr));
+	GskRenderer *renderer = native ? gtk_native_get_renderer(native) : nullptr;
+	if (!renderer || GSK_IS_CAIRO_RENDERER(renderer)) return FALSE;
+
+	const gint width = gdk_pixbuf_get_width(pr->pixbuf);
+	const gint height = gdk_pixbuf_get_height(pr->pixbuf);
+	// GdkPixbuf and texture sampling round fractional nearest-neighbor positions
+	// differently. Keep that case on the existing pixel-exact path.
+	if (pr->zoom_quality == GDK_INTERP_NEAREST && (pr->width % width != 0 || pr->height % height != 0)) return FALSE;
+
+	// Keep downsampling on the CPU to preserve its antialiasing, and bound uploads
+	// by the configured tile cache budget and a conservative texture dimension.
+	return pr->width >= width && pr->height >= height && width <= 8192 && height <= 8192 &&
+	       gdk_pixbuf_get_byte_length(pr->pixbuf) <= static_cast<guint64>(pr->tile_cache_max) * 1048576;
+}
+
+GdkTexture *rt_source_texture(RendererTiles *rt)
+{
+	if (!rt->source_texture)
+		{
+		GdkPixbuf *pixbuf = rt->pr->pixbuf;
+		g_autoptr(GBytes) bytes = g_bytes_new(gdk_pixbuf_get_pixels(pixbuf), gdk_pixbuf_get_byte_length(pixbuf));
+		rt->source_texture = gdk_memory_texture_new(gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf),
+		                                            GDK_MEMORY_R8G8B8, bytes, gdk_pixbuf_get_rowstride(pixbuf));
+		}
+	return rt->source_texture;
+}
 
 inline gint get_right_pixbuf_offset(RendererTiles *rt)
 {
@@ -1409,6 +1447,17 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 	PixbufRenderer *pr = rt->pr;
+	if (rt_texture_scaling_available(rt))
+		{
+		rt_queue_clear(rt);
+		rt_tile_free_all(rt);
+		rt->preserve_image = FALSE;
+		rt->draw_pending = FALSE;
+		gtk_widget_queue_draw(GTK_WIDGET(pr));
+		pr_render_complete_signal(pr);
+		return G_SOURCE_REMOVE;
+		}
+
 	QueueData *qd;
 	gboolean fast;
 	const gboolean first_pass = !g_queue_is_empty(&rt->draw_queue);
@@ -1625,6 +1674,14 @@ void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 {
 	PixbufRenderer *pr = rt->pr;
 
+	if (rt_texture_scaling_available(rt))
+		{
+		if (!rt->draw_idle_id) rt->draw_idle_id = g_idle_add(rt_queue_draw_idle_cb, rt);
+		gtk_widget_queue_draw(GTK_WIDGET(pr));
+		return;
+		}
+	g_clear_object(&rt->source_texture);
+
 	rt_sync_scroll(rt);
 
 	if (pr->width < 1 || pr->height < 1) return;
@@ -1693,6 +1750,7 @@ void renderer_scroll(void *renderer, gint x_off, gint y_off)
 void renderer_area_changed(void *renderer, GdkRectangle src)
 {
 	auto rt = static_cast<RendererTiles *>(renderer);
+	g_clear_object(&rt->source_texture);
 	PixbufRenderer *pr = rt->pr;
 	gint x1;
 	gint y1;
@@ -1741,6 +1799,7 @@ void rt_redraw(RendererTiles *rt, GdkRectangle rect,
 void renderer_update_pixbuf(void *renderer, gboolean)
 {
 	auto *rt = static_cast<RendererTiles *>(renderer);
+	g_clear_object(&rt->source_texture);
 	g_clear_object(&rt->composite_texture);
 	g_clear_pointer(&rt->image_node, gsk_render_node_unref);
 	rt->preserve_image = FALSE;
@@ -1764,6 +1823,7 @@ void renderer_update_zoom(void *renderer, gboolean lazy)
 void renderer_invalidate_region(void *renderer, GdkRectangle region)
 {
 	auto *rt = static_cast<RendererTiles *>(renderer);
+	g_clear_object(&rt->source_texture);
 	g_clear_object(&rt->composite_texture);
 
 	const gint x1 = ROUND_DOWN(region.x, rt->tile_width);
@@ -1834,6 +1894,7 @@ void renderer_stereo_set(void *renderer, gint stereo_mode)
 void renderer_free(void *renderer)
 {
 	auto rt = static_cast<RendererTiles *>(renderer);
+	g_clear_object(&rt->source_texture);
 	rt_queue_clear(rt);
 	rt_tile_free_all(rt);
 	if (rt->spare_tile) g_object_unref(rt->spare_tile);
@@ -1889,11 +1950,18 @@ GdkTexture *rt_composite_texture(RendererTiles *rt)
 void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 {
 	auto rt = static_cast<RendererTiles *>(data);
+	if (rt->source_texture && !rt_texture_scaling_available(rt))
+		{
+		// Settings can change without a zoom request. Rebuild tiles before
+		// retiring the complete texture preview.
+		rt->preserve_image = rt->image_node != nullptr;
+		rt_queue(rt, 0, 0, rt->pr->width, rt->pr->height, true, TileRender::ALL, TRUE, false);
+		}
 
 
 
 	graphene_rect_t bounds;
-	if (rt->preserve_image && !g_queue_is_empty(&rt->draw_queue))
+	if (!rt_texture_scaling_available(rt) && rt->preserve_image && !g_queue_is_empty(&rt->draw_queue))
 		{
 		// Do not show a background-only or partially rebuilt zoom frame.
 		if (rt->pr->zoom == 0.0 && rt->preview_width > 0 && rt->preview_height > 0)
@@ -1938,7 +2006,15 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 		graphene_rect_init(&image, rt->pr->x_offset + rt->stereo_off_x,
 		                   rt->pr->y_offset + rt->stereo_off_y, rt->pr->vis_width, rt->pr->vis_height);
 		gtk_snapshot_push_clip(image_snapshot, &image);
-		if (display_scale != std::floor(display_scale))
+		if (rt_texture_scaling_available(rt))
+			{
+			graphene_rect_init(&bounds, rt->pr->x_offset - rt->pr->x_scroll,
+			                   rt->pr->y_offset - rt->pr->y_scroll, rt->pr->width, rt->pr->height);
+			gtk_snapshot_append_scaled_texture(image_snapshot, rt_source_texture(rt),
+			                                   rt->pr->zoom_quality == GDK_INTERP_NEAREST ? GSK_SCALING_FILTER_NEAREST : GSK_SCALING_FILTER_LINEAR,
+			                                   &bounds);
+			}
+		else if (display_scale != std::floor(display_scale))
 			{
 			if (auto *texture = rt_composite_texture(rt))
 				{

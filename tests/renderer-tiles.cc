@@ -349,6 +349,290 @@ TEST(RendererTilesTexture, FractionalDisplayScaleHasNoTileSeams)
 	gtk_window_destroy(window);
 }
 
+GdkTexture *find_scaled_texture(GskRenderNode *node, GskScalingFilter *filter)
+{
+	switch (gsk_render_node_get_node_type(node))
+		{
+		case GSK_TEXTURE_SCALE_NODE:
+			if (filter) *filter = gsk_texture_scale_node_get_filter(node);
+			return gsk_texture_scale_node_get_texture(node);
+		case GSK_CLIP_NODE:
+			return find_scaled_texture(gsk_clip_node_get_child(node), filter);
+		case GSK_CONTAINER_NODE:
+			for (guint i = 0; i < gsk_container_node_get_n_children(node); ++i)
+				{
+				if (auto *texture = find_scaled_texture(gsk_container_node_get_child(node, i), filter)) return texture;
+				}
+			break;
+		default:
+			break;
+		}
+	return nullptr;
+}
+
+TEST(RendererTilesTexture, MagnificationReusesSourceAndInvalidatesChangedPixels)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	pr->tile_cache_max = 8;
+	gtk_window_set_default_size(window, 300, 200);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 800, 600);
+	for (int y = 0; y < 600; ++y)
+		{
+		for (int x = 0; x < 800; ++x)
+			{
+			auto *pixel = gdk_pixbuf_get_pixels(image) + y * gdk_pixbuf_get_rowstride(image) + x * 3;
+			pixel[0] = 0x20 + x % 128;
+			pixel[1] = 0x40 + y % 128;
+			pixel[2] = 0x60;
+			}
+		}
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	gtk_window_present(window);
+	const auto finish_rendering = [pr]()
+	{
+		for (int i = 0; i < 1000; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (pr->complete && gtk_widget_get_mapped(GTK_WIDGET(pr))) return true;
+			g_usleep(1000);
+			}
+		return false;
+	};
+	ASSERT_TRUE(finish_rendering());
+	if (GSK_IS_CAIRO_RENDERER(gtk_native_get_renderer(GTK_NATIVE(window))))
+		{
+		gtk_window_destroy(window);
+		GTEST_SKIP() << "Requires a GL or Vulkan renderer";
+		}
+	const auto source_texture = [pr](GskScalingFilter *filter = nullptr)
+	{
+		auto *snapshot = gtk_snapshot_new();
+		renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
+		auto *node = gtk_snapshot_free_to_node(snapshot);
+		if (!node) return static_cast<GdkTexture *>(nullptr);
+		auto *texture = find_scaled_texture(node, filter);
+		if (texture) g_object_ref(texture);
+		gsk_render_node_unref(node);
+		return texture;
+	};
+	g_autoptr(GdkTexture) original = source_texture();
+	ASSERT_NE(original, nullptr);
+	EXPECT_EQ(gdk_texture_get_width(original), 800);
+	EXPECT_EQ(gdk_texture_get_height(original), 600);
+
+	for (const auto quality : {GDK_INTERP_NEAREST, GDK_INTERP_BILINEAR})
+		{
+		pr->zoom_quality = quality;
+		for (const double zoom : {2.0, 3.0, 1.5})
+			{
+			if (quality == GDK_INTERP_NEAREST && zoom == 1.5) continue;
+			pixbuf_renderer_zoom_set(pr, zoom);
+			ASSERT_TRUE(finish_rendering());
+			pixbuf_renderer_scroll(pr, 31, 17);
+			ASSERT_TRUE(finish_rendering());
+			GskScalingFilter filter = GSK_SCALING_FILTER_NEAREST;
+			g_autoptr(GdkTexture) zoomed = source_texture(&filter);
+			EXPECT_EQ(zoomed, original);
+			EXPECT_EQ(filter, quality == GDK_INTERP_NEAREST ? GSK_SCALING_FILTER_NEAREST : GSK_SCALING_FILTER_LINEAR);
+			auto *snapshot = gtk_snapshot_new();
+			renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
+			auto *node = gtk_snapshot_free_to_node(snapshot);
+			graphene_rect_t viewport;
+			graphene_rect_init(&viewport, 0, 0, pr->viewport_width, pr->viewport_height);
+			g_autoptr(GdkTexture) rendered = gsk_renderer_render_texture(gtk_native_get_renderer(GTK_NATIVE(window)), node, &viewport);
+			gsk_render_node_unref(node);
+			ASSERT_NE(rendered, nullptr);
+			const int stride = gdk_texture_get_width(rendered);
+			std::vector<uint32_t> output(stride * gdk_texture_get_height(rendered));
+			gdk_texture_download(rendered, reinterpret_cast<guchar *>(output.data()), stride * 4);
+			g_autoptr(GdkPixbuf) reference = gdk_pixbuf_scale_simple(image, pr->width, pr->height, quality);
+			for (int y = 5; y < pr->vis_height - 5; y += 29)
+				{
+				for (int x = 5; x < pr->vis_width - 5; x += 37)
+					{
+					const uint32_t actual = output[(y + pr->y_offset) * stride + x + pr->x_offset];
+					const auto *expected = gdk_pixbuf_get_pixels(reference) +
+					                       (y + pr->y_scroll) * gdk_pixbuf_get_rowstride(reference) + (x + pr->x_scroll) * 3;
+					const int tolerance = quality == GDK_INTERP_NEAREST ? 0 : 2;
+					for (int channel = 0; channel < 3; ++channel)
+						{
+						EXPECT_LE(std::abs(static_cast<int>((actual >> (16 - channel * 8)) & 0xff) - expected[channel]), tolerance);
+						}
+					}
+				}
+
+			}
+		}
+
+	gdk_pixbuf_fill(image, 0xabcdefFF);
+	pixbuf_renderer_area_changed(pr, {0, 0, 800, 600});
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) changed = source_texture();
+	ASSERT_NE(changed, nullptr);
+	EXPECT_NE(changed, original);
+	std::vector<uint32_t> pixels(800 * 600);
+	gdk_texture_download(original, reinterpret_cast<guchar *>(pixels.data()), 800 * 4);
+	EXPECT_EQ(pixels[0], 0xff204060U);
+	gdk_texture_download(changed, reinterpret_cast<guchar *>(pixels.data()), 800 * 4);
+	EXPECT_EQ(pixels[0], 0xffabcdefU);
+
+	pr->zoom_quality = GDK_INTERP_NEAREST;
+	pixbuf_renderer_zoom_set(pr, 2.0);
+	ASSERT_TRUE(finish_rendering());
+	pixbuf_renderer_zoom_set(pr, 1.5);
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) fractional_nearest = source_texture();
+	EXPECT_EQ(fractional_nearest, nullptr);
+	pr->zoom_quality = GDK_INTERP_BILINEAR;
+
+	// Downsampling and images larger than the cache budget keep the tile path.
+	pixbuf_renderer_zoom_set(pr, -2.0);
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) reduced = source_texture();
+	EXPECT_EQ(reduced, nullptr);
+	pr->tile_cache_max = 1;
+	pixbuf_renderer_zoom_set(pr, 2.0);
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) over_budget = source_texture();
+	EXPECT_EQ(over_budget, nullptr);
+
+	pr->tile_cache_max = 8;
+	pixbuf_renderer_set_post_process_func(pr,
+		[](PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint) {}, FALSE);
+	pixbuf_renderer_zoom_set(pr, 3.0);
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) processed = source_texture();
+	EXPECT_EQ(processed, nullptr);
+	pixbuf_renderer_set_post_process_func(pr, nullptr, FALSE);
+	pixbuf_renderer_set_orientation(pr, 6);
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) rotated = source_texture();
+	EXPECT_EQ(rotated, nullptr);
+
+	g_autoptr(GdkPixbuf) alpha = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
+	gdk_pixbuf_fill(alpha, 0x20406080);
+	pixbuf_renderer_set_orientation(pr, 1);
+	pixbuf_renderer_set_pixbuf(pr, alpha, 2.0);
+	ASSERT_TRUE(finish_rendering());
+	g_autoptr(GdkTexture) transparent = source_texture();
+	EXPECT_EQ(transparent, nullptr);
+	gtk_window_destroy(window);
+}
+
+// Run explicitly with --gtest_also_run_disabled_tests and a hardware GSK renderer.
+TEST(RendererTilesTexture, DISABLED_BenchmarkMagnification)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	for (const int image_width : {1600, 4000})
+		{
+		const int image_height = image_width * 3 / 4;
+		g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, image_width, image_height);
+		for (int y = 0; y < image_height; ++y)
+			{
+			for (int x = 0; x < image_width; ++x)
+				{
+				auto *pixel = gdk_pixbuf_get_pixels(image) + y * gdk_pixbuf_get_rowstride(image) + x * 3;
+				pixel[0] = (x / 3 + y / 7) % 256;
+				pixel[1] = (x / 11 + y / 5) % 256;
+				pixel[2] = (x / 13 + y / 17) % 256;
+				}
+			}
+		for (int repeat = 0; repeat < 5; ++repeat)
+			{
+			for (int order = 0; order < 2; ++order)
+				{
+				const bool gpu = (repeat + order) % 2 != 0;
+				auto *window = GTK_WINDOW(gtk_window_new());
+				auto *pr = pixbuf_renderer_new();
+				pr->tile_cache_max = 64;
+				pr->zoom_2pass = FALSE;
+				pr->zoom_quality = GDK_INTERP_BILINEAR;
+				if (!gpu)
+					{
+					// An identity callback forces the existing CPU tile path without
+					// changing the pixels, cache budget, or interpolation settings.
+					pixbuf_renderer_set_post_process_func(pr,
+						[](PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint) {}, FALSE);
+					}
+				gtk_window_set_title(window, "Geeqie zoom benchmark");
+				gtk_window_set_default_size(window, 1024, 768);
+				gtk_window_set_child(window, GTK_WIDGET(pr));
+				pr->complete = FALSE;
+				pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+				gtk_window_present(window);
+				for (int i = 0; i < 5000 && (!gtk_widget_get_mapped(GTK_WIDGET(pr)) || pr->viewport_width < 1 || pr->viewport_height < 1 || !pr->complete); ++i)
+					{
+					while (g_main_context_iteration(nullptr, FALSE)) {}
+					g_usleep(1000);
+					}
+				ASSERT_TRUE(gtk_widget_get_mapped(GTK_WIDGET(pr)));
+				ASSERT_GT(pr->viewport_width, 0);
+				ASSERT_GT(pr->viewport_height, 0);
+				ASSERT_TRUE(pr->complete);
+				auto *renderer = gtk_native_get_renderer(GTK_NATIVE(window));
+				if (GSK_IS_CAIRO_RENDERER(renderer))
+					{
+					gtk_window_destroy(window);
+					GTEST_SKIP() << "Requires a GL or Vulkan renderer";
+					}
+				g_print("BENCH_RENDERER,%s,viewport=%dx%d\n", G_OBJECT_TYPE_NAME(renderer), pr->viewport_width, pr->viewport_height);
+				std::vector<guchar> pixels(static_cast<size_t>(pr->viewport_width) * pr->viewport_height * 4);
+				const auto frame = [&](double zoom, double &prepare_ms, double &total_ms)
+				{
+					const gint64 start = g_get_monotonic_time();
+					pr->complete = FALSE;
+					pixbuf_renderer_zoom_set(pr, zoom);
+					const gint64 deadline = start + 5 * G_TIME_SPAN_SECOND;
+					while (!pr->complete && g_get_monotonic_time() < deadline)
+						{
+						if (!g_main_context_iteration(nullptr, FALSE)) g_usleep(50);
+						}
+					ASSERT_TRUE(pr->complete);
+					prepare_ms = (g_get_monotonic_time() - start) / 1000.0;
+					auto *snapshot = gtk_snapshot_new();
+					renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
+					auto *node = gtk_snapshot_free_to_node(snapshot);
+					ASSERT_NE(node, nullptr);
+					EXPECT_EQ(find_scaled_texture(node, nullptr) != nullptr, gpu);
+					graphene_rect_t viewport;
+					graphene_rect_init(&viewport, 0, 0, pr->viewport_width, pr->viewport_height);
+					g_autoptr(GdkTexture) output = gsk_renderer_render_texture(renderer, node, &viewport);
+					gsk_render_node_unref(node);
+					ASSERT_NE(output, nullptr);
+					pixels.resize(static_cast<size_t>(gdk_texture_get_width(output)) * gdk_texture_get_height(output) * 4);
+					// Download waits for the GPU result. Both paths pay the same readback cost.
+					gdk_texture_download(output, pixels.data(), gdk_texture_get_width(output) * 4);
+					total_ms = (g_get_monotonic_time() - start) / 1000.0;
+				};
+				double prepare_ms = 0;
+				double total_ms = 0;
+				frame(1.1, prepare_ms, total_ms);
+				g_print("BENCH_FIRST_ZOOM,%d,%s,%d,%.3f,%.3f\n", image_width, gpu ? "texture" : "cpu", repeat, prepare_ms, total_ms);
+				for (const double zoom : {1.25, 1.5, 1.75}) frame(zoom, prepare_ms, total_ms);
+				std::vector<double> prepare;
+				std::vector<double> completed;
+				for (int i = 0; i < 24; ++i)
+					{
+					frame(1.1 + (i % 12) * 0.15, prepare_ms, total_ms);
+					prepare.push_back(prepare_ms);
+					completed.push_back(total_ms);
+					}
+				std::sort(prepare.begin(), prepare.end());
+				std::sort(completed.begin(), completed.end());
+				g_print("BENCH_WARM,%d,%s,%d,%.3f,%.3f,%.3f\n", image_width, gpu ? "texture" : "cpu", repeat,
+				        (prepare[11] + prepare[12]) / 2, (completed[11] + completed[12]) / 2, completed[22]);
+				gtk_window_destroy(window);
+				while (g_main_context_iteration(nullptr, FALSE)) {}
+				}
+			}
+		}
+}
+
 TEST(RendererTilesTexture, PreservesOpaqueColorsAndOwnsItsPixels)
 {
 	std::array<unsigned char, 32> pixels = {};
