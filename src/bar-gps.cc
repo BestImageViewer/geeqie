@@ -651,16 +651,7 @@ void bar_pane_gps_clear_marker_queue(PaneGPSData *pgd)
 gboolean bar_pane_gps_create_markers_cb(gpointer data)
 {
 	auto *pgd = static_cast<PaneGPSData *>(data);
-
 	if (!pgd) return G_SOURCE_REMOVE;
-
-	if (!pgd->marker_queue)
-		{
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), 0);
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
-		pgd->create_markers_id = 0;
-		return G_SOURCE_REMOVE;
-		}
 
 	const gint selection_added = pgd->selection_count - g_list_length(pgd->marker_queue);
 	if (pgd->selection_count > 0)
@@ -674,22 +665,18 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 	pgd->marker_queue = g_list_delete_link(pgd->marker_queue, pgd->marker_queue);
 
 	bar_pane_gps_add_file_marker(pgd, fd);
-
 	bar_pane_gps_set_status(pgd);
 
-	if (pgd->marker_queue)
-		{
-		pgd->create_markers_id = g_idle_add(bar_pane_gps_create_markers_cb, pgd);
-		}
-	else
+	if (!pgd->marker_queue)
 		{
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), 0);
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
 		pgd->create_markers_id = 0;
 		bar_pane_gps_fit_markers(pgd);
+		return G_SOURCE_REMOVE;
 		}
 
-	return G_SOURCE_REMOVE;
+	return G_SOURCE_CONTINUE;
 }
 
 /* Deleted files stay in the layout selection until the file list is refreshed.
