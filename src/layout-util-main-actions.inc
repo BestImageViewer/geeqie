@@ -2534,6 +2534,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-sort-add-selection",
+		nullptr,
+		N_("Add to highlighted collection"),
+		layout_menu_bar_sort_add_selection_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-sort-manager",
 		PIXBUF_INLINE_ICON_SORT,
 		N_("Sort manager"),

@@ -34,6 +34,7 @@ struct FileDialogData
 	gboolean alternate_default;
 	const gchar *checkbox_text;
 	gboolean *checkbox_value; /**< Updated only when a file is accepted; must outlive the dialog */
+	gboolean accept_existing; /**< For SAVE: accept existing files without replacement confirmation; callback must preserve them */
 	gboolean focus_accept; /**< Initially focus the accept button */
 };
 

@@ -21,11 +21,13 @@
 
 #include "bar-sort.h"
 
+#include <set>
 #include <string>
 
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
+#include "actions.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "editors.h"
@@ -59,6 +61,7 @@ struct SortData : BarSort
 
 	GtkWidget *folder_group;
 	GtkWidget *collection_group;
+	GtkWidget *collection_hint;
 
 	GtkWidget *add_button;
 	GtkWidget *undo_button;
@@ -77,37 +80,33 @@ static void bar_sort_undo_set(SortData *sd, GList *src_list, const gchar *dest);
 
 static void bar_sort_collection_list_build(GtkWidget *bookmarks)
 {
-	FileData *dir_fd;
-	GList *work;
-
 	history_list_free_key(SORT_KEY_COLLECTIONS);
 	bookmark_list_set_key(bookmarks, SORT_KEY_COLLECTIONS);
 
-	dir_fd = file_data_new_dir(get_collections_dir());
+	auto *dir_fd = file_data_new_dir(get_collections_dir());
 	g_autoptr(FileDataList) list = nullptr;
 	filelist_read(dir_fd, &list, nullptr);
 	file_data_unref(dir_fd);
 
-	list = filelist_sort_path(list);
-
-	work = list;
-	while (work)
+	std::set<std::string> paths;
+	for (GList *work = list; work; work = work->next)
 		{
-		FileData *fd;
-		g_autofree gchar *name = nullptr;
-
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
-
-		if (file_extension_match(fd->path, GQ_COLLECTION_EXT))
+		auto *fd = static_cast<FileData *>(work->data);
+		paths.emplace(fd->path);
+		}
+	if (const HistoryList *external = history_list_find_by_key("sort_manager_external_collections"))
+		{
+		for (const auto &path : *external)
 			{
-			name = remove_extension_from_path(fd->name);
+			if (isfile(path.c_str())) paths.emplace(path);
 			}
-		else
-			{
-			name = g_strdup(fd->name);
-			}
-		bookmark_list_add(bookmarks, name, fd->path);
+		}
+	for (const auto &path : paths)
+		{
+		const gchar *filename = filename_from_path(path.c_str());
+		g_autofree gchar *name = file_extension_match(path.c_str(), GQ_COLLECTION_EXT)
+		                       ? remove_extension_from_path(filename) : g_strdup(filename);
+		bookmark_list_add(bookmarks, name, path.c_str());
 		}
 }
 
@@ -121,6 +120,8 @@ static void bar_sort_mode_sync(SortData *sd, BarSort::Mode mode)
 	bookmark_list_set_no_defaults(sd->bookmarks, !folder_mode);
 	bookmark_list_set_editable(sd->bookmarks, folder_mode);
 	bookmark_list_set_only_directories(sd->bookmarks, folder_mode);
+	bookmark_list_set_select_only_on_ctrl(sd->bookmarks, !folder_mode);
+	gtk_widget_set_visible(sd->collection_hint, !folder_mode);
 
 	if (folder_mode)
 		{
@@ -149,7 +150,7 @@ static void bar_sort_mode_cb(GObject *object, GParamSpec *, gpointer data)
 		}
 	else
 		{
-		gtk_widget_set_tooltip_text(sd->add_button, _("Create new Collection file"));
+		gtk_widget_set_tooltip_text(sd->add_button, _("Add or create collection"));
 		bar_sort_mode_sync(sd, BarSort::MODE_COLLECTION);
 		}
 }
@@ -296,6 +297,7 @@ static void bar_sort_bookmark_select_folder(SortData *sd, const gchar *path)
 
 static void bar_sort_bookmark_select_collection(SortData *sd, const gchar *path)
 {
+	bookmark_list_set_selected_path(sd->bookmarks, path);
 	g_autoptr(FileDataList) list = nullptr;
 
 	switch (sd->selection)
@@ -322,6 +324,7 @@ static void bar_sort_bookmark_select_collection(SortData *sd, const gchar *path)
 		}
 
 	bar_sort_undo_set(sd, list, path);
+	g_free(sd->undo_collection);
 	sd->undo_collection = g_strdup(path);
 
 	g_list_foreach(list, reinterpret_cast<GFunc>(collect_manager_add), const_cast<gchar *>(path));
@@ -356,11 +359,25 @@ static void bar_sort_bookmark_drop_collection(SortData *sd, const gchar *path, G
 {
 	if (!path || !list) return;
 
+	bookmark_list_set_selected_path(sd->bookmarks, path);
 	bar_sort_undo_set(sd, list, path);
 	g_free(sd->undo_collection);
 	sd->undo_collection = g_strdup(path);
 
 	g_list_foreach(list, reinterpret_cast<GFunc>(collect_manager_add), const_cast<gchar *>(path));
+}
+
+void bar_sort_add_to_collection(GtkWidget *bar)
+{
+	if (!bar || !gtk_widget_is_visible(bar)) return;
+
+	auto *sd = static_cast<SortData *>(g_object_get_data(G_OBJECT(bar), "bar_sort_data"));
+	if (!sd || sd->mode != BarSort::MODE_COLLECTION) return;
+
+	g_autofree gchar *path = g_strdup(bookmark_list_get_selected_path(sd->bookmarks));
+	if (!path || !isfile(path)) return;
+
+	bar_sort_bookmark_select_collection(sd, path);
 }
 
 static void bar_sort_bookmark_drop(SortData *sd, const gchar *path, GList *list)
@@ -448,25 +465,22 @@ static void bar_sort_set_selection_cb(GtkWidget *button, gpointer data)
 	sd->selection = selection;
 }
 
-static gboolean save_new_collection(GFile *file, gpointer data)
+gboolean bar_sort_collection_add(const gchar *path)
 {
-	auto *sd = static_cast<SortData *>(data);
+	if (!path || !file_extension_match(path, GQ_COLLECTION_EXT)) return FALSE;
 
-	g_autofree gchar *path = g_file_get_path(file);
 	g_autoptr(CollectionData) cd = collection_new(path);
-
-	if (!collection_save(cd, path))
+	if (isfile(path))
 		{
-		g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", _("File save failed."));
-		g_autofree gchar *detail = g_strdup_printf(_("File \"%s\" was not saved."), path);
-		gtk_alert_dialog_set_detail(dialog, detail);
-		gtk_alert_dialog_set_modal(dialog, TRUE);
-		gtk_alert_dialog_show(dialog, GTK_WINDOW(sd->lw->window));
-
-		return FALSE;
+		if (!collection_load(cd, path, COLLECTION_LOAD_NONE)) return FALSE;
+		}
+	else
+		{
+		if (isname(path) || !collection_save(cd, path)) return FALSE;
 		}
 
-	bar_sort_collection_list_build(sd->bookmarks);
+	g_autofree gchar *canonical_path = g_canonicalize_filename(path, nullptr);
+	history_list_add_to_key("sort_manager_external_collections", canonical_path, 0);
 	return TRUE;
 }
 
@@ -478,13 +492,22 @@ static void new_collection_file_response_cb(GFile *file, gpointer data)
 		{
 		g_autoptr(GFile) parent = g_file_get_parent(file);
 
-		if (save_new_collection(file, sd))
+		g_autofree gchar *path = g_file_get_path(file);
+		if (bar_sort_collection_add(path))
 			{
+			bar_sort_collection_list_build(sd->bookmarks);
+			bookmark_list_set_selected_path(sd->bookmarks, path);
 			if (parent != nullptr)
 				{
 				g_autofree gchar *dirname = g_file_get_path(parent);
 				history_list_add_to_key("open_collection", dirname, -1);
 				}
+			}
+		else
+			{
+			g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", _("Unable to add collection."));
+			gtk_alert_dialog_set_detail(dialog, _("Choose a valid .gqv collection or a new .gqv filename in a writable folder."));
+			gtk_alert_dialog_show(dialog, GTK_WINDOW(sd->lw->window));
 			}
 		}
 }
@@ -502,7 +525,8 @@ static void bar_sort_add_cb(GtkWidget *, gpointer data)
 		FileDialogData fdd{};
 
 		fdd.action = FileDialogAction::SAVE;
-		fdd.accept_text = _("Save");
+		fdd.accept_text = _("Add");
+		fdd.accept_existing = TRUE;
 		fdd.callback = new_collection_file_response_cb;
 		fdd.data = sd;
 		fdd.filename = get_collections_dir();
@@ -510,7 +534,7 @@ static void bar_sort_add_cb(GtkWidget *, gpointer data)
 		fdd.filter_description = _("Collection files");
 		fdd.history_key = "open_collection";
 		fdd.suggested_name = _("Untitled.gqv");
-		fdd.title = _("Create empty Collection file");
+		fdd.title = _("Add or create collection");
 
 		file_dialog_show(fdd);
 		}
@@ -647,6 +671,20 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 			}
 	};
 	sd->bookmarks = bookmark_list_new(SORT_KEY_FOLDERS, bar_sort_bookmark_select);
+	bookmark_list_set_tooltip_func(sd->bookmarks, [sd](const gchar *path) -> std::string
+	{
+		if (sd->mode != BarSort::MODE_COLLECTION) return path;
+
+		g_autofree gchar *shortcut = action_accelerator_label("win.main-win-sort-add-selection");
+		g_autofree gchar *shortcut_hint = shortcut
+		                               ? g_strdup_printf(_("%s to add images to the highlighted collection using the selected option."), shortcut)
+		                               : nullptr;
+		g_autofree gchar *text = g_strjoin("\n", path, "",
+		                                 _("Click to set the destination and add images."),
+		                                 _("Ctrl+click to set the destination only."),
+		                                 shortcut_hint, nullptr);
+		return text;
+	});
 	bookmark_list_set_drop_func(sd->bookmarks, [sd](const gchar *path, GList *list)
 	{
 		bar_sort_bookmark_drop(sd, path, list);
@@ -655,6 +693,13 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	gtk_widget_set_hexpand(sd->bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(sd->bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(sd->vbox), sd->bookmarks);
+
+	sd->collection_hint = gtk_label_new(_("Ctrl+click selects a destination without adding images."));
+	gtk_label_set_wrap(GTK_LABEL(sd->collection_hint), TRUE);
+	gtk_label_set_max_width_chars(GTK_LABEL(sd->collection_hint), 32);
+	gtk_label_set_xalign(GTK_LABEL(sd->collection_hint), 0.0);
+	gtk_widget_add_css_class(sd->collection_hint, "dim-label");
+	gtk_box_append(GTK_BOX(sd->vbox), sd->collection_hint);
 
 	tbar = pref_toolbar_new(sd->vbox);
 	DEBUG_NAME(tbar);

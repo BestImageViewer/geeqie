@@ -610,6 +610,14 @@ static void collect_manager_refresh()
 			}
 		}
 
+	if (const HistoryList *external = history_list_find_by_key("sort_manager_external_collections"))
+		{
+		for (const auto &path : *external)
+			{
+			if (file_extension_match(path.c_str(), GQ_COLLECTION_EXT) && isfile(path.c_str())) paths.emplace(path);
+			}
+		}
+
 	GList *work = collection_manager_entry_list;
 	while (work)
 		{

@@ -66,6 +66,7 @@ struct BookButtonData
 	std::string name;
 	std::string path;
 	std::string icon;
+	gboolean suppress_activation = FALSE;
 };
 
 struct BookMarkData
@@ -73,13 +74,17 @@ struct BookMarkData
 	GtkWidget *widget;
 	GtkWidget *box;
 	std::string key;
+	std::string selected_key;
+	std::string selected_path;
 
 	BookmarkSelectFunc select_func;
 	BookmarkDropFunc drop_func;
+	BookmarkTooltipFunc tooltip_func;
 
 	gboolean no_defaults;
 	gboolean editable;
 	gboolean only_directories;
+	gboolean select_only_on_ctrl;
 
 	GtkWidget *active_button;
 };
@@ -196,8 +201,28 @@ static void bookmark_select_cb(GtkWidget *button, gpointer data)
 
 	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	if (!b) return;
+	if (b->suppress_activation)
+		{
+		b->suppress_activation = FALSE;
+		return;
+		}
 
 	if (bm->select_func) bm->select_func(b->path.c_str());
+}
+
+static void bookmark_select_only_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer data)
+{
+	auto *bm = static_cast<BookMarkData *>(data);
+	GtkWidget *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
+	if (!b) return;
+	b->suppress_activation = FALSE;
+	if (!bm->select_only_on_ctrl) return;
+	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+	if (!(state & GDK_CONTROL_MASK)) return;
+
+	b->suppress_activation = TRUE;
+	bookmark_list_set_selected_path(bm->widget, b->path.c_str());
 }
 
 static void bookmark_drop_data_free(BookmarkDropData *drop_data)
@@ -466,6 +491,8 @@ static void bookmark_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble, g
 static gboolean bookmark_keypress_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	GtkWidget *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
+	if (b) b->suppress_activation = FALSE;
 	auto bm = static_cast<BookMarkData *>(data);
 
 	switch (keyval)
@@ -499,13 +526,15 @@ static gboolean bookmark_keypress_cb(GtkEventControllerKey *controller, guint ke
 }
 
 static gboolean bookmark_tooltip_cb(GtkWidget *button, gint, gint, gboolean,
-                                    GtkTooltip *, gpointer user_data)
+                                    GtkTooltip *tooltip, gpointer user_data)
 {
-	auto *b = static_cast<BookButtonData *>(user_data);
+	auto *bm = static_cast<BookMarkData *>(user_data);
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
+	if (!b) return FALSE;
 
-	gtk_widget_set_tooltip_text(button, b->path.c_str());
-
-	return FALSE;
+	const std::string text = bm->tooltip_func ? bm->tooltip_func(b->path.c_str()) : b->path;
+	gtk_tooltip_set_text(tooltip, text.c_str());
+	return TRUE;
 }
 
 static void bookmark_add_button(BookMarkData *bm, const gchar *text)
@@ -524,6 +553,11 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 
 	GtkWidget *button = gtk_button_new();
 	gtk_widget_add_css_class(button, "flat");
+	if (bm->key == bm->selected_key && b->path == bm->selected_path)
+		{
+		gtk_widget_remove_css_class(button, "flat");
+		gtk_widget_add_css_class(button, "suggested-action");
+		}
 	gtk_box_append(GTK_BOX(bm->box), button);
 
 	g_object_set_data_full(G_OBJECT(button), "bookbuttondata", b, delete_cb<BookButtonData>);
@@ -575,6 +609,12 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 	bookmark_dnd_init(bm, button);
 
 	GtkGesture *gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_PRIMARY);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(bookmark_select_only_cb), bm);
+	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
+
+	gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bookmark_gesture_press_cb), bm);
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
@@ -583,7 +623,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 	gtk_widget_add_controller(button, controller);
 
 	gtk_widget_set_has_tooltip(button, TRUE);
-	g_signal_connect(G_OBJECT(button), "query-tooltip", G_CALLBACK(bookmark_tooltip_cb), b);
+	g_signal_connect(G_OBJECT(button), "query-tooltip", G_CALLBACK(bookmark_tooltip_cb), bm);
 }
 
 static void bookmark_populate(BookMarkData *bm)
@@ -754,11 +794,60 @@ void bookmark_list_set_key(GtkWidget *list, const gchar *key)
 	if (!list || !key) return;
 
 	bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
-	if (!bm || bm->key == key) return;
+	if (!bm) return;
 
 	bm->key = key;
 
 	bookmark_populate(bm);
+}
+
+void bookmark_list_set_selected_path(GtkWidget *list, const gchar *path)
+{
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
+	if (!bm) return;
+
+	bm->selected_key = bm->key;
+	bm->selected_path = path ? path : "";
+	for (GtkWidget *child = gtk_widget_get_first_child(bm->box); child; child = gtk_widget_get_next_sibling(child))
+		{
+		auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(child), "bookbuttondata"));
+		if (b && b->path == bm->selected_path)
+			{
+			gtk_widget_remove_css_class(child, "flat");
+			gtk_widget_add_css_class(child, "suggested-action");
+			}
+		else
+			{
+			gtk_widget_remove_css_class(child, "suggested-action");
+			gtk_widget_add_css_class(child, "flat");
+			}
+		}
+}
+
+void bookmark_list_set_tooltip_func(GtkWidget *list, const BookmarkTooltipFunc &tooltip_func)
+{
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
+	if (bm) bm->tooltip_func = tooltip_func;
+}
+
+void bookmark_list_set_select_only_on_ctrl(GtkWidget *list, gboolean enabled)
+{
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
+	if (bm) bm->select_only_on_ctrl = enabled;
+}
+
+const gchar *bookmark_list_get_selected_path(GtkWidget *list)
+{
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
+	if (!bm || bm->selected_key != bm->key || bm->selected_path.empty()) return nullptr;
+
+	for (GtkWidget *child = gtk_widget_get_first_child(bm->box); child; child = gtk_widget_get_next_sibling(child))
+		{
+		auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(child), "bookbuttondata"));
+		if (b && b->path == bm->selected_path) return bm->selected_path.c_str();
+		}
+
+	return nullptr;
 }
 
 void bookmark_list_set_no_defaults(GtkWidget *list, gboolean no_defaults)

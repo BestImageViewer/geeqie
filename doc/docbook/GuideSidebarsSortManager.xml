@@ -78,16 +78,17 @@
   <section id="Collectionview">
     <title>Collection view</title>
     <para>The Sort Manager collection view consists of a vertical list of collection, a section to determine the current selection, and a set of buttons along the bottom.</para>
-    <para>Clicking or activating an item in the list will add the selected image to that collection.</para>
+    <para>Clicking or activating an item in the list sets it as the destination and adds images according to the selection style below. Hold <keycap>Ctrl</keycap> while clicking to set the destination without adding images. The destination remains highlighted when focus returns to the files pane.</para>
+    <para>The <guilabel>Add to highlighted collection</guilabel> action adds images to the highlighted collection according to the selection style below. It works while the Sort Manager is visible in Collections mode. No shortcut is assigned by default; one can be assigned in Keyboard preferences.</para>
     <para />
     <section id="Collectionlist">
       <title>Collection list</title>
       <para>
         This is the list of collections located in the folder listed in
         <emphasis role="underline"><link linkend="GuideReferenceConfig">Configuration Files</link></emphasis>
-        . Activating a member of this list will result in the current image selection to be added to the collection. If the image already exists within the collection, it will not be added a second time.
+        , together with collections added from other folders. Activating a member of this list will result in the current image selection to be added to the collection. If the image already exists within the collection, it will not be added a second time.
       </para>
-      <para>A new empty collection can be added to the list by activating the Add button at the bottom of the sidebar.</para>
+      <para>An existing collection or a new empty collection can be added to the list by activating the Add button at the bottom of the sidebar.</para>
       <para />
     </section>
     <section id="Choosingtheselectionstyle">
@@ -117,7 +118,7 @@
     </section>
     <section id="Addbutton1">
       <title>Add button</title>
-      <para>Activate this button to add a new empty collection to the visible list. A dialog will appear to allow entry of the name to use for the new collection.</para>
+      <para>Activate this button to choose an existing .gqv collection or enter a new .gqv filename. Existing collections are added without changing their contents; a new filename creates an empty collection. Collections outside the default collections folder are remembered and remain available in the list. The added collection becomes the highlighted destination.</para>
       <para />
     </section>
     <section id="Undobutton1">

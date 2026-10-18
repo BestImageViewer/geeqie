@@ -144,4 +144,63 @@ TEST(FileChooserDestination, BreadcrumbClearsChildButExplicitSelectionRemains)
 	g_rmdir(directory);
 }
 
+TEST(FileChooserDestination, AcceptExistingReturnsExistingOrNewPathWithoutReplacement)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	g_autofree gchar *directory = g_dir_make_tmp("geeqie-add-collection-XXXXXX", nullptr);
+	ASSERT_NE(directory, nullptr);
+	g_autofree gchar *existing = g_build_filename(directory, "existing.gqv", nullptr);
+	ASSERT_TRUE(g_file_set_contents(existing, "Preserve existing content", -1, nullptr));
+	auto *parent = GTK_WINDOW(gtk_window_new());
+	gtk_window_present(parent);
+	for (const gchar *name : {"existing.gqv", "new.gqv"})
+		{
+		GFile *result = nullptr;
+		FileDialogData data{};
+		data.action = FileDialogAction::SAVE;
+		data.accept_existing = TRUE;
+		data.parent = parent;
+		data.filename = directory;
+		data.suggested_name = name;
+		data.data = &result;
+		data.callback = [](GFile *file, gpointer output)
+			{
+			*static_cast<GFile **>(output) = file ? G_FILE(g_object_ref(file)) : nullptr;
+			};
+		file_dialog_show(data);
+		auto *windows = gtk_window_get_toplevels();
+		GtkWidget *dialog = nullptr;
+		for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+			{
+			g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+			if (GTK_IS_DIALOG(window)) dialog = GTK_WIDGET(window);
+			}
+		ASSERT_NE(dialog, nullptr);
+		auto *chooser = GTK_FILE_CHOOSER(find_widget(dialog, [](GtkWidget *widget) { return GTK_IS_FILE_CHOOSER(widget); }));
+		ASSERT_NE(chooser, nullptr);
+		g_autoptr(GFile) folder = g_file_new_for_path(directory);
+		G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+		ASSERT_TRUE(wait_for([&]()
+			{
+			g_autoptr(GFile) current = gtk_file_chooser_get_current_folder(chooser);
+			return current && g_file_equal(current, folder);
+			}));
+		gtk_file_chooser_set_current_name(chooser, name);
+		gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
+		G_GNUC_END_IGNORE_DEPRECATIONS
+		ASSERT_NE(result, nullptr);
+		g_autofree gchar *actual = g_file_get_path(result);
+		g_autofree gchar *expected = g_build_filename(directory, name, nullptr);
+		EXPECT_STREQ(actual, expected);
+		g_object_unref(result);
+		}
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(existing, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "Preserve existing content");
+	gtk_window_destroy(parent);
+	g_unlink(existing);
+	g_rmdir(directory);
+}
+
 } // namespace

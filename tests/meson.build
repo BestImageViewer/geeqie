@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 unit_test_sources = files(
+'bar-sort.cc',
 'cache.cc',
 'collection-file-source.cc',
 'dnd.cc',
@@ -23,6 +24,7 @@ unit_test_sources = files(
 'search.cc',
 'similar.cc',
 'trash.cc',
+'ui-bookmark.cc',
 'ui-file-chooser.cc',
 'ui-icon.cc',
 'ui-tree-edit.cc',

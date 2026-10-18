@@ -46,6 +46,7 @@ struct PendingFileDialog
 	gchar *preview_path;
 	guint preview_timer_id;
 	gboolean finished;
+	gboolean accept_existing;
 	GtkWidget *destination_label;
 	GFile *navigation_child;
 	GList *selection_models;
@@ -753,7 +754,7 @@ void file_dialog_response_cb(GtkDialog *, gint response_id, gpointer data)
 			}
 		}
 
-	if (response_id == GTK_RESPONSE_ACCEPT && pending->action == FileDialogAction::SAVE)
+	if (response_id == GTK_RESPONSE_ACCEPT && pending->action == FileDialogAction::SAVE && !pending->accept_existing)
 		{
 		g_autoptr(GFile) file = get_selected_file(pending);
 		g_autofree gchar *path = file ? g_file_get_path(file) : nullptr;
@@ -938,6 +939,7 @@ void file_dialog_show(const FileDialogData &fdd)
 
 	auto *pending = g_new0(PendingFileDialog, 1);
 	pending->action = fdd.action;
+	pending->accept_existing = fdd.accept_existing;
 	pending->callback = fdd.callback;
 	pending->alternate_callback = fdd.alternate_callback;
 	pending->data = fdd.data;

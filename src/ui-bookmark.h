@@ -31,12 +31,18 @@
 /* bookmarks */
 
 using BookmarkSelectFunc = std::function<void(const gchar *path)>;
+using BookmarkTooltipFunc = std::function<std::string(const gchar *path)>;
 using BookmarkDropFunc = std::function<void(const gchar *path, GList *list)>;
 GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_func);
 void bookmark_list_set_key(GtkWidget *list, const gchar *key);
+void bookmark_list_set_selected_path(GtkWidget *list, const gchar *path);
+void bookmark_list_set_select_only_on_ctrl(GtkWidget *list, gboolean enabled);
+/** @return Borrowed path of the highlighted entry, or nullptr if it is absent. */
+const gchar *bookmark_list_get_selected_path(GtkWidget *list);
 void bookmark_list_set_no_defaults(GtkWidget *list, gint no_defaults);
 void bookmark_list_set_editable(GtkWidget *list, gint editable);
 void bookmark_list_set_only_directories(GtkWidget *list, gint only_directories);
+void bookmark_list_set_tooltip_func(GtkWidget *list, const BookmarkTooltipFunc &tooltip_func);
 void bookmark_list_set_drop_func(GtkWidget *list, const BookmarkDropFunc &drop_func);
 void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path);
 
