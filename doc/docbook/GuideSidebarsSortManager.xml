@@ -96,7 +96,7 @@
       <variablelist>
         <varlistentry>
           <term>
-            <guilabel>Add image</guilabel>
+            <guilabel>Add current image</guilabel>
           </term>
           <listitem>
             <para>The visible image is added to the collection.</para>
@@ -106,7 +106,7 @@
       <variablelist>
         <varlistentry>
           <term>
-            <guilabel>Add selection</guilabel>
+            <guilabel>Add selected images</guilabel>
           </term>
           <listitem>
             <para>All images selected in the file list will be added to the collection.</para>

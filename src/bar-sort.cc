@@ -626,10 +626,10 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 
 	sd->collection_group = pref_box_new(sd->vbox, FALSE, GTK_ORIENTATION_VERTICAL, 0);
 
-	buttongrp = pref_radiobutton_new(sd->collection_group, nullptr, _("Add image"),
+	buttongrp = pref_radiobutton_new(sd->collection_group, nullptr, _("Add current image"),
 	                                 sd->selection == BarSort::SELECTION_IMAGE,
 	                                 G_CALLBACK(bar_sort_set_selection_cb<BarSort::SELECTION_IMAGE>), sd);
-	pref_radiobutton_new(sd->collection_group, buttongrp, _("Add selection"),
+	pref_radiobutton_new(sd->collection_group, buttongrp, _("Add selected images"),
 	                     sd->selection == BarSort::SELECTION_SELECTED,
 	                     G_CALLBACK(bar_sort_set_selection_cb<BarSort::SELECTION_SELECTED>), sd);
 
