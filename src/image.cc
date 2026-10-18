@@ -45,6 +45,7 @@
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
+#include "renderer-tiles.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 
@@ -1362,6 +1363,7 @@ static void image_change_real(ImageWindow *imd, FileData *fd,
 			      CollectionData *cd, CollectInfo *info, gdouble zoom)
 {
 
+	image_transition_cancel(imd);
 	image_rectangle_clear(imd);
 	imd->collection = cd;
 	imd->collection_info = info;
@@ -1755,6 +1757,9 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 {
 	if (imd == source) return;
 
+	image_transition_cancel(imd);
+	image_transition_cancel(source);
+
 	imd->unknown = source->unknown;
 
 	imd->collection = source->collection;
@@ -1804,6 +1809,9 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 {
 	if (imd == source) return;
 
+	image_transition_cancel(imd);
+	image_transition_cancel(source);
+
 	imd->unknown = source->unknown;
 
 	imd->collection = source->collection;
@@ -1846,6 +1854,9 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_copy(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	image_set_pixbuf_renderer_post_process_func(imd);
+
+	/* A copied renderer has no loader to finish an in-progress source image. */
+	if (source->il) image_reload(imd);
 }
 
 
@@ -2349,8 +2360,73 @@ void image_options_sync()
  *-------------------------------------------------------------------
  */
 
+static gboolean image_transition_ready(ImageWindow *imd)
+{
+	auto *pr = PIXBUF_RENDERER(imd->pr);
+	return !imd->il && !pr->loading && pr->pixbuf && pr->complete &&
+	       renderer_tiles_is_ready(pr->renderer) &&
+	       (!pr->renderer2 || renderer_tiles_is_ready(pr->renderer2));
+}
+
+GdkPaintable *image_transition_capture(ImageWindow *imd)
+{
+	if (!gtk_widget_get_mapped(imd->pr) || !image_transition_ready(imd)) return nullptr;
+	auto *snapshot = gtk_snapshot_new();
+	// Snapshot the completed tiles directly; the widget's cached frame can still
+	// contain the last progressive update rather than the final image.
+	GTK_WIDGET_GET_CLASS(imd->pr)->snapshot(imd->pr, snapshot);
+	graphene_size_t size;
+	graphene_size_init(&size, gtk_widget_get_width(imd->pr), gtk_widget_get_height(imd->pr));
+	return gtk_snapshot_free_to_paintable(snapshot, &size);
+}
+
+void image_transition_cancel(ImageWindow *imd)
+{
+	g_clear_handle_id(&imd->transition_source, g_source_remove);
+	imd->transition_pending = FALSE;
+	gtk_stack_set_transition_type(GTK_STACK(imd->view), GTK_STACK_TRANSITION_TYPE_NONE);
+	if (gtk_stack_get_transition_running(GTK_STACK(imd->view)))
+		gtk_stack_set_visible_child(GTK_STACK(imd->view), imd->outgoing[imd->outgoing_index]);
+	gtk_stack_set_visible_child(GTK_STACK(imd->view), imd->pr);
+	gtk_picture_set_paintable(GTK_PICTURE(imd->outgoing[imd->outgoing_index]), nullptr);
+}
+
+gboolean image_transition_active(ImageWindow *imd)
+{
+	return imd->transition_pending || gtk_stack_get_transition_running(GTK_STACK(imd->view));
+}
+
+static gboolean image_transition_ready_cb(gpointer data)
+{
+	auto *imd = static_cast<ImageWindow *>(data);
+	if (!image_transition_ready(imd)) return G_SOURCE_CONTINUE;
+	imd->transition_source = 0;
+	imd->transition_pending = FALSE;
+	gtk_stack_set_transition_duration(GTK_STACK(imd->view), imd->transition_duration);
+	gtk_stack_set_transition_type(GTK_STACK(imd->view), imd->transition_type);
+	gtk_stack_set_visible_child(GTK_STACK(imd->view), imd->pr);
+	if (!gtk_stack_get_transition_running(GTK_STACK(imd->view)))
+		gtk_picture_set_paintable(GTK_PICTURE(imd->outgoing[imd->outgoing_index]), nullptr);
+	return G_SOURCE_REMOVE;
+}
+
+void image_transition_from(ImageWindow *imd, GdkPaintable *outgoing, GtkStackTransitionType type, guint duration)
+{
+	image_transition_cancel(imd);
+	if (!outgoing || type == GTK_STACK_TRANSITION_TYPE_NONE || !gtk_widget_get_mapped(imd->view)) return;
+	imd->outgoing_index ^= 1;
+	imd->transition_type = type;
+	imd->transition_duration = duration;
+	imd->transition_pending = TRUE;
+	gtk_picture_set_paintable(GTK_PICTURE(imd->outgoing[imd->outgoing_index]), outgoing);
+	gtk_stack_set_visible_child(GTK_STACK(imd->view), imd->outgoing[imd->outgoing_index]);
+	imd->transition_source = g_timeout_add(25, image_transition_ready_cb, imd);
+}
+
 static void image_free(ImageWindow *imd)
 {
+	g_clear_handle_id(&imd->transition_source, g_source_remove);
+	g_signal_handlers_disconnect_by_data(imd->view, imd);
 	image_rectangle_clear(imd);
 	image_list = g_list_remove(image_list, imd);
 
@@ -2385,11 +2461,11 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		{
 		imd->frame = gtk_frame_new(nullptr);
 		DEBUG_NAME(imd->frame);
-		g_object_ref(imd->pr);
-		if (imd->has_frame != -1) gtk_box_remove(GTK_BOX(imd->widget), imd->pr);
-		gtk_frame_set_child(GTK_FRAME(imd->frame), imd->pr);
+		g_object_ref(imd->view);
+		if (imd->has_frame != -1) gtk_box_remove(GTK_BOX(imd->widget), imd->view);
+		gtk_frame_set_child(GTK_FRAME(imd->frame), imd->view);
 
-		g_object_unref(imd->pr);
+		g_object_unref(imd->view);
 		gtk_widget_set_can_focus(imd->frame, TRUE);
 
 		GtkEventController *controller = gtk_event_controller_focus_new();
@@ -2402,18 +2478,18 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		}
 	else
 		{
-		g_object_ref(imd->pr);
+		g_object_ref(imd->view);
 		if (imd->frame)
 			{
 			gtk_frame_set_child(GTK_FRAME(imd->frame), nullptr);
 			gtk_box_remove(GTK_BOX(imd->widget), imd->frame);
 			imd->frame = nullptr;
 			}
-		gtk_widget_set_hexpand(imd->pr, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
-		gtk_widget_set_vexpand(imd->pr, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-		gtk_box_append(GTK_BOX(imd->widget), imd->pr);
+		gtk_widget_set_hexpand(imd->view, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(imd->view, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(imd->widget), imd->view);
 
-		g_object_unref(imd->pr);
+		g_object_unref(imd->view);
 		}
 
 	imd->has_frame = frame;
@@ -2438,6 +2514,29 @@ ImageWindow *image_new(gboolean frame)
 	imd->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(imd->widget);
 
+	imd->view = gtk_stack_new();
+	gtk_widget_set_hexpand(imd->view, TRUE);
+	gtk_widget_set_vexpand(imd->view, TRUE);
+	gtk_stack_set_transition_type(GTK_STACK(imd->view), GTK_STACK_TRANSITION_TYPE_NONE);
+	for (guint i = 0; i < G_N_ELEMENTS(imd->outgoing); ++i)
+		{
+		imd->outgoing[i] = gtk_picture_new();
+		gtk_picture_set_can_shrink(GTK_PICTURE(imd->outgoing[i]), TRUE);
+		gtk_picture_set_content_fit(GTK_PICTURE(imd->outgoing[i]), GTK_CONTENT_FIT_FILL);
+		gtk_stack_add_child(GTK_STACK(imd->view), imd->outgoing[i]);
+		if (i == 0) gtk_stack_add_named(GTK_STACK(imd->view), imd->pr, "image");
+		}
+	gtk_stack_set_visible_child(GTK_STACK(imd->view), imd->pr);
+	g_signal_connect(imd->view, "unmap", G_CALLBACK(+[](GtkWidget *, gpointer data)
+		{
+		image_transition_cancel(static_cast<ImageWindow *>(data));
+		}), imd);
+	g_signal_connect(imd->view, "notify::transition-running", G_CALLBACK(+[](GObject *, GParamSpec *, gpointer data)
+		{
+		auto *image = static_cast<ImageWindow *>(data);
+		if (!image->transition_pending && !gtk_stack_get_transition_running(GTK_STACK(image->view)))
+			gtk_picture_set_paintable(GTK_PICTURE(image->outgoing[image->outgoing_index]), nullptr);
+		}), imd);
 	image_set_frame(imd, frame);
 
 	image_set_selectable(imd, 0);

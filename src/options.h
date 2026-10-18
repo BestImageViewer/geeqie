@@ -244,6 +244,8 @@ struct ConfOptions
 		gint delay;	/**< in tenths of a second */
 		gboolean random;
 		gboolean repeat;
+		gint transition; /**< GtkStackTransitionType */
+		gint transition_duration; /**< milliseconds */
 	} slideshow;
 
 	/* fullscreen */

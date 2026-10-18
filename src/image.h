@@ -78,6 +78,13 @@ struct ImageWindow
 	GtkWidget *widget;	/**< use this to add it and show it */
 	GtkWidget *pr;
 	GtkWidget *frame;
+	GtkWidget *view; /**< GtkStack containing the renderer and the outgoing view */
+	GtkWidget *outgoing[2];
+	guint outgoing_index;
+	guint transition_source;
+	GtkStackTransitionType transition_type;
+	guint transition_duration;
+	gboolean transition_pending;
 
 	FileData *image_fd;
 
@@ -161,6 +168,13 @@ struct ImageWindow
 
 void image_set_frame(ImageWindow *imd, gboolean frame);
 ImageWindow *image_new(gboolean frame);
+
+/** @brief Capture the completed outgoing view; the caller owns the paintable. */
+GdkPaintable *image_transition_capture(ImageWindow *imd);
+/** @brief Show the outgoing view until the new image is ready, then let GtkStack animate. */
+void image_transition_from(ImageWindow *imd, GdkPaintable *outgoing, GtkStackTransitionType type, guint duration);
+void image_transition_cancel(ImageWindow *imd);
+gboolean image_transition_active(ImageWindow *imd);
 
 /* additional setup */
 void image_attach_window(ImageWindow *imd, GtkWidget *window,

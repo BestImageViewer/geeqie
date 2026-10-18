@@ -27,10 +27,13 @@
 
 #include "collect.h"
 #include "filedata.h"
+#include "fullscreen.h"
 #include "image.h"
 #include "layout-image.h"
 #include "layout.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
+#include "renderer-tiles.h"
 #include "view-file.h"
 
 namespace
@@ -47,11 +50,30 @@ inline FileData *slideshow_get_fd(const SlideShow *ss)
 	return ss->lw ? layout_image_get_fd(ss->lw) : image_get_fd(ss->imd);
 }
 
+ImageWindow *slideshow_visible_image(SlideShow *ss)
+{
+	if (ss->lw && ss->lw->full_screen) return ss->lw->full_screen->imd;
+	return ss->lw ? ss->lw->image : ss->imd;
+}
+
+void slideshow_transition_clear(SlideShow *ss)
+{
+	if (!ss->transition_stack) return;
+	if (!ss->finish_transition) image_transition_cancel(ss->transition_image);
+	g_object_remove_weak_pointer(G_OBJECT(ss->transition_stack),
+	                             reinterpret_cast<gpointer *>(&ss->transition_stack));
+	ss->transition_stack = nullptr;
+	ss->transition_image = nullptr;
+}
+
 } // namespace
+
+static void slideshow_timer_reset(SlideShow *ss);
 
 SlideShow::~SlideShow()
 {
 	g_clear_handle_id(&timeout_id, g_source_remove);
+	slideshow_transition_clear(this);
 
 	if (stop_func) stop_func(this);
 
@@ -108,7 +130,7 @@ bool SlideShow::should_continue() const
 	       (!from_selection && slide_count == layout_list_count(lw));
 }
 
-static gboolean slideshow_step(SlideShow *ss, gboolean forward)
+static gboolean slideshow_step(SlideShow *ss, gboolean forward, gboolean automatic = FALSE)
 {
 	if (!ss->should_continue()) return FALSE;
 
@@ -124,6 +146,12 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward)
 
 		move_first_list_item(ss->list_done, ss->list);
 		}
+
+	slideshow_transition_clear(ss);
+	ss->waiting_for_image = true;
+	auto *imd = slideshow_visible_image(ss);
+	g_autoptr(GdkPaintable) outgoing = automatic && options->slideshow.transition != GTK_STACK_TRANSITION_TYPE_NONE
+	                               ? image_transition_capture(imd) : nullptr;
 
 	gint row = ss->list_done.front();
 
@@ -166,6 +194,18 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward)
 			}
 		}
 
+	if (outgoing)
+		{
+		ss->transition_image = imd;
+		ss->transition_stack = imd->view;
+		g_object_add_weak_pointer(G_OBJECT(imd->view), reinterpret_cast<gpointer *>(&ss->transition_stack));
+		const gint duration = std::clamp(options->slideshow.transition_duration, 50, 5000);
+		const auto type = static_cast<GtkStackTransitionType>(std::clamp(options->slideshow.transition,
+		                                                             gint(GTK_STACK_TRANSITION_TYPE_NONE),
+		                                                             gint(GTK_STACK_TRANSITION_TYPE_ROTATE_LEFT_RIGHT)));
+		image_transition_from(imd, outgoing, type, duration);
+		}
+
 	if (ss->list.empty() && options->slideshow.repeat)
 		{
 		slideshow_list_init(ss, -1);
@@ -173,6 +213,7 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward)
 
 	if (ss->list.empty())
 		{
+		ss->finish_transition = outgoing != nullptr;
 		return FALSE;
 		}
 
@@ -209,15 +250,45 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward)
 	return TRUE;
 }
 
-static void slideshow_timer_reset(SlideShow *ss);
-
 static gboolean slideshow_loop_cb(gpointer data)
 {
 	auto *ss = static_cast<SlideShow *>(data);
 
 	if (ss->paused) return G_SOURCE_CONTINUE;
+	if (!ss->should_continue())
+		{
+		delete ss;
+		return G_SOURCE_REMOVE;
+		}
 
-	if (slideshow_step(ss, TRUE))
+	auto *imd = slideshow_visible_image(ss);
+	auto *pr = PIXBUF_RENDERER(imd->pr);
+	const bool rendering = gtk_widget_get_mapped(GTK_WIDGET(pr)) &&
+	                       (!pr->complete || !renderer_tiles_is_ready(pr->renderer) ||
+	                        (pr->renderer2 && !renderer_tiles_is_ready(pr->renderer2)));
+	if (pr->loading || imd->il || rendering)
+		{
+		if (!ss->waiting_for_image)
+			{
+			ss->waiting_for_image = true;
+			slideshow_timer_reset(ss);
+			}
+		return G_SOURCE_CONTINUE;
+		}
+
+	if (ss->transition_stack && image_transition_active(ss->transition_image))
+		{
+		return G_SOURCE_CONTINUE;
+		}
+
+	if (ss->waiting_for_image)
+		{
+		ss->waiting_for_image = false;
+		slideshow_timer_reset(ss);
+		return G_SOURCE_CONTINUE;
+		}
+
+	if (slideshow_step(ss, TRUE, TRUE))
 		{
 		/* Check if the user has changed the timer interval */
 		slideshow_timer_reset(ss);
@@ -234,12 +305,13 @@ static void slideshow_timer_reset(SlideShow *ss)
 	options->slideshow.delay = std::max(options->slideshow.delay, 1);
 
 	if (ss->timeout_id) g_source_remove(ss->timeout_id);
-	ss->timeout_id = g_timeout_add(options->slideshow.delay * 1000 / SLIDESHOW_SUBSECOND_PRECISION,
-				       slideshow_loop_cb, ss);
+	const guint interval = ss->waiting_for_image ? 25 : options->slideshow.delay * 1000 / SLIDESHOW_SUBSECOND_PRECISION;
+	ss->timeout_id = g_timeout_add(interval, slideshow_loop_cb, ss);
 }
 
 static void slideshow_move(SlideShow *ss, gboolean forward)
 {
+	slideshow_transition_clear(ss);
 	if (!slideshow_step(ss, forward))
 		{
 		delete ss;

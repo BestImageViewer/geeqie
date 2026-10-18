@@ -2130,6 +2130,35 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 
 	pref_checkbox_new_int(group, _("Random"), options->slideshow.random, &c_options->slideshow.random);
 	pref_checkbox_new_int(group, _("Repeat"), options->slideshow.repeat, &c_options->slideshow.repeat);
+	const gchar *transitions[] = {
+		_("None"), _("Cross-fade"), _("Slide right"), _("Slide left"), _("Slide up"), _("Slide down"),
+		_("Slide left/right"), _("Slide up/down"),
+		_("Over up"), _("Over down"), _("Over left"), _("Over right"),
+		_("Under up"), _("Under down"), _("Under left"), _("Under right"),
+		_("Over up/down"), _("Over down/up"), _("Over left/right"), _("Over right/left"),
+		_("Rotate left"), _("Rotate right"), _("Rotate left/right"), nullptr
+	};
+	static_assert(G_N_ELEMENTS(transitions) == GTK_STACK_TRANSITION_TYPE_ROTATE_LEFT_RIGHT + 2);
+	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	pref_label_new(hbox, _("Transition:"));
+	auto *transition = gtk_drop_down_new_from_strings(transitions);
+	c_options->slideshow.transition = options->slideshow.transition;
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(transition), options->slideshow.transition);
+	gtk_box_append(GTK_BOX(hbox), transition);
+	auto *duration = pref_spin_new_int(group, _("Transition duration (milliseconds):"), nullptr,
+	                                   50, 5000, 50, options->slideshow.transition_duration,
+	                                   &c_options->slideshow.transition_duration);
+	gtk_widget_set_sensitive(duration, options->slideshow.transition != GTK_STACK_TRANSITION_TYPE_NONE);
+	g_object_set_data(G_OBJECT(transition), "duration-widget", duration);
+	g_signal_connect(transition, "notify::selected", G_CALLBACK(+[](GObject *object, GParamSpec *, gpointer data)
+		{
+		auto *value = static_cast<gint *>(data);
+		*value = gtk_drop_down_get_selected(GTK_DROP_DOWN(object));
+		auto *duration_widget = GTK_WIDGET(g_object_get_data(object, "duration-widget"));
+		gtk_widget_set_sensitive(duration_widget, *value != GTK_STACK_TRANSITION_TYPE_NONE);
+		}), &c_options->slideshow.transition);
+	gtk_widget_set_tooltip_text(transition,
+	                            _("Animate automatic slide changes after the next image is ready. Paired directions alternate between slides. Manual navigation cancels the transition."));
 
 	pref_spacer(group, PREF_PAD_GROUP);
 

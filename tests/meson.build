@@ -23,6 +23,7 @@ unit_test_sources = files(
 'renderer-tiles.cc',
 'search.cc',
 'similar.cc',
+'slideshow.cc',
 'trash.cc',
 'ui-bookmark.cc',
 'ui-file-chooser.cc',

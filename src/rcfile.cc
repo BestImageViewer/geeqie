@@ -550,6 +550,8 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_INT_UNIT(*options, slideshow.delay, SLIDESHOW_SUBSECOND_PRECISION);
 	WRITE_NL(); WRITE_BOOL(*options, slideshow.random);
 	WRITE_NL(); WRITE_BOOL(*options, slideshow.repeat);
+	WRITE_NL(); WRITE_INT(*options, slideshow.transition);
+	WRITE_NL(); WRITE_INT(*options, slideshow.transition_duration);
 
 	/* Collection Options */
 	WRITE_NL(); WRITE_BOOL(*options, collections.rectangular_selection);
@@ -1021,6 +1023,14 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_INT_UNIT(*options, slideshow.delay, SLIDESHOW_SUBSECOND_PRECISION)) continue;
 		if (READ_BOOL(*options, slideshow.random)) continue;
 		if (READ_BOOL(*options, slideshow.repeat)) continue;
+		if (READ_INT_CLAMP(*options, slideshow.transition, GTK_STACK_TRANSITION_TYPE_NONE, GTK_STACK_TRANSITION_TYPE_ROTATE_LEFT_RIGHT)) continue;
+		if (gboolean crossfade = FALSE; READ_BOOL_FULL("slideshow.crossfade", crossfade))
+			{
+			if (crossfade) options->slideshow.transition = GTK_STACK_TRANSITION_TYPE_CROSSFADE;
+			continue;
+			}
+		if (READ_INT_CLAMP_FULL("slideshow.crossfade_duration", options->slideshow.transition_duration, 50, 5000)) continue;
+		if (READ_INT_CLAMP(*options, slideshow.transition_duration, 50, 5000)) continue;
 
 		/* Collection options */
 		if (READ_BOOL(*options, collections.rectangular_selection)) continue;

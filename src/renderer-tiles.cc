@@ -196,6 +196,11 @@ gboolean rt_texture_scaling_available(const RendererTiles *rt)
 	GskRenderer *renderer = native ? gtk_native_get_renderer(native) : nullptr;
 	if (!renderer || GSK_IS_CAIRO_RENDERER(renderer)) return FALSE;
 
+	// Source-texture magnification can render blank on high-DPI GL surfaces.
+	// Keep those displays on the tile path, which also handles device scaling.
+	auto *surface = gtk_native_get_surface(native);
+	if (surface && gdk_surface_get_scale(surface) != 1.0) return FALSE;
+
 	const gint width = gdk_pixbuf_get_width(pr->pixbuf);
 	const gint height = gdk_pixbuf_get_height(pr->pixbuf);
 	// GdkPixbuf and texture sampling round fractional nearest-neighbor positions
@@ -2079,6 +2084,12 @@ void rt_snapshot(void *data, GtkSnapshot *snapshot)
 void renderer_tiles_snapshot(RendererFuncs *renderer, GtkSnapshot *snapshot, double display_scale)
 {
 	rt_snapshot_scaled(renderer, snapshot, display_scale);
+}
+
+gboolean renderer_tiles_is_ready(RendererFuncs *renderer)
+{
+	auto *rt = reinterpret_cast<RendererTiles *>(renderer);
+	return !rt->draw_idle_id && g_queue_is_empty(&rt->draw_queue) && g_queue_is_empty(&rt->draw_queue_2pass);
 }
 
 RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)

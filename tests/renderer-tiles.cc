@@ -370,6 +370,54 @@ GdkTexture *find_scaled_texture(GskRenderNode *node, GskScalingFilter *filter)
 	return nullptr;
 }
 
+TEST(RendererTilesTexture, HighDpiMagnificationDisplaysTheWholeImage)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	pr->zoom_quality = GDK_INTERP_BILINEAR;
+	gtk_window_set_default_size(window, 600, 400);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 320, 240);
+	gdk_pixbuf_fill(image, 0x123456ff);
+	pixbuf_renderer_set_pixbuf(pr, image, 2.0);
+	gtk_window_present(window);
+	for (int i = 0; i < 1000; ++i)
+		{
+		while (g_main_context_iteration(nullptr, FALSE)) {}
+		if (pr->complete && gtk_widget_get_mapped(GTK_WIDGET(pr))) break;
+		g_usleep(1000);
+		}
+	EXPECT_TRUE(pr->complete);
+	auto *surface = gtk_native_get_surface(GTK_NATIVE(window));
+	if (gdk_surface_get_scale(surface) == 1.0)
+		{
+		gtk_window_destroy(window);
+		GTEST_SKIP() << "Requires a high-DPI display (for example GDK_SCALE=2)";
+		}
+	auto *snapshot = gtk_snapshot_new();
+	renderer_tiles_snapshot(pr->renderer, snapshot, gdk_surface_get_scale(surface));
+	g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
+	ASSERT_NE(node, nullptr);
+	EXPECT_EQ(find_scaled_texture(node, nullptr), nullptr);
+	graphene_rect_t viewport;
+	graphene_rect_init(&viewport, 0, 0, pr->viewport_width, pr->viewport_height);
+	g_autoptr(GdkTexture) rendered = gsk_renderer_render_texture(gtk_native_get_renderer(GTK_NATIVE(window)), node, &viewport);
+	ASSERT_NE(rendered, nullptr);
+	const int stride = gdk_texture_get_width(rendered);
+	std::vector<uint32_t> output(stride * gdk_texture_get_height(rendered));
+	gdk_texture_download(rendered, reinterpret_cast<guchar *>(output.data()), stride * 4);
+	for (int y = 1; y < pr->vis_height - 1; y += 29)
+		{
+		for (int x = 1; x < pr->vis_width - 1; x += 37)
+			{
+			EXPECT_EQ(output[((y + pr->y_offset) * stride) + x + pr->x_offset], 0xff123456U);
+			}
+		}
+	gtk_window_destroy(window);
+}
+
 TEST(RendererTilesTexture, MagnificationReusesSourceAndInvalidatesChangedPixels)
 {
 	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
@@ -403,10 +451,11 @@ TEST(RendererTilesTexture, MagnificationReusesSourceAndInvalidatesChangedPixels)
 		return false;
 	};
 	ASSERT_TRUE(finish_rendering());
-	if (GSK_IS_CAIRO_RENDERER(gtk_native_get_renderer(GTK_NATIVE(window))))
+	if (GSK_IS_CAIRO_RENDERER(gtk_native_get_renderer(GTK_NATIVE(window))) ||
+	    gdk_surface_get_scale(gtk_native_get_surface(GTK_NATIVE(window))) != 1.0)
 		{
 		gtk_window_destroy(window);
-		GTEST_SKIP() << "Requires a GL or Vulkan renderer";
+		GTEST_SKIP() << "Requires a GL or Vulkan renderer at 100% display scaling";
 		}
 	const auto source_texture = [pr](GskScalingFilter *filter = nullptr)
 	{

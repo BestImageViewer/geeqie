@@ -26,6 +26,7 @@
 #include <functional>
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 struct CollectInfo;
 struct CollectionData;
@@ -86,6 +87,11 @@ struct SlideShow
 	StopFunc stop_func{};
 
 	gboolean paused = FALSE;
+	bool waiting_for_image = true; /**< start the display delay after decoding and rendering */
+
+	GtkWidget *transition_stack = nullptr; /**< weak reference */
+	ImageWindow *transition_image = nullptr; /**< valid while transition_stack exists */
+	bool finish_transition = false; /**< let the final automatic slide finish its transition */
 
 private:
 	SlideShow(LayoutWindow *target_lw, ImageWindow *imd)

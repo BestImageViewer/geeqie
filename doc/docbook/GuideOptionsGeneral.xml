@@ -169,7 +169,7 @@
         <term>
           <guilabel>Delay between image change</guilabel>
         </term>
-        <listitem>Specifies the delay between images for slide shows, in seconds.</listitem>
+        <listitem>Specifies how long each image is displayed in a slide show, in seconds. The delay starts after the image has finished loading and rendering, so slow-loading images are not skipped. When a transition is enabled, the delay starts after the transition finishes.</listitem>
       </varlistentry>
     </variablelist>
     <variablelist>
@@ -191,6 +191,20 @@
           <guilabel>Repeat</guilabel>
         </term>
         <listitem>This will cause the slide show to loop indefinitely, it will continue with the first image after displaying the last image in the slide show list.</listitem>
+      </varlistentry>
+    </variablelist>
+    <variablelist>
+      <varlistentry>
+        <term><guilabel>Transition</guilabel></term>
+        <listitem>
+          <para>Choose a transition: None (the default), Cross-fade, Slide in each direction or paired directions, Over and Under in each direction, paired Over directions, and Rotate left, right, or left/right. Paired transitions alternate direction between slides. The outgoing view remains visible until the incoming image is ready. Manual navigation or stopping the slide show cancels the transition. Desktop animation settings are respected.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guilabel>Transition duration (milliseconds)</guilabel></term>
+        <listitem>
+          <para>Sets the transition duration, from 50 to 5000 milliseconds (default 300). Image loading and transitions extend the time between image changes. The outgoing view is retained in memory until the transition finishes.</para>
+        </listitem>
       </varlistentry>
     </variablelist>
   </section>

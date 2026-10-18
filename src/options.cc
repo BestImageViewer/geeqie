@@ -200,6 +200,8 @@ ConfOptions *conf_options_new()
 	options->slideshow.delay = 50;
 	options->slideshow.random = FALSE;
 	options->slideshow.repeat = FALSE;
+	options->slideshow.transition = 0;
+	options->slideshow.transition_duration = 300;
 
 	options->thumbnails.cache_into_dirs = FALSE;
 	options->thumbnails.enable_caching = TRUE;

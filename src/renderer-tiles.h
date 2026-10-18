@@ -30,6 +30,8 @@ struct PixbufRenderer;
 struct RendererFuncs;
 
 RendererFuncs *renderer_tiles_new(PixbufRenderer *pr);
+/** @brief Whether all queued image tiles have finished rendering. */
+gboolean renderer_tiles_is_ready(RendererFuncs *renderer);
 /** @brief Create an immutable, opaque texture copy of an RGB24 image surface. */
 GdkTexture *renderer_tiles_surface_to_texture(cairo_surface_t *surface);
 /** @brief Snapshot the image tiles for the given display scale. */
