@@ -930,6 +930,17 @@ static void open_with_application_activated_cb(GtkAppChooserWidget *, GAppInfo *
 	open_with_data_free(open_with_data);
 }
 
+static void open_with_portal_response_cb(GObject *source, GAsyncResult *result, gpointer)
+{
+	g_autoptr(GError) error = nullptr;
+	if (!gtk_file_launcher_launch_finish(GTK_FILE_LAUNCHER(source), result, &error) &&
+	    !g_error_matches(error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED) &&
+	    !g_error_matches(error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED))
+		{
+		log_printf("Error launching app: %s\n", error->message);
+		}
+}
+
 static void layout_menu_open_with_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();
@@ -937,9 +948,19 @@ static void layout_menu_open_with_cb(GSimpleAction *, GVariant *, gpointer)
 	GtkWidget *widget;
 	OpenWithData *open_with_data;
 
-	if (layout_selection_list(lw))
+	g_autoptr(FileDataList) selection = layout_selection_list(lw);
+	if (selection)
 		{
-		if (g_getenv("SNAP"))
+		if (g_file_test("/.flatpak-info", G_FILE_TEST_EXISTS))
+			{
+			auto *source = static_cast<FileData *>(selection->data);
+			g_autoptr(GFile) file = g_file_new_for_path(source->path);
+			g_autoptr(GtkFileLauncher) launcher = gtk_file_launcher_new(file);
+			gtk_file_launcher_set_always_ask(launcher, TRUE);
+			gtk_file_launcher_set_writable(launcher, TRUE);
+			gtk_file_launcher_launch(launcher, GTK_WINDOW(lw->window), nullptr, open_with_portal_response_cb, nullptr);
+			}
+		else if (g_getenv("SNAP"))
 			{
 			/** FIXME The app chooser cannot be used within a sandbox as it does
 			 * not see system .desktop files. The correct way is to use XDG DESKTOP PORTAL,
@@ -948,13 +969,13 @@ static void layout_menu_open_with_cb(GSimpleAction *, GVariant *, gpointer)
 			 * the same function.
 			 * The .desktop calls xdg-open which works as required when called externally.
 			 */
-			file_util_start_editor_from_filelist("org.geeqie.video-player.desktop", layout_selection_list(lw), nullptr, nullptr);
+			file_util_start_editor_from_filelist("org.geeqie.video-player.desktop", g_steal_pointer(&selection), nullptr, nullptr);
 			}
 		else
 			{
 			open_with_data = g_new(OpenWithData, 1);
 
-			fd = static_cast<FileData *>(g_list_first(layout_selection_list(lw))->data);
+			fd = static_cast<FileData *>(selection->data);
 
 			open_with_data->g_file_list = g_list_append(nullptr, g_file_new_for_path(fd->path));
 
