@@ -328,31 +328,28 @@ GList *vflist_selection_get_one(ViewFile *vf, FileData *fd)
 	return g_list_prepend(list, file_data_ref(fd));
 }
 
+gboolean vflist_rename_in_place(ViewFile *vf, FileData *fd)
+{
+	if (!vf || vf->type != FILEVIEW_LIST || vf->collection ||
+	    !options->file_ops.enable_in_place_rename || !fd) return FALSE;
+	if (!gtk_widget_get_mapped(vf->listview)) return FALSE;
+
+	GtkTreeIter iter;
+	if (!vflist_find_row(vf, fd, &iter)) return FALSE;
+
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
+	return tree_edit_by_path(GTK_TREE_VIEW(vf->listview), tpath,
+	                         FILE_VIEW_COLUMN_FORMATTED, fd->name,
+	                         vflist_row_rename_cb, vf);
+}
+
 void vflist_pop_menu_rename_cb(ViewFile *vf)
 {
-	GList *list;
+	g_autoptr(FileDataList) list = vf_pop_menu_file_list(vf);
+	if (list && !list->next && vflist_rename_in_place(vf, static_cast<FileData *>(list->data))) return;
 
-	list = vf_pop_menu_file_list(vf);
-	if (!vf->collection && options->file_ops.enable_in_place_rename &&
-	    list && !list->next && vf->click_fd)
-		{
-		GtkTreeModel *store;
-		GtkTreeIter iter;
-
-		file_data_list_free(list);
-
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		if (vflist_find_row(vf, vf->click_fd, &iter))
-			{
-			g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
-			tree_edit_by_path(GTK_TREE_VIEW(vf->listview), tpath,
-			                  FILE_VIEW_COLUMN_FORMATTED, vf->click_fd->name,
-			                  vflist_row_rename_cb, vf);
-			}
-		return;
-		}
-
-	file_util_rename(nullptr, list, vf->listview);
+	file_util_rename(nullptr, g_steal_pointer(&list), vf->listview);
 }
 
 static void vflist_pop_menu_thumbs_cb(GtkWidget *, gpointer data)

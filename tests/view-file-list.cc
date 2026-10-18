@@ -158,6 +158,76 @@ protected:
 	gchar *directory = nullptr;
 };
 
+GtkWidget *find_rename_entry(GtkWidget *widget)
+{
+	if (GTK_IS_ENTRY(widget)) return widget;
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		{
+		if (auto *entry = find_rename_entry(child)) return entry;
+		}
+	return nullptr;
+}
+
+void check_main_rename(LayoutWindow *layout, gboolean in_place, gboolean multiple)
+{
+	gtk_window_present(GTK_WINDOW(layout->window));
+	const gint64 deadline = g_get_monotonic_time() + 200 * G_TIME_SPAN_MILLISECOND;
+	while (g_get_monotonic_time() < deadline)
+		{
+		while (g_main_context_iteration(nullptr, FALSE)) {}
+		g_usleep(1000);
+		}
+	options->file_ops.enable_in_place_rename = in_place;
+	if (multiple) vf_select_all(layout->vf);
+	// A stale context-menu target must not override the current selection.
+	layout->vf->click_fd = vf_index_get_data(layout->vf, 2);
+	const ActionDef *action = get_main_actions();
+	while (action->action_name && g_strcmp0(action->action_name, "win.main-win-rename") != 0) ++action;
+	ASSERT_NE(action->action_name, nullptr);
+	action->callback(nullptr, nullptr, nullptr);
+	while (g_main_context_iteration(nullptr, FALSE)) {}
+
+	GtkWidget *entry = find_rename_entry(layout->vf->listview);
+	const gboolean expect_inline = in_place && !multiple && layout->vf->type == FILEVIEW_LIST;
+	EXPECT_EQ(entry != nullptr, expect_inline != FALSE);
+	if (entry)
+		{
+		EXPECT_STREQ(gtk_editable_get_text(GTK_EDITABLE(entry)), "0.jpg");
+		g_autoptr(GListModel) controllers = gtk_widget_observe_controllers(entry);
+		for (guint i = 0; i < g_list_model_get_n_items(controllers); ++i)
+			{
+			g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
+			if (!GTK_IS_EVENT_CONTROLLER_KEY(controller)) continue;
+			gboolean handled = FALSE;
+			g_signal_emit_by_name(controller, "key-pressed", GDK_KEY_Escape, 0, GDK_NO_MODIFIER_MASK, &handled);
+			}
+		}
+	gboolean found_dialog = FALSE;
+	GListModel *windows = gtk_window_get_toplevels();
+	for (guint i = g_list_model_get_n_items(windows); i > 0; --i)
+		{
+		g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i - 1));
+		const gchar *title = gtk_window_get_title(window);
+		if (title && g_str_has_prefix(title, "Rename"))
+			{
+			found_dialog = TRUE;
+			gtk_window_close(window);
+			}
+		}
+	EXPECT_EQ(found_dialog != FALSE, expect_inline == FALSE);
+	while (g_main_context_iteration(nullptr, FALSE)) {}
+}
+
+TEST_P(RepeatedDelete, MainRenameHonorsInPlaceSetting)
+{
+	check_main_rename(layout, std::get<1>(GetParam()), FALSE);
+}
+
+TEST_P(RepeatedDelete, MainRenameUsesDialogForMultipleFiles)
+{
+	check_main_rename(layout, std::get<1>(GetParam()), TRUE);
+}
+
 TEST_P(RepeatedDelete, RefreshesSelectionBeforeTheNextDelete)
 {
 	const char *name = std::get<1>(GetParam()) ? "win.main-win-delete" : "win.main-win-delete-permanent";

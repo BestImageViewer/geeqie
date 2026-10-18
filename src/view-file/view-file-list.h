@@ -70,6 +70,7 @@ void vflist_marks_set(ViewFile *vf, gboolean enable);
 void vflist_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings);
 
 GList *vflist_selection_get_one(ViewFile *vf, FileData *fd);
+gboolean vflist_rename_in_place(ViewFile *vf, FileData *fd);
 void vflist_pop_menu_rename_cb(ViewFile *vf);
 void vflist_pop_menu_add_items(ViewFile *vf, GtkWidget *menu);
 void vflist_pop_menu_show_star_rating_cb(ViewFile *vf);

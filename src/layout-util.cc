@@ -88,6 +88,7 @@
 #include "utilops.h"
 #include "view-dir.h"
 #include "view-file.h"
+#include "view-file/view-file-list.h"
 #include "window.h"
 
 namespace
@@ -509,9 +510,11 @@ static void layout_menu_move_cb(GSimpleAction *, GVariant *, gpointer)
 
 static void layout_menu_rename_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = get_current_layout();
+	auto *lw = get_current_layout();
+	g_autoptr(FileDataList) list = layout_selection_list(lw);
+	if (list && !list->next && vflist_rename_in_place(lw->vf, static_cast<FileData *>(list->data))) return;
 
-		file_util_rename(nullptr, layout_selection_list(lw), layout_window(lw));
+	file_util_rename(nullptr, g_steal_pointer(&list), layout_window(lw));
 }
 
 template<gboolean safe_delete>

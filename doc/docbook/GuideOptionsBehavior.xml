@@ -149,7 +149,7 @@
           <guilabel>In place renaming</guilabel>
         </term>
         <listitem>
-          <para>When renaming a single file, this will allow the rename entry to appear directly over the original filename.</para>
+          <para>When renaming a single file in a folder shown in list view, the rename entry appears directly over the original filename. This applies to the main Rename action (F2 by default) and the files pane context menu. Other views and multiple-file selections use the Rename dialog.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
