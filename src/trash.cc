@@ -149,6 +149,8 @@ static void file_util_safe_remove_info(const gchar *path, const TrashSettings &s
 static void file_util_safe_cleanup(guint64 incoming_size, gboolean clear, const TrashSettings &settings,
                                    FileTreeOperation *operation, TrashReport &report, GFile *protected_source = nullptr)
 {
+	if (!clear && settings.limit == 0) return;
+
 	std::vector<TrashEntry> entries;
 	g_autofree gchar *files_dir = file_util_safe_subdir("files", settings);
 	const gboolean files_complete = file_util_safe_read_dir(files_dir, TRUE, clear, entries, settings, operation);

@@ -546,6 +546,31 @@ TEST_F(EmptyFolderDelete, FailedCopyKeepsSourceAndRemovesPartialDestination)
 	ASSERT_EQ(g_chmod(child, 0600), 0);
 }
 
+TEST_F(EmptyFolderDelete, UnlimitedTrashSkipsUnreadableExistingEntries)
+{
+	if (geteuid() == 0) GTEST_SKIP() << "Requires permission checks for a non-root user";
+	g_autofree gchar *child = g_build_filename(folder, "child", nullptr);
+	ASSERT_TRUE(g_file_set_contents(child, "keep", -1, nullptr));
+	ASSERT_TRUE(delete_folder());
+	ASSERT_EQ(g_mkdir(folder, 0700), 0);
+	ASSERT_EQ(g_chmod(trashed, 0000), 0);
+
+	TrashReport report;
+	g_autoptr(GError) error = nullptr;
+	const gboolean success = file_util_safe_unlink_full(folder, file_util_trash_settings(), nullptr, report, &error);
+	EXPECT_EQ(g_chmod(trashed, 0700), 0);
+	EXPECT_TRUE(success);
+	EXPECT_EQ(error, nullptr);
+	EXPECT_FALSE(report.incomplete);
+	EXPECT_FALSE(report.cleanup_failed);
+	EXPECT_EQ(report.removed_entries, 0U);
+	EXPECT_FALSE(isdir(folder));
+	g_autofree gchar *trashed_child = g_build_filename(trashed, "child", nullptr);
+	EXPECT_EQ(filesize(trashed_child), 4);
+	g_autofree gchar *original = file_util_safe_trash_original_path(trashed);
+	EXPECT_STREQ(original, folder);
+}
+
 TEST_F(EmptyFolderDelete, OversizedTreeIsRejectedBeforeEvictingOlderEntries)
 {
 	g_autofree gchar *child = g_build_filename(folder, "child", nullptr);
