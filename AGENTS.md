@@ -115,6 +115,25 @@ Follow `CODING.md` for authoritative style. Key points:
 - Do not leave temporary `DEBUG_0()`, `DEBUG_BT()`, `DEBUG_FD()`, or `DEBUG_RU()`
   calls in committed source.
 - In C++ pointer inference, use `auto *var = function();`.
+- Prefer existing automatic cleanup mechanisms for locally owned resources,
+  including on early returns: `g_autofree` for memory freed with `g_free()`,
+  `g_autoptr(Type)` for supported resource types, `g_auto(GStrv)` for string
+  arrays, and `std::unique_ptr` for exclusively owned C++ objects.
+- Use the existing custom cleanup types where appropriate:
+  `g_autoptr(FileDataList)` frees the list and unreferences its elements,
+  `g_autoptr(CollectionData)` unreferences a collection, and `g_autoptr(FILE)`
+  closes a file.
+- Check whether an API returns a borrowed or owned value before wrapping it.
+  Initializing `g_autoptr` does not add a reference; acquire an owned reference
+  before using it for a borrowed object. When transferring ownership, use
+  `g_steal_pointer()` or the C++ owner's `release()` as appropriate. Match the
+  cleanup mechanism to the allocator and preserve API ownership contracts.
+- Prefer `FileDataRef` for references owned by a C++ scope so cleanup happens
+  automatically, including on early returns. Use explicit `file_data_ref()` /
+  `file_data_unref()` when required by raw-pointer ownership contracts, such as
+  lists or callbacks. The `FileDataRef(FileData *)` constructor adds a reference;
+  do not treat it as adopting an already-owned reference. Use `release()` only
+  when transferring ownership to a caller or another owner.
 - Header include ordering follows the Google C++ include order guidance.
 - For shell scripts, use `/bin/sh`, keep them POSIX-compatible, prefer `printf`
   over `echo`, and use portable `mktemp` patterns.
