@@ -714,27 +714,6 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 
 	if (imd->cm) return FALSE;
 
-	if (imd->color_profile_input >= COLOR_PROFILE_FILE &&
-	    imd->color_profile_input <  COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS)
-		{
-		const gchar *file = options->color_profile.input_file[imd->color_profile_input - COLOR_PROFILE_FILE];
-
-		if (!is_readable_file(file)) return FALSE;
-
-		input_type = COLOR_PROFILE_FILE;
-		input_file = file;
-		}
-	else if (imd->color_profile_input >= COLOR_PROFILE_SRGB &&
-		 imd->color_profile_input <  COLOR_PROFILE_FILE)
-		{
-		input_type = static_cast<ColorManProfileType>(imd->color_profile_input);
-		input_file = nullptr;
-		}
-	else
-		{
-		return FALSE;
-		}
-
 	ColorManMemData screen_profile;
 	if (options->color_profile.use_x11_screen_profile &&
 	    image_get_system_screen_profile(imd, screen_profile))
@@ -758,17 +737,34 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 	ColorManProfileType color_profile_from_image = COLOR_PROFILE_NONE;
 	ColorManMemData profile = exif_get_color_profile(imd->image_fd, color_profile_from_image);
 
-	if (profile.ptr)
+	if (!imd->color_profile_use_image)
 		{
-		if (!imd->color_profile_use_image)
-			{
-			profile.ptr.reset();
-			}
+		profile.ptr.reset();
+		color_profile_from_image = COLOR_PROFILE_NONE;
 		}
-	else if (imd->color_profile_use_image && color_profile_from_image != COLOR_PROFILE_NONE)
+
+	if (color_profile_from_image != COLOR_PROFILE_NONE)
 		{
 		input_type = color_profile_from_image;
-		input_file = nullptr;
+		}
+	else if (imd->color_profile_input >= COLOR_PROFILE_FILE &&
+	         imd->color_profile_input < COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS)
+		{
+		const gchar *file = options->color_profile.input_file[imd->color_profile_input - COLOR_PROFILE_FILE];
+
+		if (!is_readable_file(file)) return FALSE;
+
+		input_type = COLOR_PROFILE_FILE;
+		input_file = file;
+		}
+	else if (imd->color_profile_input >= COLOR_PROFILE_SRGB &&
+	         imd->color_profile_input < COLOR_PROFILE_FILE)
+		{
+		input_type = static_cast<ColorManProfileType>(imd->color_profile_input);
+		}
+	else
+		{
+		return FALSE;
 		}
 
 	const GdkPixbuf *pixbuf = run_in_bg ? image_get_pixbuf(imd) : nullptr;
