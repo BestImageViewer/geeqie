@@ -44,14 +44,8 @@
 #include "image-load.h"
 #include "intl.h"
 #include "jpeg-parser.h"
+#include "options.h"
 #include "pixbuf-renderer.h"
-
-namespace
-{
-
-constexpr guint64 JPEG_MAX_DECODED_BYTES = 1ULL << 30; // One GiB, excluding renderer and cache overhead.
-
-}
 
 /* error handler data */
 struct error_handler_data {
@@ -365,12 +359,14 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 	const guint64 source_rowstride = (source_width * output_channels + 3) & ~3ULL;
 	const guint64 progressive_working_bytes = cinfo.progressive_mode ? source_rowstride * cinfo.image_height : 0;
 	const guint64 required_bytes = std::max(decoded_bytes, progressive_working_bytes);
-	if (required_bytes > JPEG_MAX_DECODED_BYTES)
+	const guint64 configured_limit = static_cast<guint64>(std::clamp(options->image.jpeg_decode_memory_limit, 1, 65536)) << 20;
+	const guint64 decode_limit = std::min(configured_limit, static_cast<guint64>(G_MAXSSIZE));
+	if (required_bytes > decode_limit)
 		{
 		g_autofree gchar *decoded_size = g_format_size(required_bytes);
-		g_autofree gchar *limit_size = g_format_size(JPEG_MAX_DECODED_BYTES);
+		g_autofree gchar *limit_size = g_format_size(decode_limit);
 		g_set_error(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
-		            _("JPEG image is too large to decode safely (%u × %u, approximately %s working memory; limit %s)"),
+		            _("JPEG image is too large to decode safely (%u × %u, approximately %s working memory; limit %s).\n\nTo raise the limit, go to Preferences → General → Image loading and caching → JPEG decode memory limit (MiB)."),
 		            cinfo.image_width, cinfo.image_height, decoded_size, limit_size);
 		jpeg_destroy_decompress(&cinfo);
 		if (stereo) jpeg_destroy_decompress(&cinfo2);
@@ -408,6 +404,8 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	if (!pixbuf)
 		{
+		g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
+		                    _("Not enough memory to decode the JPEG image"));
 		jpeg_destroy_decompress (&cinfo);
 		if (stereo) jpeg_destroy_decompress (&cinfo2);
 		return FALSE;

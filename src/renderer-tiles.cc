@@ -1076,8 +1076,8 @@ void rt_tile_get_region_wide(gboolean ignore_alpha,
 		for (gint x = pb_rect.x; x < pb_rect.x + pb_rect.width; x++)
 			{
 			const gint src_x = std::clamp(static_cast<gint>(floor((x - offset_x) / scale_x)), 0, src_width - 1);
-			const guchar *src_pixel = src_pixels + (src_y * src_rowstride) + (src_x * src_channels);
-			guchar *dest_pixel = dest_pixels + (y * dest_rowstride) + (x * dest_channels);
+			const guchar *src_pixel = src_pixels + (static_cast<gsize>(src_y) * src_rowstride) + (static_cast<gsize>(src_x) * src_channels);
+			guchar *dest_pixel = dest_pixels + (static_cast<gsize>(y) * dest_rowstride) + (static_cast<gsize>(x) * dest_channels);
 
 			if (src_channels == 4 && !ignore_alpha)
 				{

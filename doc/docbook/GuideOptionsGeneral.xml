@@ -221,6 +221,14 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <guilabel>JPEG decode memory limit (MiB)</guilabel>
+        </term>
+        <listitem>
+          <para>Sets the maximum estimated memory for decoding one JPEG image, from 1 to 65536 MiB (default 1024 MiB). Increase this limit to open very large JPEG images. Rendering, caches, other images, and decoder overhead require additional memory. The limit is also capped by the process address space.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Preload next image</guilabel>
         </term>
         <listitem>

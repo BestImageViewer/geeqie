@@ -141,6 +141,7 @@ ConfOptions *conf_options_new()
 	options->image.scroll_reset_method = ScrollReset::NOCHANGE;
 	options->image.tile_cache_max = 64;
 	options->image.image_cache_max = 128; /* 4 x 10MPix */
+	options->image.jpeg_decode_memory_limit = 1024;
 	options->image.use_custom_border_color = FALSE;
 	options->image.use_custom_border_color_in_fullscreen = TRUE;
 	options->image.zoom_2pass = TRUE;

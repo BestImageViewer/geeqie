@@ -5,11 +5,63 @@
 #include <glib-object.h>
 #include <glib.h>
 
+#include <config.h>
+
 #include "filedata.h"
 #include "image-load.h"
+#include "options.h"
+
+#if HAVE_JPEG
+#include "image-load-jpeg.h"
+#endif
 
 namespace
 {
+
+#if HAVE_JPEG
+TEST(ImageLoader, ConfigurableJpegDecodeMemoryLimit)
+{
+	if (!options) options = conf_options_new();
+	struct RestoreLimit
+	{
+		gint value = options->image.jpeg_decode_memory_limit;
+		~RestoreLimit() { options->image.jpeg_decode_memory_limit = value; }
+	} restore_limit;
+
+	g_autoptr(GdkPixbuf) source = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 1024, 512);
+	gdk_pixbuf_fill(source, 0x204060ff);
+	g_autofree gchar *jpeg = nullptr;
+	gsize length = 0;
+	ASSERT_TRUE(gdk_pixbuf_save_to_buffer(source, &jpeg, &length, "jpeg", nullptr, nullptr));
+
+	// The decoded image requires 1.5 MiB. Changing the limit must affect new loads.
+	for (const gint limit : {1, 2, 1})
+		{
+		options->image.jpeg_decode_memory_limit = limit;
+		auto loader = get_image_loader_backend_jpeg();
+		loader->init([](gpointer, gint, gint, gint, gint, gpointer) {},
+		             [](gpointer, gint, gint, gpointer) {}, nullptr);
+		g_autoptr(GError) error = nullptr;
+		gsize chunk_size = length;
+		const gboolean loaded = loader->write(reinterpret_cast<const guchar *>(jpeg), chunk_size, length, &error);
+		if (limit == 1)
+			{
+			EXPECT_FALSE(loaded);
+			ASSERT_NE(error, nullptr);
+			EXPECT_EQ(error->domain, GDK_PIXBUF_ERROR);
+			EXPECT_EQ(error->code, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY);
+			}
+		else
+			{
+			EXPECT_TRUE(loaded);
+			EXPECT_EQ(error, nullptr);
+			ASSERT_NE(loader->get_pixbuf(), nullptr);
+			EXPECT_EQ(gdk_pixbuf_get_width(loader->get_pixbuf()), 1024);
+			EXPECT_EQ(gdk_pixbuf_get_height(loader->get_pixbuf()), 512);
+			}
+		}
+}
+#endif
 
 TEST(ImageLoader, CancelPendingStart)
 {

@@ -178,6 +178,7 @@ struct ConfOptions
 
 		gint tile_cache_max;	/**< in megabytes */
 		gint image_cache_max;   /**< in megabytes */
+		gint jpeg_decode_memory_limit; /**< in MiB */
 		gboolean enable_read_ahead;
 
 		ZoomMode zoom_mode;

@@ -515,6 +515,7 @@ static void config_window_apply(const ConfOptions *c_options)
 
 	options->image.tile_cache_max = c_options->image.tile_cache_max;
 	options->image.image_cache_max = c_options->image.image_cache_max;
+	options->image.jpeg_decode_memory_limit = c_options->image.jpeg_decode_memory_limit;
 
 	options->image.zoom_quality = c_options->image.zoom_quality;
 
@@ -2170,6 +2171,10 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	                                  0, 1024, 1, options->image.tile_cache_max, &c_options->image.tile_cache_max);
 	gtk_widget_set_tooltip_text(display_cache,
 	                            _("Maximum memory used to cache rendered image tiles for each image view. Larger values may improve panning and repaint performance, particularly on high-resolution displays. A value of 64 MiB is recommended."));
+	auto *jpeg_memory_limit = pref_spin_new_int(group, _("JPEG decode memory limit (MiB):"), nullptr,
+	                                           1, 65536, 1, options->image.jpeg_decode_memory_limit, &c_options->image.jpeg_decode_memory_limit);
+	gtk_widget_set_tooltip_text(jpeg_memory_limit,
+	                            _("Maximum estimated memory for decoding one JPEG image. Increase this to open very large images. Additional memory is needed for rendering, caches, and other images. The default is 1024 MiB."));
 	pref_checkbox_new_int(group, _("Preload next image"),
 			      options->image.enable_read_ahead, &c_options->image.enable_read_ahead);
 

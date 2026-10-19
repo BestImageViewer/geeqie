@@ -10,6 +10,8 @@
 #include <functional>
 #include <vector>
 
+#include <sys/mman.h>
+
 #include <cairo.h>
 
 #include "renderer-tiles.h"
@@ -18,6 +20,47 @@
 
 namespace
 {
+
+TEST(RendererTiles, SourceOffsetBeyondTwoGiB)
+{
+	if (sizeof(gsize) < 8) GTEST_SKIP() << "Requires a 64-bit address space";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+
+	constexpr int width = 39137;
+	constexpr int height = 22279;
+	constexpr int rowstride = (width * 3 + 3) & ~3;
+	constexpr gsize bytes = static_cast<gsize>(rowstride) * height;
+	// Anonymous pages reserve address space without allocating the whole image in RAM.
+	auto *pixels = static_cast<guchar *>(mmap(nullptr, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+	if (pixels == MAP_FAILED) GTEST_SKIP() << "Cannot reserve image address space";
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE, 8,
+	                                                   width, height, rowstride,
+	                                                   [](guchar *data, gpointer) { munmap(data, bytes); }, nullptr);
+	ASSERT_NE(image, nullptr);
+
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	gtk_window_set_default_size(window, 400, 300);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	gtk_window_present(window);
+	const auto finish_rendering = [pr]()
+		{
+		for (int i = 0; i < 1000; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (pr->complete && gtk_widget_get_mapped(GTK_WIDGET(pr))) return true;
+			g_usleep(1000);
+			}
+		return false;
+		};
+	EXPECT_TRUE(finish_rendering());
+	pixbuf_renderer_scroll(pr, width, height);
+	EXPECT_GT(static_cast<gsize>(pr->y_scroll) * rowstride, static_cast<gsize>(G_MAXINT));
+	EXPECT_TRUE(finish_rendering());
+	gtk_window_destroy(window);
+}
 
 TEST(RendererTilesBirdseye, FinalizeWithActiveOverlay)
 {
