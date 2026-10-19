@@ -15,6 +15,10 @@
           <attribute name="action">app.open-recent-file</attribute>
           <attribute name="label" translatable="yes">Open recent…</attribute>
         </item>
+        <item>
+          <attribute name="action">win.main-win-open-archive</attribute>
+          <attribute name="label" translatable="yes">Open archive</attribute>
+        </item>
       </section>
       <section>
         <item>
@@ -183,10 +187,6 @@
           <attribute name="label" translatable="yes">Rectangular Selection</attribute>
           <attribute name="action">win.main-win-rectangular-selection</attribute>
         </item>
-        <item>
-          <attribute name="label" translatable="yes">Show File Filter</attribute>
-          <attribute name="action">win.main-win-show-file-filter</attribute>
-        </item>
       </section>
       <section>
         <item>
@@ -208,404 +208,354 @@
       </section>
       <section>
         <item>
-          <attribute name="label" translatable="yes">Show _Marks</attribute>
-          <attribute name="action">win.main-win-show-marks</attribute>
-        </item>
-        <item>
           <attribute name="label" translatable="yes">Clear Marks</attribute>
           <attribute name="action">win.main-win-clear-marks</attribute>
         </item>
       </section>
       <section>
         <submenu>
-          <attribute name="label" translatable="yes">Mark 1</attribute>
+          <attribute name="label" translatable="yes">Toggle Mark</attribute>
           <item>
-            <attribute name="label" translatable="yes">Toggle mark 1</attribute>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
             <attribute name="action">win.main-win-toggle-mark-1</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 1</attribute>
-            <attribute name="action">win.main-win-set-mark-1</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 1</attribute>
-            <attribute name="action">win.main-win-clear-mark-1</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 1</attribute>
-              <attribute name="action">win.main-win-select-mark-1</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 1</attribute>
-              <attribute name="action">win.main-win-add-mark-1</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 1</attribute>
-              <attribute name="action">win.main-win-intersect-mark-1</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 1</attribute>
-              <attribute name="action">win.main-win-deselect-mark-1</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 1</attribute>
-              <attribute name="action">win.main-win-filter-mark-1</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 2</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 2</attribute>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
             <attribute name="action">win.main-win-toggle-mark-2</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 2</attribute>
-            <attribute name="action">win.main-win-set-mark-2</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 2</attribute>
-            <attribute name="action">win.main-win-clear-mark-2</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 2</attribute>
-              <attribute name="action">win.main-win-select-mark-2</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 2</attribute>
-              <attribute name="action">win.main-win-add-mark-2</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 2</attribute>
-              <attribute name="action">win.main-win-intersect-mark-2</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 2</attribute>
-              <attribute name="action">win.main-win-deselect-mark-2</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 2</attribute>
-              <attribute name="action">win.main-win-filter-mark-2</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 3</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 3</attribute>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
             <attribute name="action">win.main-win-toggle-mark-3</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 3</attribute>
-            <attribute name="action">win.main-win-set-mark-3</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 3</attribute>
-            <attribute name="action">win.main-win-clear-mark-3</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 3</attribute>
-              <attribute name="action">win.main-win-select-mark-3</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 3</attribute>
-              <attribute name="action">win.main-win-add-mark-3</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 3</attribute>
-              <attribute name="action">win.main-win-intersect-mark-3</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 3</attribute>
-              <attribute name="action">win.main-win-deselect-mark-3</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 3</attribute>
-              <attribute name="action">win.main-win-filter-mark-3</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 4</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 4</attribute>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
             <attribute name="action">win.main-win-toggle-mark-4</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 4</attribute>
-            <attribute name="action">win.main-win-set-mark-4</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 4</attribute>
-            <attribute name="action">win.main-win-clear-mark-4</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 4</attribute>
-              <attribute name="action">win.main-win-select-mark-4</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 4</attribute>
-              <attribute name="action">win.main-win-add-mark-4</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 4</attribute>
-              <attribute name="action">win.main-win-intersect-mark-4</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 4</attribute>
-              <attribute name="action">win.main-win-deselect-mark-4</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 4</attribute>
-              <attribute name="action">win.main-win-filter-mark-4</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 5</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 5</attribute>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
             <attribute name="action">win.main-win-toggle-mark-5</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 5</attribute>
-            <attribute name="action">win.main-win-set-mark-5</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 5</attribute>
-            <attribute name="action">win.main-win-clear-mark-5</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 5</attribute>
-              <attribute name="action">win.main-win-select-mark-5</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 5</attribute>
-              <attribute name="action">win.main-win-add-mark-5</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 5</attribute>
-              <attribute name="action">win.main-win-intersect-mark-5</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 5</attribute>
-              <attribute name="action">win.main-win-deselect-mark-5</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 5</attribute>
-              <attribute name="action">win.main-win-filter-mark-5</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 6</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 6</attribute>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
             <attribute name="action">win.main-win-toggle-mark-6</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 6</attribute>
-            <attribute name="action">win.main-win-set-mark-6</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 6</attribute>
-            <attribute name="action">win.main-win-clear-mark-6</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 6</attribute>
-              <attribute name="action">win.main-win-select-mark-6</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 6</attribute>
-              <attribute name="action">win.main-win-add-mark-6</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 6</attribute>
-              <attribute name="action">win.main-win-intersect-mark-6</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 6</attribute>
-              <attribute name="action">win.main-win-deselect-mark-6</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 6</attribute>
-              <attribute name="action">win.main-win-filter-mark-6</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 7</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 7</attribute>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
             <attribute name="action">win.main-win-toggle-mark-7</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 7</attribute>
-            <attribute name="action">win.main-win-set-mark-7</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 7</attribute>
-            <attribute name="action">win.main-win-clear-mark-7</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 7</attribute>
-              <attribute name="action">win.main-win-select-mark-7</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 7</attribute>
-              <attribute name="action">win.main-win-add-mark-7</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 7</attribute>
-              <attribute name="action">win.main-win-intersect-mark-7</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 7</attribute>
-              <attribute name="action">win.main-win-deselect-mark-7</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 7</attribute>
-              <attribute name="action">win.main-win-filter-mark-7</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 8</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 8</attribute>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
             <attribute name="action">win.main-win-toggle-mark-8</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 8</attribute>
-            <attribute name="action">win.main-win-set-mark-8</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Clear mark 8</attribute>
-            <attribute name="action">win.main-win-clear-mark-8</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 8</attribute>
-              <attribute name="action">win.main-win-select-mark-8</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 8</attribute>
-              <attribute name="action">win.main-win-add-mark-8</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 8</attribute>
-              <attribute name="action">win.main-win-intersect-mark-8</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 8</attribute>
-              <attribute name="action">win.main-win-deselect-mark-8</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 8</attribute>
-              <attribute name="action">win.main-win-filter-mark-8</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 9</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 9</attribute>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
             <attribute name="action">win.main-win-toggle-mark-9</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Set mark 9</attribute>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
+            <attribute name="action">win.main-win-toggle-mark-0</attribute>
+          </item>
+        </submenu>
+        <submenu>
+          <attribute name="label" translatable="yes">Set Mark</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
+            <attribute name="action">win.main-win-set-mark-1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
+            <attribute name="action">win.main-win-set-mark-2</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
+            <attribute name="action">win.main-win-set-mark-3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
+            <attribute name="action">win.main-win-set-mark-4</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
+            <attribute name="action">win.main-win-set-mark-5</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
+            <attribute name="action">win.main-win-set-mark-6</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
+            <attribute name="action">win.main-win-set-mark-7</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
+            <attribute name="action">win.main-win-set-mark-8</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
             <attribute name="action">win.main-win-set-mark-9</attribute>
           </item>
           <item>
-            <attribute name="label" translatable="yes">Clear mark 9</attribute>
-            <attribute name="action">win.main-win-clear-mark-9</attribute>
-          </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 9</attribute>
-              <attribute name="action">win.main-win-select-mark-9</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 9</attribute>
-              <attribute name="action">win.main-win-add-mark-9</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 9</attribute>
-              <attribute name="action">win.main-win-intersect-mark-9</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 9</attribute>
-              <attribute name="action">win.main-win-deselect-mark-9</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 9</attribute>
-              <attribute name="action">win.main-win-filter-mark-9</attribute>
-            </item>
-          </section>
-        </submenu>
-        <submenu>
-          <attribute name="label" translatable="yes">Mark 0</attribute>
-          <item>
-            <attribute name="label" translatable="yes">Toggle mark 0</attribute>
-            <attribute name="action">win.main-win-toggle-mark-0</attribute>
-          </item>
-          <item>
-            <attribute name="label" translatable="yes">Set mark 0</attribute>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
             <attribute name="action">win.main-win-set-mark-0</attribute>
           </item>
+        </submenu>
+        <submenu>
+          <attribute name="label" translatable="yes">Clear Mark</attribute>
           <item>
-            <attribute name="label" translatable="yes">Clear mark 0</attribute>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
+            <attribute name="action">win.main-win-clear-mark-1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
+            <attribute name="action">win.main-win-clear-mark-2</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
+            <attribute name="action">win.main-win-clear-mark-3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
+            <attribute name="action">win.main-win-clear-mark-4</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
+            <attribute name="action">win.main-win-clear-mark-5</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
+            <attribute name="action">win.main-win-clear-mark-6</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
+            <attribute name="action">win.main-win-clear-mark-7</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
+            <attribute name="action">win.main-win-clear-mark-8</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
+            <attribute name="action">win.main-win-clear-mark-9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
             <attribute name="action">win.main-win-clear-mark-0</attribute>
           </item>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Select mark 0</attribute>
-              <attribute name="action">win.main-win-select-mark-0</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Add mark 0</attribute>
-              <attribute name="action">win.main-win-add-mark-0</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Intersect mark 0</attribute>
-              <attribute name="action">win.main-win-intersect-mark-0</attribute>
-            </item>
-            <item>
-              <attribute name="label" translatable="yes">Deselect mark 0</attribute>
-              <attribute name="action">win.main-win-deselect-mark-0</attribute>
-            </item>
-          </section>
-          <section>
-            <item>
-              <attribute name="label" translatable="yes">Filter mark 0</attribute>
-              <attribute name="action">win.main-win-filter-mark-0</attribute>
-            </item>
-          </section>
+        </submenu>
+        <submenu>
+          <attribute name="label" translatable="yes">Select Marked</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
+            <attribute name="action">win.main-win-select-mark-1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
+            <attribute name="action">win.main-win-select-mark-2</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
+            <attribute name="action">win.main-win-select-mark-3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
+            <attribute name="action">win.main-win-select-mark-4</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
+            <attribute name="action">win.main-win-select-mark-5</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
+            <attribute name="action">win.main-win-select-mark-6</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
+            <attribute name="action">win.main-win-select-mark-7</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
+            <attribute name="action">win.main-win-select-mark-8</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
+            <attribute name="action">win.main-win-select-mark-9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
+            <attribute name="action">win.main-win-select-mark-0</attribute>
+          </item>
+        </submenu>
+        <submenu>
+          <attribute name="label" translatable="yes">Add Marked to Selection</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
+            <attribute name="action">win.main-win-add-mark-1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
+            <attribute name="action">win.main-win-add-mark-2</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
+            <attribute name="action">win.main-win-add-mark-3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
+            <attribute name="action">win.main-win-add-mark-4</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
+            <attribute name="action">win.main-win-add-mark-5</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
+            <attribute name="action">win.main-win-add-mark-6</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
+            <attribute name="action">win.main-win-add-mark-7</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
+            <attribute name="action">win.main-win-add-mark-8</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
+            <attribute name="action">win.main-win-add-mark-9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
+            <attribute name="action">win.main-win-add-mark-0</attribute>
+          </item>
+        </submenu>
+        <submenu>
+          <attribute name="label" translatable="yes">Intersect with Marked</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
+            <attribute name="action">win.main-win-intersect-mark-1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
+            <attribute name="action">win.main-win-intersect-mark-2</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
+            <attribute name="action">win.main-win-intersect-mark-3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
+            <attribute name="action">win.main-win-intersect-mark-4</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
+            <attribute name="action">win.main-win-intersect-mark-5</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
+            <attribute name="action">win.main-win-intersect-mark-6</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
+            <attribute name="action">win.main-win-intersect-mark-7</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
+            <attribute name="action">win.main-win-intersect-mark-8</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
+            <attribute name="action">win.main-win-intersect-mark-9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
+            <attribute name="action">win.main-win-intersect-mark-0</attribute>
+          </item>
+        </submenu>
+        <submenu>
+          <attribute name="label" translatable="yes">Deselect Marked</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
+            <attribute name="action">win.main-win-deselect-mark-1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
+            <attribute name="action">win.main-win-deselect-mark-2</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
+            <attribute name="action">win.main-win-deselect-mark-3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
+            <attribute name="action">win.main-win-deselect-mark-4</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
+            <attribute name="action">win.main-win-deselect-mark-5</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
+            <attribute name="action">win.main-win-deselect-mark-6</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
+            <attribute name="action">win.main-win-deselect-mark-7</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
+            <attribute name="action">win.main-win-deselect-mark-8</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
+            <attribute name="action">win.main-win-deselect-mark-9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
+            <attribute name="action">win.main-win-deselect-mark-0</attribute>
+          </item>
+        </submenu>
+        <submenu>
+          <attribute name="label" translatable="yes">Filter by Mark</attribute>
+          <item>
+            <attribute name="label" translatable="yes">Mark 1</attribute>
+            <attribute name="action">win.main-win-filter-mark-1</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 2</attribute>
+            <attribute name="action">win.main-win-filter-mark-2</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 3</attribute>
+            <attribute name="action">win.main-win-filter-mark-3</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 4</attribute>
+            <attribute name="action">win.main-win-filter-mark-4</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 5</attribute>
+            <attribute name="action">win.main-win-filter-mark-5</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 6</attribute>
+            <attribute name="action">win.main-win-filter-mark-6</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 7</attribute>
+            <attribute name="action">win.main-win-filter-mark-7</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 8</attribute>
+            <attribute name="action">win.main-win-filter-mark-8</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 9</attribute>
+            <attribute name="action">win.main-win-filter-mark-9</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Mark 0</attribute>
+            <attribute name="action">win.main-win-filter-mark-0</attribute>
+          </item>
         </submenu>
       </section>
     </submenu>
@@ -735,24 +685,6 @@
     -->
     <submenu>
       <attribute name="label" translatable="yes">_View</attribute>
-      <section>
-        <item>
-          <attribute name="action">win.main-win-view-in-new-window</attribute>
-          <attribute name="label" translatable="yes">_View in new window</attribute>
-        </item>
-        <item>
-          <attribute name="action">win.main-win-pan-view</attribute>
-          <attribute name="label" translatable="yes">Pa_n view</attribute>
-        </item>
-        <item>
-          <attribute name="action">win.main-win-exif-window</attribute>
-          <attribute name="label" translatable="yes">_Exif window</attribute>
-        </item>
-        <item>
-          <attribute name="action">win.main-win-open-archive</attribute>
-          <attribute name="label" translatable="yes">Open archive</attribute>
-        </item>
-      </section>
       <submenu>
         <attribute name="label" translatable="yes">_Files and Folders</attribute>
         <section>
@@ -785,6 +717,16 @@
           <item>
             <attribute name="action">win.main-win-hide-tools</attribute>
             <attribute name="label" translatable="yes">_Hide file list</attribute>
+          </item>
+        </section>
+        <section>
+          <item>
+            <attribute name="label" translatable="yes">Show File Filter</attribute>
+            <attribute name="action">win.main-win-show-file-filter</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Show _Marks</attribute>
+            <attribute name="action">win.main-win-show-marks</attribute>
           </item>
         </section>
       </submenu>
@@ -1102,7 +1044,8 @@
         <attribute name="action">win.main-win-fullscreen</attribute>
         <attribute name="label" translatable="yes">F_ullscreen</attribute>
       </item>
-      <section>
+      <submenu>
+        <attribute name="label" translatable="yes">Panels and Bars</attribute>
         <item>
           <attribute name="action">win.main-win-info-sidebar</attribute>
           <attribute name="label" translatable="yes">_Info sidebar</attribute>
@@ -1119,6 +1062,8 @@
           <attribute name="action">win.main-win-hide-selectable-toolbars</attribute>
           <attribute name="label" translatable="yes">Hide Selectable Bars</attribute>
         </item>
+      </submenu>
+      <section>
         <item>
           <attribute name="action">win.main-win-show-info-pixel</attribute>
           <attribute name="label" translatable="yes">Pi_xel Info</attribute>
@@ -1133,6 +1078,9 @@
           <attribute name="action">win.main-win-animate</attribute>
           <attribute name="label" translatable="yes">_Animation</attribute>
         </item>
+      </section>
+      <submenu>
+        <attribute name="label" translatable="yes">Slideshow</attribute>
         <item>
           <attribute name="action">win.main-win-slideshow</attribute>
           <attribute name="label" translatable="yes">Toggle _slideshow</attribute>
@@ -1149,7 +1097,7 @@
           <attribute name="action">win.main-win-slideshow-slower</attribute>
           <attribute name="label" translatable="yes">Slower</attribute>
         </item>
-      </section>
+      </submenu>
       <section>
         <item>
           <attribute name="action">win.main-win-refresh</attribute>
@@ -1162,32 +1110,48 @@
     -->
     <submenu>
       <attribute name="label" translatable="yes">_Windows</attribute>
-      <submenu id="new-window-submenu">
-        <attribute name="label" translatable="yes">New window</attribute>
-        <section>
-          <item>
-            <attribute name="action">win.main-win-new-window-default</attribute>
-            <attribute name="label" translatable="yes">New window default</attribute>
-          </item>
-          <item>
-            <attribute name="action">win.main-win-new-window-from-current</attribute>
-            <attribute name="label" translatable="yes">New window from current</attribute>
-          </item>
-        </section>
-        <section id="new-window-layouts-section" />
-      </submenu>
-      <item>
-        <attribute name="action">win.main-win-rename-window</attribute>
-        <attribute name="label" translatable="yes">Rename window</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.main-win-delete-window</attribute>
-        <attribute name="label" translatable="yes">Delete window</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.main-win-close-window</attribute>
-        <attribute name="label" translatable="yes">C_lose window</attribute>
-      </item>
+      <section>
+        <submenu id="new-window-submenu">
+          <attribute name="label" translatable="yes">New window</attribute>
+          <section>
+            <item>
+              <attribute name="action">win.main-win-new-window-default</attribute>
+              <attribute name="label" translatable="yes">New window default</attribute>
+            </item>
+            <item>
+              <attribute name="action">win.main-win-new-window-from-current</attribute>
+              <attribute name="label" translatable="yes">New window from current</attribute>
+            </item>
+          </section>
+          <section id="new-window-layouts-section" />
+        </submenu>
+        <item>
+          <attribute name="action">win.main-win-rename-window</attribute>
+          <attribute name="label" translatable="yes">Rename window</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.main-win-delete-window</attribute>
+          <attribute name="label" translatable="yes">Delete window</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.main-win-close-window</attribute>
+          <attribute name="label" translatable="yes">C_lose window</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="action">win.main-win-view-in-new-window</attribute>
+          <attribute name="label" translatable="yes">_View Image in New Window</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.main-win-pan-view</attribute>
+          <attribute name="label" translatable="yes">Pa_n view</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.main-win-exif-window</attribute>
+          <attribute name="label" translatable="yes">_Exif window</attribute>
+        </item>
+      </section>
     </submenu>
     <!--
          Help 
