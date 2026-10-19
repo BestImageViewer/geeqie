@@ -2536,7 +2536,7 @@ const ActionDef main_actions[] =
 		{
 		"win.main-win-sort-add-selection",
 		nullptr,
-		N_("Add to highlighted collection"),
+		N_("Sort Manager: Process images using highlighted destination"),
 		layout_menu_bar_sort_add_selection_cb,
 		nullptr,
 		ActionStateType::NONE,

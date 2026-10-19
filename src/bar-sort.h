@@ -58,7 +58,7 @@ struct BarSort
 GtkWidget *bar_sort_new_default(LayoutWindow *lw);
 GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **attribute_names, const gchar **attribute_values);
 void bar_sort_close(GtkWidget *bar);
-void bar_sort_add_to_collection(GtkWidget *bar);
+void bar_sort_add_selection(GtkWidget *bar);
 gboolean bar_sort_collection_add(const gchar *path);
 
 void bar_sort_write_config(GtkWidget *bar, RcString &rc);

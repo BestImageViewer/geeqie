@@ -18,6 +18,13 @@
   </para>
   <para>The mode of the Sort Manager is selected by the drop down list under the sidebar title. The Folder mode allows moving or copying the visible image to a folder, and the Collection mode allows adding the visible image or file selection to a collection.</para>
   <para />
+  <section id="SortManagerDestination">
+    <title>Using a highlighted destination</title>
+    <para>Hold <keycap>Ctrl</keycap> and click a folder or collection to select it as the destination without processing any images. The destination remains highlighted when focus returns to the file list. Folder and collection destinations are remembered separately when switching modes and across restarts.</para>
+    <para>To process images without clicking the destination again, assign a keyboard shortcut to <guilabel>Sort Manager: Process images using highlighted destination</guilabel> in <menuchoice><guimenu>Edit</guimenu><guimenuitem>Preferences</guimenuitem><guisubmenu>Keyboard</guisubmenu></menuchoice>. No shortcut is assigned by default. This action is available while the Sort Manager is visible.</para>
+    <para>In Folders mode, the shortcut applies the selected Copy, Move, or Desktop action to the selected images using the highlighted folder. In Collections mode, it adds the current image or selected images to the highlighted collection, according to the selection style. Clicking a destination normally both highlights it and performs the operation.</para>
+    <para>The small help button beside the Ctrl+click hint opens this Sort Manager help page.</para>
+  </section>
   <section id="Folderview">
     <title>Folder view</title>
     <para>The Sort Manager folder view consists of a vertical list for bookmarking folders, a section to select the operation to perform, and a set of buttons along the bottom.</para>
@@ -58,6 +65,7 @@
     </section>
     <section id="CopyMoveandLink">
       <title>Copy, Move, Link and Desktop actions</title>
+      <para>Clicking a folder sets and highlights the destination and processes the selected images. Hold <keycap>Ctrl</keycap> while clicking to set the destination only. The <guilabel>Sort Manager: Process images using highlighted destination</guilabel> action repeats the selected operation using that folder. A shortcut can be assigned in Keyboard preferences.</para>
       <para>
         Copy, Move and Symbolic Link are available operations to use on the active image; they should be self explanatory. In some cases, Desktop files are also listed. This is detailed in
         <emphasis role="underline"><link linkend="Geeqieextensions" endterm="titleGuidePluginsConfig" /></emphasis>
@@ -78,8 +86,8 @@
   <section id="Collectionview">
     <title>Collection view</title>
     <para>The Sort Manager collection view consists of a vertical list of collection, a section to determine the current selection, and a set of buttons along the bottom.</para>
-    <para>Clicking or activating an item in the list sets it as the destination and adds images according to the selection style below. Hold <keycap>Ctrl</keycap> while clicking to set the destination without adding images. The destination remains highlighted when focus returns to the files pane.</para>
-    <para>The <guilabel>Add to highlighted collection</guilabel> action adds images to the highlighted collection according to the selection style below. It works while the Sort Manager is visible in Collections mode. No shortcut is assigned by default; one can be assigned in Keyboard preferences.</para>
+    <para>Clicking or activating an item in the list sets it as the destination and adds images according to the selection style below. Hold <keycap>Ctrl</keycap> while clicking to set the destination without adding images. The destination remains highlighted when focus returns to the files pane. The highlighted folder and collection destinations are remembered separately across restarts.</para>
+    <para>The <guilabel>Sort Manager: Process images using highlighted destination</guilabel> action adds images to the highlighted collection according to the selection style below. It works while the Sort Manager is visible. In Folders mode, it processes the selected images using the highlighted folder and the selected Copy, Move, or Desktop action. No shortcut is assigned by default; one can be assigned in Keyboard preferences.</para>
     <para />
     <section id="Collectionlist">
       <title>Collection list</title>
