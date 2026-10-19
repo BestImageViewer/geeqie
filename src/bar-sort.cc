@@ -695,7 +695,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 			}
 	};
 	sd->bookmarks = bookmark_list_new(SORT_KEY_FOLDERS, bar_sort_bookmark_select);
-	bookmark_list_set_tooltip_func(sd->bookmarks, [sd](const gchar *path) -> std::string
+	bookmark_list_set_tooltip_func(sd->bookmarks, [](const gchar *path) -> std::string
 	{
 		g_autofree gchar *shortcut = action_accelerator_label("win.main-win-sort-add-selection");
 		g_autofree gchar *shortcut_hint = shortcut
