@@ -262,7 +262,7 @@ void generic_dialog_windows_load_config(const gchar **attribute_names, const gch
 {
 	g_autofree gchar *title = nullptr;
 	g_autofree gchar *role = nullptr;
-	GdkRectangle rect;
+	GdkRectangle rect{};
 
 	while (*attribute_names)
 		{
