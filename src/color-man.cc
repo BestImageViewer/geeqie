@@ -102,7 +102,7 @@ gint scale_factor()
 {
 	LayoutWindow *lw = get_current_layout();
 
-	return gtk_widget_get_scale_factor(lw->window);
+	return lw ? gtk_widget_get_scale_factor(lw->window) : 1;
 }
 
 /*

@@ -40,6 +40,9 @@
 #include "color-man.h"
 #include "filecache.h"
 #include "filedata.h"
+#if HAVE_JPEGXL
+#include "image-load-jpegxl.h"
+#endif
 #include "intl.h"
 #include "jpeg-parser.h"
 #include "main-defines.h"
@@ -895,6 +898,17 @@ void exif_free_fd(FileData *fd, ExifData *exif)
 ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_profile_from_image)
 {
 	color_profile_from_image = COLOR_PROFILE_NONE;
+	if (!fd) return {};
+
+#if HAVE_JPEGXL
+	if (g_strcmp0(fd->format_name, "jxl") == 0)
+		{
+		ColorManMemData profile{};
+		profile.ptr.reset(jpegxl_color_profile(fd->path, profile.len));
+		if (profile.ptr) color_profile_from_image = COLOR_PROFILE_MEM;
+		return profile;
+		}
+#endif
 
 	ExifData *exif = exif_read_fd(fd);
 	if (!exif) return {};

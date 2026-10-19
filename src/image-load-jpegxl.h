@@ -23,9 +23,12 @@
 
 #include <memory>
 
+#include <glib.h>
+
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_jpegxl();
+guchar *jpegxl_color_profile(const gchar *path, guint &profile_len);
 
 #endif /* IMAGE_LOAD_JPEGXL_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

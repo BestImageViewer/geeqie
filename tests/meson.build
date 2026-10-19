@@ -13,6 +13,7 @@ unit_test_sources = files(
 'geocode.cc',
 'history-list.cc',
 'image-load.cc',
+'image-load-jpegxl.cc',
 'image-crop.cc',
 'keyboard-shortcuts.cc',
 'layout-image-navigation.cc',

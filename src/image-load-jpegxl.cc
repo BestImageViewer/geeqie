@@ -62,8 +62,10 @@
 #include <jxl/codestream_header.h>
 #include <jxl/decode_cxx.h>
 #include <jxl/types.h>
+#include <jxl/version.h>
 
 #include "image-load.h"
+#include "ui-fileops.h"
 
 namespace
 {
@@ -220,6 +222,40 @@ ImageLoaderJPEGXL::~ImageLoaderJPEGXL()
 }
 
 } // namespace
+
+guchar *jpegxl_color_profile(const gchar *path, guint &profile_len)
+{
+	profile_len = 0;
+	g_autofree gchar *path_local = path_from_utf8(path);
+	g_autoptr(GMappedFile) file = g_mapped_file_new(path_local, FALSE, nullptr);
+	if (!file) return nullptr;
+
+	JxlDecoderPtr decoder = JxlDecoderMake(nullptr);
+	if (!decoder || JxlDecoderSubscribeEvents(decoder.get(), JXL_DEC_COLOR_ENCODING) != JXL_DEC_SUCCESS) return nullptr;
+	if (JxlDecoderSetInput(decoder.get(), reinterpret_cast<const uint8_t *>(g_mapped_file_get_contents(file)),
+	                       g_mapped_file_get_length(file)) != JXL_DEC_SUCCESS) return nullptr;
+	if (JxlDecoderProcessInput(decoder.get()) != JXL_DEC_COLOR_ENCODING) return nullptr;
+
+	// The profile must describe the decoder's pixels, which may differ from the original image.
+	size_t size = 0;
+#if JPEGXL_MAJOR_VERSION == 0 && JPEGXL_MINOR_VERSION < 9
+	const JxlPixelFormat format = {4, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
+	if (JxlDecoderGetICCProfileSize(decoder.get(), &format, JXL_COLOR_PROFILE_TARGET_DATA, &size) != JXL_DEC_SUCCESS ||
+#else
+	if (JxlDecoderGetICCProfileSize(decoder.get(), JXL_COLOR_PROFILE_TARGET_DATA, &size) != JXL_DEC_SUCCESS ||
+#endif
+	    size == 0 || size > G_MAXUINT) return nullptr;
+	g_autofree auto *profile = static_cast<guchar *>(g_try_malloc(size));
+	if (!profile) return nullptr;
+#if JPEGXL_MAJOR_VERSION == 0 && JPEGXL_MINOR_VERSION < 9
+	if (JxlDecoderGetColorAsICCProfile(decoder.get(), &format, JXL_COLOR_PROFILE_TARGET_DATA, profile, size) != JXL_DEC_SUCCESS) return nullptr;
+#else
+	if (JxlDecoderGetColorAsICCProfile(decoder.get(), JXL_COLOR_PROFILE_TARGET_DATA, profile, size) != JXL_DEC_SUCCESS) return nullptr;
+#endif
+
+	profile_len = size;
+	return g_steal_pointer(&profile);
+}
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_jpegxl()
 {
