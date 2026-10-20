@@ -74,16 +74,17 @@ gboolean ImageLoaderHEIF::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 		heif::ImageHandle handle = ctx.get_image_handle(IDs[page_num]);
 
-		// decode the image and convert colorspace to RGB, saved as 24bit interleaved
+		const gboolean alpha = handle.has_alpha_channel();
+		const auto chroma = alpha ? heif_chroma_interleaved_RGBA : heif_chroma_interleaved_RGB;
+		// Match the decoded channel layout to the GdkPixbuf alpha flag.
 		heif_image *img;
-		heif_error error = heif_decode_image(handle.get_raw_image_handle(), &img, heif_colorspace_RGB, heif_chroma_interleaved_24bit, nullptr);
+		heif_error error = heif_decode_image(handle.get_raw_image_handle(), &img, heif_colorspace_RGB, chroma, nullptr);
 		if (error.code) throw heif::Error(error);
 
 		gint stride;
 		guint8* pixels = heif_image_get_plane(img, heif_channel_interleaved, &stride);
 		gint width = heif_image_get_width(img,heif_channel_interleaved);
 		gint height = heif_image_get_height(img,heif_channel_interleaved);
-		gboolean alpha = handle.has_alpha_channel();
 
 		g_autoptr(GdkPixbuf) decoded = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, img);
 
