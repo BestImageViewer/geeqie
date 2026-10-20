@@ -176,9 +176,12 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		VDLIST(vd)->list = g_list_prepend(VDLIST(vd)->list, fd);
 		}
 
-	while (GtkWidget *child = gtk_widget_get_first_child(VDLIST(vd)->box))
+	for (GtkWidget *child = gtk_widget_get_first_child(VDLIST(vd)->box); child;)
 		{
-		gtk_box_remove(GTK_BOX(VDLIST(vd)->box), child);
+		auto *next = gtk_widget_get_next_sibling(child);
+		// Context menus are also parented to the box. Refresh only its rows.
+		if (!GTK_IS_POPOVER(child)) gtk_box_remove(GTK_BOX(VDLIST(vd)->box), child);
+		child = next;
 		}
 
 	g_hash_table_remove_all(VDLIST(vd)->labels);
@@ -339,13 +342,21 @@ gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 
 void vdlist_refresh(ViewDir *vd)
 {
+	g_autofree gchar *clicked_path = vd->click_fd ? g_strdup(vd->click_fd->path) : nullptr;
 	g_autofree gchar *selected_path = VDLIST(vd)->selected_fd ? g_strdup(VDLIST(vd)->selected_fd->path) : nullptr;
+	auto *selected_button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, VDLIST(vd)->selected_fd));
+	const gboolean restore_focus = selected_button && gtk_widget_has_focus(selected_button);
 	const gboolean scroll_pending = VDLIST(vd)->scroll_id != 0;
 	vdlist_populate(vd, FALSE);
+	vd->click_fd = vdlist_row_by_path(vd, clicked_path, nullptr);
 	if (FileData *fd = vdlist_row_by_path(vd, selected_path, nullptr))
 		{
 		vdlist_color_set(vd, fd, TRUE);
-		if (scroll_pending)
+		if (restore_focus)
+			{
+			vdlist_focus_by_path(vd, selected_path);
+			}
+		else if (scroll_pending)
 			{
 			VDLIST(vd)->scroll_id = gtk_widget_add_tick_callback(vd->view, vdlist_scroll_after_layout, vd, nullptr);
 			}

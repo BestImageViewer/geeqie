@@ -12,7 +12,9 @@
 #include "filefilter.h"
 #include "layout.h"
 #include "options.h"
+#include "ui-menu.h"
 #include "view-dir.h"
+#include "view-dir-list.h"
 
 namespace
 {
@@ -240,6 +242,68 @@ TEST_P(ViewDirNewFolder, FocusMovesToCreatedFolderWithoutEnteringIt)
 		gtk_tree_model_get(model, &iter, DIR_COLUMN_NAME, &name, -1);
 		EXPECT_STREQ(name, "created");
 		}
+}
+
+TEST_P(ViewDirNewFolder, RefreshRetainsCreatedFolderFocusAndScroll)
+{
+	if (GetParam() != DIRVIEW_LIST) GTEST_SKIP() << "Requires the folder list";
+	for (int i = 0; i < 60; ++i)
+		{
+		g_autofree gchar *path = g_strdup_printf("%s/folder-%02d", directory, i);
+		ASSERT_EQ(g_mkdir(path, 0700), 0);
+		}
+	vd_refresh(vd);
+	drain_events();
+	auto *entry = start();
+	ASSERT_NE(entry, nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "zzz-created");
+	g_signal_emit_by_name(entry, "activate");
+	drain_events();
+	drain_events();
+	auto *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vd->widget));
+	ASSERT_GT(gtk_adjustment_get_value(adjustment), 0);
+	// Simulate delayed filesystem notifications after the initial focus settles.
+	for (int i = 0; i < 3; ++i)
+		{
+		vd_refresh(vd);
+		drain_events();
+		drain_events();
+		auto *focus = gtk_root_get_focus(GTK_ROOT(layout.window));
+		ASSERT_TRUE(GTK_IS_BUTTON(focus));
+		auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(focus), "vdlist-fd"));
+		ASSERT_NE(fd, nullptr);
+		EXPECT_STREQ(fd->name, "zzz-created");
+		EXPECT_GT(gtk_adjustment_get_value(adjustment), 0);
+		}
+}
+
+TEST_P(ViewDirNewFolder, RefreshPreservesOpenContextMenuAndTarget)
+{
+	if (GetParam() != DIRVIEW_LIST) GTEST_SKIP() << "Requires the folder list";
+	g_autofree gchar *path = g_build_filename(directory, "target", nullptr);
+	ASSERT_EQ(g_mkdir(path, 0700), 0);
+	vd_refresh(vd);
+	drain_events();
+	vd->click_fd = vdlist_row_by_path(vd, path, nullptr);
+	ASSERT_NE(vd->click_fd, nullptr);
+	g_autoptr(GMenu) menu = g_menu_new();
+	g_menu_append(menu, "Test item", "win.test");
+	auto *popover = popup_menu_at(menu, vd->view, 10, 10);
+	g_object_ref(popover);
+	drain_events();
+	ASSERT_TRUE(gtk_widget_get_mapped(popover));
+	for (int i = 0; i < 3; ++i)
+		{
+		vd_refresh(vd);
+		drain_events();
+		EXPECT_EQ(gtk_widget_get_parent(popover), vd->view);
+		EXPECT_TRUE(gtk_widget_get_mapped(popover));
+		ASSERT_NE(vd->click_fd, nullptr);
+		EXPECT_STREQ(vd->click_fd->path, path);
+		}
+	gtk_popover_popdown(GTK_POPOVER(popover));
+	drain_events();
+	g_object_unref(popover);
 }
 
 TEST_P(ViewDirNewFolder, EscapeCancelsWithoutCreatingDirectory)
