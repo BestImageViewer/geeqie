@@ -104,6 +104,7 @@ enum {
 static gboolean vflist_row_rename_cb(TreeEditData *td, const gchar *old_name, const gchar *new_name, gpointer data);
 static void vflist_populate_view(ViewFile *vf, gboolean force);
 static gboolean vflist_is_multiline(ViewFile *vf);
+static void vflist_selection_sync_cb(GtkTreeSelection *source, gpointer data);
 
 static gboolean vflist_thumb_size_changed(ViewFile *vf)
 {
@@ -495,8 +496,12 @@ void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 	g_autoptr(GtkTreePath) tpath = nullptr;
 
 	vf->clicked_mark = 0;
+	VFLIST(vf)->range_selection = FALSE;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), event.x, event.y,
+	gint bin_x;
+	gint bin_y;
+	gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(event.widget), event.x, event.y, &bin_x, &bin_y);
+	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), bin_x, bin_y,
 	                                  &tpath, &column, nullptr, nullptr))
 		{
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
@@ -555,6 +560,37 @@ void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 		return;
 		}
 
+	if (event.button == GDK_BUTTON_PRIMARY && event.n_press == 1)
+		{
+		if (!(event.state & GDK_SHIFT_MASK))
+			{
+			g_clear_pointer(&VFLIST(vf)->selection_anchor, gtk_tree_row_reference_free);
+			VFLIST(vf)->selection_anchor = gtk_tree_row_reference_new(gtk_tree_view_get_model(GTK_TREE_VIEW(event.widget)), tpath);
+			}
+		else if (event.state & GDK_CONTROL_MASK)
+			{
+			g_autoptr(GtkTreePath) anchor = VFLIST(vf)->selection_anchor ? gtk_tree_row_reference_get_path(VFLIST(vf)->selection_anchor) : nullptr;
+			if (!anchor) gtk_tree_view_get_cursor(GTK_TREE_VIEW(event.widget), &anchor, nullptr);
+			if (anchor)
+				{
+				auto *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(event.widget));
+				g_autolist(GtkTreePath) selected = gtk_tree_selection_get_selected_rows(selection, nullptr);
+				VFLIST(vf)->syncing_selection = TRUE;
+				gtk_tree_view_set_cursor(GTK_TREE_VIEW(event.widget), tpath, nullptr, FALSE);
+				for (GList *work = selected; work; work = work->next)
+					gtk_tree_selection_select_path(selection, static_cast<GtkTreePath *>(work->data));
+				if (gtk_tree_path_compare(anchor, tpath) <= 0) gtk_tree_selection_select_range(selection, anchor, tpath);
+				else gtk_tree_selection_select_range(selection, tpath, anchor);
+				VFLIST(vf)->syncing_selection = FALSE;
+				vflist_selection_sync_cb(selection, vf);
+				VFLIST(vf)->select_fd = fd;
+				gtk_widget_grab_focus(event.widget);
+				VFLIST(vf)->range_selection = TRUE;
+				return;
+				}
+			}
+		}
+
 	if (event.button == GDK_BUTTON_PRIMARY && event.n_press == 1 &&
 	    !(event.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
 	    vflist_is_selected(vf, fd))
@@ -603,9 +639,12 @@ void vflist_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 		return;
 		}
 
+	gint bin_x;
+	gint bin_y;
+	gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(event.widget), event.x, event.y, &bin_x, &bin_y);
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
 	    (event.x != 0 || event.y != 0) &&
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), event.x, event.y,
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), bin_x, bin_y,
 					  &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
@@ -1940,6 +1979,7 @@ gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 
 	g_clear_handle_id(&(VFLIST(vf)->select_idle_id), g_source_remove);
 	VFLIST(vf)->select_fd = nullptr;
+	g_clear_pointer(&VFLIST(vf)->selection_anchor, gtk_tree_row_reference_free);
 	vf->click_fd = nullptr;
 	gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview)));
 
@@ -1956,6 +1996,7 @@ gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 
 void vflist_destroy_cb(ViewFile *vf)
 {
+	g_clear_pointer(&VFLIST(vf)->selection_anchor, gtk_tree_row_reference_free);
 	file_data_unregister_notify_func(vf_notify_cb, vf);
 
 	g_clear_handle_id(&(VFLIST(vf)->select_idle_id), g_source_remove);

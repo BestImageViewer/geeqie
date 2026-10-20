@@ -33,6 +33,8 @@ class FileData;
 struct ViewFileInfoList
 {
 	FileData *select_fd;
+	GtkTreeRowReference *selection_anchor;
+	gboolean range_selection;
 
 	gboolean thumbs_enabled;
 	gint thumb_width;

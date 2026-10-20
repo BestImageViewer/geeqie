@@ -2,7 +2,9 @@
 
 #include "gtest/gtest.h"
 
+#include <algorithm>
 #include <tuple>
+#include <utility>
 
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
@@ -68,6 +70,82 @@ void check_startup_selection(bool show_details)
 	gtk_window_destroy(GTK_WINDOW(window));
 	vflist_destroy_cb(&vf);
 	g_free(vf.info);
+}
+
+TEST(FileList, AdditiveRangesPreserveOtherBlocksInBothViews)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	for (const bool details : {false, true})
+		{
+		SCOPED_TRACE(details);
+		ViewFile vf{};
+		vflist_new(&vf);
+		g_autoptr(GtkWidget) filter = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+		g_object_ref_sink(filter);
+		gtk_widget_set_visible(filter, FALSE);
+		vf.file_filter.control = filter;
+		auto *store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vf.listview)));
+		for (int i = 0; i < 12; ++i)
+			{
+			g_autofree gchar *name = g_strdup_printf("/tmp/geeqie-range-%02d.jpg", i);
+			auto *fd = file_data_new_simple(name);
+			vf.list = g_list_append(vf.list, fd);
+			GtkTreeIter iter;
+			gtk_tree_store_append(store, &iter, nullptr);
+			gtk_tree_store_set(store, &iter, 0, file_data_ref(fd), 3, fd->name, 4, fd->name, 5, fd->name, -1);
+			}
+		auto *window = GTK_WINDOW(gtk_window_new());
+		gtk_window_set_default_size(window, 700, 500);
+		gtk_window_set_child(window, vflist_get_view_widget(&vf));
+		gtk_window_present(window);
+		for (int i = 0; i < 100; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+		auto *tree = GTK_TREE_VIEW(details ? VFLIST(&vf)->details_view : vf.listview);
+		auto *selection = gtk_tree_view_get_selection(tree);
+		const auto press = [&vf, tree](int row, GdkModifierType state)
+			{
+			g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_indices(row, -1);
+			GdkRectangle rect;
+			gtk_tree_view_get_background_area(tree, path, nullptr, &rect);
+			int x;
+			int y;
+			gtk_tree_view_convert_bin_window_to_widget_coords(tree, rect.x + 10, rect.y + (rect.height / 2), &x, &y);
+			vflist_press_cb(&vf, {GTK_WIDGET(tree), GDK_BUTTON_PRIMARY, static_cast<double>(x), static_cast<double>(y), state, 1});
+			};
+		for (const auto range : {std::pair{6, 8}, std::pair{8, 6}, std::pair{1, 4}})
+			{
+			gtk_tree_selection_unselect_all(selection);
+			g_autoptr(GtkTreePath) first = gtk_tree_path_new_from_indices(0, -1);
+			g_autoptr(GtkTreePath) third = gtk_tree_path_new_from_indices(2, -1);
+			gtk_tree_selection_select_range(selection, first, third);
+			press(range.first, GDK_CONTROL_MASK);
+			g_autoptr(GtkTreePath) anchor = gtk_tree_path_new_from_indices(range.first, -1);
+			gtk_tree_selection_select_path(selection, anchor);
+			press(range.second, static_cast<GdkModifierType>(GDK_CONTROL_MASK | GDK_SHIFT_MASK));
+			EXPECT_TRUE(VFLIST(&vf)->range_selection);
+			for (int i = 0; i < 12; ++i)
+				{
+				const bool expected = i <= 2 || (i >= std::min(range.first, range.second) && i <= std::max(range.first, range.second));
+				auto *fd = static_cast<FileData *>(g_list_nth_data(vf.list, i));
+				EXPECT_EQ(vflist_is_selected(&vf, fd), expected) << i;
+				}
+			}
+		g_autofree gchar *directory = g_dir_make_tmp("geeqie-range-reset-XXXXXX", nullptr);
+		ASSERT_NE(directory, nullptr);
+		FileData *dir_fd = file_data_new_dir(directory);
+		EXPECT_TRUE(vflist_set_fd(&vf, dir_fd));
+		EXPECT_EQ(VFLIST(&vf)->selection_anchor, nullptr);
+		gtk_window_destroy(window);
+		vflist_destroy_cb(&vf);
+		file_data_unref(vf.dir_fd);
+		file_data_unref(dir_fd);
+		g_free(vf.info);
+		g_rmdir(directory);
+		}
 }
 
 TEST(FileList, StartupSelectionIsVisibleWithDetails)

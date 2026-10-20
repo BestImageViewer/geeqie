@@ -2304,9 +2304,11 @@ static void vf_gesture_press_cb(GtkGestureClick *gesture, gint n_press, gdouble 
 		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
 		n_press
 	};
-	vf_press_cb(static_cast<ViewFile *>(data), event);
+	auto *vf = static_cast<ViewFile *>(data);
+	vf_press_cb(vf, event);
 
-	if (event.button == GDK_BUTTON_SECONDARY)
+	if (event.button == GDK_BUTTON_SECONDARY ||
+	    (vf->type == FILEVIEW_LIST && VFLIST(vf)->range_selection))
 		{
 		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		}
