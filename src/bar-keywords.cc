@@ -1111,7 +1111,7 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(pkd->keyword_treeview), x, y, &pkd->click_tpath, &pos);
 
 	// Keep the menu outside the tree's scroller, which dismisses popovers on adjustment changes.
-	graphene_point_t point = GRAPHENE_POINT_INIT(static_cast<float>(x), static_cast<float>(y));
+	graphene_point_t point{ static_cast<float>(x), static_cast<float>(y) };
 	graphene_point_t anchor;
 	if (!gtk_widget_compute_point(widget, pkd->pane.widget, &point, &anchor)) return;
 	menu = popover_box_new(pkd->pane.widget, anchor.x, anchor.y);
