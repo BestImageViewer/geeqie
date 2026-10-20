@@ -99,6 +99,75 @@ TEST(RendererTiles, SourceOffsetBeyondTwoGiB)
 	gtk_window_destroy(window);
 }
 
+TEST(RendererTiles, OverscrollLimitsAndBackground)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	gtk_window_set_default_size(window, 400, 300);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	GdkRGBA background = {0, 0, 1, 1};
+	pixbuf_renderer_set_color(pr, background);
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 800, 600);
+	gdk_pixbuf_fill(image, 0xff0000ff);
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	gtk_window_present(window);
+	const auto settle = [pr]()
+		{
+		for (int i = 0; i < 100; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+		return gtk_widget_get_mapped(GTK_WIDGET(pr));
+		};
+	ASSERT_TRUE(settle());
+	for (const double zoom : {1.0, -4.0, 0.0})
+		{
+		SCOPED_TRACE(zoom);
+		pixbuf_renderer_set_allow_overscroll(pr, TRUE);
+		pixbuf_renderer_zoom_set(pr, zoom);
+		for (const int direction : {-1, 1})
+			{
+			SCOPED_TRACE(direction);
+			pixbuf_renderer_scroll(pr, direction * 10000, direction * 10000);
+			ASSERT_TRUE(settle());
+			EXPECT_EQ(pr->x_scroll, (direction < 0 ? 0 : pr->width) - (pr->viewport_width / 2));
+			EXPECT_EQ(pr->y_scroll, (direction < 0 ? 0 : pr->height) - (pr->viewport_height / 2));
+			for (const double display_scale : {1.0, 1.25})
+				{
+				auto *snapshot = gtk_snapshot_new();
+				renderer_tiles_snapshot(pr->renderer, snapshot, display_scale);
+				auto *node = gtk_snapshot_free_to_node(snapshot);
+				ASSERT_NE(node, nullptr);
+				auto *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pr->viewport_width, pr->viewport_height);
+				auto *cr = cairo_create(surface);
+				gsk_render_node_draw(node, cr);
+				cairo_destroy(cr);
+				cairo_surface_flush(surface);
+				const int center_x = pr->viewport_width / 2;
+				const int center_y = pr->viewport_height / 2;
+				const int inside = direction < 0 ? 5 : -5;
+				const auto pixel = [surface](int x, int y)
+					{
+					return *reinterpret_cast<guint32 *>(cairo_image_surface_get_data(surface) + (y * cairo_image_surface_get_stride(surface)) + (x * 4));
+					};
+				EXPECT_EQ(pixel(center_x + inside, center_y + inside), 0xffff0000U);
+				EXPECT_EQ(pixel(center_x - inside, center_y - inside), 0xff0000ffU);
+				cairo_surface_destroy(surface);
+				gsk_render_node_unref(node);
+				}
+			}
+		pixbuf_renderer_set_allow_overscroll(pr, FALSE);
+		EXPECT_GE(pr->x_scroll, 0);
+		EXPECT_GE(pr->y_scroll, 0);
+		EXPECT_LE(pr->x_scroll, pr->width - pr->vis_width);
+		EXPECT_LE(pr->y_scroll, pr->height - pr->vis_height);
+		}
+	gtk_window_destroy(window);
+}
+
 TEST(RendererTilesBirdseye, FinalizeWithActiveOverlay)
 {
 	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";

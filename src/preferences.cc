@@ -469,6 +469,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->image.fit_window_to_image = c_options->image.fit_window_to_image;
 	options->image.limit_window_size = c_options->image.limit_window_size;
 	options->image.zoom_to_fit_allow_expand = c_options->image.zoom_to_fit_allow_expand;
+	options->image.allow_overscroll = c_options->image.allow_overscroll;
 	options->image.max_window_size = c_options->image.max_window_size;
 	options->image.limit_autofit_size = c_options->image.limit_autofit_size;
 	options->image.max_autofit_size = c_options->image.max_autofit_size;
@@ -2298,6 +2299,9 @@ static void config_tab_image(GtkWidget *notebook, ConfOptions *c_options)
 	c_options->image.zoom_style = options->image.zoom_style;
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 	add_zoom_style_selection_menu(table, 0, 0, _("Zoom style:"), options->image.zoom_style, &c_options->image.zoom_style);
+
+	pref_checkbox_new_int(group, _("Allow panning beyond image edges"),
+	                      options->image.allow_overscroll, &c_options->image.allow_overscroll);
 
 	group = pref_group_new(vbox, FALSE, _("Fit image to window"), GTK_ORIENTATION_VERTICAL);
 

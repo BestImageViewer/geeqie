@@ -2341,6 +2341,7 @@ static void image_options_set(ImageWindow *imd, ConfOptions *options)
 	             "enlargement_limit_value", options->image.max_enlargement_size,
 	             NULL);
 
+	pixbuf_renderer_set_allow_overscroll(PIXBUF_RENDERER(imd->pr), options->image.allow_overscroll);
 	pixbuf_renderer_set_parent(PIXBUF_RENDERER(imd->pr), GTK_WINDOW(imd->top_window));
 
 	image_stereo_set(imd, options->stereo.mode);

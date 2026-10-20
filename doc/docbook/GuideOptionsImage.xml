@@ -6,6 +6,12 @@
     <title>Zoom</title>
     <variablelist>
       <varlistentry>
+        <term><guilabel>Allow panning beyond image edges</guilabel></term>
+        <listitem>
+          <para>Allows panning until any image edge or corner reaches the center of the viewing area. This makes it easier to inspect image boundaries. Disabled by default.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term>
           <guilabel>Quality</guilabel>
         </term>

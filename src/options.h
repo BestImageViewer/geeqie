@@ -184,6 +184,7 @@ struct ConfOptions
 		ZoomMode zoom_mode;
 		gboolean zoom_2pass;
 		gboolean zoom_to_fit_allow_expand;
+		gboolean allow_overscroll;
 		GdkInterpType zoom_quality;
 		gint zoom_increment;	/**< 100 is 1.0, 5 is 0.05, 200 is 2.0, etc. */
 		ZoomStyle zoom_style;

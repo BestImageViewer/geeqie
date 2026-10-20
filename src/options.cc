@@ -149,6 +149,7 @@ ConfOptions *conf_options_new()
 	options->image.zoom_mode = ZOOM_RESET_NONE;
 	options->image.zoom_quality = GDK_INTERP_BILINEAR;
 	options->image.zoom_to_fit_allow_expand = FALSE;
+	options->image.allow_overscroll = FALSE;
 	options->image.zoom_style = ZOOM_GEOMETRIC;
 	options->image.tile_size = 128;
 

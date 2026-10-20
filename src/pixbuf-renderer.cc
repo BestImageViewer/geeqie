@@ -1692,18 +1692,18 @@ static void pixbuf_renderer_sync_scroll_center(PixbufRenderer *pr)
 	if (!pr->width || !pr->height) return;
 
 	/*
-	 * Update norm_center only if the image is bigger than the window.
+	 * Update norm_center if the image can be panned in this viewport.
 	 * With this condition the stored center survives also a temporary display
 	 * of the "broken image" icon.
 	*/
 
-	if (pr->width > pr->viewport_width)
+	if (pr->allow_overscroll || pr->width > pr->viewport_width)
 		{
 		src_x = pr->x_scroll + (pr->vis_width / 2);
 		pr->norm_center_x = static_cast<gdouble>(src_x) / pr->width;
 		}
 
-	if (pr->height > pr->viewport_height)
+	if (pr->allow_overscroll || pr->height > pr->viewport_height)
 		{
 		src_y = pr->y_scroll + (pr->vis_height / 2);
 		pr->norm_center_y = static_cast<gdouble>(src_y) / pr->height;
@@ -1716,7 +1716,7 @@ static gboolean pr_scroll_clamp(PixbufRenderer *pr)
 	gint old_xs;
 	gint old_ys;
 
-	if (pr->zoom == 0.0)
+	if (pr->zoom == 0.0 && !pr->allow_overscroll)
 		{
 		pr->x_scroll = 0;
 		pr->y_scroll = 0;
@@ -1726,6 +1726,14 @@ static gboolean pr_scroll_clamp(PixbufRenderer *pr)
 
 	old_xs = pr->x_scroll;
 	old_ys = pr->y_scroll;
+
+	if (pr->allow_overscroll)
+		{
+		pr->x_scroll = std::clamp(pr->x_scroll, -(pr->viewport_width / 2), pr->width - (pr->viewport_width / 2));
+		pr->y_scroll = std::clamp(pr->y_scroll, -(pr->viewport_height / 2), pr->height - (pr->viewport_height / 2));
+		pixbuf_renderer_sync_scroll_center(pr);
+		return (old_xs != pr->x_scroll || old_ys != pr->y_scroll);
+		}
 
 	if (pr->x_offset > 0)
 		{
@@ -1758,7 +1766,7 @@ static gboolean pr_size_clamp(PixbufRenderer *pr)
 	old_vw = pr->vis_width;
 	old_vh = pr->vis_height;
 
-	if (pr->width < pr->viewport_width)
+	if (!pr->allow_overscroll && pr->width < pr->viewport_width)
 		{
 		pr->vis_width = pr->width;
 		pr->x_offset = (pr->viewport_width - pr->width) / 2;
@@ -1769,7 +1777,7 @@ static gboolean pr_size_clamp(PixbufRenderer *pr)
 		pr->x_offset = 0;
 		}
 
-	if (pr->height < pr->viewport_height)
+	if (!pr->allow_overscroll && pr->height < pr->viewport_height)
 		{
 		pr->vis_height = pr->height;
 		pr->y_offset = (pr->viewport_height - pr->height) / 2;
@@ -1979,6 +1987,19 @@ static void pr_zoom_sync(PixbufRenderer *pr, gdouble zoom,
 	pr_update_signal(pr);
 }
 
+/**
+ * @brief Allow image edges to be panned to the viewport center
+ */
+void pixbuf_renderer_set_allow_overscroll(PixbufRenderer *pr, gboolean enable)
+{
+	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
+
+	if (pr->allow_overscroll == enable) return;
+	pr->allow_overscroll = enable;
+	pr_zoom_sync(pr, pr->zoom, PR_ZOOM_FORCE, 0, 0);
+	pixbuf_renderer_update_viewport(pr);
+}
+
 static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 {
 	gboolean zoom_changed = FALSE;
@@ -2023,7 +2044,7 @@ static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 	pr_size_clamp(pr);
 	// The fullscreen renderer receives its image before its first allocation.
 	// Preserve the image center when the final viewport dimensions arrive.
-	if (pr->zoom != 0.0)
+	if (pr->zoom != 0.0 || pr->allow_overscroll)
 		{
 		pr->x_scroll = (center_x * pr->width) - (pr->vis_width / 2.0);
 		pr->y_scroll = (center_y * pr->height) - (pr->vis_height / 2.0);

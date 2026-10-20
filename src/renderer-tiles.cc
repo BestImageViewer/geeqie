@@ -2030,6 +2030,11 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 			}
 		else
 			{
+			// Edge tile surfaces include padding beyond the actual image.
+			graphene_rect_init(&bounds, rt->pr->x_offset - rt->x_scroll + rt->stereo_off_x,
+			                   rt->pr->y_offset - rt->y_scroll + rt->stereo_off_y,
+			                   rt->pr->width, rt->pr->height);
+			gtk_snapshot_push_clip(image_snapshot, &bounds);
 			for (GList *work = (rt->pr->pixbuf || rt->pr->source_tiles_enabled) ? rt->tiles : nullptr; work; work = work->next)
 				{
 				auto *it = static_cast<ImageTile *>(work->data);
@@ -2044,6 +2049,7 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 				                   gdk_texture_get_width(it->texture), gdk_texture_get_height(it->texture));
 				gtk_snapshot_append_texture(image_snapshot, it->texture, &bounds);
 				}
+			gtk_snapshot_pop(image_snapshot);
 			}
 		gtk_snapshot_pop(image_snapshot);
 		gtk_snapshot_pop(image_snapshot);

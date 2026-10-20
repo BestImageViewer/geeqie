@@ -487,6 +487,7 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_SEPARATOR();
 	WRITE_NL(); WRITE_BOOL(*options, image.zoom_2pass);
 	WRITE_NL(); WRITE_BOOL(*options, image.zoom_to_fit_allow_expand);
+	WRITE_NL(); WRITE_BOOL(*options, image.allow_overscroll);
 	WRITE_NL(); WRITE_UINT(*options, image.zoom_quality);
 	WRITE_NL(); WRITE_INT(*options, image.zoom_increment);
 	WRITE_NL(); WRITE_UINT(*options, image.zoom_style);
@@ -951,6 +952,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_UINT_ENUM_CLAMP(*options, image.zoom_style, 0, ZOOM_ARITHMETIC)) continue;
 		if (READ_BOOL(*options, image.zoom_2pass)) continue;
 		if (READ_BOOL(*options, image.zoom_to_fit_allow_expand)) continue;
+		if (READ_BOOL(*options, image.allow_overscroll)) continue;
 		if (READ_BOOL(*options, image.fit_window_to_image)) continue;
 		if (READ_BOOL(*options, image.limit_window_size)) continue;
 		if (READ_INT(*options, image.max_window_size)) continue;
