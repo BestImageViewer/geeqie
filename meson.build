@@ -563,15 +563,17 @@ endif
 
 conf_data.set('HAVE_WEBP', 0)
 libwebp_dep = []
+libwebpdemux_dep = []
 req_version = '>=0.6.1'
 option = get_option('webp')
 if not option.disabled()
     libwebp_dep = dependency('libwebp', version : req_version, required : get_option('webp'))
-    if libwebp_dep.found()
+    libwebpdemux_dep = dependency('libwebpdemux', version : req_version, required : get_option('webp'))
+    if libwebp_dep.found() and libwebpdemux_dep.found()
         conf_data.set('HAVE_WEBP', 1)
         summary({'webp' : ['webp files supported:', true]}, section : 'Configuration', bool_yn : true)
     else
-        summary({'webp' : ['libwebp ' + req_version + ' not found - webp files supported:', false]}, section : 'Configuration', bool_yn : true)
+        summary({'webp' : ['libwebp or libwebpdemux ' + req_version + ' not found - webp files supported:', false]}, section : 'Configuration', bool_yn : true)
     endif
 else
     summary({'webp' : ['disabled - webp files supported:', false]}, section : 'Configuration', bool_yn : true)

@@ -14,6 +14,7 @@ unit_test_sources = files(
 'history-list.cc',
 'image-load.cc',
 'image-load-heif.cc',
+'image-load-webp.cc',
 'image-load-jpegxl.cc',
 'image-crop.cc',
 'keyboard-shortcuts.cc',

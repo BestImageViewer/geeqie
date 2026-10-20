@@ -20,10 +20,13 @@
 
 #include "image-load-webp.h"
 
+#include <memory>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
 #include <glib.h>
 #include <webp/decode.h>
+#include <webp/demux.h>
 
 #include "image-load.h"
 
@@ -69,6 +72,30 @@ gboolean ImageLoaderWEBP::write(const guchar *buf, gsize &chunk_size, gsize coun
 		{
 		log_printf("warning: webp reader error\n");
 		return FALSE;
+		}
+
+	if (features.has_animation)
+		{
+		const WebPData encoded = {buf, count};
+		std::unique_ptr<WebPAnimDecoder, decltype(&WebPAnimDecoderDelete)> decoder(WebPAnimDecoderNew(&encoded, nullptr), WebPAnimDecoderDelete);
+		if (!decoder) return FALSE;
+		WebPAnimInfo info;
+		if (!WebPAnimDecoderGetInfo(decoder.get(), &info)) return FALSE;
+		uint8_t *frame;
+		int timestamp;
+		if (!WebPAnimDecoderGetNext(decoder.get(), &frame, &timestamp)) return FALSE;
+
+		// The animation decoder composites partial frames onto the full canvas.
+		// Its RGBA buffer is borrowed and must be copied before deleting it.
+		g_autoptr(GdkPixbuf) decoded = gdk_pixbuf_new_from_data(frame, GDK_COLORSPACE_RGB, TRUE, 8,
+		                                                     info.canvas_width, info.canvas_height,
+		                                                     info.canvas_width * 4, nullptr, nullptr);
+		if (!decoded) return FALSE;
+		pixbuf = gdk_pixbuf_copy(decoded);
+		if (!pixbuf) return FALSE;
+		area_updated_cb(nullptr, 0, 0, info.canvas_width, info.canvas_height, data);
+		chunk_size = count;
+		return TRUE;
 		}
 
 	if (features.has_alpha)
