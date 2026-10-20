@@ -847,7 +847,8 @@ void bar_pane_update_from_config(GtkWidget *pane, const gchar **attribute_names,
 
 	pd->pane_update_from_config(pane, attribute_names, attribute_values);
 
-	GtkWidget *expander = gtk_widget_get_parent(pd->widget);
+	GtkWidget *expander_box = gtk_widget_get_parent(pd->widget);
+	GtkWidget *expander = gtk_widget_get_parent(expander_box);
 	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd->expanded);
 
 	pd->pane_update(pane);
