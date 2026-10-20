@@ -28,6 +28,7 @@
 
 #include <gio/gio.h>
 #include <glib-object.h>
+#include <graphene.h>
 
 #include <config.h>
 
@@ -162,14 +163,21 @@ static gboolean vd_new_folder_finish(gpointer data)
 		{
 		if (vd->type == DIRVIEW_LIST)
 			{
-			if (auto *fd = vdlist_row_by_path(vd, path, nullptr)) vdlist_scroll_to_fd(vd, fd, 0.5);
+			vdlist_focus_by_path(vd, path);
 			}
 		else
 			{
 			auto fd = FileData::new_dir(path);
 			vdtree_populate_path(vd, fd, TRUE, TRUE);
 			GtkTreeIter iter;
-			if (vd_find_row(vd, fd, &iter)) tree_view_row_make_visible(GTK_TREE_VIEW(vd->view), &iter, TRUE);
+			if (vd_find_row(vd, fd, &iter))
+				{
+				auto *tree = GTK_TREE_VIEW(vd->view);
+				g_autoptr(GtkTreePath) tree_path = gtk_tree_model_get_path(gtk_tree_view_get_model(tree), &iter);
+				gtk_tree_view_set_cursor(tree, tree_path, nullptr, FALSE);
+				tree_view_row_make_visible(tree, &iter, TRUE);
+				gtk_widget_grab_focus(vd->view);
+				}
 			}
 		}
 	return G_SOURCE_REMOVE;
@@ -1002,17 +1010,25 @@ static gboolean vd_new_folder_start(GtkWidget *, GdkFrameClock *, gpointer data)
 {
 	auto *vd = static_cast<ViewDir *>(data);
 	auto *pending = vd->new_folder;
-	if (pending->row && gtk_widget_get_height(pending->row) == 0) return G_SOURCE_CONTINUE;
-	pending->start_id = 0;
+	GdkRectangle rect{};
 	if (pending->row)
 		{
+		if (gtk_widget_get_height(pending->row) == 0) return G_SOURCE_CONTINUE;
 		auto *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vd->widget));
+		const double previous = gtk_adjustment_get_value(adjustment);
 		gtk_adjustment_set_value(adjustment, gtk_adjustment_get_upper(adjustment) - gtk_adjustment_get_page_size(adjustment));
+		// Wait for the viewport to move before positioning the editor.
+		if (gtk_adjustment_get_value(adjustment) != previous) return G_SOURCE_CONTINUE;
+
+		graphene_rect_t bounds;
+		if (!gtk_widget_compute_bounds(pending->row, vd->widget, &bounds)) return G_SOURCE_CONTINUE;
+		// Anchor to the visible pane, independently of long directory names
+		// or the horizontal scroll position of the placeholder row.
+		rect = {0, static_cast<int>(bounds.origin.y), gtk_widget_get_width(vd->widget), static_cast<int>(bounds.size.height)};
 		}
-	if (pending->popover)
+	else
 		{
 		g_autoptr(GtkTreePath) path = gtk_tree_row_reference_get_path(pending->tree_row);
-		GdkRectangle rect;
 		auto *tree = GTK_TREE_VIEW(vd->view);
 		gtk_tree_view_get_cell_area(tree, path, gtk_tree_view_get_column(tree, 0), &rect);
 		graphene_point_t origin{static_cast<float>(rect.x), static_cast<float>(rect.y)};
@@ -1022,9 +1038,10 @@ static gboolean vd_new_folder_start(GtkWidget *, GdkFrameClock *, gpointer data)
 			rect.x = translated.x;
 			rect.y = translated.y;
 			}
-		gtk_popover_set_pointing_to(GTK_POPOVER(pending->popover), &rect);
-		popover_popup(pending->popover);
 		}
+	pending->start_id = 0;
+	gtk_popover_set_pointing_to(GTK_POPOVER(pending->popover), &rect);
+	popover_popup(pending->popover);
 	gtk_widget_grab_focus(pending->entry);
 	gtk_editable_select_region(GTK_EDITABLE(pending->entry), 0, -1);
 	return G_SOURCE_REMOVE;
@@ -1045,8 +1062,7 @@ void vd_new_folder(ViewDir *vd, FileData *dir_fd)
 		{
 		pending->row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 		gtk_box_append(GTK_BOX(pending->row), ui_image_new_from_icon_name(GQ_ICON_DIRECTORY));
-		gtk_widget_set_hexpand(pending->entry, TRUE);
-		gtk_box_append(GTK_BOX(pending->row), pending->entry);
+		gtk_box_append(GTK_BOX(pending->row), gtk_label_new(_("new-folder")));
 		gtk_box_append(GTK_BOX(vd->view), pending->row);
 		}
 	else
@@ -1074,17 +1090,16 @@ void vd_new_folder(ViewDir *vd, FileData *dir_fd)
 		g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(model, &iter);
 		pending->tree_row = gtk_tree_row_reference_new(model, path);
 		gtk_tree_view_scroll_to_cell(tree, path, nullptr, TRUE, 0.5, 0.0);
-		GdkRectangle rect;
-		gtk_tree_view_get_cell_area(tree, path, gtk_tree_view_get_column(tree, 0), &rect);
-		pending->popover = gtk_popover_new();
-		gtk_popover_set_has_arrow(GTK_POPOVER(pending->popover), FALSE);
-		gtk_popover_set_autohide(GTK_POPOVER(pending->popover), FALSE);
-		gtk_popover_set_position(GTK_POPOVER(pending->popover), GTK_POS_BOTTOM);
-		gtk_widget_set_parent(pending->popover, vd->widget);
-		gtk_popover_set_pointing_to(GTK_POPOVER(pending->popover), &rect);
-		gtk_popover_set_child(GTK_POPOVER(pending->popover), pending->entry);
-		g_signal_connect(pending->popover, "closed", G_CALLBACK(vd_new_folder_closed), vd);
 		}
+
+	pending->popover = gtk_popover_new();
+	gtk_popover_set_has_arrow(GTK_POPOVER(pending->popover), FALSE);
+	gtk_popover_set_autohide(GTK_POPOVER(pending->popover), FALSE);
+	gtk_popover_set_position(GTK_POPOVER(pending->popover), GTK_POS_BOTTOM);
+	if (pending->row) gtk_widget_set_halign(pending->popover, GTK_ALIGN_START);
+	gtk_widget_set_parent(pending->popover, vd->widget);
+	gtk_popover_set_child(GTK_POPOVER(pending->popover), pending->entry);
+	g_signal_connect(pending->popover, "closed", G_CALLBACK(vd_new_folder_closed), vd);
 
 	vd->new_folder = pending;
 	g_signal_connect(pending->entry, "activate", G_CALLBACK(vd_new_folder_activate), vd);

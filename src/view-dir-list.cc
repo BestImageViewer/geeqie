@@ -466,7 +466,7 @@ struct DirectoryRenameData
 	gchar *path;
 };
 
-static gboolean vdlist_rename_focus_after_layout(GtkWidget *widget, GdkFrameClock *clock, gpointer data)
+static gboolean vdlist_focus_after_layout(GtkWidget *widget, GdkFrameClock *clock, gpointer data)
 {
 	auto *vd = static_cast<ViewDir *>(data);
 	auto *button = static_cast<GtkWidget *>(g_hash_table_lookup(VDLIST(vd)->buttons, VDLIST(vd)->selected_fd));
@@ -474,14 +474,14 @@ static gboolean vdlist_rename_focus_after_layout(GtkWidget *widget, GdkFrameCloc
 	return vdlist_scroll_after_layout(widget, clock, data);
 }
 
-static void vdlist_rename_focus(ViewDir *vd, const gchar *path)
+void vdlist_focus_by_path(ViewDir *vd, const gchar *path)
 {
 	FileData *fd = vdlist_row_by_path(vd, path, nullptr);
 	if (!fd) return;
 
 	vdlist_scroll_to_fd(vd, fd, 0.5);
 	if (VDLIST(vd)->scroll_id) gtk_widget_remove_tick_callback(vd->view, VDLIST(vd)->scroll_id);
-	VDLIST(vd)->scroll_id = gtk_widget_add_tick_callback(vd->view, vdlist_rename_focus_after_layout, vd, nullptr);
+	VDLIST(vd)->scroll_id = gtk_widget_add_tick_callback(vd->view, vdlist_focus_after_layout, vd, nullptr);
 }
 
 static void vdlist_rename_activate(GtkEntry *entry, gpointer data)
@@ -498,7 +498,7 @@ static void vdlist_rename_activate(GtkEntry *entry, gpointer data)
 	file_util_rename_dir(fd, new_path, vd->view, [vd, old_path = std::string(fd->path)](gboolean success, const gchar *path)
 	{
 		if (success) vd_refresh(vd);
-		vdlist_rename_focus(vd, success ? path : old_path.c_str());
+		vdlist_focus_by_path(vd, success ? path : old_path.c_str());
 	});
 }
 
@@ -541,7 +541,7 @@ void vdlist_rename_by_data(ViewDir *vd, FileData *fd)
 	g_signal_connect(popover, "closed", G_CALLBACK(+[](GtkPopover *popover, gpointer data)
 	{
 		auto *rename = static_cast<DirectoryRenameData *>(data);
-		vdlist_rename_focus(rename->vd, rename->path);
+		vdlist_focus_by_path(rename->vd, rename->path);
 		gtk_widget_unparent(GTK_WIDGET(popover));
 	}), rename);
 	popover_popup(popover);

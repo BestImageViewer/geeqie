@@ -37,6 +37,7 @@ void vdlist_refresh(ViewDir *vd);
 FileData *vdlist_fd_at_point(ViewDir *vd, gdouble x, gdouble y);
 void vdlist_color_set(ViewDir *vd, FileData *fd, gboolean set);
 void vdlist_scroll_to_fd(ViewDir *vd, FileData *fd, gfloat y_align);
+void vdlist_focus_by_path(ViewDir *vd, const gchar *path);
 void vdlist_rename_by_data(ViewDir *vd, FileData *fd);
 
 FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row);

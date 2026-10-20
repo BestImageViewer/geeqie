@@ -2,6 +2,8 @@
 
 #include "gtest/gtest.h"
 
+#include <string>
+
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 
@@ -83,7 +85,8 @@ protected:
 			}
 		if (directory)
 			{
-			for (const auto *name : {"created", "new-folder"})
+			g_autoptr(GDir) dir = g_dir_open(directory, 0, nullptr);
+			while (const gchar *name = g_dir_read_name(dir))
 				{
 				g_autofree gchar *path = g_build_filename(directory, name, nullptr);
 				g_rmdir(path);
@@ -135,6 +138,46 @@ TEST_P(ViewDirNewFolder, DescendChecksExistingUnexpandedSubfolders)
 	file_data_unref(fd);
 }
 
+TEST_P(ViewDirNewFolder, LongNamesDoNotHideNewFolderText)
+{
+	if (GetParam() != DIRVIEW_LIST) GTEST_SKIP() << "Requires the folder list";
+	for (int i = 0; i < 20; ++i)
+		{
+		const std::string name(220, 'a' + i);
+		g_autofree gchar *path = g_build_filename(directory, name.c_str(), nullptr);
+		ASSERT_EQ(g_mkdir(path, 0700), 0);
+		}
+	vd_set_fd(vd, layout.dir_fd);
+	vd_refresh(vd);
+	drain_events();
+	auto *horizontal = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(vd->widget));
+	ASSERT_GT(gtk_adjustment_get_upper(horizontal), gtk_adjustment_get_page_size(horizontal));
+
+	for (bool scroll_right : {false, true})
+		{
+		gtk_adjustment_set_value(horizontal, scroll_right ? gtk_adjustment_get_upper(horizontal) : 0);
+		drain_events();
+		auto *entry = start();
+		ASSERT_NE(entry, nullptr);
+		const auto check_bounds = [&]()
+			{
+			graphene_rect_t bounds;
+			ASSERT_TRUE(gtk_widget_compute_bounds(entry, vd->widget, &bounds));
+			EXPECT_GE(bounds.origin.x, 0);
+			EXPECT_LE(bounds.origin.x + bounds.size.width, gtk_widget_get_width(vd->widget));
+			EXPECT_TRUE(gtk_widget_get_mapped(entry));
+			};
+		check_bounds();
+		gtk_editable_set_text(GTK_EDITABLE(entry), "typed-test");
+		gtk_editable_set_position(GTK_EDITABLE(entry), -1);
+		gtk_widget_grab_focus(entry);
+		drain_events();
+		check_bounds();
+		vd_set_fd(vd, layout.dir_fd);
+		drain_events();
+		}
+}
+
 TEST_P(ViewDirNewFolder, CreatesOnlyAfterReturnAndRetainsInvalidNames)
 {
 	auto *entry = start();
@@ -162,6 +205,41 @@ TEST_P(ViewDirNewFolder, CreatesOnlyAfterReturnAndRetainsInvalidNames)
 	drain_events();
 	g_autofree gchar *default_path = g_build_filename(directory, "new-folder", nullptr);
 	EXPECT_TRUE(g_file_test(default_path, G_FILE_TEST_IS_DIR));
+}
+
+TEST_P(ViewDirNewFolder, FocusMovesToCreatedFolderWithoutEnteringIt)
+{
+	auto *entry = start();
+	ASSERT_NE(entry, nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "created");
+	g_signal_emit_by_name(entry, "activate");
+	drain_events();
+	drain_events();
+	ASSERT_EQ(vd->new_folder, nullptr);
+	EXPECT_STREQ(vd->dir_fd->path, directory);
+
+	if (GetParam() == DIRVIEW_LIST)
+		{
+		auto *focus = gtk_root_get_focus(GTK_ROOT(layout.window));
+		ASSERT_TRUE(GTK_IS_BUTTON(focus));
+		auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(focus), "vdlist-fd"));
+		ASSERT_NE(fd, nullptr);
+		EXPECT_STREQ(fd->name, "created");
+		}
+	else
+		{
+		EXPECT_TRUE(gtk_widget_has_focus(vd->view));
+		auto *tree = GTK_TREE_VIEW(vd->view);
+		g_autoptr(GtkTreePath) path = nullptr;
+		gtk_tree_view_get_cursor(tree, &path, nullptr);
+		ASSERT_NE(path, nullptr);
+		auto *model = gtk_tree_view_get_model(tree);
+		GtkTreeIter iter;
+		ASSERT_TRUE(gtk_tree_model_get_iter(model, &iter, path));
+		g_autofree gchar *name = nullptr;
+		gtk_tree_model_get(model, &iter, DIR_COLUMN_NAME, &name, -1);
+		EXPECT_STREQ(name, "created");
+		}
 }
 
 TEST_P(ViewDirNewFolder, EscapeCancelsWithoutCreatingDirectory)
