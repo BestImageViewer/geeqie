@@ -6,6 +6,12 @@
     <title>Zoom</title>
     <variablelist>
       <varlistentry>
+        <term><guilabel>Use nearest-neighbor sampling above 200% zoom</guilabel></term>
+        <listitem>
+          <para>Displays crisp pixel boundaries above 200% magnification. At 200% and below, the selected zoom quality is used. Disabled by default. A keyboard shortcut can be assigned to this option in Preferences → Keyboard.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><guilabel>Allow panning beyond image edges</guilabel></term>
         <listitem>
           <para>Allows panning until any image edge or corner reaches the center of the viewing area. This makes it easier to inspect image boundaries. Disabled by default.</para>

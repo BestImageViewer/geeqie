@@ -470,6 +470,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->image.limit_window_size = c_options->image.limit_window_size;
 	options->image.zoom_to_fit_allow_expand = c_options->image.zoom_to_fit_allow_expand;
 	options->image.allow_overscroll = c_options->image.allow_overscroll;
+	options->image.nearest_above_200 = c_options->image.nearest_above_200;
 	options->image.max_window_size = c_options->image.max_window_size;
 	options->image.limit_autofit_size = c_options->image.limit_autofit_size;
 	options->image.max_autofit_size = c_options->image.max_autofit_size;
@@ -2299,6 +2300,11 @@ static void config_tab_image(GtkWidget *notebook, ConfOptions *c_options)
 	c_options->image.zoom_style = options->image.zoom_style;
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 	add_zoom_style_selection_menu(table, 0, 0, _("Zoom style:"), options->image.zoom_style, &c_options->image.zoom_style);
+
+	ct_button = pref_checkbox_new_int(group, _("Use nearest-neighbor sampling above 200% zoom"),
+	                                 options->image.nearest_above_200, &c_options->image.nearest_above_200);
+	gtk_widget_set_tooltip_text(ct_button,
+	                            _("A keyboard shortcut for this option can be assigned in Preferences → Keyboard using the action ‘Use nearest-neighbor sampling above 200% zoom’."));
 
 	pref_checkbox_new_int(group, _("Allow panning beyond image edges"),
 	                      options->image.allow_overscroll, &c_options->image.allow_overscroll);

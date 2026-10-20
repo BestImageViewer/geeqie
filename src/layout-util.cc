@@ -1843,6 +1843,13 @@ static void layout_menu_draw_rectangle_aspect_ratio_cb(GSimpleAction *action, GV
 	image_rectangle_update_aspect_ratio();
 }
 
+static void layout_menu_nearest_above_200_cb(GSimpleAction *action, GVariant *state, gpointer)
+{
+	options->image.nearest_above_200 = g_variant_get_boolean(state);
+	g_simple_action_set_state(action, state);
+	image_options_sync();
+}
+
 static void layout_menu_draw_rectangle_portrait_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
 	options->rectangle_draw_portrait = g_variant_get_boolean(state);
@@ -3590,6 +3597,8 @@ static void layout_util_sync_views(LayoutWindow *lw)
 			{
 			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("icons"));
 			}
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-nearest-above-200");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->image.nearest_above_200));
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-crop-portrait");
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->rectangle_draw_portrait));
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-crop");

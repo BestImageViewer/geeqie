@@ -1987,6 +1987,15 @@ static void pr_zoom_sync(PixbufRenderer *pr, gdouble zoom,
 	pr_update_signal(pr);
 }
 
+void pixbuf_renderer_set_nearest_above_200(PixbufRenderer *pr, gboolean enable)
+{
+	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
+
+	if (pr->nearest_above_200 == enable) return;
+	pr->nearest_above_200 = enable;
+	pr_zoom_sync(pr, pr->zoom, PR_ZOOM_FORCE, 0, 0);
+}
+
 /**
  * @brief Allow image edges to be panned to the viewport center
  */

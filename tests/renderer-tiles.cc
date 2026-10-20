@@ -168,6 +168,72 @@ TEST(RendererTiles, OverscrollLimitsAndBackground)
 	gtk_window_destroy(window);
 }
 
+TEST(RendererTiles, HighZoomNearestMatchesExplicitQualityAcrossThreshold)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	gtk_window_set_default_size(window, 240, 180);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	gtk_window_present(window);
+	const auto capture = [pr]()
+		{
+		for (int i = 0; i < 100; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+		auto *snapshot = gtk_snapshot_new();
+		renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
+		auto *node = gtk_snapshot_free_to_node(snapshot);
+		auto *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pr->viewport_width, pr->viewport_height);
+		auto *cr = cairo_create(surface);
+		if (node) gsk_render_node_draw(node, cr);
+		cairo_destroy(cr);
+		cairo_surface_flush(surface);
+		auto *bytes = cairo_image_surface_get_data(surface);
+		std::vector<guchar> pixels(bytes, bytes + (cairo_image_surface_get_stride(surface) * pr->viewport_height));
+		cairo_surface_destroy(surface);
+		if (node) gsk_render_node_unref(node);
+		return pixels;
+		};
+	EXPECT_FALSE(pr->nearest_above_200);
+	for (const bool alpha : {false, true})
+		{
+		g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, alpha, 8, 32, 24);
+		for (int y = 0; y < 24; ++y)
+			for (int x = 0; x < 32; ++x)
+				{
+				auto *pixel = gdk_pixbuf_get_pixels(image) + (y * gdk_pixbuf_get_rowstride(image)) + (x * gdk_pixbuf_get_n_channels(image));
+				pixel[0] = (x % 2) ? 255 : 0;
+				pixel[1] = (y % 2) ? 255 : 0;
+				pixel[2] = 128;
+				if (alpha) pixel[3] = 128;
+				}
+		for (const int orientation : {1, 6})
+			{
+			pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+			pixbuf_renderer_set_orientation(pr, orientation);
+			for (const double zoom : {3.0, 2.0, 1.5, 2.5, 1.0, -2.0})
+				{
+				SCOPED_TRACE(zoom);
+				SCOPED_TRACE(orientation);
+				SCOPED_TRACE(alpha);
+				pr->zoom_quality = GDK_INTERP_BILINEAR;
+				pixbuf_renderer_set_nearest_above_200(pr, TRUE);
+				pixbuf_renderer_zoom_set(pr, zoom);
+				const auto automatic = capture();
+				EXPECT_EQ(pr->zoom_quality, GDK_INTERP_BILINEAR);
+				pr->zoom_quality = zoom > 2.0 ? GDK_INTERP_NEAREST : GDK_INTERP_BILINEAR;
+				pixbuf_renderer_set_nearest_above_200(pr, FALSE);
+				EXPECT_EQ(automatic, capture());
+				}
+			}
+		}
+	gtk_window_destroy(window);
+}
+
 TEST(RendererTilesBirdseye, FinalizeWithActiveOverlay)
 {
 	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";

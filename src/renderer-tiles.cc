@@ -183,6 +183,11 @@ struct RendererTiles
 constexpr size_t COLOR_BYTES = 3; /* rgb */
 
 
+GdkInterpType rt_zoom_quality(const PixbufRenderer *pr)
+{
+	return pr->nearest_above_200 && pr->scale > 2.0 ? GDK_INTERP_NEAREST : pr->zoom_quality;
+}
+
 gboolean rt_texture_scaling_available(const RendererTiles *rt)
 {
 	const PixbufRenderer *pr = rt->pr;
@@ -190,7 +195,7 @@ gboolean rt_texture_scaling_available(const RendererTiles *rt)
 	    pr->orientation != EXIF_ORIENTATION_TOP_LEFT || rt->stereo_mode != PR_STEREO_NONE ||
 	    (pr->stereo_data == STEREO_PIXBUF_SBS || pr->stereo_data == STEREO_PIXBUF_CROSS) ||
 	    gdk_pixbuf_get_has_alpha(pr->pixbuf) ||
-	    (pr->zoom_quality != GDK_INTERP_NEAREST && pr->zoom_quality != GDK_INTERP_BILINEAR)) return FALSE;
+	    (rt_zoom_quality(pr) != GDK_INTERP_NEAREST && rt_zoom_quality(pr) != GDK_INTERP_BILINEAR)) return FALSE;
 
 	GtkNative *native = gtk_widget_get_native(GTK_WIDGET(pr));
 	GskRenderer *renderer = native ? gtk_native_get_renderer(native) : nullptr;
@@ -205,7 +210,7 @@ gboolean rt_texture_scaling_available(const RendererTiles *rt)
 	const gint height = gdk_pixbuf_get_height(pr->pixbuf);
 	// GdkPixbuf and texture sampling round fractional nearest-neighbor positions
 	// differently. Keep that case on the existing pixel-exact path.
-	if (pr->zoom_quality == GDK_INTERP_NEAREST && (pr->width % width != 0 || pr->height % height != 0)) return FALSE;
+	if (rt_zoom_quality(pr) == GDK_INTERP_NEAREST && (pr->width % width != 0 || pr->height % height != 0)) return FALSE;
 
 	// Keep downsampling on the CPU to preserve its antialiasing, and bound uploads
 	// by the configured tile cache budget and a conservative texture dimension.
@@ -947,7 +952,7 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 	 * small sizes for anything but GDK_INTERP_NEAREST
 	 */
 	const gboolean force_nearest = pr->width < PR_MIN_SCALE_SIZE || pr->height < PR_MIN_SCALE_SIZE;
-	GdkInterpType interp_type = force_nearest ? GDK_INTERP_NEAREST : pr->zoom_quality;
+	GdkInterpType interp_type = force_nearest ? GDK_INTERP_NEAREST : rt_zoom_quality(pr);
 
 #if 0
 	// Draws red over draw region, to check for leaks (regions not filled)
@@ -1278,7 +1283,7 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		                   static_cast<gdouble>(0.0) - src_x - (get_right_pixbuf_offset(rt) * scale_x),
 		                   static_cast<gdouble>(0.0) - src_y,
 		                   scale_x, scale_y,
-		                   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
+		                   (fast) ? GDK_INTERP_NEAREST : rt_zoom_quality(pr),
 		                   it->x + pb_rect.x, it->y + pb_rect.y, wide_image);
 		if (rt->stereo_mode & PR_STEREO_ANAGLYPH &&
 		    (pr->stereo_pixbuf_offset_right > 0 || pr->stereo_pixbuf_offset_left > 0))
@@ -1289,7 +1294,7 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 			                   static_cast<gdouble>(0.0) - src_x - (get_left_pixbuf_offset(rt) * scale_x),
 			                   static_cast<gdouble>(0.0) - src_y,
 			                   scale_x, scale_y,
-			                   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
+			                   (fast) ? GDK_INTERP_NEAREST : rt_zoom_quality(pr),
 			                   it->x + pb_rect.x, it->y + pb_rect.y, wide_image);
 			pr_create_anaglyph(rt->stereo_mode, it->pixbuf, right_pb, pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height);
 			/* do not care about freeing spare_tile, it will be reused */
@@ -1481,7 +1486,7 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 	if (first_pass)
 		{
 		qd = static_cast<QueueData *>(g_queue_peek_head(&rt->draw_queue));
-		fast = (pr->zoom_2pass && ((pr->zoom_quality != GDK_INTERP_NEAREST && pr->scale != 1.0) || pr->post_process_slow));
+		fast = (pr->zoom_2pass && ((rt_zoom_quality(pr) != GDK_INTERP_NEAREST && pr->scale != 1.0) || pr->post_process_slow));
 		}
 	else
 		{
@@ -1767,7 +1772,7 @@ void renderer_area_changed(void *renderer, GdkRectangle src)
 	GdkRectangle rect = pr_coords_map_orientation_reverse(orientation, src,
 	                                                      pr->image_width, pr->image_height);
 
-	if (pr->scale != 1.0 && pr->zoom_quality != GDK_INTERP_NEAREST)
+	if (pr->scale != 1.0 && rt_zoom_quality(pr) != GDK_INTERP_NEAREST)
 		{
 		/* increase region when using a zoom quality that may access surrounding pixels */
 		rect.y -= 1;
@@ -2018,7 +2023,7 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 			graphene_rect_init(&bounds, rt->pr->x_offset - rt->pr->x_scroll,
 			                   rt->pr->y_offset - rt->pr->y_scroll, rt->pr->width, rt->pr->height);
 			gtk_snapshot_append_scaled_texture(image_snapshot, rt_source_texture(rt),
-			                                   rt->pr->zoom_quality == GDK_INTERP_NEAREST ? GSK_SCALING_FILTER_NEAREST : GSK_SCALING_FILTER_LINEAR,
+			                                   rt_zoom_quality(rt->pr) == GDK_INTERP_NEAREST ? GSK_SCALING_FILTER_NEAREST : GSK_SCALING_FILTER_LINEAR,
 			                                   &bounds);
 			}
 		else if (display_scale != std::floor(display_scale))

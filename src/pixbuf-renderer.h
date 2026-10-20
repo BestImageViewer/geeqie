@@ -201,6 +201,7 @@ struct PixbufRenderer
 
 	GdkInterpType zoom_quality;
 	gboolean zoom_2pass;
+	gboolean nearest_above_200;
 	gboolean zoom_expand;
 	gboolean allow_overscroll;
 
@@ -361,6 +362,7 @@ void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y)
 void pixbuf_renderer_zoom_adjust(PixbufRenderer *pr, gdouble increment);
 void pixbuf_renderer_zoom_adjust_at_point(PixbufRenderer *pr, gdouble increment, gint x, gint y);
 
+void pixbuf_renderer_set_nearest_above_200(PixbufRenderer *pr, gboolean enable);
 void pixbuf_renderer_set_allow_overscroll(PixbufRenderer *pr, gboolean enable);
 void pixbuf_renderer_zoom_set(PixbufRenderer *pr, gdouble zoom);
 gdouble pixbuf_renderer_zoom_get(PixbufRenderer *pr);

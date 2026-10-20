@@ -649,6 +649,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-nearest-above-200",
+		nullptr,
+		N_("Use nearest-neighbor sampling above 200% zoom"),
+		layout_menu_nearest_above_200_cb,
+		nullptr,
+		ActionStateType::BOOLEAN,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-crop-portrait",
 		nullptr,
 		N_("Portrait orientation"),
