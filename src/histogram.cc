@@ -28,6 +28,7 @@
 
 #include "filedata.h"
 #include "geometry.h"
+#include "image.h"
 #include "intl.h"
 #include "pixbuf-util.h"
 
@@ -231,10 +232,12 @@ static gboolean histmap_idle_cb(gpointer data)
 
 gboolean histmap_start_idle(FileData *fd)
 {
-	if (fd->histmap || !fd->pixbuf) return FALSE;
+	if (fd->histmap) return FALSE;
+	auto *source = fd->pixbuf ? fd->pixbuf : image_get_complete_pixbuf(fd);
+	if (!source) return FALSE;
 
 	fd->histmap = histmap_new();
-	fd->histmap->pixbuf = g_object_ref(fd->pixbuf);
+	fd->histmap->pixbuf = GDK_PIXBUF(g_object_ref(source));
 	fd->histmap->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, histmap_idle_cb, fd, nullptr);
 
 	return TRUE;

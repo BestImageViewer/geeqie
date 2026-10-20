@@ -15,6 +15,7 @@
 #include "filedata.h"
 #include "filefilter.h"
 #include "fullscreen.h"
+#include "histogram.h"
 #include "image.h"
 #include "layout-image.h"
 #include "layout.h"
@@ -47,6 +48,7 @@ protected:
 		if (!options) options = conf_options_new();
 		saved_slideshow = options->slideshow;
 		saved_read_ahead = options->image.enable_read_ahead;
+		saved_image_cache_max = options->image.image_cache_max;
 		options->image.enable_read_ahead = FALSE;
 		options->slideshow.delay = 1;
 		options->slideshow.repeat = TRUE;
@@ -79,6 +81,7 @@ protected:
 		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", saved_animations, nullptr);
 		options->slideshow = saved_slideshow;
 		options->image.enable_read_ahead = saved_read_ahead;
+		options->image.image_cache_max = saved_image_cache_max;
 		if (directory)
 			{
 			g_autoptr(GDir) dir = g_dir_open(directory, 0, nullptr);
@@ -168,6 +171,7 @@ protected:
 	SlideShow *ss = nullptr;
 	gchar *directory = nullptr;
 	decltype(options->slideshow) saved_slideshow{};
+	decltype(options->image.image_cache_max) saved_image_cache_max{};
 	gboolean saved_read_ahead = FALSE;
 	gboolean saved_animations = TRUE;
 };
@@ -212,6 +216,28 @@ TEST_P(SlideshowTransitions, NativeTransitionLoadsAndShowsTheWholeIncomingImage)
 INSTANTIATE_TEST_SUITE_P(AllGtkStackTransitions, SlideshowTransitions,
                         ::testing::Range(int(GTK_STACK_TRANSITION_TYPE_NONE),
                                          int(GTK_STACK_TRANSITION_TYPE_ROTATE_LEFT_RIGHT) + 1));
+
+TEST_F(SlideshowTransitions, HistogramWorksWithoutPreloadingOrImageCache)
+{
+	options->image.image_cache_max = 0;
+	ASSERT_NO_FATAL_FAILURE(start_show());
+	ss->pause_toggle();
+	EXPECT_FALSE(options->image.enable_read_ahead);
+	for (int i = 0; i < 2; ++i)
+		{
+		auto *fd = image_get_fd(imd);
+		ASSERT_NE(fd, nullptr);
+		EXPECT_EQ(fd->pixbuf, nullptr);
+		auto *source = image_get_complete_pixbuf(fd);
+		ASSERT_NE(source, nullptr);
+		EXPECT_EQ(gdk_pixbuf_get_width(source), gdk_pixbuf_get_width(image_get_pixbuf(imd)));
+		EXPECT_EQ(gdk_pixbuf_get_height(source), gdk_pixbuf_get_height(image_get_pixbuf(imd)));
+		if (!histmap_get(fd)) EXPECT_TRUE(histmap_start_idle(fd));
+		ASSERT_TRUE(wait_until([fd]() { return histmap_get(fd) != nullptr; }));
+		ss->next();
+		ASSERT_TRUE(wait_until([this, fd]() { return image_get_fd(imd) != fd && ready(); }));
+		}
+}
 
 TEST_F(SlideshowTransitions, AutomaticAdvanceAnimatesAndManualAdvanceCancels)
 {

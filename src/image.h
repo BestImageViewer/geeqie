@@ -225,6 +225,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source);
 
 gboolean image_get_image_size(ImageWindow *imd, gint &width, gint &height);
 GdkPixbuf *image_get_pixbuf(ImageWindow *imd);
+GdkPixbuf *image_get_complete_pixbuf(FileData *fd);
 
 /* manipulation */
 void image_area_changed(ImageWindow *imd, gint x, gint y, gint width, gint height);

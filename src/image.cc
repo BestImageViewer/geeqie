@@ -211,6 +211,22 @@ void image_rectangle_clear(ImageWindow *imd)
 
 static GList *image_list = nullptr;
 
+/**
+ * @brief Return borrowed, complete displayed pixels without requiring the image cache
+ */
+GdkPixbuf *image_get_complete_pixbuf(FileData *fd)
+{
+	for (GList *work = image_list; work; work = work->next)
+		{
+		auto *imd = static_cast<ImageWindow *>(work->data);
+		if (imd->image_fd == fd && !imd->il && !(imd->state & IMAGE_STATE_LOADING) && !imd->unknown)
+			{
+			if (auto *pixbuf = image_get_pixbuf(imd)) return pixbuf;
+			}
+		}
+	return nullptr;
+}
+
 static void image_read_ahead_start(ImageWindow *imd);
 static void image_cache_set(ImageWindow *imd, FileData *fd);
 
@@ -1151,6 +1167,8 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 
 	image_loader_free(imd->il);
 	imd->il = nullptr;
+	if (imd->image_fd && !imd->unknown && image_get_pixbuf(imd))
+		file_data_send_notification(imd->image_fd, NOTIFY_PIXBUF);
 
 	image_read_ahead_start(imd);
 }
