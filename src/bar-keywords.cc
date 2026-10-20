@@ -1110,14 +1110,11 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 	pkd->click_tpath = nullptr;
 	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(pkd->keyword_treeview), x, y, &pkd->click_tpath, &pos);
 
-	GtkWidget *popover_parent = widget;
-#if GTK_CHECK_VERSION(4, 22, 0)
-	if (GtkWidget *ancestor = gtk_widget_get_ancestor(widget, GTK_TYPE_POPOVER_BIN))
-		{
-		popover_parent = ancestor;
-		}
-#endif
-	menu = popover_box_new(popover_parent, x, y);
+	// Keep the menu outside the tree's scroller, which dismisses popovers on adjustment changes.
+	graphene_point_t point = GRAPHENE_POINT_INIT(static_cast<float>(x), static_cast<float>(y));
+	graphene_point_t anchor;
+	if (!gtk_widget_compute_point(widget, pkd->pane.widget, &point, &anchor)) return;
+	menu = popover_box_new(pkd->pane.widget, anchor.x, anchor.y);
 
 	popover_item_add_icon(menu, _("New keyword"), GQ_ICON_NEW,
 	                   G_CALLBACK(bar_pane_keywords_edit_dialog_cb<FALSE>), pkd);
@@ -1222,7 +1219,9 @@ gboolean bar_pane_keywords_menu_common(GtkWidget *widget, gdouble x, gdouble y, 
 void bar_pane_keywords_gesture_menu_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-	bar_pane_keywords_menu_common(widget, x, y, gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)), data);
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
+	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+	bar_pane_keywords_menu_common(widget, x, y, button, data);
 }
 
 /*
@@ -1554,7 +1553,8 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
-	g_signal_connect(gesture, "released", G_CALLBACK(bar_pane_keywords_gesture_menu_cb), pkd);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(bar_pane_keywords_gesture_menu_cb), pkd);
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(gesture));
 
 	GtkDragSource *drag_source = gtk_drag_source_new();
