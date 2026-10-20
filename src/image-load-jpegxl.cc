@@ -88,7 +88,7 @@ private:
 	GdkPixbuf *pixbuf;
 };
 
-uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, size_t &ysize, size_t &stride)
+uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, size_t &ysize, size_t &stride, bool &has_alpha)
 {
 	JxlDecoderPtr dec = JxlDecoderMake(nullptr);
 	if (!dec)
@@ -106,6 +106,7 @@ uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, s
 	/* This file will be replaced by libjxl at some time */
 	ysize = 0;
 	stride = 0;
+	has_alpha = false;
 	
 	std::unique_ptr<uint8_t, decltype(&free)> pixels{nullptr, free};
 	JxlBasicInfo info;
@@ -132,7 +133,9 @@ uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, s
 					}
 				xsize = info.xsize;
 				ysize = info.ysize;
-				stride = info.xsize * 4;
+				has_alpha = info.alpha_bits != 0;
+				format.num_channels = has_alpha ? 4 : 3;
+				stride = xsize * format.num_channels;
 				break;
 			case JXL_DEC_NEED_IMAGE_OUT_BUFFER:
 				{
@@ -177,13 +180,14 @@ gboolean ImageLoaderJPEGXL::write(const guchar *buf, gsize &chunk_size, gsize co
 	size_t xsize;
 	size_t ysize;
 	size_t stride;
+	bool has_alpha;
 	uint8_t *pixels = nullptr;
 
-	pixels = JxlMemoryToPixels(buf, count, xsize, ysize, stride);
+	pixels = JxlMemoryToPixels(buf, count, xsize, ysize, stride, has_alpha);
 
 	if (pixels)
 		{
-		pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, TRUE, 8, xsize, ysize, stride, free_pixels, nullptr);
+		pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, has_alpha, 8, xsize, ysize, stride, free_pixels, nullptr);
 
 		area_updated_cb(nullptr, 0, 0, xsize, ysize, data);
 

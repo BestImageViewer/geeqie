@@ -4,7 +4,7 @@
 
 #include <config.h>
 
-#if HAVE_JPEGXL && HAVE_LCMS
+#if HAVE_JPEGXL
 
 #include <array>
 #include <cstdint>
@@ -16,7 +16,9 @@
 #include <glib/gstdio.h>
 #include <jxl/encode_cxx.h>
 #include <jxl/version.h>
+#if HAVE_LCMS
 #include <lcms2.h>
+#endif
 #include <unistd.h>
 
 #include "color-man.h"
@@ -31,6 +33,90 @@
 namespace
 {
 
+class JpegXLPixels : public testing::TestWithParam<int>
+{
+};
+
+TEST_P(JpegXLPixels, PreservesAlphaAndOpaqueFilteredColors)
+{
+	const int channels = GetParam();
+	const bool has_alpha = channels == 2 || channels == 4;
+	constexpr int width = 17;
+	constexpr int height = 15;
+	std::vector<uint8_t> pixels(width * height * channels, 128);
+	if (has_alpha)
+		{
+		for (int i = 0; i < width * height; ++i)
+			pixels[i * channels + channels - 1] = (i % 4) * 85;
+		}
+
+	auto encoder = JxlEncoderMake(nullptr);
+	ASSERT_NE(encoder, nullptr);
+	JxlBasicInfo info;
+	JxlEncoderInitBasicInfo(&info);
+	info.xsize = width;
+	info.ysize = height;
+	info.bits_per_sample = 8;
+	info.num_color_channels = channels <= 2 ? 1 : 3;
+	info.num_extra_channels = has_alpha ? 1 : 0;
+	info.alpha_bits = has_alpha ? 8 : 0;
+	info.uses_original_profile = JXL_TRUE;
+	ASSERT_EQ(JxlEncoderSetBasicInfo(encoder.get(), &info), JXL_ENC_SUCCESS);
+	JxlColorEncoding color;
+	JxlColorEncodingSetToSRGB(&color, channels <= 2);
+	ASSERT_EQ(JxlEncoderSetColorEncoding(encoder.get(), &color), JXL_ENC_SUCCESS);
+	auto *settings = JxlEncoderFrameSettingsCreate(encoder.get(), nullptr);
+	ASSERT_EQ(JxlEncoderSetFrameLossless(settings, JXL_TRUE), JXL_ENC_SUCCESS);
+	const JxlPixelFormat format = {static_cast<uint32_t>(channels), JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
+	ASSERT_EQ(JxlEncoderAddImageFrame(settings, &format, pixels.data(), pixels.size()), JXL_ENC_SUCCESS);
+	JxlEncoderCloseInput(encoder.get());
+	std::vector<uint8_t> encoded(65536);
+	auto *next = encoded.data();
+	size_t available = encoded.size();
+	ASSERT_EQ(JxlEncoderProcessOutput(encoder.get(), &next, &available), JXL_ENC_SUCCESS);
+	encoded.resize(next - encoded.data());
+
+	auto loader = get_image_loader_backend_jpegxl();
+	loader->init([](gpointer, gint, gint, gint, gint, gpointer) {}, [](gpointer, gint, gint, gpointer) {}, nullptr);
+	gsize chunk_size = encoded.size();
+	ASSERT_TRUE(loader->write(encoded.data(), chunk_size, encoded.size(), nullptr));
+	auto *decoded = loader->get_pixbuf();
+	ASSERT_NE(decoded, nullptr);
+	EXPECT_EQ(gdk_pixbuf_get_has_alpha(decoded), has_alpha);
+	EXPECT_EQ(gdk_pixbuf_get_n_channels(decoded), has_alpha ? 4 : 3);
+	ASSERT_EQ(gdk_pixbuf_get_width(decoded), width);
+	ASSERT_EQ(gdk_pixbuf_get_height(decoded), height);
+	for (int y = 0; y < height; ++y)
+		{
+		for (int x = 0; x < width; ++x)
+			{
+			const auto *pixel = gdk_pixbuf_get_pixels(decoded) + y * gdk_pixbuf_get_rowstride(decoded) + x * gdk_pixbuf_get_n_channels(decoded);
+			for (int channel = 0; channel < 3; ++channel) EXPECT_EQ(pixel[channel], 128);
+			if (has_alpha)
+				{
+				EXPECT_EQ(pixel[3], pixels[(y * width + x) * channels + channels - 1]);
+				}
+			}
+		}
+
+	if (has_alpha) return;
+	// This compositing API also scales RGB sources, while opaque RGBA sources
+	// take the blending path that previously darkened filtered JXL images.
+	for (const auto quality : {GDK_INTERP_NEAREST, GDK_INTERP_TILES, GDK_INTERP_BILINEAR, GDK_INTERP_HYPER})
+		{
+		SCOPED_TRACE(quality);
+		g_autoptr(GdkPixbuf) rendered = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 7, 6);
+		gdk_pixbuf_composite_color(decoded, rendered, 0, 0, 7, 6, 0, 0, 7.0 / width, 6.0 / height,
+		                           quality, 255, 0, 0, 16, 0xffffff, 0);
+		for (int y = 0; y < 6; ++y)
+			for (int x = 0; x < 7 * 3; ++x)
+				ASSERT_EQ(gdk_pixbuf_get_pixels(rendered)[y * gdk_pixbuf_get_rowstride(rendered) + x], 128);
+		}
+}
+
+INSTANTIATE_TEST_SUITE_P(SourceChannels, JpegXLPixels, testing::Values(1, 2, 3, 4));
+
+#if HAVE_LCMS
 G_DEFINE_AUTO_CLEANUP_FREE_FUNC(cmsHPROFILE, cmsCloseProfile, nullptr)
 G_DEFINE_AUTO_CLEANUP_FREE_FUNC(cmsHTRANSFORM, cmsDeleteTransform, nullptr)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(cmsToneCurve, cmsFreeToneCurve)
@@ -169,6 +255,8 @@ TEST(JpegXLColorProfile, NoCurrentImage)
 	EXPECT_EQ(profile.ptr, nullptr);
 	EXPECT_EQ(profile.len, 0U);
 }
+
+#endif // HAVE_LCMS
 
 } // namespace
 #endif
