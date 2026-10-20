@@ -21,6 +21,43 @@
 namespace
 {
 
+TEST(RendererTiles, TransferPreservesViewedCenterAcrossViewportAllocation)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 2000, 1600);
+	gdk_pixbuf_fill(image, 0x123456ff);
+	for (const bool move : {false, true})
+		{
+		SCOPED_TRACE(move);
+		for (const double center : {0.2, 0.5, 0.8})
+			{
+			SCOPED_TRACE(center);
+			auto *source = pixbuf_renderer_new();
+			auto *destination = pixbuf_renderer_new();
+			g_object_ref_sink(source);
+			g_object_ref_sink(destination);
+			g_signal_emit_by_name(source, "resize", 400, 300);
+			pixbuf_renderer_set_pixbuf(source, image, 2.0);
+			pixbuf_renderer_set_scroll_center(source, center, center);
+			if (move) pixbuf_renderer_move(destination, source);
+			else pixbuf_renderer_copy(destination, source);
+			g_signal_emit_by_name(destination, "resize", 1000, 700);
+			EXPECT_NEAR(destination->norm_center_x, center, 0.001);
+			EXPECT_NEAR(destination->norm_center_y, center, 0.001);
+			EXPECT_NEAR(destination->x_scroll, center * 4000 - 500, 1);
+			EXPECT_NEAR(destination->y_scroll, center * 3200 - 350, 1);
+			// Leaving fullscreen transfers back to an already allocated renderer.
+			if (move) pixbuf_renderer_move(source, destination);
+			else pixbuf_renderer_copy(source, destination);
+			EXPECT_NEAR(source->norm_center_x, center, 0.001);
+			EXPECT_NEAR(source->norm_center_y, center, 0.001);
+			g_object_unref(destination);
+			g_object_unref(source);
+			}
+		}
+}
+
 TEST(RendererTiles, SourceOffsetBeyondTwoGiB)
 {
 	if (sizeof(gsize) < 8) GTEST_SKIP() << "Requires a 64-bit address space";

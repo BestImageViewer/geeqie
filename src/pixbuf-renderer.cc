@@ -1982,6 +1982,8 @@ static void pr_zoom_sync(PixbufRenderer *pr, gdouble zoom,
 static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 {
 	gboolean zoom_changed = FALSE;
+	const gdouble center_x = pr->norm_center_x;
+	const gdouble center_y = pr->norm_center_y;
 
 	gint new_viewport_width = new_width;
 	gint new_viewport_height = new_height;
@@ -2019,6 +2021,13 @@ static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 		}
 
 	pr_size_clamp(pr);
+	// The fullscreen renderer receives its image before its first allocation.
+	// Preserve the image center when the final viewport dimensions arrive.
+	if (pr->zoom != 0.0)
+		{
+		pr->x_scroll = (center_x * pr->width) - (pr->vis_width / 2.0);
+		pr->y_scroll = (center_y * pr->height) - (pr->vis_height / 2.0);
+		}
 	pr_scroll_clamp(pr);
 
 	if (zoom_changed)
@@ -2751,6 +2760,8 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 
 	pr->x_scroll = source->x_scroll;
 	pr->y_scroll = source->y_scroll;
+	pr->norm_center_x = source->norm_center_x;
+	pr->norm_center_y = source->norm_center_y;
 	pr->mouse = source->mouse;
 
 	const ScrollReset scroll_reset = pr->scroll_reset;
@@ -2807,6 +2818,8 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 
 	pr->x_scroll = source->x_scroll;
 	pr->y_scroll = source->y_scroll;
+	pr->norm_center_x = source->norm_center_x;
+	pr->norm_center_y = source->norm_center_y;
 	pr->mouse = source->mouse;
 
 	const ScrollReset scroll_reset = pr->scroll_reset;

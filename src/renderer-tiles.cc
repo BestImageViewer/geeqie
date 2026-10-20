@@ -1887,6 +1887,8 @@ void renderer_update_viewport(void *renderer)
 	rt_sync_scroll(rt);
 	rt_overlay_update_sizes(rt);
 	rt_border_clear(rt);
+	// A larger viewport or a changed center can expose uncached image tiles.
+	rt_queue(rt, 0, 0, rt->pr->width, rt->pr->height, true, TileRender::ALL, FALSE, false);
 }
 
 void renderer_stereo_set(void *renderer, gint stereo_mode)
