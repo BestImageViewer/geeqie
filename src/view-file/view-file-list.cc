@@ -531,7 +531,8 @@ void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 
 	if (event.button == GDK_BUTTON_SECONDARY)
 		{
-		if (fd && !vflist_is_selected(vf, fd))
+		g_autoptr(FileDataList) pane_selection = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+		if (!pane_selection && fd && !vflist_is_selected(vf, fd))
 			{
 			GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(event.widget));
 			gtk_tree_selection_unselect_all(selection);

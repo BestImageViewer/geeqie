@@ -182,6 +182,10 @@
       menu item. Zoom is then applied to all displayed images.
     </para>
     <para>Connected scrolling is also possible using Shift and primary mouse button.</para>
+    <para>To select images in split panes for file operations, click the checkbox in the upper-left corner of each desired pane. The checkbox appears when the pointer is over a pane and remains visible while selected. Its tooltip explains its purpose. You can also hold Ctrl and Shift and click a pane with the primary mouse button. Click a selected checkbox again, or repeat the gesture, to deselect a pane. Selected panes have a colored border, independent of the active pane.</para>
+    <para>Press Delete, or choose <menuchoice><guimenu>File</guimenu><guimenuitem>Move selection to Trash…</guimenuitem></menuchoice>, to review and delete the selected images together. The confirmation lists full paths and includes grouped sidecars according to the normal deletion rules. Existing Trash settings apply.</para>
+    <para>While panes are selected, selection actions in the image-pane and file-list right-click menus use those images. This includes copy, move, rename, deletion, clipboard paths, plugins, and collections. Right-clicking another image preserves the pane selection. Copy Image is available for a single selected image; clipboard path actions support multiple selected images.</para>
+    <para>Escape clears the pane selection. Changing a displayed image or the split layout also clears the selection. Delete and Shift+Delete use the pane selection when present, otherwise they use the file-list selection. Shift+Delete requests permanent deletion.</para>
     <para>As a general rule, hotkeys and mouse without shift affects just one image and with shift all images.</para>
     <para />
   </section>

@@ -870,6 +870,11 @@ static void vf_dnd_init(ViewFile *vf)
 
 GList *vf_pop_menu_file_list(ViewFile *vf)
 {
+	if (vf->layout)
+		{
+		if (auto *list = layout_image_selection_list(vf->layout)) return list;
+		}
+
 	if (!vf->click_fd) return nullptr;
 
 	if (vf_is_selected(vf, vf->click_fd))
@@ -898,17 +903,16 @@ static void vf_pop_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	if (!vf->click_fd) return;
-
-	if (vf_is_selected(vf, vf->click_fd))
+	g_autoptr(FileDataList) list = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+	if (list)
+		view_window_new_from_list(list);
+	else if (vf->click_fd && vf_is_selected(vf, vf->click_fd))
 		{
-		g_autoptr(FileDataList) list = vf_selection_get_list(vf);
+		list = vf_selection_get_list(vf);
 		view_window_new_from_list(list);
 		}
-	else
-		{
+	else if (vf->click_fd)
 		view_window_new(vf->click_fd);
-		}
 }
 
 static void vf_pop_menu_open_archive_cb(GtkWidget *, gpointer data)
@@ -961,13 +965,16 @@ static void vf_pop_menu_copy_image_done_cb(ImageLoader *loader, gpointer data)
 static void vf_pop_menu_copy_image_cb(GtkWidget *, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
-	if (!vf->click_fd) return;
+	g_autoptr(FileDataList) selection = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+	if (selection && selection->next) return;
+	auto *fd = selection ? static_cast<FileData *>(selection->data) : vf->click_fd;
+	if (!fd) return;
 
 	GdkClipboard *clipboard = gdk_display_get_clipboard(gtk_widget_get_display(vf->listview));
 	if (!clipboard) return;
 
 	auto *copy_data = g_new(VfCopyImageData, 1);
-	copy_data->loader = image_loader_new(vf->click_fd);
+	copy_data->loader = image_loader_new(fd);
 	copy_data->clipboard = GDK_CLIPBOARD(g_object_ref(clipboard));
 	g_signal_connect(copy_data->loader, "done", G_CALLBACK(vf_pop_menu_copy_image_done_cb<TRUE>), copy_data);
 	g_signal_connect(copy_data->loader, "error", G_CALLBACK(vf_pop_menu_copy_image_done_cb<FALSE>), copy_data);
@@ -1003,7 +1010,14 @@ static void vf_pop_menu_restore_cb(GtkWidget *, gpointer data)
 static void vf_pop_menu_restore_elsewhere_cb(GtkWidget *, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
-	if (vf->click_fd) file_util_safe_trash_restore_choose(vf->click_fd->path, TRUE, vf->listview);
+	g_autoptr(FileDataList) selection = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+	if (selection)
+		{
+		for (GList *work = selection; work; work = work->next)
+			file_util_safe_trash_restore_choose(static_cast<FileData *>(work->data)->path, TRUE, vf->listview);
+		}
+	else if (vf->click_fd)
+		file_util_safe_trash_restore_choose(vf->click_fd->path, TRUE, vf->listview);
 }
 
 static void vf_pop_menu_rename_cb(GtkWidget *, gpointer data)
@@ -1022,7 +1036,11 @@ static void vf_pop_menu_delete_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview, safe_delete);
+	g_autoptr(FileDataList) selection = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+	const gboolean pane_selection = selection != nullptr;
+	if (!selection) selection = vf_pop_menu_file_list(vf);
+	if (pane_selection) layout_image_selection_clear(vf->layout);
+	file_util_delete(nullptr, g_steal_pointer(&selection), vf->listview, safe_delete, pane_selection);
 }
 
 template<gboolean quoted>
@@ -1114,11 +1132,14 @@ static void vf_collection_remove_action_cb(GSimpleAction *, GVariant *, gpointer
 {
 	auto *vf = vf_from_action_data(data);
 	if (!vf || !vf->collection) return;
-	g_autoptr(FileDataList) files = nullptr;
-	if (vf->click_fd && !vf_is_selected(vf, vf->click_fd))
-		files = g_list_append(files, file_data_ref(vf->click_fd));
-	else
-		vf_selection_foreach(vf, [&files](FileData *fd) { files = g_list_append(files, file_data_ref(fd)); });
+	g_autoptr(FileDataList) files = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+	if (!files)
+		{
+		if (vf->click_fd && !vf_is_selected(vf, vf->click_fd))
+			files = g_list_append(files, file_data_ref(vf->click_fd));
+		else
+			vf_selection_foreach(vf, [&files](FileData *fd) { files = g_list_append(files, file_data_ref(fd)); });
+		}
 	for (GList *work = files; work; work = work->next)
 		while (collection_remove(vf->collection, static_cast<FileData *>(work->data))) {}
 }
@@ -1478,6 +1499,15 @@ static void vf_pop_menu_selection_to_mark_action_cb(GSimpleAction *, GVariant *p
 	auto *vf = vf_from_action_data(data);
 	if (!vf || !parameter) return;
 
+	g_autoptr(FileDataList) list = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+	if (list)
+		{
+		const auto mode = static_cast<SelectionToMarkMode>(g_variant_get_int32(parameter));
+		for (GList *work = list; work; work = work->next)
+			file_data_selection_to_mark(static_cast<FileData *>(work->data), vf->active_mark, mode);
+		return;
+		}
+
 	switch (g_variant_get_int32(parameter))
 		{
 		case STM_MODE_SET: vf_selection_to_mark(vf, vf->active_mark, STM_MODE_SET); break;
@@ -1630,7 +1660,8 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 		vflist_color_set(vf, vf->click_fd, TRUE);
 		}
 
-	active = (vf->click_fd != nullptr);
+	g_autoptr(FileDataList) pane_selection = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+	active = (vf->click_fd != nullptr || pane_selection);
 	class_archive = (vf->click_fd != nullptr && vf->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
 
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-view-file.ui");
@@ -1757,7 +1788,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	vf_pop_menu_set_action_enabled(vf, "view-file-view-new", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-open-archive", active && class_archive);
 	vf_pop_menu_set_action_enabled(vf, "view-file-copy", active);
-	vf_pop_menu_set_action_enabled(vf, "view-file-copy-image", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-copy-image", pane_selection ? !pane_selection->next : vf->click_fd != nullptr);
 	vf_pop_menu_set_action_enabled(vf, "view-file-move", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-rename", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-copy-path", active);
@@ -1772,11 +1803,11 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	vf_pop_menu_set_action_enabled(vf, "view-file-mark-to-selection", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-selection-to-mark", active);
 
-	if (options->file_ops.confirm_move_to_trash)
+	if (pane_selection || options->file_ops.confirm_move_to_trash)
 		{
 		menu_item_include_ellipsis(G_MENU_MODEL(menu_model), "win.view-file-delete");
 		}
-	if (options->file_ops.confirm_delete)
+	if (pane_selection || options->file_ops.confirm_delete)
 		{
 		menu_item_include_ellipsis(G_MENU_MODEL(menu_model), "win.view-file-delete-permanent");
 		}

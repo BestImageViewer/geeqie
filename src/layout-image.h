@@ -56,6 +56,9 @@ void layout_image_set_index(LayoutWindow *lw, gint index);
 void layout_image_set_collection(LayoutWindow *lw, CollectionData *cd, CollectInfo *info);
 
 void layout_image_refresh(LayoutWindow *lw);
+void layout_image_selection_clear(LayoutWindow *lw);
+GList *layout_image_selection_list(LayoutWindow *lw);
+GList *layout_image_context_list(LayoutWindow *lw);
 
 void layout_image_color_profile_set(LayoutWindow *lw, gint input_type, gboolean use_image);
 gboolean layout_image_color_profile_get(LayoutWindow *lw, gint &input_type, gboolean &use_image);

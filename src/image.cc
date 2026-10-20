@@ -1367,6 +1367,9 @@ static void image_change_real(ImageWindow *imd, FileData *fd,
 	if (imd->auto_refresh && imd->image_fd)
 		file_data_unregister_real_time_monitor(imd->image_fd);
 
+	if (imd->image_fd != fd && imd->func_file_changed)
+		imd->func_file_changed(imd, imd->data_file_changed);
+
 	file_data_unref(imd->image_fd);
 	imd->image_fd = file_data_ref(fd);
 
@@ -1598,6 +1601,9 @@ void image_set_fd(ImageWindow *imd, FileData *fd)
 {
 	if (imd->auto_refresh && imd->image_fd)
 		file_data_unregister_real_time_monitor(imd->image_fd);
+
+	if (imd->image_fd != fd && imd->func_file_changed)
+		imd->func_file_changed(imd, imd->data_file_changed);
 
 	file_data_unref(imd->image_fd);
 	imd->image_fd = file_data_ref(fd);
@@ -2458,7 +2464,7 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		imd->frame = gtk_frame_new(nullptr);
 		DEBUG_NAME(imd->frame);
 		g_object_ref(imd->view);
-		if (imd->has_frame != -1) gtk_box_remove(GTK_BOX(imd->widget), imd->view);
+		if (imd->has_frame != -1) gtk_overlay_set_child(GTK_OVERLAY(imd->overlay), nullptr);
 		gtk_frame_set_child(GTK_FRAME(imd->frame), imd->view);
 
 		g_object_unref(imd->view);
@@ -2470,7 +2476,7 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 
 		gtk_widget_set_hexpand(imd->frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 		gtk_widget_set_vexpand(imd->frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-		gtk_box_append(GTK_BOX(imd->widget), imd->frame);
+		gtk_overlay_set_child(GTK_OVERLAY(imd->overlay), imd->frame);
 		}
 	else
 		{
@@ -2478,12 +2484,12 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		if (imd->frame)
 			{
 			gtk_frame_set_child(GTK_FRAME(imd->frame), nullptr);
-			gtk_box_remove(GTK_BOX(imd->widget), imd->frame);
+			gtk_overlay_set_child(GTK_OVERLAY(imd->overlay), nullptr);
 			imd->frame = nullptr;
 			}
 		gtk_widget_set_hexpand(imd->view, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 		gtk_widget_set_vexpand(imd->view, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-		gtk_box_append(GTK_BOX(imd->widget), imd->view);
+		gtk_overlay_set_child(GTK_OVERLAY(imd->overlay), imd->view);
 
 		g_object_unref(imd->view);
 		}
@@ -2509,6 +2515,11 @@ ImageWindow *image_new(gboolean frame)
 
 	imd->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(imd->widget);
+
+	imd->overlay = gtk_overlay_new();
+	gtk_widget_set_hexpand(imd->overlay, TRUE);
+	gtk_widget_set_vexpand(imd->overlay, TRUE);
+	gtk_box_append(GTK_BOX(imd->widget), imd->overlay);
 
 	imd->view = gtk_stack_new();
 	gtk_widget_set_hexpand(imd->view, TRUE);

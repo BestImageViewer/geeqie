@@ -70,6 +70,7 @@ namespace
 {
 
 constexpr gint IMAGE_MIN_WIDTH = 100;
+constexpr auto LAYOUT_IMAGE_SELECTION_BUTTON_KEY = "layout-image-selection-button";
 constexpr auto LAYOUT_IMAGE_POPUP_CLICK_PARENT_KEY = "layout-image-popup-click-parent";
 constexpr auto LAYOUT_IMAGE_POPUP_ACTIONS_KEY = "layout-image-popup-actions";
 
@@ -116,6 +117,7 @@ static void touchpad_zoom_remove(GtkWidget *widget, GtkEventController *&control
 void layout_image_full_screen_start(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return;
+	layout_image_selection_clear(lw);
 
 	if (lw->full_screen) return;
 
@@ -553,8 +555,16 @@ static gboolean li_check_if_current_path(LayoutWindow *lw, const gchar *path)
 	return strcmp(lw->dir_fd->path, dirname) == 0;
 }
 
+GList *layout_image_context_list(LayoutWindow *lw)
+{
+	if (auto *list = layout_image_selection_list(lw)) return list;
+	auto *fd = lw->image ? image_get_fd(lw->image) : nullptr;
+	return fd ? g_list_append(nullptr, file_data_ref(fd)) : nullptr;
+}
+
 static GList *layout_image_get_fd_list(LayoutWindow *lw)
 {
+	if (auto *selection = layout_image_selection_list(lw)) return selection;
 	GList *list = nullptr;
 	FileData *fd = layout_image_get_fd(lw);
 
@@ -604,12 +614,13 @@ static void layout_image_pop_menu_plugin_run_cb(GSimpleAction *, GVariant *param
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	const gchar *key = g_variant_get_string(parameter, nullptr);
+	g_autoptr(FileDataList) list = layout_image_get_fd_list(lw);
 
 	if (!editor_window_flag_set(key))
 		{
 		layout_image_full_screen_stop(lw);
 		}
-	file_util_start_editor_from_file(key, layout_image_get_fd(lw), lw->window);
+	file_util_start_editor_from_filelist(key, g_steal_pointer(&list), nullptr, lw->window);
 }
 
 static void layout_image_pop_menu_alter_cb(GSimpleAction *, GVariant *parameter, gpointer data)
@@ -617,13 +628,41 @@ static void layout_image_pop_menu_alter_cb(GSimpleAction *, GVariant *parameter,
 	auto lw = static_cast<LayoutWindow *>(data);
 	auto type = static_cast<AlterType>(g_variant_get_int32(parameter));
 
-	image_alter_orientation(lw->image, lw->image->image_fd, type);
+	g_autoptr(FileDataList) list = layout_image_selection_list(lw);
+	if (!list)
+		{
+		image_alter_orientation(lw->image, lw->image->image_fd, type);
+		return;
+		}
+
+	for (GList *work = list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		ImageWindow *source = nullptr;
+		for (auto *imd : lw->split_images)
+			{
+			if (imd && image_get_fd(imd) == fd)
+				{
+				image_alter_orientation(imd, fd, type);
+				source = imd;
+				break;
+				}
+			}
+		if (!source) continue;
+		for (auto *imd : lw->split_images)
+			{
+			if (!imd || imd == source || image_get_fd(imd) != fd) continue;
+			imd->orientation = source->orientation;
+			pixbuf_renderer_set_orientation(PIXBUF_RENDERER(imd->pr), imd->orientation);
+			}
+		}
 }
 
 static void layout_image_pop_menu_view_new_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	view_window_new(layout_image_get_fd(lw));
+	g_autoptr(FileDataList) list = layout_image_context_list(lw);
+	view_window_new_from_list(list);
 }
 
 static void layout_image_pop_menu_set_layout_path_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -641,38 +680,52 @@ static void layout_image_pop_menu_open_archive_cb(GSimpleAction *, GVariant *, g
 static void layout_image_pop_menu_copy_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	file_util_copy(layout_image_get_fd(lw), nullptr, nullptr, layout_image_popup_click_parent(lw));
+	file_util_copy(nullptr, layout_image_context_list(lw), nullptr, layout_image_popup_click_parent(lw));
 }
 
 static void layout_image_pop_menu_move_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	file_util_move(layout_image_get_fd(lw), nullptr, nullptr, layout_image_popup_click_parent(lw));
+	file_util_move(nullptr, layout_image_context_list(lw), nullptr, layout_image_popup_click_parent(lw));
 }
 
 static void layout_image_pop_menu_rename_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	file_util_rename(layout_image_get_fd(lw), nullptr, layout_image_popup_click_parent(lw));
+	file_util_rename(nullptr, layout_image_context_list(lw), layout_image_popup_click_parent(lw));
 }
 
 template<gboolean quoted>
 static void layout_image_pop_menu_copy_path_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), quoted, ClipboardAction::COPY);
+	file_util_path_list_to_clipboard(layout_image_context_list(lw), quoted, ClipboardAction::COPY);
 }
 
 static void layout_image_pop_menu_cut_path_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), FALSE, ClipboardAction::CUT);
+	file_util_path_list_to_clipboard(layout_image_context_list(lw), FALSE, ClipboardAction::CUT);
 }
 
 static void layout_image_pop_menu_copy_image_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	GdkPixbuf *pixbuf = image_get_pixbuf(lw->image);
+	g_autoptr(FileDataList) selection = layout_image_selection_list(lw);
+	if (selection && selection->next) return;
+	auto *source = lw->image;
+	if (selection)
+		{
+		for (auto *imd : lw->split_images)
+			{
+			if (imd && image_get_fd(imd) == selection->data)
+				{
+				source = imd;
+				break;
+				}
+			}
+		}
+	GdkPixbuf *pixbuf = image_get_pixbuf(source);
 	if (!pixbuf)
 		{
 		return;
@@ -700,13 +753,17 @@ template<gboolean safe_delete>
 static void layout_image_pop_menu_delete_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	file_util_delete(layout_image_get_fd(lw), nullptr, layout_image_popup_click_parent(lw), safe_delete);
+	g_autoptr(FileDataList) list = layout_image_selection_list(lw);
+	const gboolean pane_selection = list != nullptr;
+	if (!list) list = layout_image_context_list(lw);
+	if (pane_selection) layout_image_selection_clear(lw);
+	file_util_delete(nullptr, g_steal_pointer(&list), layout_image_popup_click_parent(lw), safe_delete, pane_selection);
 }
 
 static void layout_image_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, layout_image_get_fd(lw));
+	g_autoptr(FileDataList) selection_list = layout_image_context_list(lw);
 	collection_by_index_add_filelist(g_variant_get_int32(parameter), selection_list);
 }
 
@@ -830,6 +887,8 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw, GtkWidget *parent, gdo
 
 	const gchar *path = layout_image_get_path(lw);
 	gboolean has_path = path != nullptr;
+	g_autoptr(FileDataList) selection = layout_image_selection_list(lw);
+	const gboolean has_selection = has_path || selection;
 	gboolean fullscreen = layout_image_full_screen_active(lw);
 	gboolean class_archive = has_path && lw->image->image_fd->format_class == FORMAT_CLASS_ARCHIVE;
 	GtkWidget *popup_parent = parent ? parent : layout_image_popup_click_parent(lw);
@@ -850,21 +909,21 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw, GtkWidget *parent, gdo
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
 	submenu_add_collections_new(collections_menu, "win.layout-image-collections");
 
-	layout_image_pop_menu_set_enabled(lw, "layout-image-plugin-run", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-alter", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-view-in-new-window", has_path && !fullscreen);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-plugin-run", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-alter", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-view-in-new-window", has_selection && !fullscreen);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-go-to-directory", has_path && !li_check_if_current_path(lw, path));
 	layout_image_pop_menu_set_enabled(lw, "layout-image-open-archive", class_archive);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-copy", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-move", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-rename", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-path", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-path-unquoted", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-image", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-cut-path", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-delete", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-delete-permanent", has_path);
-	layout_image_pop_menu_set_enabled(lw, "layout-image-collections", has_path);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-copy", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-move", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-rename", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-path", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-path-unquoted", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-image", selection ? !selection->next : has_path);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-cut-path", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-delete", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-delete-permanent", has_selection);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-collections", has_selection);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-slideshow-pause", layout_image_slideshow_active(lw));
 	layout_image_pop_menu_set_enabled(lw, "layout-image-hide-selectable-toolbars", !fullscreen);
 
@@ -872,11 +931,11 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw, GtkWidget *parent, gdo
 	layout_image_pop_menu_set_boolean_state(lw, "layout-image-hide-tools", lw->options.tools_hidden);
 	layout_image_pop_menu_set_boolean_state(lw, "layout-image-hide-selectable-toolbars", lw->options.selectable_toolbars_hidden);
 
-	if (options->file_ops.confirm_move_to_trash)
+	if (selection || options->file_ops.confirm_move_to_trash)
 		{
 		menu_item_include_ellipsis(G_MENU_MODEL(menu_model), "win.layout-image-delete");
 		}
-	if (options->file_ops.confirm_delete)
+	if (selection || options->file_ops.confirm_delete)
 		{
 		menu_item_include_ellipsis(G_MENU_MODEL(menu_model), "win.layout-image-delete-permanent");
 		}
@@ -2051,6 +2110,12 @@ static void layout_image_drag_cb(ImageWindow *imd, const GqPointerMotionEvent *e
 static void layout_image_button_inactive_cb(ImageWindow *imd, GqMouseButtonEvent *event, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
+	g_autoptr(FileDataList) selection = layout_image_selection_list(lw);
+	if (event->button == GDK_BUTTON_SECONDARY && selection)
+		{
+		layout_image_pop_menu(lw, imd->widget, event->x, event->y);
+		return;
+		}
 	GtkWidget *menu;
 	gint i = image_idx(lw, imd);
 
@@ -2174,6 +2239,89 @@ static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
  *----------------------------------------------------------------------------
  */
 
+static void layout_image_selection_set(LayoutWindow *lw, gint index, gboolean selected)
+{
+	lw->split_images_selected[index] = selected;
+	auto *imd = lw->split_images[index];
+	if (!imd) return;
+	if (selected)
+		gtk_widget_add_css_class(imd->widget, "pane-selected");
+	else
+		gtk_widget_remove_css_class(imd->widget, "pane-selected");
+
+	auto *button = GTK_CHECK_BUTTON(g_object_get_data(G_OBJECT(imd->widget), LAYOUT_IMAGE_SELECTION_BUTTON_KEY));
+	if (button) gtk_check_button_set_active(button, selected);
+}
+
+void layout_image_selection_clear(LayoutWindow *lw)
+{
+	for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
+		layout_image_selection_set(lw, i, FALSE);
+}
+
+static void layout_image_selection_toggled_cb(GtkCheckButton *button, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
+		{
+		auto *imd = lw->split_images[i];
+		if (!imd || g_object_get_data(G_OBJECT(imd->widget), LAYOUT_IMAGE_SELECTION_BUTTON_KEY) != button) continue;
+		const gboolean selected = gtk_check_button_get_active(button) && image_get_fd(imd) && lw->split_mode != SPLIT_NONE;
+		if (lw->split_images_selected[i] != selected || gtk_check_button_get_active(button) != selected)
+			layout_image_selection_set(lw, i, selected);
+		break;
+		}
+}
+
+static void layout_image_selection_enter_cb(GtkEventControllerMotion *controller, gdouble, gdouble, gpointer)
+{
+	gtk_widget_add_css_class(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller)), "pane-hover");
+}
+
+static void layout_image_selection_leave_cb(GtkEventControllerMotion *controller, gpointer)
+{
+	gtk_widget_remove_css_class(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller)), "pane-hover");
+}
+
+GList *layout_image_selection_list(LayoutWindow *lw)
+{
+	GList *list = nullptr;
+	for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
+		{
+		auto *imd = lw->split_images[i];
+		if (!imd || !lw->split_images_selected[i] || !gtk_widget_get_visible(imd->widget)) continue;
+		auto *fd = image_get_fd(imd);
+		if (fd && !g_list_find(list, fd)) list = g_list_append(list, file_data_ref(fd));
+		}
+	return list;
+}
+
+static void layout_image_selection_changed_cb(ImageWindow *, gpointer data)
+{
+	layout_image_selection_clear(static_cast<LayoutWindow *>(data));
+}
+
+static void layout_image_selection_pressed_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	const auto state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+	const auto modifiers = GDK_CONTROL_MASK | GDK_SHIFT_MASK;
+	if ((state & gtk_accelerator_get_default_mod_mask()) != modifiers || lw->split_mode == SPLIT_NONE) return;
+
+	auto *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	auto *button = GTK_WIDGET(g_object_get_data(G_OBJECT(widget), LAYOUT_IMAGE_SELECTION_BUTTON_KEY));
+	auto *target = gtk_widget_pick(widget, x, y, GTK_PICK_DEFAULT);
+	if (button && target && (target == button || gtk_widget_is_ancestor(target, button))) return;
+	for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
+		{
+		auto *imd = lw->split_images[i];
+		if (!imd || imd->widget != widget || !image_get_fd(imd)) continue;
+		layout_image_selection_set(lw, i, !lw->split_images_selected[i]);
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		break;
+		}
+}
+
 static void layout_image_update_cb(ImageWindow *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -2187,6 +2335,34 @@ GtkWidget *layout_image_new(LayoutWindow *lw, gint i)
 	if (!lw->split_images[i])
 		{
 		lw->split_images[i] = image_new(TRUE);
+		lw->split_images[i]->func_file_changed = layout_image_selection_changed_cb;
+		lw->split_images[i]->data_file_changed = lw;
+
+		auto *button = gtk_check_button_new();
+		gtk_widget_add_css_class(button, "pane-select-button");
+		gtk_widget_set_halign(button, GTK_ALIGN_START);
+		gtk_widget_set_valign(button, GTK_ALIGN_START);
+		gtk_widget_set_margin_start(button, 8);
+		gtk_widget_set_margin_top(button, 8);
+		gtk_widget_set_focus_on_click(button, FALSE);
+		gtk_widget_set_tooltip_text(button, _("Select this image for file operations"));
+		gtk_accessible_update_property(GTK_ACCESSIBLE(button), GTK_ACCESSIBLE_PROPERTY_LABEL,
+		                               _("Select this image for file operations"), -1);
+		gtk_widget_set_visible(button, lw->split_mode != SPLIT_NONE);
+		gtk_overlay_add_overlay(GTK_OVERLAY(lw->split_images[i]->overlay), button);
+		g_object_set_data(G_OBJECT(lw->split_images[i]->widget), LAYOUT_IMAGE_SELECTION_BUTTON_KEY, button);
+		g_signal_connect(button, "toggled", G_CALLBACK(layout_image_selection_toggled_cb), lw);
+
+		auto *motion = gtk_event_controller_motion_new();
+		g_signal_connect(motion, "enter", G_CALLBACK(layout_image_selection_enter_cb), nullptr);
+		g_signal_connect(motion, "leave", G_CALLBACK(layout_image_selection_leave_cb), nullptr);
+		gtk_widget_add_controller(lw->split_images[i]->widget, motion);
+
+		auto *selection = gtk_gesture_click_new();
+		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(selection), GDK_BUTTON_PRIMARY);
+		gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(selection), GTK_PHASE_CAPTURE);
+		g_signal_connect(selection, "pressed", G_CALLBACK(layout_image_selection_pressed_cb), lw);
+		gtk_widget_add_controller(lw->split_images[i]->widget, GTK_EVENT_CONTROLLER(selection));
 
 		g_object_ref(lw->split_images[i]->widget);
 
@@ -2324,6 +2500,12 @@ static void layout_image_setup_split_common(LayoutWindow *lw, gint n)
 			image_set_frame(lw->split_images[i], frame);
 			image_set_selectable(lw->split_images[i], (n > 1));
 			}
+
+	for (i = 0; i < n; i++)
+		{
+		auto *button = GTK_WIDGET(g_object_get_data(G_OBJECT(lw->split_images[i]->widget), LAYOUT_IMAGE_SELECTION_BUTTON_KEY));
+		gtk_widget_set_visible(button, n > 1);
+		}
 
 	for (i = n; i < MAX_SPLIT_IMAGES; i++)
 		{

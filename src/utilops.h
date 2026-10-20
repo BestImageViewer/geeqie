@@ -50,7 +50,8 @@ GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *messa
 
 using FileUtilDoneFunc = std::function<void(gboolean, const gchar *)>;
 
-void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete);
+// force_dialog always confirms and displays full paths.
+void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, gboolean force_dialog = FALSE);
 void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, const FileUtilDoneFunc &done_func);
 void file_util_move(FileData *source_fd, GList *source_list, const gchar *dest_path, GtkWidget *parent);
 void file_util_copy(FileData *source_fd, GList *source_list, const gchar *dest_path, GtkWidget *parent);

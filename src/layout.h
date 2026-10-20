@@ -179,6 +179,7 @@ GtkBuilder *builder;
 	ImageWindow *image;
 
 	ImageWindow *split_images[MAX_SPLIT_IMAGES];
+	gboolean split_images_selected[MAX_SPLIT_IMAGES];
 	ImageSplitMode split_mode;
 	GtkEventController *split_images_touchpad_zoom[MAX_SPLIT_IMAGES];
 	gint active_split_image;

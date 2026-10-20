@@ -2234,6 +2234,7 @@ static void layout_grid_compute(LayoutWindow *lw,
 
 void layout_split_change(LayoutWindow *lw, ImageSplitMode mode)
 {
+	if (lw) layout_image_selection_clear(lw);
 	GtkWidget *image;
 	gint i;
 if (!lw)

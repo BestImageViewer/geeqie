@@ -213,6 +213,8 @@ void keyboard_scroll_calc(gint &x, gint &y, GdkModifierType state, guint keyval,
 static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModifierType state, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
+	if (keyval == GDK_KEY_Escape && !(state & gtk_accelerator_get_default_mod_mask()))
+		layout_image_selection_clear(lw);
 
 	GtkRoot *root = gtk_widget_get_root(widget);
 	GtkWidget *focus = root ? gtk_root_get_focus(root) : nullptr;
@@ -299,6 +301,7 @@ static gboolean layout_rectangle_key_press_cb(GtkEventControllerKey *, guint key
 	if (!options->draw_rectangle || keyval != GDK_KEY_Escape || (state & gtk_accelerator_get_default_mod_mask())) return FALSE;
 
 	auto *lw = static_cast<LayoutWindow *>(data);
+	layout_image_selection_clear(lw);
 	g_action_group_change_action_state(G_ACTION_GROUP(lw->window), "main-win-draw-rectangle", g_variant_new_boolean(FALSE));
 	return TRUE;
 }
@@ -520,16 +523,27 @@ static void layout_menu_rename_cb(GSimpleAction *, GVariant *, gpointer)
 template<gboolean safe_delete>
 static void layout_menu_delete_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = get_current_layout();
+	auto *lw = get_current_layout();
+	if (!lw) return;
 
-	if (lw && lw->vf && lw->vf->refresh_idle_id)
+	g_autoptr(FileDataList) list = layout_image_selection_list(lw);
+	const gboolean pane_selection = list != nullptr;
+	if (pane_selection)
 		{
-		/* Key repeat can arrive before the refresh queued by the last deletion. */
-		vf_refresh_idle_cancel(lw->vf);
-		vf_refresh(lw->vf);
+		layout_image_selection_clear(lw);
+		}
+	else
+		{
+		if (lw->vf && lw->vf->refresh_idle_id)
+			{
+			/* Key repeat can arrive before the refresh queued by the last deletion. */
+			vf_refresh_idle_cancel(lw->vf);
+			vf_refresh(lw->vf);
+			}
+		list = layout_selection_list(lw);
 		}
 
-	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), safe_delete);
+	file_util_delete(nullptr, g_steal_pointer(&list), layout_window(lw), safe_delete, pane_selection);
 }
 
 template<gboolean disable>
@@ -1418,6 +1432,7 @@ static void layout_menu_escape_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();
 
+	layout_image_selection_clear(lw);
 	layout_exit_fullscreen(lw);
 }
 

@@ -348,6 +348,7 @@ struct UtilityData {
 	guint update_idle_id; /* event source id */
 	guint perform_idle_id; /* event source id */
 
+	gboolean full_paths;
 	gboolean with_sidecars; /* operate on grouped or single files; TRUE = use file_data_sc_, FALSE = use file_data_ functions */
 
 	/* alternative dialog parts */
@@ -1811,6 +1812,7 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 
 	ud->gd = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
 				   ud->parent, FALSE,  file_util_cancel_cb, ud);
+	if (ud->full_paths) gtk_window_set_default_size(GTK_WINDOW(ud->gd->dialog), 720, 480);
 	if (ud->discard_func) generic_dialog_add_button(ud->gd, GQ_ICON_REVERT, _("Discard changes"), file_util_discard_cb, FALSE);
 	if (ud->details_func) generic_dialog_add_button(ud->gd, GQ_ICON_DIALOG_INFO, _("File details"), file_util_details_cb, FALSE);
 
@@ -1846,7 +1848,7 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 
 	box = pref_group_new(box, TRUE, ud->messages.desc_flist, GTK_ORIENTATION_HORIZONTAL);
 
-	ud->listview = file_util_dialog_add_list(box, ud->flist, FALSE, ud->with_sidecars);
+	ud->listview = file_util_dialog_add_list(box, ud->flist, ud->full_paths, ud->with_sidecars);
 	if (ud->with_sidecars) file_util_dialog_add_list_column(ud->listview, _("Sidecars"), FALSE, UTILITY_COLUMN_SIDECARS);
 
 	if (ud->type == UtilityType::WRITE_METADATA) file_util_dialog_add_list_column(ud->listview, _("Write to file"), FALSE, UTILITY_COLUMN_DEST_NAME);
@@ -2388,7 +2390,7 @@ static void file_util_mark_ungrouped_files(GList *work)
 		}
 }
 
-static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *parent, gboolean safe_delete, UtilityPhase phase, const FileUtilDoneFunc &done_func)
+static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *parent, gboolean safe_delete, UtilityPhase phase, const FileUtilDoneFunc &done_func, gboolean full_paths = FALSE)
 {
 	if (source_fd)
 		flist = g_list_append(flist, file_data_ref(source_fd));
@@ -2411,6 +2413,7 @@ static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *
 	file_util_mark_ungrouped_files(ungrouped);
 
 	UtilityData *ud = file_util_data_new(UtilityType::DELETE);
+	ud->full_paths = full_paths;
 
 	ud->phase = phase;
 
@@ -2982,11 +2985,11 @@ static gboolean file_util_write_metadata_first(UtilityType type, UtilityPhase ph
 /* full-featured entry points
 */
 
-void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete)
+void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, gboolean force_dialog)
 {
-	const gboolean confirm = safe_delete ? options->file_ops.confirm_move_to_trash : options->file_ops.confirm_delete;
+	const gboolean confirm = force_dialog || (safe_delete ? options->file_ops.confirm_move_to_trash : options->file_ops.confirm_delete);
 
-	file_util_delete_full(source_fd, source_list, parent, safe_delete, confirm ? UtilityPhase::START : UtilityPhase::ENTERING, nullptr);
+	file_util_delete_full(source_fd, source_list, parent, safe_delete, confirm ? UtilityPhase::START : UtilityPhase::ENTERING, nullptr, force_dialog);
 }
 
 void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, const FileUtilDoneFunc &done_func)

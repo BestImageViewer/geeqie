@@ -953,7 +953,8 @@ void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 			break;
 		case GDK_BUTTON_SECONDARY:
 			{
-			if (!vficon_is_selected(vf, fd))
+			g_autoptr(FileDataList) pane_selection = vf->layout ? layout_image_selection_list(vf->layout) : nullptr;
+			if (!pane_selection && !vficon_is_selected(vf, fd))
 				{
 				vficon_select_none(vf);
 				vficon_select_util(vf, fd, TRUE);

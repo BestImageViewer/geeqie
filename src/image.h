@@ -78,6 +78,7 @@ struct ImageWindow
 	GtkWidget *widget;	/**< use this to add it and show it */
 	GtkWidget *pr;
 	GtkWidget *frame;
+	GtkWidget *overlay; /**< Contains the framed image and pane controls */
 	GtkWidget *view; /**< GtkStack containing the renderer and the outgoing view */
 	GtkWidget *outgoing[2];
 	guint outgoing_index;
@@ -105,6 +106,8 @@ struct ImageWindow
 	gboolean completed;
 	ImageState state;	/**< mask of IMAGE_STATE_* flags about current image */
 
+	void (*func_file_changed)(ImageWindow *imd, gpointer data);
+	gpointer data_file_changed;
 	void (*func_update)(ImageWindow *imd, gpointer data);
 	void (*func_complete)(ImageWindow *imd, gint preload, gpointer data);
 	void (*func_state)(ImageWindow *imd, ImageState state, gpointer data);

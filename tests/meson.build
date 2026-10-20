@@ -17,6 +17,7 @@ unit_test_sources = files(
 'image-crop.cc',
 'keyboard-shortcuts.cc',
 'layout-image-navigation.cc',
+'layout-image-selection.cc',
 'metadata-description.cc',
 'metadata-template.cc',
 'pixbuf-util.cc',
