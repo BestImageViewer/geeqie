@@ -649,6 +649,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-crop-portrait",
+		nullptr,
+		N_("Portrait orientation"),
+		layout_menu_draw_rectangle_portrait_cb,
+		nullptr,
+		ActionStateType::BOOLEAN,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-crop-rectangle",
 		nullptr,
 		N_("Save Cropped Copy…"),

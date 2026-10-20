@@ -1840,6 +1840,14 @@ static void layout_menu_draw_rectangle_aspect_ratio_cb(GSimpleAction *action, GV
 	g_simple_action_set_state((action), state);
 
 	options->rectangle_draw_aspect_ratio = mode;
+	image_rectangle_update_aspect_ratio();
+}
+
+static void layout_menu_draw_rectangle_portrait_cb(GSimpleAction *action, GVariant *state, gpointer)
+{
+	options->rectangle_draw_portrait = g_variant_get_boolean(state);
+	g_simple_action_set_state(action, state);
+	image_rectangle_update_aspect_ratio();
 }
 
 static void overlay_screen_display_profile_set(gint i)
@@ -3582,6 +3590,8 @@ static void layout_util_sync_views(LayoutWindow *lw)
 			{
 			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("icons"));
 			}
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-crop-portrait");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->rectangle_draw_portrait));
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-crop");
 		if (options->rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_NONE)
 			{

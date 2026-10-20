@@ -649,6 +649,10 @@
             <attribute name="label" translatable="yes">Crop 16:9</attribute>
             <attribute name="target">16-9</attribute>
           </item>
+          <item>
+            <attribute name="action">win.main-win-crop-portrait</attribute>
+            <attribute name="label" translatable="yes">Portrait orientation</attribute>
+          </item>
         </submenu>
         <item>
           <attribute name="action">win.main-win-crop-rectangle</attribute>

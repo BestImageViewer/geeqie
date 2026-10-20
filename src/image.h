@@ -288,6 +288,7 @@ void image_options_sync();
 
 std::tuple<int, int, int, int> image_get_rectangle();
 void image_select_rectangle(ImageWindow *imd, gboolean active);
+void image_rectangle_update_aspect_ratio();
 gboolean image_get_selected_rectangle(ImageWindow *imd, GdkRectangle &rectangle);
 void image_update_title(ImageWindow *imd);
 #endif

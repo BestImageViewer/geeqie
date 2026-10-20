@@ -1034,7 +1034,7 @@
           </menuchoice>
         </term>
         <listitem>
-          <para>Select an aspect ratio for the above action.</para>
+          <para>Select an aspect ratio for the above action. Enable <guilabel>Portrait orientation</guilabel> to swap width and height, for example from 16:9 to 9:16. Changing the ratio or orientation updates the current rectangle around its center, shrinking it if necessary to stay within the image. The orientation is remembered for new rectangles.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

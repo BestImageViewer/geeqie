@@ -77,6 +77,7 @@ ConfOptions *conf_options_new()
 	options->rot_invariant_sim = TRUE;
 	options->sort_totals = FALSE;
 	options->rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE;
+	options->rectangle_draw_portrait = FALSE;
 
 	options->file_filter.disable = FALSE;
 	options->file_filter.show_dot_directory = FALSE;

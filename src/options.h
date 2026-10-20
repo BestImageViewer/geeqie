@@ -128,6 +128,7 @@ struct ConfOptions
 	DnDAction dnd_default_action;
 	ClipboardSelection clipboard_selection;
 	RectangleDrawAspectRatio rectangle_draw_aspect_ratio;
+	gboolean rectangle_draw_portrait;
 
 	gboolean save_window_positions;
 	gboolean use_saved_window_positions_for_new_windows;

@@ -57,6 +57,12 @@ namespace
 
 constexpr gdouble aspect_ratios[5] {0.0, gdouble(1.0), gdouble(4.0) / 3, gdouble(3) / 2, gdouble(16) / 9};
 
+gdouble rectangle_aspect_ratio(RectangleDrawAspectRatio mode)
+{
+	const auto ratio = aspect_ratios[static_cast<gint>(mode)];
+	return ratio > 0 && options->rectangle_draw_portrait ? 1.0 / ratio : ratio;
+}
+
 /*
  * SelectionRectangle
  */
@@ -84,7 +90,7 @@ private:
 SelectionRectangle::SelectionRectangle(gint origin_x, gint origin_y, RectangleDrawAspectRatio rectangle_draw_aspect_ratio)
     : x(origin_x)
     , y(origin_y)
-    , aspect_ratio(aspect_ratios[static_cast<gint>(rectangle_draw_aspect_ratio)])
+    , aspect_ratio(rectangle_aspect_ratio(rectangle_draw_aspect_ratio))
     , origin_x(origin_x)
     , origin_y(origin_y)
     , rectangle_draw_aspect_ratio(rectangle_draw_aspect_ratio)
@@ -351,6 +357,37 @@ void image_select_rectangle(ImageWindow *imd, gboolean active)
 	image_rectangle_draw(imd);
 }
 
+void image_rectangle_update_aspect_ratio()
+{
+	if (!rectangle_owner || !rect_id) return;
+	auto *pr = PIXBUF_RENDERER(rectangle_owner->pr);
+	const double center_x = selection_rectangle.x + (selection_rectangle.width / 2.0);
+	const double center_y = selection_rectangle.y + (selection_rectangle.height / 2.0);
+	double width = selection_rectangle.width;
+	double height = selection_rectangle.height;
+	const double ratio = rectangle_aspect_ratio(options->rectangle_draw_aspect_ratio);
+	if (ratio > 0)
+		{
+		const double area = width * height;
+		width = std::sqrt(area * ratio);
+		height = width / ratio;
+		const double left = pr->x_offset - pr->x_scroll;
+		const double top = pr->y_offset - pr->y_scroll;
+		const double right = left + (pr->image_width * pr->scale);
+		const double bottom = top + (pr->image_height * pr->scale * pr->aspect_ratio);
+		const double factor = std::min({1.0, (2 * std::min(center_x - left, right - center_x)) / width,
+		                              (2 * std::min(center_y - top, bottom - center_y)) / height});
+		width *= factor;
+		height *= factor;
+		}
+	selection_rectangle = SelectionRectangle(static_cast<int>(center_x - (width / 2.0)),
+	                                         static_cast<int>(center_y - (height / 2.0)),
+	                                         options->rectangle_draw_aspect_ratio);
+	selection_rectangle.width = std::max(1, static_cast<int>(width));
+	selection_rectangle.height = std::max(1, static_cast<int>(height));
+	image_rectangle_draw(rectangle_owner);
+}
+
 static void image_press_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
@@ -369,7 +406,7 @@ static void image_press_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpointer
 		    event->x >= selection_rectangle.x && event->x < selection_rectangle.x + selection_rectangle.width &&
 		    event->y >= selection_rectangle.y && event->y < selection_rectangle.y + selection_rectangle.height;
 		rectangle_pending = !rectangle_resize_edges && !rectangle_moving;
-		selection_rectangle.aspect_ratio = aspect_ratios[static_cast<gint>(options->rectangle_draw_aspect_ratio)];
+		selection_rectangle.aspect_ratio = rectangle_aspect_ratio(options->rectangle_draw_aspect_ratio);
 		return;
 		}
 	image_rectangle_clear(imd);

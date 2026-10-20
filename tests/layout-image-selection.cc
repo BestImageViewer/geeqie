@@ -9,10 +9,69 @@
 #include "layout.h"
 #include "layout-image.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
 #include "view-file.h"
 
 namespace
 {
+
+TEST(ImageRectangle, PortraitOrientationUpdatesExistingAndNewSelections)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *imd = image_new(FALSE);
+	gtk_window_set_default_size(window, 800, 600);
+	gtk_window_set_child(window, imd->widget);
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 800, 600);
+	gdk_pixbuf_fill(pixels, 0xffffffff);
+	image_change_pixbuf(imd, pixels, 1.0, FALSE);
+	gtk_window_present(window);
+	for (int i = 0; i < 100; ++i)
+		{
+		while (g_main_context_iteration(nullptr, FALSE)) {}
+		g_usleep(1000);
+		}
+	const auto saved_draw = options->draw_rectangle;
+	options->draw_rectangle = TRUE;
+	const auto saved_ratio = options->rectangle_draw_aspect_ratio;
+	const auto saved_portrait = options->rectangle_draw_portrait;
+	for (const auto mode : {RECTANGLE_DRAW_ASPECT_RATIO_SIXTEEN_NINE,
+	                        RECTANGLE_DRAW_ASPECT_RATIO_FOUR_THREE, RECTANGLE_DRAW_ASPECT_RATIO_THREE_TWO})
+		{
+		options->rectangle_draw_aspect_ratio = mode;
+		options->rectangle_draw_portrait = FALSE;
+		image_select_rectangle(imd, TRUE);
+		GdkRectangle landscape{};
+		EXPECT_TRUE(image_get_selected_rectangle(imd, landscape));
+		EXPECT_GT(landscape.width, landscape.height);
+		options->rectangle_draw_portrait = TRUE;
+		image_rectangle_update_aspect_ratio();
+		GdkRectangle portrait{};
+		EXPECT_TRUE(image_get_selected_rectangle(imd, portrait));
+		EXPECT_GT(portrait.height, portrait.width);
+		EXPECT_NEAR(static_cast<double>(portrait.height) / portrait.width,
+		            static_cast<double>(landscape.width) / landscape.height, 0.02);
+		EXPECT_NEAR(portrait.x + (portrait.width / 2.0), landscape.x + (landscape.width / 2.0), 2);
+		EXPECT_NEAR(portrait.y + (portrait.height / 2.0), landscape.y + (landscape.height / 2.0), 2);
+		EXPECT_GE(portrait.x, 0);
+		EXPECT_GE(portrait.y, 0);
+		EXPECT_LE(portrait.x + portrait.width, 800);
+		EXPECT_LE(portrait.y + portrait.height, 600);
+		image_select_rectangle(imd, TRUE);
+		EXPECT_TRUE(image_get_selected_rectangle(imd, portrait));
+		EXPECT_GT(portrait.height, portrait.width);
+		options->rectangle_draw_portrait = FALSE;
+		image_rectangle_update_aspect_ratio();
+		EXPECT_TRUE(image_get_selected_rectangle(imd, landscape));
+		EXPECT_GT(landscape.width, landscape.height);
+		}
+	image_select_rectangle(imd, FALSE);
+	options->draw_rectangle = saved_draw;
+	options->rectangle_draw_aspect_ratio = saved_ratio;
+	options->rectangle_draw_portrait = saved_portrait;
+	gtk_window_destroy(window);
+}
 
 class LayoutImageSelection : public testing::Test
 {
