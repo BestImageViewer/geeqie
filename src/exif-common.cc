@@ -505,19 +505,27 @@ gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 
 gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 {
-	ExifItem *item = exif_get_item(exif, "Exif.GPSInfo.GPSAltitudeRef");
-	if (!item) return nullptr;
+	std::optional<gint> reference;
+	for (auto *item = exif_get_first_item(exif); item; item = exif_get_next_item(exif))
+		{
+		g_autofree gchar *key = exif_item_get_tag_name(item);
+		if (g_strcmp0(key, "Exif.GPSInfo.GPSAltitudeRef") != 0 ||
+		    !exif_item_is_unsigned_byte(item) || exif_item_get_elements(item) != 1) continue;
+		const auto value = exif_item_get_integer(item);
+		if (!value || (*value != 0 && *value != 1)) continue;
+		if (reference && *reference != *value) return nullptr;
+		reference = value;
+		}
+	if (!reference) return nullptr;
 
 	ExifRational *r = exif_get_rational(exif, "Exif.GPSInfo.GPSAltitude");
 	if (!r) return nullptr;
 
 	gdouble alt = exif_rational_to_double(r, false);
 
-	auto ref = exif_item_get_integer(item);
-
 	return g_strdup_printf("%0.f m %s",
 	                       alt,
-	                       (ref.value_or(0) == 0) ? _("Above Sea Level") : _("Below Sea Level"));
+	                       (*reference == 0) ? _("Above Sea Level") : _("Below Sea Level"));
 }
 
 /**

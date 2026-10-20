@@ -4,6 +4,7 @@
 
 #include <array>
 #include <string>
+#include <utility>
 #include <unistd.h>
 #include <vector>
 
@@ -21,6 +22,7 @@
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "intl.h"
 #include "metadata.h"
 #include "options.h"
 
@@ -184,6 +186,67 @@ TEST_F(ImageCrop, EmbedsColorProfileInBothFormats)
 #endif
 
 #if HAVE_EXIV2
+TEST_F(ImageCrop, AltitudeReferenceRequiresUnambiguousByteValue)
+{
+	struct TestCase
+	{
+		std::vector<std::pair<Exiv2::TypeId, const char *>> references;
+		int expected;
+	};
+	const std::vector<TestCase> cases = {
+		{{}, -1},
+		{{{Exiv2::unsignedByte, "0"}}, 0},
+		{{{Exiv2::unsignedByte, "1"}}, 1},
+		{{{Exiv2::unsignedRational, "220/100"}, {Exiv2::unsignedByte, "0"}}, 0},
+		{{{Exiv2::unsignedByte, "0"}, {Exiv2::unsignedRational, "220/100"}}, 0},
+		{{{Exiv2::unsignedRational, "220/100"}, {Exiv2::unsignedByte, "1"}}, 1},
+		{{{Exiv2::unsignedRational, "220/100"}}, -1},
+		{{{Exiv2::unsignedByte, "2"}}, -1},
+		{{{Exiv2::unsignedShort, "1"}}, -1},
+		{{{Exiv2::signedByte, "1"}}, -1},
+		{{{Exiv2::unsignedByte, "0 1"}}, -1},
+		{{{Exiv2::unsignedByte, "0"}, {Exiv2::unsignedByte, "0"}}, 0},
+		{{{Exiv2::unsignedByte, "0"}, {Exiv2::unsignedByte, "1"}}, -1},
+		{{{Exiv2::unsignedByte, "1"}, {Exiv2::unsignedByte, "0"}}, -1},
+	};
+	g_autofree gchar *image_path = g_build_filename(directory, "altitude.jpg", nullptr);
+	for (size_t index = 0; index < cases.size(); ++index)
+		{
+		SCOPED_TRACE(index);
+		const auto &test = cases[index];
+		Exiv2::ExifData data;
+		auto altitude = Exiv2::Value::create(Exiv2::unsignedRational);
+		ASSERT_EQ(altitude->read("100/1"), 0);
+		data.add(Exiv2::ExifKey("Exif.GPSInfo.GPSAltitude"), altitude.get());
+		for (const auto &reference : test.references)
+			{
+			auto value = Exiv2::Value::create(reference.first);
+			ASSERT_EQ(value->read(reference.second), 0);
+			data.add(Exiv2::ExifKey("Exif.GPSInfo.GPSAltitudeRef"), value.get());
+			}
+		Exiv2::Blob encoded;
+		Exiv2::ExifParser::encode(encoded, Exiv2::littleEndian, data);
+		const size_t segment_size = encoded.size() + 8;
+		std::vector<guchar> jpeg = {0xff, 0xd8, 0xff, 0xe1,
+		                            static_cast<guchar>(segment_size >> 8), static_cast<guchar>(segment_size),
+		                            'E', 'x', 'i', 'f', 0, 0};
+		jpeg.insert(jpeg.end(), encoded.begin(), encoded.end());
+		jpeg.insert(jpeg.end(), {0xff, 0xd9});
+		ASSERT_TRUE(g_file_set_contents(image_path, reinterpret_cast<const gchar *>(jpeg.data()), jpeg.size(), nullptr));
+		auto *exif = exif_read(image_path, nullptr, nullptr);
+		ASSERT_NE(exif, nullptr);
+		const auto result = exif_get_formatted_by_key(exif, "formatted.GPSAltitude");
+		g_autofree gchar *text = result.value_or(nullptr);
+		if (test.expected < 0) EXPECT_EQ(text, nullptr);
+		else
+			{
+			g_autofree gchar *expected = g_strdup_printf("100 m %s", test.expected == 0 ? _("Above Sea Level") : _("Below Sea Level"));
+			EXPECT_STREQ(text, expected);
+			}
+		exif_free(exif);
+		}
+}
+
 TEST_F(ImageCrop, CopiesMetadataAndUpdatesDimensionsAndOrientation)
 {
 	ExifData *exif = exif_read(path, nullptr, nullptr);

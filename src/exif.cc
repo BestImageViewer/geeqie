@@ -612,6 +612,11 @@ gchar *exif_item_get_description(ExifItem *item)
 	return g_strdup(_(item->marker->description));
 }
 
+gboolean exif_item_is_unsigned_byte(ExifItem *item)
+{
+	return item && exif_item_get_format_id(item) == EXIF_FORMAT_BYTE_UNSIGNED;
+}
+
 const gchar *exif_item_get_format_name(ExifItem *item, gboolean brief)
 {
 	if (!item || !item->marker) return nullptr;

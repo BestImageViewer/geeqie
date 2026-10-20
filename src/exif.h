@@ -87,6 +87,7 @@ ExifItem *exif_get_next_item(ExifData *exif);
 gchar *exif_item_get_tag_name(ExifItem *item);
 guint exif_item_get_tag_id(ExifItem *item);
 guint exif_item_get_elements(ExifItem *item);
+gboolean exif_item_is_unsigned_byte(ExifItem *item);
 gchar *exif_item_get_data(ExifItem *item, guint *data_len);
 gchar *exif_item_get_description(ExifItem *item);
 const gchar *exif_item_get_format_name(ExifItem *item, gboolean brief);

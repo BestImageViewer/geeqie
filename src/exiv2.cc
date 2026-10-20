@@ -745,6 +745,11 @@ static Exiv2::TypeId exif_item_get_type_id(ExifItem *item)
 	}
 }
 
+gboolean exif_item_is_unsigned_byte(ExifItem *item)
+{
+	return exif_item_get_type_id(item) == Exiv2::unsignedByte;
+}
+
 const char *exif_item_get_format_name(ExifItem *item, gboolean)
 {
 	try {
