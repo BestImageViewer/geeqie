@@ -60,6 +60,9 @@ struct LayoutConfig
 
 	GtkWidget *list_view{};
 	GListStore *store{};
+	GtkSingleSelection *selection{}; // Owned by list_view.
+	GtkWidget *move_up{};
+	GtkWidget *move_down{};
 
 	gint style{};
 
@@ -218,6 +221,59 @@ GdkContentProvider *layout_config_drag_prepare(GtkDragSource *source, gdouble, g
 	return item ? gdk_content_provider_new_typed(layout_config_item_get_type(), item) : nullptr;
 }
 
+void layout_config_selection_changed(GtkSingleSelection *, GParamSpec *, gpointer data)
+{
+	auto *lc = static_cast<LayoutConfig *>(data);
+	const guint selected = gtk_single_selection_get_selected(lc->selection);
+	const guint count = g_list_model_get_n_items(G_LIST_MODEL(lc->store));
+	gtk_widget_set_sensitive(lc->move_up, selected != GTK_INVALID_LIST_POSITION && selected > 0);
+	gtk_widget_set_sensitive(lc->move_down, selected != GTK_INVALID_LIST_POSITION && selected + 1 < count);
+}
+
+void layout_config_order_move(LayoutConfig *lc, guint source, guint destination, gboolean focus)
+{
+	const guint count = g_list_model_get_n_items(G_LIST_MODEL(lc->store));
+	if (source >= count || destination >= count) return;
+	if (source != destination)
+		{
+		g_autoptr(GPtrArray) items = g_ptr_array_new_with_free_func(g_object_unref);
+		for (guint position = 0; position < count; position++)
+			g_ptr_array_add(items, g_list_model_get_item(G_LIST_MODEL(lc->store), position));
+		if (source < destination)
+			std::rotate(items->pdata + source, items->pdata + source + 1, items->pdata + destination + 1);
+		else
+			std::rotate(items->pdata + destination, items->pdata + source, items->pdata + source + 1);
+		// Publish one change so selection tracks the same item throughout the move.
+		g_list_store_splice(lc->store, 0, count, items->pdata, count);
+		}
+	gtk_single_selection_set_selected(lc->selection, destination);
+	layout_config_selection_changed(lc->selection, nullptr, lc);
+	gtk_list_view_scroll_to(GTK_LIST_VIEW(lc->list_view), destination,
+	                        focus ? GTK_LIST_SCROLL_FOCUS : GTK_LIST_SCROLL_NONE, nullptr);
+}
+
+void layout_config_move_selected(LayoutConfig *lc, gint direction, gboolean focus)
+{
+	const guint selected = gtk_single_selection_get_selected(lc->selection);
+	const guint count = g_list_model_get_n_items(G_LIST_MODEL(lc->store));
+	if (selected == GTK_INVALID_LIST_POSITION || (direction < 0 && selected == 0) ||
+	    (direction > 0 && selected + 1 >= count)) return;
+	layout_config_order_move(lc, selected, direction < 0 ? selected - 1 : selected + 1, focus);
+}
+
+gboolean layout_config_key_pressed(GtkEventControllerKey *, guint key, guint, GdkModifierType state, gpointer data)
+{
+	if ((state & gtk_accelerator_get_default_mod_mask()) != GDK_CONTROL_MASK) return FALSE;
+	auto *lc = static_cast<LayoutConfig *>(data);
+	if (key == GDK_KEY_Up || key == GDK_KEY_KP_Up)
+		layout_config_move_selected(lc, -1, TRUE);
+	else if (key == GDK_KEY_Down || key == GDK_KEY_KP_Down)
+		layout_config_move_selected(lc, 1, TRUE);
+	else
+		return FALSE;
+	return TRUE;
+}
+
 gboolean layout_config_drop(GtkDropTarget *target, const GValue *value, gdouble, gdouble y, gpointer data)
 {
 	auto *lc = static_cast<LayoutConfig *>(data);
@@ -245,12 +301,7 @@ gboolean layout_config_drop(GtkDropTarget *target, const GValue *value, gdouble,
 	guint insert_position = target_position;
 	if (y >= gtk_widget_get_height(row_widget) / 2.0) insert_position++;
 	if (source_position < insert_position) insert_position--;
-	if (source_position == insert_position) return TRUE;
-
-	g_object_ref(source_item);
-	g_list_store_remove(lc->store, source_position);
-	g_list_store_insert(lc->store, insert_position, source_item);
-	g_object_unref(source_item);
+	layout_config_order_move(lc, source_position, insert_position, TRUE);
 
 	return TRUE;
 }
@@ -383,11 +434,15 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 	gtk_box_append(GTK_BOX(box), scrolled);
 
 	lc->store = g_list_store_new(layout_config_item_get_type());
-	GtkSelectionModel *selection = GTK_SELECTION_MODEL(gtk_no_selection_new(G_LIST_MODEL(g_object_ref(lc->store))));
+	lc->selection = gtk_single_selection_new(G_LIST_MODEL(g_object_ref(lc->store)));
 	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
 	g_signal_connect(factory, "setup", G_CALLBACK(layout_config_factory_setup), lc);
 	g_signal_connect(factory, "bind", G_CALLBACK(layout_config_factory_bind), nullptr);
-	lc->list_view = gtk_list_view_new(selection, factory);
+	lc->list_view = gtk_list_view_new(GTK_SELECTION_MODEL(lc->selection), factory);
+	auto *keys = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(keys, GTK_PHASE_CAPTURE);
+	g_signal_connect(keys, "key-pressed", G_CALLBACK(layout_config_key_pressed), lc);
+	gtk_widget_add_controller(lc->list_view, keys);
 
 	const auto [a, b, c] = layout_config_order_from_text(order);
 	layout_config_list_append(lc->store, a);
@@ -396,7 +451,26 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), lc->list_view);
 
-	pref_label_new(box, _("(drag to change order)"));
+	GtkWidget *buttons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	gtk_box_append(GTK_BOX(box), buttons);
+	lc->move_up = gtk_button_new_with_mnemonic(_("Move _Up"));
+	lc->move_down = gtk_button_new_with_mnemonic(_("Move _Down"));
+	gtk_box_append(GTK_BOX(buttons), lc->move_up);
+	gtk_box_append(GTK_BOX(buttons), lc->move_down);
+	g_signal_connect(lc->move_up, "clicked", G_CALLBACK(+[](GtkButton *, gpointer data)
+		{
+		layout_config_move_selected(static_cast<LayoutConfig *>(data), -1, FALSE);
+		}), lc);
+	g_signal_connect(lc->move_down, "clicked", G_CALLBACK(+[](GtkButton *, gpointer data)
+		{
+		layout_config_move_selected(static_cast<LayoutConfig *>(data), 1, FALSE);
+		}), lc);
+	g_signal_connect(lc->selection, "notify::selected", G_CALLBACK(layout_config_selection_changed), lc);
+	layout_config_selection_changed(lc->selection, nullptr, lc);
+	GtkWidget *hint = pref_label_new(box, _("Drag to change order, or select a pane and use Ctrl+Up/Ctrl+Down or the move buttons."));
+	gtk_label_set_wrap(GTK_LABEL(hint), TRUE);
+	gtk_label_set_max_width_chars(GTK_LABEL(hint), 48);
+	gtk_label_set_xalign(GTK_LABEL(hint), 0.0);
 
 	return box;
 }

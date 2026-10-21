@@ -18,6 +18,7 @@ unit_test_sources = files(
 'image-load-jpegxl.cc',
 'image-crop.cc',
 'keyboard-shortcuts.cc',
+'layout-config.cc',
 'layout-image-navigation.cc',
 'layout-image-selection.cc',
 'metadata-description.cc',
