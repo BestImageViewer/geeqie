@@ -111,6 +111,10 @@ Follow `CODING.md` for authoritative style. Key points:
 - C/C++ indentation uses tabs at 4-space width.
 - Variables and functions use `small_letters`; defines use `CAPITAL_LETTERS`.
 - Prefer explicit names and avoid macros where practical.
+- Keep C++ code compatible with C++17. Avoid designated initializers and C
+  compound literals, including those introduced by library macros such as
+  `GRAPHENE_POINT_INIT()`. Prefer aggregate initialization, for example
+  `graphene_point_t point{x, y};`, or the library's initialization function.
 - Use GLib helpers where appropriate, for example `g_ascii_isspace()`.
 - Do not leave temporary `DEBUG_0()`, `DEBUG_BT()`, `DEBUG_FD()`, or `DEBUG_RU()`
   calls in committed source.
