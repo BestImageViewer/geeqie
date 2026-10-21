@@ -65,6 +65,32 @@ GtkWidget *find_cancel_button(GtkWidget *widget)
 	return nullptr;
 }
 
+GtkWidget *find_conflict_control(GtkWidget *widget, const gchar *label)
+{
+	if (GTK_IS_CHECK_BUTTON(widget) && g_strcmp0(gtk_check_button_get_label(GTK_CHECK_BUTTON(widget)), label) == 0) return widget;
+	if (GTK_IS_BUTTON(widget) && g_strcmp0(gtk_button_get_label(GTK_BUTTON(widget)), label) == 0) return widget;
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		if (auto *found = find_conflict_control(child, label)) return found;
+	return nullptr;
+}
+
+bool accept_visible_folder_merge()
+{
+	GListModel *windows = gtk_window_get_toplevels();
+	for (guint i = 0; i < g_list_model_get_n_items(windows); i++)
+		{
+		g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+		const gchar *title = gtk_window_get_title(window);
+		if (!title || !strstr(title, "Folder merge conflict") || !gtk_widget_get_visible(GTK_WIDGET(window))) continue;
+		if (GtkWidget *merge = find_conflict_control(GTK_WIDGET(window), "Merge"))
+			{
+			g_signal_emit_by_name(merge, "clicked");
+			return true;
+			}
+		}
+	return false;
+}
+
 class TrashNotificationCapture
 {
 public:
@@ -272,38 +298,462 @@ TEST_F(EmptyFolderDelete, FolderDropRejectsDescendantThroughAlias)
 	EXPECT_STREQ(source->path, folder);
 }
 
-TEST_F(EmptyFolderDelete, FolderDropRefusesExistingDestination)
+TEST_F(EmptyFolderDelete, FolderDropMergesExistingDestination)
 {
 	g_autofree gchar *target = g_build_filename(root, "target", nullptr);
 	g_autofree gchar *existing = g_build_filename(target, "folder", nullptr);
 	g_autofree gchar *keep = g_build_filename(existing, "keep", nullptr);
+	g_autofree gchar *hidden = g_build_filename(folder, ".hidden", nullptr);
+	g_autofree gchar *copied = g_build_filename(existing, ".hidden", nullptr);
 	ASSERT_EQ(g_mkdir(target, 0700), 0);
 	ASSERT_EQ(g_mkdir(existing, 0700), 0);
 	ASSERT_TRUE(g_file_set_contents(keep, "original", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(hidden, "new", -1, nullptr));
 	auto source = FileData::new_dir(folder);
-	for (bool move : {false, true})
+	file_util_copy_simple(g_list_prepend(nullptr, file_data_ref(source)), target, nullptr);
+	ASSERT_TRUE(wait_for([&] { accept_visible_folder_merge(); return source->change == nullptr; }));
+	EXPECT_TRUE(isfile(hidden));
+	EXPECT_TRUE(isfile(copied));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(keep, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "original");
+}
+
+TEST_F(EmptyFolderDelete, FolderMergeConflictDialogCancelsSkipsAndRenames)
+{
+	g_autofree gchar *target = g_build_filename(root, "target", nullptr);
+	g_autofree gchar *existing = g_build_filename(target, "folder", nullptr);
+	g_autofree gchar *conflict = g_build_filename(folder, "conflict", nullptr);
+	g_autofree gchar *keep = g_build_filename(existing, "conflict", nullptr);
+	g_autofree gchar *renamed = g_build_filename(existing, "renamed", nullptr);
+	ASSERT_EQ(g_mkdir(target, 0700), 0);
+	ASSERT_EQ(g_mkdir(existing, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(conflict, "new", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(keep, "original", -1, nullptr));
+	auto source = FileData::new_dir(folder);
+	for (const gchar *choice : {"Cancel", "Skip", "Rename"})
 		{
-		GList *list = g_list_prepend(nullptr, file_data_ref(source));
-		if (move) file_util_move_simple(list, target, nullptr);
-		else file_util_copy_simple(list, target, nullptr);
+		file_util_move_simple(g_list_prepend(nullptr, file_data_ref(source)), target, nullptr);
+		GtkWindow *dialog = nullptr;
+		ASSERT_TRUE(wait_for([&]
+			{
+			if (accept_visible_folder_merge()) return false;
+			GListModel *windows = gtk_window_get_toplevels();
+			for (guint i = 0; i < g_list_model_get_n_items(windows); i++)
+				{
+				g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+				const gchar *title = gtk_window_get_title(window);
+				if (title && strstr(title, "Folder merge conflict") && gtk_widget_get_visible(GTK_WIDGET(window)))
+					{
+					dialog = window;
+					return true;
+					}
+				}
+			return false;
+			}));
+		ASSERT_NE(find_label(GTK_WIDGET(dialog), keep), nullptr);
+		const auto find_widget = [](GtkWidget *widget, const gchar *label, auto &&self) -> GtkWidget *
+			{
+			if (!label && GTK_IS_ENTRY(widget)) return widget;
+			if (label && GTK_IS_BUTTON(widget) && g_strcmp0(gtk_button_get_label(GTK_BUTTON(widget)), label) == 0) return widget;
+			for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+				if (auto *found = self(child, label, self)) return found;
+			return nullptr;
+			};
+		if (strcmp(choice, "Rename") == 0)
+			{
+			GtkWidget *entry = find_widget(GTK_WIDGET(dialog), nullptr, find_widget);
+			ASSERT_NE(entry, nullptr);
+			gtk_editable_set_text(GTK_EDITABLE(entry), "renamed");
+			}
+		GtkWidget *button = find_widget(GTK_WIDGET(dialog), choice, find_widget);
+		ASSERT_NE(button, nullptr);
+		g_signal_emit_by_name(button, "clicked");
 		ASSERT_TRUE(wait_for([&] { return source->change == nullptr; }));
-		EXPECT_TRUE(isdir(folder));
-		EXPECT_TRUE(isfile(keep));
-		EXPECT_STREQ(source->path, folder);
-		bool visible_warning = false;
+		EXPECT_EQ(isfile(conflict), strcmp(choice, "Rename") != 0);
+		g_autofree gchar *contents = nullptr;
+		ASSERT_TRUE(g_file_get_contents(keep, &contents, nullptr, nullptr));
+		EXPECT_STREQ(contents, "original");
+		}
+	EXPECT_FALSE(isdir(folder));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(renamed, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "new");
+}
+
+TEST_F(EmptyFolderDelete, FolderMergeApplyToAllSkipsThenDuplicates)
+{
+	g_autofree gchar *target = g_build_filename(root, "target", nullptr);
+	g_autofree gchar *existing = g_build_filename(target, "folder", nullptr);
+	ASSERT_EQ(g_mkdir(target, 0700), 0);
+	ASSERT_EQ(g_mkdir(existing, 0700), 0);
+	for (const gchar *name : {"image.jpg", "image.xmp"})
+		{
+		g_autofree gchar *source_path = g_build_filename(folder, name, nullptr);
+		g_autofree gchar *destination_path = g_build_filename(existing, name, nullptr);
+		ASSERT_TRUE(g_file_set_contents(source_path, "new", -1, nullptr));
+		ASSERT_TRUE(g_file_set_contents(destination_path, "original", -1, nullptr));
+		}
+	g_autofree gchar *numbered = g_build_filename(existing, "image (Copy).jpg", nullptr);
+	ASSERT_TRUE(g_file_set_contents(numbered, "keep numbered", -1, nullptr));
+	auto source = FileData::new_dir(folder);
+	for (const gchar *action : {"Skip", "Duplicate"})
+		{
+		file_util_move_simple(g_list_prepend(nullptr, file_data_ref(source)), target, nullptr);
+		GtkWindow *dialog = nullptr;
+		ASSERT_TRUE(wait_for([&]
+			{
+			if (accept_visible_folder_merge()) return false;
+			GListModel *windows = gtk_window_get_toplevels();
+			for (guint i = 0; i < g_list_model_get_n_items(windows); i++)
+				{
+				g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+				const gchar *title = gtk_window_get_title(window);
+				if (title && strstr(title, "Folder merge conflict") && gtk_widget_get_visible(GTK_WIDGET(window)))
+					{
+					dialog = window;
+					return true;
+					}
+				}
+			return false;
+			}));
+		GtkWidget *checkbox = find_conflict_control(GTK_WIDGET(dialog), "Apply this action to all files");
+		ASSERT_NE(checkbox, nullptr);
+		EXPECT_FALSE(gtk_check_button_get_active(GTK_CHECK_BUTTON(checkbox)));
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(checkbox), TRUE);
+		GtkWidget *button = find_conflict_control(GTK_WIDGET(dialog), action);
+		ASSERT_NE(button, nullptr);
+		g_signal_emit_by_name(button, "clicked");
+		ASSERT_TRUE(wait_for([&] { return source->change == nullptr; })) << "Further conflicts must not ask again";
+		EXPECT_EQ(isdir(folder), strcmp(action, "Skip") == 0);
+		}
+	for (const gchar *name : {"image (Copy 2).jpg", "image (Copy).xmp"})
+		{
+		g_autofree gchar *path = g_build_filename(existing, name, nullptr);
+		g_autofree gchar *contents = nullptr;
+		ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
+		EXPECT_STREQ(contents, "new");
+		}
+	for (const gchar *name : {"image.jpg", "image.xmp", "image (Copy).jpg"})
+		{
+		g_autofree gchar *path = g_build_filename(existing, name, nullptr);
+		g_autofree gchar *contents = nullptr;
+		ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
+		EXPECT_STREQ(contents, strcmp(name, "image (Copy).jpg") == 0 ? "keep numbered" : "original");
+		}
+}
+
+TEST_F(EmptyFolderDelete, MergeDuplicateAllHandlesDotfilesAndDirectoryConflicts)
+{
+	g_autofree gchar *destination = g_build_filename(root, "destination", nullptr);
+	g_autofree gchar *subdir = g_build_filename(folder, "sub.dir", nullptr);
+	g_autofree gchar *child = g_build_filename(subdir, "child", nullptr);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	ASSERT_EQ(g_mkdir(subdir, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(child, "child", -1, nullptr));
+	for (const gchar *name : {".hidden", "image.jpg", "sub.dir"})
+		{
+		g_autofree gchar *source_path = g_build_filename(folder, name, nullptr);
+		g_autofree gchar *destination_path = g_build_filename(destination, name, nullptr);
+		if (strcmp(name, "sub.dir") != 0) ASSERT_TRUE(g_file_set_contents(source_path, "new", -1, nullptr));
+		ASSERT_TRUE(g_file_set_contents(destination_path, "original", -1, nullptr));
+		}
+	int conflicts = 0;
+	FileTreeOperation operation;
+	operation.conflict = [&conflicts](GFile *, GFile *)
+		{
+		conflicts++;
+		return FileTreeConflict{FileTreeConflictAction::DUPLICATE, {}, true};
+		};
+	g_autoptr(GFile) source = g_file_new_for_path(folder);
+	g_autoptr(GFile) dest = g_file_new_for_path(destination);
+	g_autoptr(GError) error = nullptr;
+	gboolean source_removed = FALSE;
+	ASSERT_TRUE(file_tree_merge(source, dest, TRUE, source_removed, &error, &operation)) << (error ? error->message : "");
+	EXPECT_EQ(conflicts, 1);
+	EXPECT_TRUE(source_removed);
+	for (const gchar *name : {".hidden (Copy)", "image (Copy).jpg", "sub.dir (Copy)/child"})
+		{
+		g_autofree gchar *path = g_build_filename(destination, name, nullptr);
+		EXPECT_TRUE(isfile(path)) << name;
+		}
+}
+
+TEST_F(EmptyFolderDelete, FolderDuplicateKeepsExistingFoldersAndRecordsMoveDestination)
+{
+	g_autofree gchar *target = g_build_filename(root, "target", nullptr);
+	g_autofree gchar *existing = g_build_filename(target, "folder", nullptr);
+	g_autofree gchar *previous_copy = g_build_filename(target, "folder (Copy)", nullptr);
+	g_autofree gchar *duplicate = g_build_filename(target, "folder (Copy 2)", nullptr);
+	g_autofree gchar *source_child = g_build_filename(folder, "child", nullptr);
+	g_autofree gchar *duplicate_child = g_build_filename(duplicate, "child", nullptr);
+	ASSERT_EQ(g_mkdir(target, 0700), 0);
+	ASSERT_EQ(g_mkdir(existing, 0700), 0);
+	ASSERT_EQ(g_mkdir(previous_copy, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(source_child, "source", -1, nullptr));
+	auto source = FileData::new_dir(folder);
+	file_util_move_simple(g_list_prepend(nullptr, file_data_ref(source)), target, nullptr);
+	GtkWidget *duplicate_button = nullptr;
+	ASSERT_TRUE(wait_for([&]
+		{
 		GListModel *windows = gtk_window_get_toplevels();
 		for (guint i = 0; i < g_list_model_get_n_items(windows); i++)
 			{
 			g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
-			const gchar *title = gtk_window_get_title(window);
-			if (title && strstr(title, move ? "Move folder" : "Copy folder") &&
-			    gtk_widget_get_visible(GTK_WIDGET(window)) && find_label(GTK_WIDGET(window), existing))
+			if (!gtk_widget_get_visible(GTK_WIDGET(window))) continue;
+			if (!find_conflict_control(GTK_WIDGET(window), "Merge")) continue;
+			duplicate_button = find_conflict_control(GTK_WIDGET(window), "Duplicate");
+			if (duplicate_button) return true;
+			}
+		return false;
+		}));
+	g_signal_emit_by_name(duplicate_button, "clicked");
+	ASSERT_TRUE(wait_for([&] { return source->change == nullptr; }));
+	EXPECT_FALSE(isdir(folder));
+	EXPECT_TRUE(isdir(existing));
+	EXPECT_TRUE(isdir(previous_copy));
+	EXPECT_STREQ(source->path, duplicate);
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(duplicate_child, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "source");
+	g_autofree gchar *unexpected = g_build_filename(existing, "child", nullptr);
+	EXPECT_FALSE(isfile(unexpected));
+}
+
+TEST_F(EmptyFolderDelete, FolderMergeAllAppliesToNestedFolders)
+{
+	g_autofree gchar *target = g_build_filename(root, "target", nullptr);
+	g_autofree gchar *destination = g_build_filename(target, "folder", nullptr);
+	ASSERT_EQ(g_mkdir(target, 0700), 0);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	for (const gchar *name : {"first", "second"})
+		{
+		g_autofree gchar *source_subdir = g_build_filename(folder, name, nullptr);
+		g_autofree gchar *destination_subdir = g_build_filename(destination, name, nullptr);
+		ASSERT_EQ(g_mkdir(source_subdir, 0700), 0);
+		ASSERT_EQ(g_mkdir(destination_subdir, 0700), 0);
+		g_autofree gchar *source_child = g_build_filename(source_subdir, "new", nullptr);
+		g_autofree gchar *existing_child = g_build_filename(destination_subdir, "keep", nullptr);
+		ASSERT_TRUE(g_file_set_contents(source_child, "source", -1, nullptr));
+		ASSERT_TRUE(g_file_set_contents(existing_child, "original", -1, nullptr));
+		}
+	auto source = FileData::new_dir(folder);
+	file_util_move_simple(g_list_prepend(nullptr, file_data_ref(source)), target, nullptr);
+	GtkWindow *dialog = nullptr;
+	ASSERT_TRUE(wait_for([&]
+		{
+		GListModel *windows = gtk_window_get_toplevels();
+		for (guint i = 0; i < g_list_model_get_n_items(windows); i++)
+			{
+			g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+			if (!gtk_widget_get_visible(GTK_WIDGET(window))) continue;
+			if (find_conflict_control(GTK_WIDGET(window), "Merge"))
 				{
-				visible_warning = true;
+				dialog = window;
+				return true;
 				}
 			}
-		EXPECT_TRUE(visible_warning) << "The conflict must be explained in a visible dialog";
+		return false;
+		}));
+	GtkWidget *checkbox = find_conflict_control(GTK_WIDGET(dialog), "Apply this action to all files");
+	ASSERT_NE(checkbox, nullptr);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(checkbox), TRUE);
+	g_signal_emit_by_name(find_conflict_control(GTK_WIDGET(dialog), "Merge"), "clicked");
+	ASSERT_TRUE(wait_for([&] { return source->change == nullptr; })) << "Nested folder conflicts must not open further dialogs";
+	EXPECT_FALSE(isdir(folder));
+	for (const gchar *name : {"first", "second"})
+		{
+		g_autofree gchar *copied = g_build_filename(destination, name, "new", nullptr);
+		g_autofree gchar *original = g_build_filename(destination, name, "keep", nullptr);
+		EXPECT_TRUE(isfile(copied));
+		EXPECT_TRUE(isfile(original));
 		}
+}
+
+TEST_F(EmptyFolderDelete, MergeMoveKeepsSkippedFilesAndTheirAncestors)
+{
+	g_autofree gchar *subdir = g_build_filename(folder, "subdir", nullptr);
+	g_autofree gchar *conflict = g_build_filename(subdir, "same", nullptr);
+	g_autofree gchar *unique = g_build_filename(subdir, ".hidden", nullptr);
+	g_autofree gchar *destination = g_build_filename(root, "destination", nullptr);
+	g_autofree gchar *destination_subdir = g_build_filename(destination, "subdir", nullptr);
+	g_autofree gchar *existing = g_build_filename(destination_subdir, "same", nullptr);
+	g_autofree gchar *copied = g_build_filename(destination_subdir, ".hidden", nullptr);
+	ASSERT_EQ(g_mkdir(subdir, 0700), 0);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	ASSERT_EQ(g_mkdir(destination_subdir, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(conflict, "source", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(unique, "hidden", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(existing, "destination", -1, nullptr));
+	FileTreeOperation operation;
+	operation.conflict = [](GFile *, GFile *) { return FileTreeConflict{FileTreeConflictAction::SKIP, {}}; };
+	g_autoptr(GFile) source = g_file_new_for_path(folder);
+	g_autoptr(GFile) dest = g_file_new_for_path(destination);
+	g_autoptr(GError) error = nullptr;
+	gboolean source_removed = TRUE;
+	ASSERT_TRUE(file_tree_merge(source, dest, TRUE, source_removed, &error, &operation)) << (error ? error->message : "");
+	EXPECT_FALSE(source_removed);
+	EXPECT_TRUE(isfile(conflict));
+	EXPECT_FALSE(isfile(unique));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(existing, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "destination");
+	g_autofree gchar *hidden_contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(copied, &hidden_contents, nullptr, nullptr));
+	EXPECT_STREQ(hidden_contents, "hidden");
+}
+
+TEST_F(EmptyFolderDelete, MergeRenamesWholeDirectoryOnTypeConflict)
+{
+	g_autofree gchar *subdir = g_build_filename(folder, "subdir", nullptr);
+	g_autofree gchar *child = g_build_filename(subdir, "child.xmp", nullptr);
+	g_autofree gchar *destination = g_build_filename(root, "destination", nullptr);
+	g_autofree gchar *existing = g_build_filename(destination, "subdir", nullptr);
+	g_autofree gchar *copied = g_build_filename(destination, "renamed", "child.xmp", nullptr);
+	ASSERT_EQ(g_mkdir(subdir, 0750), 0);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(child, "metadata", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(existing, "original", -1, nullptr));
+	FileTreeOperation operation;
+	operation.conflict = [](GFile *, GFile *) { return FileTreeConflict{FileTreeConflictAction::RENAME, "renamed"}; };
+	g_autoptr(GFile) source = g_file_new_for_path(folder);
+	g_autoptr(GFile) dest = g_file_new_for_path(destination);
+	g_autoptr(GError) error = nullptr;
+	gboolean source_removed = FALSE;
+	ASSERT_TRUE(file_tree_merge(source, dest, TRUE, source_removed, &error, &operation)) << (error ? error->message : "");
+	EXPECT_TRUE(source_removed);
+	EXPECT_FALSE(isdir(folder));
+	EXPECT_TRUE(isfile(copied));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(existing, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "original");
+}
+
+TEST_F(EmptyFolderDelete, MergeDoesNotFollowDestinationDirectorySymlinks)
+{
+	g_autofree gchar *subdir = g_build_filename(folder, "subdir", nullptr);
+	g_autofree gchar *child = g_build_filename(subdir, "child", nullptr);
+	g_autofree gchar *destination = g_build_filename(root, "destination", nullptr);
+	g_autofree gchar *outside = g_build_filename(root, "outside", nullptr);
+	g_autofree gchar *alias = g_build_filename(destination, "subdir", nullptr);
+	g_autofree gchar *unexpected = g_build_filename(outside, "child", nullptr);
+	ASSERT_EQ(g_mkdir(subdir, 0700), 0);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	ASSERT_EQ(g_mkdir(outside, 0700), 0);
+	ASSERT_EQ(symlink(outside, alias), 0);
+	ASSERT_TRUE(g_file_set_contents(child, "source", -1, nullptr));
+	int conflicts = 0;
+	FileTreeOperation operation;
+	operation.conflict = [&conflicts](GFile *, GFile *)
+		{
+		conflicts++;
+		return FileTreeConflict{FileTreeConflictAction::SKIP, {}};
+		};
+	g_autoptr(GFile) source = g_file_new_for_path(folder);
+	g_autoptr(GFile) dest = g_file_new_for_path(destination);
+	gboolean source_removed = TRUE;
+	ASSERT_TRUE(file_tree_merge(source, dest, TRUE, source_removed, nullptr, &operation));
+	EXPECT_EQ(conflicts, 1);
+	EXPECT_FALSE(source_removed);
+	EXPECT_TRUE(isfile(child));
+	EXPECT_TRUE(islink(alias));
+	EXPECT_FALSE(isfile(unexpected));
+}
+
+TEST_F(EmptyFolderDelete, CancelingMergeLeavesAllSourceContentsAndExistingDestination)
+{
+	g_autofree gchar *conflict = g_build_filename(folder, "same", nullptr);
+	g_autofree gchar *unique = g_build_filename(folder, "unique", nullptr);
+	g_autofree gchar *destination = g_build_filename(root, "destination", nullptr);
+	g_autofree gchar *existing = g_build_filename(destination, "same", nullptr);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(conflict, "source", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(unique, "source", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(existing, "original", -1, nullptr));
+	FileTreeOperation operation;
+	operation.conflict = [](GFile *, GFile *) { return FileTreeConflict{}; };
+	g_autoptr(GFile) source = g_file_new_for_path(folder);
+	g_autoptr(GFile) dest = g_file_new_for_path(destination);
+	g_autoptr(GError) error = nullptr;
+	gboolean source_removed = TRUE;
+	EXPECT_FALSE(file_tree_merge(source, dest, TRUE, source_removed, &error, &operation));
+	EXPECT_TRUE(g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED));
+	EXPECT_FALSE(source_removed);
+	EXPECT_TRUE(isfile(conflict));
+	EXPECT_TRUE(isfile(unique));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(existing, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "original");
+}
+
+TEST_F(EmptyFolderDelete, MergeRejectsDestinationReplacedWhileResolvingConflict)
+{
+	g_autofree gchar *conflict = g_build_filename(folder, "same", nullptr);
+	g_autofree gchar *destination = g_build_filename(root, "destination", nullptr);
+	g_autofree gchar *existing = g_build_filename(destination, "same", nullptr);
+	g_autofree gchar *saved = g_build_filename(root, "saved", nullptr);
+	g_autofree gchar *outside = g_build_filename(root, "outside", nullptr);
+	g_autofree gchar *unexpected = g_build_filename(outside, "renamed", nullptr);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	ASSERT_EQ(g_mkdir(outside, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(conflict, "source", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(existing, "original", -1, nullptr));
+	FileTreeOperation operation;
+	operation.conflict = [&](GFile *, GFile *)
+		{
+		EXPECT_EQ(g_rename(destination, saved), 0);
+		EXPECT_EQ(symlink(outside, destination), 0);
+		return FileTreeConflict{FileTreeConflictAction::RENAME, "renamed"};
+		};
+	g_autoptr(GFile) source = g_file_new_for_path(folder);
+	g_autoptr(GFile) dest = g_file_new_for_path(destination);
+	g_autoptr(GError) error = nullptr;
+	gboolean source_removed = TRUE;
+	EXPECT_FALSE(file_tree_merge(source, dest, TRUE, source_removed, &error, &operation));
+	EXPECT_TRUE(g_error_matches(error, G_IO_ERROR, G_IO_ERROR_BUSY));
+	EXPECT_FALSE(source_removed);
+	EXPECT_TRUE(isfile(conflict));
+	EXPECT_FALSE(isfile(unexpected));
+}
+
+TEST_F(EmptyFolderDelete, MergeCancellationDuringRemovalKeepsCopiesAndRemainingSource)
+{
+	g_autofree gchar *first = g_build_filename(folder, "first", nullptr);
+	g_autofree gchar *second = g_build_filename(folder, "second", nullptr);
+	g_autofree gchar *destination = g_build_filename(root, "destination", nullptr);
+	g_autofree gchar *copied_first = g_build_filename(destination, "first", nullptr);
+	g_autofree gchar *copied_second = g_build_filename(destination, "second", nullptr);
+	ASSERT_EQ(g_mkdir(destination, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(first, "first", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(second, "second", -1, nullptr));
+	g_autoptr(GCancellable) cancellable = g_cancellable_new();
+	struct CancelRemoval
+	{
+		GCancellable *cancellable;
+		FileTreeOperation *operation;
+		int removals = 0;
+	} cancel{cancellable, nullptr};
+	FileTreeOperation operation;
+	cancel.operation = &operation;
+	operation.cancellable = cancellable;
+	operation.data = &cancel;
+	operation.progress = [](GFile *, gpointer data)
+		{
+		auto *cancel = static_cast<CancelRemoval *>(data);
+		if (cancel->operation->phase == FileTreePhase::REMOVE && ++cancel->removals == 2)
+			g_cancellable_cancel(cancel->cancellable);
+		};
+	g_autoptr(GFile) source = g_file_new_for_path(folder);
+	g_autoptr(GFile) dest = g_file_new_for_path(destination);
+	g_autoptr(GError) error = nullptr;
+	gboolean source_removed = TRUE;
+	EXPECT_FALSE(file_tree_merge(source, dest, TRUE, source_removed, &error, &operation));
+	EXPECT_TRUE(g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED));
+	EXPECT_FALSE(source_removed);
+	EXPECT_TRUE(isdir(folder));
+	EXPECT_NE(isfile(first), isfile(second));
+	EXPECT_TRUE(isfile(copied_first));
+	EXPECT_TRUE(isfile(copied_second));
 }
 
 TEST_F(EmptyFolderDelete, PrivateTrashPreservesFolderAndOriginalPath)
@@ -771,6 +1221,19 @@ TEST_F(EmptyFolderDelete, CrossFilesystemMovePreservesTreeAndRelativeLinks)
 	EXPECT_STREQ(target, "subdir/.hidden");
 	ASSERT_TRUE(file_tree_move(dest, source, nullptr));
 	EXPECT_TRUE(isfile(child));
+	// Exercise merging into a preexisting folder on the second filesystem too.
+	ASSERT_EQ(g_mkdir(dest_path, 0700), 0);
+	g_autofree gchar *existing = g_build_filename(dest_path, "keep", nullptr);
+	ASSERT_TRUE(g_file_set_contents(existing, "original", -1, nullptr));
+	gboolean source_removed = FALSE;
+	ASSERT_TRUE(file_tree_merge(source, dest, TRUE, source_removed, &error)) << (error ? error->message : "");
+	EXPECT_TRUE(source_removed);
+	EXPECT_FALSE(isdir(folder));
+	EXPECT_TRUE(isfile(dest_child));
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(existing, &contents, nullptr, nullptr));
+	EXPECT_STREQ(contents, "original");
+	ASSERT_TRUE(file_tree_move(dest, source, nullptr));
 }
 
 } // namespace

@@ -3044,21 +3044,25 @@ static gboolean file_util_transfer_folder(GList *list, const gchar *dest_path, G
 	g_autofree gchar *name = g_path_get_basename(canonical_source);
 	g_autofree gchar *destination = g_build_filename(dest_path, name, nullptr);
 	struct stat destination_stat;
-	if (lstat_utf8(destination, &destination_stat))
+	const gboolean exists = lstat_utf8(destination, &destination_stat);
+	const gboolean merge = exists && S_ISDIR(destination_stat.st_mode) && !islink((*source)->path);
+	if (exists && !merge)
 		{
 		g_autofree gchar *message = g_strdup_printf(_("The destination already exists:\n%s\n\nChoose another folder."), destination);
 		warning_dialog(title, message, GQ_ICON_DIALOG_ERROR, parent);
 		return TRUE;
 		}
-	if (!(move ? file_data_sc_add_ci_move(*source, destination) : file_data_sc_add_ci_copy(*source, destination)))
+	if (!(move ? file_data_sc_add_ci_move(*source, dest_path) : file_data_sc_add_ci_copy(*source, dest_path)))
 		{
 		warning_dialog(title, _("Another operation in progress.\n"), GQ_ICON_DIALOG_ERROR, parent);
 		return TRUE;
 		}
 	const std::string source_path = canonical_source;
 	const std::string destination_path = destination;
+	auto source_removed = std::make_shared<gboolean>(FALSE);
+	auto actual_destination = std::make_shared<std::string>();
 	file_tree_task_run(title, parent,
-		[source_path, destination_path, move](FileTreeOperation *operation, GError **error)
+		[source_path, destination_path, move, merge, source_removed, actual_destination](FileTreeOperation *operation, GError **error)
 			{
 			g_autofree gchar *source_fs = path_from_utf8(source_path.c_str());
 			g_autofree gchar *destination_fs = path_from_utf8(destination_path.c_str());
@@ -3080,18 +3084,42 @@ static gboolean file_util_transfer_folder(GList *list, const gchar *dest_path, G
 				g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, _("Cannot transfer a folder into itself or one of its subfolders."));
 				return FALSE;
 				}
-			// Neither operation merges with or replaces an existing destination.
-			return move ? file_tree_move(source_file, destination_file, error, operation)
-			            : file_tree_copy(source_file, destination_file, error, operation);
+			if (merge)
+				{
+				const gboolean success = file_tree_merge(source_file, destination_file, move, *source_removed, error, operation);
+				*actual_destination = operation->destination;
+				return success;
+				}
+			const gboolean success = move ? file_tree_move(source_file, destination_file, error, operation)
+			                              : file_tree_copy(source_file, destination_file, error, operation);
+			*source_removed = move && success;
+			return success;
 			},
-		[source, move](gboolean success, const GError *error)
+		[source, move, source_removed, actual_destination](gboolean success, const GError *error)
 			{
-			if (success) file_data_apply_ci(*source);
+			if (success && (!move || *source_removed))
+				{
+				if (move && !actual_destination->empty() && *actual_destination != (*source)->change->dest)
+					{
+					// Rename records an exact path, including an automatically chosen basename.
+					file_data_free_ci(*source);
+					if (!file_data_sc_add_ci_rename(*source, actual_destination->c_str()))
+						{
+						file_data_send_notification(*source, NOTIFY_REREAD);
+						return;
+						}
+					}
+				file_data_apply_ci(*source);
+				}
 			else
 				{
-				file_data_send_notification(*source, NOTIFY_REREAD);
-				warning_dialog(move ? _("Move failed") : _("Copy failed"),
-				               error ? error->message : _("Unknown error"), GQ_ICON_DIALOG_ERROR, nullptr);
+				// A partial merge keeps the source folder and refreshes both parents.
+				file_data_send_notification(*source, NOTIFY_CHANGE);
+				if (!success)
+					{
+					warning_dialog(move ? _("Move failed") : _("Copy failed"),
+					               error ? error->message : _("Unknown error"), GQ_ICON_DIALOG_ERROR, nullptr);
+					}
 				}
 			file_data_free_ci(*source);
 			});

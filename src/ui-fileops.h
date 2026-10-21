@@ -26,6 +26,8 @@
 
 #include <cstdio>
 #include <ctime>
+#include <functional>
+#include <string>
 
 #include <gio/gio.h>
 #include <glib.h>
@@ -114,6 +116,15 @@ struct FileTreeStats
 
 enum class FileTreePhase { SCAN, COPY, REMOVE };
 
+enum class FileTreeConflictAction { CANCEL, SKIP, RENAME, DUPLICATE, MERGE };
+
+struct FileTreeConflict
+{
+	FileTreeConflictAction action = FileTreeConflictAction::CANCEL;
+	std::string name; /**< New basename for RENAME */
+	bool apply_to_all = false; /**< Repeats Skip, Duplicate, or folder Merge */
+};
+
 /** Callback runs on the operation's thread; it must not access GTK. */
 struct FileTreeOperation
 {
@@ -121,11 +132,20 @@ struct FileTreeOperation
 	void (*progress)(GFile *file, gpointer data) = nullptr;
 	gpointer data = nullptr;
 	FileTreePhase phase = FileTreePhase::SCAN;
+	std::function<FileTreeConflict(GFile *, GFile *)> conflict = {};
+	bool confirm_merge = false;
+	std::string destination = {}; /**< Actual UTF-8 root destination, including duplication */
 };
 
 gboolean file_tree_stats(GFile *file, FileTreeStats &stats, GError **error, FileTreeOperation *operation = nullptr);
 gboolean file_tree_copy(GFile *source, GFile *dest, GError **error, FileTreeOperation *operation = nullptr);
 gboolean file_tree_move(GFile *source, GFile *dest, GError **error, FileTreeOperation *operation = nullptr);
+/** Merges directories without replacing entries or following destination symlinks.
+ * Conflicts are resolved on the calling thread through operation->conflict.
+ * Completed destination entries remain on failure. source_removed reports a complete move.
+ */
+gboolean file_tree_merge(GFile *source, GFile *dest, gboolean move, gboolean &source_removed,
+                         GError **error, FileTreeOperation *operation = nullptr);
 
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error, FileTreeOperation *operation = nullptr);
 

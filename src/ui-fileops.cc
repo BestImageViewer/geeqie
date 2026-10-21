@@ -1096,8 +1096,21 @@ gboolean tree_verify(const TreeEntry &entry, FileTreeOperation *operation, GErro
 	return FALSE;
 }
 
+gboolean tree_verify_destination(const TreeEntry &entry, FileTreeOperation *operation, GError **error, bool identity_only)
+{
+	g_autoptr(GFile) file = g_file_new_for_uri(entry.uri.c_str());
+	g_autoptr(GFileInfo) info = g_file_query_info(file, TREE_ATTRIBUTES, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                                          tree_cancellable(operation), error);
+	if (!info) return FALSE;
+	// Destination parents may be mount roots; they are not traversed or removed.
+	if (tree_entry_matches(entry, tree_entry(file, info), identity_only)) return TRUE;
+	g_autofree gchar *display = g_file_get_parse_name(file);
+	g_set_error(error, G_IO_ERROR, G_IO_ERROR_BUSY, _("The destination changed during the merge:\n%s"), display);
+	return FALSE;
+}
+
 gboolean tree_verify_ancestors(GFile *file, const std::unordered_map<std::string, const TreeEntry *> &directories,
-                               FileTreeOperation *operation, GError **error)
+                               FileTreeOperation *operation, GError **error, bool destination = false)
 {
 	g_autoptr(GFile) parent = g_file_get_parent(file);
 	while (parent)
@@ -1105,7 +1118,8 @@ gboolean tree_verify_ancestors(GFile *file, const std::unordered_map<std::string
 		g_autofree gchar *uri = g_file_get_uri(parent);
 		const auto found = directories.find(uri);
 		if (found == directories.end()) break;
-		if (!tree_verify(*found->second, operation, error, true)) return FALSE;
+		if (destination ? !tree_verify_destination(*found->second, operation, error, true)
+		                : !tree_verify(*found->second, operation, error, true)) return FALSE;
 		auto *next = g_file_get_parent(parent);
 		g_object_unref(g_steal_pointer(&parent));
 		parent = next;
@@ -1121,7 +1135,8 @@ std::unordered_map<std::string, const TreeEntry *> tree_directories(const TreePl
 	return directories;
 }
 
-gboolean tree_remove_plan(const TreePlan &plan, FileTreeOperation *operation, GError **error, guint64 *removed = nullptr)
+gboolean tree_remove_plan(const TreePlan &plan, FileTreeOperation *operation, GError **error, guint64 *removed = nullptr,
+                          const std::unordered_set<std::string> *retained = nullptr)
 {
 	if (operation) operation->phase = FileTreePhase::REMOVE;
 	// Validate the complete copy before deleting any source entries.
@@ -1131,6 +1146,7 @@ gboolean tree_remove_plan(const TreePlan &plan, FileTreeOperation *operation, GE
 		if (!tree_verify(entry, operation, error)) return FALSE;
 	for (const auto &entry : plan)
 		{
+		if (retained && retained->count(entry.uri)) continue;
 		g_autoptr(GFile) file = g_file_new_for_uri(entry.uri.c_str());
 		if (!tree_progress(file, operation, error) ||
 		    !tree_verify_ancestors(file, directories, operation, error) ||
@@ -1284,6 +1300,227 @@ gboolean file_tree_move(GFile *source, GFile *dest, GError **error, FileTreeOper
 	g_autofree gchar *source_display = g_file_get_parse_name(source);
 	g_autofree gchar *dest_display = g_file_get_parse_name(dest);
 	g_prefix_error(error, _("Copying completed, but source removal did not finish.\nThe completed copy remains at:\n%s\n\nSource entries removed: %" G_GUINT64_FORMAT "\nAny remaining source contents are at:\n%s\n\n"), dest_display, removed, source_display);
+	return FALSE;
+}
+
+gboolean file_tree_merge(GFile *source, GFile *dest, gboolean move, gboolean &source_removed,
+                         GError **error, FileTreeOperation *operation)
+{
+	source_removed = FALSE;
+	if (operation) operation->destination.clear();
+	FileTreeStats stats;
+	TreePlan plan;
+	if (!tree_prepare(source, stats, &plan, operation, error)) return FALSE;
+	g_autofree gchar *source_path = g_file_get_path(source);
+	g_autoptr(GFile) parent = g_file_get_parent(dest);
+	g_autofree gchar *parent_path = parent ? g_file_get_path(parent) : nullptr;
+	g_autofree gchar *real_source = source_path ? realpath(source_path, nullptr) : nullptr;
+	g_autofree gchar *real_parent = parent_path ? realpath(parent_path, nullptr) : nullptr;
+	if (!real_source || !real_parent)
+		{
+		g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND, _("Source or destination folder does not exist."));
+		return FALSE;
+		}
+	g_autoptr(GFile) resolved_source = g_file_new_for_path(real_source);
+	g_autoptr(GFile) resolved_parent = g_file_new_for_path(real_parent);
+	g_autofree gchar *basename = g_file_get_basename(dest);
+	g_autoptr(GFile) resolved_dest = g_file_get_child(resolved_parent, basename);
+	if (g_file_equal(resolved_dest, resolved_source) || g_file_has_prefix(resolved_dest, resolved_source) ||
+	    g_file_has_prefix(resolved_source, resolved_dest))
+		{
+		g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, _("Cannot merge a folder with itself, its parent folders, or its subfolders."));
+		return FALSE;
+		}
+
+	const auto source_directories = tree_directories(plan);
+	TreePlan destination_entries;
+	std::unordered_map<std::string, const TreeEntry *> destination_directories;
+	std::unordered_map<std::string, std::string> destinations;
+	std::unordered_set<std::string> retained;
+	std::unordered_set<std::string> created_directories;
+	FileTreeConflict repeated_choice;
+	bool merge_all_folders = false;
+	// Reserve before taking pointers to directory entries.
+	destination_entries.reserve(plan.size() + 1);
+	g_autoptr(GFileInfo) parent_info = g_file_query_info(resolved_parent, TREE_ATTRIBUTES,
+	                                  G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, tree_cancellable(operation), error);
+	if (!parent_info) return FALSE;
+	destination_entries.push_back(tree_entry(resolved_parent, parent_info));
+	destination_directories.emplace(destination_entries.back().uri, &destination_entries.back());
+	const auto retain_source = [&retained](GFile *file)
+		{
+		g_autoptr(GFile) current = G_FILE(g_object_ref(file));
+		while (current)
+			{
+			g_autofree gchar *uri = g_file_get_uri(current);
+			retained.emplace(uri);
+			auto *next = g_file_get_parent(current);
+			g_object_unref(g_steal_pointer(&current));
+			current = next;
+			}
+		};
+	if (operation) operation->phase = FileTreePhase::COPY;
+	for (auto it = plan.rbegin(); it != plan.rend(); ++it)
+		{
+		g_autoptr(GFile) file = g_file_new_for_uri(it->uri.c_str());
+		g_autoptr(GFile) destination = nullptr;
+		if (g_file_equal(file, source)) destination = G_FILE(g_object_ref(resolved_dest));
+		else
+			{
+			g_autoptr(GFile) source_parent = g_file_get_parent(file);
+			g_autofree gchar *parent_uri = g_file_get_uri(source_parent);
+			const auto found = destinations.find(parent_uri);
+			if (found == destinations.end())
+				{
+				retain_source(file);
+				continue;
+				}
+			g_autoptr(GFile) target_parent = g_file_new_for_uri(found->second.c_str());
+			g_autofree gchar *name = g_file_get_basename(file);
+			destination = g_file_get_child(target_parent, name);
+			}
+		if (!tree_progress(file, operation, error) || !tree_verify_ancestors(file, source_directories, operation, error) ||
+		    !tree_verify(*it, operation, error)) goto fail;
+		bool renamed = false;
+		bool skip = false;
+		bool merge_directory = false;
+		bool duplicate_current = false;
+		g_autofree gchar *original_name = g_file_get_basename(destination);
+		guint rename_index = 0;
+		while (TRUE)
+			{
+			if (!tree_verify_ancestors(destination, destination_directories, operation, error, true)) goto fail;
+			g_autoptr(GError) query_error = nullptr;
+			g_autoptr(GFileInfo) existing = g_file_query_info(destination, TREE_ATTRIBUTES,
+			                               G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, tree_cancellable(operation), &query_error);
+			if (!existing)
+				{
+				if (g_error_matches(query_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) break;
+				g_propagate_error(error, g_steal_pointer(&query_error));
+				goto fail;
+				}
+			const bool folders = it->type == G_FILE_TYPE_DIRECTORY && g_file_info_get_file_type(existing) == G_FILE_TYPE_DIRECTORY;
+			if (!renamed && folders && (!operation || !operation->confirm_merge || merge_all_folders) && !repeated_choice.apply_to_all)
+				{
+				merge_directory = true;
+				break;
+				}
+			const auto choice = duplicate_current ? FileTreeConflict{FileTreeConflictAction::DUPLICATE, {}} :
+			                    repeated_choice.apply_to_all ? repeated_choice :
+			                    (operation && operation->conflict ? operation->conflict(file, destination) : FileTreeConflict{});
+			if (choice.action == FileTreeConflictAction::MERGE && folders)
+				{
+				merge_directory = true;
+				if (choice.apply_to_all) merge_all_folders = true;
+				break;
+				}
+			if (choice.apply_to_all && (choice.action == FileTreeConflictAction::SKIP || choice.action == FileTreeConflictAction::DUPLICATE)) repeated_choice = choice;
+			if (choice.action == FileTreeConflictAction::CANCEL)
+				{
+				g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_CANCELLED, _("Folder merge canceled."));
+				goto fail;
+				}
+			if (choice.action == FileTreeConflictAction::SKIP)
+				{
+				skip = true;
+				break;
+				}
+			if (choice.action == FileTreeConflictAction::DUPLICATE)
+				{
+				duplicate_current = true;
+				// Keep each item's own name and extension when automatically renaming.
+				const gchar *extension = it->type == G_FILE_TYPE_DIRECTORY ? nullptr : strrchr(original_name, '.');
+				if (extension == original_name) extension = nullptr;
+				g_autofree gchar *stem = extension ? g_strndup(original_name, extension - original_name) : g_strdup(original_name);
+				++rename_index;
+				g_autofree gchar *name = rename_index == 1 ? g_strdup_printf(_("%s (Copy)%s"), stem, extension ? extension : "")
+				                                         : g_strdup_printf(_("%s (Copy %u)%s"), stem, rename_index, extension ? extension : "");
+				g_autoptr(GFile) target_parent = g_file_get_parent(destination);
+				g_object_unref(g_steal_pointer(&destination));
+				destination = g_file_get_child(target_parent, name);
+				renamed = true;
+				continue;
+				}
+			if (choice.name.empty() || choice.name == "." || choice.name == ".." || choice.name.find('/') != std::string::npos)
+				{
+				g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_INVALID_FILENAME, _("Enter a file name without a folder path."));
+				goto fail;
+				}
+			g_autoptr(GFile) target_parent = g_file_get_parent(destination);
+			g_autofree gchar *name_fs = path_from_utf8(choice.name.c_str());
+			g_object_unref(g_steal_pointer(&destination));
+			destination = g_file_get_child(target_parent, name_fs);
+			renamed = true;
+			}
+		if (skip)
+			{
+			retain_source(file);
+			continue;
+			}
+		if (operation && g_file_equal(file, source))
+			{
+			g_autofree gchar *path = g_file_get_path(destination);
+			g_autofree gchar *utf8 = path_to_utf8(path);
+			operation->destination = utf8;
+			}
+		// Revalidate after the conflict dialog, which can remain open indefinitely.
+		if (!tree_progress(file, operation, error) || !tree_verify_ancestors(file, source_directories, operation, error) ||
+		    !tree_verify(*it, operation, error) || !tree_verify_ancestors(destination, destination_directories, operation, error, true)) goto fail;
+		if (it->type == G_FILE_TYPE_DIRECTORY)
+			{
+			if (!merge_directory && !g_file_make_directory(destination, tree_cancellable(operation), error)) goto fail;
+			if (!merge_directory) created_directories.emplace(it->uri);
+			}
+		else
+			{
+			TreeCopyProgress progress{file, operation};
+			if (!g_file_copy(file, destination, G_FILE_COPY_NOFOLLOW_SYMLINKS, tree_cancellable(operation), tree_copy_progress, &progress, error)) goto fail;
+			}
+		g_autoptr(GFileInfo) copied = g_file_query_info(destination, TREE_ATTRIBUTES,
+		                            G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, tree_cancellable(operation), error);
+		if (!copied) goto fail;
+		if (g_file_info_get_file_type(copied) != it->type)
+			{
+			g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_BUSY, _("The destination changed during the merge."));
+			goto fail;
+			}
+		destination_entries.push_back(tree_entry(destination, copied));
+		if (it->type == G_FILE_TYPE_DIRECTORY)
+			{
+			destinations.emplace(it->uri, destination_entries.back().uri);
+			destination_directories.emplace(destination_entries.back().uri, &destination_entries.back());
+			}
+		}
+	// Preserve attributes on new folders, leaving existing destination folders alone.
+	for (const auto &entry : plan)
+		{
+		if (!created_directories.count(entry.uri)) continue;
+		g_autoptr(GFile) file = g_file_new_for_uri(entry.uri.c_str());
+		g_autoptr(GFile) destination = g_file_new_for_uri(destinations.at(entry.uri).c_str());
+		if (!tree_verify_ancestors(destination, destination_directories, operation, error, true) ||
+		    !tree_verify_destination(*destination_directories.at(destinations.at(entry.uri)), operation, error, true) ||
+		    !tree_verify(entry, operation, error)) goto fail;
+		g_autoptr(GFileInfo) attributes = g_file_query_info(file,
+		                     G_FILE_ATTRIBUTE_UNIX_MODE "," G_FILE_ATTRIBUTE_TIME_MODIFIED ","
+		                     G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC "," G_FILE_ATTRIBUTE_TIME_ACCESS ","
+		                     G_FILE_ATTRIBUTE_TIME_ACCESS_USEC ",xattr::*",
+		                     G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, tree_cancellable(operation), error);
+		if (!attributes || !g_file_set_attributes_from_info(destination, attributes, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                                                  tree_cancellable(operation), error)) goto fail;
+		}
+	for (const auto &entry : plan)
+		if (!tree_verify(entry, operation, error)) goto fail;
+	if (!move) return TRUE;
+	for (const auto &entry : destination_entries)
+		if (!tree_verify_destination(entry, operation, error, entry.type == G_FILE_TYPE_DIRECTORY)) goto fail;
+	if (!tree_remove_plan(plan, operation, error, nullptr, &retained)) goto fail;
+	source_removed = retained.count(plan.back().uri) == 0;
+	return TRUE;
+
+fail:
+	g_autofree gchar *source_display = g_file_get_parse_name(source);
+	g_autofree gchar *dest_display = g_file_get_parse_name(dest);
+	g_prefix_error(error, _("The merge did not finish. Completed copies remain at:\n%s\n\nAny remaining source contents are at:\n%s\n\n"), dest_display, source_display);
 	return FALSE;
 }
 
