@@ -35,6 +35,16 @@
     </para>
     <para />
   </section>
+  <section id="FileListFont">
+    <title>Changing the file list font</title>
+    <para>The file list normally uses your desktop's interface font. To change the font for the file names and details in list view, create or edit <filename>~/.config/gtk-4.0/gtk.css</filename>. The file must be named <filename>gtk.css</filename>, in the <filename>gtk-4.0</filename> directory (with a hyphen). If that directory already contains <filename>settings.ini</filename>, leave it in place and create <filename>gtk.css</filename> alongside it. Put the following rule in <filename>gtk.css</filename>, not in <filename>settings.ini</filename>; no <filename>geeqie.ini</filename> file is needed:</para>
+    <programlisting>.geeqie-file-list {
+    font-family: monospace;
+}</programlisting>
+    <para>If <envar>XDG_CONFIG_HOME</envar> is set, use <filename>gtk-4.0/gtk.css</filename> inside that directory instead. Create the directory and file if they do not exist, and preserve any existing rules.</para>
+    <para>You can replace <literal>monospace</literal> with an installed font name, such as <literal>"DejaVu Sans Mono"</literal>, and optionally add <literal>font-size: 11pt;</literal> inside the braces.</para>
+    <para>Restart Geeqie to apply the change. This rule applies only to the file list; the folder pane and icon view keep their usual fonts. To restore the default font, remove the rule and restart Geeqie.</para>
+  </section>
   <section id="Iconview">
     <title id="titleIconview">Icon view</title>
     <para>

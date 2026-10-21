@@ -2064,6 +2064,8 @@ ViewFile *vflist_new(ViewFile *vf)
 
 	vf->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	VFLIST(vf)->details_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	gtk_widget_add_css_class(vf->listview, "geeqie-file-list");
+	gtk_widget_add_css_class(VFLIST(vf)->details_view, "geeqie-file-list");
 	g_object_unref(store);
 
 	g_signal_connect(G_OBJECT(vf->listview), "row-expanded",
