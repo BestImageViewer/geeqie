@@ -231,6 +231,81 @@ protected:
 	gboolean saved_confirm_trash_dir = FALSE;
 };
 
+TEST_F(EmptyFolderDelete, FolderDropCopiesThenMovesWholeTree)
+{
+	g_autofree gchar *subdir = g_build_filename(folder, "subdir", nullptr);
+	g_autofree gchar *hidden = g_build_filename(subdir, ".hidden", nullptr);
+	g_autofree gchar *target = g_build_filename(root, "target", nullptr);
+	g_autofree gchar *copied = g_build_filename(target, "folder", "subdir", ".hidden", nullptr);
+	ASSERT_EQ(g_mkdir(subdir, 0700), 0);
+	ASSERT_EQ(g_mkdir(target, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(hidden, "contents", -1, nullptr));
+	auto source = FileData::new_dir(folder);
+	file_util_copy_simple(g_list_prepend(nullptr, file_data_ref(source)), target, nullptr);
+	ASSERT_TRUE(wait_for([&] { return source->change == nullptr; }));
+	EXPECT_TRUE(isfile(hidden));
+	EXPECT_TRUE(isfile(copied));
+
+	g_autofree gchar *move_target = g_build_filename(root, "move-target", nullptr);
+	g_autofree gchar *moved = g_build_filename(move_target, "folder", nullptr);
+	g_autofree gchar *moved_hidden = g_build_filename(moved, "subdir", ".hidden", nullptr);
+	ASSERT_EQ(g_mkdir(move_target, 0700), 0);
+	file_util_move_simple(g_list_prepend(nullptr, file_data_ref(source)), move_target, nullptr);
+	ASSERT_TRUE(wait_for([&] { return source->change == nullptr; }));
+	EXPECT_FALSE(isdir(folder));
+	EXPECT_TRUE(isfile(moved_hidden));
+	EXPECT_STREQ(source->path, moved);
+}
+
+TEST_F(EmptyFolderDelete, FolderDropRejectsDescendantThroughAlias)
+{
+	g_autofree gchar *subdir = g_build_filename(folder, "subdir", nullptr);
+	g_autofree gchar *alias = g_build_filename(root, "alias", nullptr);
+	g_autofree gchar *invalid = g_build_filename(subdir, "folder", nullptr);
+	ASSERT_EQ(g_mkdir(subdir, 0700), 0);
+	ASSERT_EQ(symlink(subdir, alias), 0);
+	auto source = FileData::new_dir(folder);
+	file_util_move_simple(g_list_prepend(nullptr, file_data_ref(source)), alias, nullptr);
+	ASSERT_TRUE(wait_for([&] { return source->change == nullptr; }));
+	EXPECT_TRUE(isdir(folder));
+	EXPECT_FALSE(isdir(invalid));
+	EXPECT_STREQ(source->path, folder);
+}
+
+TEST_F(EmptyFolderDelete, FolderDropRefusesExistingDestination)
+{
+	g_autofree gchar *target = g_build_filename(root, "target", nullptr);
+	g_autofree gchar *existing = g_build_filename(target, "folder", nullptr);
+	g_autofree gchar *keep = g_build_filename(existing, "keep", nullptr);
+	ASSERT_EQ(g_mkdir(target, 0700), 0);
+	ASSERT_EQ(g_mkdir(existing, 0700), 0);
+	ASSERT_TRUE(g_file_set_contents(keep, "original", -1, nullptr));
+	auto source = FileData::new_dir(folder);
+	for (bool move : {false, true})
+		{
+		GList *list = g_list_prepend(nullptr, file_data_ref(source));
+		if (move) file_util_move_simple(list, target, nullptr);
+		else file_util_copy_simple(list, target, nullptr);
+		ASSERT_TRUE(wait_for([&] { return source->change == nullptr; }));
+		EXPECT_TRUE(isdir(folder));
+		EXPECT_TRUE(isfile(keep));
+		EXPECT_STREQ(source->path, folder);
+		bool visible_warning = false;
+		GListModel *windows = gtk_window_get_toplevels();
+		for (guint i = 0; i < g_list_model_get_n_items(windows); i++)
+			{
+			g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+			const gchar *title = gtk_window_get_title(window);
+			if (title && strstr(title, move ? "Move folder" : "Copy folder") &&
+			    gtk_widget_get_visible(GTK_WIDGET(window)) && find_label(GTK_WIDGET(window), existing))
+				{
+				visible_warning = true;
+				}
+			}
+		EXPECT_TRUE(visible_warning) << "The conflict must be explained in a visible dialog";
+		}
+}
+
 TEST_F(EmptyFolderDelete, PrivateTrashPreservesFolderAndOriginalPath)
 {
 	ASSERT_TRUE(delete_folder());

@@ -1223,9 +1223,15 @@ static GdkDragAction vd_dnd_select_action(GdkDrop *drop)
 	return GDK_ACTION_NONE;
 }
 
-static DnDAction vd_dnd_requested_action(GtkDropTargetAsync *target)
+static DnDAction vd_dnd_requested_action(GtkDropTargetAsync *target, GdkDrop *drop)
 {
-	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(target));
+	GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(target));
+	// DND events may omit modifiers. Read the keyboard associated with the drop
+	// before starting the asynchronous data transfer, while the keys are held.
+	GdkDevice *device = gdk_drop_get_device(drop);
+	GdkSeat *seat = device ? gdk_device_get_seat(device) : nullptr;
+	GdkDevice *keyboard = seat ? gdk_seat_get_keyboard(seat) : nullptr;
+	if (keyboard) state = gdk_device_get_modifier_state(keyboard);
 	if (state & GDK_CONTROL_MASK) return DND_ACTION_COPY;
 	if (state & GDK_SHIFT_MASK) return DND_ACTION_MOVE;
 
@@ -1236,12 +1242,10 @@ static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *target, GdkDrop *dro
 {
 	auto vd = static_cast<ViewDir *>(data);
 	GdkDrag *drag = gdk_drop_get_drag(drop);
-	if (drag && g_object_get_data(G_OBJECT(drag), VIEW_DIR_DRAG_DATA_KEY) == vd)
+	if (!drag || g_object_get_data(G_OBJECT(drag), VIEW_DIR_DRAG_DATA_KEY) != vd)
 		{
-		return GDK_ACTION_NONE;
+		vd->click_fd = nullptr;
 		}
-
-	vd->click_fd = nullptr;
 
 	vd_dnd_drop_update(vd, x, y);
 
@@ -1271,7 +1275,7 @@ static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *target, GdkDrop *dro
 	if (!vd->drop_fd) return GDK_ACTION_NONE;
 
 	const GdkDragAction actions = gdk_drop_get_actions(drop);
-	switch (vd_dnd_requested_action(target))
+	switch (vd_dnd_requested_action(target, drop))
 		{
 		case DND_ACTION_COPY:
 			return (actions & GDK_ACTION_COPY) ? GDK_ACTION_COPY : vd_dnd_select_action(drop);
@@ -1359,12 +1363,6 @@ static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
 static gboolean vd_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GdkDrag *drag = gdk_drop_get_drag(drop);
-	if (drag && g_object_get_data(G_OBJECT(drag), VIEW_DIR_DRAG_DATA_KEY) == vd)
-		{
-		return FALSE;
-		}
-
 	vd_dnd_drop_update(vd, x, y);
 	vd_dnd_drop_scroll_cancel(vd);
 	widget_auto_scroll_stop(vd->view);
@@ -1374,7 +1372,7 @@ static gboolean vd_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x
 	auto *drop_data = g_new0(VdDropReadData, 1);
 	drop_data->view = GTK_WIDGET(g_object_ref(vd->view));
 	drop_data->drop_fd = file_data_ref(vd->drop_fd);
-	drop_data->action = vd_dnd_requested_action(target);
+	drop_data->action = vd_dnd_requested_action(target, drop);
 	graphene_point_t position{static_cast<float>(x), static_cast<float>(y)};
 	if (!gtk_widget_compute_point(vd->view, vd->widget, &position, &drop_data->position))
 		{
@@ -1584,12 +1582,22 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (vd->type == DIRVIEW_TREE)
 		{
-		GtkTreeIter iter;
-		auto base_fd_ref = FileData::new_dir(base);
-
-		if (vd_find_row(vd, base_fd_ref, &iter))
+		const auto refresh_parent = [vd](const gchar *path)
 			{
-			vdtree_populate_path_by_iter(vd, &iter, TRUE, vd->dir_fd);
+			if (!path) return;
+			g_autofree gchar *parent = remove_level_from_path(path);
+			auto parent_fd = FileData::new_dir(parent);
+			GtkTreeIter iter;
+			if (vd_find_row(vd, parent_fd, &iter))
+				{
+				vdtree_populate_path_by_iter(vd, &iter, TRUE, vd->dir_fd);
+				}
+			};
+		refresh_parent(fd->path);
+		if ((type & NOTIFY_CHANGE) && fd->change)
+			{
+			refresh_parent(fd->change->source);
+			refresh_parent(fd->change->dest);
 			}
 		}
 }

@@ -21,8 +21,10 @@
 
 #include "utilops.h"
 
+#include <sys/stat.h>
 #include <unistd.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <string>
@@ -3019,16 +3021,95 @@ void file_util_rename(FileData *source_fd, GList *source_list, GtkWidget *parent
 	file_util_rename_full(source_fd, source_list, nullptr, parent, UtilityPhase::START);
 }
 
-/* these avoid the location entry dialog unless there is an error, list must be files only and
+// Consumes lists containing folders; ordinary file lists use the existing file operations.
+static gboolean file_util_transfer_folder(GList *list, const gchar *dest_path, GtkWidget *parent, gboolean move)
+{
+	bool has_folder = false;
+	for (GList *work = list; work; work = work->next)
+		{
+		if (isdir(static_cast<FileData *>(work->data)->path)) has_folder = true;
+		}
+	if (!has_folder) return FALSE;
+
+	g_autoptr(FileDataList) owned_list = list;
+	const gchar *title = move ? _("Move folder") : _("Copy folder");
+	if (list->next || !dest_path)
+		{
+		warning_dialog(title, _("Transfer one folder at a time."), GQ_ICON_DIALOG_ERROR, parent);
+		return TRUE;
+		}
+
+	auto source = std::make_shared<FileDataRef>(static_cast<FileData *>(list->data));
+	g_autofree gchar *canonical_source = g_canonicalize_filename((*source)->path, nullptr);
+	g_autofree gchar *name = g_path_get_basename(canonical_source);
+	g_autofree gchar *destination = g_build_filename(dest_path, name, nullptr);
+	struct stat destination_stat;
+	if (lstat_utf8(destination, &destination_stat))
+		{
+		g_autofree gchar *message = g_strdup_printf(_("The destination already exists:\n%s\n\nChoose another folder."), destination);
+		warning_dialog(title, message, GQ_ICON_DIALOG_ERROR, parent);
+		return TRUE;
+		}
+	if (!(move ? file_data_sc_add_ci_move(*source, destination) : file_data_sc_add_ci_copy(*source, destination)))
+		{
+		warning_dialog(title, _("Another operation in progress.\n"), GQ_ICON_DIALOG_ERROR, parent);
+		return TRUE;
+		}
+	const std::string source_path = canonical_source;
+	const std::string destination_path = destination;
+	file_tree_task_run(title, parent,
+		[source_path, destination_path, move](FileTreeOperation *operation, GError **error)
+			{
+			g_autofree gchar *source_fs = path_from_utf8(source_path.c_str());
+			g_autofree gchar *destination_fs = path_from_utf8(destination_path.c_str());
+			g_autoptr(GFile) source_file = g_file_new_for_path(source_fs);
+			g_autoptr(GFile) destination_file = g_file_new_for_path(destination_fs);
+			g_autoptr(GFile) destination_parent = g_file_get_parent(destination_file);
+			g_autofree gchar *parent_path = destination_parent ? g_file_get_path(destination_parent) : nullptr;
+			g_autofree gchar *real_source = realpath(source_fs, nullptr);
+			g_autofree gchar *real_parent = parent_path ? realpath(parent_path, nullptr) : nullptr;
+			if (!real_source || !real_parent)
+				{
+				g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND, _("Source or destination folder does not exist."));
+				return FALSE;
+				}
+			g_autoptr(GFile) resolved_source = g_file_new_for_path(real_source);
+			g_autoptr(GFile) resolved_parent = g_file_new_for_path(real_parent);
+			if (g_file_equal(resolved_parent, resolved_source) || g_file_has_prefix(resolved_parent, resolved_source))
+				{
+				g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, _("Cannot transfer a folder into itself or one of its subfolders."));
+				return FALSE;
+				}
+			// Neither operation merges with or replaces an existing destination.
+			return move ? file_tree_move(source_file, destination_file, error, operation)
+			            : file_tree_copy(source_file, destination_file, error, operation);
+			},
+		[source, move](gboolean success, const GError *error)
+			{
+			if (success) file_data_apply_ci(*source);
+			else
+				{
+				file_data_send_notification(*source, NOTIFY_REREAD);
+				warning_dialog(move ? _("Move failed") : _("Copy failed"),
+				               error ? error->message : _("Unknown error"), GQ_ICON_DIALOG_ERROR, nullptr);
+				}
+			file_data_free_ci(*source);
+			});
+	return TRUE;
+}
+
+/* these avoid the location entry dialog unless there is an error, and
  * dest_path must be a valid directory path
  */
 void file_util_move_simple(GList *list, const gchar *dest_path, GtkWidget *parent)
 {
+	if (file_util_transfer_folder(list, dest_path, parent, TRUE)) return;
 	file_util_move_full(nullptr, list, dest_path, parent, UtilityPhase::ENTERING);
 }
 
 void file_util_copy_simple(GList *list, const gchar *dest_path, GtkWidget *parent)
 {
+	if (file_util_transfer_folder(list, dest_path, parent, FALSE)) return;
 	file_util_copy_full(nullptr, list, dest_path, parent, UtilityPhase::ENTERING);
 }
 
