@@ -55,7 +55,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Two pass zooming</guilabel>
+          <guilabel>Two pass rendering (apply HQ zoom and color correction in second pass)</guilabel>
         </term>
         <listitem>
           <para>
@@ -63,8 +63,9 @@
             <emphasis>Nearest</emphasis>
             zoom quality. After image decoding is complete, the image is scaled again using the selected
             <emphasis>Zoom Quality</emphasis>
-            method. This allows faster display of an image as it is decoded from the source file.
+            method, and ICC color correction is applied if color management is enabled. This allows faster display of an image as it is decoded from the source file, but the first pass is not color corrected and the colors may visibly change during the second pass.
           </para>
+          <para>Disable this option to apply the selected zoom quality and ICC color correction in a single rendering pass. This avoids displaying an uncorrected first pass, but may delay the initial display. Image preloading caches decoded source pixels; it does not pre-render them for the display's color profile.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
