@@ -13,12 +13,15 @@ Package Status:
 Versions:
 
 ![AppImage](https://img.shields.io/badge/AppImage-CI-blue)
+![Arch](https://img.shields.io/archlinux/v/extra/x86_64/geeqie)
 ![Debian Stable](https://img.shields.io/debian/v/geeqie/trixie?label=debian%20stable)
 ![Debian Unstable](https://img.shields.io/debian/v/geeqie/sid?label=debian%20unstable)
 ![Flathub](https://img.shields.io/flathub/v/org.geeqie.Geeqie)
 ![Homebrew](https://img.shields.io/homebrew/v/geeqie)
 ![MacPorts](https://img.shields.io/macports/v/geeqie)
 ![Snap](https://img.shields.io/badge/Snap-CI-blue)
+![Ubuntu](https://img.shields.io/ubuntu/v/geeqie)
+![Snap](https://img.shields.io/snapcraft/v/geeqie/latest/edge)
 
 Language Translations:
 
