@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Convert image…
+Comment=Create JPEG or PNG copies of selected images
+Exec=geeqie-convert-image.sh %F
+TryExec=zenity
+Categories=X-Geeqie;Graphics;
+OnlyShowIn=X-Geeqie;
+X-Geeqie-Verbose=true
+Icon=geeqie

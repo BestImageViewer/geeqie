@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 subdir('camera-import')
+subdir('convert-image')
 subdir('exif-datetime-to-file')
 subdir('export-jpeg')
 subdir('geocode-parameters')

@@ -143,6 +143,13 @@
       , see above.
     </para>
   </section>
+  <section id="ConvertImage">
+    <title>Convert image</title>
+    <para>Choose <guimenuitem>Convert image…</guimenuitem> from the Plugins menu to create JPEG or PNG copies of the selected images. This plugin requires Zenity and ImageMagick (the <command>magick</command> or <command>convert</command> program).</para>
+    <para>Choose JPEG or PNG and a destination folder. For JPEG, also choose quality (1–100; default 90). PNG uses lossless compression and preserves transparency; JPEG renders transparent areas white. Originals are preserved. Existing destination names are skipped and reported in the plugin output window, along with conversion failures. Files with the same base name share a destination name, so only the first successful conversion is saved.</para>
+    <para>Images are automatically oriented, and metadata, including embedded color profiles, is retained where supported by ImageMagick and the output format. Only the first frame or page is converted. Supported input formats, including RAW formats, depend on the installed ImageMagick delegates and security policy. This operation converts the original file; it does not export Geeqie's displayed adjustments.</para>
+    <para>The separate Export jpeg plugin extracts an existing embedded preview from a RAW file.</para>
+  </section>
   <section id="Specialplugins">
     <title>Special plugins</title>
     <para>A desktop file with one of the following names has a special function. It will replace the corresponding internal command.</para>
