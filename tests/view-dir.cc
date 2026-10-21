@@ -101,8 +101,18 @@ protected:
 	GtkWidget *start()
 	{
 		vd_new_folder(vd, layout.dir_fd);
-		drain_events();
-		return find_entry(vd->widget);
+		// Opening the editor may need multiple frame-clock ticks to lay out the
+		// placeholder, scroll it into view, and then map the popover.
+		const gint64 deadline = g_get_monotonic_time() + 5 * G_TIME_SPAN_SECOND;
+		while (g_get_monotonic_time() < deadline)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			GtkWidget *entry = find_entry(vd->widget);
+			if (entry && gtk_widget_get_mapped(entry) && gtk_widget_get_width(entry) > 0) return entry;
+			g_usleep(1000);
+			}
+		ADD_FAILURE() << "The new-folder editor did not become visible";
+		return nullptr;
 	}
 
 	LayoutWindow layout{};
