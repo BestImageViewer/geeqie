@@ -310,12 +310,12 @@ static void sync_options_with_current_state(ConfOptions *options)
 
 }
 
-void save_options(ConfOptions *options)
+gboolean save_options(ConfOptions *options)
 {
 	sync_options_with_current_state(options);
 
 	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
-	save_config_to_file(rc_path, options, nullptr);
+	return save_config_to_file(rc_path, options, nullptr);
 }
 
 gboolean load_options(ConfOptions *)

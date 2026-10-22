@@ -94,6 +94,41 @@ constexpr std::array<const gchar *, 22> group_keys{
 };
 
 GtkTreeStore *keyword_tree;
+gboolean keyword_tree_autosave_enabled = FALSE;
+guint keyword_tree_autosave_blocks = 0;
+guint keyword_tree_autosave_id = 0;
+std::string keyword_tree_saved_state;
+
+std::string keyword_tree_state()
+{
+	g_autoptr(GString) text = g_string_new(nullptr);
+	RcString rc{text, 0};
+	keyword_tree_write_config(rc);
+	return text->str;
+}
+
+gboolean keyword_tree_autosave_cb(gpointer)
+{
+	if (keyword_tree_autosave_blocks) return G_SOURCE_CONTINUE;
+	keyword_tree_autosave_id = 0;
+	const std::string state = keyword_tree_state();
+	// Filtering and expansion can change model rows without changing the
+	// persistent hierarchy. Do not write the configuration for those updates.
+	if (state != keyword_tree_saved_state)
+		{
+		// Saving before discovery finishes could lose plugin configuration.
+		layout_editors_reload_finish();
+		if (save_options(options)) keyword_tree_saved_state = state;
+		}
+	return G_SOURCE_REMOVE;
+}
+
+void keyword_tree_changed()
+{
+	if (!keyword_tree_autosave_enabled || keyword_tree_autosave_blocks || keyword_tree_autosave_id) return;
+	// Bound the delay from the first edit, including during continuous editing.
+	keyword_tree_autosave_id = g_timeout_add(2000, keyword_tree_autosave_cb, nullptr);
+}
 
 void string_list_free(gpointer data)
 {
@@ -1620,10 +1655,38 @@ void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keyword
 }
 
 
+KeywordTreeAutosaveBlock::KeywordTreeAutosaveBlock()
+	: update_baseline(keyword_tree_autosave_enabled && keyword_tree_state() == keyword_tree_saved_state)
+{
+	++keyword_tree_autosave_blocks;
+}
+
+KeywordTreeAutosaveBlock::~KeywordTreeAutosaveBlock()
+{
+	--keyword_tree_autosave_blocks;
+	if (update_baseline && !keyword_tree_autosave_blocks && keyword_tree_autosave_enabled && !keyword_tree_autosave_id)
+		{
+		keyword_tree_saved_state = keyword_tree_state();
+		}
+}
+
+void keyword_tree_autosave_set_enabled(gboolean enabled)
+{
+	keyword_tree_autosave_enabled = enabled;
+	g_clear_handle_id(&keyword_tree_autosave_id, g_source_remove);
+	keyword_tree_saved_state = keyword_tree_state();
+}
+
 GtkTreeStore *keyword_tree_get_or_new()
 {
 	if (!keyword_tree)
+		{
 		keyword_tree = gtk_tree_store_new(KEYWORD_COLUMN_COUNT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_POINTER);
+		for (const gchar *signal : {"row-changed", "row-inserted", "row-deleted", "rows-reordered"})
+			{
+			g_signal_connect_swapped(keyword_tree, signal, G_CALLBACK(keyword_tree_changed), nullptr);
+			}
+		}
 
 	return keyword_tree;
 }
@@ -1639,6 +1702,7 @@ static GtkTreeIter keyword_tree_default_append(GtkTreeStore *keyword_tree, GtkTr
 void keyword_tree_set_default(GtkTreeStore *keyword_tree)
 {
 	if (!keyword_tree) return;
+	const KeywordTreeAutosaveBlock autosave_block;
 
 	GtkTreeIter i1;
 	GtkTreeIter i2;

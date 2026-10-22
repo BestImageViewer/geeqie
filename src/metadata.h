@@ -106,6 +106,21 @@ void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keyword
 void keyword_tree_set_default(GtkTreeStore *keyword_tree);
 GtkTreeStore *keyword_tree_get_or_new();
 
+/** @brief Enable delayed configuration saving after persistent keyword-tree edits. */
+void keyword_tree_autosave_set_enabled(gboolean enabled);
+
+/** @brief Suppress autosave notifications while loading or initializing keywords. */
+class KeywordTreeAutosaveBlock
+{
+public:
+	KeywordTreeAutosaveBlock();
+	~KeywordTreeAutosaveBlock();
+	KeywordTreeAutosaveBlock(const KeywordTreeAutosaveBlock &) = delete;
+	KeywordTreeAutosaveBlock &operator=(const KeywordTreeAutosaveBlock &) = delete;
+private:
+	bool update_baseline;
+};
+
 void keyword_tree_write_config(RcString &rc);
 GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar **attribute_names, const gchar **attribute_values);
 

@@ -755,10 +755,10 @@ static void write_disabled_plugins(RcString &rc)
  *-----------------------------------------------------------------------------
  */
 
-void RcString::save_to_file(const gchar *utf8_path) const
+gboolean RcString::save_to_file(const gchar *utf8_path) const
 {
 	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
-	secure_save(rc_pathl, str->str, -1);
+	return secure_save(rc_pathl, str->str, -1);
 }
 
 gboolean save_config_to_file(const gchar *utf8_path, const ConfOptions *options, LayoutWindow *lw)
@@ -829,9 +829,7 @@ gboolean save_config_to_file(const gchar *utf8_path, const ConfOptions *options,
 	WRITE_NL(); WRITE_STRING("</gq>\n");
 	WRITE_SEPARATOR();
 
-	rc.save_to_file(utf8_path);
-
-	return TRUE;
+	return rc.save_to_file(utf8_path);
 }
 
 gboolean save_default_layout_options_to_file(const gchar *utf8_path, LayoutWindow *lw)
@@ -859,9 +857,7 @@ gboolean save_default_layout_options_to_file(const gchar *utf8_path, LayoutWindo
 	WRITE_NL(); WRITE_STRING("</gq>\n");
 	WRITE_SEPARATOR();
 
-	rc.save_to_file(utf8_path);
-
-	return TRUE;
+	return rc.save_to_file(utf8_path);
 }
 
 /*
@@ -1812,6 +1808,7 @@ static void end_element(GMarkupParseContext *,
 
 gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup)
 {
+	const KeywordTreeAutosaveBlock autosave_block;
 	static GMarkupParser parser = {
 	    start_element,
 	    end_element,

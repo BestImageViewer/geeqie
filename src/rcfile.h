@@ -38,7 +38,7 @@ struct RcString
 	void write_int_unit_option(const gchar *label, gint n, gint subunits) const;
 	void write_bool_option(const gchar *label, gboolean value) const;
 
-	void save_to_file(const gchar *utf8_path) const;
+	gboolean save_to_file(const gchar *utf8_path) const;
 
 	GString *str;
 	int indent;

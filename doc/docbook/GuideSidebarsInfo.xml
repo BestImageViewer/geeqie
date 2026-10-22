@@ -139,6 +139,7 @@
       section shows how marks and keywords inter-operate.
     </para>
     <para>The ordering of keywords in the right-hand box may be changed by drag-and-drop.</para>
+    <para>Changes to the keyword hierarchy are automatically saved in <filename>geeqierc.xml</filename> about two seconds after the first edit in a group of changes. This also saves the current application settings. The hierarchy is saved again when Geeqie exits normally. A save failure is reported through a notification and the log window.</para>
     <para>
       The meta-data write operation for a file is triggered either
       <emphasis role="underline"><link linkend="Buttons">manually</link></emphasis>

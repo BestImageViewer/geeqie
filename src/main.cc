@@ -384,6 +384,7 @@ void mkdir_if_not_exists(const gchar *path)
 void exit_program_final()
 {
 	GFile *archive_file;
+	keyword_tree_autosave_set_enabled(FALSE);
 
 	 /* make sure that external editors are loaded, we would save incomplete configuration otherwise */
 	layout_editors_reload_finish();
@@ -857,6 +858,7 @@ void startup_cb(GtkApplication *app, gpointer)
 	g_object_unref(provider);
 
 	gtk_application_window_new(app);
+	keyword_tree_autosave_set_enabled(TRUE);
 }
 
 void startup_cache_maintenance_cb(GtkApplication *app, gpointer)
