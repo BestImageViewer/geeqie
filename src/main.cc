@@ -58,6 +58,7 @@
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "fullscreen.h"
 #if HAVE_LUA
 #  include "glua.h"
 #endif
@@ -797,7 +798,9 @@ void activate_cb(GtkApplication *, gpointer)
 	 */
 	if (lw->window)
 		{
-		gtk_window_present(GTK_WINDOW(lw->window));
+		/* Command-line processing may already have entered fullscreen. */
+		GtkWidget *window = lw->full_screen ? lw->full_screen->window : lw->window;
+		gtk_window_present(GTK_WINDOW(window));
 
 		/** @FIXME This is not a fix - it is a workaround
 		 * https://github.com/BestImageViewer/geeqie/issues/1765
