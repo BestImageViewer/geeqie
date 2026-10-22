@@ -216,17 +216,10 @@ public:
 
 			if (image_->mimeType() == "image/jpeg")
 				{
-				/* try to get jpeg color profile */
-				Exiv2::BasicIo &io = image_->io();
-				gint open = io.isopen();
-				if (!open) io.open();
-				if (io.isopen())
-					{
-					auto mapped = static_cast<unsigned char*>(io.mmap());
-					if (mapped) exif_jpeg_parse_color(this, mapped, io.size());
-					io.munmap();
-					}
-				if (!open) io.close();
+				// Profile parsing must also survive truncation by an external editor.
+				gsize length;
+				g_autofree auto *data = read_file_snapshot(pathl, length);
+				if (data) exif_jpeg_parse_color(this, data, length);
 				}
 			}
 		catch (Exiv2::AnyError& e)

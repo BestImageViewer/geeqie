@@ -102,7 +102,7 @@ struct ImageLoader
 	GCond *can_destroy_cond;
 	gboolean thread;
 
-	guchar *mapped_file;
+	guchar *input_buffer; /**< Owned encoded data, independent of source-file changes. */
 	gsize read_buffer_size;
 	guint idle_read_loop_count;
 };

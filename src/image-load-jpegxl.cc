@@ -231,13 +231,13 @@ guchar *jpegxl_color_profile(const gchar *path, guint &profile_len)
 {
 	profile_len = 0;
 	g_autofree gchar *path_local = path_from_utf8(path);
-	g_autoptr(GMappedFile) file = g_mapped_file_new(path_local, FALSE, nullptr);
-	if (!file) return nullptr;
+	gsize length;
+	g_autofree auto *data = read_file_snapshot(path_local, length);
+	if (!data) return nullptr;
 
 	JxlDecoderPtr decoder = JxlDecoderMake(nullptr);
 	if (!decoder || JxlDecoderSubscribeEvents(decoder.get(), JXL_DEC_COLOR_ENCODING) != JXL_DEC_SUCCESS) return nullptr;
-	if (JxlDecoderSetInput(decoder.get(), reinterpret_cast<const uint8_t *>(g_mapped_file_get_contents(file)),
-	                       g_mapped_file_get_length(file)) != JXL_DEC_SUCCESS) return nullptr;
+	if (JxlDecoderSetInput(decoder.get(), data, length) != JXL_DEC_SUCCESS) return nullptr;
 	if (JxlDecoderProcessInput(decoder.get()) != JXL_DEC_COLOR_ENCODING) return nullptr;
 
 	// The profile must describe the decoder's pixels, which may differ from the original image.

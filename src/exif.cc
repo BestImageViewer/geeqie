@@ -48,10 +48,6 @@
 #include "exif.h"
 
 #include <algorithm>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <cstdio>
 #include <cstring>
@@ -1159,55 +1155,7 @@ ExifItem *exif_get_next_item(ExifData *exif)
 	return nullptr;
 }
 
-static gint map_file(const gchar *path, void **mapping, gint *size)
-{
-	gint fd;
-	struct stat fs;
 
-	fd = open(path, O_RDONLY);
-	if (fd == -1)
-		{
-		perror(path);
-		return -1;
-		}
-
-	if (fstat(fd, &fs) == -1)
-		{
-		perror(path);
-		close(fd);
-		return -1;
-		}
-
-	*size = fs.st_size;
-
-	*mapping = mmap(nullptr, *size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
-	if (*mapping == MAP_FAILED)
-		{
-		perror(path);
-		close(fd);
-		return -1;
-		}
-
-	close(fd);
-	return 0;
-}
-
-static gint unmap_file(gpointer mapping, gint size)
-{
-	if (munmap(mapping, size) == -1)
-		{
-		perror("munmap");
-		return -1;
-		}
-
-	return 0;
-}
-
-/**
- * @brief exif_read returns processed data (merged from image and sidecar, etc.)
- * this function gives access to the original data from the image.
- * original data are part of the processed data and should not be freed separately
- */
 ExifData *exif_get_original(ExifData *exif)
 {
 	return exif;
@@ -1225,14 +1173,15 @@ void exif_free(ExifData *exif)
 ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 {
 	ExifData *exif;
-	gpointer f;
 	gint res;
-	gint size;
+	gsize size_bytes;
 
 	if (!path) return nullptr;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
-	if (map_file(pathl, &f, &size) == -1) return nullptr;
+	g_autofree auto *f = read_file_snapshot(pathl, size_bytes, nullptr, G_MAXINT);
+	if (!f) return nullptr;
+	const gint size = size_bytes;
 
 	exif = g_new0(ExifData, 1);
 	exif->path = g_strdup(path);
@@ -1285,7 +1234,6 @@ ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 		exif = nullptr;
 		}
 
-	unmap_file(f, size);
 
 	if (exif) exif->items = g_list_reverse(exif->items);
 
@@ -1601,80 +1549,56 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 	return g_list_append(nullptr, str);
 }
 
-struct UnmapData
+struct ExifPreviewData
 {
 	guchar *ptr;
-	guchar *map_data;
-	size_t map_len;
+	guchar *source_data;
 };
 
-static GList *exif_unmap_list = nullptr;
+static GList *exif_previews = nullptr;
 
 guchar *exif_get_preview(ExifData *exif, guint *data_len, gint, gint)
 {
 	guint offset;
 	const gchar* path;
-	struct stat st;
-	guchar *map_data;
-	size_t map_len;
-	int fd;
+	gsize source_size;
 
 	if (!exif) return nullptr;
 	path = exif->path;
+	g_autofree gchar *path_fs = path_from_utf8(path);
+	g_autofree guchar *source_data = read_file_snapshot(path_fs, source_size);
+	if (!source_data) return nullptr;
 
-	fd = open(path, O_RDONLY);
-
-
-	if (fd == -1)
+	if (format_raw_img_exif_offsets(source_data, source_size, &offset, nullptr) && offset)
 		{
-		return nullptr;
-		}
-
-	if (fstat(fd, &st) == -1)
-		{
-		close(fd);
-		return nullptr;
-		}
-	map_len = st.st_size;
-	map_data = static_cast<guchar *>(mmap(nullptr, map_len, PROT_READ, MAP_PRIVATE, fd, 0));
-	close(fd);
-
-	if (map_data == MAP_FAILED)
-		{
-		return nullptr;
-		}
-
-	if (format_raw_img_exif_offsets(map_data, map_len, &offset, nullptr) && offset)
-		{
-		UnmapData *ud;
+		ExifPreviewData *ud;
 
 		DEBUG_1("%s: offset %u", path, offset);
 
-		*data_len = map_len - offset;
-		ud = g_new(UnmapData, 1);
-		ud->ptr = map_data + offset;
-		ud->map_data = map_data;
-		ud->map_len = map_len;
+		*data_len = source_size - offset;
+		ud = g_new(ExifPreviewData, 1);
+		ud->ptr = source_data + offset;
+		ud->source_data = g_steal_pointer(&source_data);
 
-		exif_unmap_list = g_list_prepend(exif_unmap_list, ud);
+		exif_previews = g_list_prepend(exif_previews, ud);
 		return ud->ptr;
 		}
 
-	munmap(map_data, map_len);
 	return nullptr;
 
 }
 
 void exif_free_preview(const guchar *buf)
 {
-	GList *work = exif_unmap_list;
+	GList *work = exif_previews;
 
 	while (work)
 		{
-		auto ud = static_cast<UnmapData *>(work->data);
+		auto ud = static_cast<ExifPreviewData *>(work->data);
 		if (ud->ptr == buf)
 			{
-			exif_unmap_list = g_list_remove_link(exif_unmap_list, work);
+			exif_previews = g_list_delete_link(exif_previews, work);
+			g_free(ud->source_data);
 			g_free(ud);
 			return;
 			}

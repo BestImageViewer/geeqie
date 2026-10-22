@@ -21,9 +21,9 @@
 
 #include "image-load.h"
 
-#include <sys/mman.h>
-
 #include <cstring>
+
+#include <gio/gio.h>
 
 #include <config.h>
 
@@ -144,7 +144,7 @@ static void image_loader_init(GTypeInstance *instance, gpointer)
 
 	il->idle_read_loop_count = IMAGE_LOADER_IDLE_READ_LOOP_COUNT_DEFAULT;
 	il->read_buffer_size = IMAGE_LOADER_READ_BUFFER_SIZE_DEFAULT;
-	il->mapped_file = nullptr;
+	il->input_buffer = nullptr;
 	il->preview = IMAGE_LOADER_PREVIEW_NONE;
 
 	il->requested_width = 0;
@@ -632,7 +632,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_FITS
 		if (il->bytes_total >= 6 &&
-			(memcmp(il->mapped_file, "SIMPLE", 6) == 0))
+			(memcmp(il->input_buffer, "SIMPLE", 6) == 0))
 			{
 			DEBUG_1("Using custom fits loader");
 			il->backend = get_image_loader_backend_fits();
@@ -641,7 +641,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_PDF
 		if (il->bytes_total >= 4 &&
-		    (memcmp(il->mapped_file + 0, "%PDF", 4) == 0))
+		    (memcmp(il->input_buffer + 0, "%PDF", 4) == 0))
 			{
 			DEBUG_1("Using custom pdf loader");
 			il->backend = get_image_loader_backend_pdf();
@@ -650,11 +650,11 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_HEIF
 		if (il->bytes_total >= 12 &&
-		    ((memcmp(il->mapped_file + 4, "ftypheic", 8) == 0) ||
-		     (memcmp(il->mapped_file + 4, "ftypheix", 8) == 0) ||
-		     (memcmp(il->mapped_file + 4, "ftypmsf1", 8) == 0) ||
-		     (memcmp(il->mapped_file + 4, "ftypmif1", 8) == 0) ||
-		     (memcmp(il->mapped_file + 4, "ftypavif", 8) == 0)))
+		    ((memcmp(il->input_buffer + 4, "ftypheic", 8) == 0) ||
+		     (memcmp(il->input_buffer + 4, "ftypheix", 8) == 0) ||
+		     (memcmp(il->input_buffer + 4, "ftypmsf1", 8) == 0) ||
+		     (memcmp(il->input_buffer + 4, "ftypmif1", 8) == 0) ||
+		     (memcmp(il->input_buffer + 4, "ftypavif", 8) == 0)))
 			{
 			DEBUG_1("Using custom heif loader");
 			il->backend = get_image_loader_backend_heif();
@@ -663,8 +663,8 @@ static void image_loader_setup_loader(ImageLoader *il)
 	#endif
 	#if HAVE_WEBP
 		if (il->bytes_total >= 12 &&
-			(memcmp(il->mapped_file, "RIFF", 4) == 0) &&
-			(memcmp(il->mapped_file + 8, "WEBP", 4) == 0))
+			(memcmp(il->input_buffer, "RIFF", 4) == 0) &&
+			(memcmp(il->input_buffer + 8, "WEBP", 4) == 0))
 			{
 			DEBUG_1("Using custom webp loader");
 			il->backend = get_image_loader_backend_webp();
@@ -673,8 +673,8 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_DJVU
 		if (il->bytes_total >= 16 &&
-			(memcmp(il->mapped_file, "AT&TFORM", 8) == 0) &&
-			(memcmp(il->mapped_file + 12, "DJV", 3) == 0))
+			(memcmp(il->input_buffer, "AT&TFORM", 8) == 0) &&
+			(memcmp(il->input_buffer + 12, "DJV", 3) == 0))
 			{
 			DEBUG_1("Using custom djvu loader");
 			il->backend = get_image_loader_backend_djvu();
@@ -683,7 +683,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_EXR
 		if (il->bytes_total >= 4 &&
-			(memcmp(il->mapped_file, "\x76\x2F\x31\x01", 4) == 0))
+			(memcmp(il->input_buffer, "\x76\x2F\x31\x01", 4) == 0))
 			{
 			DEBUG_1("Using custom exr loader");
 			il->backend = get_image_loader_backend_exr();
@@ -691,7 +691,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		else
 #endif
 #if HAVE_JPEG
-		if (il->bytes_total >= 2 && il->mapped_file[0] == 0xff && il->mapped_file[1] == 0xd8)
+		if (il->bytes_total >= 2 && il->input_buffer[0] == 0xff && il->input_buffer[1] == 0xd8)
 			{
 			DEBUG_1("Using custom jpeg loader");
 			il->backend = get_image_loader_backend_jpeg();
@@ -699,8 +699,8 @@ static void image_loader_setup_loader(ImageLoader *il)
 #if !HAVE_RAW
 		else
 		if (il->bytes_total >= 11 &&
-		    (memcmp(il->mapped_file + 4, "ftypcrx", 7) == 0) &&
-		    (memcmp(il->mapped_file + 64, "CanonCR3", 8) == 0))
+		    (memcmp(il->input_buffer + 4, "ftypcrx", 7) == 0) &&
+		    (memcmp(il->input_buffer + 64, "CanonCR3", 8) == 0))
 			{
 			DEBUG_1("Using custom cr3 loader");
 			il->backend = get_image_loader_backend_cr3();
@@ -710,10 +710,10 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_TIFF
 		if (il->bytes_total >= 10 &&
-		    (memcmp(il->mapped_file, "MM\0*", 4) == 0 ||
-		     memcmp(il->mapped_file, "MM\0+\0\x08\0\0", 8) == 0 ||
-		     memcmp(il->mapped_file, "II+\0\x08\0\0\0", 8) == 0 ||
-		     memcmp(il->mapped_file, "II*\0", 4) == 0))
+		    (memcmp(il->input_buffer, "MM\0*", 4) == 0 ||
+		     memcmp(il->input_buffer, "MM\0+\0\x08\0\0", 8) == 0 ||
+		     memcmp(il->input_buffer, "II+\0\x08\0\0\0", 8) == 0 ||
+		     memcmp(il->input_buffer, "II*\0", 4) == 0))
 		     	{
 			DEBUG_1("Using custom tiff loader");
 			il->backend = get_image_loader_backend_tiff();
@@ -722,21 +722,21 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_NPY
 		if (il->bytes_total >= 6 &&
-			(memcmp(il->mapped_file, "\x93NUMPY", 6) == 0))
+			(memcmp(il->input_buffer, "\x93NUMPY", 6) == 0))
 			{
 			DEBUG_1("Using custom npy loader");
 			il->backend = get_image_loader_backend_npy();
 			}
 		else
 #endif
-		if (il->bytes_total >= 3 && il->mapped_file[0] == 0x44 && il->mapped_file[1] == 0x44 && il->mapped_file[2] == 0x53)
+		if (il->bytes_total >= 3 && il->input_buffer[0] == 0x44 && il->input_buffer[1] == 0x44 && il->input_buffer[2] == 0x53)
 			{
 			DEBUG_1("Using dds loader");
 			il->backend = get_image_loader_backend_dds();
 			}
 		else
 		if (il->bytes_total >= 6 &&
-			(memcmp(il->mapped_file, "8BPS\0\x01", 6) == 0))
+			(memcmp(il->input_buffer, "8BPS\0\x01", 6) == 0))
 			{
 			DEBUG_1("Using custom psd loader");
 			il->backend = get_image_loader_backend_psd();
@@ -744,7 +744,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		else
 #if HAVE_J2K
 		if (il->bytes_total >= 12 &&
-			(memcmp(il->mapped_file, "\0\0\0\x0CjP\x20\x20\x0D\x0A\x87\x0A", 12) == 0))
+			(memcmp(il->input_buffer, "\0\0\0\x0CjP\x20\x20\x0D\x0A\x87\x0A", 12) == 0))
 			{
 			DEBUG_1("Using custom j2k loader");
 			il->backend = get_image_loader_backend_j2k();
@@ -753,9 +753,9 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 #if HAVE_JPEGXL
 		if ((il->bytes_total >= 12 &&
-		     (memcmp(il->mapped_file, "\0\0\0\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A", 12) == 0)) ||
+		     (memcmp(il->input_buffer, "\0\0\0\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A", 12) == 0)) ||
 		    (il->bytes_total >= 2 &&
-		     (memcmp(il->mapped_file, "\xFF\x0A", 2) == 0)))
+		     (memcmp(il->input_buffer, "\xFF\x0A", 2) == 0)))
 			{
 			DEBUG_1("Using custom jpeg xl loader");
 			il->backend = get_image_loader_backend_jpegxl();
@@ -826,7 +826,7 @@ static gboolean image_loader_continue(ImageLoader *il)
 
 		gsize b = std::min(il->read_buffer_size, il->bytes_total - il->bytes_read);
 
-		if (!il->backend->write(il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
+		if (!il->backend->write(il->input_buffer + il->bytes_read, b, il->bytes_total, &il->error))
 			{
 			image_loader_error(il);
 			return G_SOURCE_REMOVE;
@@ -856,7 +856,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 	image_loader_setup_loader(il);
 
 	g_assert(il->bytes_read == 0);
-	if (!il->backend->write(il->mapped_file, b, il->bytes_total, &il->error))
+	if (!il->backend->write(il->input_buffer, b, il->bytes_total, &il->error))
 		{
 		image_loader_stop_loader(il);
 		return FALSE;
@@ -876,7 +876,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 			}
 
 		b = std::min(il->read_buffer_size, il->bytes_total - il->bytes_read);
-		if (b > 0 && !il->backend->write(il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
+		if (b > 0 && !il->backend->write(il->input_buffer + il->bytes_read, b, il->bytes_total, &il->error))
 			{
 			image_loader_stop_loader(il);
 			return FALSE;
@@ -908,12 +908,30 @@ static gboolean image_loader_begin(ImageLoader *il)
 /**************************************************************************************/
 /* the following functions are always executed in the main thread */
 
+/** @brief Prepare encoded data independently of subsequent source-file changes. */
+static gboolean image_loader_read_source(ImageLoader *il)
+{
+	g_autofree gchar *path = path_from_utf8(il->fd->path);
+	gsize maximum = G_MAXSIZE;
+#if HAVE_FFMPEGTHUMBNAILER
+	// The video backend opens the path itself and does not consume this buffer.
+	if (il->fd->format_class == FORMAT_CLASS_VIDEO) maximum = 4096;
+#endif
+	il->input_buffer = read_file_snapshot(path, il->bytes_total, &il->error, maximum,
+	    [il]() { return image_loader_get_stopping(il); });
+	return il->input_buffer != nullptr;
+}
 
 static gboolean image_loader_setup_source(ImageLoader *il)
 {
-	if (!il || il->backend || il->mapped_file) return FALSE;
+	if (!il || il->backend || il->input_buffer) return FALSE;
 
-	il->mapped_file = nullptr;
+	il->input_buffer = nullptr;
+
+#if HAVE_FFMPEGTHUMBNAILER
+	// Video frames come from the video backend, not RAW preview extraction.
+	if (il->fd && il->fd->format_class == FORMAT_CLASS_VIDEO) return image_loader_read_source(il);
+#endif
 
 	if (il->fd)
 		{
@@ -921,35 +939,35 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 		if (options->thumbnails.use_exif)
 			{
-			il->mapped_file = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), il->requested_width, il->requested_height);
+			il->input_buffer = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), il->requested_width, il->requested_height);
 
-			if (il->mapped_file)
+			if (il->input_buffer)
 				{
 				il->preview = IMAGE_LOADER_PREVIEW_EXIF;
 				}
 			}
 		else
 			{
-			il->mapped_file = libraw_get_preview(il->fd->path, il->bytes_total);
+			il->input_buffer = libraw_get_preview(il->fd->path, il->bytes_total);
 
-			if (il->mapped_file)
+			if (il->input_buffer)
 				{
 				il->preview = IMAGE_LOADER_PREVIEW_LIBRAW;
 				}
 			}
 
 		/* If libraw does not find a thumbnail, try exiv2 */
-		if (!il->mapped_file)
+		if (!il->input_buffer)
 			{
-			il->mapped_file = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), 0, 0); /* get the largest available preview image or NULL for normal images*/
+			il->input_buffer = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), 0, 0); /* get the largest available preview image or NULL for normal images*/
 
-			if (il->mapped_file)
+			if (il->input_buffer)
 				{
 				/* exiv2 sometimes returns a pointer to a file section that is not a jpeg */
-				if (!is_jpeg_container(il->mapped_file, il->bytes_total))
+				if (!is_jpeg_container(il->input_buffer, il->bytes_total))
 					{
-					exif_free_preview(il->mapped_file);
-					il->mapped_file = nullptr;
+					exif_free_preview(il->input_buffer);
+					il->input_buffer = nullptr;
 					}
 				else
 					{
@@ -958,23 +976,16 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 				}
 			}
 
-		if (il->mapped_file)
+		if (il->input_buffer)
 			{
 			DEBUG_1("Usable reduced size (preview) image loaded from file %s", il->fd->path);
 			}
 		exif_free_fd(il->fd, exif);
 		}
 
-	if (!il->mapped_file)
+	if (!il->input_buffer)
 		{
-		/* normal file */
-		g_autofree gchar *pathl = path_from_utf8(il->fd->path);
-
-		il->mapped_file = map_file(pathl, il->bytes_total); // bytes_total written from fs.stsize
-		if (!il->mapped_file)
-			{
-			return FALSE;
-			}
+		if (!image_loader_read_source(il)) return FALSE;
 		il->preview = IMAGE_LOADER_PREVIEW_NONE;
 		}
 
@@ -985,21 +996,21 @@ static void image_loader_stop_source(ImageLoader *il)
 {
 	if (!il) return;
 
-	if (il->mapped_file)
+	if (il->input_buffer)
 		{
 		if (il->preview == IMAGE_LOADER_PREVIEW_EXIF)
 			{
-			exif_free_preview(il->mapped_file);
+			exif_free_preview(il->input_buffer);
 			}
 		else if (il->preview == IMAGE_LOADER_PREVIEW_LIBRAW)
 			{
-			libraw_free_preview(il->mapped_file);
+			libraw_free_preview(il->input_buffer);
 			}
 		else
 			{
-			munmap(il->mapped_file, il->bytes_total);
+			g_free(il->input_buffer);
 			}
-		il->mapped_file = nullptr;
+		il->input_buffer = nullptr;
 		}
 }
 

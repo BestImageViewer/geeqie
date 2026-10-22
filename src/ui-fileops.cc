@@ -22,7 +22,6 @@
 #include "ui-fileops.h"
 
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <utime.h>
@@ -1524,20 +1523,84 @@ fail:
 	return FALSE;
 }
 
-guchar *map_file(const gchar *path, gsize &map_len)
+/**
+ * @brief Read owned encoded data so external truncation cannot cause SIGBUS.
+ * @param path Source path in filesystem encoding.
+ * @param size_out Bytes returned, or zero on failure.
+ * @param error Optional read, allocation, cancellation, or change-detection error.
+ * @param maximum Maximum number of bytes to read (a prefix for video backends).
+ * @param cancelled Optional cancellation check before each read.
+ * @return Data freed with g_free(), or nullptr on failure.
+ *
+ * Size and timestamp checks detect changes during reading on a best-effort
+ * basis; they do not provide an atomic filesystem snapshot.
+ */
+guchar *read_file_snapshot(const gchar *path, gsize &size_out, GError **error, gsize maximum,
+                           const std::function<bool()> &cancelled)
 {
-	g_auto(FileDescriptor) fd = open(path, O_RDONLY | O_NONBLOCK);
-	if (fd == -1) return nullptr;
+	size_out = 0;
+	g_autoptr(GFile) file = g_file_new_for_path(path);
+	g_autoptr(GFileInputStream) stream = g_file_read(file, nullptr, error);
+	if (!stream) return nullptr;
 
-	struct stat st;
-	if (fstat(fd, &st) == -1) return nullptr;
+	constexpr const gchar *attributes = G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+	    G_FILE_ATTRIBUTE_STANDARD_SIZE "," G_FILE_ATTRIBUTE_TIME_MODIFIED ","
+	    G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC "," G_FILE_ATTRIBUTE_TIME_CHANGED ","
+	    G_FILE_ATTRIBUTE_TIME_CHANGED_USEC;
+	g_autoptr(GFileInfo) before = g_file_input_stream_query_info(stream, attributes, nullptr, error);
+	if (!before) return nullptr;
+	const goffset size = g_file_info_get_size(before);
+	if (g_file_info_get_file_type(before) != G_FILE_TYPE_REGULAR || size <= 0)
+		{
+		g_set_error_literal(error, G_FILE_ERROR, G_FILE_ERROR_INVAL, _("Image source is not a nonempty regular file"));
+		return nullptr;
+		}
 
-	auto *map_data = static_cast<guchar *>(mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
-	if (map_data == MAP_FAILED) return nullptr;
+	const guint64 length = std::min<guint64>(size, maximum);
+	if (length > G_MAXSSIZE)
+		{
+		g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY, _("Image source is too large to read into memory"));
+		return nullptr;
+		}
+	g_autofree auto *buffer = static_cast<guchar *>(g_try_malloc(length));
+	if (!buffer)
+		{
+		g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY, _("Not enough memory to read the image source"));
+		return nullptr;
+		}
+	for (gsize offset = 0; offset < length;)
+		{
+		if (cancelled && cancelled())
+			{
+			g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_CANCELLED, _("Image source read was cancelled"));
+			return nullptr;
+			}
+		const gsize count = std::min<gsize>(length - offset, 1024 * 1024);
+		const gssize bytes = g_input_stream_read(G_INPUT_STREAM(stream), buffer + offset, count, nullptr, error);
+		if (bytes < 0) return nullptr;
+		if (bytes == 0)
+			{
+			g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_BUSY, _("Image source changed while being read"));
+			return nullptr;
+			}
+		offset += bytes;
+		}
 
-	map_len = st.st_size;
-	return map_data;
+	g_autoptr(GFileInfo) after = g_file_input_stream_query_info(stream, attributes, nullptr, error);
+	if (!after) return nullptr;
+	if (g_file_info_get_size(after) != size ||
+	    g_file_info_get_attribute_uint64(before, G_FILE_ATTRIBUTE_TIME_MODIFIED) != g_file_info_get_attribute_uint64(after, G_FILE_ATTRIBUTE_TIME_MODIFIED) ||
+	    g_file_info_get_attribute_uint32(before, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC) != g_file_info_get_attribute_uint32(after, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC) ||
+	    g_file_info_get_attribute_uint64(before, G_FILE_ATTRIBUTE_TIME_CHANGED) != g_file_info_get_attribute_uint64(after, G_FILE_ATTRIBUTE_TIME_CHANGED) ||
+	    g_file_info_get_attribute_uint32(before, G_FILE_ATTRIBUTE_TIME_CHANGED_USEC) != g_file_info_get_attribute_uint32(after, G_FILE_ATTRIBUTE_TIME_CHANGED_USEC))
+		{
+		g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_BUSY, _("Image source changed while being read"));
+		return nullptr;
+		}
+	size_out = length;
+	return g_steal_pointer(&buffer);
 }
+
 
 /**
  * @brief Get list of file extensions supported by gdk_pixbuf_loader

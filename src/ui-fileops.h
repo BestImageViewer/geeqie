@@ -149,7 +149,9 @@ gboolean file_tree_merge(GFile *source, GFile *dest, gboolean move, gboolean &so
 
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error, FileTreeOperation *operation = nullptr);
 
-guchar *map_file(const gchar *path, gsize &map_len);
+/** @brief Read a stable owned image buffer; free the result with g_free(). */
+guchar *read_file_snapshot(const gchar *path, gsize &size_out, GError **error = nullptr,
+                           gsize maximum = G_MAXSIZE, const std::function<bool()> &cancelled = {});
 
 GList *pixbuf_gdk_known_extensions();
 

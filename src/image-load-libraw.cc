@@ -31,37 +31,34 @@
 
 #if HAVE_RAW
 
-#include <sys/mman.h>
-
 #include <cstddef>
 
 #include <libraw/libraw.h>
 
 #include "ui-fileops.h"
 
-struct UnmapData
+struct LibRawPreviewData
 {
 	guchar *ptr;
-	guchar *map_data;
-	size_t map_len;
+	guchar *source_data;
 	LibRaw *lr;
 };
 
-static GList *libraw_unmap_list = nullptr;
+static GList *libraw_previews = nullptr;
 
 void libraw_free_preview(const guchar *buf)
 {
-	GList *work = libraw_unmap_list;
+	GList *work = libraw_previews;
 
 	while (work)
 		{
-		auto ud = static_cast<UnmapData *>(work->data);
+		auto ud = static_cast<LibRawPreviewData *>(work->data);
 		if (ud->ptr == buf)
 			{
-			munmap(ud->map_data, ud->map_len);
 			delete ud->lr;
+			g_free(ud->source_data);
 			g_free(ud);
-			libraw_unmap_list = g_list_delete_link(libraw_unmap_list, work);
+			libraw_previews = g_list_delete_link(libraw_previews, work);
 			return;
 			}
 		work = work->next;
@@ -71,37 +68,33 @@ void libraw_free_preview(const guchar *buf)
 
 guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 {
-	size_t map_len;
+	size_t source_size;
 	g_autofree gchar *pathl = path_from_utf8(path);
-	guchar *map_data = map_file(pathl, map_len);
-	if (!map_data)
+	g_autofree guchar *source_data = read_file_snapshot(pathl, source_size);
+	if (!source_data)
 		{
 		return nullptr;
 		}
 
 	auto lr = std::make_unique<LibRaw>();
 
-	int ret = lr->open_buffer(map_data, map_len);
+	int ret = lr->open_buffer(source_data, source_size);
 	if (ret == LIBRAW_SUCCESS)
 		{
 		ret = lr->unpack_thumb();
 		if (ret == LIBRAW_SUCCESS && lr->is_jpeg_thumb())
 			{
-			auto *ud = g_new(UnmapData, 1);
+			auto *ud = g_new(LibRawPreviewData, 1);
 			ud->ptr = reinterpret_cast<guchar *>(lr->imgdata.thumbnail.thumb);
-			ud->map_data = map_data;
-			ud->map_len = map_len;
+			ud->source_data = g_steal_pointer(&source_data);
 			ud->lr = lr.release();
 
-			libraw_unmap_list = g_list_prepend(libraw_unmap_list, ud);
+			libraw_previews = g_list_prepend(libraw_previews, ud);
 
 			data_len = ud->lr->imgdata.thumbnail.tlength;
 			return ud->ptr;
 			}
 		}
-
-	munmap(map_data, map_len);
-
 	return nullptr;
 }
 
