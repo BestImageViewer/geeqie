@@ -468,6 +468,12 @@ void gq_dupes_export(GtkApplication *, GApplicationCommandLine *app_command_line
 	g_application_command_line_print(app_command_line, "%s\n", output_string->str);
 }
 
+void gq_dupes_export_json(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	g_autoptr(GString) output = export_duplicates_json_command_line();
+	g_application_command_line_print(app_command_line, "%s", output->str);
+}
+
 void gq_file(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
 
@@ -1392,6 +1398,7 @@ CommandLineOptionEntry command_line_options[] =
 	{ "file",                        gq_file,                        PRIMARY_REMOTE, GUI  },
 	{ "dupes",                       gq_dupes<FALSE>,                PRIMARY_REMOTE, GUI  },
 	{ "dupes-export",                gq_dupes_export,                PRIMARY_REMOTE, TEXT_QUIET },
+	{ "dupes-export-json",           gq_dupes_export_json,           PRIMARY_REMOTE, TEXT_QUIET },
 	{ "dupes-recurse",               gq_dupes<TRUE>,                 PRIMARY_REMOTE, GUI  },
 	{ "File",                        gq_File,                        PRIMARY_REMOTE, GUI  },
 	{ "file-extensions",             gq_file_extensions,             PRIMARY_REMOTE, TEXT_QUIET },

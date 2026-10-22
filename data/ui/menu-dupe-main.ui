@@ -41,6 +41,14 @@
             <attribute name="label" translatable="yes">Export to tab-delimited</attribute>
             <attribute name="action">win.dupe-win-export-to-tab-delimited</attribute>
           </item>
+          <item>
+            <attribute name="label" translatable="yes">Export to JSON</attribute>
+            <attribute name="action">win.dupe-win-export-to-json</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Run script with JSON…</attribute>
+            <attribute name="action">win.dupe-win-run-results-script</attribute>
+          </item>
         </section>
       </submenu>
     </section>

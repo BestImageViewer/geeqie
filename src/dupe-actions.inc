@@ -159,6 +159,32 @@ static const ActionDef dupe_main_actions[] =
 		},
 
 		{
+		"win.dupe-win-export-to-json",
+		nullptr,
+		N_("Export to JSON"),
+		dupe_pop_menu_export_cb<EXPORT_JSON>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.dupe-win-run-results-script",
+		nullptr,
+		N_("Run script with JSON…"),
+		dupe_run_script_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.dupe-win-export-to-tab-delimited",
 		nullptr,
 		N_("Export to tab-delimited"),

@@ -200,6 +200,28 @@
     </para>
     <para>The image Dimensions column of the result list will only contain dimension information when comparing by dimensions, or when the data is easily available from memory or has been read from the cache.</para>
   </section>
+  <section id="DuplicateResultsExport">
+    <title>Exporting results for scripts</title>
+    <para>After comparison finishes, use the results context menu's Export submenu to choose <guilabel>Export to JSON</guilabel> or <guilabel>Run script with JSON…</guilabel>. JSON exports all result groups, including unselected members, and records which files were selected. CSV and tab-delimited exports continue to export selected rows.</para>
+    <para>To run a script, choose an executable script with an interpreter line, such as <literal>#!/usr/bin/env python3</literal>. Geeqie passes one argument: the path of a temporary JSON snapshot. The script runs asynchronously. Geeqie removes the snapshot when the script exits, and reports launch failures or unsuccessful exit status. The snapshot is captured when the menu command is invoked; later selection changes do not affect it.</para>
+    <para>The command <literal>geeqie --dupes-export-json</literal> writes JSON from the most recently opened Find Duplicates window to standard output without changing its selection:</para>
+    <programlisting>geeqie --dupes-export-json &gt; duplicates.json</programlisting>
+    <para>Check <literal>schema</literal> (<literal>org.geeqie.duplicates</literal>), <literal>version</literal> (<literal>1</literal>), and <literal>status</literal> before processing. A status of <literal>ready</literal> means comparison is complete; <literal>incomplete</literal> and <literal>no_window</literal> return an empty groups array. An empty completed search also has status <literal>ready</literal>.</para>
+    <para>Completed exports include stable, untranslated criterion names in <literal>criteria</literal>, the numeric <literal>match_mask</literal> from <literal>DupeMatchType</literal>, <literal>two_sets</literal>, <literal>algorithm</literal> (<literal>standard</literal> or <literal>phash</literal>), <literal>threshold</literal> in percent, and <literal>ignore_orientation</literal>. Algorithm and threshold are null for comparisons that do not use similarity.</para>
+    <para>Each group has an export-local numeric <literal>id</literal>, a <literal>representative_id</literal>, and a <literal>members</literal> array. Each member includes its file URI as <literal>id</literal>, its <literal>path</literal>, source <literal>set</literal> (1 or 2), <literal>selected</literal> flag, byte <literal>size</literal>, modification time <literal>mtime</literal> in seconds since the Unix epoch, and <literal>width</literal> and <literal>height</literal> when known. Unknown dimensions are null. A file may occur in multiple groups and retains the same URI identifier.</para>
+    <para>The <literal>similarity_to_representative</literal> value is the numeric percentage stored for that member's match to its group representative. It is null for the representative itself and for comparisons without similarity. It does not describe every possible pair of group members. The root <literal>score_semantics</literal> field is <literal>member_to_representative_percent</literal>. JSON strings escape quotes, backslashes and control characters; numbers do not depend on locale.</para>
+    <para>For example, an executable Python script can read the snapshot and print each group's paths:</para>
+    <programlisting>#!/usr/bin/env python3
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as source:
+    results = json.load(source)
+if (results["schema"], results["version"], results["status"]) != ("org.geeqie.duplicates", 1, "ready"):
+    raise SystemExit("No completed duplicate results")
+for group in results["groups"]:
+    print(group["id"], [member["path"] for member in group["members"]])</programlisting>
+  </section>
   <section id="Statusbar2">
     <title>Status bar</title>
     <para>Along the bottom of the Find Duplicates window is an area that displays the count of files contained in the window, and the number of files in the result list.</para>

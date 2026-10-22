@@ -161,6 +161,9 @@ struct DupeWindow
 	gint thread_count; /**< Incremented each time a similarity check thread item is completed */
 	GMutex thread_count_mutex;
 	gboolean abort; /**< Stop the similarity check thread queue */
+	gboolean comparison_perceptual;
+	gboolean comparison_rotation_invariant;
+	gint comparison_threshold;
 };
 
 
@@ -174,5 +177,12 @@ void dupe_window_add_files(DupeWindow *dw, GList *list, gboolean recurse);
 void dupe_window_add_folder(const gchar *path, gboolean recurse);
 
 GString *export_duplicates_data_command_line();
+/** @brief Export complete match groups as versioned JSON; selection contains FileData pointers. */
+GString *dupe_export_json(const DupeWindow *dw, const GList *selection = nullptr);
+gboolean dupe_export_ready(const DupeWindow *dw);
+GString *export_duplicates_json_command_line();
+/** @brief Run an executable with a private JSON snapshot argument; remove the snapshot on completion. */
+void dupe_run_results_script(GFile *script, const gchar *json, GAsyncReadyCallback callback, gpointer data);
+gboolean dupe_run_results_script_finish(GAsyncResult *result, GError **error);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

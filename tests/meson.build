@@ -5,6 +5,7 @@ unit_test_sources = files(
 'cache.cc',
 'collection-file-source.cc',
 'dnd.cc',
+'dupe-export.cc',
 'editors.cc',
 'exiv2.cc',
 'filecache.cc',

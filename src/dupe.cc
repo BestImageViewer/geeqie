@@ -2346,6 +2346,11 @@ static gboolean dupe_check_cb(gpointer data)
 
 static void dupe_check_start(DupeWindow *dw)
 {
+	dw->comparison_perceptual = options->alternate_similarity_algorithm.enabled;
+	dw->comparison_rotation_invariant = options->rot_invariant_sim;
+	dw->comparison_threshold = dw->match_mask & DUPE_MATCH_SIM_HIGH ? 95 :
+	                           dw->match_mask & DUPE_MATCH_SIM_MED ? 90 :
+	                           dw->match_mask & DUPE_MATCH_SIM_CUSTOM ? options->duplicates_similarity_threshold : 85;
 	dw->setup_done = FALSE;
 
 	dw->setup_count = g_list_length(dw->list);
@@ -4031,13 +4036,13 @@ static void column_clicked_cb(GtkWidget *,  gpointer data)
 
 enum SeparatorType {
 	EXPORT_CSV = 0,
-	EXPORT_TSV
+	EXPORT_TSV,
+	EXPORT_JSON
 };
 
 struct ExportDupesData
 {
-	SeparatorType separator;
-	DupeWindow *dupewindow;
+	GString *output;
 };
 
 
@@ -4055,6 +4060,7 @@ static GString *export_duplicates_data(DupeWindow *dw, const char *sep)
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
 	GtkTreeModel *store;
 	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+	if (!slist) return output_string;
 
 	auto *tpath = static_cast<GtkTreePath *>(slist->data);
 	GtkTreeIter iter;
@@ -4149,31 +4155,44 @@ GString *export_duplicates_data_command_line()
 	return export_duplicates_data(dw, "\t");
 }
 
+GString *export_duplicates_json_command_line()
+{
+	auto *dw = dupe_window_list ? static_cast<DupeWindow *>(g_list_last(dupe_window_list)->data) : nullptr;
+	g_autoptr(FileDataList) selection = dw ? dupe_listview_get_selection(dw->listview) : nullptr;
+	return dupe_export_json(dw, selection);
+}
+
+static GString *dupe_json_snapshot(DupeWindow *dw)
+{
+	if (!dupe_export_ready(dw))
+		{
+		file_util_warning_dialog(_("Comparison incomplete"), _("Wait for the duplicate comparison to finish before exporting results."),
+		                         GQ_ICON_DIALOG_WARNING, dw->window);
+		return nullptr;
+		}
+	g_autoptr(FileDataList) selection = dupe_listview_get_selection(dw->listview);
+	return dupe_export_json(dw, selection);
+}
+
 static void save_export_file(GFile *file, ExportDupesData *edd)
 {
-	g_autofree char *filename = g_file_get_path(file);
-	g_autoptr(GFile) out_file = g_file_new_for_path(filename);
-
 	g_autoptr(GError) error = nullptr;
-	g_autoptr(GFileOutputStream) gfstream = g_file_replace(out_file, nullptr, TRUE, G_FILE_CREATE_NONE, nullptr, &error);
+	g_autoptr(GFileOutputStream) gfstream = g_file_replace(file, nullptr, TRUE, G_FILE_CREATE_NONE, nullptr, &error);
 	if (error)
 		{
-		log_printf(_("Error creating Export duplicates data file: Error: %s\n"), error->message);
+		file_util_warning_dialog(_("Export failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 		return;
 		}
 
-	const char *sep = (edd->separator == EXPORT_CSV) ?  "," : "\t";
-	g_autoptr(GString) output_string = export_duplicates_data(edd->dupewindow, sep);
-	output_string = g_string_prepend(output_string, "header");
-
-	g_output_stream_write(G_OUTPUT_STREAM(gfstream), output_string->str, output_string->len, nullptr, &error);
+	if (!g_output_stream_write_all(G_OUTPUT_STREAM(gfstream), edd->output->str, edd->output->len, nullptr, nullptr, &error) ||
+	    !g_output_stream_close(G_OUTPUT_STREAM(gfstream), nullptr, &error))
+		file_util_warning_dialog(_("Export failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 
 	g_autoptr(GFile) parent = g_file_get_parent(file);
 	if (!parent) return;
 
 	g_autofree char *parent_path = g_file_get_path(parent);
-	g_autofree char *dirname = g_path_get_dirname(parent_path);
-	history_list_add_to_key("export_duplicates", dirname, -1);
+	if (parent_path) history_list_add_to_key("export_duplicates", parent_path, -1);
 }
 
 static void export_response_cb(GFile *file, gpointer data)
@@ -4185,6 +4204,7 @@ static void export_response_cb(GFile *file, gpointer data)
 		save_export_file(file, edd);
 		}
 
+	g_string_free(edd->output, TRUE);
 	g_free(edd);
 }
 
@@ -4197,8 +4217,13 @@ static void dupe_pop_menu_export_cb(GSimpleAction *, GVariant *, gpointer data)
 	auto *dw = static_cast<DupeWindow *>(data);
 
 	auto *edd = g_new0(ExportDupesData, 1);
-	edd->dupewindow = dw;
-	edd->separator = separator;
+	edd->output = separator == EXPORT_JSON ? dupe_json_snapshot(dw) :
+	              export_duplicates_data(dw, separator == EXPORT_CSV ? "," : "\t");
+	if (!edd->output)
+		{
+		g_free(edd);
+		return;
+		}
 
 	FileDialogData fdd{};
 
@@ -4206,12 +4231,41 @@ static void dupe_pop_menu_export_cb(GSimpleAction *, GVariant *, gpointer data)
 	fdd.accept_text = _("Save");
 	fdd.callback = export_response_cb;
 	fdd.data = edd;
-	fdd.filter = (separator == EXPORT_CSV) ? ".csv" : ".tsv";
-	fdd.filter_description = (separator == EXPORT_CSV) ? "csv files" : "tsv files";
+	fdd.filter = separator == EXPORT_JSON ? ".json" : separator == EXPORT_CSV ? ".csv" : ".tsv";
+	fdd.filter_description = separator == EXPORT_JSON ? _("JSON files") : separator == EXPORT_CSV ? _("CSV files") : _("TSV files");
 	fdd.history_key = "export_duplicates";
-	fdd.suggested_name = (separator == EXPORT_CSV) ? _("Untitled.csv") : _("Untitled.tsv");
+	fdd.suggested_name = separator == EXPORT_JSON ? _("Untitled.json") : separator == EXPORT_CSV ? _("Untitled.csv") : _("Untitled.tsv");
 	fdd.title = _("Export duplicates data");
 
+	file_dialog_show(fdd);
+}
+
+static void dupe_script_finished_cb(GObject *, GAsyncResult *result, gpointer)
+{
+	g_autoptr(GError) error = nullptr;
+	if (!dupe_run_results_script_finish(result, &error))
+		file_util_warning_dialog(_("Script failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
+}
+
+static void dupe_script_selected_cb(GFile *file, gpointer data)
+{
+	g_autoptr(GString) contents = static_cast<GString *>(data);
+	if (file) dupe_run_results_script(file, contents->str, dupe_script_finished_cb, nullptr);
+}
+
+static void dupe_run_script_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *dw = static_cast<DupeWindow *>(data);
+	GString *contents = dupe_json_snapshot(dw);
+	if (!contents) return;
+	FileDialogData fdd{};
+	fdd.action = FileDialogAction::OPEN;
+	fdd.title = _("Run script with duplicate results");
+	fdd.accept_text = _("Run");
+	fdd.history_key = "duplicates_script";
+	fdd.callback = dupe_script_selected_cb;
+	fdd.data = contents;
+	fdd.parent = GTK_WINDOW(dw->window);
 	file_dialog_show(fdd);
 }
 
