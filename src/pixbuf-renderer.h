@@ -195,7 +195,7 @@ struct PixbufRenderer
 	gdouble zoom_min;
 	gdouble zoom_max;
 	gdouble zoom;		/**< zoom we want (0 is auto) */
-	gdouble scale;		/**< zoom we got (should never be 0) */
+	gdouble scale;		/**< logical display pixels per image pixel (should never be 0) */
 
 	gdouble aspect_ratio;   /**< screen pixel aspect ratio (2.0 for 3DTV SBS mode) */
 
@@ -366,7 +366,8 @@ void pixbuf_renderer_set_nearest_above_200(PixbufRenderer *pr, gboolean enable);
 void pixbuf_renderer_set_allow_overscroll(PixbufRenderer *pr, gboolean enable);
 void pixbuf_renderer_zoom_set(PixbufRenderer *pr, gdouble zoom);
 gdouble pixbuf_renderer_zoom_get(PixbufRenderer *pr);
-gdouble pixbuf_renderer_zoom_get_scale(PixbufRenderer *pr);
+/** Effective zoom in physical display pixels per image pixel, including auto-fit. */
+gdouble pixbuf_renderer_zoom_get_scale(const PixbufRenderer *pr);
 
 void pixbuf_renderer_zoom_set_limits(PixbufRenderer *pr, gdouble min, gdouble max);
 

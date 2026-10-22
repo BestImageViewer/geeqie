@@ -183,9 +183,17 @@ struct RendererTiles
 constexpr size_t COLOR_BYTES = 3; /* rgb */
 
 
+int rt_tile_scale(const RendererTiles *rt)
+{
+	if (rt->pr->source_tiles_enabled) return 1;
+	GtkNative *native = gtk_widget_get_native(GTK_WIDGET(rt->pr));
+	GdkSurface *surface = native ? gtk_native_get_surface(native) : nullptr;
+	return surface ? static_cast<int>(std::ceil(gdk_surface_get_scale(surface))) : gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr));
+}
+
 GdkInterpType rt_zoom_quality(const PixbufRenderer *pr)
 {
-	return pr->nearest_above_200 && pr->scale > 2.0 ? GDK_INTERP_NEAREST : pr->zoom_quality;
+	return pr->nearest_above_200 && pixbuf_renderer_zoom_get_scale(pr) > 2.0 ? GDK_INTERP_NEAREST : pr->zoom_quality;
 }
 
 gboolean rt_texture_scaling_available(const RendererTiles *rt)
@@ -468,16 +476,25 @@ ImageTile *rt_tile_get(RendererTiles *rt, gint x, gint y, gboolean only_existing
 	return rt_tile_add(rt, x, y);
 }
 
+
 void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 {
+	if (it->surface && cairo_image_surface_get_width(it->surface) != rt->tile_width * rt_tile_scale(rt))
+		{
+		g_clear_pointer(&it->surface, cairo_surface_destroy);
+		g_clear_object(&it->pixbuf);
+		g_clear_object(&it->texture);
+		rt->tile_cache_size -= it->size;
+		it->size = 0;
+		}
 	if (!it->surface)
 		{
 		// Reserve space for both the Cairo pixels and their immutable texture copy.
-		const guint size = 2 * surface_calc_size(rt->tile_width, rt->tile_height);
+		const guint size = 2 * surface_calc_size((rt->tile_width * rt_tile_scale(rt)), (rt->tile_height * rt_tile_scale(rt)));
 
 		rt_tile_free_space(rt, size, it);
 
-		it->surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, rt->tile_width, rt->tile_height);
+		it->surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, (rt->tile_width * rt_tile_scale(rt)), (rt->tile_height * rt_tile_scale(rt)));
 
 		it->size += size;
 		rt->tile_cache_size += size;
@@ -485,9 +502,9 @@ void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 
 	if (!it->pixbuf)
 		{
-		GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rt->tile_width, rt->tile_height);
+		GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, (rt->tile_width * rt_tile_scale(rt)), (rt->tile_height * rt_tile_scale(rt)));
 
-		const guint size = gdk_pixbuf_get_rowstride(pixbuf) * rt->tile_height;
+		const guint size = gdk_pixbuf_get_rowstride(pixbuf) * (rt->tile_height * rt_tile_scale(rt));
 
 		rt_tile_free_space(rt, size, it);
 
@@ -672,7 +689,11 @@ void rt_scale_factor_changed_cb(GObject *, GParamSpec *, gpointer data)
 
 GdkPixbuf *rt_get_spare_tile(RendererTiles *rt)
 {
-	if (!rt->spare_tile) rt->spare_tile = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rt->tile_width, rt->tile_height);
+	if (rt->spare_tile && gdk_pixbuf_get_width(rt->spare_tile) != rt->tile_width * rt_tile_scale(rt))
+		{
+		g_clear_object(&rt->spare_tile);
+		}
+	if (!rt->spare_tile) rt->spare_tile = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, (rt->tile_width * rt_tile_scale(rt)), (rt->tile_height * rt_tile_scale(rt)));
 	return rt->spare_tile;
 }
 
@@ -688,7 +709,7 @@ void rt_tile_rotate_90_clockwise(RendererTiles *rt, GdkPixbuf **tile, gint x, gi
 	guchar *dpi;
 	gint i;
 	gint j;
-	gint tw = rt->tile_width;
+	gint tw = (rt->tile_width * rt_tile_scale(rt));
 
 	srs = gdk_pixbuf_get_rowstride(src);
 	const guchar *s_pix = gdk_pixbuf_read_pixels(src);
@@ -727,7 +748,7 @@ void rt_tile_rotate_90_counter_clockwise(RendererTiles *rt, GdkPixbuf **tile, gi
 	guchar *dpi;
 	gint i;
 	gint j;
-	gint th = rt->tile_height;
+	gint th = (rt->tile_height * rt_tile_scale(rt));
 
 	srs = gdk_pixbuf_get_rowstride(src);
 	const guchar *s_pix = gdk_pixbuf_read_pixels(src);
@@ -766,7 +787,7 @@ void rt_tile_mirror_only(RendererTiles *rt, GdkPixbuf **tile, gint x, gint y, gi
 	gint i;
 	gint j;
 
-	gint tw = rt->tile_width;
+	gint tw = (rt->tile_width * rt_tile_scale(rt));
 
 	srs = gdk_pixbuf_get_rowstride(src);
 	const guchar *s_pix = gdk_pixbuf_read_pixels(src);
@@ -804,8 +825,8 @@ void rt_tile_mirror_and_flip(RendererTiles *rt, GdkPixbuf **tile, gint x, gint y
 	guchar *dpi;
 	gint i;
 	gint j;
-	gint tw = rt->tile_width;
-	gint th = rt->tile_height;
+	gint tw = (rt->tile_width * rt_tile_scale(rt));
+	gint th = (rt->tile_height * rt_tile_scale(rt));
 
 	srs = gdk_pixbuf_get_rowstride(src);
 	const guchar *s_pix = gdk_pixbuf_read_pixels(src);
@@ -841,7 +862,7 @@ void rt_tile_flip_only(RendererTiles *rt, GdkPixbuf **tile, gint x, gint y, gint
 	guchar *dp;
 	guchar *dpi;
 	gint i;
-	gint th = rt->tile_height;
+	gint th = (rt->tile_height * rt_tile_scale(rt));
 
 	srs = gdk_pixbuf_get_rowstride(src);
 	const guchar *s_pix = gdk_pixbuf_read_pixels(src);
@@ -891,7 +912,7 @@ void rt_tile_apply_orientation(RendererTiles *rt, gint orientation, GdkPixbuf **
 		case EXIF_ORIENTATION_LEFT_TOP:
 			{
 				rt_tile_flip_only(rt, pixbuf, x, y, w, h);
-				rt_tile_rotate_90_clockwise(rt, pixbuf, x, rt->tile_height - y - h, w, h);
+				rt_tile_rotate_90_clockwise(rt, pixbuf, x, (rt->tile_height * rt_tile_scale(rt)) - y - h, w, h);
 			}
 			break;
 		case EXIF_ORIENTATION_RIGHT_TOP:
@@ -903,7 +924,7 @@ void rt_tile_apply_orientation(RendererTiles *rt, gint orientation, GdkPixbuf **
 		case EXIF_ORIENTATION_RIGHT_BOTTOM:
 			{
 				rt_tile_flip_only(rt, pixbuf, x, y, w, h);
-				rt_tile_rotate_90_counter_clockwise(rt, pixbuf, x, rt->tile_height - y - h, w, h);
+				rt_tile_rotate_90_counter_clockwise(rt, pixbuf, x, (rt->tile_height * rt_tile_scale(rt)) - y - h, w, h);
 			}
 			break;
 		case EXIF_ORIENTATION_LEFT_BOTTOM:
@@ -1214,6 +1235,11 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 
 	if (new_data) it->blank = FALSE;
 
+	const int backing_scale = rt_tile_scale(rt);
+	x *= backing_scale;
+	y *= backing_scale;
+	w *= backing_scale;
+	h *= backing_scale;
 	rt_tile_prepare(rt, it);
 	g_clear_object(&it->texture);
 	g_clear_object(&rt->composite_texture);
@@ -1228,7 +1254,7 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		/* no data, do fast rect fill */
 		cairo_t *cr;
 		cr = cairo_create(it->surface);
-		cairo_rectangle (cr, 0, 0, it->w, it->h);
+		cairo_rectangle (cr, 0, 0, it->w * backing_scale, it->h * backing_scale);
 		cairo_set_source_rgb(cr, 0, 0, 0);
 		cairo_fill (cr);
 		cairo_destroy (cr);
@@ -1246,17 +1272,17 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 
 		if (pr->image_width == 0 || pr->image_height == 0) return;
 
-		scale_x = static_cast<gdouble>(pr->width) / pr->image_width;
-		scale_y = static_cast<gdouble>(pr->height) / pr->image_height;
+		scale_x = static_cast<gdouble>(pr->width * backing_scale) / pr->image_width;
+		scale_y = static_cast<gdouble>(pr->height * backing_scale) / pr->image_height;
 
-		pr_tile_coords_map_orientation(orientation, it->x, it->y,
-		                               pr->width, pr->height,
-		                               rt->tile_width, rt->tile_height,
+		pr_tile_coords_map_orientation(orientation, it->x * backing_scale, it->y * backing_scale,
+		                               pr->width * backing_scale, pr->height * backing_scale,
+		                               (rt->tile_width * backing_scale), (rt->tile_height * backing_scale),
 		                               src_x, src_y);
 		GdkRectangle pb_rect = pr_tile_region_map_orientation(orientation,
 		                                                      {x, y, w, h},
-		                                                      rt->tile_width,
-		                                                      rt->tile_height);
+		                                                      (rt->tile_width * backing_scale),
+		                                                      (rt->tile_height * backing_scale));
 
 		switch (orientation)
 			{
@@ -1284,7 +1310,7 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		                   static_cast<gdouble>(0.0) - src_y,
 		                   scale_x, scale_y,
 		                   (fast) ? GDK_INTERP_NEAREST : rt_zoom_quality(pr),
-		                   it->x + pb_rect.x, it->y + pb_rect.y, wide_image);
+		                   (it->x * backing_scale) + pb_rect.x, (it->y * backing_scale) + pb_rect.y, wide_image);
 		if (rt->stereo_mode & PR_STEREO_ANAGLYPH &&
 		    (pr->stereo_pixbuf_offset_right > 0 || pr->stereo_pixbuf_offset_left > 0))
 			{
@@ -1295,7 +1321,7 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 			                   static_cast<gdouble>(0.0) - src_y,
 			                   scale_x, scale_y,
 			                   (fast) ? GDK_INTERP_NEAREST : rt_zoom_quality(pr),
-			                   it->x + pb_rect.x, it->y + pb_rect.y, wide_image);
+			                   (it->x * backing_scale) + pb_rect.x, (it->y * backing_scale) + pb_rect.y, wide_image);
 			pr_create_anaglyph(rt->stereo_mode, it->pixbuf, right_pb, pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height);
 			/* do not care about freeing spare_tile, it will be reused */
 			}
@@ -1937,7 +1963,7 @@ GdkTexture *rt_composite_texture(RendererTiles *rt)
 	/* Join the opaque tile pixels at their original integer coordinates.
 	 * Scaling separate texture nodes antialiases each edge independently,
 	 * allowing the background to show through between adjacent tiles. */
-	auto *surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, pr->vis_width, pr->vis_height);
+	auto *surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, pr->vis_width * rt_tile_scale(rt), pr->vis_height * rt_tile_scale(rt));
 	auto *cr = cairo_create(surface);
 	cairo_set_source_rgb(cr, pr->color.red, pr->color.green, pr->color.blue);
 	cairo_paint(cr);
@@ -1946,11 +1972,11 @@ GdkTexture *rt_composite_texture(RendererTiles *rt)
 		{
 		auto *it = static_cast<ImageTile *>(work->data);
 		if (!it->surface_valid || !rt_tile_is_visible(rt, it)) continue;
-		const gint x = it->x - rt->x_scroll;
-		const gint y = it->y - rt->y_scroll;
+		const gint x = (it->x - rt->x_scroll) * rt_tile_scale(rt);
+		const gint y = (it->y - rt->y_scroll) * rt_tile_scale(rt);
 		cairo_set_source_surface(cr, it->surface, x, y);
 		cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
-		cairo_rectangle(cr, x, y, it->w, it->h);
+		cairo_rectangle(cr, x, y, it->w * rt_tile_scale(rt), it->h * rt_tile_scale(rt));
 		cairo_fill(cr);
 		}
 	cairo_destroy(cr);
@@ -2051,7 +2077,8 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 				if (!it->texture) continue;
 				graphene_rect_init(&bounds, rt->pr->x_offset + it->x - rt->x_scroll + rt->stereo_off_x,
 				                   rt->pr->y_offset + it->y - rt->y_scroll + rt->stereo_off_y,
-				                   gdk_texture_get_width(it->texture), gdk_texture_get_height(it->texture));
+				                   static_cast<float>(gdk_texture_get_width(it->texture)) / rt_tile_scale(rt),
+				                   static_cast<float>(gdk_texture_get_height(it->texture)) / rt_tile_scale(rt));
 				gtk_snapshot_append_texture(image_snapshot, it->texture, &bounds);
 				}
 			gtk_snapshot_pop(image_snapshot);

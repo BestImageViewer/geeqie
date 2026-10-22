@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdlib>
 #include <cstdint>
 #include <cstring>
@@ -17,6 +18,7 @@
 #include "renderer-tiles.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
+#include "pixbuf-util.h"
 
 namespace
 {
@@ -583,6 +585,77 @@ GdkTexture *find_scaled_texture(GskRenderNode *node, GskScalingFilter *filter)
 			break;
 		}
 	return nullptr;
+}
+
+TEST(RendererTilesTexture, ActualSizeUsesPhysicalPixels)
+{
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	auto *window = GTK_WINDOW(gtk_window_new());
+	auto *pr = pixbuf_renderer_new();
+	pr->zoom_quality = GDK_INTERP_NEAREST;
+	gtk_window_set_default_size(window, 600, 400);
+	gtk_window_set_child(window, GTK_WIDGET(pr));
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 320, 240);
+	const int rowstride = gdk_pixbuf_get_rowstride(image);
+	auto *pixels = gdk_pixbuf_get_pixels(image);
+	for (int y = 0; y < 240; ++y)
+		{
+		for (int x = 0; x < 320; ++x)
+			{
+			const guchar color = (x % 2) ? 255 : 0;
+			std::fill_n(pixels + y * rowstride + x * 3, 3, color);
+			}
+		}
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	gtk_window_present(window);
+	for (int orientation = 1; orientation <= 8; ++orientation)
+		{
+		SCOPED_TRACE(orientation);
+		g_autoptr(GdkPixbuf) alpha = gdk_pixbuf_add_alpha(image, FALSE, 0, 0, 0);
+		pixbuf_renderer_set_pixbuf(pr, orientation % 2 ? image : alpha, 1.0);
+		pixbuf_renderer_set_orientation(pr, orientation);
+		for (int i = 0; i < 1000; ++i)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (pr->complete && gtk_widget_get_mapped(GTK_WIDGET(pr))) break;
+			g_usleep(1000);
+			}
+		const double scale = gdk_surface_get_scale(gtk_native_get_surface(GTK_NATIVE(window)));
+		EXPECT_NEAR(pr->width * scale, orientation < 5 ? 320 : 240, scale);
+		EXPECT_NEAR(pr->height * scale, orientation < 5 ? 240 : 320, scale);
+		EXPECT_DOUBLE_EQ(pixbuf_renderer_zoom_get_scale(pr), 1.0);
+		auto *snapshot = gtk_snapshot_new();
+		gtk_snapshot_scale(snapshot, scale, scale);
+		renderer_tiles_snapshot(pr->renderer, snapshot, scale);
+		g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
+		graphene_rect_t viewport;
+		graphene_rect_init(&viewport, 0, 0, pr->viewport_width * scale, pr->viewport_height * scale);
+		g_autoptr(GdkTexture) rendered = gsk_renderer_render_texture(gtk_native_get_renderer(GTK_NATIVE(window)), node, &viewport);
+		ASSERT_NE(rendered, nullptr);
+		const int stride = gdk_texture_get_width(rendered);
+		std::vector<uint32_t> output(stride * gdk_texture_get_height(rendered));
+		gdk_texture_download(rendered, reinterpret_cast<guchar *>(output.data()), stride * 4);
+		if (scale == std::floor(scale))
+			{
+			const int left = pr->x_offset * scale;
+			const int top = pr->y_offset * scale;
+			g_autoptr(GdkPixbuf) reference = pixbuf_apply_orientation(image, orientation);
+			const auto *row = gdk_pixbuf_get_pixels(reference) + 50 * gdk_pixbuf_get_rowstride(reference);
+			for (int x = 8; x < gdk_pixbuf_get_width(reference) - 8; ++x)
+				{
+				EXPECT_EQ(output[(top + 50) * stride + left + x], row[x * 3] ? 0xffffffffU : 0xff000000U) << x;
+				}
+			}
+		}
+	for (double zoom : {2.0, -2.0, 0.0})
+		{
+		pixbuf_renderer_zoom_set(pr, zoom);
+		const double expected = zoom == 2.0 ? 2.0 : zoom == -2.0 ? 0.5 : 1.0;
+		EXPECT_DOUBLE_EQ(pixbuf_renderer_zoom_get_scale(pr), expected);
+		}
+	gtk_window_destroy(window);
 }
 
 TEST(RendererTilesTexture, HighDpiMagnificationDisplaysTheWholeImage)

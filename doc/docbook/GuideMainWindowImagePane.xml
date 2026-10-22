@@ -3,6 +3,7 @@
   <title id="titleGuideMainWindowImagePane">Image Pane</title>
   <para>The image pane is the region of the main window that displays the selected image. The image pane allows adjustment of display size and orientation; it also provides several methods to manipulate the image with the mouse and keyboard.</para>
   <para />
+  <para>At 100% zoom (1:1), one image pixel corresponds to one physical display pixel, independently of desktop scaling. Interface text and controls retain the desktop scale. Moving the window between displays preserves the selected zoom and adjusts the image size accordingly.</para>
   <section id="Imagedisplay">
     <title>Image display</title>
     <para>The image is drawn to the screen as it is decoded from disk. The image can be panned and zoomed while it is still loading. Image adjustment operations for rotation, mirror, and flip will delay until the image is completed. The adjustment queue will remember one operation and will retain the most recently requested function, which will be performed once the image has finished loading.</para>
