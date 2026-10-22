@@ -65,7 +65,11 @@
           </row>
           <row>
             <entry>res</entry>
-            <entry>Image resolution</entry>
+            <entry>Image dimensions in pixels (width x height)</entry>
+          </row>
+          <row>
+            <entry>formatted.Resolution</entry>
+            <entry>Image density and units from EXIF metadata, such as 200 x 200 (dot/inch)</entry>
           </row>
           <row>
             <entry>keywords</entry>
@@ -98,6 +102,9 @@
         </tbody>
       </tgroup>
     </table>
+    <para>Pixel dimensions and image density are different values. The <literal>%res%</literal> tag displays the image width and height in pixels. To also display the recorded density, use:</para>
+    <programlisting>%res% | %formatted.Resolution%</programlisting>
+    <para>The <literal>%formatted.Resolution%</literal> tag reads <literal>Exif.Image.XResolution</literal>, <literal>Exif.Image.YResolution</literal>, and <literal>Exif.Image.ResolutionUnit</literal>. Density may be recorded per inch or per centimeter; the tag displays the recorded unit rather than converting it to pixels per inch. If either EXIF density value is missing, the tag is empty. A missing unit is shown as unknown. Density stored only in JPEG JFIF or PNG-specific fields is not read by this formatter.</para>
     <para>
       As an aide, in addition to standard metadata tags, Geeqie provides a number of
       <emphasis role="underline"><link linkend="formatted_exif">pre-formatted tags</link></emphasis>
