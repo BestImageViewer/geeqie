@@ -1507,7 +1507,7 @@ static void vficon_item_update(ViewFileIconItem *item, GtkWidget *child)
 		const guint mark = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(button), "view-file-mark"));
 		g_object_set_data(G_OBJECT(button), "view-file-fd", fd);
 		g_signal_handlers_block_by_func(button, (gpointer)vficon_mark_toggled_cb, nullptr);
-		gtk_check_button_set_active(GTK_CHECK_BUTTON(button), file_data_get_mark(fd, mark));
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(button), vf_mark_get_for_display(vf, fd, mark));
 		g_signal_handlers_unblock_by_func(button, (gpointer)vficon_mark_toggled_cb, nullptr);
 		}
 

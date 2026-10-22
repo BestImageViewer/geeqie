@@ -895,16 +895,16 @@ static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *it
 #define STORE_SET_IS_SLOW 1
 #if STORE_SET_IS_SLOW
 /* this is 3x faster on a directory with 20000 files */
-					FILE_COLUMN_MARKS + 0, file_data_get_mark(fd, 0),
-					FILE_COLUMN_MARKS + 1, file_data_get_mark(fd, 1),
-					FILE_COLUMN_MARKS + 2, file_data_get_mark(fd, 2),
-					FILE_COLUMN_MARKS + 3, file_data_get_mark(fd, 3),
-					FILE_COLUMN_MARKS + 4, file_data_get_mark(fd, 4),
-					FILE_COLUMN_MARKS + 5, file_data_get_mark(fd, 5),
-					FILE_COLUMN_MARKS + 6, file_data_get_mark(fd, 6),
-					FILE_COLUMN_MARKS + 7, file_data_get_mark(fd, 7),
-					FILE_COLUMN_MARKS + 8, file_data_get_mark(fd, 8),
-					FILE_COLUMN_MARKS + 9, file_data_get_mark(fd, 9),
+					FILE_COLUMN_MARKS + 0, vf_mark_get_for_display(vf, fd, 0),
+					FILE_COLUMN_MARKS + 1, vf_mark_get_for_display(vf, fd, 1),
+					FILE_COLUMN_MARKS + 2, vf_mark_get_for_display(vf, fd, 2),
+					FILE_COLUMN_MARKS + 3, vf_mark_get_for_display(vf, fd, 3),
+					FILE_COLUMN_MARKS + 4, vf_mark_get_for_display(vf, fd, 4),
+					FILE_COLUMN_MARKS + 5, vf_mark_get_for_display(vf, fd, 5),
+					FILE_COLUMN_MARKS + 6, vf_mark_get_for_display(vf, fd, 6),
+					FILE_COLUMN_MARKS + 7, vf_mark_get_for_display(vf, fd, 7),
+					FILE_COLUMN_MARKS + 8, vf_mark_get_for_display(vf, fd, 8),
+					FILE_COLUMN_MARKS + 9, vf_mark_get_for_display(vf, fd, 9),
 #if FILEDATA_MARKS_SIZE != 10
 #error this needs to be updated
 #endif
@@ -915,7 +915,7 @@ static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *it
 	{
 	gint i;
 	for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
-		gtk_tree_store_set(store, iter, FILE_COLUMN_MARKS + i, file_data_get_mark(fd, i), -1);
+		gtk_tree_store_set(store, iter, FILE_COLUMN_MARKS + i, vf_mark_get_for_display(vf, fd, i), -1);
 	}
 #endif
 }
@@ -1155,6 +1155,17 @@ void vflist_read_metadata_progress_count(const GList *list, gint &count, gint &d
 			vflist_read_metadata_progress_count(fd->sidecar_files, count, done);
 			}
 		count++;
+		}
+}
+
+void vflist_set_marks_fd(ViewFile *vf, FileData *fd)
+{
+	GtkTreeIter iter;
+	if (!vflist_find_row(vf, fd, &iter)) return;
+	auto *store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview)));
+	for (gint mark = 0; mark < FILEDATA_MARKS_SIZE; mark++)
+		{
+		gtk_tree_store_set(store, &iter, FILE_COLUMN_MARKS + mark, vf_mark_get_for_display(vf, fd, mark), -1);
 		}
 }
 

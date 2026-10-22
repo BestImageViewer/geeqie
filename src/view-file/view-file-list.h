@@ -102,6 +102,7 @@ void vflist_color_set(ViewFile *vf, FileData *fd, gboolean color_set);
 void vflist_thumb_progress_count(const GList *list, gint &count, gint &done);
 void vflist_read_metadata_progress_count(const GList *list, gint &count, gint &done);
 void vflist_set_thumb_fd(ViewFile *vf, FileData *fd);
+void vflist_set_marks_fd(ViewFile *vf, FileData *fd);
 FileData *vflist_thumb_next_fd(ViewFile *vf);
 
 FileData *vflist_star_next_fd(ViewFile *vf);

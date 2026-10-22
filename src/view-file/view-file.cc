@@ -1854,6 +1854,7 @@ static void vf_collection_changed_cb(CollectionData *collection, gpointer data)
 
 static void vf_collection_release(ViewFile *vf)
 {
+	vf_marks_load_cancel(vf);
 	if (!vf->collection) return;
 	collection_remove_listener(vf->collection, vf_collection_changed_cb, vf);
 	for (GList *work = vf->monitored_files; work; work = work->next)
@@ -1870,6 +1871,7 @@ static void vf_collection_release(ViewFile *vf)
 
 gboolean vf_read_source(ViewFile *vf, GList **list)
 {
+	vf_marks_load_cancel(vf);
 	*list = nullptr;
 	if (vf->source == FileViewSource::DIRECTORY)
 		{
@@ -1983,6 +1985,7 @@ gboolean vf_refresh(ViewFile *vf)
 gboolean vf_set_fd(ViewFile *vf, FileData *dir_fd)
 {
 	if (!dir_fd) return FALSE;
+	vf_marks_load_cancel(vf);
 	vf_collection_release(vf);
 	vf_collection_actions_update(vf);
 	gboolean ret;
@@ -2000,6 +2003,7 @@ gboolean vf_set_fd(ViewFile *vf, FileData *dir_fd)
 static void vf_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
+	vf_marks_load_cancel(vf);
 	file_data_list_free(vf->drag_selection);
 
 	if (vf->marks_filter_controller && vf->layout && vf->layout->window)
@@ -2041,7 +2045,7 @@ static void vf_destroy_cb(GtkWidget *, gpointer data)
 
 	if (vf->read_metadata_in_idle_id)
 		{
-		g_idle_remove_by_data(vf);
+		g_source_remove(vf->read_metadata_in_idle_id);
 		}
 	vf_collection_release(vf);
 	file_data_unref(vf->dir_fd);
@@ -3035,6 +3039,62 @@ void vf_star_update(ViewFile *vf)
 	vf_star_next(vf);
 }
 
+void vf_marks_load_cancel(ViewFile *vf)
+{
+	if (vf->marks_load_idle_id) g_source_remove(vf->marks_load_idle_id);
+	vf->marks_load_idle_id = 0;
+	if (vf->marks_load_queue)
+		{
+		g_queue_free_full(vf->marks_load_queue, reinterpret_cast<GDestroyNotify>(file_data_unref));
+		vf->marks_load_queue = nullptr;
+		}
+	g_clear_pointer(&vf->marks_load_pending, g_hash_table_destroy);
+}
+
+static gboolean vf_marks_load_idle_cb(gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+	// One file per iteration lets input and drawing run between metadata reads.
+	auto *fd = static_cast<FileData *>(g_queue_pop_head(vf->marks_load_queue));
+	if (fd)
+		{
+		g_hash_table_remove(vf->marks_load_pending, fd);
+		file_data_get_marks(fd);
+		if (vf->listview)
+			{
+			switch (vf->type)
+				{
+				case FILEVIEW_LIST: vflist_set_marks_fd(vf, fd); break;
+				case FILEVIEW_ICON: vficon_set_thumb_fd(vf, fd); break;
+				}
+			}
+		file_data_unref(fd);
+		}
+	if (!g_queue_is_empty(vf->marks_load_queue)) return G_SOURCE_CONTINUE;
+	vf->marks_load_idle_id = 0;
+	return G_SOURCE_REMOVE;
+}
+
+gboolean vf_mark_get_for_display(ViewFile *vf, FileData *fd, gint mark)
+{
+	FileData::GetMarkFunc get_mark = nullptr;
+	file_data_get_registered_mark_func(mark, &get_mark, nullptr, nullptr);
+	if (vf->marks_enabled && get_mark && !(fd->valid_marks & (1 << mark)))
+		{
+		if (!vf->marks_load_queue) vf->marks_load_queue = g_queue_new();
+		if (!vf->marks_load_pending) vf->marks_load_pending = g_hash_table_new(g_direct_hash, g_direct_equal);
+		if (g_hash_table_add(vf->marks_load_pending, fd))
+			{
+			g_queue_push_tail(vf->marks_load_queue, file_data_ref(fd));
+			}
+		if (!vf->marks_load_idle_id)
+			{
+			vf->marks_load_idle_id = g_idle_add_full(G_PRIORITY_LOW, vf_marks_load_idle_cb, vf, nullptr);
+			}
+		}
+	return !!(fd->marks & (1 << mark));
+}
+
 void vf_marks_set(ViewFile *vf, gboolean enable)
 {
 	gboolean changed = (vf->marks_enabled != enable);
@@ -3044,6 +3104,7 @@ void vf_marks_set(ViewFile *vf, gboolean enable)
 	if (!changed) return;
 
 	vf->marks_enabled = enable;
+	if (!enable) vf_marks_load_cancel(vf);
 
 	switch (vf->type)
 	{
@@ -3302,7 +3363,7 @@ void vf_read_metadata_in_idle(ViewFile *vf)
 
 	if (vf->read_metadata_in_idle_id)
 		{
-		g_idle_remove_by_data(vf);
+		g_source_remove(vf->read_metadata_in_idle_id);
 		}
 	vf->read_metadata_in_idle_id = 0;
 

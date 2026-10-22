@@ -116,9 +116,16 @@ struct ViewFile
 	GList *editmenu_fd_list; /**< file list for edit menu */
 
 	guint read_metadata_in_idle_id;
+	guint marks_load_idle_id;
+	GQueue *marks_load_queue;
+	GHashTable *marks_load_pending;
 
 	using SelectionCallback = std::function<void(FileData *)>;
 };
+
+/** Read cached marks for display and defer unresolved keyword lookups. */
+gboolean vf_mark_get_for_display(ViewFile *vf, FileData *fd, gint mark);
+void vf_marks_load_cancel(ViewFile *vf);
 
 struct ViewFileMouseButtonEvent
 {

@@ -25,6 +25,110 @@
 namespace
 {
 
+class DeferredMarks : public ::testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		file_data_get_registered_mark_func(0, &saved_get, &saved_set, &saved_data);
+		if (saved_get || saved_set || saved_data) GTEST_SKIP() << "Requires an unused mark";
+		installed = true;
+		file_data_register_mark_func(0, read_mark, nullptr, this, nullptr);
+		vf.marks_enabled = TRUE;
+	}
+
+	void TearDown() override
+	{
+		vf_marks_load_cancel(&vf);
+		if (installed) file_data_register_mark_func(0, nullptr, nullptr, nullptr, nullptr);
+	}
+
+	static gboolean read_mark(FileData *, gint, gpointer data)
+	{
+		auto *self = static_cast<DeferredMarks *>(data);
+		++self->reads;
+		return self->value;
+	}
+
+	ViewFile vf{};
+	int reads = 0;
+	bool installed = false;
+	gboolean value = FALSE;
+	FileData::GetMarkFunc saved_get = nullptr;
+	FileData::SetMarkFunc saved_set = nullptr;
+	gpointer saved_data = nullptr;
+};
+
+TEST_F(DeferredMarks, DisplayDefersAndDeduplicatesReads)
+{
+	auto first = FileData::new_simple("/tmp/geeqie-deferred-mark-first.jpg");
+	auto second = FileData::new_simple("/tmp/geeqie-deferred-mark-second.jpg");
+	EXPECT_FALSE(vf_mark_get_for_display(&vf, first, 0));
+	EXPECT_FALSE(vf_mark_get_for_display(&vf, first, 0));
+	EXPECT_FALSE(vf_mark_get_for_display(&vf, second, 0));
+	EXPECT_EQ(reads, 0);
+	ASSERT_NE(vf.marks_load_idle_id, 0U);
+	EXPECT_EQ(g_queue_get_length(vf.marks_load_queue), 2U);
+	while (reads == 0) g_main_context_iteration(nullptr, FALSE);
+	EXPECT_EQ(reads, 1);
+	while (vf.marks_load_idle_id) g_main_context_iteration(nullptr, FALSE);
+	EXPECT_EQ(reads, 2);
+	EXPECT_TRUE(first->valid_marks & 1);
+	EXPECT_TRUE(second->valid_marks & 1);
+	vf_mark_get_for_display(&vf, first, 0);
+	EXPECT_EQ(vf.marks_load_idle_id, 0U);
+}
+
+TEST_F(DeferredMarks, ResolvedMarksUpdateListRow)
+{
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	value = TRUE;
+	auto fd = FileData::new_simple("/tmp/geeqie-deferred-mark-row.jpg");
+	vflist_new(&vf);
+	auto *store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vf.listview)));
+	GtkTreeIter iter;
+	gtk_tree_store_append(store, &iter, nullptr);
+	gtk_tree_store_set(store, &iter, 0, file_data_ref(fd), -1);
+	vf.list = g_list_append(vf.list, file_data_ref(fd));
+	vflist_set_marks_fd(&vf, fd);
+	gboolean active = TRUE;
+	gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 12, &active, -1);
+	EXPECT_FALSE(active);
+	EXPECT_EQ(reads, 0);
+	while (vf.marks_load_idle_id) g_main_context_iteration(nullptr, FALSE);
+	gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 12, &active, -1);
+	EXPECT_TRUE(active);
+	EXPECT_EQ(reads, 1);
+	file_data_set_mark(fd, 0, FALSE);
+	vf_marks_load_cancel(&vf);
+	vflist_destroy_cb(&vf);
+	g_free(vf.info);
+	vf.info = nullptr;
+	vf.listview = nullptr;
+}
+
+TEST_F(DeferredMarks, CancellationDropsPendingReads)
+{
+	auto fd = FileData::new_simple("/tmp/geeqie-deferred-mark-cancel.jpg");
+	vf_mark_get_for_display(&vf, fd, 0);
+	vf_marks_load_cancel(&vf);
+	EXPECT_EQ(reads, 0);
+	EXPECT_EQ(vf.marks_load_idle_id, 0U);
+	EXPECT_EQ(vf.marks_load_queue, nullptr);
+	EXPECT_FALSE(fd->valid_marks & 1);
+}
+
+TEST_F(DeferredMarks, HiddenMarksDoNotReadMetadata)
+{
+	auto fd = FileData::new_simple("/tmp/geeqie-deferred-mark-hidden.jpg");
+	vf.marks_enabled = FALSE;
+	vf_mark_get_for_display(&vf, fd, 0);
+	EXPECT_EQ(reads, 0);
+	EXPECT_EQ(vf.marks_load_idle_id, 0U);
+}
+
 void check_startup_selection(bool show_details)
 {
 	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";

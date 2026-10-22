@@ -18,6 +18,7 @@
     menu has been selected, each image will have a set of 10 check-boxes displayed adjacent to it in the file pane in both icon and list mode. In addition a set of 10 check-boxes will be shown at the top of the files pane. Clicking any of these will filter the displayed list.
   </para>
   <para>Moving the mouse over any of the check-boxes at the top of the files pane will show mnemonic text for that mark. The text can be modified by right-clicking on the check box.</para>
+  <para>Marks linked to keywords appear incrementally as image metadata is read. Until a file has been read, its displayed marks may be incomplete. Hiding marks stops pending mark reads. Filtering by marks and explicit mark operations resolve the required values immediately and may take time in large folders.</para>
   <para>
     If the
     <emphasis role="underline"><link linkend="InformationandhistogramOverlay" endterm="titleInformationandhistogramOverlay" /></emphasis>
