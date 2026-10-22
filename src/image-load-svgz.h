@@ -23,9 +23,12 @@
 
 #include <memory>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 struct ImageLoaderBackend;
 
-std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_svgz();
+/** @brief Use the system SVG loader unless an alternative loader factory is supplied. */
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_svgz(GdkPixbufLoader *(*factory)(GError **) = nullptr);
 
 #endif
 

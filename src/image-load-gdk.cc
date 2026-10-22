@@ -27,6 +27,7 @@
 
 #include "filedata.h"
 #include "image-load.h"
+#include "intl.h"
 #include "ui-fileops.h"
 
 namespace
@@ -35,6 +36,7 @@ namespace
 struct ImageLoaderGdk : public ImageLoaderBackend
 {
 public:
+	explicit ImageLoaderGdk(GdkPixbufLoader *(*factory)(GError **)) : loader_factory(factory) {}
 	~ImageLoaderGdk() override;
 
 	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
@@ -46,14 +48,17 @@ public:
 	gchar **get_format_mime_types() override;
 
 private:
-	GdkPixbufLoader *loader;
+	gboolean check_loader(GError **error);
+	GdkPixbufLoader *loader = nullptr;
+	GError *init_error = nullptr;
+	GdkPixbufLoader *(*loader_factory)(GError **);
 };
 
 gchar *ImageLoaderGdk::get_format_name()
 {
 	GdkPixbufFormat *format;
 
-	format = gdk_pixbuf_loader_get_format(loader);
+	format = loader ? gdk_pixbuf_loader_get_format(loader) : nullptr;
 	if (format)
 		{
 		return gdk_pixbuf_format_get_name(format);
@@ -64,7 +69,8 @@ gchar *ImageLoaderGdk::get_format_name()
 
 gchar **ImageLoaderGdk::get_format_mime_types()
 {
-	return gdk_pixbuf_format_get_mime_types(gdk_pixbuf_loader_get_format(loader));
+	GdkPixbufFormat *format = loader ? gdk_pixbuf_loader_get_format(loader) : nullptr;
+	return format ? gdk_pixbuf_format_get_mime_types(format) : g_new0(gchar *, 1);
 }
 
 void ImageLoaderGdk::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data)
@@ -73,54 +79,69 @@ void ImageLoaderGdk::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_pre
 
 	/** @FIXME gdk-pixbuf-loader does not recognize .xbm files unless
 	 * the mime type is given. There should be a general case */
-	if (g_ascii_strncasecmp(il->fd->extension, ".xbm", 4) == 0)
+	if (loader_factory)
 		{
-		loader = gdk_pixbuf_loader_new_with_mime_type("image/x-xbitmap", nullptr);
+		loader = loader_factory(&init_error);
+		}
+	else if (g_ascii_strncasecmp(il->fd->extension, ".xbm", 4) == 0)
+		{
+		loader = gdk_pixbuf_loader_new_with_mime_type("image/x-xbitmap", &init_error);
 		}
 	else if (file_extension_match(il->fd->path, ".svg"))
 		{
 		loader = gdk_pixbuf_loader_new_with_type("geeqie-svg", nullptr);
-		if (!loader) loader = gdk_pixbuf_loader_new_with_mime_type("image/svg+xml", nullptr);
+		if (!loader) loader = gdk_pixbuf_loader_new_with_mime_type("image/svg+xml", &init_error);
 		}
 	else
 		{
 		loader = gdk_pixbuf_loader_new();
 		}
 
+	if (!loader) return;
 	g_signal_connect(G_OBJECT(loader), "area-updated", G_CALLBACK(area_updated_cb), data);
 	g_signal_connect(G_OBJECT(loader), "size-prepared", G_CALLBACK(size_prepared_cb), data);
 }
 
 void ImageLoaderGdk::set_size(int width, int height)
 {
-	gdk_pixbuf_loader_set_size(loader, width, height);
+	if (loader) gdk_pixbuf_loader_set_size(loader, width, height);
+}
+
+gboolean ImageLoaderGdk::check_loader(GError **error)
+{
+	if (loader) return TRUE;
+	g_propagate_error(error, init_error ? g_error_copy(init_error) :
+	                  g_error_new_literal(GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_UNKNOWN_TYPE,
+	                                      _("No image loader is available for this file.")));
+	return FALSE;
 }
 
 gboolean ImageLoaderGdk::write(const guchar *buf, gsize &chunk_size, gsize, GError **error)
 {
-	return gdk_pixbuf_loader_write(loader, buf, chunk_size, error);
+	return check_loader(error) && gdk_pixbuf_loader_write(loader, buf, chunk_size, error);
 }
 
 GdkPixbuf *ImageLoaderGdk::get_pixbuf()
 {
-	return gdk_pixbuf_loader_get_pixbuf(loader);
+	return loader ? gdk_pixbuf_loader_get_pixbuf(loader) : nullptr;
 }
 
 gboolean ImageLoaderGdk::close(GError **error)
 {
-	return gdk_pixbuf_loader_close(loader, error);
+	return check_loader(error) && gdk_pixbuf_loader_close(loader, error);
 }
 
 ImageLoaderGdk::~ImageLoaderGdk()
 {
-	g_object_unref(G_OBJECT(loader));
+	g_clear_object(&loader);
+	g_clear_error(&init_error);
 }
 
 } // namespace
 
-std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_default()
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_default(GdkPixbufLoader *(*factory)(GError **))
 {
-	return std::make_unique<ImageLoaderGdk>();
+	return std::make_unique<ImageLoaderGdk>(factory);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

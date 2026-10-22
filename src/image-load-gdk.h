@@ -24,9 +24,12 @@
 
 #include <memory>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 struct ImageLoaderBackend;
 
-std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_default();
+/** @brief Use the system loader unless an alternative loader factory is supplied. */
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_default(GdkPixbufLoader *(*factory)(GError **) = nullptr);
 
 #endif
 

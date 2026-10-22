@@ -25,6 +25,7 @@
 #include <glib.h>
 
 #include "image-load.h"
+#include "intl.h"
 
 namespace
 {
@@ -32,6 +33,7 @@ namespace
 struct ImageLoaderSvgz : public ImageLoaderBackend
 {
 public:
+	explicit ImageLoaderSvgz(GdkPixbufLoader *(*factory)(GError **)) : loader_factory(factory) {}
 	~ImageLoaderSvgz() override;
 
 	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
@@ -43,7 +45,10 @@ public:
 	gchar **get_format_mime_types() override;
 
 private:
-	GdkPixbufLoader *loader;
+	gboolean check_loader(GError **error);
+	GdkPixbufLoader *loader = nullptr;
+	GError *init_error = nullptr;
+	GdkPixbufLoader *(*loader_factory)(GError **);
 };
 
 gchar *ImageLoaderSvgz::get_format_name()
@@ -53,17 +58,19 @@ gchar *ImageLoaderSvgz::get_format_name()
 
 gchar **ImageLoaderSvgz::get_format_mime_types()
 {
-	static const gchar *mime[] = {"image/svg", nullptr};
+	static const gchar *mime[] = {"image/svg+xml", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
 void ImageLoaderSvgz::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data)
 {
-	g_autoptr(GError) error = nullptr;
-
-	loader = gdk_pixbuf_loader_new_with_type("geeqie-svg", nullptr);
-	if (!loader) loader = gdk_pixbuf_loader_new_with_mime_type("image/svg", &error);
-	if (error)
+	if (loader_factory) loader = loader_factory(&init_error);
+	else
+		{
+		loader = gdk_pixbuf_loader_new_with_type("geeqie-svg", nullptr);
+		if (!loader) loader = gdk_pixbuf_loader_new_with_mime_type("image/svg+xml", &init_error);
+		}
+	if (!loader)
 		{
 		return;
 		}
@@ -74,34 +81,44 @@ void ImageLoaderSvgz::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_pr
 
 void ImageLoaderSvgz::set_size(int width, int height)
 {
-	gdk_pixbuf_loader_set_size(loader, width, height);
+	if (loader) gdk_pixbuf_loader_set_size(loader, width, height);
+}
+
+gboolean ImageLoaderSvgz::check_loader(GError **error)
+{
+	if (loader) return TRUE;
+	g_propagate_error(error, init_error ? g_error_copy(init_error) :
+	                  g_error_new_literal(GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_UNKNOWN_TYPE,
+	                                      _("No image loader is available for this file.")));
+	return FALSE;
 }
 
 gboolean ImageLoaderSvgz::write(const guchar *buf, gsize &chunk_size, gsize, GError **error)
 {
-	return gdk_pixbuf_loader_write(loader, buf, chunk_size, error);
+	return check_loader(error) && gdk_pixbuf_loader_write(loader, buf, chunk_size, error);
 }
 
 GdkPixbuf *ImageLoaderSvgz::get_pixbuf()
 {
-	return gdk_pixbuf_loader_get_pixbuf(loader);
+	return loader ? gdk_pixbuf_loader_get_pixbuf(loader) : nullptr;
 }
 
 gboolean ImageLoaderSvgz::close(GError **error)
 {
-	return gdk_pixbuf_loader_close(loader, error);
+	return check_loader(error) && gdk_pixbuf_loader_close(loader, error);
 }
 
 ImageLoaderSvgz::~ImageLoaderSvgz()
 {
-	g_object_unref(G_OBJECT(loader));
+	g_clear_object(&loader);
+	g_clear_error(&init_error);
 }
 
 } // namespace
 
-std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_svgz()
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_svgz(GdkPixbufLoader *(*factory)(GError **))
 {
-	return std::make_unique<ImageLoaderSvgz>();
+	return std::make_unique<ImageLoaderSvgz>(factory);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
