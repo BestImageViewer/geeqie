@@ -90,6 +90,7 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <para>Timeline and Calendar normally use the file modification date. To group images by the time they were photographed, right-click in Pan View and enable <guimenuitem>Sort by original capture date</guimenuitem>. This uses <literal>Exif.Photo.DateTimeOriginal</literal>; images without a usable original capture date retain their file modification date. The setting is remembered when Pan View is closed.</para>
     <para />
   </section>
   <section id="Howeachimageshouldberepresented">

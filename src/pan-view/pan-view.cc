@@ -2056,6 +2056,8 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	GApplication *app = g_application_get_default();
 	register_actions_from_table(GTK_APPLICATION(app), pw->window, pan_actions, get_keyfile_merged(), pw);
+	auto *date_action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-sort-by-exif-date");
+	g_simple_action_set_state(G_SIMPLE_ACTION(date_action), g_variant_new_boolean(pw->exif_date_enable));
 
 	gtk_widget_grab_focus(pw->imd->widget);
 	gtk_window_present(GTK_WINDOW(pw->window));
@@ -2114,9 +2116,6 @@ static void pan_popup_menu(PanWindow *pw, GtkWidget *parent, gdouble x, gdouble 
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-delete-permanent");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
-
-	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-sort-exifdate");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-show-exif-information");

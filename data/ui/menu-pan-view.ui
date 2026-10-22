@@ -85,7 +85,7 @@
     <section>
       <item>
         <attribute name="action">win.pan-win-sort-by-exif-date</attribute>
-        <attribute name="label" translatable="yes">Sort by Exif date</attribute>
+        <attribute name="label" translatable="yes">Sort by original capture date</attribute>
       </item>
       <item>
         <attribute name="action">win.pan-win-show-exif-information</attribute>

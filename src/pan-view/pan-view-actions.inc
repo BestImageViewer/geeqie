@@ -315,7 +315,7 @@ static const ActionDef pan_actions[] =
 		{
 		"win.pan-win-sort-by-exif-date",
 		nullptr,
-		N_("Sort by exif date"),
+		N_("Sort by original capture date"),
 		pan_exif_date_toggle_cb,
 		nullptr,
 		ActionStateType::BOOLEAN,
