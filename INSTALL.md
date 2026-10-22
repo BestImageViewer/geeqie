@@ -134,13 +134,59 @@ git checkout v2.9
 * **Compiler:** C compiler and C++ compiler supporting C++17
 * **Build tools:** Meson ≥1.3.2, Ninja, pkg-config/pkgconf
 * **GTK:** GTK4 ≥4.18, including development headers
-* **GLib:** ≥2.66, including development headers
+* **GLib:** ≥2.66, including GIO Unix support and development headers
 * **Pango:** ≥1.46, including development headers
-* **Supporting tools:** Python for Meson, gettext, standard shell utilities
+* **Supporting tools:** Python 3 for Meson, gettext, standard shell utilities
 
 These are the versions declared in meson.build. GTK and other dependencies may impose higher minimum versions on their own dependencies.
 
-Optional development libraries enable additional features. You can get a list for Debian options by:
+The master branch uses GTK4. GTK2 and GTK3 are not supported by this branch.
+The optional map pane uses libshumate; libchamplain, Clutter and clutter-gtk are
+not required.
+
+### Optional libraries
+
+The following are upstream library names, not distribution package names.
+Install their development headers and pkg-config files to enable the features
+you need. A dash means Geeqie's Meson configuration specifies no minimum
+version; the library's own requirements still apply.
+
+| Feature | Upstream library | Minimum version | Meson option |
+| --- | --- | --- | --- |
+| Archive browsing | libarchive | 3.4.0 | `archive` |
+| Color management | Little CMS 2 | 2.0 | `cms` |
+| DjVu images | DjVuLibre (`ddjvuapi`) | 2.5.27 | `djvu` |
+| EXIF/IPTC/XMP metadata editing | Exiv2 | 0.18 | `exiv2` |
+| OpenEXR images | OpenEXR and Imath | 3.0.0 each | `exr` |
+| FITS images | CFITSIO | — | `fits` |
+| GPS map pane | libshumate (`shumate-1.0`) | 1.5.0 | `gps_map` |
+| HEIF/HEIC/AVIF images | libheif | 1.3.2 | `heif` |
+| JPEG 2000 images | OpenJPEG (`libopenjp2`) | 2.3.0 | `j2k` |
+| Dedicated JPEG decoding | libjpeg-compatible library, such as libjpeg-turbo | — | `jpeg` |
+| JPEG XL images | libjxl | 0.3.7 | `jpegxl` |
+| Embedded RAW previews | LibRaw | 0.20 | `libraw` |
+| Lua scripting | Lua | 5.3 | `lua` |
+| PDF images | Poppler GLib | 0.62 | `pdf` |
+| Spelling checks | libspelling (`libspelling-1`) | — | `spell` |
+| Dedicated TIFF decoding | libtiff | — | `tiff` |
+| Video GPS metadata | Exiv2, FFmpeg libavformat and libavutil | Exiv2 0.18; no FFmpeg minimum specified | `videometadata` |
+| Video thumbnails | FFmpegthumbnailer | 2.1.0 | `videothumbnailer` |
+| WebP images and animation | libwebp and libwebpdemux | 0.6.1 each | `webp` |
+
+Additional image formats can be supplied by GdkPixbuf loaders on your system.
+The `npy` option enables NumPy image support without an additional library.
+
+Optional documentation tools include Yelp Tools (`yelp_build`) for HTML help,
+Pandoc (`pandoc`) for the HTML README, and Doxygen (`doxygen`) for Lua API help
+when building from Git. PDF help (`help_pdf`) uses Apache FOP, libxslt's
+`xsltproc`, DocBook XSL stylesheets, Poppler's `pdftotext`, `pdfoutline`, and awk.
+These tools are not needed to compile the viewer. Unit tests (`unit_tests`)
+use GoogleTest and GoogleMock, with a Meson subproject fallback; see [TESTING.md](TESTING.md).
+
+### Distribution examples
+
+Package names vary between distributions. The Debian-based installation script
+can list the packages it uses:
 
 ```sh
 wget https://raw.githubusercontent.com/BestImageViewer/geeqie/master/geeqie-install-debian.sh
@@ -148,9 +194,8 @@ chmod +x geeqie-install-debian.sh
 ./geeqie-install-debian.sh --list
 ```
 
-GPS metadata in smartphone videos requires the Exiv2, libavformat, and libavutil
-development libraries. This support is detected automatically; use
-`-Dvideometadata=enabled` to require it or `-Dvideometadata=disabled` to omit it.
+Use the upstream library table above when installing dependencies on other
+systems. The script's package list is a distribution-specific example.
 
 ## Installation scripts
 
@@ -180,64 +225,105 @@ If you wish to compile the sources yourself you may download the latest version 
 
 ## Compiling and Installing
 
+Configure and compile as your normal user:
+
 ```sh
 meson setup build
-ninja -C build install
+ninja -C build
 ```
 
-List compile options:
+Run directly from the build directory:
+
+```sh
+./build/src/geeqie
+```
+
+### Build options
+
+List the available options and their current values:
 
 ```sh
 meson configure build
 ```
 
-Apply options e.g.:
+Optional library features default to `auto`:
+
+* `auto`: enable the feature if its dependencies are found; otherwise configure without it.
+* `enabled`: require the dependencies; configuration fails if a required library is missing or too old.
+* `disabled`: omit the feature and skip its dependency checks.
+
+For example, require PDF support and omit WebP support:
 
 ```sh
-sudo ninja -C build uninstall
 meson configure build -Dpdf=enabled -Dwebp=disabled
-ninja -C build install
+ninja -C build
 ```
 
-Re-display configuration data:
+Check Meson's configuration summary for the features actually enabled. Some
+documentation and debugging options use additional availability checks rather
+than treating `enabled` as a strict requirement. Boolean options take `true`
+or `false`, rather than these feature values.
+
+Re-run configuration and display the summary:
 
 ```sh
-ninja -C build reconfigure
+meson setup --reconfigure build
 ```
 
-Meaning of options:
+### Install for your user
 
-`auto` If the library is not found, continue the installation
-
-`enabled` If the library is not found, stop the installation
-
-`disabled` Do not look for the library
-
-Uninstall:
+Use a separate build directory configured with a user-owned prefix. This
+requires no administrator privileges:
 
 ```sh
-sudo ninja -C build uninstall
+meson setup build-user --prefix="$HOME/.local"
+ninja -C build-user
+meson install -C build-user --no-rebuild
 ```
 
-Install new version:
+The executable is installed as `$HOME/.local/bin/geeqie`. Add `$HOME/.local/bin`
+to your `PATH` if it is not already present.
+
+### Install system-wide
+
+The default prefix is `/usr/local`. Installing there usually requires
+administrator privileges. After compiling as your normal user, install with
+your system's privilege mechanism, for example:
 
 ```sh
-sudo ninja -C build uninstall
+sudo meson install -C build --no-rebuild
+```
+
+The `--no-rebuild` option keeps compilation separate from the privileged
+installation step. A writable custom prefix does not require `sudo`.
+
+### Update or uninstall
+
+Keep the source checkout and build directory if you want to update or uninstall
+this installation. To update a Git checkout, download changes and rebuild as
+your normal user:
+
+```sh
 git pull
-ninja -C build install
+ninja -C build
 ```
 
-### Note
+Then repeat the appropriate installation command above. For a user installation,
+use `build-user` instead of `build` when rebuilding.
 
-It is recommended to always use `git clone git://git.geeqie.org/geeqie.git` to download Geeqie. After installing Geeqie you may delete the folder you have cloned Geeqie into.
+To uninstall, use the same build directory and privileges used for installation:
 
-However if you leave the folder intact, whenever new features or patches are available, execute:
+```sh
+ninja -C build-user uninstall
+```
 
-`sudo ninja -C build uninstall; git pull; ninja -C build install`
+Or, for the default system-wide installation:
 
-Only the changed sources are downloaded, which makes this a quick operation.
+```sh
+sudo ninja -C build uninstall
+```
 
-Your configuration file, history file and desktop files are not affected by this process.
+Uninstalling leaves your personal configuration, history, and collections intact.
 
 ## Windows
 
