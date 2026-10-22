@@ -25,6 +25,7 @@
 #include <numeric>
 #include <random>
 
+#include "collect-io.h"
 #include "collect.h"
 #include "filedata.h"
 #include "fullscreen.h"
@@ -120,7 +121,7 @@ bool SlideShow::should_continue() const
 {
 	if (slide_fd != slideshow_get_fd(this)) return false;
 
-	if (filelist) return true;
+	if (filelist) return !cd || !lw || (lw->vf && lw->vf->collection == cd);
 
 	if (cd) return g_list_length(cd->list) == slide_count;
 
@@ -136,7 +137,16 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward, gboolean automat
 
 	if (forward)
 		{
-		if (ss->list.empty()) return TRUE;
+		if (ss->list.empty() && ss->rescan && options->slideshow.repeat)
+			{
+			GList *updated = ss->rescan();
+			file_data_list_free(ss->filelist);
+			ss->filelist = updated;
+			ss->slide_count = g_list_length(updated);
+			slideshow_list_init(ss, -1);
+			if (ss->list.empty()) return FALSE;
+			}
+		if (ss->list.empty()) return ss->rescan ? FALSE : TRUE;
 
 		move_first_list_item(ss->list, ss->list_done);
 		}
@@ -161,7 +171,9 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward, gboolean automat
 	if (ss->filelist)
 		{
 		ss->slide_fd = file_data_ref((FileData *)g_list_nth_data(ss->filelist, row));
-		if (ss->lw)
+		if (ss->lw && ss->cd)
+			layout_image_set_fd(ss->lw, ss->slide_fd);
+		else if (ss->lw)
 			layout_set_fd(ss->lw, ss->slide_fd);
 		else
 			image_change_fd(ss->imd, ss->slide_fd, image_zoom_get_default(ss->imd));
@@ -206,10 +218,12 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward, gboolean automat
 		image_transition_from(imd, outgoing, type, duration);
 		}
 
-	if (ss->list.empty() && options->slideshow.repeat)
+	if (ss->list.empty() && options->slideshow.repeat && !ss->rescan)
 		{
 		slideshow_list_init(ss, -1);
 		}
+
+	if (ss->list.empty() && ss->rescan && options->slideshow.repeat) return TRUE;
 
 	if (ss->list.empty())
 		{
@@ -352,12 +366,14 @@ static SlideShow *slideshow_start_real(SlideShow *ss, gint start_index,
 }
 
 SlideShow *SlideShow::start_from_filelist(LayoutWindow *target_lw, ImageWindow *imd,
-                                          GList *list, const StopFunc &stop_func)
+                                          GList *list, const StopFunc &stop_func,
+                                          const std::function<GList *()> &rescan)
 {
 	if (!list) return nullptr;
 
 	auto *ss = new SlideShow(target_lw, imd);
 	ss->filelist = list;
+	ss->rescan = rescan;
 	ss->slide_count = g_list_length(ss->filelist);
 
 	return slideshow_start_real(ss, -1, stop_func);
@@ -376,6 +392,41 @@ SlideShow *SlideShow::start_from_collection(LayoutWindow *target_lw, ImageWindow
 	return slideshow_start_real(ss, (!options->slideshow.random && start_info) ?
 	                                g_list_index(ss->cd->list, start_info) : -1,
 	                            stop_func);
+}
+
+static GList *slideshow_collection_files(CollectionData *cd)
+{
+	GList *files = nullptr;
+	for (GList *work = cd->list; work; work = work->next)
+		{
+		auto *info = static_cast<CollectInfo *>(work->data);
+		files = g_list_prepend(files, file_data_ref(info->fd));
+		}
+	return g_list_reverse(files);
+}
+
+SlideShow *SlideShow::start_from_collection_view(LayoutWindow *lw, ImageWindow *imd,
+                                                 CollectionData *cd, const StopFunc &stop_func)
+{
+	if (!cd || !cd->list) return nullptr;
+	auto *ss = new SlideShow(lw, imd);
+	ss->cd = collection_ref(cd);
+	ss->filelist = slideshow_collection_files(cd);
+	ss->slide_count = g_list_length(ss->filelist);
+	ss->rescan = [ss]()
+		{
+		// Unsaved edits belong to the user and take precedence over disk changes.
+		if (ss->cd->changed || !ss->cd->path) return slideshow_collection_files(ss->cd);
+		g_autoptr(CollectionData) updated = collection_new(ss->cd->path);
+		if (collection_load(updated, ss->cd->path, COLLECTION_LOAD_NONE))
+			{
+			return slideshow_collection_files(updated);
+			}
+		// A missing or temporarily unreadable collection must not lose the playlist.
+		return filelist_copy(ss->filelist);
+		};
+	const int start_index = options->slideshow.random ? -1 : g_list_index(ss->filelist, slideshow_get_fd(ss));
+	return slideshow_start_real(ss, start_index, stop_func);
 }
 
 SlideShow *SlideShow::start(LayoutWindow *lw, const StopFunc &stop_func)

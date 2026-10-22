@@ -640,7 +640,11 @@ static void vd_pop_menu_slide_cb(GSimpleAction *, GVariant *, gpointer data)
 	if (!vd->layout) return;
 	if (!vd->click_fd) return;
 
-	layout_set_fd(vd->layout, vd->click_fd);
+	if (vd_is_collection(vd->click_fd))
+		{
+		if (!layout_set_path(vd->layout, vd->click_fd->path)) return;
+		}
+	else if (!layout_set_fd(vd->layout, vd->click_fd)) return;
 	layout_select_none(vd->layout);
 	layout_image_slideshow_stop(vd->layout);
 	layout_image_slideshow_start(vd->layout);
@@ -654,7 +658,7 @@ static void vd_pop_menu_slide_rec_cb(GSimpleAction *, GVariant *, gpointer data)
 	GList *list = filelist_recursive_full(vd->click_fd, vd->layout->options.file_view_list_sort);
 
 	layout_image_slideshow_stop(vd->layout);
-	layout_image_slideshow_start_from_list(vd->layout, list);
+	layout_image_slideshow_start_from_list(vd->layout, list, vd->click_fd);
 }
 
 template<gboolean recursive>
@@ -920,7 +924,7 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (vd->dir_fd && strcmp(vd->dir_fd->path, G_DIR_SEPARATOR_S) != 0));
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-slideshow");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), fd != nullptr);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-slideshow-recursive");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);

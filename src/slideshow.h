@@ -55,10 +55,13 @@ struct SlideShow
 	void prev();
 
 	static SlideShow *start_from_filelist(LayoutWindow *target_lw, ImageWindow *imd,
-	                                      GList *list, const StopFunc &stop_func);
+	                                      GList *list, const StopFunc &stop_func,
+	                                      const std::function<GList *()> &rescan = {});
 	static SlideShow *start_from_collection(LayoutWindow *target_lw, ImageWindow *imd,
 	                                        CollectionData *cd, CollectInfo *start_info,
 	                                        const StopFunc &stop_func);
+	static SlideShow *start_from_collection_view(LayoutWindow *lw, ImageWindow *imd,
+	                                            CollectionData *cd, const StopFunc &stop_func);
 	static SlideShow *start(LayoutWindow *lw, const StopFunc &stop_func);
 
 	void get_index_and_total(gint &index, gint &total) const;
@@ -71,6 +74,7 @@ struct SlideShow
 	                                      @FIXME it is probably required only by img-view.cc and should be dropped with it */
 
 	GList *filelist = nullptr;
+	std::function<GList *()> rescan{}; /**< rebuild a recursive folder list before repeating */
 	CollectionData *cd = nullptr;
 	FileData *dir_fd = nullptr;
 

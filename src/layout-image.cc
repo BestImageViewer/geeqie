@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <memory>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -223,7 +224,11 @@ void layout_image_slideshow_start(LayoutWindow *lw)
 	CollectInfo *info;
 	CollectionData *cd = image_get_collection(lw->image, &info);
 
-	if (cd && info)
+	if (lw->vf && lw->vf->collection && layout_selection_count(lw) < 2)
+		{
+		lw->slideshow = SlideShow::start_from_collection_view(lw, nullptr, lw->vf->collection, slideshow_stop_func);
+		}
+	else if (cd && info)
 		{
 		lw->slideshow = SlideShow::start_from_collection(lw, nullptr, cd, info, slideshow_stop_func);
 		}
@@ -236,7 +241,7 @@ void layout_image_slideshow_start(LayoutWindow *lw)
 }
 
 /* note that slideshow will take ownership of the list, do not free it */
-void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list)
+void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list, FileData *recursive_dir)
 {
 	if (!layout_valid(&lw)) return;
 
@@ -246,8 +251,17 @@ void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list)
 		return;
 		}
 
+	std::function<GList *()> rescan;
+	if (recursive_dir)
+		{
+		auto directory = std::make_shared<FileDataRef>(recursive_dir);
+		rescan = [directory, sort = lw->options.file_view_list_sort]()
+			{
+			return filelist_recursive_full(*directory, sort);
+			};
+		}
 	lw->slideshow = SlideShow::start_from_filelist(lw, nullptr, list,
-	                                               [lw](SlideShow *){ layout_image_slideshow_stop_func(lw); });
+	                                               [lw](SlideShow *){ layout_image_slideshow_stop_func(lw); }, rescan);
 
 	layout_status_update_info(lw, nullptr);
 }

@@ -1187,11 +1187,12 @@ void gq_slideshow_recurse(GtkApplication *, GApplicationCommandLine *,GVariantDi
 
 	layout_valid(&lw_id);
 	list = filelist_recursive_full(dir_fd, lw_id->options.file_view_list_sort);
+	if (list)
+		{
+		layout_image_slideshow_stop(lw_id);
+		layout_image_slideshow_start_from_list(lw_id, list, dir_fd);
+		}
 	file_data_unref(dir_fd);
-	if (!list) return;
-
-	layout_image_slideshow_stop(lw_id);
-	layout_image_slideshow_start_from_list(lw_id, list);
 }
 
 void gq_tell(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)

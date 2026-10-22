@@ -121,7 +121,12 @@
         <para>Slide show recursive: The slide show will include all images in the selected folder, and all images in the folders that are contained within the selected folder.</para>
       </listitem>
     </itemizedlist>
-    <para />
+    <para>When Repeat is enabled, a recursive slide show rescans the starting folder and its subfolders before each new cycle. Newly added images are included and removed images are omitted. The original sort order is retained, or the updated list is shuffled if Random is enabled. If no images remain, the slide show stops.</para>
+  </section>
+  <section id="Collectionslideshowrepeat">
+    <title>Repeating a collection</title>
+    <para>To start a slide show from a collection displayed as a virtual folder, right-click its entry in the folder pane and select Slide show. With Repeat enabled, the saved collection is reread before each new cycle so changes to its membership are included. This does not scan the folders containing its images.</para>
+    <para>If the collection has unsaved edits, playback uses its current in-memory contents instead. Reloading affects the slide show playlist without replacing the collection being edited. If the saved file cannot be read, playback retains its previous playlist; if it is successfully read and empty, playback stops. A slide show limited to selected images continues to use that selection.</para>
   </section>
   <section id="Slideshowsequencenavigation">
     <title>Slide show sequence navigation</title>

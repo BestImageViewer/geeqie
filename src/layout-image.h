@@ -102,7 +102,7 @@ void layout_image_full_screen_toggle(LayoutWindow *lw);
 gboolean layout_image_full_screen_active(LayoutWindow *lw);
 
 void layout_image_slideshow_start(LayoutWindow *lw);
-void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list);
+void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list, FileData *recursive_dir = nullptr);
 void layout_image_slideshow_stop(LayoutWindow *lw);
 void layout_image_slideshow_toggle(LayoutWindow *lw);
 gboolean layout_image_slideshow_active(LayoutWindow *lw);

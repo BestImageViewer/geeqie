@@ -12,6 +12,8 @@
 #include "gtest/gtest.h"
 
 #include "accelerators.h"
+#include "collect-io.h"
+#include "collect.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "fullscreen.h"
@@ -22,6 +24,7 @@
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "renderer-tiles.h"
+#include "view-file.h"
 
 namespace
 {
@@ -123,7 +126,7 @@ protected:
 		return pixel;
 	}
 
-	void start_show()
+	void start_show(bool recursive = false)
 	{
 		directory = g_dir_make_tmp("geeqie-slideshow-XXXXXX", nullptr);
 		ASSERT_NE(directory, nullptr);
@@ -154,12 +157,38 @@ protected:
 		g_autofree gchar *startup = g_strdup_printf("%d", STARTUP_PATH_HOME);
 		const gchar *values[] = {directory, startup, nullptr};
 		layout = layout_new_from_config(names, values, FALSE);
-		ss = SlideShow::start_from_filelist(nullptr, imd, files, [this](SlideShow *) { ss = nullptr; });
+		std::function<GList *()> rescan;
+		if (recursive)
+			{
+			rescan = [root = std::string(directory)]()
+				{
+				auto dir = FileData::new_dir(root.c_str());
+				return filelist_recursive_full(dir, {SORT_NAME, TRUE, TRUE});
+				};
+			}
+		ss = SlideShow::start_from_filelist(nullptr, imd, files, [this](SlideShow *) { ss = nullptr; }, rescan);
 		ASSERT_NE(ss, nullptr);
 		ss->pause_toggle();
 		ASSERT_TRUE(wait_until([this]() { return ready(); }));
 		EXPECT_FALSE(image_transition_active(imd));
 		ss->pause_toggle();
+	}
+
+	CollectionData *start_collection_show()
+	{
+		start_show();
+		if (!ss) return nullptr;
+		g_autofree gchar *path = g_build_filename(directory, "show.gqv", nullptr);
+		auto *cd = collection_new(path);
+		for (GList *work = ss->filelist; work; work = work->next)
+			{
+			collection_add(cd, static_cast<FileData *>(work->data), FALSE);
+			}
+		collection_save(cd, path);
+		delete ss;
+		ss = SlideShow::start_from_collection_view(nullptr, imd, cd, [this](SlideShow *) { ss = nullptr; });
+		if (ss) ss->pause_toggle();
+		return cd;
 	}
 
 	GtkWindow *window = nullptr;
@@ -175,6 +204,124 @@ protected:
 	gboolean saved_read_ahead = FALSE;
 	gboolean saved_animations = TRUE;
 };
+
+TEST_F(SlideshowTransitions, RecursiveRepeatRescansBeforeStartingNextCycle)
+{
+	ASSERT_NO_FATAL_FAILURE(start_show(true));
+	ss->pause_toggle();
+	ss->next();
+	ss->next();
+	ASSERT_TRUE(ss->list.empty());
+	g_autofree gchar *old = g_build_filename(directory, "0.png", nullptr);
+	ASSERT_EQ(g_unlink(old), 0);
+	g_autofree gchar *subdir = g_build_filename(directory, "new-folder", nullptr);
+	ASSERT_EQ(g_mkdir(subdir, 0700), 0);
+	g_autofree gchar *added = g_build_filename(subdir, "added.png", nullptr);
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 8, 8);
+	gdk_pixbuf_fill(pixels, 0x00ff00ff);
+	ASSERT_TRUE(gdk_pixbuf_save(pixels, added, "png", nullptr, nullptr));
+	// The old list remains intact during the final slide's display delay.
+	EXPECT_EQ(ss->slide_count, 3U);
+	ss->next();
+	ASSERT_NE(ss, nullptr);
+	EXPECT_EQ(ss->slide_count, 3U);
+	bool found = false;
+	for (GList *work = ss->filelist; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		EXPECT_STRNE(fd->path, old);
+		if (g_strcmp0(fd->path, added) == 0) found = true;
+		}
+	EXPECT_TRUE(found);
+	g_unlink(added);
+	g_rmdir(subdir);
+}
+
+TEST_F(SlideshowTransitions, RecursiveRepeatStopsWhenFolderBecomesEmpty)
+{
+	ASSERT_NO_FATAL_FAILURE(start_show(true));
+	ss->pause_toggle();
+	ss->next();
+	ss->next();
+	for (int i = 0; i < 3; ++i)
+		{
+		g_autofree gchar *path = g_strdup_printf("%s/%d.png", directory, i);
+		ASSERT_EQ(g_unlink(path), 0);
+		}
+	ss->next();
+	EXPECT_EQ(ss, nullptr);
+}
+
+TEST_F(SlideshowTransitions, CollectionViewSlideshowKeepsVirtualFolder)
+{
+	g_autoptr(CollectionData) cd = start_collection_show();
+	ASSERT_NE(cd, nullptr);
+	ASSERT_TRUE(layout_set_collection(layout, cd));
+	layout_select_none(layout);
+	layout_image_slideshow_start(layout);
+	ASSERT_NE(layout->slideshow, nullptr);
+	layout->slideshow->pause_toggle();
+	EXPECT_TRUE(static_cast<bool>(layout->slideshow->rescan));
+	layout->slideshow->next();
+	EXPECT_EQ(layout->vf->collection, cd);
+	EXPECT_TRUE(layout->slideshow->should_continue());
+	layout_image_slideshow_stop(layout);
+}
+
+TEST_F(SlideshowTransitions, CollectionRepeatReloadsSavedMembers)
+{
+	g_autoptr(CollectionData) cd = start_collection_show();
+	ASSERT_NE(ss, nullptr);
+	ss->next();
+	ss->next();
+	ASSERT_TRUE(ss->list.empty());
+	g_autofree gchar *third = g_build_filename(directory, "2.png", nullptr);
+	g_autofree gchar *contents = g_strdup_printf("#Geeqie collection\n\"%s\"\n", third);
+	ASSERT_TRUE(g_file_set_contents(cd->path, contents, -1, nullptr));
+	ss->next();
+	ASSERT_NE(ss, nullptr);
+	EXPECT_EQ(ss->slide_count, 1U);
+	EXPECT_STREQ(ss->slide_fd->path, third);
+	EXPECT_EQ(g_list_length(cd->list), 3U);
+	EXPECT_FALSE(cd->changed);
+	// An unavailable file retains the last successful snapshot.
+	ASSERT_EQ(g_unlink(cd->path), 0);
+	ss->next();
+	ASSERT_NE(ss, nullptr);
+	EXPECT_EQ(ss->slide_count, 1U);
+	EXPECT_STREQ(ss->slide_fd->path, third);
+}
+
+TEST_F(SlideshowTransitions, CollectionRepeatPreservesUnsavedEdits)
+{
+	g_autoptr(CollectionData) cd = start_collection_show();
+	ASSERT_NE(ss, nullptr);
+	ss->next();
+	ss->next();
+	g_autofree gchar *contents = nullptr;
+	gsize length = 0;
+	ASSERT_TRUE(g_file_get_contents(cd->path, &contents, &length, nullptr));
+	collection_remove(cd, static_cast<CollectInfo *>(cd->list->data)->fd);
+	ASSERT_TRUE(cd->changed);
+	ss->next();
+	ASSERT_NE(ss, nullptr);
+	EXPECT_EQ(ss->slide_count, 2U);
+	EXPECT_TRUE(cd->changed);
+	g_autofree gchar *after = nullptr;
+	ASSERT_TRUE(g_file_get_contents(cd->path, &after, nullptr, nullptr));
+	EXPECT_STREQ(contents, after);
+}
+
+TEST_F(SlideshowTransitions, CollectionRepeatStopsForEmptySavedCollection)
+{
+	g_autoptr(CollectionData) cd = start_collection_show();
+	ASSERT_NE(ss, nullptr);
+	ss->next();
+	ss->next();
+	ASSERT_TRUE(g_file_set_contents(cd->path, "#Geeqie collection\n", -1, nullptr));
+	ss->next();
+	EXPECT_EQ(ss, nullptr);
+}
 
 TEST_P(SlideshowTransitions, NativeTransitionLoadsAndShowsTheWholeIncomingImage)
 {
