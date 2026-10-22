@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
 
 ## @file
 ## @brief Symlink grouped files
@@ -6,21 +7,49 @@
 ## It uses geeqie remote connection to get details about grouped files
 ##
 
-# iterate over files on commandline
+group_list=$(mktemp "${TMPDIR:-/tmp}/geeqie-symlink.XXXXXXXXXX") || exit 1
+trap 'rm -f "$group_list"' 0
+trap 'exit 1' HUP INT TERM
 
 for file in "$@"
 do
-	# we got only one file for each group, typically the main one
-	# get the sidecars:
-	geeqie --get-sidecars="$file" | while read -r sidecar
+	# Capture the query separately so a failed producer cannot look successful.
+	if ! geeqie --get-sidecars="$file" > "$group_list"
+	then
+		printf 'Cannot read grouped files for: %s\n' "$file" >&2
+		exit 1
+	fi
+	if [ ! -s "$group_list" ]
+	then
+		printf 'No grouped files returned for: %s\n' "$file" >&2
+		exit 1
+	fi
+	while IFS= read -r sidecar || [ -n "$sidecar" ]
 	do
-		# the main file is included in the sidecar file list, no special handling is required
-		# get destination path for each sidecar file:
-		destination=$(geeqie --get-destination "$sidecar")
-
-		if [ -n "$destination" ]
+		if [ -z "$sidecar" ]
 		then
-			ln -s "$sidecar" "$destination"
+			printf 'Empty grouped filename returned for: %s\n' "$file" >&2
+			exit 1
 		fi
-	done
+		if ! destination=$(geeqie --get-destination="$sidecar")
+		then
+			printf 'Cannot read symlink destination for: %s\n' "$sidecar" >&2
+			exit 1
+		fi
+		if [ -z "$destination" ]
+		then
+			printf 'No symlink destination returned for: %s\n' "$sidecar" >&2
+			exit 1
+		fi
+		if [ -e "$destination" ] || [ -L "$destination" ]
+		then
+			printf 'Symlink destination already exists: %s\n' "$destination" >&2
+			exit 1
+		fi
+		if ! ln -s "$sidecar" "$destination"
+		then
+			printf 'Cannot create symlink: %s -> %s\n' "$destination" "$sidecar" >&2
+			exit 1
+		fi
+	done < "$group_list"
 done

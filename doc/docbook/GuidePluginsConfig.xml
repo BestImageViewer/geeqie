@@ -150,6 +150,11 @@
     <para>Images are automatically oriented, and metadata, including embedded color profiles, is retained where supported by ImageMagick and the output format. Only the first frame or page is converted. Supported input formats, including RAW formats, depend on the installed ImageMagick delegates and security policy. This operation converts the original file; it does not export Geeqie's displayed adjustments.</para>
     <para>The separate Export jpeg plugin extracts an existing embedded preview from a RAW file.</para>
   </section>
+  <section id="SymlinkGroupedFiles">
+    <title>Symlink grouped files</title>
+    <para>Drop files onto a writable folder in the folder pane, including the parent folder entry, and choose <guimenuitem>Symlink grouped files</guimenuitem>. The plugin creates symbolic links for the selected files and their grouped sidecars.</para>
+    <para>The plugin reports an error if grouped-file or destination lookup fails, a destination already exists, or a link cannot be created. It stops at the first failure. Existing files, directories and symbolic links are not replaced; links already created before a failure remain in place. Enable <literal>X-Geeqie-Verbose=true</literal> in the plugin's desktop file to display its diagnostic output.</para>
+  </section>
   <section id="Specialplugins">
     <title>Special plugins</title>
     <para>A desktop file with one of the following names has a special function. It will replace the corresponding internal command.</para>
