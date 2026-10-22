@@ -742,6 +742,9 @@ endif
 
 # Icon naming checks
 icon_naming_python = find_program('python3', required : true)
+test('JPEG rotation', icon_naming_python,
+     args : [buildauxdir / 'test-jpeg-rotation.py', meson.project_source_root() / 'data/plugins/rotate/geeqie-rotate'],
+     timeout : 100, suite : 'functional')
 test('Icon naming', icon_naming_python,
      args : [files('build-aux/icon-naming-check.py'), meson.current_source_dir()],
      timeout : 30, suite : 'analysis')

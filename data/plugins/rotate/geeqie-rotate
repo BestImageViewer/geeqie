@@ -1,12 +1,52 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
 
 ## @file
 ## @brief This is a helper script that rotates image files according to the metadata
 ##
-## Requirements: ImageMagick, exiftran, exiv2
+## Requirements: ImageMagick, exiftran, exiv2, jpegtran
 ##
 
 GQ_METADATA_DIR="$HOME/.local/share/geeqie/metadata"
+
+## @brief Reject JPEG transformations that cannot preserve every image block.
+jpeg_rotation_check()
+{
+	if ! command -v jpegtran > /dev/null 2>&1 || ! command -v exiv2 > /dev/null 2>&1
+	then
+		printf '%s\n' 'JPEG rotation requires jpegtran and exiv2.' >&2
+		return 1
+	fi
+
+	jpeg_orientation=$2
+	if [ -z "$jpeg_orientation" ]
+	then
+		jpeg_orientation=$(exiv2 -K Exif.Image.Orientation -Pv "$1" 2> /dev/null)
+		jpeg_orientation=${jpeg_orientation:-1}
+	fi
+
+	case "$jpeg_orientation" in
+		1) set -- "$1" ;;
+		2) set -- "$1" -flip horizontal ;;
+		3) set -- "$1" -rotate 180 ;;
+		4) set -- "$1" -flip vertical ;;
+		5) set -- "$1" -transpose ;;
+		6) set -- "$1" -rotate 90 ;;
+		7) set -- "$1" -transverse ;;
+		8) set -- "$1" -rotate 270 ;;
+		*)
+			printf 'Invalid JPEG orientation for %s\n' "$1" >&2
+			return 1
+			;;
+	esac
+	jpeg_file=$1
+	shift
+	if ! jpegtran -perfect -copy none "$@" "$jpeg_file" > /dev/null
+	then
+		printf 'Cannot rotate JPEG without losing edge pixels; file unchanged: %s\n' "$jpeg_file" >&2
+		return 1
+	fi
+}
 
 gq_exiftran()
 {
@@ -58,13 +98,14 @@ rotate()
 
 	case "$ext" in
 		jpg | jpeg)
+			jpeg_rotation_check "$1" "$gq_orientation" || return 1
 			if [ -n "$gq_orientation" ]
 			then
 				gq_exiv2 -M "set Exif.Image.Orientation $gq_orientation" "$1"
 				# shellcheck disable=2181
 				[ $? != 0 ] && exit 1
 			fi
-			if gq_exiftran -aip "$1"
+			if gq_exiftran -aip -np "$1"
 			then
 				# exiftran ignores xmp, set it manually
 				gq_exiv2 -M "set Xmp.tiff.Orientation 1" "$1"
@@ -123,7 +164,8 @@ rotate_image_file()
 
 	case "$ext" in
 		jpg | jpeg)
-			gq_exiftran -i "$1" "$3"
+			jpeg_rotation_check "$3" "$rotation" || return 1
+			gq_exiftran -i -np "$1" "$3"
 			# shellcheck disable=2181
 			[ $? != 0 ] && return 6
 			return 0
@@ -168,7 +210,7 @@ fi
 
 if [ -n "$rotation" ]
 then
-	if [ "$rotation" = "0" ]
+	if [ "$rotation" = "0" ] || [ "$rotation" = "1" ]
 	then
 		exit 0
 	fi
@@ -222,6 +264,10 @@ do
 			[ ! -w "$sidecar" ] && exit 5
 			rotate "$sidecar"
 			ret=$?
+			if [ "$ret" != 0 ]
+			then
+				exit "$ret"
+			fi
 		done
 		# Bourne shell runs DO loops in a sub-shell
 		ret=$?

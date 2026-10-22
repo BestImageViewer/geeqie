@@ -872,9 +872,10 @@
         </term>
         <listitem>
           <para>This command affects only jpeg, tiff and png files. The image file on disk is rotated to the orientation as specified by its Exif Orientation tag.</para>
+          <para>JPEG transformations preserve the compressed image coefficients without another lossy compression step. File size and checksums can change because the compressed representation and metadata are rewritten. Transformations that would discard edge pixels at JPEG block boundaries are refused, leaving the file unchanged.</para>
           <warning>
             <para>
-              The file rotate.desktop, using external commands exiftran, exiv2 and mogrify, is used to implement this command. Refer to
+              The plugin org.geeqie.rotate.desktop, using external commands exiftran, exiv2, jpegtran and mogrify, is used to implement this command. Refer to
               <emphasis role="underline"><link linkend="GuideImageManagementPlugins">Plugins section</link></emphasis>
               for details.
             </para>
@@ -923,11 +924,11 @@
         </term>
         <listitem>
           <para>
-            Saves the current image orientation to the disk file. This operation can only be carried out on jpeg, tiff and png files. Jpeg rotations are lossless.
+            Saves the current image orientation to the disk file. This operation can only be carried out on jpeg, tiff and png files. JPEG transformations preserve the compressed image coefficients without another lossy compression step. File size and checksums can change. Transformations that would discard edge pixels at JPEG block boundaries are refused, leaving the file unchanged.
             <note>
               The Preferences/Metadata option "Write altered image orientation to the metadata" must be off.
               <para />
-              Exiftran and mogrify must be installed.
+              Exiftran, exiv2 and jpegtran are required for JPEG files; ImageMagick's mogrify is required for TIFF and PNG files.
             </note>
           </para>
         </listitem>
