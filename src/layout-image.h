@@ -96,8 +96,6 @@ void layout_image_last(LayoutWindow *lw);
 
 void layout_image_menu_popup(LayoutWindow *lw);
 
-void layout_image_to_root(LayoutWindow *lw);
-
 void layout_image_full_screen_start(LayoutWindow *lw);
 void layout_image_full_screen_stop(LayoutWindow *lw);
 void layout_image_full_screen_toggle(LayoutWindow *lw);

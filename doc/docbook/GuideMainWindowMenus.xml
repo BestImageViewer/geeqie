@@ -1112,22 +1112,6 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
-        <term>
-          <menuchoice>
-            <guimenu>Set as wallpaper</guimenu>
-          </menuchoice>
-        </term>
-        <listitem>
-          <para>
-            Renders the current image to the root window (desktop). The resulting image will be tiled to fit the root window if zoom is not set to
-            <emphasis role="i">Fit to window</emphasis>
-            ; when zoom is set to
-            <emphasis role="i">Fit to window</emphasis>
-            , the image will be scaled to fill the root window.
-          </para>
-        </listitem>
-      </varlistentry>
     </variablelist>
     <para />
   </section>

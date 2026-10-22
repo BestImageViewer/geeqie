@@ -282,9 +282,6 @@ std::optional<ColorManStatus> image_color_profile_get_status(const ImageWindow *
 
 void image_set_delay_flip(ImageWindow *imd, gint delay);
 
-void image_to_root_window(ImageWindow *imd, gboolean scaled);
-
-
 void image_options_sync();
 
 std::tuple<int, int, int, int> image_get_rectangle();

@@ -2330,13 +2330,6 @@ void image_set_delay_flip(ImageWindow *imd, gboolean delay)
 		}
 }
 
-/**
- * @brief Wallpaper util
- */
-void image_to_root_window(ImageWindow *, gboolean)
-{
-}
-
 void image_select(ImageWindow *imd, bool select)
 {
 	if (!imd->has_frame) return;
