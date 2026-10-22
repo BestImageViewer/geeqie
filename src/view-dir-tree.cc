@@ -320,7 +320,7 @@ static NodeData *vdtree_find_iter_by_name(ViewDir *vd, GtkTreeIter *parent, cons
 		NodeData *nd;
 
 		gtk_tree_model_get(store, iter, DIR_COLUMN_POINTER, &nd, -1);
-		if (nd && strcmp(nd->fd->name, name) == 0) return nd;
+			if (nd && nd->fd && strcmp(nd->fd->name, name) == 0) return nd;
 		} while (gtk_tree_model_iter_next(store, iter));
 
 	return nullptr;
@@ -431,13 +431,31 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 	time_t current_time;
 	GtkTreeIter child;
 	NodeData *nd;
-	gboolean add_hidden = FALSE;
+	g_autofree gchar *target_child = nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
 	gtk_tree_model_get(store, iter, DIR_COLUMN_POINTER, &nd, -1);
 
 	if (!nd) return FALSE;
 	if (vd_is_collection(nd->fd)) return TRUE;
+
+	if (target_fd && g_str_has_prefix(target_fd->path, nd->fd->path))
+		{
+		const gsize parent_length = strlen(nd->fd->path);
+		const gchar *relative = target_fd->path + parent_length;
+		if (parent_length == 1 || *relative == G_DIR_SEPARATOR)
+			{
+			if (*relative == G_DIR_SEPARATOR) ++relative;
+			if (*relative)
+				{
+				const gchar *end = strchr(relative, G_DIR_SEPARATOR);
+				target_child = end ? g_strndup(target_fd->path, end - target_fd->path) : g_strdup(target_fd->path);
+				}
+			}
+		}
+	GtkTreeIter target_iter;
+	const gboolean target_missing = target_child &&
+	    !vdtree_find_iter_by_name(vd, iter, filename_from_path(target_child), &target_iter);
 
 	current_time = time(nullptr);
 
@@ -451,7 +469,7 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 			vdtree_node_free(nd);
 			return FALSE;
 			}
-		if (!force && current_time - nd->last_update < 2)
+		if (!force && !target_missing && current_time - nd->last_update < 2)
 			{
 			DEBUG_1("Too frequent update of %s", nd->fd->path);
 			return TRUE;
@@ -459,40 +477,30 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 		file_data_check_changed_files(nd->fd); /* make sure we have recent info */
 		}
 
-	/* when hidden files are not enabled, and the user enters a hidden path,
-	 * allow the tree to display that path by specifically inserting the hidden entries
-	 */
-	if (!options->file_filter.show_hidden_files &&
-	    target_fd &&
-	    strncmp(nd->fd->path, target_fd->path, strlen(nd->fd->path)) == 0)
-		{
-		gint n;
-
-		n = strlen(nd->fd->path);
-		if (target_fd->path[n] == G_DIR_SEPARATOR && target_fd->path[n+1] == '.')
-			add_hidden = TRUE;
-		}
-
-	if (nd->expanded && (!force && !add_hidden) && nd->fd->version == nd->version)
+	if (nd->expanded && !force && !target_missing && nd->fd->version == nd->version)
 		return TRUE;
 
 	vdtree_busy_push(vd);
 
 	vd_read_directories(nd->fd, &list);
 
-	if (add_hidden)
+	// Listing an ancestor may be forbidden even though a known child is
+	// accessible. Also retain known hidden components of the current path.
+	if (target_child)
 		{
-		gint n;
-
-		n = strlen(nd->fd->path) + 1;
-
-		while (target_fd->path[n] != '\0' && target_fd->path[n] != G_DIR_SEPARATOR) n++;
-
-		g_autofree gchar *name8 = g_strndup(target_fd->path, n);
-
-		if (isdir(name8))
+		bool found = false;
+		for (GList *entry = list; entry; entry = entry->next)
 			{
-			list = g_list_prepend(list, file_data_new_dir(name8));
+			auto *fd = static_cast<FileData *>(entry->data);
+			if (strcmp(fd->path, target_child) == 0)
+				{
+				found = true;
+				break;
+				}
+			}
+		if (!found && isdir(target_child) && access_file(target_child, X_OK))
+			{
+			list = g_list_prepend(list, file_data_new_dir(target_child));
 			}
 		}
 

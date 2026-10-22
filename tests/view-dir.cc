@@ -15,6 +15,7 @@
 #include "ui-menu.h"
 #include "view-dir.h"
 #include "view-dir-list.h"
+#include "view-dir-tree.h"
 
 namespace
 {
@@ -122,6 +123,90 @@ protected:
 	gchar *directory = nullptr;
 	gboolean saved_descend = FALSE;
 };
+
+TEST_P(ViewDirNewFolder, KnownPathThroughExecuteOnlyAncestorSurvivesRefresh)
+{
+	if (GetParam() != DIRVIEW_TREE) GTEST_SKIP() << "Requires the folder tree";
+	g_autofree gchar *child_path = g_build_filename(directory, "accessible", nullptr);
+	g_autofree gchar *sibling_path = g_build_filename(directory, "unlisted", nullptr);
+	ASSERT_EQ(g_mkdir(child_path, 0700), 0);
+	ASSERT_EQ(g_mkdir(sibling_path, 0700), 0);
+	struct RestorePermissions
+	{
+		const gchar *path;
+		~RestorePermissions() { g_chmod(path, 0700); }
+	} restore{directory};
+	ASSERT_EQ(g_chmod(directory, 0100), 0);
+	{
+		g_autoptr(GDir) dir = g_dir_open(directory, 0, nullptr);
+		if (dir) GTEST_SKIP() << "Requires directory read permissions to be enforced";
+	}
+	auto child = FileData::new_dir(child_path);
+	FileData *child_fd = child;
+	ASSERT_TRUE(vd_set_fd(vd, child_fd));
+	drain_events();
+	GtkTreeIter iter;
+	EXPECT_TRUE(vd_find_row(vd, child_fd, &iter));
+	auto sibling = FileData::new_dir(sibling_path);
+	FileData *sibling_fd = sibling;
+	EXPECT_FALSE(vd_find_row(vd, sibling_fd, &iter));
+	vd_refresh(vd);
+	drain_events();
+	EXPECT_TRUE(vd_find_row(vd, child_fd, &iter));
+	EXPECT_FALSE(vd_find_row(vd, sibling_fd, &iter));
+
+	// Navigating to another known child must bypass the cached parent listing.
+	ASSERT_TRUE(vd_set_fd(vd, sibling_fd));
+	drain_events();
+	EXPECT_TRUE(vd_find_row(vd, sibling_fd, &iter));
+	EXPECT_EQ(vdtree_populate_path(vd, sibling_fd, TRUE, TRUE), sibling_fd);
+
+	RestorePermissions restore_sibling{sibling_path};
+	ASSERT_EQ(g_chmod(sibling_path, 0000), 0);
+	ASSERT_TRUE(vd_set_fd(vd, child_fd));
+	EXPECT_EQ(vdtree_populate_path(vd, child_fd, TRUE, TRUE), child_fd);
+	EXPECT_EQ(vdtree_populate_path(vd, sibling_fd, TRUE, TRUE), nullptr);
+	EXPECT_FALSE(vd_find_row(vd, sibling_fd, &iter));
+}
+
+TEST_P(ViewDirNewFolder, KnownHiddenPathSurvivesRefreshWithoutDuplicates)
+{
+	if (GetParam() != DIRVIEW_TREE) GTEST_SKIP() << "Requires the folder tree";
+	struct RestoreHiddenFilter
+	{
+		gboolean saved = options->file_filter.show_hidden_files;
+		~RestoreHiddenFilter() { options->file_filter.show_hidden_files = saved; }
+	} restore;
+	options->file_filter.show_hidden_files = FALSE;
+	g_autofree gchar *path = g_build_filename(directory, ".known", nullptr);
+	g_autofree gchar *other_path = g_build_filename(directory, ".other", nullptr);
+	ASSERT_EQ(g_mkdir(path, 0700), 0);
+	ASSERT_EQ(g_mkdir(other_path, 0700), 0);
+	auto child = FileData::new_dir(path);
+	auto other = FileData::new_dir(other_path);
+	ASSERT_TRUE(vd_set_fd(vd, child));
+	for (int pass = 0; pass < 2; ++pass)
+		{
+		EXPECT_NE(vdtree_populate_path(vd, child, TRUE, TRUE), nullptr);
+		GtkTreeIter iter;
+		EXPECT_TRUE(vd_find_row(vd, child, &iter));
+		EXPECT_FALSE(vd_find_row(vd, other, &iter));
+		ASSERT_TRUE(vd_find_row(vd, layout.dir_fd, &iter));
+		GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
+		GtkTreeIter row;
+		ASSERT_TRUE(gtk_tree_model_iter_children(model, &row, &iter));
+		int matches = 0;
+		do
+			{
+			g_autofree gchar *name = nullptr;
+			gtk_tree_model_get(model, &row, DIR_COLUMN_NAME, &name, -1);
+			if (g_strcmp0(name, ".known") == 0) ++matches;
+			} while (gtk_tree_model_iter_next(model, &row));
+		EXPECT_EQ(matches, 1);
+		vd_refresh(vd);
+		drain_events();
+		}
+}
 
 TEST_P(ViewDirNewFolder, DescendChecksExistingUnexpandedSubfolders)
 {
