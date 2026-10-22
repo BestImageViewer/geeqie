@@ -25,8 +25,10 @@
 #include <cstdint>
 #include <cstring>
 #include <exception>
+#include <map>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <config.h>
@@ -307,6 +309,41 @@ static void ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer 
 	exif_update_metadata(static_cast<ExifData *>(data), static_cast<gchar *>(key), static_cast<GList *>(value));
 }
 
+/* Apply semantic edits to the original metadata, preserving unrelated fields
+ * that EXIF/XMP synchronization may have normalized in the working copy. */
+template<typename Metadata>
+static void metadata_apply_changes(Metadata &destination, const Metadata &before, const Metadata &after,
+                                   Metadata *previous_changes = nullptr, Metadata *current_changes = nullptr)
+{
+	using Values = std::vector<std::tuple<int, long, std::string>>;
+	std::map<std::string, Values> previous;
+	std::map<std::string, Values> current;
+	for (const auto &item : before)
+		previous[item.key()].emplace_back(item.typeId(), item.count(), item.toString());
+	for (const auto &item : after)
+		current[item.key()].emplace_back(item.typeId(), item.count(), item.toString());
+	for (const auto &entry : current) previous.try_emplace(entry.first);
+	for (const auto &entry : previous)
+		{
+		const auto found = current.find(entry.first);
+		if (found != current.end() && entry.second == found->second) continue;
+		for (auto item = destination.begin(); item != destination.end();)
+			{
+			if (item->key() == entry.first) item = destination.erase(item);
+			else ++item;
+			}
+		for (const auto &item : after)
+			if (item.key() == entry.first)
+				{
+				destination.add(item);
+				if (current_changes) current_changes->add(item);
+				}
+		if (previous_changes)
+			for (const auto &item : before)
+				if (item.key() == entry.first) previous_changes->add(item);
+		}
+}
+
 // This allows read-write access to the metadata
 struct ExifDataProcessed : public ExifData
 {
@@ -317,6 +354,10 @@ protected:
 	Exiv2::ExifData exifData_;
 	Exiv2::IptcData iptcData_;
 	Exiv2::XmpData xmpData_;
+	Exiv2::ExifData initialExifData_;
+	Exiv2::IptcData initialIptcData_;
+	Exiv2::XmpData initialXmpData_;
+	Exiv2::XmpData initialSidecarXmpData_;
 
 public:
 	ExifDataProcessed(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
@@ -343,6 +384,10 @@ public:
 			{
 			DEBUG_1("Exiv2: Catching bug\n");
 			}
+		initialExifData_ = exifData_;
+		initialIptcData_ = iptcData_;
+		initialXmpData_ = xmpData_;
+		if (sidecarData_) initialSidecarXmpData_ = xmpData_;
 		if (modified_xmp)
 			{
 			g_hash_table_foreach(modified_xmp, ExifDataProcessed_update_xmp, this);
@@ -358,12 +403,6 @@ public:
 	{
 		if (!path)
 			{
-			if (options->metadata.save_legacy_IPTC)
-				copyXmpToIptc(xmpData_, iptcData_);
-			else
-				iptcData_.clear();
-
-			copyXmpToExif(xmpData_, exifData_);
 			Exiv2::Image *image = imageData_->image();
 
 			if (!image)
@@ -376,10 +415,39 @@ public:
 #else
 				throw Exiv2::Error(21);
 #endif
-			image->setExifData(exifData_);
-			image->setIptcData(iptcData_);
-			image->setXmpData(xmpData_);
+			auto saved_exif = imageData_->exifData();
+			auto saved_iptc = imageData_->iptcData();
+			auto saved_xmp = imageData_->xmpData();
+			metadata_apply_changes(saved_exif, initialExifData_, exifData_);
+			metadata_apply_changes(saved_iptc, initialIptcData_, iptcData_);
+			Exiv2::XmpData edited_xmp_before;
+			Exiv2::XmpData edited_xmp_after;
+			metadata_apply_changes(saved_xmp, initialXmpData_, xmpData_, &edited_xmp_before, &edited_xmp_after);
+
+			/* Convert only edited XMP fields. Comparing both states also handles
+			 * deleted mappings without normalizing unrelated dates or tags. */
+			Exiv2::ExifData mapped_before;
+			Exiv2::ExifData mapped_after;
+			copyXmpToExif(edited_xmp_before, mapped_before);
+			copyXmpToExif(edited_xmp_after, mapped_after);
+			metadata_apply_changes(saved_exif, mapped_before, mapped_after);
+			Exiv2::IptcData mapped_iptc_before;
+			Exiv2::IptcData mapped_iptc_after;
+			if (options->metadata.save_legacy_IPTC)
+				{
+				copyXmpToIptc(edited_xmp_before, mapped_iptc_before);
+				copyXmpToIptc(edited_xmp_after, mapped_iptc_after);
+				metadata_apply_changes(saved_iptc, mapped_iptc_before, mapped_iptc_after);
+				}
+			image->setExifData(saved_exif);
+			image->setIptcData(saved_iptc);
+			image->setXmpData(saved_xmp);
 			image->writeMetadata();
+			metadata_apply_changes(exifData_, mapped_before, mapped_after);
+			metadata_apply_changes(iptcData_, mapped_iptc_before, mapped_iptc_after);
+			initialExifData_ = exifData_;
+			initialIptcData_ = iptcData_;
+			initialXmpData_ = xmpData_;
 			}
 		else
 			{
@@ -387,7 +455,14 @@ public:
 
 			auto sidecar = Exiv2::ImageFactory::create(Exiv2::ImageType::xmp, pathl);
 
-			sidecar->setXmpData(xmpData_);
+			if (sidecarData_)
+				{
+				auto saved_xmp = sidecarData_->xmpData();
+				metadata_apply_changes(saved_xmp, initialSidecarXmpData_, xmpData_);
+				sidecar->setXmpData(saved_xmp);
+				}
+			else
+				sidecar->setXmpData(xmpData_);
 			sidecar->writeMetadata();
 			}
 	}

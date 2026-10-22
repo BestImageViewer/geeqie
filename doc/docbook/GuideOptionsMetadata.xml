@@ -47,17 +47,18 @@
   <section id="WriteToImageFiles">
     <title>Step 1 Options:</title>
     <para>If Step 1 above was successful, the following options take effect:</para>
+    <para>Saving edits preserves unrelated EXIF, XMP and IPTC fields. For example, changing orientation does not convert an existing XMP date-only value into an EXIF timestamp.</para>
     <itemizedlist>
       <listitem>
         <para>
           <guilabel>Store metadata also in legacy IPTC tags (converted according to IPTC4XMP standard)</guilabel>
           <para />
-          If checked, Geeqie will write IPTC tags as defined in
+          If checked, Geeqie will also update the corresponding IPTC tags for edited XMP fields, as defined in
           <emphasis role="underline"><link linkend="GuideReferenceStandards" endterm="titleGuideReferenceStandards" /></emphasis>
           <para />
           The conversion from XMP tag to IPTC tag is performed by exiv2. A list of the XMP-IPTC conversions is at the end of
           <ulink url="https://exiv2.org/conversion.html">this table</ulink>
-          .
+          . Unrelated existing IPTC tags are preserved, including when this option is unchecked.
         </para>
       </listitem>
       <listitem>
