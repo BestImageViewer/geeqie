@@ -23,7 +23,10 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <memory>
+#include <string>
 
+#include <gio/gio.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
@@ -44,6 +47,8 @@
 #include "ui-tabcomp.h"
 #include "ui-utildlg.h"
 #include "window.h"
+
+static void cache_manager_sizes_refresh();
 
 namespace
 {
@@ -70,6 +75,7 @@ struct CacheManager
 	GenericDialog *dialog;
 	GtkWidget *folder_entry;
 	GtkWidget *progress;
+	GList *size_labels;
 
 	GList *list_todo;
 
@@ -280,6 +286,7 @@ static bool is_empty_dir(const gchar *path)
 static void cache_maintain_home_stop(CMData *cm)
 {
 	g_clear_handle_id(&cm->idle_id, g_source_remove);
+	cache_manager_sizes_refresh();
 
 	if (!cm->remote)
 		{
@@ -651,6 +658,7 @@ static void cache_manager_render_close_cb(GenericDialog *, gpointer data)
 
 static void cache_manager_render_finish(CacheOpsData *cd)
 {
+	cache_manager_sizes_refresh();
 	cache_manager_render_reset(cd);
 	if (!cd->remote)
 		{
@@ -947,6 +955,7 @@ static void cache_manager_standard_clean_close_cb(GenericDialog *, gpointer data
 
 static void cache_manager_standard_clean_done(CacheOpsData *cd)
 {
+	cache_manager_sizes_refresh();
 	if (!cd->remote)
 		{
 		gtk_widget_set_sensitive(cd->button_stop, FALSE);
@@ -1207,6 +1216,12 @@ static CacheManager *cache_manager = nullptr;
 
 static void cache_manager_close_cb(GenericDialog *gd, gpointer)
 {
+	for (GList *work = cache_manager->size_labels; work; work = work->next)
+		{
+		auto *cancellable = static_cast<GCancellable *>(g_object_get_data(G_OBJECT(work->data), "cache-size-cancellable"));
+		if (cancellable) g_cancellable_cancel(cancellable);
+		}
+	g_list_free(cache_manager->size_labels);
 	generic_dialog_close(gd);
 
 	g_free(cache_manager);
@@ -1218,6 +1233,119 @@ static void cache_manager_help_cb(GenericDialog *, gpointer)
 	help_window_show("GuideReferenceManagement.html");
 }
 
+enum class CacheSizeStatus { COMPLETE, MISSING, INCOMPLETE };
+
+struct CacheSizeResult
+{
+	FileTreeStats stats;
+	CacheSizeStatus status = CacheSizeStatus::INCOMPLETE;
+	std::string error;
+};
+
+struct CacheSizeTask
+{
+	GWeakRef label;
+	std::string path;
+
+	CacheSizeTask(GtkWidget *widget, const gchar *directory) : path(directory)
+	{
+		g_weak_ref_init(&label, widget);
+	}
+
+	~CacheSizeTask()
+	{
+		g_weak_ref_clear(&label);
+	}
+};
+
+static void cache_manager_size_worker(GTask *task, gpointer, gpointer task_data, GCancellable *cancellable)
+{
+	auto *data = static_cast<CacheSizeTask *>(task_data);
+	auto result = std::make_unique<CacheSizeResult>();
+	g_autofree gchar *path = path_from_utf8(data->path.c_str());
+	g_autoptr(GFile) file = g_file_new_for_path(path);
+	g_autoptr(GError) error = nullptr;
+	g_autoptr(GFileInfo) info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_TYPE,
+	                                           G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, cancellable, &error);
+	if (!info && g_error_matches(error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+		{
+		result->status = CacheSizeStatus::MISSING;
+		}
+	else if (info && g_file_info_get_file_type(info) == G_FILE_TYPE_DIRECTORY)
+		{
+		FileTreeOperation operation;
+		operation.cancellable = cancellable;
+		if (file_tree_stats(file, result->stats, &error, &operation)) result->status = CacheSizeStatus::COMPLETE;
+		}
+	else if (info)
+		{
+		g_set_error_literal(&error, G_IO_ERROR, G_IO_ERROR_NOT_DIRECTORY, _("Cache location is not a directory."));
+		}
+	if (error) result->error = error->message;
+	g_task_return_pointer(task, result.release(), [](gpointer value) { delete static_cast<CacheSizeResult *>(value); });
+}
+
+static void cache_manager_size_done(GObject *, GAsyncResult *result, gpointer)
+{
+	auto *task = G_TASK(result);
+	auto *data = static_cast<CacheSizeTask *>(g_task_get_task_data(task));
+	g_autoptr(GError) error = nullptr;
+	std::unique_ptr<CacheSizeResult> size(static_cast<CacheSizeResult *>(g_task_propagate_pointer(task, &error)));
+	g_autoptr(GObject) label = static_cast<GObject *>(g_weak_ref_get(&data->label));
+	if (!size || !label || g_object_get_data(label, "cache-size-cancellable") != g_task_get_cancellable(task)) return;
+
+	g_autofree gchar *text = nullptr;
+	switch (size->status)
+		{
+		case CacheSizeStatus::COMPLETE:
+			{
+			g_autofree gchar *formatted = g_format_size_full(size->stats.bytes, G_FORMAT_SIZE_IEC_UNITS);
+			text = g_strdup_printf(_("Cache data size: %s"), formatted);
+			break;
+			}
+		case CacheSizeStatus::MISSING:
+			text = g_strdup(_("Cache data size: directory not created"));
+			break;
+		case CacheSizeStatus::INCOMPLETE:
+			text = g_strdup(_("Cache data size: unable to calculate"));
+			break;
+		}
+	gtk_label_set_text(GTK_LABEL(label), text);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(label), size->error.empty() ? nullptr : size->error.c_str());
+}
+
+static void cache_manager_size_cancel(gpointer data)
+{
+	g_cancellable_cancel(G_CANCELLABLE(data));
+	g_object_unref(data);
+}
+
+static void cache_manager_size_refresh(GtkWidget *label)
+{
+	const auto *path = static_cast<const gchar *>(g_object_get_data(G_OBJECT(label), "cache-size-path"));
+	g_autoptr(GCancellable) cancellable = g_cancellable_new();
+	g_object_set_data_full(G_OBJECT(label), "cache-size-cancellable", g_object_ref(cancellable), cache_manager_size_cancel);
+	gtk_label_set_text(GTK_LABEL(label), _("Cache data size: Calculating…"));
+	gtk_widget_set_tooltip_text(label, nullptr);
+	g_autoptr(GTask) task = g_task_new(nullptr, cancellable, cache_manager_size_done, nullptr);
+	g_task_set_task_data(task, new CacheSizeTask(label, path), [](gpointer data) { delete static_cast<CacheSizeTask *>(data); });
+	g_task_run_in_thread(task, cache_manager_size_worker);
+}
+
+static void cache_manager_sizes_refresh()
+{
+	if (!cache_manager) return;
+	for (GList *work = cache_manager->size_labels; work; work = work->next)
+		{
+		cache_manager_size_refresh(GTK_WIDGET(work->data));
+		}
+}
+
+static void cache_manager_sizes_refresh_cb(GenericDialog *, gpointer)
+{
+	cache_manager_sizes_refresh();
+}
+
 static GtkWidget *cache_manager_location_label(GtkWidget *group, const gchar *subdir)
 {
 	GtkWidget *label;
@@ -1227,6 +1355,11 @@ static GtkWidget *cache_manager_location_label(GtkWidget *group, const gchar *su
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 	gtk_label_set_yalign(GTK_LABEL(label), 0.5);
 
+	GtkWidget *size_label = pref_label_new(group, "");
+	gtk_label_set_xalign(GTK_LABEL(size_label), 0.0);
+	g_object_set_data_full(G_OBJECT(size_label), "cache-size-path", g_strdup(subdir), g_free);
+	cache_manager->size_labels = g_list_append(cache_manager->size_labels, size_label);
+	cache_manager_size_refresh(size_label);
 	return label;
 }
 
@@ -1257,6 +1390,7 @@ static void cache_manager_sim_close_cb(GenericDialog *, gpointer data)
 
 static void cache_manager_sim_finish(CacheOpsData *cd)
 {
+	cache_manager_sizes_refresh();
 	cache_manager_sim_reset(cd);
 	if (!cd->remote)
 		{
@@ -1630,6 +1764,7 @@ void cache_manager_show()
 
 	if (cache_manager)
 		{
+		cache_manager_sizes_refresh();
 		gtk_window_present(GTK_WINDOW(cache_manager->dialog->dialog));
 		return;
 		}
@@ -1643,6 +1778,8 @@ void cache_manager_show()
 	gd = cache_manager->dialog;
 
 	gd->cancel_cb = cache_manager_close_cb;
+	generic_dialog_add_button(gd, GQ_ICON_REFRESH, _("Refresh sizes"),
+	                          cache_manager_sizes_refresh_cb, FALSE);
 	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"),
 				  cache_manager_close_cb, FALSE);
 	generic_dialog_add_button(gd, GQ_ICON_HELP, _("Help"),

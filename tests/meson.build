@@ -3,6 +3,7 @@
 unit_test_sources = files(
 'bar-sort.cc',
 'cache.cc',
+'cache-maint.cc',
 'collection-file-source.cc',
 'dnd.cc',
 'dupe-export.cc',

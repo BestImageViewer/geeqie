@@ -9,6 +9,8 @@
     </menuchoice>
     .
   </para>
+  <para>Each displayed cache location has a Cache data size value, calculated in the background. It is the total size of file contents and symbolic-link entries in that directory tree, rather than allocated disk space. Symbolic links are not followed. Thumbnails stored alongside source images elsewhere are not included.</para>
+  <para>Select Refresh sizes to recalculate the totals. Sizes also refresh when an in-dialog cleanup, thumbnail rendering, or similarity-cache operation finishes. Use Refresh sizes after an external cache-maintenance job. A directory that does not yet exist is identified separately from a size that could not be calculated. Closing the dialog cancels pending size scans.</para>
   <para />
   <section id="Geeqiethumbnailcache">
     <title>Geeqie thumbnail and sim. cache</title>
