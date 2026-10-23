@@ -436,6 +436,59 @@ TEST_P(RepeatedDelete, RefreshesSelectionBeforeTheNextDelete)
 	EXPECT_EQ(layout->vf->refresh_idle_id, 0U);
 }
 
+TEST_P(RepeatedDelete, ShiftArrowsExtendAndShrinkImmediatelyAfterAnchorRemoval)
+{
+	if (layout->vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	auto *vf = layout->vf;
+	const gboolean saved_rectangular = options->collections.rectangular_selection;
+	options->collections.rectangular_selection = std::get<1>(GetParam());
+	// Establish the first image as the keyboard anchor.
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Right, static_cast<GdkModifierType>(0));
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Left, static_cast<GdkModifierType>(0));
+	EXPECT_EQ(vf->click_fd, vf_index_get_data(vf, 0));
+	g_autofree gchar *path = g_build_filename(directory, "0.jpg", nullptr);
+	g_autofree gchar *moved = g_build_filename(options->file_ops.safe_delete_path, "moved.jpg", nullptr);
+	if (std::get<1>(GetParam()))
+		{
+		EXPECT_EQ(g_mkdir(options->file_ops.safe_delete_path, 0700), 0);
+		EXPECT_EQ(g_rename(path, moved), 0);
+		}
+	else
+		{
+		EXPECT_EQ(g_unlink(path), 0);
+		}
+	vf_refresh(vf);
+	EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+	EXPECT_EQ(vf->click_fd, vf_index_get_data(vf, 0));
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Right, GDK_SHIFT_MASK);
+	EXPECT_EQ(vf_selection_count(vf, nullptr), 2U);
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Left, GDK_SHIFT_MASK);
+	EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+	EXPECT_TRUE(vficon_is_selected(vf, vf_index_get_data(vf, 0)));
+	options->collections.rectangular_selection = saved_rectangular;
+	if (std::get<1>(GetParam()))
+		{
+		EXPECT_EQ(g_unlink(moved), 0);
+		EXPECT_EQ(g_rmdir(options->file_ops.safe_delete_path), 0);
+		}
+}
+
+TEST_P(RepeatedDelete, RefreshPreservesSurvivingKeyboardAnchor)
+{
+	if (layout->vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	auto *vf = layout->vf;
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Right, static_cast<GdkModifierType>(0));
+	FileDataRef anchor(vf->click_fd);
+	g_autofree gchar *path = g_build_filename(directory, "0.jpg", nullptr);
+	EXPECT_EQ(g_unlink(path), 0);
+	vf_refresh(vf);
+	EXPECT_EQ(vf->click_fd, *anchor);
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Right, GDK_SHIFT_MASK);
+	EXPECT_EQ(vf_selection_count(vf, nullptr), 2U);
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Left, GDK_SHIFT_MASK);
+	EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+}
+
 TEST_P(RepeatedDelete, ViewSwitchWaitsForMenuActionToReturn)
 {
 	auto *previous = layout->vf;

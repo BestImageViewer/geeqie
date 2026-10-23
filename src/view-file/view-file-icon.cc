@@ -883,6 +883,7 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifie
 		old_fd = vficon_find_data(vf, VFICON(vf)->focus_row, VFICON(vf)->focus_column, nullptr);
 		vficon_move_focus(vf, focus_row, focus_col, TRUE);
 		new_fd = vficon_find_data(vf, VFICON(vf)->focus_row, VFICON(vf)->focus_column, nullptr);
+		if (!g_list_find(vf->list, vf->click_fd)) vf->click_fd = old_fd ? old_fd : new_fd;
 
 		if (new_fd != old_fd)
 			{
@@ -1407,6 +1408,16 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 		/* all selected files disappeared */
 		vficon_select_closest(vf, first_selected);
 		}
+
+	/* Refresh can remove the keyboard range anchor or move the focused row. */
+	FileData *focus = VFICON(vf)->focus_fd;
+	if (!g_list_find(vf->list, focus))
+		{
+		focus = static_cast<FileData *>(VFICON(vf)->selection ? VFICON(vf)->selection->data :
+		                                vf->list ? vf->list->data : nullptr);
+		}
+	vficon_set_focus(vf, focus);
+	if (!g_list_find(vf->list, vf->click_fd)) vf->click_fd = focus;
 	file_data_unref(first_selected);
 
 	return ret;
