@@ -13,6 +13,7 @@ unit_test_sources = files(
 'filecache.cc',
 'filedata/filedata.cc',
 'filedata/filelist.cc',
+'filedata/marks.cc',
 'filedata/ref.cc',
 'geocode.cc',
 'history-list.cc',

@@ -182,6 +182,7 @@
         </term>
         <listitem>
           <para>Save all marks that have been set. Note that marks that are linked to a keyword will always be saved irrespective of this setting.</para>
+          <para>Saved marks are retained for temporarily unavailable files, such as files on a disconnected drive. They become available again when the files return at the same paths. Clearing all marks also clears retained marks for unavailable files.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

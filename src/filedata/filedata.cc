@@ -2586,15 +2586,43 @@ gboolean FileData::file_data_sc_perform_ci(FileData *fd)
 	return ret;
 }
 
-/*
- * updates FileData structure according to FileDataChangeInfo
- */
+static void file_data_forget_deleted_marks(FileData *deleted, FileDataContext *context)
+{
+	const bool directory = S_ISDIR(deleted->mode);
+	if (!directory)
+		{
+		if (deleted->marks)
+			{
+			deleted->marks = 0;
+			::file_data_unref(deleted);
+			}
+		return;
+		}
+	const size_t length = strlen(deleted->path);
+	g_autoptr(FileDataList) files = nullptr;
+	GHashTableIter iter;
+	gpointer value;
+	g_hash_table_iter_init(&iter, context->file_data_pool);
+	while (g_hash_table_iter_next(&iter, nullptr, &value))
+		{
+		auto *fd = static_cast<FileData *>(value);
+		if (fd->marks && (fd == deleted || (g_str_has_prefix(fd->path, deleted->path) && fd->path[length] == G_DIR_SEPARATOR)))
+			files = g_list_prepend(files, ::file_data_ref(fd));
+		}
+	for (GList *work = files; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		fd->marks = 0;
+		::file_data_unref(fd); /* release the marked-file reference */
+		}
+}
 
+/* Updates FileData structure according to FileDataChangeInfo. */
 gboolean FileData::file_data_apply_ci(FileData *fd)
 {
+	FileDataRef keep_alive(fd);
 	FileDataChangeType type = fd->change->type;
 
-	/** @FIXME delete ?*/
 	if (type == FILEDATA_CHANGE_MOVE || type == FILEDATA_CHANGE_RENAME)
 		{
 		DEBUG_1("planned change: applying %s -> %s", fd->change->dest, fd->path);
@@ -2615,6 +2643,8 @@ gboolean FileData::file_data_apply_ci(FileData *fd)
 			fd->set_path(fd->change->dest);
 			}
 		}
+	if (type == FILEDATA_CHANGE_DELETE) file_data_forget_deleted_marks(fd, fd->context);
+
 	file_data_increment_version(fd);
 	file_data_send_notification(fd, NOTIFY_CHANGE);
 
@@ -2882,20 +2912,12 @@ gboolean FileData::file_data_unregister_real_time_monitor(FileData *fd)
  *-----------------------------------------------------------------------------
  */
 
-static void marks_get_files(gpointer key, gpointer value, gpointer userdata)
+static void marks_get_files(gpointer, gpointer value, gpointer userdata)
 {
-	auto file_name = static_cast<gchar *>(key);
-	auto result = static_cast<GString *>(userdata);
-	FileData *fd;
-
-	if (isfile(file_name))
-		{
-		fd = static_cast<FileData *>(value);
-		if (fd && fd->marks > 0)
-			{
-			g_string_append_printf(result, "%s,%u\n", fd->path, fd->marks);
-			}
-		}
+	auto *fd = static_cast<FileData *>(value);
+	auto *result = static_cast<GString *>(userdata);
+	/* An unavailable path can belong to a disconnected drive. */
+	if (fd->marks > 0) g_string_append_printf(result, "%s,%u\n", fd->path, fd->marks);
 }
 
 gboolean FileData::marks_list_load(const gchar *path)
@@ -2914,28 +2936,32 @@ gboolean FileData::marks_list_load(const gchar *path)
 		return FALSE;
 		}
 
-	while (fgets(s_buf, sizeof(s_buf), f))
+	g_autofree gchar *line = nullptr;
+	size_t capacity = 0;
+	while (getline(&line, &capacity, f) >= 0)
 		{
-		if (s_buf[0]=='#') continue;
+		if (line[0] == '#') continue;
+		g_strchomp(line);
+		/* The final comma separates the mask; filenames can contain commas. */
+		gchar *separator = strrchr(line, ',');
+		if (!separator || separator == line) continue;
+		*separator = '\0';
+		gchar *end = nullptr;
+		const guint64 value = g_ascii_strtoull(separator + 1, &end, 10);
+		if (end == separator + 1 || *end || value == 0 || value >= (1U << FILEDATA_MARKS_SIZE)) continue;
 
-		const gchar *file_path = strtok(s_buf, ",");
-		if (!isfile(file_path)) continue;
-
-		const gchar *marks_str = strtok(nullptr, ",");
-		const gint marks_value = atoi(marks_str); // marks_str is guaranteed to contain a non-zero number
-
-		// TODO[xsdg]: This looks like it leaks a bunch of FileDatas.  Are these cleaned
-		// up anywhere?
-		FileData *fd = file_data_new_no_grouping(file_path);
-		::file_data_ref(fd);
-
-		for (gint n = 0; n <= 9; n++)
+		auto fd = FileData::new_no_grouping(line);
+		if (!isfile(line))
 			{
-			gint mark_no = 1 << n;
-			if (marks_value & mark_no)
-				{
-				::file_data_set_mark(fd, n, 1);
-				}
+			/* Keep the normal marked-file reference, without invoking metadata
+			 * callbacks for a file that cannot currently be read or written. */
+			if (!fd->marks) ::file_data_ref(fd);
+			fd->marks |= static_cast<guint>(value);
+			continue;
+			}
+		for (gint n = 0; n < FILEDATA_MARKS_SIZE; n++)
+			{
+			if (value & (1U << n)) ::file_data_set_mark(fd, n, TRUE);
 			}
 		}
 
@@ -2958,36 +2984,36 @@ gboolean FileData::marks_list_save(gchar *path, gboolean save)
 	return secure_save(pathl, marks->str, -1);
 }
 
-static void marks_clear(gpointer key, gpointer value, gpointer)
-{
-	auto file_name = static_cast<gchar *>(key);
-	gint mark_no;
-	gint n;
-	FileData *fd;
-
-	if (isfile(file_name))
-		{
-		fd = static_cast<FileData *>(value);
-		if (fd && fd->marks > 0)
-			{
-			n = 0;
-			while (n <= 9)
-				{
-				mark_no = 1 << n;
-				if (fd->marks & mark_no)
-					{
-					file_data_set_mark(fd, n , 0);
-					}
-				n++;
-				}
-			}
-		}
-}
-
 void FileData::marks_clear_all()
 {
 	FileDataContext *context = FileData::DefaultFileDataContext();
-	g_hash_table_foreach(context->file_data_pool, marks_clear, nullptr);
+	/* Clearing the last mark can release an object from the pool. Hold a
+	 * snapshot so the pool is not modified during hash table iteration. */
+	g_autoptr(FileDataList) files = nullptr;
+	GHashTableIter iter;
+	gpointer value;
+	g_hash_table_iter_init(&iter, context->file_data_pool);
+	while (g_hash_table_iter_next(&iter, nullptr, &value))
+		{
+		files = g_list_prepend(files, ::file_data_ref(static_cast<FileData *>(value)));
+		}
+	for (GList *work = files; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		if (!isfile(fd->path))
+			{
+			if (fd->marks)
+				{
+				fd->marks = 0;
+				::file_data_unref(fd);
+				}
+			continue;
+			}
+		for (gint n = 0; n < FILEDATA_MARKS_SIZE; n++)
+			{
+			if (fd->marks & (1U << n)) ::file_data_set_mark(fd, n, FALSE);
+			}
+		}
 }
 
 void FileData::file_data_set_page_num(FileData *fd, gint page_num)
