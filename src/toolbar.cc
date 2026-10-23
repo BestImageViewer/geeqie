@@ -121,6 +121,12 @@ void toolbarlist_add_button_cb(GSimpleAction *, GVariant *parameter, gpointer da
 
 	const gchar *label = get_description_for_action_name(action_name);
 	const gchar *icon = get_icon_for_action_name(action_name);
+	if (file_extension_match(action_name, ".desktop"))
+		{
+		const auto *editor = get_editor_by_command(action_name);
+		label = editor && editor->name && *editor->name ? editor->name : action_name;
+		icon = editor && editor->icon && *editor->icon ? editor->icon : GQ_ICON_RUN;
+		}
 
 	toolbarlist_add_button(action_name, label, icon, GTK_BOX(data));
 }
@@ -169,13 +175,15 @@ void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType
 			                                  actions[i].action_name);
 			}
 
+		g_menu_item_set_attribute(item, "custom", "s", actions[i].action_name);
 		g_menu_append_item(menu, item);
 		}
 }
 
-gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
+} // namespace
+
+GMenuModel *toolbar_add_menu_new(ToolbarType bar)
 {
-	auto bar = static_cast<ToolbarType>(GPOINTER_TO_INT(data));
 	GMenu *menu_model;
 	GMenu *main_submenu;
 
@@ -195,8 +203,40 @@ gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 	toolbar_menu_add_actions(main_submenu, get_app_actions(), bar);
 	toolbar_menu_add_actions(main_submenu, get_main_actions(), bar);
 
+	g_autoptr(GMenu) plugins = g_menu_new();
+	const gchar *add_action = bar == TOOLBAR_MAIN ? "win.preferences-win-main-toolbarlist-add"
+	                                           : "win.preferences-win-status-toolbarlist-add";
+	for (const EditorDescription *editor : editor_list_get())
+		{
+		const gchar *label = editor->name && *editor->name ? editor->name : editor->key;
+		const gchar *icon_name = editor->icon && *editor->icon ? editor->icon : GQ_ICON_RUN;
+		g_autoptr(GMenuItem) item = g_menu_item_new(label, nullptr);
+		g_menu_item_set_action_and_target_value(item, add_action, g_variant_new_string(editor->key));
+		g_autoptr(GIcon) icon = ui_icon_new(icon_name);
+		g_menu_item_set_icon(item, icon);
+		g_menu_item_set_attribute(item, "custom", "s", editor->key);
+		g_menu_append_item(plugins, item);
+		}
+	if (g_menu_model_get_n_items(G_MENU_MODEL(plugins))) g_menu_append_submenu(menu_model, _("Plugins"), G_MENU_MODEL(plugins));
+	return G_MENU_MODEL(g_object_ref(menu_model));
+}
+
+GtkWidget *toolbar_add_popover_new(ToolbarType bar)
+{
+	g_autoptr(GMenuModel) model = toolbar_add_menu_new(bar);
+	auto *popover = gtk_popover_menu_new_from_model(model);
+	menu_icon_rows_refresh(popover, model);
+	return popover;
+}
+
+namespace
+{
+
+gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
+{
+	auto bar = static_cast<ToolbarType>(GPOINTER_TO_INT(data));
 	auto *window = get_config_window();
-	auto *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
+	auto *popover = toolbar_add_popover_new(bar);
 	popover_set_parent(popover, window);
 	// Opening beside the window lets the long list use the monitor's height.
 	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_RIGHT);
@@ -277,6 +317,11 @@ static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 					{
 					icon = g_strdup((*it)->icon);
 					}
+				}
+			if (!icon || !*icon)
+				{
+				g_free(icon);
+				icon = g_strdup(GQ_ICON_RUN);
 				}
 			}
 		else

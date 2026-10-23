@@ -653,6 +653,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 
 		gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), lw->menu_model);
 		GtkPopover *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(menu_button));
+		menu_icon_rows_refresh(GTK_WIDGET(popover), lw->menu_model);
 		g_signal_connect(popover, "closed", G_CALLBACK(layout_hamburger_menu_closed_cb), lw);
 
 		GtkEventController *controller = gtk_event_controller_key_new();

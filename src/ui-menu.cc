@@ -477,7 +477,95 @@ bool menu_item_include_ellipsis(GMenuModel *model, const char *action)
 	return FALSE;
 }
 
-void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_list)
+static void menu_icon_row_clicked(GtkButton *button, gpointer)
+{
+	GtkWidget *popover = gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_POPOVER);
+	if (popover) gtk_popover_popdown(GTK_POPOVER(popover));
+}
+
+static void menu_icon_row_update_accel(GtkWidget *button, gpointer data)
+{
+	auto *label = GTK_SHORTCUT_LABEL(data);
+	GApplication *app = g_application_get_default();
+	g_auto(GStrv) accels = nullptr;
+	if (GTK_IS_APPLICATION(app))
+		{
+		g_autofree gchar *action = g_action_print_detailed_name(gtk_actionable_get_action_name(GTK_ACTIONABLE(button)),
+		                                                     gtk_actionable_get_action_target_value(GTK_ACTIONABLE(button)));
+		accels = gtk_application_get_accels_for_action(GTK_APPLICATION(app), action);
+		}
+	const auto *fixed = static_cast<const gchar *>(g_object_get_data(G_OBJECT(label), "menu-icon-accel"));
+	const gchar *accel = accels && accels[0] ? accels[0] : fixed;
+	gtk_shortcut_label_set_accelerator(label, accel ? accel : "");
+	gtk_widget_set_visible(GTK_WIDGET(label), accel && *accel);
+}
+
+static void menu_icon_rows_add(GtkWidget *menu, GMenuModel *model, GList **rows)
+{
+	for (int i = 0; i < g_menu_model_get_n_items(model); ++i)
+		{
+		for (const gchar *link : {G_MENU_LINK_SECTION, G_MENU_LINK_SUBMENU})
+			{
+			g_autoptr(GMenuModel) child = g_menu_model_get_item_link(model, i, link);
+			if (child) menu_icon_rows_add(menu, child, rows);
+			}
+		g_autofree gchar *id = nullptr;
+		if (!g_menu_model_get_item_attribute(model, i, "custom", "s", &id)) continue;
+		g_autofree gchar *label = nullptr;
+		g_autofree gchar *action = nullptr;
+		g_menu_model_get_item_attribute(model, i, G_MENU_ATTRIBUTE_LABEL, "s", &label);
+		g_menu_model_get_item_attribute(model, i, G_MENU_ATTRIBUTE_ACTION, "s", &action);
+		g_autoptr(GVariant) target = g_menu_model_get_item_attribute_value(model, i, G_MENU_ATTRIBUTE_TARGET, nullptr);
+		g_autoptr(GVariant) serialized = g_menu_model_get_item_attribute_value(model, i, G_MENU_ATTRIBUTE_ICON, nullptr);
+		if (!serialized || !action) continue;
+		g_autoptr(GIcon) icon = g_icon_deserialize(serialized);
+
+		g_autoptr(GtkWidget) button = GTK_WIDGET(g_object_ref_sink(gtk_button_new()));
+		gtk_widget_add_css_class(button, "flat");
+		auto *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+		gtk_button_set_child(GTK_BUTTON(button), box);
+		auto *image = gtk_image_new_from_gicon(icon);
+		gtk_image_set_pixel_size(GTK_IMAGE(image), 16);
+		gtk_box_append(GTK_BOX(box), image);
+		auto *text = gtk_label_new_with_mnemonic(label);
+		gtk_label_set_xalign(GTK_LABEL(text), 0.0);
+		gtk_widget_set_hexpand(text, TRUE);
+		gtk_box_append(GTK_BOX(box), text);
+		gtk_actionable_set_action_name(GTK_ACTIONABLE(button), action);
+		gtk_actionable_set_action_target_value(GTK_ACTIONABLE(button), target);
+		auto *shortcut = gtk_shortcut_label_new("");
+		g_autofree gchar *accel = nullptr;
+		g_menu_model_get_item_attribute(model, i, "accel", "s", &accel);
+		g_object_set_data_full(G_OBJECT(shortcut), "menu-icon-accel", g_steal_pointer(&accel), g_free);
+		gtk_widget_add_css_class(shortcut, "dim-label");
+		gtk_box_append(GTK_BOX(box), shortcut);
+		menu_icon_row_update_accel(button, shortcut);
+		g_signal_connect(button, "map", G_CALLBACK(menu_icon_row_update_accel), shortcut);
+		g_signal_connect_after(button, "clicked", G_CALLBACK(menu_icon_row_clicked), nullptr);
+		const gboolean added = GTK_IS_POPOVER_MENU_BAR(menu)
+		                     ? gtk_popover_menu_bar_add_child(GTK_POPOVER_MENU_BAR(menu), button, id)
+		                     : gtk_popover_menu_add_child(GTK_POPOVER_MENU(menu), button, id);
+		if (added) *rows = g_list_prepend(*rows, g_object_ref(button));
+		}
+}
+
+void menu_icon_rows_refresh(GtkWidget *menu, GMenuModel *model)
+{
+	auto *previous = static_cast<GList *>(g_object_get_data(G_OBJECT(menu), "menu-icon-rows"));
+	for (GList *work = previous; work; work = work->next)
+		{
+		/* Model changes may already have removed the custom row's slot. */
+		if (!gtk_widget_get_parent(GTK_WIDGET(work->data))) continue;
+		if (GTK_IS_POPOVER_MENU_BAR(menu)) gtk_popover_menu_bar_remove_child(GTK_POPOVER_MENU_BAR(menu), GTK_WIDGET(work->data));
+		else gtk_popover_menu_remove_child(GTK_POPOVER_MENU(menu), GTK_WIDGET(work->data));
+		}
+	g_object_set_data(G_OBJECT(menu), "menu-icon-rows", nullptr);
+	GList *rows = nullptr;
+	menu_icon_rows_add(menu, model, &rows);
+	g_object_set_data_full(G_OBJECT(menu), "menu-icon-rows", rows, [](gpointer data) { g_list_free_full(static_cast<GList *>(data), g_object_unref); });
+}
+
+void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_list, bool show_icons)
 {
 	EditorsList editors_list = editor_list_get();
 
@@ -510,6 +598,11 @@ void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_li
 		g_autoptr(GIcon) icon = ui_icon_new(icon_name);
 		g_menu_item_set_icon(item, icon);
 
+		if (show_icons)
+			{
+			g_autofree gchar *id = g_strconcat("plugin:", ed->key, nullptr);
+			g_menu_item_set_attribute(item, "custom", "s", id);
+			}
 		g_menu_append_item(plugins_menu, item);
 		}
 }

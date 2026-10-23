@@ -2979,7 +2979,13 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(lw->builder, "plugins-submenu"));
 	g_menu_remove_all(plugins_menu);
 
-	plugins_menu_populate(plugins_menu, "win.main-win-plugin-run", nullptr);
+	plugins_menu_populate(plugins_menu, "win.main-win-plugin-run", nullptr, true);
+	if (lw->menu_bar) menu_icon_rows_refresh(lw->menu_bar, lw->menu_model);
+	if (lw->hamburger_menu_button)
+		{
+		GtkPopover *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(lw->hamburger_menu_button));
+		if (popover) menu_icon_rows_refresh(GTK_WIDGET(popover), lw->menu_model);
+		}
 }
 
 void create_toolbars(LayoutWindow *lw)
@@ -3164,6 +3170,7 @@ GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
 
 	lw->menu_bar = gtk_popover_menu_bar_new_from_model(lw->menu_model);
 	layout_menu_bar_use_sliding_submenus(lw->menu_bar);
+	menu_icon_rows_refresh(lw->menu_bar, lw->menu_model);
 
 	return g_object_ref(lw->menu_bar);
 }

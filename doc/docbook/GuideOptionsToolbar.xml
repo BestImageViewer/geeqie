@@ -8,10 +8,10 @@
     <para />
     Additional items may be included by clicking on the "Plus" symbol at the bottom of the tab. A list of all available options is displayed.
   </para>
-  <para>Most of the Geeqie menu items are available, plus any desktop (Plugins) files.</para>
+  <para>Most of the Geeqie menu items are available. The Plugins submenu lists enabled plugins for both the Main Toolbar and the Status Toolbar.</para>
   <note>
     <para>
-      If you select a desktop file, ensure that it includes an icon - the desktop file format is described in the
+      Plugin icons may be theme names or absolute file paths. A generic icon is used when no icon is specified or a theme icon cannot be found. The desktop file format is described in the
       <emphasis role="underline"><link linkend="GuideReferenceStandards">Standards section</link></emphasis>
     </para>
   </note>

@@ -36,6 +36,7 @@
 #include "geometry.h"
 #include "history-list.h"
 #include "main-defines.h"
+#include "ui-fileops.h"
 
 namespace
 {
@@ -1035,6 +1036,17 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 GIcon *ui_icon_new(const gchar *icon_name)
 {
 	if (!icon_name || !*icon_name) return nullptr;
+	if (g_path_is_absolute(icon_name))
+		{
+		g_autofree gchar *path = path_from_utf8(icon_name);
+		if (g_file_test(path, G_FILE_TEST_IS_REGULAR))
+			{
+			g_autoptr(GFile) file = g_file_new_for_path(path);
+			return g_file_icon_new(file);
+			}
+		icon_name = GQ_ICON_RUN;
+		}
+
 
 	if (g_str_has_prefix(icon_name, "gq-"))
 		{

@@ -34,6 +34,9 @@ enum ToolbarType : gint {
 
 GtkWidget *toolbar_select_new(LayoutWindow *lw, GtkWidget *window, ToolbarType bar);
 void toolbar_apply(ToolbarType bar);
+/** Build the toolbar item chooser. The caller owns the returned model. */
+GMenuModel *toolbar_add_menu_new(ToolbarType bar);
+GtkWidget *toolbar_add_popover_new(ToolbarType bar);
 
 const gchar *toolbar_type_config_name(ToolbarType type);
 

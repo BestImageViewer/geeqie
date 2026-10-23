@@ -55,7 +55,9 @@ void popover_set_parent(GtkWidget *popover, GtkWidget *parent);
 void popover_popup(GtkWidget *popover);
 
 bool menu_item_include_ellipsis(GMenuModel *model, const gchar *action);
-void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_list);
+void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_list, bool show_icons = false);
+/** Refresh icon-and-label custom rows in a popover menu or menu bar. */
+void menu_icon_rows_refresh(GtkWidget *menu, GMenuModel *model);
 void color_profiles_menu_populate(LayoutWindow *lw, const char *action);
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window);
 GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdouble y);
