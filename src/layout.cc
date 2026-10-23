@@ -1591,6 +1591,7 @@ static void layout_sync_path(LayoutWindow *lw)
 		vd_set_fd(lw->vd, lw->dir_fd);
 		}
 	if (lw->vf) vf_set_fd(lw->vf, lw->dir_fd);
+	bar_sort_update(lw->bar_sort);
 }
 
 gboolean layout_set_path(LayoutWindow *lw, const gchar *path)

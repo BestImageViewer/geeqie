@@ -62,6 +62,10 @@ struct SortData : BarSort
 	GtkWidget *folder_group;
 	GtkWidget *collection_group;
 	GtkWidget *destination_hint;
+	GtkWidget *folder_specific;
+	gchar *source_path;
+	gchar *folder_key;
+	gboolean updating_folder;
 
 	GtkWidget *add_button;
 	GtkWidget *undo_button;
@@ -118,9 +122,65 @@ static const gchar *bar_sort_destination_key(BarSort::Mode mode)
 static void bar_sort_destination_save(SortData *sd)
 {
 	if (sd->mode != BarSort::MODE_FOLDER && sd->mode != BarSort::MODE_COLLECTION) return;
+	if (sd->mode == BarSort::MODE_FOLDER && g_strcmp0(sd->folder_key, SORT_KEY_FOLDERS) != 0) return;
 
 	const gchar *path = bookmark_list_get_selected_path(sd->bookmarks);
 	if (path) history_list_add_to_key(bar_sort_destination_key(sd->mode), path, 1);
+}
+
+static gchar *bar_sort_folder_key(const gchar *path)
+{
+	g_autofree gchar *digest = g_compute_checksum_for_string(G_CHECKSUM_SHA256, path, -1);
+	return g_strconcat("sort_manager_folder_", digest, nullptr);
+}
+
+void bar_sort_update(GtkWidget *bar)
+{
+	if (!bar) return;
+	auto *sd = static_cast<SortData *>(g_object_get_data(G_OBJECT(bar), "bar_sort_data"));
+	if (!sd) return;
+
+	g_autofree gchar *path = sd->lw->dir_fd ? g_canonicalize_filename(sd->lw->dir_fd->path, nullptr) : nullptr;
+	g_autofree gchar *key = path ? bar_sort_folder_key(path) : nullptr;
+	g_autofree gchar *enabled_key = key ? g_strconcat(key, "_enabled", nullptr) : nullptr;
+	const gboolean specific = enabled_key && g_strcmp0(history_list_find_last_path_by_key(enabled_key), "1") == 0;
+	const gchar *folder_key = specific ? key : SORT_KEY_FOLDERS;
+
+	sd->updating_folder = TRUE;
+	gtk_widget_set_sensitive(sd->folder_specific, path != nullptr);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(sd->folder_specific), specific);
+	gtk_widget_set_tooltip_text(sd->folder_specific, path);
+	sd->updating_folder = FALSE;
+	g_free(sd->source_path);
+	sd->source_path = g_steal_pointer(&path);
+	if (g_strcmp0(sd->folder_key, folder_key) == 0) return;
+
+	if (sd->mode == BarSort::MODE_FOLDER) bar_sort_destination_save(sd);
+	g_free(sd->folder_key);
+	sd->folder_key = g_strdup(folder_key);
+	if (sd->mode == BarSort::MODE_FOLDER)
+		{
+		bookmark_list_set_no_defaults(sd->bookmarks, specific);
+		bookmark_list_set_key(sd->bookmarks, sd->folder_key);
+		bookmark_list_set_selected_path(sd->bookmarks, nullptr);
+		bar_sort_undo_set(sd, nullptr, nullptr);
+		}
+}
+
+static void bar_sort_folder_specific_cb(GtkCheckButton *button, gpointer data)
+{
+	auto *sd = static_cast<SortData *>(data);
+	if (sd->updating_folder || !sd->source_path) return;
+	g_autofree gchar *key = bar_sort_folder_key(sd->source_path);
+	g_autofree gchar *enabled_key = g_strconcat(key, "_enabled", nullptr);
+	if (gtk_check_button_get_active(button)) history_list_add_to_key(enabled_key, "1", 1);
+	else history_list_free_key(enabled_key);
+
+	bar_sort_update(sd->vbox);
+	layout_window_foreach([sd](LayoutWindow *lw)
+		{
+		if (lw != sd->lw) bar_sort_update(lw->bar_sort);
+		});
 }
 
 static void bar_sort_mode_sync(SortData *sd, BarSort::Mode mode)
@@ -131,7 +191,7 @@ static void bar_sort_mode_sync(SortData *sd, BarSort::Mode mode)
 
 	gboolean folder_mode = (sd->mode == BarSort::MODE_FOLDER);
 
-	bookmark_list_set_no_defaults(sd->bookmarks, !folder_mode);
+	bookmark_list_set_no_defaults(sd->bookmarks, !folder_mode || g_strcmp0(sd->folder_key, SORT_KEY_FOLDERS) != 0);
 	bookmark_list_set_editable(sd->bookmarks, folder_mode);
 	bookmark_list_set_only_directories(sd->bookmarks, folder_mode);
 	bookmark_list_set_select_only_on_ctrl(sd->bookmarks, TRUE);
@@ -140,7 +200,7 @@ static void bar_sort_mode_sync(SortData *sd, BarSort::Mode mode)
 		{
 		gtk_widget_set_visible(sd->collection_group, FALSE);
 		gtk_widget_set_visible(sd->folder_group, TRUE);
-		bookmark_list_set_key(sd->bookmarks, SORT_KEY_FOLDERS);
+		bookmark_list_set_key(sd->bookmarks, sd->folder_key);
 		}
 	else
 		{
@@ -150,7 +210,8 @@ static void bar_sort_mode_sync(SortData *sd, BarSort::Mode mode)
 		}
 
 	bookmark_list_set_selected_path(sd->bookmarks,
-	                                history_list_find_last_path_by_key(bar_sort_destination_key(sd->mode)));
+	                                folder_mode && g_strcmp0(sd->folder_key, SORT_KEY_FOLDERS) != 0
+	                                ? nullptr : history_list_find_last_path_by_key(bar_sort_destination_key(sd->mode)));
 	bar_sort_undo_set(sd, nullptr, nullptr);
 }
 
@@ -475,9 +536,9 @@ static void bar_filter_message_cb(GtkGestureClick *gesture, gint, gdouble, gdoub
 	bar_filter_message_common(gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)));
 }
 
-static void bar_sort_help_cb(gpointer)
+static void bar_sort_help_cb(GtkWidget *, gpointer)
 {
-	bar_filter_help_dialog();
+	help_window_show("GuideSidebarsSortManager.html");
 }
 
 template<BarSort::Selection selection>
@@ -579,6 +640,8 @@ static void bar_sort_destroy(gpointer data)
 	auto sd = static_cast<SortData *>(data);
 
 	g_free(sd->filter_key);
+	g_free(sd->source_path);
+	g_free(sd->folder_key);
 	g_list_free_full(sd->undo_src_list, g_free);
 	g_list_free_full(sd->undo_dest_list, g_free);
 	g_free(sd->undo_collection);
@@ -630,6 +693,8 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	sd->folder_group = pref_box_new(sd->vbox, FALSE, GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(sd->folder_group);
 	gtk_widget_set_tooltip_text(sd->folder_group, _("See the Help file for additional functions"));
+	sd->folder_specific = pref_checkbox_new(sd->folder_group, _("Use destinations for this folder"), FALSE,
+	                                        G_CALLBACK(bar_sort_folder_specific_cb), sd);
 
 	buttongrp = pref_radiobutton_new(sd->folder_group, nullptr, _("Copy"), sd->action == BarSort::COPY,
 	                                 G_CALLBACK(bar_sort_set_action_cb<BarSort::COPY>), sd);
@@ -716,26 +781,13 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	gtk_widget_set_vexpand(sd->bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
 	gtk_box_append(GTK_BOX(sd->vbox), sd->bookmarks);
 
-	GtkWidget *destination_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gtk_box_append(GTK_BOX(sd->vbox), destination_box);
-
 	sd->destination_hint = gtk_label_new(_("Ctrl+click selects a destination without adding images."));
 	gtk_label_set_wrap(GTK_LABEL(sd->destination_hint), TRUE);
 	gtk_label_set_max_width_chars(GTK_LABEL(sd->destination_hint), 32);
 	gtk_label_set_xalign(GTK_LABEL(sd->destination_hint), 0.0);
 	gtk_widget_add_css_class(sd->destination_hint, "dim-label");
 	gtk_widget_set_hexpand(sd->destination_hint, TRUE);
-	gtk_box_append(GTK_BOX(destination_box), sd->destination_hint);
-
-	GtkWidget *help_button = gtk_button_new();
-	gtk_button_set_child(GTK_BUTTON(help_button), ui_image_new_from_icon_name(GQ_ICON_HELP));
-	gtk_widget_set_valign(help_button, GTK_ALIGN_CENTER);
-	gtk_widget_set_tooltip_text(help_button, _("Sort Manager help"));
-	g_signal_connect(help_button, "clicked", G_CALLBACK(+[](GtkButton *, gpointer)
-	{
-		help_window_show("GuideSidebarsSortManager.html");
-	}), nullptr);
-	gtk_box_append(GTK_BOX(destination_box), help_button);
+	gtk_box_append(GTK_BOX(sd->vbox), sd->destination_hint);
 
 	tbar = pref_toolbar_new(sd->vbox);
 	DEBUG_NAME(tbar);
@@ -747,10 +799,11 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 					      _("Undo last image"),
 					      G_CALLBACK(bar_sort_undo_cb), sd);
 	pref_toolbar_button(tbar, GQ_ICON_HELP, _("Help"), FALSE,
-	                    _("Functions additional to Copy and Move"),
+	                    _("Sort Manager help"),
 	                    G_CALLBACK(bar_sort_help_cb), sd);
 
 	sd->mode = static_cast<BarSort::Mode>(-1);
+	bar_sort_update(sd->vbox);
 	bar_sort_mode_sync(sd, bar_sort.mode);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), static_cast<guint>(sd->mode));
 

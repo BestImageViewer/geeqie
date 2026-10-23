@@ -23,7 +23,7 @@
     <para>Hold <keycap>Ctrl</keycap> and click a folder or collection to select it as the destination without processing any images. The destination remains highlighted when focus returns to the file list. Folder and collection destinations are remembered separately when switching modes and across restarts.</para>
     <para>To process images without clicking the destination again, assign a keyboard shortcut to <guilabel>Sort Manager: Process images using highlighted destination</guilabel> in <menuchoice><guimenu>Edit</guimenu><guimenuitem>Preferences</guimenuitem><guisubmenu>Keyboard</guisubmenu></menuchoice>. No shortcut is assigned by default. This action is available while the Sort Manager is visible.</para>
     <para>In Folders mode, the shortcut applies the selected Copy, Move, or Desktop action to the selected images using the highlighted folder. In Collections mode, it adds the current image or selected images to the highlighted collection, according to the selection style. Clicking a destination normally both highlights it and performs the operation.</para>
-    <para>The small help button beside the Ctrl+click hint opens this Sort Manager help page.</para>
+    <para>The <guibutton>Help</guibutton> button opens this Sort Manager help page.</para>
   </section>
   <section id="Folderview">
     <title>Folder view</title>
@@ -34,6 +34,9 @@
       <title>Bookmark list</title>
       <para>This is a list of possible folders to use as a destination for the selected operation. A context menu will appear by right clicking on an item, or pressing the menu key when the item has the focus.</para>
       <para>Folders can be added to the list by activating the Add button at the bottom of the sidebar, or dragging a folder onto the list.</para>
+      <para>By default, folder destinations are shared across source folders and Geeqie windows. Enable <guilabel>Use destinations for this folder</guilabel> to use a separate destination list for the currently displayed source folder. The list starts empty; use <guibutton>Add</guibutton> or drag destination folders onto it.</para>
+      <para>For example, configure Nature, Sports, and People as destinations while viewing Downloads, then configure Cycling, Skiing, and Swimming while viewing Sports. Geeqie switches lists when you navigate. The setting applies to that exact source folder, without inheritance by subfolders. Windows displaying the same source folder share its list.</para>
+      <para>Turning the option off restores the shared list and retains the folder's separate list for later use. Switching lists clears the highlighted destination, so select a destination before using the keyboard action to process images. Folder associations and destination lists are saved in Geeqie's configuration; no configuration files are created in image folders. Renaming or moving a source folder does not transfer its association to the new path. Collections mode is unaffected.</para>
       <para>
         To edit an item select
         <emphasis role="bold">Properties</emphasis>
@@ -67,8 +70,7 @@
       <title>Copy, Move, Link and Desktop actions</title>
       <para>Clicking a folder sets and highlights the destination and processes the selected images. Hold <keycap>Ctrl</keycap> while clicking to set the destination only. The <guilabel>Sort Manager: Process images using highlighted destination</guilabel> action repeats the selected operation using that folder. A shortcut can be assigned in Keyboard preferences.</para>
       <para>
-        Copy, Move and Symbolic Link are available operations to use on the active image; they should be self explanatory. In some cases, Desktop files are also listed. This is detailed in
-        <emphasis role="underline"><link linkend="Geeqieextensions" endterm="titleGuidePluginsConfig" /></emphasis>
+        Plugins whose desktop files contain <literal>X-Geeqie-Filter=true</literal> also appear in the folder action list. Selecting a plugin and clicking a destination passes that folder to the plugin. See <link linkend="Geeqieextensions">Geeqie desktop file keys</link> for the filter key and how a plugin retrieves its destination.
       </para>
       <para />
     </section>
