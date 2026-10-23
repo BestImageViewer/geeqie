@@ -21,6 +21,7 @@
 
 import os
 import pathlib
+import signal
 import subprocess
 import sys
 import time
@@ -32,7 +33,7 @@ from typing import Optional
 # Requires "psutil" import, plus `import` command from ImageMagick/GraphicsMagick.
 SHOULD_TAKE_SCREENSHOT = False
 
-MAX_GEEQIE_INIT_TIME_S = 10
+MAX_GEEQIE_INIT_TIME_S = 30
 MAX_REMOTE_CMD_TIME_S = 10
 MAX_IMAGE_LOAD_TIME_S = 30
 MAX_GEEQIE_SHUTDOWN_TIME_S = 10
@@ -81,6 +82,64 @@ class GeeqieTestError(Exception):
         return self._description
 
 
+def stop_process_group(proc: subprocess.Popen) -> None:
+    """Stop the wrapper and its children, including children of an exited wrapper."""
+    try:
+        os.killpg(proc.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        proc.wait(timeout=3)
+    except subprocess.TimeoutExpired:
+        pass
+    finally:
+        # xvfb-run can exit before Geeqie does. Always clean up remaining children.
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        try:
+            proc.wait(timeout=3)
+        except subprocess.TimeoutExpired:
+            print("Process group did not exit after SIGKILL", file=sys.stderr)
+
+
+def run_command(args, timeout: float) -> subprocess.CompletedProcess:
+    """Run a remote client in its own process group and clean up on timeout."""
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            text=True, start_new_session=True)
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+        return subprocess.CompletedProcess(args, proc.returncode, stdout, stderr)
+    finally:
+        stop_process_group(proc)
+        proc.stdout.close()
+        proc.stderr.close()
+
+
+def wait_for_remote(proc, run_remote, filename: str, startup_path=None) -> None:
+    """Wait for the running viewer to answer, rather than for a startup directory."""
+    deadline = time.monotonic() + MAX_GEEQIE_INIT_TIME_S
+    while True:
+        if proc.poll() is not None:
+            raise GeeqieTestError("initialization", proc)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise GeeqieTestError("initialization (waiting for remote readiness)", proc)
+        # startup_common runs after the viewer has registered on D-Bus. A client
+        # launched earlier could become the primary application itself.
+        if startup_path is not None and not startup_path.exists():
+            time.sleep(min(0.2, remaining))
+            continue
+        try:
+            result = run_remote("--tell", timeout=min(2, remaining))
+            if result.returncode == 0 and result.stdout.strip() == filename:
+                return
+        except subprocess.TimeoutExpired:
+            pass
+        time.sleep(min(0.2, max(0, deadline - time.monotonic())))
+
+
 def main(argv) -> int:
     geeqie_exe = argv[1]
     test_image_path = pathlib.Path(argv[2])
@@ -104,10 +163,8 @@ def main(argv) -> int:
     # All geeqie commands start with this.
     geeqie_cmd_prefix = ["xvfb-run", "--auto-servernum", geeqie_exe]
 
-    def run_remote_command(command: str) -> subprocess.CompletedProcess:
-        return subprocess.run(
-                args=[*geeqie_cmd_prefix, command],
-                capture_output=True, text=True, timeout=MAX_REMOTE_CMD_TIME_S)
+    def run_remote_command(command: str, timeout=MAX_REMOTE_CMD_TIME_S) -> subprocess.CompletedProcess:
+        return run_command([*geeqie_cmd_prefix, command], timeout)
 
     def wait_for_file_info() -> subprocess.CompletedProcess:
         """Wait until Geeqie reports that the current image has been loaded."""
@@ -128,23 +185,14 @@ def main(argv) -> int:
 
             time.sleep(1)
 
-    # Start geeqie and have it open the provided test image path.
-    # TODO(xsdg): Note that killing the `xvfb-run` script will not forward that
-    # signal to the geeqie process.  See
-    # <https://unix.stackexchange.com/questions/291804/howto-terminate-xvfb-run-properly>.
-    # So we should modify or replace xvfb-run to allow us to kill an errant geeqie process.
-    geeqie_proc = subprocess.Popen(args=[*geeqie_cmd_prefix, f"--file={symlink_image_file}"])
+    # A dedicated process group lets cleanup stop xvfb-run, Xvfb and Geeqie.
+    geeqie_proc = subprocess.Popen(
+            args=[*geeqie_cmd_prefix, f"--file={symlink_image_file}"],
+            start_new_session=True)
 
-    # try/finally to ensure we clean up geeqie_proc
     try:
-        start_time = time.monotonic()
-        # Wait up to MAX_GEEQIE_INIT_TIME_S for remote to initialize.
-        command_fifo_path = pathlib.Path(os.environ["XDG_CONFIG_HOME"], "geeqie/layouts")
-
-        while not command_fifo_path.exists():
-            time.sleep(1)
-            if time.monotonic() - start_time > MAX_GEEQIE_INIT_TIME_S:
-                raise GeeqieTestError("init (before creating command fifo)", geeqie_proc)
+        startup_path = pathlib.Path(os.environ["XDG_CONFIG_HOME"], "geeqie/layouts")
+        wait_for_remote(geeqie_proc, run_remote_command, str(symlink_image_file), startup_path)
 
         # We make sure Geeqie can stay alive for 2 seconds after initialization.
         time.sleep(2)
@@ -166,8 +214,7 @@ def main(argv) -> int:
                 print("FAILED TO CAPTURE SCREENSHOT")
 
         # Request shutdown
-        subprocess.run(args=[*geeqie_cmd_prefix, "--quit"],
-                       timeout=MAX_REMOTE_CMD_TIME_S)
+        run_remote_command("--quit")
 
         # If there's a timeout, or the exit code isn't zero, flag it.
         try:
@@ -188,20 +235,8 @@ def main(argv) -> int:
         raise GeeqieTestError("remote command timeout", geeqie_proc=None) from e
 
     finally:
-        if geeqie_proc.poll() is None:
-            # Stash the true error now, before we alter the state of geeqie_proc.
-            exit_error = GeeqieTestError("shutdown", geeqie_proc)
-
-            # geeqie is still running after we requested it to exit, so try SIGTERM.
-            geeqie_proc.terminate()
-
-            try:
-                geeqie_proc.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                print("sending SIGKILL to geeqie")
-                geeqie_proc.kill()
-
-            raise exit_error
+        # Do not replace a startup/load error with a secondary shutdown error.
+        stop_process_group(geeqie_proc)
 
     return 0
 

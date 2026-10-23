@@ -742,6 +742,9 @@ endif
 
 # Icon naming checks
 icon_naming_python = find_program('python3', required : true)
+test('Image test harness', icon_naming_python,
+     args : [buildauxdir / 'test-image-test.py'],
+     timeout : 30, suite : 'functional')
 test('Symlink plugin', icon_naming_python,
      args : [buildauxdir / 'test-symlink-plugin.py', meson.project_source_root() / 'data/plugins/symlink/geeqie-symlink'],
      timeout : 30, suite : 'functional')
