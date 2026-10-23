@@ -1230,14 +1230,24 @@ ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 
 	if (res != 0)
 		{
-		exif_free(exif);
-		exif = nullptr;
+		/* A JPEG or PNG can contain density without any EXIF tags. */
+		g_autofree gchar *density = exif_get_data_as_text(exif, "formatted.Resolution");
+		if (!density)
+			{
+			exif_free(exif);
+			exif = nullptr;
+			}
 		}
 
 
 	if (exif) exif->items = g_list_reverse(exif->items);
 
 	return exif;
+}
+
+gchar *exif_get_image_path(ExifData *exif)
+{
+	return exif ? g_strdup(exif->path) : nullptr;
 }
 
 ExifItem *exif_get_item(ExifData *exif, const gchar *key)

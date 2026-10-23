@@ -80,6 +80,9 @@ gboolean exif_copy_crop_metadata(FileData *source, const gchar *destination, gin
 
 void exif_free(ExifData *exif);
 
+/** Return an allocated UTF-8 filename for the source image. */
+gchar *exif_get_image_path(ExifData *exif);
+
 ExifItem *exif_get_item(ExifData *exif, const gchar *key);
 ExifItem *exif_get_first_item(ExifData *exif);
 ExifItem *exif_get_next_item(ExifData *exif);

@@ -197,19 +197,22 @@
           </row>
           <row>
             <entry>
-              <para>formatted.Resolution</para>
+              <para id="formatted-resolution">formatted.Resolution</para>
             </entry>
             <entry>
               <para>
-                Exif.Image.Xresolution
+                Exif.Image.XResolution
                 <para />
-                Exif.Image.Yresolution
+                Exif.Image.YResolution
                 <para />
                 Exif.Image.ResolutionUnit
               </para>
             </entry>
             <entry>
-              <para>Resolution</para>
+              <para>Recorded horizontal and vertical image density, for example <literal>300 x 300 (dot/inch)</literal>. This is separate from the image dimensions in pixels and the monitor's physical pixel density.</para>
+              <para>Valid EXIF density values take precedence. EXIF density retains its recorded unit, which may be per inch or per centimeter; a missing unit is shown as unknown.</para>
+              <para>If either EXIF density value is missing or invalid, Geeqie uses JPEG JFIF density or PNG pHYs density when available. JFIF density retains its recorded unit; PNG pixels per meter are converted to pixels per inch.</para>
+              <para>Values that specify only pixel aspect ratio are not displayed. If no usable density is available, the tag is empty.</para>
             </entry>
           </row>
           <row>

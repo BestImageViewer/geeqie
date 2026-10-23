@@ -642,6 +642,12 @@ ExifData *exif_get_original(ExifData *exif)
 }
 
 
+gchar *exif_get_image_path(ExifData *exif)
+{
+	auto *image = exif ? exif->image() : nullptr;
+	return image ? path_to_utf8(image->io().path().c_str()) : nullptr;
+}
+
 ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 {
 	try {

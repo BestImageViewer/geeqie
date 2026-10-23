@@ -9,6 +9,7 @@ unit_test_sources = files(
 'dupe-export.cc',
 'editors.cc',
 'exiv2.cc',
+'exif-resolution.cc',
 'filecache.cc',
 'filedata/filedata.cc',
 'filedata/filelist.cc',

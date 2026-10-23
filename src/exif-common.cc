@@ -28,6 +28,7 @@
 #endif
 
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -416,16 +417,64 @@ gchar *exif_build_formatted_Flash(ExifData *exif)
 	return g_string_free(string, FALSE);
 }
 
+gchar *exif_build_file_resolution(ExifData *exif)
+{
+	g_autofree gchar *path = exif_get_image_path(exif);
+	if (!path) return nullptr;
+	g_autofree gchar *pathl = path_from_utf8(path);
+	g_autoptr(FILE) file = fopen(pathl, "rb");
+	if (!file) return nullptr;
+	guchar header[20];
+	if (fread(header, 1, sizeof(header), file) != sizeof(header)) return nullptr;
+
+	/* JFIF APP0 immediately follows SOI; density unit zero is only an aspect ratio. */
+	if (memcmp(header, "\xff\xd8\xff\xe0", 4) == 0 &&
+	    memcmp(header + 6, "JFIF\0", 5) == 0 &&
+	    ((header[4] << 8) | header[5]) >= 16)
+		{
+		const guint x = (header[14] << 8) | header[15];
+		const guint y = (header[16] << 8) | header[17];
+		if (!x || !y || (header[13] != 1 && header[13] != 2)) return nullptr;
+		return g_strdup_printf("%u x %u (%s/%s)", x, y, _("dot"), header[13] == 1 ? _("inch") : _("cm"));
+		}
+
+	if (memcmp(header, "\x89PNG\r\n\x1a\n", 8) != 0 || fseek(file, 8, SEEK_SET) != 0) return nullptr;
+	const auto read_uint32 = [](const guchar *bytes)
+		{
+		return (static_cast<guint32>(bytes[0]) << 24) | (static_cast<guint32>(bytes[1]) << 16) |
+		       (static_cast<guint32>(bytes[2]) << 8) | bytes[3];
+		};
+	/* pHYs precedes IDAT. Skip payloads rather than reading or decoding image pixels. */
+	while (fread(header, 1, 8, file) == 8)
+		{
+		const guint32 length = read_uint32(header);
+		if (length > G_MAXINT32 || memcmp(header + 4, "IDAT", 4) == 0 || memcmp(header + 4, "IEND", 4) == 0) return nullptr;
+		if (memcmp(header + 4, "pHYs", 4) == 0)
+			{
+			if (length != 9 || fread(header, 1, 13, file) != 13 || header[8] != 1) return nullptr;
+			const guint32 x = read_uint32(header);
+			const guint32 y = read_uint32(header + 4);
+			if (!x || !y) return nullptr;
+			/* PNG stores pixels per meter; express it as pixels per inch. */
+			return g_strdup_printf("%0.f x %0.f (%s/%s)", x * 0.0254, y * 0.0254, _("dot"), _("inch"));
+			}
+		if (fseek(file, static_cast<long>(length) + 4, SEEK_CUR) != 0) return nullptr;
+		}
+	return nullptr;
+}
+
 gchar *exif_build_formatted_Resolution(ExifData *exif)
 {
 	ExifRational *rx = exif_get_rational(exif, "Exif.Image.XResolution");
+	/* The Exiv2 backend returns a shared temporary rational. Copy before the next lookup. */
+	const gdouble x = rx && rx->den ? static_cast<gdouble>(rx->num) / rx->den : 0.0;
 	ExifRational *ry = exif_get_rational(exif, "Exif.Image.YResolution");
-	if (!rx || !ry) return nullptr;
+	const gdouble y = ry && ry->den ? static_cast<gdouble>(ry->num) / ry->den : 0.0;
+	if (x <= 0.0 || y <= 0.0) return exif_build_file_resolution(exif);
 
 	g_autofree gchar *units = exif_get_data_as_text(exif, "Exif.Image.ResolutionUnit");
 	return g_strdup_printf("%0.f x %0.f (%s/%s)",
-	                       rx->den ? static_cast<gdouble>(rx->num) / rx->den : 1.0,
-	                       ry->den ? static_cast<gdouble>(ry->num) / ry->den : 1.0,
+	                       x, y,
 	                       _("dot"),
 	                       units ? units : _("unknown"));
 }
