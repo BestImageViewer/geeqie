@@ -3045,7 +3045,11 @@ void vf_marks_load_cancel(ViewFile *vf)
 	vf->marks_load_idle_id = 0;
 	if (vf->marks_load_queue)
 		{
-		g_queue_free_full(vf->marks_load_queue, reinterpret_cast<GDestroyNotify>(file_data_unref));
+		static const auto vf_marks_load_cancel_file_data_unref = [](gpointer data)
+		{
+			file_data_unref(static_cast<FileData *>(data));
+		};
+		g_queue_free_full(vf->marks_load_queue, vf_marks_load_cancel_file_data_unref);
 		vf->marks_load_queue = nullptr;
 		}
 	g_clear_pointer(&vf->marks_load_pending, g_hash_table_destroy);
