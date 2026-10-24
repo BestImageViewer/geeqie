@@ -66,8 +66,8 @@ namespace
 constexpr gint DEFAULT_ZOOM = 7;
 constexpr gint GPS_MARKER_THUMB_SIZE = 128;
 constexpr const gchar *DEFAULT_MAP_ID = SHUMATE_MAP_SOURCE_OSM_MAPNIK;
-constexpr const gchar *DEFAULT_MAP_NAME = "OpenStreetMap";
-constexpr const gchar *DEFAULT_MAP_LICENSE = "OpenStreetMap contributors";
+constexpr const gchar *DEFAULT_MAP_NAME = "OpenStreetMap"; // NOTRANSLATE: Map provider name or required attribution.
+constexpr const gchar *DEFAULT_MAP_LICENSE = "OpenStreetMap contributors"; // NOTRANSLATE: Map provider name or required attribution.
 constexpr const gchar *DEFAULT_MAP_LICENSE_URI = "https://www.openstreetmap.org/copyright";
 constexpr const gchar *DEFAULT_MAP_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
@@ -155,8 +155,8 @@ void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 		auto *fd = static_cast<FileData *>(work->data);
 		if (fd->name && !fd->parent)
 			{
-			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLatitude", pgd->dest_latitude);
-			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLongitude", pgd->dest_longitude);
+			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLatitude", pgd->dest_latitude); // NOTRANSLATE: Metadata key defined by the file format.
+			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLongitude", pgd->dest_longitude); // NOTRANSLATE: Metadata key defined by the file format.
 			}
 		}
 
@@ -190,8 +190,8 @@ void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 			{
 			count++;
 			pgd->geocode_list = g_list_append(pgd->geocode_list, file_data_ref(fd));
-			if (metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude") &&
-			    metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude"))
+			if (metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude") && // NOTRANSLATE: Metadata key defined by the file format.
+			    metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude")) // NOTRANSLATE: Metadata key defined by the file format.
 				{
 				geocoded_count++;
 				}
@@ -254,7 +254,7 @@ void bar_pane_gps_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer d
 	if (text && *text)
 		{
 		g_autofree gchar *location = decode_geo_parameters(text);
-		if (location && !g_strstr_len(location, -1, "Error"))
+		if (location && !g_strstr_len(location, -1, "Error")) // NOTRANSLATE: Geographic decoder status token or diagnostic.
 			{
 			g_auto(GStrv) latlong = g_strsplit(location, " ", 2);
 			if (latlong[0] && latlong[1])
@@ -518,7 +518,7 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	marker_data->fd = file_data_ref(fd);
 	marker_data->pgd = pgd;
 
-	marker_data->direction = metadata_read_GPS_direction(fd, "Xmp.exif.GPSImgDirection", 1000);
+	marker_data->direction = metadata_read_GPS_direction(fd, "Xmp.exif.GPSImgDirection", 1000); // NOTRANSLATE: Metadata key defined by the file format.
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_widget_add_css_class(box, "gps-marker");
@@ -552,8 +552,8 @@ gboolean bar_pane_gps_add_file_marker(PaneGPSData *pgd, FileData *fd)
 {
 	if (!pgd || !fd) return FALSE;
 
-	const auto lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
-	const auto lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
+	const auto lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude"); // NOTRANSLATE: Metadata key defined by the file format.
+	const auto lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude"); // NOTRANSLATE: Metadata key defined by the file format.
 
 	if (!lat || !lon)
 		{
@@ -581,8 +581,8 @@ void bar_pane_gps_fit_markers(PaneGPSData *pgd)
 	for (GList *work = pgd->selection_list; work; work = work->next)
 		{
 		auto *fd = static_cast<FileData *>(work->data);
-		const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
-		const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
+		const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude"); // NOTRANSLATE: Metadata key defined by the file format.
+		const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude"); // NOTRANSLATE: Metadata key defined by the file format.
 		if (!latitude || !longitude) continue;
 
 		min_latitude = MIN(min_latitude, *latitude);
@@ -925,7 +925,7 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 			continue;
 			}
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (title)
@@ -1154,7 +1154,7 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 		if (READ_INT_FULL("height", height))
 			continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	latitude = static_cast<gdouble>(int_latitude) / 1000000;

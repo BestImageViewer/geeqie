@@ -341,14 +341,14 @@ gboolean format_raw_img_exif_offsets_fd(gint fd, const gchar *path,
 
 	if (fstat(fd, &st) == -1)
 		{
-		log_printf("Failed to stat file %d\n", fd);
+		log_printf("Failed to stat file %d\n", fd); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 	map_len = st.st_size;
 	map_data = mmap(nullptr, map_len, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (map_data == MAP_FAILED)
 		{
-		log_printf("Failed to mmap file %d\n", fd);
+		log_printf("Failed to mmap file %d\n", fd); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 
@@ -356,14 +356,14 @@ gboolean format_raw_img_exif_offsets_fd(gint fd, const gchar *path,
 
 	if (munmap(map_data, map_len) == -1)
 		{
-		log_printf("Failed to unmap file %d\n", fd);
+		log_printf("Failed to unmap file %d\n", fd); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (success && image_offset)
 		{
 		if (lseek(fd, *image_offset, SEEK_SET) != static_cast<off_t>(*image_offset))
 			{
-			log_printf("Failed to seek to embedded image\n");
+			log_printf("Failed to seek to embedded image\n"); // NOTRANSLATE: Diagnostic message.
 
 			*image_offset = 0;
 			if (*exif_offset) *exif_offset = 0;
@@ -381,7 +381,7 @@ static FormatExifEntry *format_exif_makernote_find(ExifData *exif, guchar *tiff,
 	ExifItem *make;
 	gint n;
 
-	make = exif_get_item(exif, "Exif.Image.Make");
+	make = exif_get_item(exif, "Exif.Image.Make"); // NOTRANSLATE: Metadata key defined by the file format.
 
 	n = 0;
 	while (format_exif_list[n].header_pattern)

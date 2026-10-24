@@ -15,22 +15,22 @@ gboolean is_app_action(const gchar *action_name)
 {
 	static const gchar *app_actions[] =
 		{
-		"About",
-		"HelpChangeLog",
-		"HelpContents",
-		"HelpKbd",
-		"HelpNotes",
-		"HelpPdf",
-		"HelpSearch",
-		"HelpShortcuts",
-		"NewCollection",
-		"NewWindowDefault",
-		"OpenCollection",
-		"OpenFile",
-		"OpenRecent",
-		"OpenWith",
-		"Preferences",
-		"Quit"
+		"About", // NOTRANSLATE: Persistent action identifier.
+		"HelpChangeLog", // NOTRANSLATE: Persistent action identifier.
+		"HelpContents", // NOTRANSLATE: Persistent action identifier.
+		"HelpKbd", // NOTRANSLATE: Persistent action identifier.
+		"HelpNotes", // NOTRANSLATE: Persistent action identifier.
+		"HelpPdf", // NOTRANSLATE: Persistent action identifier.
+		"HelpSearch", // NOTRANSLATE: Persistent action identifier.
+		"HelpShortcuts", // NOTRANSLATE: Persistent action identifier.
+		"NewCollection", // NOTRANSLATE: Persistent action identifier.
+		"NewWindowDefault", // NOTRANSLATE: Persistent action identifier.
+		"OpenCollection", // NOTRANSLATE: Persistent action identifier.
+		"OpenFile", // NOTRANSLATE: Persistent action identifier.
+		"OpenRecent", // NOTRANSLATE: Persistent action identifier.
+		"OpenWith", // NOTRANSLATE: Persistent action identifier.
+		"Preferences", // NOTRANSLATE: Persistent action identifier.
+		"Quit" // NOTRANSLATE: Persistent action identifier.
 		};
 
 	for (const auto *name : app_actions)
@@ -299,7 +299,7 @@ void convert_configuration_file()
 
 	if (!g_file_get_contents(rc_path, &contents, &length, &error))
 		{
-		log_printf("Failed to read file: %s", error->message);
+		log_printf("Failed to read file: %s", error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_error(&error);
 		return;
 		}
@@ -312,7 +312,7 @@ void convert_configuration_file()
 
 	if (!regex)
 		{
-		log_printf("Failed to compile regex: %s", error->message);
+		log_printf("Failed to compile regex: %s", error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_error(&error);
 		return;
 		}
@@ -352,7 +352,7 @@ void convert_configuration_file()
 			{
 			if (error)
 				{
-				log_printf("Regex iteration failed: %s", error->message);
+				log_printf("Regex iteration failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
 				g_clear_error(&error);
 				return;
 				}
@@ -371,7 +371,7 @@ void convert_configuration_file()
 							  &error);
 	if (!out)
 		{
-		log_printf("Failed to open file for replacement: %s", error->message);
+		log_printf("Failed to open file for replacement: %s", error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_error(&error);
 		return;
 		}
@@ -383,14 +383,14 @@ void convert_configuration_file()
 				       nullptr,
 				       &error))
 		{
-		log_printf("Failed to write file: %s", error->message);
+		log_printf("Failed to write file: %s", error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_error(&error);
 		return;
 		}
 
 	if (!g_output_stream_close(G_OUTPUT_STREAM(out), nullptr, &error))
 		{
-		log_printf("Failed to close file: %s", error->message);
+		log_printf("Failed to close file: %s", error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_error(&error);
 		return;
 		}
@@ -426,12 +426,12 @@ void convert_accel_map()
 	g_autofree gchar *accels_map_path = g_build_filename(get_rc_dir(), "accels", nullptr);
 	if (!g_file_get_contents(accels_map_path, &contents, &length, nullptr))
 		{
-		log_printf("Error loading accelerator file");
+		log_printf("Error loading accelerator file"); // NOTRANSLATE: Diagnostic message.
 
 		g_autoptr(GError) error = nullptr;
 		if (!g_file_set_contents(accels_ini_filename(), "", 0, &error))
 			{
-			log_printf("Failed to create accels.ini file: %s\n", error->message);
+			log_printf("Failed to create accels.ini file: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 			}
 
 		return;
@@ -441,14 +441,14 @@ void convert_accel_map()
 
 	if (!convert_gtk_accel_lines_to_keyfile(contents, keyfile, nullptr))
 		{
-		log_printf("Error converting accelerator file");
+		log_printf("Error converting accelerator file"); // NOTRANSLATE: Diagnostic message.
 
 		return;
 		}
 
 	if (!g_key_file_save_to_file(keyfile, accels_ini_path, nullptr))
 		{
-		log_printf("Error saving accelerator file");
+		log_printf("Error saving accelerator file"); // NOTRANSLATE: Diagnostic message.
 		}
 }
 

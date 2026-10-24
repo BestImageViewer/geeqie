@@ -725,7 +725,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 	    image_get_system_screen_profile(imd, screen_profile))
 		{
 		screen_type = COLOR_PROFILE_MEM;
-		DEBUG_1("Using system screen profile, length: %u", screen_profile.len);
+		DEBUG_1("Using system screen profile, length: %u", screen_profile.len); // NOTRANSLATE: Diagnostic message.
 		}
 	else if (options->color_profile.screen_file &&
 	    is_readable_file(options->color_profile.screen_file))
@@ -2105,7 +2105,7 @@ gdouble image_zoom_get_default(ImageWindow *imd)
 
 void image_stereo_set(ImageWindow *imd, gint stereo_mode)
 {
-	DEBUG_1("Setting stereo mode %04x for imd %p", stereo_mode, (void *)imd);
+	DEBUG_1("Setting stereo mode %04x for imd %p", stereo_mode, (void *)imd); // NOTRANSLATE: Diagnostic message.
 	pixbuf_renderer_stereo_set(PIXBUF_RENDERER(imd->pr), stereo_mode);
 }
 
@@ -2156,7 +2156,7 @@ static void image_notify_cb(FileData *fd, NotifyType type, gpointer data)
 		   modified files should be detacted anyway and NOTIFY_REREAD should be received
 		   or they are removed from the filelist completely on "move" and "delete"
 		*/
-		DEBUG_1("Notify image: %s %04x", fd->path, type);
+		DEBUG_1("Notify image: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		image_reload(imd);
 		}
 }

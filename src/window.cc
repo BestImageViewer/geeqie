@@ -112,7 +112,7 @@ static void help_browser_run(const gchar *path)
 
 	if (uri == nullptr)
 		{
-		log_printf("Error converting '%s' to URI: %s\n", path, error ? error->message : "unknown error");
+		log_printf("Error converting '%s' to URI: %s\n", path, error ? error->message : "unknown error"); // NOTRANSLATE: Diagnostic message.
 
 		return;
 		}
@@ -121,7 +121,7 @@ static void help_browser_run(const gchar *path)
 
 	if (error)
 		{
-		log_printf("Error opening %s in the default browser\n", error->message);
+		log_printf("Error opening %s in the default browser\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 }
 
@@ -147,7 +147,7 @@ void help_window_show(const gchar *key)
 			g_free(path);
 			if (g_strcmp0(key, "index.html") == 0)
 				{
-				path = g_build_filename("https://www.geeqie.org/help/", "GuideIndex.html", NULL);
+				path = g_build_filename("https://www.geeqie.org/help/", "GuideIndex.html", NULL); // NOTRANSLATE: Documentation filename.
 				}
 			else
 				{
@@ -190,7 +190,7 @@ void help_window_show(const gchar *key)
 		}
 	else
 		{
-		open_help_file("ChangeLog.html", "ChangeLog");
+		open_help_file("ChangeLog.html", "ChangeLog"); // NOTRANSLATE: Documentation filename.
 		}
 }
 

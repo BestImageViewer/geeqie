@@ -255,7 +255,7 @@ void cache_maintenance(GtkApplication *app, const gchar *path)
 {
 	if (!cache_prepare_thumbnail_directory(get_thumbnails_cache_dir(), true))
 		{
-		log_printf("Unable to use thumbnail cache directory: %s\n", get_thumbnails_cache_dir());
+		log_printf("Unable to use thumbnail cache directory: %s\n", get_thumbnails_cache_dir()); // NOTRANSLATE: Diagnostic message.
 		g_application_quit(G_APPLICATION(app));
 		return;
 		}
@@ -400,7 +400,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 			{
 			if (!still_have_a_file && !dlist && cm->list->next && !rmdir_utf8(fd->path))
 				{
-				log_printf("Unable to delete dir: %s\n", fd->path);
+				log_printf("Unable to delete dir: %s\n", fd->path); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 		else
@@ -408,7 +408,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 			/* must re-check for an empty dir */
 			if (is_empty_dir(fd->path) && cm->list->next && !rmdir_utf8(fd->path))
 				{
-				log_printf("Unable to delete dir: %s\n", fd->path);
+				log_printf("Unable to delete dir: %s\n", fd->path); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 
@@ -553,7 +553,7 @@ static void cache_maint_moved(FileData *fd)
 
 		if (!move_file(src_path, dest_path))
 			{
-			DEBUG_1("Failed to move cache file \"%s\" to \"%s\"", src_path, dest_path);
+			DEBUG_1("Failed to move cache file \"%s\" to \"%s\"", src_path, dest_path); // NOTRANSLATE: Diagnostic message.
 			/* we remove it anyway - it's stale */
 			unlink_file(src_path);
 			}
@@ -576,7 +576,7 @@ static void cache_maint_removed(FileData *fd)
 
 		if (!unlink_file(path))
 			{
-			DEBUG_1("Failed to remove cache file %s", path);
+			DEBUG_1("Failed to remove cache file %s", path); // NOTRANSLATE: Diagnostic message.
 			}
 	};
 
@@ -607,7 +607,7 @@ void cache_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify cache_maint: %s %04x", fd->path, type);
+	DEBUG_1("Notify cache_maint: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 	switch (fd->change->type)
 		{
 		case FILEDATA_CHANGE_MOVE:
@@ -806,7 +806,7 @@ static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 			}
 		else
 			{
-			log_printf("The specified folder can not be found: %s\n", path);
+			log_printf("The specified folder can not be found: %s\n", path); // NOTRANSLATE: Diagnostic message.
 			}
 		}
 	else
@@ -840,7 +840,7 @@ static void cache_manager_render_start_render_remote(CacheOpsData *cd, const gch
 
 	if (!isdir(path))
 		{
-		log_printf("The specified folder can not be found: %s\n", path);
+		log_printf("The specified folder can not be found: %s\n", path); // NOTRANSLATE: Diagnostic message.
 		}
 	else
 		{
@@ -1230,7 +1230,7 @@ static void cache_manager_close_cb(GenericDialog *gd, gpointer)
 
 static void cache_manager_help_cb(GenericDialog *, gpointer)
 {
-	help_window_show("GuideReferenceManagement.html");
+	help_window_show("GuideReferenceManagement.html"); // NOTRANSLATE: Documentation filename.
 }
 
 enum class CacheSizeStatus { COMPLETE, MISSING, INCOMPLETE };
@@ -1449,7 +1449,7 @@ static void cache_manager_sim_start_sim_remote(GtkApplication *, CacheOpsData *c
 
 	if (!isdir(path))
 		{
-		log_printf("The specified folder can not be found: %s\n", path);
+		log_printf("The specified folder can not be found: %s\n", path); // NOTRANSLATE: Diagnostic message.
 		}
 	else
 		{
@@ -1563,7 +1563,7 @@ static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 			}
 		else
 			{
-			log_printf("The specified folder can not be found: %s\n", path);
+			log_printf("The specified folder can not be found: %s\n", path); // NOTRANSLATE: Diagnostic message.
 			}
 		}
 	else
@@ -1688,7 +1688,7 @@ static void cache_manager_cache_maintenance_start_cb(GenericDialog *, gpointer d
 			}
 		else
 			{
-			log_printf("The specified folder can not be found: \"%s\"\n", path);
+			log_printf("The specified folder can not be found: \"%s\"\n", path); // NOTRANSLATE: Diagnostic message.
 			}
 		}
 	else

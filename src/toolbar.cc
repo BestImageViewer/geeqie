@@ -287,7 +287,7 @@ static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 		{
 		auto name = static_cast<const gchar *>(work->data);
 
-		if (g_strcmp0(name, "Separator") == 0)
+		if (g_strcmp0(name, "Separator") == 0) // NOTRANSLATE: Legacy configuration value.
 			{
 			toolbarlist_add_button(name, name, PIXBUF_INLINE_ICON_PLACEHOLDER, box);
 			continue;

@@ -16,7 +16,7 @@ GVariant *get_property(GDBusConnection *connection, const char *path,
                       const char *interface, const char *property, GCancellable *cancellable)
 {
 	g_autoptr(GVariant) reply = g_dbus_connection_call_sync(connection, SERVICE, path,
-	                                                      "org.freedesktop.DBus.Properties", "Get", // D-Bus protocol names, not UI text.
+	                                                      "org.freedesktop.DBus.Properties", "Get", // NOTRANSLATE: D-Bus protocol method.
 	                                                      g_variant_new("(ss)", interface, property),
 	                                                      G_VARIANT_TYPE("(v)"), G_DBUS_CALL_FLAGS_NONE,
 	                                                      CALL_TIMEOUT_MS, cancellable, nullptr);
@@ -38,11 +38,11 @@ GBytes *display_profile_read(GDBusConnection *connection, const char *connector,
 {
 	// colord uses XRANDR_name on X11 and OutputName in newer desktop integrations.
 	g_autofree gchar *device_path = nullptr;
-	for (const char *property : {"OutputName", "XRANDR_name"})
+	for (const char *property : {"OutputName", "XRANDR_name"}) // NOTRANSLATE: D-Bus protocol name.
 		{
 		g_autoptr(GVariant) reply = g_dbus_connection_call_sync(connection, SERVICE,
 		                                                      "/org/freedesktop/ColorManager", SERVICE,
-		                                                      "FindDeviceByProperty",
+		                                                      "FindDeviceByProperty", // NOTRANSLATE: D-Bus protocol name.
 		                                                      g_variant_new("(ss)", property, connector),
 		                                                      G_VARIANT_TYPE("(o)"), G_DBUS_CALL_FLAGS_NONE,
 		                                                      CALL_TIMEOUT_MS, cancellable, nullptr);
@@ -56,12 +56,12 @@ GBytes *display_profile_read(GDBusConnection *connection, const char *connector,
 	if (!device_path) return nullptr;
 
 	g_autoptr(GVariant) profiles = get_property(connection, device_path,
-	                                           "org.freedesktop.ColorManager.Device", "Profiles", cancellable);
+	                                           "org.freedesktop.ColorManager.Device", "Profiles", cancellable); // NOTRANSLATE: D-Bus protocol name.
 	if (!profiles || !g_variant_is_of_type(profiles, G_VARIANT_TYPE("ao")) ||
 	    g_variant_n_children(profiles) == 0) return nullptr;
 	g_autoptr(GVariant) profile_path = g_variant_get_child_value(profiles, 0);
 	g_autoptr(GVariant) filename = get_property(connection, g_variant_get_string(profile_path, nullptr),
-	                                           "org.freedesktop.ColorManager.Profile", "Filename", cancellable);
+	                                           "org.freedesktop.ColorManager.Profile", "Filename", cancellable); // NOTRANSLATE: D-Bus protocol name.
 	if (!filename || !g_variant_is_of_type(filename, G_VARIANT_TYPE_STRING)) return nullptr;
 
 	g_autoptr(GFile) file = g_file_new_for_path(g_variant_get_string(filename, nullptr));

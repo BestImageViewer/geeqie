@@ -736,7 +736,7 @@ static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
 {
 	if (!entry)
 		{
-		log_printf("Tab completion error: entry != NULL\n");
+		log_printf("Tab completion error: entry != NULL\n"); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 

@@ -115,20 +115,20 @@ gchar *remove_common_prefix(gchar *s, gchar *t)
 gdouble get_crop_factor(ExifData *exif)
 {
 	gdouble res_unit_tbl[] = {0.0, 25.4, 25.4, 10.0, 1.0, 0.001 };
-	gdouble xres = exif_get_rational_as_double(exif, "Exif.Photo.FocalPlaneXResolution");
-	gdouble yres = exif_get_rational_as_double(exif, "Exif.Photo.FocalPlaneYResolution");
+	gdouble xres = exif_get_rational_as_double(exif, "Exif.Photo.FocalPlaneXResolution"); // NOTRANSLATE: Metadata key defined by the file format.
+	gdouble yres = exif_get_rational_as_double(exif, "Exif.Photo.FocalPlaneYResolution"); // NOTRANSLATE: Metadata key defined by the file format.
 	gdouble size;
 	gdouble ratio;
 
 	if (xres == 0.0 || yres == 0.0) return 0.0;
 
-	auto res_unit = exif_get_integer(exif, "Exif.Photo.FocalPlaneResolutionUnit");
+	auto res_unit = exif_get_integer(exif, "Exif.Photo.FocalPlaneResolutionUnit"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!res_unit) return 0.0;
 	if (res_unit < 1 || res_unit > 5) return 0.0;
 
-	auto w = exif_get_integer(exif, "Exif.Photo.PixelXDimension");
+	auto w = exif_get_integer(exif, "Exif.Photo.PixelXDimension"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!w) return 0.0;
-	auto h = exif_get_integer(exif, "Exif.Photo.PixelYDimension");
+	auto h = exif_get_integer(exif, "Exif.Photo.PixelYDimension"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!h) return 0.0;
 
 	const gdouble xsize = w.value() * res_unit_tbl[res_unit.value()] / xres;
@@ -160,9 +160,9 @@ gboolean remove_suffix(gchar *str, const gchar *suffix, gint suffix_len)
 
 gchar *exif_build_formatted_Camera(ExifData *exif)
 {
-	g_autofree gchar *make = exif_get_data_as_text(exif, "Exif.Image.Make");
-	g_autofree gchar *model = exif_get_data_as_text(exif, "Exif.Image.Model");
-	g_autofree gchar *software = exif_get_data_as_text(exif, "Exif.Image.Software");
+	g_autofree gchar *make = exif_get_data_as_text(exif, "Exif.Image.Make"); // NOTRANSLATE: Metadata key defined by the file format.
+	g_autofree gchar *model = exif_get_data_as_text(exif, "Exif.Image.Model"); // NOTRANSLATE: Metadata key defined by the file format.
+	g_autofree gchar *software = exif_get_data_as_text(exif, "Exif.Image.Software"); // NOTRANSLATE: Metadata key defined by the file format.
 	gchar *model2;
 	gchar *software2;
 
@@ -218,10 +218,10 @@ gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_key, cons
 		}
 	else
 		{
-		text = exif_get_data_as_text(exif, "Exif.Image.DateTime");
+		text = exif_get_data_as_text(exif, "Exif.Image.DateTime"); // NOTRANSLATE: Metadata key defined by the file format.
 		if (!text) return nullptr;
 
-		subsec = exif_get_data_as_text(exif, "Exif.Photo.SubSecTime");
+		subsec = exif_get_data_as_text(exif, "Exif.Photo.SubSecTime"); // NOTRANSLATE: Metadata key defined by the file format.
 		}
 
 	/* Convert the stuff into a tm struct */
@@ -236,7 +236,7 @@ gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_key, cons
 			g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 			if (error)
 				{
-				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
+				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 				}
 			else
 				{
@@ -256,19 +256,19 @@ gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_key, cons
 
 gchar *exif_build_formatted_DateTime(ExifData *exif)
 {
-	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeOriginal", "Exif.Photo.SubSecTimeOriginal");
+	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeOriginal", "Exif.Photo.SubSecTimeOriginal"); // NOTRANSLATE: Metadata key defined by the file format.
 }
 
 gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
 {
-	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeDigitized", "Exif.Photo.SubSecTimeDigitized");
+	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeDigitized", "Exif.Photo.SubSecTimeDigitized"); // NOTRANSLATE: Metadata key defined by the file format.
 }
 
 gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 {
 	ExifRational *r;
 
-	r = exif_get_rational(exif, "Exif.Photo.ExposureTime");
+	r = exif_get_rational(exif, "Exif.Photo.ExposureTime"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (r && r->num && r->den)
 		{
 		gdouble n = static_cast<gdouble>(r->den) / static_cast<gdouble>(r->num);
@@ -276,7 +276,7 @@ gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 						  n > 1.0 ? n : 1.0 / n);
 		}
 
-	r = exif_get_rational(exif, "Exif.Photo.ShutterSpeedValue");
+	r = exif_get_rational(exif, "Exif.Photo.ShutterSpeedValue"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (r && r->num  && r->den)
 		{
 		gdouble n = pow(2.0, exif_rational_to_double(r, true));
@@ -294,8 +294,8 @@ gchar *exif_build_formatted_Aperture(ExifData *exif)
 {
 	gdouble n;
 
-	n = exif_get_rational_as_double(exif, "Exif.Photo.FNumber");
-	if (n == 0.0) n = exif_get_rational_as_double(exif, "Exif.Photo.ApertureValue");
+	n = exif_get_rational_as_double(exif, "Exif.Photo.FNumber"); // NOTRANSLATE: Metadata key defined by the file format.
+	if (n == 0.0) n = exif_get_rational_as_double(exif, "Exif.Photo.ApertureValue"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (n == 0.0) return nullptr;
 
 	return g_strdup_printf("f/%.1f", n);
@@ -304,7 +304,7 @@ gchar *exif_build_formatted_Aperture(ExifData *exif)
 gchar *exif_build_formatted_ExposureBias(ExifData *exif)
 {
 	bool sign;
-	ExifRational *r = exif_get_rational(exif, "Exif.Photo.ExposureBiasValue", &sign);
+	ExifRational *r = exif_get_rational(exif, "Exif.Photo.ExposureBiasValue", &sign); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!r) return nullptr;
 
 	gdouble n = exif_rational_to_double(r, sign);
@@ -315,7 +315,7 @@ gchar *exif_build_formatted_FocalLength(ExifData *exif)
 {
 	gdouble n;
 
-	n = exif_get_rational_as_double(exif, "Exif.Photo.FocalLength");
+	n = exif_get_rational_as_double(exif, "Exif.Photo.FocalLength"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (n == 0.0) return nullptr;
 	return g_strdup_printf("%.0f mm", n);
 }
@@ -325,12 +325,12 @@ gchar *exif_build_formatted_FocalLength35mmFilm(ExifData *exif)
 	gdouble f;
 	gdouble c;
 
-	if (auto n = exif_get_integer(exif, "Exif.Photo.FocalLengthIn35mmFilm"); n && n != 0)
+	if (auto n = exif_get_integer(exif, "Exif.Photo.FocalLengthIn35mmFilm"); n && n != 0) // NOTRANSLATE: Metadata key defined by the file format.
 		{
 		return g_strdup_printf("%d mm", n.value());
 		}
 
-	f = exif_get_rational_as_double(exif, "Exif.Photo.FocalLength");
+	f = exif_get_rational_as_double(exif, "Exif.Photo.FocalLength"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (f == 0.0) return nullptr;
 
 	c = get_crop_factor(exif);
@@ -343,18 +343,18 @@ gchar *exif_build_formatted_ISOSpeedRating(ExifData *exif)
 {
 	gchar *text;
 
-	text = exif_get_data_as_text(exif, "Exif.Photo.ISOSpeedRatings");
+	text = exif_get_data_as_text(exif, "Exif.Photo.ISOSpeedRatings"); // NOTRANSLATE: Metadata key defined by the file format.
 	/* old canon may set this instead */
-	if (!text) text = exif_get_data_as_text(exif, "Exif.CanonSi.ISOSpeed");
+	if (!text) text = exif_get_data_as_text(exif, "Exif.CanonSi.ISOSpeed"); // NOTRANSLATE: Metadata key defined by the file format.
 	/* kodak may set this instead */
-	if (!text) text = exif_get_data_as_text(exif, "Exif.Photo.ExposureIndex");
+	if (!text) text = exif_get_data_as_text(exif, "Exif.Photo.ExposureIndex"); // NOTRANSLATE: Metadata key defined by the file format.
 	return text;
 }
 
 gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
 {
 	bool sign;
-	ExifRational *r = exif_get_rational(exif, "Exif.Photo.SubjectDistance", &sign);
+	ExifRational *r = exif_get_rational(exif, "Exif.Photo.SubjectDistance", &sign); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!r) return nullptr;
 
 	if (static_cast<glong>(r->num) == static_cast<glong>(0xffffffff)) return g_strdup(_("infinity"));
@@ -372,13 +372,13 @@ gchar *exif_build_formatted_Flash(ExifData *exif)
 	GString *string;
 	gint v;
 
-	auto flash = exif_get_integer(exif, "Exif.Photo.Flash");
+	auto flash = exif_get_integer(exif, "Exif.Photo.Flash"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!flash) return nullptr;
 
 	const gint n = flash.value();
 
 	/* Exif 2.1 only defines first 3 bits */
-	if (n <= 0x07) return exif_get_data_as_text(exif, "Exif.Photo.Flash");
+	if (n <= 0x07) return exif_get_data_as_text(exif, "Exif.Photo.Flash"); // NOTRANSLATE: Metadata key defined by the file format.
 
 	/* must be Exif 2.2 */
 	string = g_string_new("");
@@ -465,14 +465,14 @@ gchar *exif_build_file_resolution(ExifData *exif)
 
 gchar *exif_build_formatted_Resolution(ExifData *exif)
 {
-	ExifRational *rx = exif_get_rational(exif, "Exif.Image.XResolution");
+	ExifRational *rx = exif_get_rational(exif, "Exif.Image.XResolution"); // NOTRANSLATE: Metadata key defined by the file format.
 	/* The Exiv2 backend returns a shared temporary rational. Copy before the next lookup. */
 	const gdouble x = rx && rx->den ? static_cast<gdouble>(rx->num) / rx->den : 0.0;
-	ExifRational *ry = exif_get_rational(exif, "Exif.Image.YResolution");
+	ExifRational *ry = exif_get_rational(exif, "Exif.Image.YResolution"); // NOTRANSLATE: Metadata key defined by the file format.
 	const gdouble y = ry && ry->den ? static_cast<gdouble>(ry->num) / ry->den : 0.0;
 	if (x <= 0.0 || y <= 0.0) return exif_build_file_resolution(exif);
 
-	g_autofree gchar *units = exif_get_data_as_text(exif, "Exif.Image.ResolutionUnit");
+	g_autofree gchar *units = exif_get_data_as_text(exif, "Exif.Image.ResolutionUnit"); // NOTRANSLATE: Metadata key defined by the file format.
 	return g_strdup_printf("%0.f x %0.f (%s/%s)",
 	                       x, y,
 	                       _("dot"),
@@ -488,20 +488,20 @@ gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 	g_autofree guchar *profile_data = exif_get_color_profile(exif, &profile_len);
 	if (!profile_data)
 		{
-		auto cs = exif_get_integer(exif, "Exif.Photo.ColorSpace");
+		auto cs = exif_get_integer(exif, "Exif.Photo.ColorSpace"); // NOTRANSLATE: Metadata key defined by the file format.
 
-		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
+		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex"); // NOTRANSLATE: Metadata key defined by the file format.
 
 		/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
 		if (cs == 1)
 			{
 			name = _("sRGB");
-			source = "ColorSpace";
+			source = "ColorSpace"; // NOTRANSLATE: Color-profile identifier.
 			}
 		else if (cs == 2 || (interop_index && !strcmp(interop_index, "R03")))
 			{
 			name = _("AdobeRGB");
-			source = (cs == 2) ? "ColorSpace" : "Iop";
+			source = (cs == 2) ? "ColorSpace" : "Iop"; // NOTRANSLATE: Color-profile identifier.
 			}
 		}
 	else
@@ -546,8 +546,8 @@ gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 		g_string_append_printf(string, "%0lu° %0lu' %0.2f\" %.1s", p1, p2, p3, ref);
 	};
 
-	build("Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef");
-	build("Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef");
+	build("Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef"); // NOTRANSLATE: Metadata key defined by the file format.
+	build("Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef"); // NOTRANSLATE: Metadata key defined by the file format.
 
 	return g_string_free(string, FALSE);
 }
@@ -558,7 +558,7 @@ gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 	for (auto *item = exif_get_first_item(exif); item; item = exif_get_next_item(exif))
 		{
 		g_autofree gchar *key = exif_item_get_tag_name(item);
-		if (g_strcmp0(key, "Exif.GPSInfo.GPSAltitudeRef") != 0 ||
+		if (g_strcmp0(key, "Exif.GPSInfo.GPSAltitudeRef") != 0 || // NOTRANSLATE: Metadata key defined by the file format.
 		    !exif_item_is_unsigned_byte(item) || exif_item_get_elements(item) != 1) continue;
 		const auto value = exif_item_get_integer(item);
 		if (!value || (*value != 0 && *value != 1)) continue;
@@ -567,7 +567,7 @@ gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 		}
 	if (!reference) return nullptr;
 
-	ExifRational *r = exif_get_rational(exif, "Exif.GPSInfo.GPSAltitude");
+	ExifRational *r = exif_get_rational(exif, "Exif.GPSInfo.GPSAltitude"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!r) return nullptr;
 
 	gdouble alt = exif_rational_to_double(r, false);
@@ -600,20 +600,20 @@ void zd_tz(const ZoneDetectResult *results, gchar **timezone, gchar **countrynam
 			{
 			if (timezone)
 				{
-				if (g_strstr_len(results[index].fieldNames[i], -1, "TimezoneIdPrefix"))
+				if (g_strstr_len(results[index].fieldNames[i], -1, "TimezoneIdPrefix")) // NOTRANSLATE: Timezone database field identifier.
 					{
 					timezone_pre = g_strdup(results[index].data[i]);
 					}
-				if (g_strstr_len(results[index].fieldNames[i], -1, "TimezoneId"))
+				if (g_strstr_len(results[index].fieldNames[i], -1, "TimezoneId")) // NOTRANSLATE: Timezone database field identifier.
 					{
 					timezone_id = g_strdup(results[index].data[i]);
 					}
 				}
-			if (countryname && g_strstr_len(results[index].fieldNames[i], -1, "CountryName"))
+			if (countryname && g_strstr_len(results[index].fieldNames[i], -1, "CountryName")) // NOTRANSLATE: Timezone database field identifier.
 				{
 				*countryname = g_strdup(results[index].data[i]);
 				}
-			if (countryalpha2 && g_strstr_len(results[index].fieldNames[i], -1, "CountryAlpha2"))
+			if (countryalpha2 && g_strstr_len(results[index].fieldNames[i], -1, "CountryAlpha2")) // NOTRANSLATE: Timezone database field identifier.
 				{
 				*countryalpha2 = g_strdup(results[index].data[i]);
 				}
@@ -625,7 +625,7 @@ void zd_tz(const ZoneDetectResult *results, gchar **timezone, gchar **countrynam
 
 void ZoneDetect_onError(int errZD, int errNative)
 {
-	log_printf("Error: ZoneDetect %s (0x%08X)\n", ZDGetErrorString(errZD), (unsigned)errNative);
+	log_printf("Error: ZoneDetect %s (0x%08X)\n", ZDGetErrorString(errZD), (unsigned)errNative); // NOTRANSLATE: Diagnostic message.
 }
 
 /**
@@ -655,10 +655,10 @@ bool exif_build_tz_data(ExifData *exif, gchar **timezone, gchar **countryname, g
 		return (g_strcmp0(text_ref, ref_inverse) != 0) ? value : -value;
 	};
 
-	auto latitude = get_latlon("Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef", "South");
+	auto latitude = get_latlon("Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef", "South"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!latitude) return false;
 
-	auto longitude = get_latlon("Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef", "West");
+	auto longitude = get_latlon("Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef", "West"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!longitude) return false;
 
 	g_autofree gchar *timezone_path = g_build_filename(get_rc_dir(), TIMEZONE_DATABASE_FILE, NULL);
@@ -669,7 +669,7 @@ bool exif_build_tz_data(ExifData *exif, gchar **timezone, gchar **countryname, g
 	g_autoptr(ZoneDetect) cd = ZDOpenDatabase(timezone_path);
 	if (!cd)
 		{
-		log_printf("Error: Init of timezone database %s failed\n", timezone_path);
+		log_printf("Error: Init of timezone database %s failed\n", timezone_path); // NOTRANSLATE: Diagnostic message.
 		return false;
 		}
 
@@ -687,10 +687,10 @@ bool exif_build_tz_data(ExifData *exif, gchar **timezone, gchar **countryname, g
  */
 gchar *exif_build_date_time(ExifData *exif)
 {
-	g_autofree gchar *text_date = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSDateStamp");
+	g_autofree gchar *text_date = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSDateStamp"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!text_date) return nullptr;
 
-	g_autofree gchar *text_time = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSTimeStamp");
+	g_autofree gchar *text_time = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSTimeStamp"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!text_time) return nullptr;
 
 	return g_strconcat(text_date, ":", text_time, NULL);
@@ -738,7 +738,7 @@ gchar *exif_build_formatted_localtime(ExifData *exif)
 				g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 				if (error)
 					{
-					log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
+					log_printf("Error converting locale strftime to UTF-8: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 					}
 				else
 					{
@@ -811,7 +811,7 @@ gchar *exif_build_formatted_countrycode(ExifData *exif)
 
 gchar *exif_build_formatted_star_rating(ExifData *exif)
 {
-	auto n = exif_get_integer(exif, "Xmp.xmp.Rating");
+	auto n = exif_get_integer(exif, "Xmp.xmp.Rating"); // NOTRANSLATE: Metadata key defined by the file format.
 
 	return convert_rating_to_stars(n.value_or(0));
 }
@@ -984,12 +984,12 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 
 	if (profile.ptr)
 		{
-		DEBUG_1("Found embedded color profile");
+		DEBUG_1("Found embedded color profile"); // NOTRANSLATE: Diagnostic message.
 		color_profile_from_image = COLOR_PROFILE_MEM;
 		}
 	else
 		{
-		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
+		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex"); // NOTRANSLATE: Metadata key defined by the file format.
 
 		if (interop_index)
 			{
@@ -997,29 +997,29 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 			if (!strcmp(interop_index, "R98"))
 				{
 				color_profile_from_image = COLOR_PROFILE_SRGB;
-				DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB");
+				DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			else if (!strcmp(interop_index, "R03"))
 				{
 				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-				DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB");
+				DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 		else
 			{
-			auto cs = exif_get_integer(exif, "Exif.Photo.ColorSpace");
+			auto cs = exif_get_integer(exif, "Exif.Photo.ColorSpace"); // NOTRANSLATE: Metadata key defined by the file format.
 
 			/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
 			if (cs == 1)
 				{
 				color_profile_from_image = COLOR_PROFILE_SRGB;
-				DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB");
+				DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			else if (cs == 2)
 				{
 				/* non-standard way of specifying AdobeRGB (used by some software) */
 				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-				DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB");
+				DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 		}
@@ -1085,7 +1085,7 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 		cp_offset += chunk.length;
 		}
 
-	DEBUG_1("Found embedded icc profile in jpeg");
+	DEBUG_1("Found embedded icc profile in jpeg"); // NOTRANSLATE: Diagnostic message.
 	exif_add_jpeg_color_profile(exif, g_steal_pointer(&cp_data), cp_length);
 
 	return true;

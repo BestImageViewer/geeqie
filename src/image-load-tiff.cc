@@ -208,7 +208,7 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 							tiff_load_map_file, tiff_load_unmap_file);
 	if (!tiff)
 		{
-		DEBUG_1("Failed to open TIFF image");
+		DEBUG_1("Failed to open TIFF image"); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 
@@ -220,28 +220,28 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	if (!TIFFSetDirectory(tiff, page_num))
 		{
-		DEBUG_1("Failed to open TIFF image");
+		DEBUG_1("Failed to open TIFF image"); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}
 
 	if (!TIFFGetField (tiff, TIFFTAG_IMAGEWIDTH, &width))
 		{
-		DEBUG_1("Could not get image width (bad TIFF file)");
+		DEBUG_1("Could not get image width (bad TIFF file)"); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}
 
 	if (!TIFFGetField (tiff, TIFFTAG_IMAGELENGTH, &height))
 		{
-		DEBUG_1("Could not get image height (bad TIFF file)");
+		DEBUG_1("Could not get image height (bad TIFF file)"); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}
 
 	if (width <= 0 || height <= 0)
 		{
-		DEBUG_1("Width or height of TIFF image is zero");
+		DEBUG_1("Width or height of TIFF image is zero"); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}
@@ -249,7 +249,7 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 	rowstride = width * 4;
 	if (rowstride / 4 != width)
 		{ /* overflow */
-		DEBUG_1("Dimensions of TIFF image too large: width %d", width);
+		DEBUG_1("Dimensions of TIFF image too large: width %d", width); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}
@@ -257,7 +257,7 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 	bytes = static_cast<size_t>(height) * rowstride;
 	if (bytes / rowstride != static_cast<size_t>(height))
 		{ /* overflow */
-		DEBUG_1("Dimensions of TIFF image too large: height %d", height);
+		DEBUG_1("Dimensions of TIFF image too large: height %d", height); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}
@@ -270,7 +270,7 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	if (!pixels)
 		{
-		DEBUG_1("Insufficient memory to open TIFF file: need %zu", bytes);
+		DEBUG_1("Insufficient memory to open TIFF file: need %zu", bytes); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}
@@ -281,7 +281,7 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 	if (!pixbuf)
 		{
 		g_free (pixels);
-		DEBUG_1("Insufficient memory to open TIFF file");
+		DEBUG_1("Insufficient memory to open TIFF file"); // NOTRANSLATE: Diagnostic message.
 		TIFFClose(tiff);
 		return FALSE;
 		}

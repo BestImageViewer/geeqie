@@ -324,7 +324,7 @@ gchar *file_util_safe_trash_original_path(const gchar *path)
 	g_autoptr(GKeyFile) key_file = g_key_file_new();
 	if (!g_key_file_load_from_file(key_file, info_path, G_KEY_FILE_NONE, nullptr)) return nullptr;
 
-	g_autofree gchar *escaped_path = g_key_file_get_string(key_file, "Trash Info", "Path", nullptr);
+	g_autofree gchar *escaped_path = g_key_file_get_string(key_file, "Trash Info", "Path", nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 	if (!escaped_path) return nullptr;
 
 	gchar *original_path = g_uri_unescape_string(escaped_path, nullptr);
@@ -367,7 +367,7 @@ static gboolean file_util_safe_trash_restore_to(const gchar *path, const gchar *
 		}
 
 	g_autofree gchar *message = g_strdup_printf(_("Unable to finish restoring to:\n%s\n\n%s"), dest_path, error ? error->message : _("Unknown error"));
-	log_printf("Error: %s\n", message);
+	log_printf("Error: %s\n", message); // NOTRANSLATE: Diagnostic message.
 	warning_dialog(_("Restore failed"), message, GQ_ICON_DIALOG_WARNING, parent);
 	return FALSE;
 }
@@ -475,7 +475,7 @@ gboolean file_util_safe_trash_restore(const gchar *path, gboolean move, GtkWidge
 
 static void move_to_trash_failed_cb(GenericDialog *, gpointer)
 {
-	help_window_show("TrashFailed.html");
+	help_window_show("TrashFailed.html"); // NOTRANSLATE: Documentation filename.
 }
 
 gboolean file_util_safe_unlink_full(const gchar *path, const TrashSettings &settings,

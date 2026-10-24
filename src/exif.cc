@@ -101,33 +101,33 @@ TAG_GPSOFFSET = 0x8825
  *-----------------------------------------------------------------------------
  */
 static ExifTextList ExifCompressionList[] = {
-	{ 1, "Uncompressed" },
+	{ 1, "Uncompressed" }, // NOTRANSLATE: File-format identifier or raw metadata value.
 	{ 2, "CCITT 1D" },
 	{ 3, "T4/Group 3 Fax" },
 	{ 4, "T6/Group 4 Fax" },
 	{ 5, "LZW" },
 	{ 6, "JPEG (old style)" },
 	{ 7, "JPEG" },
-	{ 8, "Adobe Deflate" },
+	{ 8, "Adobe Deflate" }, // NOTRANSLATE: File-format identifier or raw metadata value.
 	{ 9, "JBIG B&W" },
 	{ 10, "JBIG Color" },
-	{ 32766, "Next" },
+	{ 32766, "Next" }, // NOTRANSLATE: File-format identifier or raw metadata value.
 	{ 32771, "CCIRLEW" },
-	{ 32773, "PackBits" },
-	{ 32809, "ThunderScan" },
+	{ 32773, "PackBits" }, // NOTRANSLATE: File-format identifier or raw metadata value.
+	{ 32809, "ThunderScan" }, // NOTRANSLATE: File-format identifier or raw metadata value.
 	{ 32895, "IT8CTPAD" },
 	{ 32896, "IT8LW" },
 	{ 32897, "IT8MP" },
 	{ 32898, "IT8BL" },
-	{ 32908, "PixasFilm" },
-	{ 32909, "PixasLog" },
-	{ 32946, "Deflate" },
+	{ 32908, "PixasFilm" }, // NOTRANSLATE: File-format identifier or raw metadata value.
+	{ 32909, "PixasLog" }, // NOTRANSLATE: File-format identifier or raw metadata value.
+	{ 32946, "Deflate" }, // NOTRANSLATE: File-format identifier or raw metadata value.
 	{ 32947, "DCS" },
 	{ 34661, "JBIG" },
 	{ 34676, "SGILog" },
 	{ 34677, "SGILog24" },
 	{ 34712, "JPEF 2000" },
-	{ 34713, "Nikon NEF Compressed" },
+	{ 34713, "Nikon NEF Compressed" }, // NOTRANSLATE: File-format identifier or raw metadata value.
 	EXIF_TEXT_LIST_END
 };
 
@@ -322,114 +322,114 @@ Tags that don't match are not supported by exiv2 and should not be used anywhere
 
 /**< the known exif tags list */
 static ExifMarker ExifKnownMarkersList[] = {
-{ 0x0100, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageWidth",	N_("Image Width"), nullptr },
-{ 0x0101, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageLength",	N_("Image Height"), nullptr },
-{ 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.BitsPerSample",	N_("Bits per Sample/Pixel"), nullptr },
-{ 0x0103, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.Compression",	N_("Compression"), ExifCompressionList },
-{ 0x010e, EXIF_FORMAT_STRING, -1,		"Exif.Image.ImageDescription",	N_("Image description"), nullptr },
-{ 0x010f, EXIF_FORMAT_STRING, -1,		"Exif.Image.Make",		N_("Camera make"), nullptr },
-{ 0x0110, EXIF_FORMAT_STRING, -1,		"Exif.Image.Model",		N_("Camera model"), nullptr },
-{ 0x0112, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.Orientation",	N_("Orientation"), ExifOrientationList },
-{ 0x011a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.XResolution",	N_("X resolution"), nullptr },
-{ 0x011b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.YResolution",	N_("Y Resolution"), nullptr },
-{ 0x0128, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.ResolutionUnit",	N_("Resolution units"), ExifUnitList },
-{ 0x0131, EXIF_FORMAT_STRING, -1, 		"Exif.Image.Software",		N_("Firmware"), nullptr },
-{ 0x0132, EXIF_FORMAT_STRING, 20,		"Exif.Image.DateTime",		N_("Date"), nullptr },
-{ 0x013e, EXIF_FORMAT_RATIONAL_UNSIGNED, 2,	"Exif.Image.WhitePoint",	N_("White point"), nullptr },
-{ 0x013f, EXIF_FORMAT_RATIONAL_UNSIGNED, 6,	"Exif.Image.PrimaryChromaticities",N_("Primary chromaticities"), nullptr },
-{ 0x0211, EXIF_FORMAT_RATIONAL_UNSIGNED, 3,	"Exif.Image.YCbCrCoefficients",	N_("YCbCy coefficients"), nullptr },
-{ 0x0213, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.YCbCrPositioning",	N_("YCbCr positioning"), ExifYCbCrPosList },
-{ 0x0214, EXIF_FORMAT_RATIONAL_UNSIGNED, 6, 	"Exif.Image.ReferenceBlackWhite",N_("Black white reference"), nullptr },
-{ 0x8298, EXIF_FORMAT_STRING, -1,		"Exif.Image.Copyright",		N_("Copyright"), nullptr },
-{ 0x8769, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ExifTag",		N_("SubIFD Exif offset"), nullptr },
+{ 0x0100, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageWidth",	N_("Image Width"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0101, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageLength",	N_("Image Height"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.BitsPerSample",	N_("Bits per Sample/Pixel"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0103, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.Compression",	N_("Compression"), ExifCompressionList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x010e, EXIF_FORMAT_STRING, -1,		"Exif.Image.ImageDescription",	N_("Image description"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x010f, EXIF_FORMAT_STRING, -1,		"Exif.Image.Make",		N_("Camera make"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0110, EXIF_FORMAT_STRING, -1,		"Exif.Image.Model",		N_("Camera model"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0112, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.Orientation",	N_("Orientation"), ExifOrientationList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x011a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.XResolution",	N_("X resolution"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x011b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.YResolution",	N_("Y Resolution"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0128, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.ResolutionUnit",	N_("Resolution units"), ExifUnitList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0131, EXIF_FORMAT_STRING, -1, 		"Exif.Image.Software",		N_("Firmware"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0132, EXIF_FORMAT_STRING, 20,		"Exif.Image.DateTime",		N_("Date"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x013e, EXIF_FORMAT_RATIONAL_UNSIGNED, 2,	"Exif.Image.WhitePoint",	N_("White point"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x013f, EXIF_FORMAT_RATIONAL_UNSIGNED, 6,	"Exif.Image.PrimaryChromaticities",N_("Primary chromaticities"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0211, EXIF_FORMAT_RATIONAL_UNSIGNED, 3,	"Exif.Image.YCbCrCoefficients",	N_("YCbCy coefficients"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0213, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.YCbCrPositioning",	N_("YCbCr positioning"), ExifYCbCrPosList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0214, EXIF_FORMAT_RATIONAL_UNSIGNED, 6, 	"Exif.Image.ReferenceBlackWhite",N_("Black white reference"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x8298, EXIF_FORMAT_STRING, -1,		"Exif.Image.Copyright",		N_("Copyright"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x8769, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ExifTag",		N_("SubIFD Exif offset"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
 	/* subIFD follows */
-{ 0x829a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureTime",	N_("Exposure time (seconds)"), nullptr },
-{ 0x829d, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FNumber",		N_("FNumber"), nullptr },
-{ 0x8822, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ExposureProgram",	N_("Exposure program"), ExifExposureProgramList },
-{ 0x8824, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SpectralSensitivity",N_("Spectral Sensitivity"), nullptr },
-{ 0x8827, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.ISOSpeedRatings",	N_("ISO sensitivity"), nullptr },
-{ 0x8828, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.OECF",		N_("Optoelectric conversion factor"), nullptr },
-{ 0x9000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.ExifVersion",	N_("Exif version"), nullptr },
-{ 0x9003, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeOriginal",	N_("Date original"), nullptr },
-{ 0x9004, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeDigitized",	N_("Date digitized"), nullptr },
-{ 0x9101, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.ComponentsConfiguration",N_("Pixel format"), nullptr },
-{ 0x9102, EXIF_FORMAT_RATIONAL_UNSIGNED,1,	"Exif.Photo.CompressedBitsPerPixel",N_("Compression ratio"), nullptr },
-{ 0x9201, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ShutterSpeedValue",	N_("Shutter speed"), nullptr },
-{ 0x9202, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ApertureValue",	N_("Aperture"), nullptr },
-{ 0x9203, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.BrightnessValue",	N_("Brightness"), nullptr },
-{ 0x9204, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ExposureBiasValue",	N_("Exposure bias"), nullptr },
-{ 0x9205, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.MaxApertureValue",	N_("Maximum aperture"), nullptr },
-{ 0x9206, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.SubjectDistance",	N_("Subject distance"), nullptr },
-{ 0x9207, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.MeteringMode",	N_("Metering mode"), ExifMeteringModeList },
-{ 0x9208, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.LightSource",	N_("Light source"), ExifLightSourceList },
-{ 0x9209, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Flash",		N_("Flash"), ExifFlashList },
-{ 0x920a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, 	"Exif.Photo.FocalLength",	N_("Focal length"), nullptr },
-{ 0x9214, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.SubjectArea",	N_("Subject area"), nullptr },
-{ 0x927c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.MakerNote",		N_("MakerNote"), nullptr },
-{ 0x9286, EXIF_FORMAT_UNDEFINED, -1, 		"Exif.Photo.UserComment",	N_("UserComment"), nullptr },
-{ 0x9290, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTime",	N_("Subsecond time"), nullptr },
-{ 0x9291, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeOriginal",N_("Subsecond time original"), nullptr },
-{ 0x9292, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeDigitized",N_("Subsecond time digitized"), nullptr },
-{ 0xa000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.FlashpixVersion",	N_("FlashPix version"), nullptr },
-{ 0xa001, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ColorSpace",	N_("Colorspace"), ExifColorSpaceList },
+{ 0x829a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureTime",	N_("Exposure time (seconds)"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x829d, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FNumber",		N_("FNumber"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x8822, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ExposureProgram",	N_("Exposure program"), ExifExposureProgramList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x8824, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SpectralSensitivity",N_("Spectral Sensitivity"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x8827, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.ISOSpeedRatings",	N_("ISO sensitivity"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x8828, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.OECF",		N_("Optoelectric conversion factor"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.ExifVersion",	N_("Exif version"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9003, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeOriginal",	N_("Date original"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9004, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeDigitized",	N_("Date digitized"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9101, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.ComponentsConfiguration",N_("Pixel format"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9102, EXIF_FORMAT_RATIONAL_UNSIGNED,1,	"Exif.Photo.CompressedBitsPerPixel",N_("Compression ratio"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9201, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ShutterSpeedValue",	N_("Shutter speed"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9202, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ApertureValue",	N_("Aperture"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9203, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.BrightnessValue",	N_("Brightness"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9204, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ExposureBiasValue",	N_("Exposure bias"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9205, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.MaxApertureValue",	N_("Maximum aperture"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9206, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.SubjectDistance",	N_("Subject distance"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9207, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.MeteringMode",	N_("Metering mode"), ExifMeteringModeList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9208, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.LightSource",	N_("Light source"), ExifLightSourceList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9209, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Flash",		N_("Flash"), ExifFlashList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x920a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, 	"Exif.Photo.FocalLength",	N_("Focal length"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9214, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.SubjectArea",	N_("Subject area"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x927c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.MakerNote",		N_("MakerNote"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9286, EXIF_FORMAT_UNDEFINED, -1, 		"Exif.Photo.UserComment",	N_("UserComment"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9290, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTime",	N_("Subsecond time"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9291, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeOriginal",N_("Subsecond time original"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x9292, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeDigitized",N_("Subsecond time digitized"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.FlashpixVersion",	N_("FlashPix version"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa001, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ColorSpace",	N_("Colorspace"), ExifColorSpaceList }, // NOTRANSLATE: Metadata key defined by the file format.
 	/* ExifImageWidth, ExifImageHeight can also be unsigned short */
-{ 0xa002, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelXDimension",	N_("Width"), nullptr },
-{ 0xa003, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelYDimension",	N_("Height"), nullptr },
-{ 0xa004, EXIF_FORMAT_STRING, -1,		"Exif.Photo.RelatedSoundFile",	N_("Audio data"), nullptr },
-{ 0xa005, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ExifInteroperabilityOffset",   N_("ExifR98 extension"), nullptr },
-{ 0xa20b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",	N_("Flash strength"), nullptr },
-{ 0xa20c, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SpatialFrequencyResponse",N_("Spatial frequency response"), nullptr },
-{ 0xa20e, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneXResolution", N_("X Pixel density"), nullptr },
-{ 0xa20f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneYResolution", N_("Y Pixel density"), nullptr },
-{ 0xa210, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.FocalPlaneResolutionUnit", N_("Pixel density units"), ExifUnitList },
-{ 0x0214, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Photo.SubjectLocation",	N_("Subject location"), nullptr },
-{ 0xa215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	N_("ISO sensitivity"), nullptr },
-{ 0xa217, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.SensingMethod",	N_("Sensor type"), ExifSensorList },
-{ 0xa300, EXIF_FORMAT_UNDEFINED, 1,		"Exif.Photo.FileSource",	N_("Source type"), ExifSourceList },
-{ 0xa301, EXIF_FORMAT_UNDEFINED, 1,		"Exif.Photo.SceneType",		N_("Scene type"), ExifSceneList },
-{ 0xa302, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.CFAPattern",	N_("Color filter array pattern"), nullptr },
+{ 0xa002, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelXDimension",	N_("Width"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa003, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelYDimension",	N_("Height"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa004, EXIF_FORMAT_STRING, -1,		"Exif.Photo.RelatedSoundFile",	N_("Audio data"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa005, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ExifInteroperabilityOffset",   N_("ExifR98 extension"), nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0xa20b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",	N_("Flash strength"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa20c, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SpatialFrequencyResponse",N_("Spatial frequency response"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa20e, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneXResolution", N_("X Pixel density"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa20f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneYResolution", N_("Y Pixel density"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa210, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.FocalPlaneResolutionUnit", N_("Pixel density units"), ExifUnitList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x0214, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Photo.SubjectLocation",	N_("Subject location"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	N_("ISO sensitivity"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa217, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.SensingMethod",	N_("Sensor type"), ExifSensorList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa300, EXIF_FORMAT_UNDEFINED, 1,		"Exif.Photo.FileSource",	N_("Source type"), ExifSourceList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa301, EXIF_FORMAT_UNDEFINED, 1,		"Exif.Photo.SceneType",		N_("Scene type"), ExifSceneList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa302, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.CFAPattern",	N_("Color filter array pattern"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
 	/* tags a4xx were added for Exif 2.2 (not just these - some above, as well) */
-{ 0xa401, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.CustomRendered",	N_("Render process"), ExifCustRenderList },
-{ 0xa402, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ExposureMode",	N_("Exposure mode"), ExifExposureModeList },
-{ 0xa403, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.WhiteBalance",	N_("White balance"), ExifWhiteBalanceList },
-{ 0xa404, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.DigitalZoomRatio",	N_("Digital zoom ratio"), nullptr },
-{ 0xa405, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.FocalLengthIn35mmFilm",N_("Focal length (35mm)"), nullptr },
-{ 0xa406, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SceneCaptureType",	N_("Scene capture type"), ExifSceneCaptureList },
-{ 0xa407, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.GainControl",	N_("Gain control"), ExifGainControlList },
-{ 0xa408, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Contrast",		N_("Contrast"), ExifContrastList },
-{ 0xa409, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Saturation",	N_("Saturation"), ExifSaturationList },
-{ 0xa40a, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Sharpness",		N_("Sharpness"), ExifSharpnessList },
-{ 0xa40b, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.DeviceSettingDescription",N_("Device setting"), nullptr },
-{ 0xa40c, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SubjectDistanceRange",N_("Subject range"), ExifSubjectRangeList },
-{ 0xa420, EXIF_FORMAT_STRING, -1,		"Exif.Photo.ImageUniqueID",	N_("Image serial number"), nullptr },
+{ 0xa401, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.CustomRendered",	N_("Render process"), ExifCustRenderList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa402, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ExposureMode",	N_("Exposure mode"), ExifExposureModeList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa403, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.WhiteBalance",	N_("White balance"), ExifWhiteBalanceList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa404, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.DigitalZoomRatio",	N_("Digital zoom ratio"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa405, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.FocalLengthIn35mmFilm",N_("Focal length (35mm)"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa406, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SceneCaptureType",	N_("Scene capture type"), ExifSceneCaptureList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa407, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.GainControl",	N_("Gain control"), ExifGainControlList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa408, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Contrast",		N_("Contrast"), ExifContrastList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa409, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Saturation",	N_("Saturation"), ExifSaturationList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa40a, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Sharpness",		N_("Sharpness"), ExifSharpnessList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa40b, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.DeviceSettingDescription",N_("Device setting"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa40c, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SubjectDistanceRange",N_("Subject range"), ExifSubjectRangeList }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0xa420, EXIF_FORMAT_STRING, -1,		"Exif.Photo.ImageUniqueID",	N_("Image serial number"), nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
 	/* place known, but undocumented or lesser used tags here */
-{ 0x00fe, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.NewSubfileType",	nullptr, nullptr },
-{ 0x00ff, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SubfileType",			nullptr, nullptr },
-{ 0x012d, EXIF_FORMAT_SHORT_UNSIGNED, 3,	"Exif.Image.TransferFunction",	nullptr, nullptr },
-{ 0x013b, EXIF_FORMAT_STRING, -1,		"Exif.Image.Artist",		"Artist", nullptr },
-{ 0x013d, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Predictor",		nullptr, nullptr },
-{ 0x0142, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileWidth",		nullptr, nullptr },
-{ 0x0143, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileLength",		nullptr, nullptr },
-{ 0x0144, EXIF_FORMAT_LONG_UNSIGNED, -1,	"TileOffsets",		nullptr, nullptr },
-{ 0x0145, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"TileByteCounts",	nullptr, nullptr },
-{ 0x014a, EXIF_FORMAT_LONG_UNSIGNED, -1,	"Exif.Image.SubIFDs",		nullptr, nullptr },
+{ 0x00fe, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.NewSubfileType",	nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x00ff, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SubfileType",			nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x012d, EXIF_FORMAT_SHORT_UNSIGNED, 3,	"Exif.Image.TransferFunction",	nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x013b, EXIF_FORMAT_STRING, -1,		"Exif.Image.Artist",		"Artist", nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x013d, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Predictor",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0142, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileWidth",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0143, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileLength",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0144, EXIF_FORMAT_LONG_UNSIGNED, -1,	"TileOffsets",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0145, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"TileByteCounts",	nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x014a, EXIF_FORMAT_LONG_UNSIGNED, -1,	"Exif.Image.SubIFDs",		nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
 { 0x015b, EXIF_FORMAT_UNDEFINED, -1,		"JPEGTables",		nullptr, nullptr },
-{ 0x828d, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Image.CFARepeatPatternDim",	nullptr, nullptr },
-{ 0x828e, EXIF_FORMAT_BYTE_UNSIGNED, -1,	"Exif.Image.CFAPattern",		nullptr, nullptr },
-{ 0x828f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.BatteryLevel",		nullptr, nullptr },
+{ 0x828d, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Image.CFARepeatPatternDim",	nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x828e, EXIF_FORMAT_BYTE_UNSIGNED, -1,	"Exif.Image.CFAPattern",		nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x828f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.BatteryLevel",		nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
 { 0x83bb, EXIF_FORMAT_LONG_UNSIGNED, -1,	"IPTC/NAA",		nullptr, nullptr },
-{ 0x8773, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.InterColorProfile",		nullptr, nullptr },
-{ 0x8825, EXIF_FORMAT_LONG_UNSIGNED, 1,		"GPSInfo",		"SubIFD GPS offset", nullptr },
-{ 0x8829, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Interlace",		nullptr, nullptr },
-{ 0x882a, EXIF_FORMAT_SHORT, 1,			"TimeZoneOffset",	nullptr, nullptr },
-{ 0x882b, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SelfTimerMode",	nullptr, nullptr },
-{ 0x920b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",		nullptr, nullptr },
-{ 0x920c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.SpatialFrequencyResponse", nullptr, nullptr },
-{ 0x920d, EXIF_FORMAT_UNDEFINED, -1,		"Noise",		nullptr, nullptr },
-{ 0x9211, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ImageNumber",		nullptr, nullptr },
-{ 0x9212, EXIF_FORMAT_STRING, 1,		"SecurityClassification", nullptr, nullptr },
-{ 0x9213, EXIF_FORMAT_STRING, -1,		"ImageHistory",		nullptr, nullptr },
-{ 0x9215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	nullptr, nullptr },
+{ 0x8773, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.InterColorProfile",		nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x8825, EXIF_FORMAT_LONG_UNSIGNED, 1,		"GPSInfo",		"SubIFD GPS offset", nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x8829, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Interlace",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x882a, EXIF_FORMAT_SHORT, 1,			"TimeZoneOffset",	nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x882b, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SelfTimerMode",	nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x920b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",		nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x920c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.SpatialFrequencyResponse", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+{ 0x920d, EXIF_FORMAT_UNDEFINED, -1,		"Noise",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x9211, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ImageNumber",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x9212, EXIF_FORMAT_STRING, 1,		"SecurityClassification", nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x9213, EXIF_FORMAT_STRING, -1,		"ImageHistory",		nullptr, nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x9215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
 { 0x9216, EXIF_FORMAT_BYTE_UNSIGNED, 4,		"TIFF/EPStandardID",	nullptr, nullptr },
 
 EXIF_MARKER_LIST_END
@@ -439,36 +439,36 @@ static ExifMarker ExifKnownGPSInfoMarkersList[] = {
         /* The following do not work at the moment as the tag value 0x0000 has a
          * special meaning. */
         /* { 0x0000, EXIF_FORMAT_BYTE, -1, "Exif.GPSInfo.GPSVersionID", NULL, NULL }, */
-        { 0x0001, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLatitudeRef", nullptr, nullptr },
-        { 0x0002, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLatitude", nullptr, nullptr },
-        { 0x0003, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLongitudeRef", nullptr, nullptr },
-        { 0x0004, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLongitude", nullptr, nullptr },
-        { 0x0005, EXIF_FORMAT_BYTE_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitudeRef", nullptr, nullptr },
-        { 0x0006, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitude", nullptr, nullptr },
-        { 0x0007, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSTimeStamp", nullptr, nullptr },
-        { 0x0008, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSatellites", nullptr, nullptr },
-        { 0x0009, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSStatus", nullptr, nullptr },
-        { 0x000a, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMeasureMode", nullptr, nullptr },
-        { 0x000b, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDOP", nullptr, nullptr },
-        { 0x000c, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSpeedRef", nullptr, nullptr },
-        { 0x000d, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSSpeed", nullptr, nullptr },
-        { 0x000e, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSTrackRef", nullptr, nullptr },
-        { 0x000f, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSTrack", nullptr, nullptr },
-        { 0x0010, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSImgDirectionRef", nullptr, nullptr },
-        { 0x0011, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSImgDirection", nullptr, nullptr },
-        { 0x0012, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMapDatum", nullptr, nullptr },
-        { 0x0013, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLatitudeRef", nullptr, nullptr },
-        { 0x0014, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLatitude", nullptr, nullptr },
-        { 0x0015, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLongitudeRef", nullptr, nullptr },
-        { 0x0016, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLongitude", nullptr, nullptr },
-        { 0x0017, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestBearingRef", nullptr, nullptr },
-        { 0x0018, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestBearing", nullptr, nullptr },
-        { 0x0019, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestDistanceRef", nullptr, nullptr },
-        { 0x001a, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestDistance", nullptr, nullptr },
-        { 0x001b, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSProcessingMethod", nullptr, nullptr },
-        { 0x001c, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSAreaInformation", nullptr, nullptr },
-        { 0x001d, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSDateStamp", nullptr, nullptr },
-        { 0x001e, EXIF_FORMAT_SHORT, -1, "Exif.GPSInfo.GPSDifferential", nullptr, nullptr },
+        { 0x0001, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLatitudeRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0002, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLatitude", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0003, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLongitudeRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0004, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLongitude", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0005, EXIF_FORMAT_BYTE_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitudeRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0006, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitude", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0007, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSTimeStamp", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0008, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSatellites", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0009, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSStatus", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x000a, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMeasureMode", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x000b, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDOP", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x000c, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSpeedRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x000d, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSSpeed", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x000e, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSTrackRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x000f, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSTrack", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0010, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSImgDirectionRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0011, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSImgDirection", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0012, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMapDatum", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0013, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLatitudeRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0014, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLatitude", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0015, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLongitudeRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0016, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLongitude", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0017, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestBearingRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0018, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestBearing", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x0019, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestDistanceRef", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x001a, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestDistance", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x001b, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSProcessingMethod", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x001c, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSAreaInformation", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x001d, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSDateStamp", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
+        { 0x001e, EXIF_FORMAT_SHORT, -1, "Exif.GPSInfo.GPSDifferential", nullptr, nullptr }, // NOTRANSLATE: Metadata key defined by the file format.
 
         EXIF_MARKER_LIST_END
 };
@@ -1063,7 +1063,7 @@ gint exif_tiff_parse(ExifData *exif, guchar *tiff, guint size, ExifMarker *list)
 	     length of NN... == SSSS - 2.
        NNN.: the data in this segment
  */
-static ExifMarker jpeg_color_marker = { 0x8773, EXIF_FORMAT_UNDEFINED, -1, "Exif.Image.InterColorProfile", nullptr, nullptr };
+static ExifMarker jpeg_color_marker = { 0x8773, EXIF_FORMAT_UNDEFINED, -1, "Exif.Image.InterColorProfile", nullptr, nullptr }; // NOTRANSLATE: Metadata key defined by the file format.
 
 void exif_add_jpeg_color_profile(ExifData *exif, guchar *cp_data, guint cp_length)
 {
@@ -1089,7 +1089,7 @@ static gint exif_jpeg_parse(ExifData *exif,
 		return -2;
 		}
 
-	constexpr std::string_view magic{ "Exif\x00\x00" };
+	constexpr std::string_view magic{ "Exif\x00\x00" }; // NOTRANSLATE: File-format identifier or raw metadata value.
 	JpegSegment seg;
 	if (jpeg_segment_find(data, size, JPEG_MARKER_APP1, magic, seg))
 		{
@@ -1106,7 +1106,7 @@ static gint exif_jpeg_parse(ExifData *exif,
 
 guchar *exif_get_color_profile(ExifData *exif, guint *data_len)
 {
-	ExifItem *prof_item = exif_get_item(exif, "Exif.Image.InterColorProfile");
+	ExifItem *prof_item = exif_get_item(exif, "Exif.Image.InterColorProfile"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (prof_item && exif_item_get_format_id(prof_item) == EXIF_FORMAT_UNDEFINED)
 		return reinterpret_cast<guchar *>(exif_item_get_data(prof_item, data_len));
 	return nullptr;
@@ -1512,13 +1512,13 @@ void exif_write_data_list(ExifData *exif, FILE *f, bool human_readable_list)
 
 gboolean exif_write(ExifData *)
 {
-	log_printf("Not compiled with EXIF write support\n");
+	log_printf("Not compiled with EXIF write support\n"); // NOTRANSLATE: Diagnostic message.
 	return FALSE;
 }
 
 gboolean exif_write_sidecar(ExifData *, gchar *)
 {
-	log_printf("Not compiled with EXIF write support\n");
+	log_printf("Not compiled with EXIF write support\n"); // NOTRANSLATE: Diagnostic message.
 	return FALSE;
 }
 
@@ -1541,7 +1541,7 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 	if (!key) return nullptr;
 
 	/* convert xmp key to exif key */
-	if (strcmp(key, "Xmp.tiff.Orientation") == 0) key = "Exif.Image.Orientation";
+	if (strcmp(key, "Xmp.tiff.Orientation") == 0) key = "Exif.Image.Orientation"; // NOTRANSLATE: Metadata key defined by the file format.
 
 	if (format == METADATA_FORMATTED)
 		{

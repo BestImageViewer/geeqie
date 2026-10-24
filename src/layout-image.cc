@@ -471,7 +471,7 @@ static void animation_async_ready_cb(GObject *, GAsyncResult *res, gpointer data
 		}
 	else
 		{
-		log_printf("Error reading GIF file: %s\n", error->message);
+		log_printf("Error reading GIF file: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_object_unref(animation->in_file);
@@ -509,7 +509,7 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 		}
 	else
 		{
-		log_printf("Error reading animation file: %s\nError: %s\n", lw->image->image_fd->path, error->message);
+		log_printf("Error reading animation file: %s\nError: %s\n", lw->image->image_fd->path, error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return TRUE;
@@ -2231,7 +2231,7 @@ static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 	gtk_label_set_text(GTK_LABEL(lw->info_pixel), text);
 
 	g_autoptr(PangoAttrList) attrs = pango_attr_list_new();
-	pango_attr_list_insert(attrs, pango_attr_family_new("Monospace"));
+	pango_attr_list_insert(attrs, pango_attr_family_new("Monospace")); // NOTRANSLATE: Font description.
 	gtk_label_set_attributes(GTK_LABEL(lw->info_pixel), attrs);
 }
 
@@ -2708,7 +2708,7 @@ void layout_image_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify layout_image: %s %04x", fd->path, type);
+	DEBUG_1("Notify layout_image: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

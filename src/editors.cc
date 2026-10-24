@@ -197,7 +197,7 @@ static gboolean editors_finished = FALSE;
 #ifdef G_KEY_FILE_DESKTOP_GROUP
 #define DESKTOP_GROUP G_KEY_FILE_DESKTOP_GROUP
 #else
-#define DESKTOP_GROUP "Desktop Entry"
+#define DESKTOP_GROUP "Desktop Entry" // NOTRANSLATE: Configuration key defined by the file format.
 #endif
 
 static void editor_description_free(EditorDescription *editor)
@@ -260,8 +260,8 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 	const gchar *key = filename_from_path(path);
 	if (is_valid_editor_command(key)) return FALSE; /* the file found earlier wins */
 
-	g_autofree gchar *type = g_key_file_get_string(key_file, DESKTOP_GROUP, "Type", nullptr);
-	if (!type || strcmp(type, "Application") != 0)
+	g_autofree gchar *type = g_key_file_get_string(key_file, DESKTOP_GROUP, "Type", nullptr); // NOTRANSLATE: Configuration key defined by the file format.
+	if (!type || strcmp(type, "Application") != 0) // NOTRANSLATE: Desktop-file identifier or external-command diagnostic.
 		{
 		/* We only consider desktop entries of Application type */
 		return FALSE;
@@ -274,13 +274,13 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 
 	g_hash_table_insert(editors, editor->key, editor);
 
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Hidden", nullptr)
-	    || g_key_file_get_boolean(key_file, DESKTOP_GROUP, "NoDisplay", nullptr))
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Hidden", nullptr) // NOTRANSLATE: Configuration key defined by the file format.
+	    || g_key_file_get_boolean(key_file, DESKTOP_GROUP, "NoDisplay", nullptr)) // NOTRANSLATE: Configuration key defined by the file format.
 		{
 		editor->hidden = TRUE;
 		}
 
-	g_auto(GStrv) categories = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "Categories", nullptr, nullptr);
+	g_auto(GStrv) categories = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "Categories", nullptr, nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 	if (categories)
 		{
 		gboolean found = FALSE;
@@ -288,7 +288,7 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 		for (i = 0; categories[i]; i++)
 			{
 			/* IMHO "Graphics" is exactly the category that we are interested in, so this does not have to be configurable */
-			if (strcmp(categories[i], "Graphics") == 0)
+			if (strcmp(categories[i], "Graphics") == 0) // NOTRANSLATE: Desktop-file identifier or external-command diagnostic.
 				{
 				found = TRUE;
 				}
@@ -306,13 +306,13 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 		editor->ignored = TRUE;
 		}
 
-	g_auto(GStrv) only_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "OnlyShowIn", nullptr, nullptr);
+	g_auto(GStrv) only_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "OnlyShowIn", nullptr, nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 	if (only_show_in && !g_strv_contains(only_show_in, "X-Geeqie"))
 		{
 		editor->ignored = TRUE;
 		}
 
-	g_auto(GStrv) not_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "NotShowIn", nullptr, nullptr);
+	g_auto(GStrv) not_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "NotShowIn", nullptr, nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 	if (not_show_in && g_strv_contains(not_show_in, "X-Geeqie"))
 		{
 		editor->ignored = TRUE;
@@ -327,8 +327,8 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 		return TRUE;
 		}
 
-	editor->name = g_key_file_get_locale_string(key_file, DESKTOP_GROUP, "Name", nullptr, nullptr);
-	editor->icon = g_key_file_get_string(key_file, DESKTOP_GROUP, "Icon", nullptr);
+	editor->name = g_key_file_get_locale_string(key_file, DESKTOP_GROUP, "Name", nullptr, nullptr); // NOTRANSLATE: Configuration key defined by the file format.
+	editor->icon = g_key_file_get_string(key_file, DESKTOP_GROUP, "Icon", nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 
 	/* Icon key can be either a full path (absolute with file name extension) or an icon name (without extension) */
 	if (editor->icon && !g_path_is_absolute(editor->icon))
@@ -351,21 +351,21 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 		editor->icon = nullptr;
 		}
 
-	editor->exec = g_key_file_get_string(key_file, DESKTOP_GROUP, "Exec", nullptr);
+	editor->exec = g_key_file_get_string(key_file, DESKTOP_GROUP, "Exec", nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 
 	editor->menu_path = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-Menu-Path", nullptr);
-	if (!editor->menu_path) editor->menu_path = g_strdup("PluginsMenu");
+	if (!editor->menu_path) editor->menu_path = g_strdup("PluginsMenu"); // NOTRANSLATE: Desktop-file identifier or external-command diagnostic.
 
 	editor->hotkey = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-Hotkey", nullptr);
 
-	editor->comment = g_key_file_get_string(key_file, DESKTOP_GROUP, "Comment", nullptr);
+	editor->comment = g_key_file_get_string(key_file, DESKTOP_GROUP, "Comment", nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 
 	g_autofree gchar *extensions = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-File-Extensions", nullptr);
 	if (extensions)
 		editor->ext_list = filter_to_list(extensions);
 	else
 		{
-		g_auto(GStrv) mime_types = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "MimeType", nullptr, nullptr);
+		g_auto(GStrv) mime_types = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "MimeType", nullptr, nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 		if (mime_types)
 			{
 			editor->ext_list = editor_mime_types_to_extensions(mime_types);
@@ -377,7 +377,7 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE);
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose-Multi", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE_MULTI);
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Filter", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_DEST);
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Terminal", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_TERMINAL);
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Terminal", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_TERMINAL); // NOTRANSLATE: Configuration key defined by the file format.
 
 	editor->flags = static_cast<EditorFlags>(editor->flags | editor_command_parse(editor, nullptr, FALSE, nullptr));
 
@@ -489,7 +489,7 @@ EditorDesktopFiles editor_load_desktop_files(const std::vector<std::string> &dir
 			file.key_file.reset(g_key_file_new());
 			if (!g_key_file_load_from_file(file.key_file.get(), file.path.c_str(), G_KEY_FILE_NONE, nullptr)) continue;
 
-			g_autofree gchar *try_exec = g_key_file_get_string(file.key_file.get(), DESKTOP_GROUP, "TryExec", nullptr);
+			g_autofree gchar *try_exec = g_key_file_get_string(file.key_file.get(), DESKTOP_GROUP, "TryExec", nullptr); // NOTRANSLATE: Configuration key defined by the file format.
 			if (try_exec)
 				{
 				g_autofree gchar *executable = g_find_program_in_path(try_exec);
@@ -699,7 +699,7 @@ static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition,
 			if (!g_utf8_validate(buf, count, nullptr))
 				{
 				g_autofree gchar *utf8 = g_locale_to_utf8(buf, count, nullptr, nullptr, nullptr);
-				vw->fill(utf8 ? utf8 : "Error converting text to valid utf8\n", -1);
+				vw->fill(utf8 ? utf8 : "Error converting text to valid utf8\n", -1); // NOTRANSLATE: Desktop-file identifier or external-command diagnostic.
 				}
 			else
 				{
@@ -1058,7 +1058,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 	if (output)
 		{
 		*output = result.get_command();
-		DEBUG_3("Editor cmd: %s", *output);
+		DEBUG_3("Editor cmd: %s", *output); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return flags;

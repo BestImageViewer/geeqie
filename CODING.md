@@ -1,5 +1,13 @@
 # Coding and Documentation Style
 
+For strings that are not user-facing, use an inline comment such as
+`// NOTRANSLATE: D-Bus protocol method.` rather than adding a string to the
+exclusion list in `build-aux/untranslated-text.sh`. The marker suppresses the
+whole line, so keep user-facing strings on separate lines and explain why the
+annotated text must not be translated. Use `/* NOTRANSLATE: reason */` before
+the trailing backslash on a continued macro line. Ordinary comments do not
+suppress the check, and exclusions must not be added for entire files.
+
 [Error Logging](#error-logging)  
 [SPDX license](#spdx-license)  
 [Git change log](#git-change-log)  

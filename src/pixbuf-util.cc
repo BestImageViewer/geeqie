@@ -175,7 +175,7 @@ gboolean pixbuf_to_file_as_png(GdkPixbuf *pixbuf, const gchar *filename)
 
 	if (error)
 		{
-		log_printf("Error saving png file: %s\n", error->message);
+		log_printf("Error saving png file: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return ret;
@@ -391,7 +391,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 				pixbuf = gdk_pixbuf_new_from_file(icon, &error);
 				if (error)
 					{
-					DEBUG_1("Couldn't load icon as absolute path %s: %s", icon, error->message);
+					DEBUG_1("Couldn't load icon as absolute path %s: %s", icon, error->message); // NOTRANSLATE: Diagnostic message.
 					g_error_free(error);
 					}
 				}

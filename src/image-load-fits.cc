@@ -92,7 +92,7 @@ gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	if (naxis != 2)    // Ensure it's a 2D image
 		{
-		log_printf("Error: FITS image is not 2D");
+		log_printf("Error: FITS image is not 2D"); // NOTRANSLATE: Diagnostic message.
 		fits_close_file(fptr, &status);
 		return FALSE;
 		}
@@ -104,7 +104,7 @@ gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize coun
 	auto *image_data = (gfloat *)malloc(width * height * sizeof(gfloat));
 	if (!image_data)
 		{
-		log_printf("Memory allocation error when processing .fits file");
+		log_printf("Memory allocation error when processing .fits file"); // NOTRANSLATE: Diagnostic message.
 		fits_close_file(fptr, &status);
 		return FALSE;
 		}
@@ -125,7 +125,7 @@ gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize coun
 	g_autoptr(GdkPixbuf) pixbuf_tmp = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 	if (!pixbuf_tmp)
 		{
-		log_printf("Failed to create GdkPixbuf for .fits file");
+		log_printf("Failed to create GdkPixbuf for .fits file"); // NOTRANSLATE: Diagnostic message.
 		free(image_data);
 
 		return FALSE;

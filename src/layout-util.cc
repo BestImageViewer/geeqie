@@ -384,7 +384,7 @@ static void clear_marks_cancel_cb(GenericDialog *gd, gpointer)
 
 static void clear_marks_help_cb(GenericDialog *, gpointer)
 {
-	help_window_show("GuideMainWindowMenus.html");
+	help_window_show("GuideMainWindowMenus.html"); // NOTRANSLATE: Documentation filename.
 }
 
 static void layout_menu_clear_marks_ok_cb(GenericDialog *gd, gpointer)
@@ -909,7 +909,7 @@ static void open_with_response_cb(GtkDialog *, gint response_id, gpointer data)
 
 		if (error)
 			{
-			log_printf("Error launching app: %s\n", error->message);
+			log_printf("Error launching app: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 			}
 		}
 
@@ -941,7 +941,7 @@ static void open_with_application_activated_cb(GtkAppChooserWidget *, GAppInfo *
 
 	if (error)
 		{
-		log_printf("Error launching app.: %s\n", error->message);
+		log_printf("Error launching app.: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	open_with_data_free(open_with_data);
@@ -954,7 +954,7 @@ static void open_with_portal_response_cb(GObject *source, GAsyncResult *result, 
 	    !g_error_matches(error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED) &&
 	    !g_error_matches(error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED))
 		{
-		log_printf("Error launching app: %s\n", error->message);
+		log_printf("Error launching app: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 }
 
@@ -1908,7 +1908,7 @@ static void layout_menu_help_cb(GSimpleAction *, GVariant *, gpointer)
 
 	if (g_strcmp0(type, "search") == 0)
 		{
-		help_window_show("GuideImageSearchSearch.html");
+		help_window_show("GuideImageSearchSearch.html"); // NOTRANSLATE: Documentation filename.
 		}
 	else
 		{
@@ -1959,32 +1959,32 @@ static constexpr struct
 	const gchar *menu_name;
 	const gchar *key_name;
 } keyboard_map_hardcoded[] = {
-	{"Scroll","Left"},
-	{"FastScroll", "&lt;Shift&gt;Left"},
-	{"Left Border", "&lt;Control&gt;Left"},
-	{"Left Border", "&lt;Shift&gt;&lt;Control&gt;Left"},
-	{"Scroll", "Right"},
-	{"FastScroll", "&lt;Shift&gt;Right"},
-	{"Right Border", "&lt;Control&gt;Right"},
-	{"Right Border", "&lt;Shift&gt;&lt;Control&gt;Right"},
-	{"Scroll", "Up"},
-	{"FastScroll", "&lt;Shift&gt;Up"},
-	{"Upper Border", "&lt;Control&gt;Up"},
-	{"Upper Border", "&lt;Shift&gt;&lt;Control&gt;Up"},
-	{"Scroll", "Down"},
-	{"FastScroll", "&lt;Shift&gt;Down"},
-	{"Lower Border", "&lt;Control&gt;Down"},
-	{"Lower Border", "&lt;Shift&gt;&lt;Control&gt;Down"},
-	{"Next/Drag", "M1"},
-	{"FastDrag", "&lt;Shift&gt;M1"},
-	{"DnD Start", "M2"},
-	{"Menu", "M3"},
-	{"PrevImage", "MW4"},
-	{"NextImage", "MW5"},
-	{"ScrollUp", "&lt;Shift&gt;MW4"},
-	{"ScrollDown", "&lt;Shift&gt;MW5"},
-	{"ZoomIn", "&lt;Control&gt;MW4"},
-	{"ZoomOut", "&lt;Control&gt;MW5"},
+	{"Scroll","Left"}, // NOTRANSLATE: Keyboard-map notation.
+	{"FastScroll", "&lt;Shift&gt;Left"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Left Border", "&lt;Control&gt;Left"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Left Border", "&lt;Shift&gt;&lt;Control&gt;Left"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Scroll", "Right"}, // NOTRANSLATE: Keyboard-map notation.
+	{"FastScroll", "&lt;Shift&gt;Right"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Right Border", "&lt;Control&gt;Right"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Right Border", "&lt;Shift&gt;&lt;Control&gt;Right"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Scroll", "Up"}, // NOTRANSLATE: Keyboard-map notation.
+	{"FastScroll", "&lt;Shift&gt;Up"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Upper Border", "&lt;Control&gt;Up"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Upper Border", "&lt;Shift&gt;&lt;Control&gt;Up"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Scroll", "Down"}, // NOTRANSLATE: Keyboard-map notation.
+	{"FastScroll", "&lt;Shift&gt;Down"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Lower Border", "&lt;Control&gt;Down"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Lower Border", "&lt;Shift&gt;&lt;Control&gt;Down"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Next/Drag", "M1"}, // NOTRANSLATE: Keyboard-map notation.
+	{"FastDrag", "&lt;Shift&gt;M1"}, // NOTRANSLATE: Keyboard-map notation.
+	{"DnD Start", "M2"}, // NOTRANSLATE: Keyboard-map notation.
+	{"Menu", "M3"}, // NOTRANSLATE: Keyboard-map notation.
+	{"PrevImage", "MW4"}, // NOTRANSLATE: Keyboard-map notation.
+	{"NextImage", "MW5"}, // NOTRANSLATE: Keyboard-map notation.
+	{"ScrollUp", "&lt;Shift&gt;MW4"}, // NOTRANSLATE: Keyboard-map notation.
+	{"ScrollDown", "&lt;Shift&gt;MW5"}, // NOTRANSLATE: Keyboard-map notation.
+	{"ZoomIn", "&lt;Control&gt;MW4"}, // NOTRANSLATE: Keyboard-map notation.
+	{"ZoomOut", "&lt;Control&gt;MW5"}, // NOTRANSLATE: Keyboard-map notation.
 };
 
 static gchar *convert_template_line(const gchar *template_line, const GPtrArray *keyboard_map_array)
@@ -2035,12 +2035,12 @@ static void convert_keymap_template_to_file(const gint fd, const GPtrArray *keyb
 
 		g_autoptr(GError) error = nullptr;
 		g_io_channel_write_chars(channel, converted_line, -1, nullptr, &error);
-		if (error) log_printf("Warning: Keyboard Map:%s\n", error->message);
+		if (error) log_printf("Warning: Keyboard Map:%s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_autoptr(GError) error = nullptr;
 	g_io_channel_flush(channel, &error);
-	if (error) log_printf("Warning: Keyboard Map:%s\n", error->message);
+	if (error) log_printf("Warning: Keyboard Map:%s\n", error->message); // NOTRANSLATE: Diagnostic message.
 }
 
 struct KeyboardMapScope
@@ -2078,7 +2078,7 @@ static void keyboard_map_show(const gchar *window_prefix, const gchar *filename_
 	const gint fd = g_file_open_tmp(tmp_template, &tmp_file, &error);
 	if (error)
 		{
-		log_printf("Error: Keyboard Map - cannot create file:%s\n", error->message);
+		log_printf("Error: Keyboard Map - cannot create file:%s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		return;
 		}
 
@@ -2830,7 +2830,7 @@ static gchar *create_tmp_config_file()
 	gint fd = g_file_open_tmp("geeqie_layout_name_XXXXXX.xml", &tmp_file, &error);
 	if (error)
 		{
-		log_printf("Error: Window layout - cannot create file: %s\n", error->message);
+		log_printf("Error: Window layout - cannot create file: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
@@ -3257,7 +3257,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		return;
 		}
 
-	if (g_strcmp0(action_name, "Separator") == 0)
+	if (g_strcmp0(action_name, "Separator") == 0) // NOTRANSLATE: Persistent widget or action identifier.
 		{
 		button = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 		}
@@ -3410,7 +3410,7 @@ void layout_toolbar_add_from_config(LayoutWindow *lw, ToolbarType type, const ch
 
 		if (READ_CHAR_FULL("action", action)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	layout_toolbar_add(lw, type, action);
@@ -3431,7 +3431,7 @@ void layout_util_status_update_write(LayoutWindow *lw)
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (n > 0));
 
 	const gchar *icon_name = n > 0 ? GQ_ICON_SAVE_AS : GQ_ICON_SAVE;
-	g_autofree const gchar *icon_tooltip= n > 0 ? g_strdup_printf("Number of files with unsaved metadata: %d",n) : g_strdup("No unsaved metadata");
+	g_autofree const gchar *icon_tooltip= n > 0 ? g_strdup_printf(_("Number of files with unsaved metadata: %d"),n) : g_strdup(_("No unsaved metadata"));
 
 	for (int i = 0; i < TOOLBAR_COUNT; i++) // NOLINT(modernize-loop-convert)
 		{

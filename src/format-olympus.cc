@@ -146,7 +146,7 @@ static ExifTextList KonMinTagColorMode[]= {
 	{ 1,	"black and white" },
 	{ 2,	"vivid" },
 	{ 3,	"solarization" },
-	{ 4,	"Adobe RGB" },
+	{ 4,	"Adobe RGB" }, // NOTRANSLATE: File-format identifier or raw metadata value.
 	EXIF_TEXT_LIST_END
 };
 
@@ -204,48 +204,48 @@ static ExifTextList OlympusTagContrast[]= {
 
 
 static ExifMarker OlympusExifMarkersList[] = {
-{ 0x0001, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", nullptr },
-{ 0x0003, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", nullptr },
-{ 0x0040, EXIF_FORMAT_LONG_UNSIGNED, -1, "CompressedImageSize",	"Compressed image size", nullptr },
-{ 0x0081, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	nullptr },
-{ 0x0088, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	nullptr },
-{ 0x0089, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailLength",	"Thumbnail length",	nullptr },
-{ 0x0101, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.ColorMode", "Color mode",	KonMinTagColorMode },
-{ 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.Quality", "Quality",		KonMinTagQuality },
-{ 0x0103, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.Quality", "Quality",		KonMinTagQuality },
-{ 0x0200, EXIF_FORMAT_LONG_UNSIGNED, 3,  "Olympus.SpecialMode",	"Special mode",		nullptr },
-{ 0x0201, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.JpegQuality",	"Jpeg quality",		OlympusTagJpegQuality },
-{ 0x0202, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Macro",	"Macro",		OlympusTagMacro },
-{ 0x0204, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.DigitalZoom", "Digital zoom",	nullptr },
-{ 0x0207, EXIF_FORMAT_STRING, -1,	 "Olympus.Firmware",	"Firmware version",	nullptr },
-{ 0x0208, EXIF_FORMAT_STRING, -1,	 "Olympus.PictureInfo",	"Picture info",		nullptr },
-{ 0x0209, EXIF_FORMAT_UNDEFINED, -1,	 "Olympus.CameraID",	"Camera ID",		nullptr },
-{ 0x020b, EXIF_FORMAT_LONG_UNSIGNED, 1,	 "Epson.ImageWidth",	"Image width",		nullptr },
-{ 0x020c, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Epson.ImageHeight",	"Image height",		nullptr },
-{ 0x020d, EXIF_FORMAT_STRING, -1,	 "Epson.Manufacturer",	"Manufacturer",		nullptr },
-{ 0x0e00, EXIF_FORMAT_BYTE, -1,		 "Olympus.PrintImageMatching", "Print image matching", nullptr },
-{ 0x1004, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.FlashMode",	"Flash mode",		OlympusTagFlashMode },
-{ 0x1006, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.Bracket",	"Bracket",		nullptr },
-{ 0x100b, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.FocusMode",	"Focus mode",		OlympusTagFocusMode },
-{ 0x100c, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.FocusDistance", "Focus distance",	nullptr },
-{ 0x100d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Zoom",	"Zoom",			nullptr },
-{ 0x1006, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.MacroFocus",	"Macro focus",		nullptr },
-{ 0x100f, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Sharpness",	"Sharpness",		OlympusTagSharpness },
-{ 0x1011, EXIF_FORMAT_SHORT_UNSIGNED, 9, "Olympus.ColorMatrix",	"Color matrix",		nullptr },
-{ 0x1012, EXIF_FORMAT_SHORT_UNSIGNED, 4, "Olympus.BlackLevel",	"Black level",		nullptr },
-{ 0x1015, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.WhiteBalance", "White balance",	nullptr },
-{ 0x1017, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.RedBias",	"Red bias",		nullptr },
-{ 0x1018, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.BlueBias",	"Blue bias",		nullptr },
-{ 0x101a, EXIF_FORMAT_STRING, -1,	 "Olympus.SerialNumber", "Serial number",	nullptr },
-{ 0x1023, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.FlashBias",	"Flash bias",		nullptr },
-{ 0x1029, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Contrast",	"Contrast",		OlympusTagContrast },
-{ 0x102a, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.SharpnessFactor", "Sharpness factor",	nullptr },
-{ 0x102b, EXIF_FORMAT_SHORT_UNSIGNED, 6, "Olympus.ColorControl", "Color control",	nullptr },
-{ 0x102c, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.ValidBits",	"Valid bits",		nullptr },
-{ 0x102d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CoringFilter", "Coring filter",	nullptr },
-{ 0x102e, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalWidth",	"Final width",		nullptr },
-{ 0x102f, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalHeight",	"Final height",		nullptr },
-{ 0x1034, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CompressionRatio", "Compression ratio", nullptr },
+{ 0x0001, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0003, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0040, EXIF_FORMAT_LONG_UNSIGNED, -1, "CompressedImageSize",	"Compressed image size", nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0081, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0088, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0089, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailLength",	"Thumbnail length",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0101, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.ColorMode", "Color mode",	KonMinTagColorMode }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.Quality", "Quality",		KonMinTagQuality }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0103, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.Quality", "Quality",		KonMinTagQuality }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0200, EXIF_FORMAT_LONG_UNSIGNED, 3,  "Olympus.SpecialMode",	"Special mode",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0201, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.JpegQuality",	"Jpeg quality",		OlympusTagJpegQuality }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0202, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Macro",	"Macro",		OlympusTagMacro }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0204, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.DigitalZoom", "Digital zoom",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0207, EXIF_FORMAT_STRING, -1,	 "Olympus.Firmware",	"Firmware version",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0208, EXIF_FORMAT_STRING, -1,	 "Olympus.PictureInfo",	"Picture info",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0209, EXIF_FORMAT_UNDEFINED, -1,	 "Olympus.CameraID",	"Camera ID",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x020b, EXIF_FORMAT_LONG_UNSIGNED, 1,	 "Epson.ImageWidth",	"Image width",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x020c, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Epson.ImageHeight",	"Image height",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x020d, EXIF_FORMAT_STRING, -1,	 "Epson.Manufacturer",	"Manufacturer",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x0e00, EXIF_FORMAT_BYTE, -1,		 "Olympus.PrintImageMatching", "Print image matching", nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1004, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.FlashMode",	"Flash mode",		OlympusTagFlashMode }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1006, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.Bracket",	"Bracket",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x100b, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.FocusMode",	"Focus mode",		OlympusTagFocusMode }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x100c, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.FocusDistance", "Focus distance",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x100d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Zoom",	"Zoom",			nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1006, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.MacroFocus",	"Macro focus",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x100f, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Sharpness",	"Sharpness",		OlympusTagSharpness }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1011, EXIF_FORMAT_SHORT_UNSIGNED, 9, "Olympus.ColorMatrix",	"Color matrix",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1012, EXIF_FORMAT_SHORT_UNSIGNED, 4, "Olympus.BlackLevel",	"Black level",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1015, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.WhiteBalance", "White balance",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1017, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.RedBias",	"Red bias",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1018, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.BlueBias",	"Blue bias",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x101a, EXIF_FORMAT_STRING, -1,	 "Olympus.SerialNumber", "Serial number",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1023, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.FlashBias",	"Flash bias",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1029, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Contrast",	"Contrast",		OlympusTagContrast }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x102a, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.SharpnessFactor", "Sharpness factor",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x102b, EXIF_FORMAT_SHORT_UNSIGNED, 6, "Olympus.ColorControl", "Color control",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x102c, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.ValidBits",	"Valid bits",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x102d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CoringFilter", "Coring filter",	nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x102e, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalWidth",	"Final width",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x102f, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalHeight",	"Final height",		nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
+{ 0x1034, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CompressionRatio", "Compression ratio", nullptr }, // NOTRANSLATE: File-format identifier or raw metadata value.
 EXIF_MARKER_LIST_END
 };
 
@@ -306,11 +306,11 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 		return FALSE;
 		}
 
-	item = exif_get_item(exif, "Olympus.SpecialMode");
+	item = exif_get_item(exif, "Olympus.SpecialMode"); // NOTRANSLATE: File-format identifier or raw metadata value.
 	if (item && item->data_len == 3 * sizeof(guint32))
 		{
 		static ExifMarker marker = { 0x0200, EXIF_FORMAT_STRING, -1,
-					     "Olympus.ShootingMode", "Shooting mode", nullptr };
+					     "Olympus.ShootingMode", "Shooting mode", nullptr }; // NOTRANSLATE: File-format identifier or raw metadata value.
 		auto array = static_cast<guint32 *>(item->data);
 		g_autofree gchar *text = nullptr;
 		gint l;
@@ -333,11 +333,11 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 		exif->items = g_list_prepend(exif->items, item);
 		}
 
-	item = exif_get_item(exif, "Olympus.WhiteBalance");
+	item = exif_get_item(exif, "Olympus.WhiteBalance"); // NOTRANSLATE: File-format identifier or raw metadata value.
 	if (item && item->data_len == 2 * sizeof(guint16))
 		{
 		static ExifMarker marker = { 0x1015, EXIF_FORMAT_STRING, -1,
-					     "Olympus.WhiteBalance", "White balance", nullptr };
+					     "Olympus.WhiteBalance", "White balance", nullptr }; // NOTRANSLATE: File-format identifier or raw metadata value.
 		auto array = static_cast<guint16 *>(item->data);
 		g_autofree gchar *text = nullptr;
 		gint l;

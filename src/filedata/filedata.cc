@@ -129,7 +129,7 @@ const gchar *FileData::text_from_time(time_t t)
 	ret = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 	if (error)
 		{
-		log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
+		log_printf("Error converting locale strftime to UTF-8: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		return "";
 		}
 
@@ -473,7 +473,7 @@ void FileData::read_exif_time_data(FileData *file)
 
 	if (file->exif)
 		{
-		g_autofree gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeOriginal");
+		g_autofree gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeOriginal"); // NOTRANSLATE: Metadata key defined by the file format.
 		DEBUG_2("%s read_exif_time_data: reading %p %s", get_exec_time(), (void *)file, file->path);
 
 		if (tmp)
@@ -501,7 +501,7 @@ void FileData::read_exif_time_digitized_data(FileData *file)
 
 	if (file->exif)
 		{
-		g_autofree gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeDigitized");
+		g_autofree gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeDigitized"); // NOTRANSLATE: Metadata key defined by the file format.
 		DEBUG_2("%s read_exif_time_digitized_data: reading %p %s", get_exec_time(), (void *)file, file->path);
 
 		if (tmp)
@@ -541,9 +541,9 @@ void FileData::read_media_time_data(FileData *file)
 		}
 
 	constexpr const gchar *quicktime_date_keys[] = {
-		"Xmp.video.DateUTC",
-		"Xmp.video.TrackCreateDate",
-		"Xmp.video.TrackModifyDate"
+		"Xmp.video.DateUTC", // NOTRANSLATE: Metadata key defined by the file format.
+		"Xmp.video.TrackCreateDate", // NOTRANSLATE: Metadata key defined by the file format.
+		"Xmp.video.TrackModifyDate" // NOTRANSLATE: Metadata key defined by the file format.
 	};
 
 	for (const gchar *key : quicktime_date_keys)
@@ -616,9 +616,9 @@ FileData *FileData::file_data_ref()
 	FileData *fd = this; // TODO(xsdg): Do null checks at call-sites, if necessary.
 	if (fd->magick != FD_MAGICK)
 #ifdef DEBUG_FILEDATA
-		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd);
+		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd); // NOTRANSLATE: Diagnostic message.
 #else
-		log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
+		log_printf("Error: fd magick mismatch fd=%p", (void *)fd); // NOTRANSLATE: Diagnostic message.
 #endif
 	g_assert(fd->magick == FD_MAGICK);
 	fd->ref++;
@@ -756,9 +756,9 @@ void FileData::file_data_unref()
 	FileData *fd = this;  // TODO(xsdg): clean this up across the board.
 	if (fd->magick != FD_MAGICK)
 #ifdef DEBUG_FILEDATA
-		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd);
+		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd); // NOTRANSLATE: Diagnostic message.
 #else
-		log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
+		log_printf("Error: fd magick mismatch fd=%p", (void *)fd); // NOTRANSLATE: Diagnostic message.
 #endif
 	g_assert(fd->magick == FD_MAGICK);
 
@@ -793,7 +793,7 @@ void FileData::file_data_unref()
 void FileData::file_data_lock(FileData *fd)
 {
 	if (fd == nullptr) return;
-	if (fd->magick != FD_MAGICK) log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
+	if (fd->magick != FD_MAGICK) log_printf("Error: fd magick mismatch fd=%p", (void *)fd); // NOTRANSLATE: Diagnostic message.
 
 	g_assert(fd->magick == FD_MAGICK);
 	fd->locked = TRUE;
@@ -811,7 +811,7 @@ void FileData::file_data_lock(FileData *fd)
 void FileData::file_data_unlock(FileData *fd)
 {
 	if (fd == nullptr) return;
-	if (fd->magick != FD_MAGICK) log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
+	if (fd->magick != FD_MAGICK) log_printf("Error: fd magick mismatch fd=%p", (void *)fd); // NOTRANSLATE: Diagnostic message.
 
 	g_assert(fd->magick == FD_MAGICK);
 	fd->locked = FALSE;
@@ -2103,7 +2103,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 
 	if (!fd->change)
 		{
-		DEBUG_1("Change checked: no change info: %s", fd->path);
+		DEBUG_1("Change checked: no change info: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 		return ret;
 		}
 
@@ -2111,7 +2111,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		{
 		/* this probably should not happen */
 		ret |= CHANGE_NO_SRC;
-		DEBUG_1("Change checked: file does not exist: %s", fd->path);
+		DEBUG_1("Change checked: file does not exist: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 		return ret;
 		}
 
@@ -2124,7 +2124,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 	    fd->modified_xmp)
 		{
 		ret |= CHANGE_WARN_UNSAVED_META;
-		DEBUG_1("Change checked: unsaved metadata: %s", fd->path);
+		DEBUG_1("Change checked: unsaved metadata: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (fd->change->type != FILEDATA_CHANGE_DELETE &&
@@ -2132,13 +2132,13 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		 !file_is_readable_no_follow(fd->path))
 		{
 		ret |= CHANGE_NO_READ_PERM;
-		DEBUG_1("Change checked: no read permission: %s", fd->path);
+		DEBUG_1("Change checked: no read permission: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 		}
 	else if ((fd->change->type == FILEDATA_CHANGE_DELETE || fd->change->type == FILEDATA_CHANGE_MOVE) &&
 	    	 !access_file(dir, W_OK))
 		{
 		ret |= CHANGE_NO_WRITE_PERM_DIR;
-		DEBUG_1("Change checked: source dir is readonly: %s", fd->path);
+		DEBUG_1("Change checked: source dir is readonly: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 		}
 	else if (fd->change->type != FILEDATA_CHANGE_COPY &&
 		 fd->change->type != FILEDATA_CHANGE_UNSPECIFIED &&
@@ -2146,7 +2146,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		 !file_is_writable_no_follow(fd->path))
 		{
 		ret |= CHANGE_WARN_NO_WRITE_PERM;
-		DEBUG_1("Change checked: no write permission: %s", fd->path);
+		DEBUG_1("Change checked: no write permission: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 		}
 	/* WRITE_METADATA is special because it can be configured to silently write to ~/.geeqie/...
 	   - that means that there are no hard errors and warnings can be disabled
@@ -2171,7 +2171,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 					if (options->metadata.warn_on_write_problems)
 						{
 						ret |= CHANGE_WARN_NO_WRITE_PERM;
-						DEBUG_1("Change checked: file is not writable: %s", fd->path);
+						DEBUG_1("Change checked: file is not writable: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 						}
 					}
 				}
@@ -2189,7 +2189,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 					if (options->metadata.warn_on_write_problems)
 						{
 						ret |= CHANGE_WARN_NO_WRITE_PERM;
-						DEBUG_1("Change checked: file is not writable: %s", sidecar);
+						DEBUG_1("Change checked: file is not writable: %s", sidecar); // NOTRANSLATE: Diagnostic message.
 						}
 					}
 				}
@@ -2233,7 +2233,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 			else
 				{
 				ret |= CHANGE_NO_WRITE_PERM_DEST;
-				DEBUG_1("Change checked: file is not writable: %s", metadata_path);
+				DEBUG_1("Change checked: file is not writable: %s", metadata_path); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 		}
@@ -2256,7 +2256,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 				if (g_ascii_strcasecmp(fd->extension, dest_ext) != 0)
 					{
 					ret |= CHANGE_WARN_CHANGED_EXT;
-					DEBUG_1("Change checked: source and destination have different extensions: %s -> %s", fd->path, fd->change->dest);
+					DEBUG_1("Change checked: source and destination have different extensions: %s -> %s", fd->path, fd->change->dest); // NOTRANSLATE: Diagnostic message.
 					}
 				}
 			}
@@ -2265,7 +2265,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 			if (fd->change->type != FILEDATA_CHANGE_UNSPECIFIED) /** @FIXME this is now needed for running editors */
 		   		{
 				ret |= CHANGE_WARN_SAME;
-				DEBUG_1("Change checked: source and destination are the same: %s -> %s", fd->path, fd->change->dest);
+				DEBUG_1("Change checked: source and destination are the same: %s -> %s", fd->path, fd->change->dest); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 
@@ -2273,12 +2273,12 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		if (!isdir(dest_dir))
 			{
 			ret |= CHANGE_NO_DEST_DIR;
-			DEBUG_1("Change checked: destination dir does not exist: %s -> %s", fd->path, fd->change->dest);
+			DEBUG_1("Change checked: destination dir does not exist: %s -> %s", fd->path, fd->change->dest); // NOTRANSLATE: Diagnostic message.
 			}
 		else if (!access_file(dest_dir, W_OK))
 			{
 			ret |= CHANGE_WARN_NO_WRITE_PERM_DEST_DIR;
-			DEBUG_1("Change checked: destination dir is readonly: %s -> %s", fd->path, fd->change->dest);
+			DEBUG_1("Change checked: destination dir is readonly: %s -> %s", fd->path, fd->change->dest); // NOTRANSLATE: Diagnostic message.
 			}
 		else if (!same)
 			{
@@ -2287,18 +2287,18 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 				if (!access_file(fd->change->dest, W_OK))
 					{
 					ret |= CHANGE_NO_WRITE_PERM_DEST;
-					DEBUG_1("Change checked: destination file exists and is readonly: %s -> %s", fd->path, fd->change->dest);
+					DEBUG_1("Change checked: destination file exists and is readonly: %s -> %s", fd->path, fd->change->dest); // NOTRANSLATE: Diagnostic message.
 					}
 				else
 					{
 					ret |= CHANGE_WARN_DEST_EXISTS;
-					DEBUG_1("Change checked: destination exists: %s -> %s", fd->path, fd->change->dest);
+					DEBUG_1("Change checked: destination exists: %s -> %s", fd->path, fd->change->dest); // NOTRANSLATE: Diagnostic message.
 					}
 				}
 			else if (isdir(fd->change->dest))
 				{
 				ret |= CHANGE_DEST_EXISTS;
-				DEBUG_1("Change checked: destination exists: %s -> %s", fd->path, fd->change->dest);
+				DEBUG_1("Change checked: destination exists: %s -> %s", fd->path, fd->change->dest); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 		}
@@ -2322,7 +2322,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		}
 
 	fd->change->error = ret;
-	if (ret == 0) DEBUG_1("Change checked: OK: %s", fd->path);
+	if (ret == 0) DEBUG_1("Change checked: OK: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 
 	return ret;
 }
@@ -2780,7 +2780,7 @@ gboolean FileData::file_data_register_notify_func(NotifyFunc func, gpointer data
 
 		if (nd->func == func && nd->data == data)
 			{
-			g_warning("Notify func already registered");
+			g_warning("Notify func already registered"); // NOTRANSLATE: Diagnostic message.
 			return FALSE;
 			}
 		work = work->next;
@@ -2792,7 +2792,7 @@ gboolean FileData::file_data_register_notify_func(NotifyFunc func, gpointer data
 	nd->priority = priority;
 
 	notify_func_list = g_list_insert_sorted(notify_func_list, nd, file_data_notify_sort);
-	DEBUG_2("Notify func registered: %p", (void *)nd);
+	DEBUG_2("Notify func registered: %p", (void *)nd); // NOTRANSLATE: Diagnostic message.
 
 	return TRUE;
 }
@@ -2808,14 +2808,14 @@ gboolean FileData::file_data_unregister_notify_func(NotifyFunc func, gpointer da
 		if (nd->func == func && nd->data == data)
 			{
 			notify_func_list = g_list_delete_link(notify_func_list, work);
-			DEBUG_2("Notify func unregistered: %p", (void *)nd);
+			DEBUG_2("Notify func unregistered: %p", (void *)nd); // NOTRANSLATE: Diagnostic message.
 			g_free(nd);
 			return TRUE;
 			}
 		work = work->next;
 		}
 
-	g_warning("Notify func not found");
+	g_warning("Notify func not found"); // NOTRANSLATE: Diagnostic message.
 	return FALSE;
 }
 
@@ -2862,7 +2862,7 @@ gboolean FileData::file_data_register_real_time_monitor(FileData *fd)
 
 	count = GPOINTER_TO_INT(g_hash_table_lookup(file_data_monitor_pool, fd));
 
-	DEBUG_1("Register realtime %d %s", count, fd->path);
+	DEBUG_1("Register realtime %d %s", count, fd->path); // NOTRANSLATE: Diagnostic message.
 
 	count++;
 	g_hash_table_insert(file_data_monitor_pool, fd, GINT_TO_POINTER(count));
@@ -2883,7 +2883,7 @@ gboolean FileData::file_data_unregister_real_time_monitor(FileData *fd)
 
 	count = GPOINTER_TO_INT(g_hash_table_lookup(file_data_monitor_pool, fd));
 
-	DEBUG_1("Unregister realtime %d %s", count, fd->path);
+	DEBUG_1("Unregister realtime %d %s", count, fd->path); // NOTRANSLATE: Diagnostic message.
 
 	g_assert(count > 0);
 

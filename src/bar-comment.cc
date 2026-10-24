@@ -84,7 +84,7 @@ void bar_pane_comment_update(PaneCommentData *pcd)
 	GtkTextBuffer *comment_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pcd->comment_view));
 
 	g_autofree gchar *orig_comment = text_widget_text_pull(pcd->comment_view);
-	if (g_strcmp0(pcd->key, "Xmp.xmp.Rating") == 0)
+	if (g_strcmp0(pcd->key, "Xmp.xmp.Rating") == 0) // NOTRANSLATE: Metadata key defined by the file format.
 		{
 		rating = metadata_read_int(pcd->pane.fd, pcd->key, 0);
 		comment = g_strdup_printf("%d", rating);
@@ -176,7 +176,7 @@ void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribut
 		if (READ_CHAR(*pcd, key)) continue;
 		if (READ_INT(*pcd, height)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (title)
@@ -192,7 +192,7 @@ void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto pcd = static_cast<PaneCommentData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pcd->pane.fd)
 		{
-		DEBUG_1("Notify pane_comment: %s %04x", fd->path, type);
+		DEBUG_1("Notify pane_comment: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 		bar_pane_comment_update(pcd);
 		}
@@ -267,7 +267,7 @@ GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, const gchar
 	bar_pane_comment_set_extra_menu(pcd);
 
 #if HAVE_SPELL
-	if (g_strcmp0(key, "Xmp.xmp.Rating") != 0)
+	if (g_strcmp0(key, "Xmp.xmp.Rating") != 0) // NOTRANSLATE: Metadata key defined by the file format.
 		{
 		if (options->metadata.check_spelling)
 			{
@@ -304,7 +304,7 @@ GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const
 		if (READ_CHAR_FULL("key", key)) continue;
 		if (READ_INT_FULL("height", height)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return bar_pane_comment_new(id, title, key, expanded, height);

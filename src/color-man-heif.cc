@@ -139,7 +139,7 @@ guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile
 			primaries_name = "SMPTE 240M";
 			break;
 		case heif_color_primaries_generic_film:
-			primaries_name = "Generic film";
+			primaries_name = "Generic film"; // NOTRANSLATE: Color-profile identifier.
 			break;
 		case heif_color_primaries_ITU_R_BT_2020_2_and_2100_0:
 			primaries_name = "BT.2020";
@@ -202,15 +202,15 @@ guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile
 
 				return cmsBuildParametricToneCurve(nullptr, 4, rec709_parameters);
 			});
-			trc_name = "Rec709 RGB";
+			trc_name = "Rec709 RGB"; // NOTRANSLATE: Color-profile identifier.
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_470_6_System_M:
 			profile = get_profile([](){ return cmsBuildGamma(nullptr, 2.2F); });
-			trc_name = "Gamma2.2 RGB";
+			trc_name = "Gamma2.2 RGB"; // NOTRANSLATE: Color-profile identifier.
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_470_6_System_B_G:
 			profile = get_profile([](){ return cmsBuildGamma(nullptr, 2.8F); });
-			trc_name = "Gamma2.8 RGB";
+			trc_name = "Gamma2.8 RGB"; // NOTRANSLATE: Color-profile identifier.
 			break;
 		case heif_transfer_characteristic_linear:
 			profile = get_profile([](){ return cmsBuildGamma(nullptr, 1.0F); });

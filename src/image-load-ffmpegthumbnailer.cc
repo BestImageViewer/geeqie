@@ -65,9 +65,9 @@ private:
 void image_loader_ft_log_cb(ThumbnailerLogLevel log_level, const char* msg)
 {
 	if (log_level == ThumbnailerLogLevelError)
-		log_printf("ImageLoaderFFmpegthumbnailer: %s",msg);
+		log_printf("ImageLoaderFFmpegthumbnailer: %s",msg); // NOTRANSLATE: Diagnostic message.
 	else
-		DEBUG_1("ImageLoaderFFmpegthumbnailer: %s",msg);
+		DEBUG_1("ImageLoaderFFmpegthumbnailer: %s",msg); // NOTRANSLATE: Diagnostic message.
 }
 #endif
 

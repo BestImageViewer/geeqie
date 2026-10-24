@@ -78,8 +78,8 @@ static FileData *lua_check_image(lua_State *L, int index)
 {
 	FileData **fd;
 	luaL_checktype(L, index, LUA_TUSERDATA);
-	fd = static_cast<FileData **>(luaL_checkudata(L, index, "Image"));
-	if (fd == nullptr) luaL_typerror(L, index, "Image");
+	fd = static_cast<FileData **>(luaL_checkudata(L, index, "Image")); // NOTRANSLATE: Lua API identifier or diagnostic.
+	if (fd == nullptr) luaL_typerror(L, index, "Image"); // NOTRANSLATE: Lua API identifier or diagnostic.
 	return *fd;
 }
 
@@ -100,7 +100,7 @@ static int lua_image_get_exif(lua_State *L)
 	exif = exif_read_fd(fd);
 
 	exif_data = static_cast<ExifData **>(lua_newuserdata(L, sizeof(ExifData *)));
-	luaL_getmetatable(L, "Exif");
+	luaL_getmetatable(L, "Exif"); // NOTRANSLATE: Lua API identifier or diagnostic.
 	lua_setmetatable(L, -2);
 
 	*exif_data = exif;
@@ -211,8 +211,8 @@ static ExifData *lua_check_exif(lua_State *L, int index)
 {
 	ExifData **exif;
 	luaL_checktype(L, index, LUA_TUSERDATA);
-	exif = static_cast<ExifData **>(luaL_checkudata(L, index, "Exif"));
-	if (exif == nullptr) luaL_typerror(L, index, "Exif");
+	exif = static_cast<ExifData **>(luaL_checkudata(L, index, "Exif")); // NOTRANSLATE: Lua API identifier or diagnostic.
+	if (exif == nullptr) luaL_typerror(L, index, "Exif"); // NOTRANSLATE: Lua API identifier or diagnostic.
 	return *exif;
 }
 
@@ -251,8 +251,8 @@ static int lua_exif_get_datum(lua_State *L)
 
 	g_autofree gchar *value = exif_get_data_as_text(exif, key);
 
-	if (strcmp(key, "Exif.Photo.DateTimeDigitized") == 0 ||
-	    strcmp(key, "Exif.Photo.DateTimeOriginal") == 0)
+	if (strcmp(key, "Exif.Photo.DateTimeDigitized") == 0 || // NOTRANSLATE: Metadata key defined by the file format.
+	    strcmp(key, "Exif.Photo.DateTimeOriginal") == 0) // NOTRANSLATE: Metadata key defined by the file format.
 		{
 		std::tm tm{};
 		if (value && strptime(value, "%Y:%m:%d %H:%M:%S", &tm))
@@ -313,8 +313,8 @@ void lua_init()
 			{nullptr, nullptr}
 	};
 
-	LUA_register_global(L, "Image", image_methods);
-	luaL_newmetatable(L, "Image");
+	LUA_register_global(L, "Image", image_methods); // NOTRANSLATE: Lua API identifier or diagnostic.
+	luaL_newmetatable(L, "Image"); // NOTRANSLATE: Lua API identifier or diagnostic.
 	LUA_register_meta(L, meta_methods);
 	lua_pushliteral(L, "__index");
 	lua_pushvalue(L, -3);
@@ -325,8 +325,8 @@ void lua_init()
 	lua_pop(L, 1);
 	lua_pop(L, 1);
 
-	LUA_register_global(L, "Exif", exif_methods);
-	luaL_newmetatable(L, "Exif");
+	LUA_register_global(L, "Exif", exif_methods); // NOTRANSLATE: Lua API identifier or diagnostic.
+	luaL_newmetatable(L, "Exif"); // NOTRANSLATE: Lua API identifier or diagnostic.
 	LUA_register_meta(L, meta_methods);
 	lua_pushliteral(L, "__index");
 	lua_pushvalue(L, -3);
@@ -356,13 +356,13 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 
 	/* Collection Table (Dummy at the moment) */
 	lua_newtable(L);
-	lua_setglobal(L, "Collection");
+	lua_setglobal(L, "Collection"); // NOTRANSLATE: Lua API identifier or diagnostic.
 
 	/* Current Image */
 	auto image_data = static_cast<FileData **>(lua_newuserdata(L, sizeof(FileData *)));
-	luaL_getmetatable(L, "Image");
+	luaL_getmetatable(L, "Image"); // NOTRANSLATE: Lua API identifier or diagnostic.
 	lua_setmetatable(L, -2);
-	lua_setglobal(L, "Image");
+	lua_setglobal(L, "Image"); // NOTRANSLATE: Lua API identifier or diagnostic.
 
 	*image_data = fd;
 
@@ -378,7 +378,7 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 
 	if (result)
 		{
-		return g_strdup_printf("Error running lua script: %s", lua_tostring(L, -1));
+		return g_strdup_printf("Error running lua script: %s", lua_tostring(L, -1)); // NOTRANSLATE: Lua API identifier or diagnostic.
 		}
 
 	gchar *data = g_strdup(lua_tostring(L, -1));
@@ -386,7 +386,7 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 	g_autofree gchar *tmp = g_locale_to_utf8(data, strlen(data), nullptr, nullptr, &error);
 	if (error)
 		{
-		log_printf("Error converting lua output from locale to UTF-8: %s\n", error->message);
+		log_printf("Error converting lua output from locale to UTF-8: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 	else
 		{

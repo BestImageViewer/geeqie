@@ -93,12 +93,12 @@ uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, s
 	JxlDecoderPtr dec = JxlDecoderMake(nullptr);
 	if (!dec)
 		{
-		log_printf("JxlDecoderCreate failed\n");
+		log_printf("JxlDecoderCreate failed\n"); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 	if (JXL_DEC_SUCCESS != JxlDecoderSubscribeEvents(dec.get(), JXL_DEC_BASIC_INFO | JXL_DEC_FULL_IMAGE))
 		{
-		log_printf("JxlDecoderSubscribeEvents failed\n");
+		log_printf("JxlDecoderSubscribeEvents failed\n"); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
@@ -120,15 +120,15 @@ uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, s
 		switch (status)
 			{
 			case JXL_DEC_ERROR:
-				log_printf("Decoder error\n");
+				log_printf("Decoder error\n"); // NOTRANSLATE: Diagnostic message.
 				return nullptr;
 			case JXL_DEC_NEED_MORE_INPUT:
-				log_printf("Error, already provided all input\n");
+				log_printf("Error, already provided all input\n"); // NOTRANSLATE: Diagnostic message.
 				return nullptr;
 			case JXL_DEC_BASIC_INFO:
 				if (JXL_DEC_SUCCESS != JxlDecoderGetBasicInfo(dec.get(), &info))
 					{
-					log_printf("JxlDecoderGetBasicInfo failed\n");
+					log_printf("JxlDecoderGetBasicInfo failed\n"); // NOTRANSLATE: Diagnostic message.
 					return nullptr;
 					}
 				xsize = info.xsize;
@@ -142,19 +142,19 @@ uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, s
 				size_t buffer_size;
 				if (JXL_DEC_SUCCESS != JxlDecoderImageOutBufferSize(dec.get(), &format, &buffer_size))
 					{
-					log_printf("JxlDecoderImageOutBufferSize failed\n");
+					log_printf("JxlDecoderImageOutBufferSize failed\n"); // NOTRANSLATE: Diagnostic message.
 					return nullptr;
 					}
 				if (buffer_size != stride * ysize)
 					{
-					log_printf("Invalid out buffer size %zu %zu\n", buffer_size, stride * ysize);
+					log_printf("Invalid out buffer size %zu %zu\n", buffer_size, stride * ysize); // NOTRANSLATE: Diagnostic message.
 					return nullptr;
 					}
 				size_t pixels_buffer_size = buffer_size * sizeof(uint8_t);
 				pixels.reset(static_cast<uint8_t *>(malloc(pixels_buffer_size)));
 				if (JXL_DEC_SUCCESS != JxlDecoderSetImageOutBuffer(dec.get(), &format, pixels.get(), pixels_buffer_size))
 					{
-					log_printf("JxlDecoderSetImageOutBuffer failed\n");
+					log_printf("JxlDecoderSetImageOutBuffer failed\n"); // NOTRANSLATE: Diagnostic message.
 					return nullptr;
 					}
 				}
@@ -163,10 +163,10 @@ uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, s
 				// This means the decoder has decoded all pixels into the buffer.
 				return pixels.release();
 			case JXL_DEC_SUCCESS:
-				log_printf("Decoding finished before receiving pixel data\n");
+				log_printf("Decoding finished before receiving pixel data\n"); // NOTRANSLATE: Diagnostic message.
 				return nullptr;
 			default:
-				log_printf("Unexpected decoder status: %d\n", status);
+				log_printf("Unexpected decoder status: %d\n", status); // NOTRANSLATE: Diagnostic message.
 				return nullptr;
 			}
 		}

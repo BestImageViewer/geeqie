@@ -88,7 +88,7 @@ void FileCache::notify_cb(FileData *fd, NotifyType type, gpointer data)
 	/* invalidate the entry on each file change */
 	if (!(type & (NOTIFY_REREAD | NOTIFY_CHANGE))) return;
 
-	DEBUG_1("Notify cache: %s %04x", fd->path, type);
+	DEBUG_1("Notify cache: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	auto *fc = static_cast<FileCache *>(data);
 	fc->dump();

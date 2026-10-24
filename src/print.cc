@@ -178,7 +178,7 @@ template<const gchar *title>
 void print_set_font_cb(GtkWidget *widget, gpointer data)
 {
 	g_autoptr(GtkFontDialog) dialog = gtk_font_dialog_new();
-	gtk_font_dialog_set_title(dialog, title);
+	gtk_font_dialog_set_title(dialog, _(title));
 	gtk_font_dialog_set_modal(dialog, TRUE);
 
 	const gchar *font = *static_cast<gchar **>(data);
@@ -320,7 +320,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	static constexpr gchar image_text_font_title[] = "Image text font";
+	static constexpr gchar image_text_font_title[] = N_("Image text font");
 	pref_button_new(hbox, GQ_ICON_SELECT_FONT, _("Font"),
 	                G_CALLBACK(print_set_font_cb<image_text_font_title>), &options->printer.image_font);
 
@@ -382,7 +382,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	static constexpr gchar page_text_font_title[] = "Page text font";
+	static constexpr gchar page_text_font_title[] = N_("Page text font");
 	pref_button_new(hbox, GQ_ICON_SELECT_FONT, _("Font"),
 	                G_CALLBACK(print_set_font_cb<page_text_font_title>), &options->printer.page_font);
 }
@@ -612,7 +612,7 @@ GtkPrintSettings *load_print_settings()
 	gtk_print_settings_load_file(settings, print_settings_path, &error);
 	if (error)
 		{
-		log_printf("Error: Printer settings load failed:\n%s", error->message);
+		log_printf("Error: Printer settings load failed:\n%s", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return settings;
@@ -627,7 +627,7 @@ void save_print_settings(GtkPrintOperation *operation)
 	gtk_print_settings_to_file(print_settings, print_settings_path, &error);
 	if (error)
 		{
-		log_printf("Error: Print settings save failed:\n%s", error->message);
+		log_printf("Error: Print settings save failed:\n%s", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 }
 
@@ -640,7 +640,7 @@ GtkPageSetup *load_page_setup()
 	gtk_page_setup_load_file(page_setup, page_setup_path, &error);
 	if (error)
 		{
-		log_printf("Error: Print page setup load failed:\n%s", error->message);
+		log_printf("Error: Print page setup load failed:\n%s", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return page_setup;
@@ -655,7 +655,7 @@ void save_page_setup(GtkPrintOperation *operation)
 	gtk_page_setup_to_file(page_setup, page_setup_path, &error);
 	if (error)
 		{
-		log_printf("Error: Print page setup save failed:\n%s", error->message);
+		log_printf("Error: Print page setup save failed:\n%s", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 }
 

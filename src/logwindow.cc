@@ -364,12 +364,12 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	pref_spin_new(hbox, _("Debug level:"), nullptr, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX, 1, 0,
 	              get_debug_level(), G_CALLBACK(debug_changed_cb), nullptr);
 
-	GtkWidget *pause = gtk_toggle_button_new_with_label("Pause");
+	GtkWidget *pause = gtk_toggle_button_new_with_label(_("Pause"));
 	gtk_widget_set_tooltip_text(pause, _("Pause scrolling"));
 	gtk_box_append(GTK_BOX(hbox), pause);
 	g_signal_connect(pause, "toggled", G_CALLBACK(log_window_pause_cb), nullptr);
 
-	GtkWidget *wrap = gtk_toggle_button_new_with_label("Wrap");
+	GtkWidget *wrap = gtk_toggle_button_new_with_label(_("Wrap"));
 	gtk_widget_set_tooltip_text(wrap, _("Enable line wrap"));
 	gtk_box_append(GTK_BOX(hbox), wrap);
 	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), text);
@@ -430,7 +430,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 		logwin->color_tags[i] = gtk_text_buffer_create_tag(buffer, tag_name,
 		                                                   "foreground", tags[i],
-		                                                   "family", "MonoSpace",
+		                                                   "family", "MonoSpace", // NOTRANSLATE: Font description.
 		                                                   NULL);
 		}
 

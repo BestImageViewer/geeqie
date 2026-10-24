@@ -46,7 +46,7 @@ void image_overlay_init(ConfOptions::ImageOverlay &image_overlay)
 	image_overlay.y = -10;
 	image_overlay.text_color = { 0, 0, 0, 255 };
 	image_overlay.background = { 240, 240, 240, 210 };
-	image_overlay.font = g_strdup("Sans 10");
+	image_overlay.font = g_strdup("Sans 10"); // NOTRANSLATE: Font description.
 }
 
 } // namespace
@@ -241,8 +241,8 @@ ConfOptions *conf_options_new()
 	options->printer.image_scale = 100;
 	options->printer.proof_width = 144;
 	options->printer.proof_height = 144;
-	options->printer.image_font = g_strdup("Serif 10");
-	options->printer.page_font = g_strdup("Serif 10");
+	options->printer.image_font = g_strdup("Serif 10"); // NOTRANSLATE: Font description.
+	options->printer.page_font = g_strdup("Serif 10"); // NOTRANSLATE: Font description.
 	options->printer.page_text = g_strdup("");
 	options->printer.image_text_position = FOOTER_1;
 	options->printer.page_text_position = HEADER_1;
@@ -326,12 +326,12 @@ gboolean load_options(ConfOptions *)
 		{
 		g_autofree gchar *rc_path = g_build_filename(GQ_SYSTEM_WIDE_DIR, RC_FILE_NAME, NULL);
 		success = isfile(rc_path) && load_config_from_file(rc_path, TRUE);
-		DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed");
+		DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed"); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
 	success = isfile(rc_path) && load_config_from_file(rc_path, TRUE);
-	DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed");
+	DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed"); // NOTRANSLATE: Diagnostic message.
 	return success;
 }
 

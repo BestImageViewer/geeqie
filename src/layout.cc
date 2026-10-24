@@ -212,7 +212,7 @@ void layout_load_attributes(LayoutOptions &lop, const gchar **attribute_names, c
 		if (READ_BOOL(lop, animate)) continue;
 		if (READ_INT(lop, workspace)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (id && !is_current_layout_id(id))
@@ -980,7 +980,7 @@ void layout_status_update_progress(LayoutWindow *lw, gdouble val, const gchar *t
 
 	/* Give priority to the loading meta data message
 	 */
-	if(!g_strcmp0(text, "Loading thumbs…"))
+	if(!g_strcmp0(text, "Loading thumbs…")) // NOTRANSLATE: Internal progress-message comparison.
 		{
 		if (meta)
 			{
@@ -2702,7 +2702,7 @@ static void layout_config_apply_cb(GtkWidget *, gpointer data)
 
 static void layout_config_help_cb(GtkWidget *, gpointer)
 {
-	help_window_show("GuideOptionsLayout.html");
+	help_window_show("GuideOptionsLayout.html"); // NOTRANSLATE: Documentation filename.
 }
 
 static void layout_config_ok_cb(GtkWidget *widget, gpointer data)
@@ -2742,7 +2742,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	layout_sync_options_with_current_state(lw);
 	copy_layout_options(lc->options, lw->options);
 
-	lc->configwindow = window_new("Layout", PIXBUF_INLINE_ICON_CONFIG, _("Window options and layout"));
+	lc->configwindow = window_new("Layout", PIXBUF_INLINE_ICON_CONFIG, _("Window options and layout")); // NOTRANSLATE: Persistent widget or action identifier.
 	window_close_on_escape(lc->configwindow, GTK_PHASE_CAPTURE);
 	DEBUG_NAME(lc->configwindow);
 	if (lw && lw->window) gtk_window_set_transient_for(GTK_WINDOW(lc->configwindow), GTK_WINDOW(lw->window));

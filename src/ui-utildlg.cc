@@ -275,7 +275,7 @@ void generic_dialog_windows_load_config(const gchar **attribute_names, const gch
 		if (READ_INT_FULL("w", rect.width)) continue;
 		if (READ_INT_FULL("h", rect.height)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (title && title[0] != 0)

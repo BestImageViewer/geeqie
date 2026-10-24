@@ -1290,13 +1290,13 @@ static void file_util_perform_ci(UtilityData *ud)
 			{
 			if (editor_blocks_file(ud->external_command))
 				{
-				DEBUG_1("Starting %s and waiting for results", ud->external_command);
+				DEBUG_1("Starting %s and waiting for results", ud->external_command); // NOTRANSLATE: Diagnostic message.
 				flags = start_editor_from_filelist_full(ud->external_command, ud->flist, nullptr, file_util_perform_ci_cb, ud);
 				}
 			else
 				{
 				/* start the editor without callback and finish the operation internally */
-				DEBUG_1("Starting %s and finishing the operation", ud->external_command);
+				DEBUG_1("Starting %s and finishing the operation", ud->external_command); // NOTRANSLATE: Diagnostic message.
 				flags = start_editor_from_filelist(ud->external_command, ud->flist);
 				file_util_perform_ci_internal(ud);
 				}
@@ -2113,7 +2113,7 @@ void file_util_dialog_run(UtilityData *ud)
 				case UtilityType::RENAME:
 					file_util_dialog_init_source_dest(ud, TRUE);
 
-					if (!options->save_dialog_window_positions || !generic_dialog_find_window("Rename", "dlg_confirm"))
+					if (!options->save_dialog_window_positions || !generic_dialog_find_window("Rename", "dlg_confirm")) // NOTRANSLATE: Persistent widget or action identifier.
 						{
 						gtk_window_set_default_size(GTK_WINDOW(ud->gd->dialog), RENAME_WINDOW_WIDTH, RENAME_WINDOW_HEIGHT);
 						}
@@ -2845,7 +2845,7 @@ static gboolean file_util_rename_dir_prepare(UtilityData *ud, const gchar *new_p
 
 		ok = file_data_sc_add_ci_rename(fd, np);
 
-		DEBUG_1("Dir rename: %s -> %s", fd->path, np);
+		DEBUG_1("Dir rename: %s -> %s", fd->path, np); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (ok)
@@ -3193,7 +3193,7 @@ static void create_folder_cb(GFile *folder, gpointer data)
 			{
 			log_printf("warning, folder %s was not created\n", current_folder);
 
-			g_autoptr(GNotification) notification = g_notification_new("Geeqie");
+			g_autoptr(GNotification) notification = g_notification_new("Geeqie"); // NOTRANSLATE: Application name.
 			GApplication *app = g_application_get_default ();
 
 			g_notification_set_title(notification, _("Create Folder"));

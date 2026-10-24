@@ -471,7 +471,7 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 			}
 		if (!force && !target_missing && current_time - nd->last_update < 2)
 			{
-			DEBUG_1("Too frequent update of %s", nd->fd->path);
+			DEBUG_1("Too frequent update of %s", nd->fd->path); // NOTRANSLATE: Diagnostic message.
 			return TRUE;
 			}
 		file_data_check_changed_files(nd->fd); /* make sure we have recent info */

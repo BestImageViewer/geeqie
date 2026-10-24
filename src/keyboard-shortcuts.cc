@@ -24,7 +24,7 @@ gchar *resource_text_load_extra()
 
 	if (!bytes)
 		{
-		log_printf("Failed to load resource keyboard-shortcuts-extra.ui.inc: %s", error ? error->message : "unknown error");
+		log_printf("Failed to load resource keyboard-shortcuts-extra.ui.inc: %s", error ? error->message : "unknown error"); // NOTRANSLATE: Diagnostic message.
 
 		return nullptr;
 		}
@@ -298,7 +298,7 @@ GtkShortcutsWindow *shortcuts_window_new_from_xml(const gchar *xml)
 
 	if (!builder)
 		{
-		log_printf("Failed to create GtkBuilder from shortcuts XML");
+		log_printf("Failed to create GtkBuilder from shortcuts XML"); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
@@ -306,7 +306,7 @@ GtkShortcutsWindow *shortcuts_window_new_from_xml(const gchar *xml)
 
 	if (!obj || !GTK_IS_SHORTCUTS_WINDOW(obj))
 		{
-		log_printf("GtkShortcutsWindow object not found in generated XML");
+		log_printf("GtkShortcutsWindow object not found in generated XML"); // NOTRANSLATE: Diagnostic message.
 		g_object_unref(builder);
 		return nullptr;
 		}

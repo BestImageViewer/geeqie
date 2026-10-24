@@ -69,28 +69,28 @@ enum MetadataKey {
  *  @brief Tags that will be written to all files in a group - selected by: options->metadata.sync_grouped_files, Preferences/Metadata/Write The Same Description Tags To All Grouped Sidecars
  */
 constexpr std::array<const gchar *, 22> group_keys{
-	"Xmp.dc.title",
-	"Xmp.photoshop.Urgency",
-	"Xmp.photoshop.Category",
-	"Xmp.photoshop.SupplementalCategory",
-	"Xmp.dc.subject",
-	"Xmp.iptc.Location",
-	"Xmp.photoshop.Instruction",
-	"Xmp.photoshop.DateCreated",
-	"Xmp.dc.creator",
-	"Xmp.photoshop.AuthorsPosition",
-	"Xmp.photoshop.City",
-	"Xmp.photoshop.State",
-	"Xmp.iptc.CountryCode",
-	"Xmp.photoshop.Country",
-	"Xmp.photoshop.TransmissionReference",
-	"Xmp.photoshop.Headline",
-	"Xmp.photoshop.Credit",
-	"Xmp.photoshop.Source",
-	"Xmp.dc.rights",
-	"Xmp.dc.description",
-	"Xmp.photoshop.CaptionWriter",
-	"Xmp.xmp.Rating",
+	"Xmp.dc.title", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.Urgency", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.Category", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.SupplementalCategory", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.dc.subject", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.iptc.Location", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.Instruction", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.DateCreated", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.dc.creator", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.AuthorsPosition", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.City", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.State", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.iptc.CountryCode", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.Country", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.TransmissionReference", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.Headline", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.Credit", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.Source", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.dc.rights", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.dc.description", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.photoshop.CaptionWriter", // NOTRANSLATE: Metadata key defined by the file format.
+	"Xmp.xmp.Rating", // NOTRANSLATE: Metadata key defined by the file format.
 };
 
 GtkTreeStore *keyword_tree;
@@ -389,7 +389,7 @@ void metadata_notify_cb(FileData *fd, NotifyType type, gpointer)
 
 		if (g_list_find(metadata_write_queue, fd))
 			{
-			DEBUG_1("Notify metadata: %s %04x", fd->path, type);
+			DEBUG_1("Notify metadata: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 			if (!isname(fd->path))
 				{
 				/* ignore deleted files */
@@ -586,7 +586,7 @@ static gboolean metadata_legacy_write(FileData *fd)
 
 	g_assert(fd->change && fd->change->dest);
 
-	DEBUG_1("Saving description: %s", fd->change->dest);
+	DEBUG_1("Saving description: %s", fd->change->dest); // NOTRANSLATE: Diagnostic message.
 
 	if (!fd->modified_xmp) return TRUE;
 
@@ -945,12 +945,12 @@ gboolean metadata_write_GPS_coord(FileData *fd, const gchar *key, gdouble value)
 		param = -param;
 	deg = param;
 	min = (param * 60) - (deg * 60);
-	if (g_strcmp0(key, "Xmp.exif.GPSLongitude") == 0)
+	if (g_strcmp0(key, "Xmp.exif.GPSLongitude") == 0) // NOTRANSLATE: Metadata key defined by the file format.
 		if (value < 0)
 			ref = "W";
 		else
 			ref = "E";
-	else if (g_strcmp0(key, "Xmp.exif.GPSLatitude") == 0)
+	else if (g_strcmp0(key, "Xmp.exif.GPSLatitude") == 0) // NOTRANSLATE: Metadata key defined by the file format.
 		if (value < 0)
 			ref = "S";
 		else
@@ -1861,7 +1861,7 @@ GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *pa
 		if (READ_BOOL_FULL("kw", is_kw)) continue;
 		if (READ_CHAR_FULL("mark", mark_str)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (name && name[0])

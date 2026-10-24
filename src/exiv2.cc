@@ -72,28 +72,28 @@ struct AltKey
 
 /* this is a list of keys that should be converted, even with the older Exiv2 which does not support it directly */
 static constexpr AltKey alt_keys[] = {
-	{"Xmp.tiff.Orientation",		"Exif.Image.Orientation", 	nullptr},
-	{"Xmp.dc.title",			nullptr,				"Iptc.Application2.ObjectName"		},
-	{"Xmp.photoshop.Urgency",		nullptr,				"Iptc.Application2.Urgency"		},
-	{"Xmp.photoshop.Category",		nullptr,				"Iptc.Application2.Category"		},
-	{"Xmp.photoshop.SupplementalCategory",	nullptr,				"Iptc.Application2.SuppCategory"	},
-	{"Xmp.dc.subject",			nullptr,				"Iptc.Application2.Keywords"		},
-	{"Xmp.iptc.Location",			nullptr,				"Iptc.Application2.LocationName"	},
-	{"Xmp.photoshop.Instruction",		nullptr,				"Iptc.Application2.SpecialInstructions"	},
-	{"Xmp.photoshop.DateCreated",		nullptr,				"Iptc.Application2.DateCreated"		},
-	{"Xmp.dc.creator",			nullptr,				"Iptc.Application2.Byline"		},
-	{"Xmp.photoshop.AuthorsPosition",	nullptr,				"Iptc.Application2.BylineTitle"		},
-	{"Xmp.photoshop.City",			nullptr,				"Iptc.Application2.City"		},
-	{"Xmp.photoshop.State",			nullptr,				"Iptc.Application2.ProvinceState"	},
-	{"Xmp.iptc.CountryCode",		nullptr,				"Iptc.Application2.CountryCode"		},
-	{"Xmp.photoshop.Country",		nullptr,				"Iptc.Application2.CountryName"		},
-	{"Xmp.photoshop.TransmissionReference",	nullptr,				"Iptc.Application2.TransmissionReference"},
-	{"Xmp.photoshop.Headline",		nullptr,				"Iptc.Application2.Headline"		},
-	{"Xmp.photoshop.Credit",		nullptr,				"Iptc.Application2.Credit"		},
-	{"Xmp.photoshop.Source",		nullptr,				"Iptc.Application2.Source"		},
-	{"Xmp.dc.rights",			nullptr,				"Iptc.Application2.Copyright"		},
-	{"Xmp.dc.description",			nullptr,				"Iptc.Application2.Caption"		},
-	{"Xmp.photoshop.CaptionWriter",		nullptr,				"Iptc.Application2.Writer"		},
+	{"Xmp.tiff.Orientation",		"Exif.Image.Orientation", 	nullptr}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.dc.title",			nullptr,				"Iptc.Application2.ObjectName"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.Urgency",		nullptr,				"Iptc.Application2.Urgency"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.Category",		nullptr,				"Iptc.Application2.Category"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.SupplementalCategory",	nullptr,				"Iptc.Application2.SuppCategory"	}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.dc.subject",			nullptr,				"Iptc.Application2.Keywords"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.iptc.Location",			nullptr,				"Iptc.Application2.LocationName"	}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.Instruction",		nullptr,				"Iptc.Application2.SpecialInstructions"	}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.DateCreated",		nullptr,				"Iptc.Application2.DateCreated"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.dc.creator",			nullptr,				"Iptc.Application2.Byline"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.AuthorsPosition",	nullptr,				"Iptc.Application2.BylineTitle"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.City",			nullptr,				"Iptc.Application2.City"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.State",			nullptr,				"Iptc.Application2.ProvinceState"	}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.iptc.CountryCode",		nullptr,				"Iptc.Application2.CountryCode"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.Country",		nullptr,				"Iptc.Application2.CountryName"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.TransmissionReference",	nullptr,				"Iptc.Application2.TransmissionReference"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.Headline",		nullptr,				"Iptc.Application2.Headline"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.Credit",		nullptr,				"Iptc.Application2.Credit"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.Source",		nullptr,				"Iptc.Application2.Source"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.dc.rights",			nullptr,				"Iptc.Application2.Copyright"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.dc.description",			nullptr,				"Iptc.Application2.Caption"		}, // NOTRANSLATE: Metadata key defined by the file format.
+	{"Xmp.photoshop.CaptionWriter",		nullptr,				"Iptc.Application2.Writer"		}, // NOTRANSLATE: Metadata key defined by the file format.
 	};
 
 #ifdef DEBUG
@@ -140,7 +140,7 @@ struct ExifData
 
 	virtual void writeMetadata(gchar * = nullptr)
 	{
-		g_critical("Unsupported method of writing metadata");
+		g_critical("Unsupported method of writing metadata"); // NOTRANSLATE: Diagnostic message.
 	}
 
 	virtual ExifData *original()
@@ -234,9 +234,9 @@ public:
 			if (auto gps = video_metadata_read_gps(path))
 				{
 				auto &data = exifData();
-				video_gps_set_coordinate(data, "Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef",
+				video_gps_set_coordinate(data, "Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef", // NOTRANSLATE: Metadata key defined by the file format.
 				                         gps->latitude, "N", "S");
-				video_gps_set_coordinate(data, "Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef",
+				video_gps_set_coordinate(data, "Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef", // NOTRANSLATE: Metadata key defined by the file format.
 				                         gps->longitude, "E", "W");
 				}
 			}
@@ -382,7 +382,7 @@ public:
 			}
 		catch (...)
 			{
-			DEBUG_1("Exiv2: Catching bug\n");
+			DEBUG_1("Exiv2: Catching bug\n"); // NOTRANSLATE: Diagnostic message.
 			}
 		initialExifData_ = exifData_;
 		initialIptcData_ = iptcData_;
@@ -580,40 +580,40 @@ gboolean exif_copy_crop_metadata(FileData *source, const gchar *destination, gin
 		Exiv2::ExifData exif;
 		// Camera, exposure, and GPS information are useful; source file layout and thumbnails are not.
 		const gchar *image_keys[] = {
-		    "Exif.Image.Make", "Exif.Image.Model", "Exif.Image.DateTime", "Exif.Image.Artist",
-		    "Exif.Image.Copyright", "Exif.Image.ImageDescription", "Exif.Image.Software",
-		    "Exif.Image.XPTitle", "Exif.Image.XPComment", "Exif.Image.XPAuthor", "Exif.Image.XPKeywords",
-		    "Exif.Image.XPSubject", "Exif.Image.XResolution", "Exif.Image.YResolution", "Exif.Image.ResolutionUnit"
+		    "Exif.Image.Make", "Exif.Image.Model", "Exif.Image.DateTime", "Exif.Image.Artist", // NOTRANSLATE: Metadata key defined by the file format.
+		    "Exif.Image.Copyright", "Exif.Image.ImageDescription", "Exif.Image.Software", // NOTRANSLATE: Metadata key defined by the file format.
+		    "Exif.Image.XPTitle", "Exif.Image.XPComment", "Exif.Image.XPAuthor", "Exif.Image.XPKeywords", // NOTRANSLATE: Metadata key defined by the file format.
+		    "Exif.Image.XPSubject", "Exif.Image.XResolution", "Exif.Image.YResolution", "Exif.Image.ResolutionUnit" // NOTRANSLATE: Metadata key defined by the file format.
 		};
 		for (const auto &item : metadata->exifData())
 			{
 			const auto key = item.key();
-			if ((key.compare(0, 11, "Exif.Photo.") == 0 && key != "Exif.Photo.MakerNote") ||
-			    key.compare(0, 13, "Exif.GPSInfo.") == 0 ||
+			if ((key.compare(0, 11, "Exif.Photo.") == 0 && key != "Exif.Photo.MakerNote") || // NOTRANSLATE: Metadata key defined by the file format.
+			    key.compare(0, 13, "Exif.GPSInfo.") == 0 || // NOTRANSLATE: Metadata key defined by the file format.
 			    std::any_of(std::begin(image_keys), std::end(image_keys), [&key](const gchar *name) { return key == name; }))
 				{
 				exif.add(item);
 				}
 			}
-		exif["Exif.Image.Orientation"] = static_cast<uint16_t>(1);
-		exif["Exif.Image.ImageWidth"] = static_cast<uint32_t>(width);
-		exif["Exif.Image.ImageLength"] = static_cast<uint32_t>(height);
-		exif["Exif.Photo.PixelXDimension"] = static_cast<uint32_t>(width);
-		exif["Exif.Photo.PixelYDimension"] = static_cast<uint32_t>(height);
+		exif["Exif.Image.Orientation"] = static_cast<uint16_t>(1); // NOTRANSLATE: Metadata key defined by the file format.
+		exif["Exif.Image.ImageWidth"] = static_cast<uint32_t>(width); // NOTRANSLATE: Metadata key defined by the file format.
+		exif["Exif.Image.ImageLength"] = static_cast<uint32_t>(height); // NOTRANSLATE: Metadata key defined by the file format.
+		exif["Exif.Photo.PixelXDimension"] = static_cast<uint32_t>(width); // NOTRANSLATE: Metadata key defined by the file format.
+		exif["Exif.Photo.PixelYDimension"] = static_cast<uint32_t>(height); // NOTRANSLATE: Metadata key defined by the file format.
 		auto xmp = metadata->xmpData();
 		for (auto item = xmp.begin(); item != xmp.end();)
 			{
 			const auto key = item->key();
-			if (key.compare(0, 8, "Xmp.crs.") == 0 || key == "Xmp.xmp.Thumbnails")
+			if (key.compare(0, 8, "Xmp.crs.") == 0 || key == "Xmp.xmp.Thumbnails") // NOTRANSLATE: Metadata key defined by the file format.
 				item = xmp.erase(item);
 			else
 				++item;
 			}
-		xmp["Xmp.tiff.Orientation"] = "1";
-		xmp["Xmp.tiff.ImageWidth"] = std::to_string(width);
-		xmp["Xmp.tiff.ImageLength"] = std::to_string(height);
-		xmp["Xmp.exif.PixelXDimension"] = std::to_string(width);
-		xmp["Xmp.exif.PixelYDimension"] = std::to_string(height);
+		xmp["Xmp.tiff.Orientation"] = "1"; // NOTRANSLATE: Metadata key defined by the file format.
+		xmp["Xmp.tiff.ImageWidth"] = std::to_string(width); // NOTRANSLATE: Metadata key defined by the file format.
+		xmp["Xmp.tiff.ImageLength"] = std::to_string(height); // NOTRANSLATE: Metadata key defined by the file format.
+		xmp["Xmp.exif.PixelXDimension"] = std::to_string(width); // NOTRANSLATE: Metadata key defined by the file format.
+		xmp["Xmp.exif.PixelYDimension"] = std::to_string(height); // NOTRANSLATE: Metadata key defined by the file format.
 		output->setExifData(exif);
 		output->setIptcData(metadata->iptcData());
 		output->setXmpData(xmp);
@@ -1145,7 +1145,7 @@ guchar *exif_get_color_profile(ExifData *exif, guint *data_len)
 	guchar *ret = exif->get_jpeg_color_profile(data_len);
 	if (ret) return ret;
 
-	ExifItem *prof_item = exif_get_item(exif, "Exif.Image.InterColorProfile");
+	ExifItem *prof_item = exif_get_item(exif, "Exif.Image.InterColorProfile"); // NOTRANSLATE: Metadata key defined by the file format.
 	if (!prof_item) return nullptr;
 
 	const Exiv2::TypeId type_id = exif_item_get_type_id(prof_item);

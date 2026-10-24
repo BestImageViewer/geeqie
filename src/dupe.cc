@@ -1262,9 +1262,9 @@ static void dupe_match_rank(DupeWindow *dw)
 
 	if (required_debug_level(2)) dupe_match_print_list(list);
 
-	DEBUG_1("Similar items: %u", g_list_length(list));
+	DEBUG_1("Similar items: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
 	list = dupe_match_group_trim(list, dw);
-	DEBUG_1("Unique groups: %u", g_list_length(list));
+	DEBUG_1("Unique groups: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
 
 	dupe_match_sort_groups(list);
 
@@ -3962,7 +3962,7 @@ static gint dupe_window_delete(GtkWidget *, gpointer data)
 
 static void dupe_help_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	help_window_show("GuideImageSearchFindingDuplicates.html");
+	help_window_show("GuideImageSearchFindingDuplicates.html"); // NOTRANSLATE: Documentation filename.
 }
 
 static gint default_sort_cb(GtkTreeModel *, GtkTreeIter *, GtkTreeIter *, gpointer)
@@ -4840,7 +4840,7 @@ static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify dupe: %s %04x", fd->path, type);
+	DEBUG_1("Notify dupe: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

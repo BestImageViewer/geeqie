@@ -98,8 +98,8 @@ TEST(KeyboardMap, PrefersAppThenMainThenRemainingWindow)
 	g_autoptr(GKeyFile) key_file = g_key_file_new();
 	g_autoptr(GPtrArray) shortcuts = g_ptr_array_new_with_free_func(g_free);
 
-	g_key_file_set_string(key_file, "win.dupe-win-delete", "accels", "Delete");
-	g_key_file_set_string(key_file, "win.main-win-delete", "accels", "Delete");
+	g_key_file_set_string(key_file, "win.dupe-win-delete", "accels", "Delete"); // NOTRANSLATE: Test accelerator spelling.
+	g_key_file_set_string(key_file, "win.main-win-delete", "accels", "Delete"); // NOTRANSLATE: Test accelerator spelling.
 	g_key_file_set_string(key_file, "win.dupe-win-open", "accels", "<Control>o");
 	g_key_file_set_string(key_file, "app.open", "accels", "<Control>o");
 	g_key_file_set_string(key_file, "win.dupe-win-rename", "accels", "F2");
@@ -120,7 +120,7 @@ TEST(KeyboardMap, FiltersSelectedWindowAndKeepsAppActions)
 	g_autoptr(GPtrArray) shortcuts = g_ptr_array_new_with_free_func(g_free);
 
 	g_key_file_set_string(key_file, "app.help", "accels", "F1");
-	g_key_file_set_string(key_file, "win.main-win-delete", "accels", "Delete");
+	g_key_file_set_string(key_file, "win.main-win-delete", "accels", "Delete"); // NOTRANSLATE: Test accelerator spelling.
 	g_key_file_set_string(key_file, "win.dupe-win-rename", "accels", "F2");
 
 	get_actions_and_accelerators(key_file, shortcuts, "win.main-win-");

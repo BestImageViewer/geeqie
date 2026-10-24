@@ -835,6 +835,8 @@ endif
 # Untranslated text checks
 untranslated_text_sh = find_program('untranslated-text.sh', dirs : buildauxdir, required : true)
 if untranslated_text_sh.found()
+    test('Untranslated text checker', icon_naming_python,
+         args : [buildauxdir / 'test-untranslated-text.py'], suite : 'analysis')
      foreach source_file : code_sources
         if fs.name(source_file).endswith('.cc')
             source_file_name = fs.name(source_file)

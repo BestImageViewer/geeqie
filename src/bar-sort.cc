@@ -505,7 +505,7 @@ static void bar_sort_set_action_cb(GtkWidget *button, gpointer data)
 
 static void bar_filter_help_cb(GenericDialog *, gpointer)
 {
-	help_window_show("GuidePluginsConfig.html#Geeqieextensions");
+	help_window_show("GuidePluginsConfig.html#Geeqieextensions"); // NOTRANSLATE: Documentation filename.
 }
 
 static void bar_filter_help_dialog()
@@ -538,7 +538,7 @@ static void bar_filter_message_cb(GtkGestureClick *gesture, gint, gdouble, gdoub
 
 static void bar_sort_help_cb(GtkWidget *, gpointer)
 {
-	help_window_show("GuideSidebarsSortManager.html");
+	help_window_show("GuideSidebarsSortManager.html"); // NOTRANSLATE: Documentation filename.
 }
 
 template<BarSort::Selection selection>
@@ -852,7 +852,7 @@ void bar_sort_cold_start(LayoutWindow *lw, const gchar **attribute_names, const 
 		if (READ_INT_CLAMP_FULL("selection", selection, 0, BarSort::SELECTION_COUNT - 1)) continue;
 		if (READ_CHAR(lw->options.bar_sort, filter_key)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	lw->options.bar_sort.action = static_cast<BarSort::Action>(action);

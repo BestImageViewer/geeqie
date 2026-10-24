@@ -125,7 +125,7 @@ gchar *path_to_utf8(const gchar *path)
 #if GQ_DEBUG_PATH_UTF8
 		log_printf("%s:%d: Unable to convert filename to UTF-8:\n%s\n%s\n", file, line, path, error->message);
 #else
-		log_printf("Unable to convert filename to UTF-8:\n%s\n%s\n", path, error->message);
+		log_printf("Unable to convert filename to UTF-8:\n%s\n%s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 #endif
 		encoding_dialog(path);
 		}
@@ -156,7 +156,7 @@ gchar *path_from_utf8(const gchar *utf8)
 #if GQ_DEBUG_PATH_UTF8
 		log_printf("%s:%d: Unable to convert filename to locale from UTF-8:\n%s\n%s\n", file, line, utf8, error->message);
 #else
-		log_printf("Unable to convert filename to locale from UTF-8:\n%s\n%s\n", utf8, error->message);
+		log_printf("Unable to convert filename to locale from UTF-8:\n%s\n%s\n", utf8, error->message); // NOTRANSLATE: Diagnostic message.
 #endif
 		}
 
@@ -180,7 +180,7 @@ const gchar *homedir()
 		return path_to_utf8(g_get_home_dir());
 	}();
 
-	DEBUG_1("Home directory: %s", home);
+	DEBUG_1("Home directory: %s", home); // NOTRANSLATE: Diagnostic message.
 
 	return home;
 }
@@ -920,7 +920,7 @@ gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	g_autofree gchar *tmp_dir = g_dir_make_tmp("geeqie_XXXXXX", &error);
 	if (error)
 		{
-		log_printf("Error: could not create temporary file n%s\n", error->message);
+		log_printf("Error: could not create temporary file n%s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
@@ -1669,7 +1669,7 @@ gboolean secure_save(const gchar *file_name, const gchar *contents, gsize length
 	gboolean success = g_file_set_contents_full(file_name, contents, length, flags, 0600, &error);
 	if (!success)
 		{
-		g_autoptr(GNotification) notification = g_notification_new("Geeqie");
+		g_autoptr(GNotification) notification = g_notification_new("Geeqie"); // NOTRANSLATE: Application name.
 		g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_URGENT);
 		g_notification_set_default_action(notification, "app.null");
 		g_notification_set_title(notification, _("File was not saved"));
@@ -1677,12 +1677,12 @@ gboolean secure_save(const gchar *file_name, const gchar *contents, gsize length
 		if (error)
 			{
 			g_notification_set_body(notification, error->message);
-			log_printf("Error: Failed to save file: %s\n%s", file_name, error->message);
+			log_printf("Error: Failed to save file: %s\n%s", file_name, error->message); // NOTRANSLATE: Diagnostic message.
 			}
 		else
 			{
 			g_notification_set_body(notification, file_name);
-			log_printf("Error: Failed to save file: %s", file_name);
+			log_printf("Error: Failed to save file: %s", file_name); // NOTRANSLATE: Diagnostic message.
 			}
 
 		GApplication *app = g_application_get_default();

@@ -122,7 +122,7 @@ GType image_loader_get_type()
 	    static_cast<GInstanceInitFunc>(image_loader_init), /* instance_init */
 	    nullptr	/* value_table */
 	};
-	static GType type = g_type_register_static(G_TYPE_OBJECT, "ImageLoaderType", &info, static_cast<GTypeFlags>(0));
+	static GType type = g_type_register_static(G_TYPE_OBJECT, "ImageLoaderType", &info, static_cast<GTypeFlags>(0)); // NOTRANSLATE: GObject type, signal, or property identifier.
 
 	return type;
 }
@@ -617,7 +617,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 
 	if (external_preview == 0)
 		{
-		DEBUG_1("Using custom external loader");
+		DEBUG_1("Using custom external loader"); // NOTRANSLATE: Diagnostic message.
 		il->backend = get_image_loader_backend_external();
 		}
 	else
@@ -625,7 +625,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 #if HAVE_FFMPEGTHUMBNAILER
 		if (il->fd->format_class == FORMAT_CLASS_VIDEO)
 			{
-			DEBUG_1("Using custom ffmpegthumbnailer loader");
+			DEBUG_1("Using custom ffmpegthumbnailer loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_ft();
 			}
 		else
@@ -634,7 +634,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if (il->bytes_total >= 6 &&
 			(memcmp(il->input_buffer, "SIMPLE", 6) == 0))
 			{
-			DEBUG_1("Using custom fits loader");
+			DEBUG_1("Using custom fits loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_fits();
 			}
 		else
@@ -643,7 +643,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if (il->bytes_total >= 4 &&
 		    (memcmp(il->input_buffer + 0, "%PDF", 4) == 0))
 			{
-			DEBUG_1("Using custom pdf loader");
+			DEBUG_1("Using custom pdf loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_pdf();
 			}
 		else
@@ -656,7 +656,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		     (memcmp(il->input_buffer + 4, "ftypmif1", 8) == 0) ||
 		     (memcmp(il->input_buffer + 4, "ftypavif", 8) == 0)))
 			{
-			DEBUG_1("Using custom heif loader");
+			DEBUG_1("Using custom heif loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_heif();
 			}
 		else
@@ -666,7 +666,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			(memcmp(il->input_buffer, "RIFF", 4) == 0) &&
 			(memcmp(il->input_buffer + 8, "WEBP", 4) == 0))
 			{
-			DEBUG_1("Using custom webp loader");
+			DEBUG_1("Using custom webp loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_webp();
 			}
 		else
@@ -676,7 +676,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			(memcmp(il->input_buffer, "AT&TFORM", 8) == 0) &&
 			(memcmp(il->input_buffer + 12, "DJV", 3) == 0))
 			{
-			DEBUG_1("Using custom djvu loader");
+			DEBUG_1("Using custom djvu loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_djvu();
 			}
 		else
@@ -685,7 +685,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if (il->bytes_total >= 4 &&
 			(memcmp(il->input_buffer, "\x76\x2F\x31\x01", 4) == 0))
 			{
-			DEBUG_1("Using custom exr loader");
+			DEBUG_1("Using custom exr loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_exr();
 			}
 		else
@@ -693,16 +693,16 @@ static void image_loader_setup_loader(ImageLoader *il)
 #if HAVE_JPEG
 		if (il->bytes_total >= 2 && il->input_buffer[0] == 0xff && il->input_buffer[1] == 0xd8)
 			{
-			DEBUG_1("Using custom jpeg loader");
+			DEBUG_1("Using custom jpeg loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_jpeg();
 			}
 #if !HAVE_RAW
 		else
 		if (il->bytes_total >= 11 &&
 		    (memcmp(il->input_buffer + 4, "ftypcrx", 7) == 0) &&
-		    (memcmp(il->input_buffer + 64, "CanonCR3", 8) == 0))
+		    (memcmp(il->input_buffer + 64, "CanonCR3", 8) == 0)) // NOTRANSLATE: File signature.
 			{
-			DEBUG_1("Using custom cr3 loader");
+			DEBUG_1("Using custom cr3 loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_cr3();
 			}
 #endif
@@ -715,7 +715,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		     memcmp(il->input_buffer, "II+\0\x08\0\0\0", 8) == 0 ||
 		     memcmp(il->input_buffer, "II*\0", 4) == 0))
 		     	{
-			DEBUG_1("Using custom tiff loader");
+			DEBUG_1("Using custom tiff loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_tiff();
 			}
 		else
@@ -724,21 +724,21 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if (il->bytes_total >= 6 &&
 			(memcmp(il->input_buffer, "\x93NUMPY", 6) == 0))
 			{
-			DEBUG_1("Using custom npy loader");
+			DEBUG_1("Using custom npy loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_npy();
 			}
 		else
 #endif
 		if (il->bytes_total >= 3 && il->input_buffer[0] == 0x44 && il->input_buffer[1] == 0x44 && il->input_buffer[2] == 0x53)
 			{
-			DEBUG_1("Using dds loader");
+			DEBUG_1("Using dds loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_dds();
 			}
 		else
 		if (il->bytes_total >= 6 &&
 			(memcmp(il->input_buffer, "8BPS\0\x01", 6) == 0))
 			{
-			DEBUG_1("Using custom psd loader");
+			DEBUG_1("Using custom psd loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_psd();
 			}
 		else
@@ -746,7 +746,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if (il->bytes_total >= 12 &&
 			(memcmp(il->input_buffer, "\0\0\0\x0CjP\x20\x20\x0D\x0A\x87\x0A", 12) == 0))
 			{
-			DEBUG_1("Using custom j2k loader");
+			DEBUG_1("Using custom j2k loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_j2k();
 			}
 		else
@@ -757,7 +757,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		    (il->bytes_total >= 2 &&
 		     (memcmp(il->input_buffer, "\xFF\x0A", 2) == 0)))
 			{
-			DEBUG_1("Using custom jpeg xl loader");
+			DEBUG_1("Using custom jpeg xl loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_jpegxl();
 			}
 		else
@@ -765,13 +765,13 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if ((il->bytes_total == 6144 || il->bytes_total == 6912) &&
 			(file_extension_match(il->fd->path, ".scr")))
 			{
-			DEBUG_1("Using custom zxscr loader");
+			DEBUG_1("Using custom zxscr loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_zxscr();
 			}
 		else
 		if (g_strcmp0(strrchr(il->fd->path, '.'), ".svgz") == 0)
 			{
-			DEBUG_1("Using custom svgz loader");
+			DEBUG_1("Using custom svgz loader"); // NOTRANSLATE: Diagnostic message.
 			il->backend = get_image_loader_backend_svgz();
 			}
 		else
@@ -978,7 +978,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 		if (il->input_buffer)
 			{
-			DEBUG_1("Usable reduced size (preview) image loaded from file %s", il->fd->path);
+			DEBUG_1("Usable reduced size (preview) image loaded from file %s", il->fd->path); // NOTRANSLATE: Diagnostic message.
 			}
 		exif_free_fd(il->fd, exif);
 		}
@@ -1221,7 +1221,7 @@ static gboolean image_loader_start_thread(ImageLoader *il)
 	il->can_destroy = FALSE; /* ImageLoader can't be freed until image_loader_thread_run finishes */
 
 	g_thread_pool_push(image_loader_thread_pool, il, nullptr);
-	DEBUG_1("Thread pool num threads: %u", g_thread_pool_get_num_threads(image_loader_thread_pool));
+	DEBUG_1("Thread pool num threads: %u", g_thread_pool_get_num_threads(image_loader_thread_pool)); // NOTRANSLATE: Diagnostic message.
 
 	return TRUE;
 }

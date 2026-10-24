@@ -61,7 +61,7 @@ public:
 	{
 		if (_pos + n > _size)
 			{
-			throw std::runtime_error("Read beyond end of buffer");
+			throw std::runtime_error("Read beyond end of buffer"); // NOTRANSLATE: Diagnostic message.
 			}
 		memcpy(c, _buffer + _pos, n);
 		_pos += n;
@@ -87,7 +87,7 @@ public:
 	{
 		if (_pos + n > _size)
 			{
-			throw std::runtime_error("Read beyond end of buffer");
+			throw std::runtime_error("Read beyond end of buffer"); // NOTRANSLATE: Diagnostic message.
 			}
 		char* ptr = const_cast<char*>(reinterpret_cast<const char*>(_buffer + _pos));
 		_pos += n;
@@ -151,7 +151,7 @@ gboolean ImageLoaderEXR::write(const guchar *buffer, gsize &chunk_size, gsize co
 
 	catch (const std::exception& e)
 		{
-		log_printf("Error loading EXR: %s", e.what());
+		log_printf("Error loading EXR: %s", e.what()); // NOTRANSLATE: Diagnostic message.
 		return false;
 		}
 }

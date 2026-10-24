@@ -765,7 +765,7 @@ GtkWidget *date_selection_new()
 					ds->spin_y = pref_spin_new(ds->box, nullptr, nullptr, 1900, 9999, 1, 0, 1900, nullptr, nullptr);
 					break;
 				default:
-					log_printf("Warning: Date locale %s is unknown", date_format);
+					log_printf("Warning: Date locale %s is unknown", date_format); // NOTRANSLATE: Diagnostic message.
 					break;
 				}
 			}

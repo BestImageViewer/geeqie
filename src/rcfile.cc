@@ -137,7 +137,7 @@ void config_file_error(const gchar *message)
 
 	GtkApplication *app = GTK_APPLICATION(g_application_get_default());
 
-	auto *notification = g_notification_new("Geeqie");
+	auto *notification = g_notification_new("Geeqie"); // NOTRANSLATE: Configuration diagnostic or application name.
 
 	g_notification_add_button(notification, _("Show log window"), "app.config-file-error");
 	g_notification_set_body(notification, error_text);
@@ -1121,7 +1121,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_DUMMY(*options, image.dither_quality, "deprecated since 2012-08-13")) continue;
 
 		/* Unknown options */
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return TRUE;
@@ -1141,7 +1141,7 @@ static void options_load_color_profiles(const gchar **attribute_names, const gch
 		if (READ_BOOL(options->color_profile, use_x11_screen_profile)) continue;
 		if (READ_INT(options->color_profile, render_intent)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 }
@@ -1158,7 +1158,7 @@ static void options_load_profile(GQParserData *parser_data, const gchar **attrib
 		if (READ_CHAR_FULL("input_file", options->color_profile.input_file[i])) continue;
 		if (READ_CHAR_FULL("input_name", options->color_profile.input_name[i])) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 	i++;
 	parser_data->func_set_data(GINT_TO_POINTER(i));
@@ -1175,7 +1175,7 @@ static void options_load_marks_tooltips(GQParserData *parser_data, const gchar *
 		const gchar *value = *attribute_values++;
 		if (READ_CHAR_FULL("text",  options->marks_tooltips[i])) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 	i++;
 	parser_data->func_set_data(GINT_TO_POINTER(i));
@@ -1198,7 +1198,7 @@ static void options_load_disabled_plugins(GQParserData *parser_data, const gchar
 			continue;
 			}
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 	i++;
 	parser_data->func_set_data(GINT_TO_POINTER(i));
@@ -1237,7 +1237,7 @@ static void options_parse_color_profiles(GQParserData *parser_data, const gchar 
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <color_profiles>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <color_profiles>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1266,7 +1266,7 @@ static void options_load_osd_profiles(GQParserData *parser_data, const gchar **a
 		if (READ_UCHAR_FULL("background_alpha", options->image_overlay_n[i].background.a)) continue;
 		if (READ_CHAR(options->image_overlay_n[i], font)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 	i++;
 	parser_data->func_set_data(GINT_TO_POINTER(i));
@@ -1280,7 +1280,7 @@ static void options_parse_osd_profiles(GQParserData *parser_data, const gchar *e
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <osd>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <osd>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1294,7 +1294,7 @@ static void options_parse_marks_tooltips(GQParserData *parser_data, const gchar 
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <marks_tooltips>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <marks_tooltips>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1345,7 +1345,7 @@ static void class_filter_load_filter_type(const gchar **attribute_names, const g
 			continue;
 			}
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (enabled_name == nullptr || enabled_value == nullptr || format_class_index < 0)
@@ -1370,7 +1370,7 @@ static void options_parse_class_filter(GQParserData *parser_data, const gchar *e
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <class_filter>:: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <class_filter>:: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1384,7 +1384,7 @@ static void options_parse_disabled_plugins(GQParserData *parser_data, const gcha
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <disabled_plugins>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <disabled_plugins>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1398,7 +1398,7 @@ static void options_parse_filter(GQParserData *parser_data, const gchar *element
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <filter>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <filter>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1428,7 +1428,7 @@ static void options_parse_keyword(GQParserData *parser_data, const gchar *elemen
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <keyword>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <keyword>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
@@ -1444,7 +1444,7 @@ static void options_parse_keyword_tree(GQParserData *parser_data, const gchar *e
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <keyword tree>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <keyword tree>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
@@ -1486,7 +1486,7 @@ static void options_parse_global(GQParserData *parser_data, const gchar *element
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <global>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <global>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
@@ -1515,7 +1515,7 @@ static void options_parse_pane(GQParserData *parser_data, const gchar *pane_name
 		}
 	else
 		{
-		g_autofree gchar *message = g_strdup_printf("Unexpected in <%s>: %s", pane_name, element_name);
+		g_autofree gchar *message = g_strdup_printf("Unexpected in <%s>: %s", pane_name, element_name); // NOTRANSLATE: Configuration diagnostic or application name.
 		config_file_error(message);
 		}
 
@@ -1628,7 +1628,7 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <bar>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <bar>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
@@ -1647,7 +1647,7 @@ static void options_parse_toolbar(GQParserData *parser_data, const gchar *elemen
 		}
 	else
 		{
-		g_autofree gchar *message = g_strdup_printf("Unexpected in <%s>: %s", toolbar_type_config_name(type), element_name);
+		g_autofree gchar *message = g_strdup_printf("Unexpected in <%s>: %s", toolbar_type_config_name(type), element_name); // NOTRANSLATE: Configuration diagnostic or application name.
 		config_file_error(message);
 		}
 
@@ -1662,7 +1662,7 @@ static void options_parse_dialogs(GQParserData *parser_data, const gchar *elemen
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <dialogs>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <dialogs>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1716,7 +1716,7 @@ static void options_parse_layout(GQParserData *parser_data, const gchar *element
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <layout>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <layout>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
@@ -1763,7 +1763,7 @@ static void options_parse_toplevel(GQParserData *parser_data, const gchar *eleme
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <toplevel>: ") + element_name).c_str());
+		config_file_error((std::string("Unexpected in <toplevel>: ") + element_name).c_str()); // NOTRANSLATE: Diagnostic message.
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
@@ -1833,7 +1833,7 @@ gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup)
 		config_file_error(error->message);
 
 		ret = FALSE;
-		DEBUG_1("Parse failed");
+		DEBUG_1("Parse failed"); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_markup_parse_context_free(context);

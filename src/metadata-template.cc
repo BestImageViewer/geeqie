@@ -35,23 +35,23 @@ struct TemplateField
 
 constexpr std::array<TemplateField, 6> default_fields{{
 	{N_("Description"), COMMENT_KEY},
-	{N_("Headline"), "Xmp.photoshop.Headline"},
+	{N_("Headline"), "Xmp.photoshop.Headline"}, // NOTRANSLATE: Metadata key defined by the file format.
 	{N_("Keywords"), KEYWORD_KEY, true},
-	{N_("Copyright"), "Xmp.dc.rights"},
-	{N_("Creator"), "Xmp.dc.creator"},
-	{N_("Credit"), "Xmp.photoshop.Credit"}
+	{N_("Copyright"), "Xmp.dc.rights"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Creator"), "Xmp.dc.creator"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Credit"), "Xmp.photoshop.Credit"} // NOTRANSLATE: Metadata key defined by the file format.
 }};
 
 constexpr std::array<TemplateField, 9> suggested_fields{{
-	{N_("Title"), "Xmp.dc.title"},
-	{N_("City"), "Xmp.photoshop.City"},
-	{N_("State/Province"), "Xmp.photoshop.State"},
-	{N_("Country"), "Xmp.photoshop.Country"},
-	{N_("Country code"), "Xmp.iptc.CountryCode"},
-	{N_("Instructions"), "Xmp.photoshop.Instructions"},
-	{N_("Source"), "Xmp.photoshop.Source"},
-	{N_("Copyright URL"), "Xmp.xmpRights.WebStatement"},
-	{N_("Subject code"), "Xmp.iptc.SubjectCode", true}
+	{N_("Title"), "Xmp.dc.title"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("City"), "Xmp.photoshop.City"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("State/Province"), "Xmp.photoshop.State"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Country"), "Xmp.photoshop.Country"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Country code"), "Xmp.iptc.CountryCode"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Instructions"), "Xmp.photoshop.Instructions"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Source"), "Xmp.photoshop.Source"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Copyright URL"), "Xmp.xmpRights.WebStatement"}, // NOTRANSLATE: Metadata key defined by the file format.
+	{N_("Subject code"), "Xmp.iptc.SubjectCode", true} // NOTRANSLATE: Metadata key defined by the file format.
 }};
 
 struct TemplateDialog;
@@ -96,7 +96,7 @@ struct TemplateDialog
 
 bool template_field_key_valid(const gchar *key)
 {
-	if (!g_str_has_prefix(key, "Xmp.")) return false;
+	if (!g_str_has_prefix(key, "Xmp.")) return false; // NOTRANSLATE: Metadata key defined by the file format.
 	const gchar *separator = strchr(key + 4, '.');
 	if (!separator || separator == key + 4 || !separator[1]) return false;
 	for (const gchar *work = key + 4; *work; ++work)
@@ -670,7 +670,7 @@ void metadata_template_dialog(GtkWidget *parent, GList *files)
 	gtk_grid_attach(GTK_GRID(add_grid), data->field_label, 1, 1, 1, 1);
 	data->field_key = gtk_entry_new();
 	gtk_widget_set_name(data->field_key, "metadata-template-field-key");
-	gtk_entry_set_placeholder_text(GTK_ENTRY(data->field_key), "Xmp.photoshop.City");
+	gtk_entry_set_placeholder_text(GTK_ENTRY(data->field_key), "Xmp.photoshop.City"); // NOTRANSLATE: Metadata key defined by the file format.
 	gtk_widget_set_tooltip_text(data->field_key, _("Choose a suggested field or enter an XMP key from the Exif window."));
 	gtk_grid_attach(GTK_GRID(add_grid), gtk_label_new(_("Metadata key:")), 0, 2, 1, 1);
 	gtk_grid_attach(GTK_GRID(add_grid), data->field_key, 1, 2, 1, 1);

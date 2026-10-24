@@ -1472,8 +1472,8 @@ static void search_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 				text = g_strdup(fd->path);
 				break;
 			case SearchDndDestination::Gps:
-				const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
-				const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
+				const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude"); // NOTRANSLATE: Metadata key defined by the file format.
+				const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude"); // NOTRANSLATE: Metadata key defined by the file format.
 				text = (latitude && longitude) ?
 				       g_strdup_printf("%f %f", *latitude, *longitude) :
 				       g_strdup(_("Image is not geocoded"));
@@ -2052,8 +2052,8 @@ static gboolean search_file_next(SearchData *sd)
 		tested = TRUE;
 		match = FALSE;
 
-		const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude");
-		const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude");
+		const auto latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude"); // NOTRANSLATE: Metadata key defined by the file format.
+		const auto longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude"); // NOTRANSLATE: Metadata key defined by the file format.
 		const bool image_has_gps = (latitude && longitude);
 
 		if (sd->match_gps == SEARCH_MATCH_NONE)
@@ -2223,7 +2223,7 @@ static GRegex *create_search_regex(const gchar *pattern)
 	GRegex *regex = g_regex_new(pattern, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
 	if (error)
 		{
-		log_printf("Error: could not compile regular expression %s\n%s\n", pattern, error->message);
+		log_printf("Error: could not compile regular expression %s\n%s\n", pattern, error->message); // NOTRANSLATE: Diagnostic message.
 		regex = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
@@ -2384,7 +2384,7 @@ static void search_start_do(SearchData *sd)
 		sd->search_lat = 1000;
 		sd->search_lon = 1000;
 		sscanf(entry_text, " %lf  %lf ", &sd->search_lat, &sd->search_lon);
-		if (entry_text == nullptr || g_strstr_len(entry_text, -1, "Error") ||
+		if (entry_text == nullptr || g_strstr_len(entry_text, -1, "Error") || // NOTRANSLATE: Geographic decoder status token or diagnostic.
 		    sd->search_lat < -90 || sd->search_lat > 90 ||
 		    sd->search_lon < -180 || sd->search_lon > 180)
 			{
@@ -2952,12 +2952,12 @@ static void search_window_close_button_cb(GtkWidget *, gpointer data)
 
 static void search_window_help_button_cb(GtkWidget *, gpointer)
 {
-	help_window_show("GuideImageSearchSearch.html");
+	help_window_show("GuideImageSearchSearch.html"); // NOTRANSLATE: Documentation filename.
 }
 
 static void search_window_help_action_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	help_window_show("GuideImageSearchSearch.html");
+	help_window_show("GuideImageSearchSearch.html"); // NOTRANSLATE: Documentation filename.
 }
 
 static gboolean search_window_delete_cb(GtkWidget *, gpointer data)
@@ -3209,7 +3209,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 		}
 	sd->ui.date_type = gtk_drop_down_new(G_LIST_MODEL(date_list), nullptr);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.date_type), 0);
-	gtk_widget_set_tooltip_text(sd->ui.date_type, "Modified (mtime)\nStatus Changed (ctime)\nOriginal (Exif.Photo.DateTimeOriginal)\nDigitized (Exif.Photo.DateTimeDigitized)");
+	gtk_widget_set_tooltip_text(sd->ui.date_type, _("Modified (mtime)\nStatus Changed (ctime)\nOriginal (Exif.Photo.DateTimeOriginal)\nDigitized (Exif.Photo.DateTimeDigitized)"));
 	gtk_box_append(GTK_BOX(hbox), sd->ui.date_type);
 
 	/* Search for image dimensions */
@@ -3580,7 +3580,7 @@ static void search_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify search: %s %04x", fd->path, type);
+	DEBUG_1("Notify search: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

@@ -423,7 +423,7 @@ static void view_escape_cb(GSimpleAction *, GVariant *, gpointer data)
 
 static void view_help_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	help_window_show("GuideOtherWindowsImageWindow.html");
+	help_window_show("GuideOtherWindowsImageWindow.html"); // NOTRANSLATE: Documentation filename.
 }
 
 /*
@@ -1619,7 +1619,7 @@ static void view_window_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify view_window: %s %04x", fd->path, type);
+	DEBUG_1("Notify view_window: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

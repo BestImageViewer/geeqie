@@ -97,7 +97,7 @@ void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute
 		// FIXME Is it intended to set title to GTK_LABEL(prd->pane.title) or simply avoid "unknown attribute"?
 		if (bar_pane_common_update_from_config(prd->pane, option, value, &title)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 }
 
@@ -107,7 +107,7 @@ void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_METADATA | NOTIFY_PIXBUF)) && fd == prd->pane.fd)
 		{
-		DEBUG_1("Notify pane_rating: %s %04x", fd->path, type);
+		DEBUG_1("Notify pane_rating: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		bar_pane_rating_update(prd);
 		}
 }
@@ -128,11 +128,11 @@ void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer data)
 
 	const char *rating = gtk_check_button_get_label(checkbutton);
 
-	if (g_strcmp0(rating, "Rejected") == 0)
+	if (g_strcmp0(rating, "Rejected") == 0) // NOTRANSLATE: Unlocalized metadata value.
 		{
 		rating = "-1";
 		}
-	else if (g_strcmp0(rating, "Unrated") == 0)
+	else if (g_strcmp0(rating, "Unrated") == 0) // NOTRANSLATE: Unlocalized metadata value.
 		{
 		rating = "0";
 		}
@@ -211,7 +211,7 @@ GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const 
 
 		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return bar_pane_rating_new(id, title, expanded);

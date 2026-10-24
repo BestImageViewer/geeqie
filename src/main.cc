@@ -154,7 +154,7 @@ GOptionEntry command_line_options[] =
 	{ "dupes-export-json"         ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,   nullptr, _("export duplicate groups as JSON")                                             , nullptr },
 	{ "dupes-recurse"             ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("find duplicates in folder recursively")                                       , "<FOLDER>" },
 	{ "file"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL bring Geeqie window to the top")                             , "<FILE>|<URL>" },
-	{ "File"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL do not bring Geeqie window to the top")                      , "<FILE>|<URL>" },
+	{ "File"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL do not bring Geeqie window to the top")                      , "<FILE>|<URL>" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 	{ "file-extensions"           ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("list known file extensions")                                                  , nullptr },
 	{ "first"                     ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("first image")                                                                 , nullptr },
 	{ "fullscreen"                , 'f', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("start / toggle in fullscreen mode")                                          , nullptr },
@@ -210,33 +210,33 @@ const gchar *get_signal_name(int signo)
 		gint sig_no;
 		const gchar *sig_name;
 	} signals_list[6] = {
-		{ SIGABRT, "Abort" },
-		{ SIGBUS, "Bus error" },
-		{ SIGFPE, "Floating-point exception" },
-		{ SIGILL, "Illegal instruction" },
+		{ SIGABRT, "Abort" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
+		{ SIGBUS, "Bus error" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
+		{ SIGFPE, "Floating-point exception" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
+		{ SIGILL, "Illegal instruction" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 		{ SIGIOT, "IOT trap" }, // @todo Same value as SIGABRT. Remove SIGIOT?
-		{ SIGSEGV, "Invalid memory reference" },
+		{ SIGSEGV, "Invalid memory reference" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 	};
 	const auto it = std::find_if(std::cbegin(signals_list), std::cend(signals_list),
 	                             [signo](const signals &s){ return s.sig_no == signo; });
-	return (it != std::cend(signals_list)) ? it->sig_name : "Unknown signal";
+	return (it != std::cend(signals_list)) ? it->sig_name : "Unknown signal"; // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 }
 
 void sig_handler_cb(int signo, siginfo_t *info, void *)
 {
-	[[maybe_unused]] ssize_t len = write(STDERR_FILENO, "Geeqie fatal error\n", 19);
+	[[maybe_unused]] ssize_t len = write(STDERR_FILENO, "Geeqie fatal error\n", 19); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 
 	const gchar *signal_name = get_signal_name(signo);
-	len = write(STDERR_FILENO, "Signal: ", 8);
+	len = write(STDERR_FILENO, "Signal: ", 8); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 	len = write(STDERR_FILENO, signal_name, strlen(signal_name));
 	len = write(STDERR_FILENO, "\n", 1);
 
-	const gchar *code_descr = (info->si_code == SEGV_MAPERR) ? "Address not mapped" : "Invalid permissions";
-	len = write(STDERR_FILENO, "Code: ", 6);
+	const gchar *code_descr = (info->si_code == SEGV_MAPERR) ? "Address not mapped" : "Invalid permissions"; // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
+	len = write(STDERR_FILENO, "Code: ", 6); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 	len = write(STDERR_FILENO, code_descr, strlen(code_descr));
 	len = write(STDERR_FILENO, "\n", 1);
 
-	len = write(STDERR_FILENO, "Address: 0x", 11);
+	len = write(STDERR_FILENO, "Address: 0x", 11); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 	if (info->si_addr == nullptr)
 		{
 		len = write(STDERR_FILENO, "0", 1);
@@ -916,7 +916,7 @@ gint main(gint argc, gchar *argv[])
 		testing::InitGoogleTest(&argc, argv);
 		return RUN_ALL_TESTS();
 #else
-		fprintf(stderr, "Unit tests are not enabled in this build.\n");
+		fprintf(stderr, "Unit tests are not enabled in this build.\n"); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
 		return 1;
 #endif
 		}

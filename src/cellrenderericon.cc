@@ -205,56 +205,56 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 	g_object_class_install_property(object_class,
 					PROP_PIXBUF,
 					g_param_spec_object("pixbuf",
-							"Pixbuf Object",
-							"The pixbuf to render",
+							"Pixbuf Object", // NOTRANSLATE: GObject type or property metadata.
+							"The pixbuf to render", // NOTRANSLATE: GObject type or property metadata.
 							GDK_TYPE_PIXBUF,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_TEXT,
 					g_param_spec_string("text",
-							"Text",
-							"Text to render",
+							"Text", // NOTRANSLATE: GObject type or property metadata.
+							"Text to render", // NOTRANSLATE: GObject type or property metadata.
 							nullptr,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_BACKGROUND_GDK,
 					g_param_spec_boxed("background_rgba",
-							"Background color",
-							"Background color as a GdkRGBA",
+							"Background color", // NOTRANSLATE: GObject type or property metadata.
+							"Background color as a GdkRGBA", // NOTRANSLATE: GObject type or property metadata.
 							GDK_TYPE_RGBA,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_FOREGROUND_GDK,
 					g_param_spec_boxed("foreground_rgba",
-							"Foreground color",
-							"Foreground color as a GdkRGBA",
+							"Foreground color", // NOTRANSLATE: GObject type or property metadata.
+							"Foreground color as a GdkRGBA", // NOTRANSLATE: GObject type or property metadata.
 							GDK_TYPE_RGBA,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_FOCUSED,
 					g_param_spec_boolean("has_focus",
-							"Focus",
-							"Draw focus indicator",
+							"Focus", // NOTRANSLATE: GObject type or property metadata.
+							"Draw focus indicator", // NOTRANSLATE: GObject type or property metadata.
 							FALSE,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_SELECTED,
 					g_param_spec_boolean("selected",
-							"Selected",
-							"Draw selected state",
+							"Selected", // NOTRANSLATE: GObject type or property metadata.
+							"Draw selected state", // NOTRANSLATE: GObject type or property metadata.
 							FALSE,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_FIXED_WIDTH,
 					g_param_spec_int("fixed_width",
-							"Fixed width",
-							"Width of cell",
+							"Fixed width", // NOTRANSLATE: GObject type or property metadata.
+							"Width of cell", // NOTRANSLATE: GObject type or property metadata.
 							-1, FIXED_ICON_SIZE_MAX,
 							-1,
 							G_PARAM_READWRITE));
@@ -262,8 +262,8 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 	g_object_class_install_property(object_class,
 					PROP_FIXED_HEIGHT,
 					g_param_spec_int("fixed_height",
-							"Fixed height",
-							"Height of icon excluding text",
+							"Fixed height", // NOTRANSLATE: GObject type or property metadata.
+							"Height of icon excluding text", // NOTRANSLATE: GObject type or property metadata.
 							-1, FIXED_ICON_SIZE_MAX,
 							-1,
 							G_PARAM_READWRITE));
@@ -271,40 +271,40 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 	g_object_class_install_property(object_class,
 					PROP_BACKGROUND_SET,
 					g_param_spec_boolean("background_set",
-							"Background set",
-							"Whether this tag affects the background color",
+							"Background set", // NOTRANSLATE: GObject type or property metadata.
+							"Whether this tag affects the background color", // NOTRANSLATE: GObject type or property metadata.
 							FALSE,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_FOREGROUND_SET,
 					g_param_spec_boolean("foreground_set",
-							"Foreground set",
-							"Whether this tag affects the foreground color",
+							"Foreground set", // NOTRANSLATE: GObject type or property metadata.
+							"Whether this tag affects the foreground color", // NOTRANSLATE: GObject type or property metadata.
 							FALSE,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_SHOW_TEXT,
 					g_param_spec_boolean("show_text",
-							"Show text",
-							"Whether the text is displayed",
+							"Show text", // NOTRANSLATE: GObject type or property metadata.
+							"Whether the text is displayed", // NOTRANSLATE: GObject type or property metadata.
 							TRUE,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_SHOW_MARKS,
 					g_param_spec_boolean("show_marks",
-							"Show marks",
-							"Whether the marks are displayed",
+							"Show marks", // NOTRANSLATE: GObject type or property metadata.
+							"Whether the marks are displayed", // NOTRANSLATE: GObject type or property metadata.
 							TRUE,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
 					PROP_NUM_MARKS,
 					g_param_spec_int("num_marks",
-							"Number of marks",
-							"Number of marks",
+							"Number of marks", // NOTRANSLATE: GObject type or property metadata.
+							"Number of marks", // NOTRANSLATE: GObject type or property metadata.
 							0, 32,
 							6,
 							G_PARAM_READWRITE));
@@ -312,8 +312,8 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 	g_object_class_install_property(object_class,
 					PROP_MARKS,
 					g_param_spec_uint("marks",
-							"Marks",
-							"Marks bit array",
+							"Marks", // NOTRANSLATE: GObject type or property metadata.
+							"Marks bit array", // NOTRANSLATE: GObject type or property metadata.
 							0, 0xffffffff,
 							0,
 							G_PARAM_READWRITE));
@@ -321,8 +321,8 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 	g_object_class_install_property(object_class,
 					PROP_TOGGLED,
 					g_param_spec_uint("toggled_mark",
-							"Toggled mark",
-							"Toggled mark",
+							"Toggled mark", // NOTRANSLATE: GObject type or property metadata.
+							"Toggled mark", // NOTRANSLATE: GObject type or property metadata.
 							0, 32,
 							0,
 							G_PARAM_READWRITE));

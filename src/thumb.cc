@@ -67,7 +67,7 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 		{
 		FILE *f = fopen(pathl, "w");
 
-		DEBUG_1("Marking thumb failure: %s", cache_path);
+		DEBUG_1("Marking thumb failure: %s", cache_path); // NOTRANSLATE: Diagnostic message.
 		if (f)
 			{
 			fclose(f);
@@ -76,7 +76,7 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 		}
 	else
 		{
-		DEBUG_1("Saving thumb: %s", cache_path);
+		DEBUG_1("Saving thumb: %s", cache_path); // NOTRANSLATE: Diagnostic message.
 		success = pixbuf_to_file_as_png(tl->fd->thumb_pixbuf, pathl);
 		}
 
@@ -87,7 +87,7 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 		}
 	else
 		{
-		DEBUG_1("Saving failed: %s", pathl);
+		DEBUG_1("Saving failed: %s", pathl); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return success;
@@ -342,16 +342,16 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 	g_autofree gchar *cache_path = tl->cache_enable ? cache_find_location(CacheType::THUMB, tl->fd->path) : nullptr;
 	if (cache_path && (cache_time_valid(cache_path, tl->fd->path) || !isfile(tl->fd->path)))
 		{
-		DEBUG_1("Found in cache:%s", tl->fd->path);
+		DEBUG_1("Found in cache:%s", tl->fd->path); // NOTRANSLATE: Diagnostic message.
 
 		if (filesize(cache_path) == 0)
 			{
-			DEBUG_1("Broken image mark found:%s", cache_path);
+			DEBUG_1("Broken image mark found:%s", cache_path); // NOTRANSLATE: Diagnostic message.
 			thumb_loader_set_fallback(tl);
 			return FALSE;
 			}
 
-		DEBUG_1("Cache location:%s", cache_path);
+		DEBUG_1("Cache location:%s", cache_path); // NOTRANSLATE: Diagnostic message.
 		}
 	else
 		{
@@ -466,7 +466,7 @@ void thumb_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE)) && fd->thumb_pixbuf)
 		{
-		DEBUG_1("Notify thumb: %s %04x", fd->path, type);
+		DEBUG_1("Notify thumb: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		g_object_unref(fd->thumb_pixbuf);
 		fd->thumb_pixbuf = nullptr;
 		}

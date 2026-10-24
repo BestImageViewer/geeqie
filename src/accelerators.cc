@@ -87,7 +87,7 @@ void accel_map_load_merged()
 
 	if (!bytes)
 		{
-		log_printf("Failed to load accels.ini resource: %s\n", error ? error->message : "unknown error");
+		log_printf("Failed to load accels.ini resource: %s\n", error ? error->message : "unknown error"); // NOTRANSLATE: Diagnostic message.
 		}
 	else
 		{
@@ -96,7 +96,7 @@ void accel_map_load_merged()
 
 		if (!g_key_file_load_from_data(defaults, data, length, G_KEY_FILE_NONE, &error))
 			{
-			log_printf("Failed to load built-in accelerators: %s\n", error->message);
+			log_printf("Failed to load built-in accelerators: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 			}
 		}
 
@@ -106,7 +106,7 @@ void accel_map_load_merged()
 
 		if (!g_key_file_load_from_file(user, path, G_KEY_FILE_NONE, &error))
 			{
-			log_printf("Failed to load user accelerators file %s: %s\n", path, error->message);
+			log_printf("Failed to load user accelerators file %s: %s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 			}
 		}
 
@@ -155,7 +155,7 @@ bool remove_modified_shortcut(const char *action_name)
 		{
 		if (!g_key_file_load_from_file(user, path, G_KEY_FILE_NONE, &error))
 			{
-			log_printf("Failed to load user accelerators file %s: %s\n", path, error->message);
+			log_printf("Failed to load user accelerators file %s: %s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 			g_clear_error(&error);
 
 			return false;
@@ -170,7 +170,7 @@ bool remove_modified_shortcut(const char *action_name)
 
 	if (!g_key_file_save_to_file(user, path, &error))
 		{
-		log_printf("Error saving accelerator file %s: %s\n", path, error->message);
+		log_printf("Error saving accelerator file %s: %s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_error(&error);
 		return false;
 		}
@@ -190,7 +190,7 @@ bool update_modified_shortcut(const char *action_name, const char *shortcuts)
 		{
 		if (!g_key_file_load_from_file(user, path, G_KEY_FILE_NONE, &error))
 			{
-			log_printf("Failed to load user accelerators file %s: %s\n", path, error->message);
+			log_printf("Failed to load user accelerators file %s: %s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 			g_clear_error(&error);
 			}
 		}
@@ -199,7 +199,7 @@ bool update_modified_shortcut(const char *action_name, const char *shortcuts)
 
 	if (!g_key_file_save_to_file(user, path, &error))
 		{
-		log_printf("Error saving accelerator file %s: %s\n", path, error->message);
+		log_printf("Error saving accelerator file %s: %s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_error(&error);
 		return false;
 		}
@@ -221,7 +221,7 @@ bool clear_modified_shortcuts()
 
 		if (!g_file_move(file, backup, G_FILE_COPY_OVERWRITE, nullptr, nullptr, nullptr, &error))
 			{
-			log_printf("Failed to back up accelerator file %s to %s: %s\n", path, backup_name, error->message);
+			log_printf("Failed to back up accelerator file %s to %s: %s\n", path, backup_name, error->message); // NOTRANSLATE: Diagnostic message.
 			return FALSE;
 			}
 		}
@@ -231,14 +231,14 @@ bool clear_modified_shortcuts()
 
 	if (!out)
 		{
-		log_printf("Failed to create empty accelerator file %s: %s\n", path, error->message);
+		log_printf("Failed to create empty accelerator file %s: %s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 
 		return FALSE;
 		}
 
 	if (!g_output_stream_close(G_OUTPUT_STREAM(out), nullptr, &error))
 		{
-		log_printf("Failed to close accelerator file %s: %s\n", path, error->message);
+		log_printf("Failed to close accelerator file %s: %s\n", path, error->message); // NOTRANSLATE: Diagnostic message.
 
 		return FALSE;
 		}

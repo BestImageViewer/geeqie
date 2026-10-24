@@ -48,14 +48,14 @@ int verbose = 0;
 
 void msg(const char *m)
 {
-	log_printf("Open Archive - libarchive error: %s \n", m);
+	log_printf("Open Archive - libarchive error: %s \n", m); // NOTRANSLATE: Diagnostic message.
 }
 
 void errmsg(const char *m)
 {
 	if (m == nullptr)
 		{
-		m = "Error: No error description provided.\n";
+		m = "Error: No error description provided.\n"; // NOTRANSLATE: Diagnostic message.
 		}
 	msg(m);
 }

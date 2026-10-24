@@ -141,14 +141,14 @@ GtkWidget *create_archive_preview(const gchar *filename)
 		result = archive_read_data_skip(archive);
 		if (result != ARCHIVE_OK)
 			{
-			log_printf("Error skipping archive data: %s\n", archive_error_string(archive));
+			log_printf("Error skipping archive data: %s\n", archive_error_string(archive)); // NOTRANSLATE: Diagnostic message.
 			break;
 			}
 		}
 
 	if (result != ARCHIVE_EOF && result != ARCHIVE_OK)
 		{
-		log_printf("Error reading archive: %s\n", archive_error_string(archive));
+		log_printf("Error reading archive: %s\n", archive_error_string(archive)); // NOTRANSLATE: Diagnostic message.
 		}
 
 	archive_read_close(archive);
@@ -229,7 +229,7 @@ GtkWidget *create_text_preview(const gchar *filename)
 	GIOChannel *channel = g_io_channel_new_file(filename, "r", &error);
 	if (!channel)
 		{
-		log_printf("Error opening file %s: %s\n", filename, error->message);
+		log_printf("Error opening file %s: %s\n", filename, error->message); // NOTRANSLATE: Diagnostic message.
 		return textview;
 		}
 
@@ -250,7 +250,7 @@ GtkWidget *create_text_preview(const gchar *filename)
 
 	if (status == G_IO_STATUS_ERROR && error)
 		{
-		log_printf("Error reading file: %s\n", error->message);
+		log_printf("Error reading file: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_io_channel_shutdown(channel, TRUE, nullptr);
@@ -372,7 +372,7 @@ GtkWidget *create_dir_preview(const gchar *dir_path)
 		{
 		if (error)
 			{
-			log_printf("Dir preview failed: %s\n", error->message);
+			log_printf("Dir preview failed: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 			}
 		return nullptr;
 		}
@@ -677,7 +677,7 @@ gboolean set_chooser_folder(PendingFileDialog *pending, GFile *folder)
 		{
 		if (error)
 			{
-			log_printf("Unable to change folder: %s\n", error->message);
+			log_printf("Unable to change folder: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
 			}
 		return FALSE;
 		}

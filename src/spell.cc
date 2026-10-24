@@ -24,7 +24,7 @@ gboolean spell_backend_is_usable()
 
 	if (pid == -1)
 		{
-		log_printf("Warning: spell check disabled; failed to probe spelling backend\n");
+		log_printf("Warning: spell check disabled; failed to probe spelling backend\n"); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 
@@ -53,14 +53,14 @@ gboolean spell_backend_is_usable()
 		{
 		if (errno != EINTR)
 			{
-			log_printf("Warning: spell check disabled; failed to probe spelling backend\n");
+			log_printf("Warning: spell check disabled; failed to probe spelling backend\n"); // NOTRANSLATE: Diagnostic message.
 			return FALSE;
 			}
 		}
 
 	if (!WIFEXITED(status) || WEXITSTATUS(status) != EXIT_SUCCESS)
 		{
-		log_printf("Warning: spell check disabled; spelling backend failed correction probe\n");
+		log_printf("Warning: spell check disabled; spelling backend failed correction probe\n"); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 

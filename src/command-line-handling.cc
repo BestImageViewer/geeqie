@@ -186,7 +186,7 @@ bool run_action(const char *text, GApplication *app, GtkWidget *win)
 
 	if (!g_action_parse_detailed_name(text, &action_name, &target, &error))
 		{
-		log_printf("Invalid detailed action name: %s\n", text);
+		log_printf("Invalid detailed action name: %s\n", text); // NOTRANSLATE: Diagnostic message.
 
 		return FALSE;
 		}
@@ -197,7 +197,7 @@ bool run_action(const char *text, GApplication *app, GtkWidget *win)
 
 		if (!activate_detailed_action(G_ACTION_GROUP(win), new_action, target))
 			{
-			log_printf("Action not found or invalid target: %s\n", action_name);
+			log_printf("Action not found or invalid target: %s\n", action_name); // NOTRANSLATE: Diagnostic message.
 
 			return FALSE;
 			}
@@ -439,7 +439,7 @@ void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_
 	else
 		{
 		/* shoould not happen */
-		g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " does not exist\n",  filename);
+		g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " does not exist\n",  filename); // NOTRANSLATE: Command-line protocol identifier or output.
 		}
 }
 
@@ -490,7 +490,7 @@ void gq_file(GtkApplication *, GApplicationCommandLine *app_command_line, GVaria
 void gq_File(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
 	gchar *text;
-	g_variant_dict_lookup(command_line_options_dict, "File", "&s", &text);
+	g_variant_dict_lookup(command_line_options_dict, "File", "&s", &text); // NOTRANSLATE: Command-line protocol identifier or output.
 
 	file_load_no_raise(text, app_command_line);
 }
@@ -565,7 +565,7 @@ void gq_get_collection(GtkApplication *, GApplicationCommandLine *app_command_li
 		}
 	else
 		{
-		g_application_command_line_print(app_command_line, "Collection " BOLD_ON "%s" BOLD_OFF " does not exist\n", text);
+		g_application_command_line_print(app_command_line, "Collection " BOLD_ON "%s" BOLD_OFF " does not exist\n", text); // NOTRANSLATE: Command-line protocol identifier or output.
 		}
 }
 
@@ -651,7 +651,7 @@ void gq_get_file_info(GtkApplication *, GApplicationCommandLine *app_command_lin
 		g_autofree gchar *local_time = exif_get_data_as_text(fd->exif, "formatted.localtime");
 		if (local_time)
 			{
-			g_string_append_printf(out_string, ("Local time: %s\n"), local_time);
+			g_string_append_printf(out_string, ("Local time: %s\n"), local_time); // NOTRANSLATE: Command-line protocol identifier or output.
 			}
 		}
 
@@ -786,16 +786,16 @@ void gq_get_render_intent(GtkApplication *, GApplicationCommandLine *app_command
 	switch (options->color_profile.render_intent)
 		{
 		case 0:
-			render_intent = g_strdup("Perceptual");
+			render_intent = g_strdup("Perceptual"); // NOTRANSLATE: Machine-readable rendering intent.
 			break;
 		case 1:
-			render_intent = g_strdup("Relative Colorimetric");
+			render_intent = g_strdup("Relative Colorimetric"); // NOTRANSLATE: Machine-readable rendering intent.
 			break;
 		case 2:
-			render_intent = g_strdup("Saturation");
+			render_intent = g_strdup("Saturation"); // NOTRANSLATE: Machine-readable rendering intent.
 			break;
 		case 3:
-			render_intent = g_strdup("Absolute Colorimetric");
+			render_intent = g_strdup("Absolute Colorimetric"); // NOTRANSLATE: Machine-readable rendering intent.
 			break;
 		default:
 			render_intent = g_strdup("none");
@@ -875,7 +875,7 @@ void gq_id(GtkApplication *, GApplicationCommandLine *app_command_line, GVariant
 	lw_id = layout_find_by_layout_id(text);
 	if (!lw_id)
 		{
-		g_application_command_line_print(app_command_line, "Layout window ID " BOLD_ON "%s" BOLD_OFF " does not exist\n",text);
+		g_application_command_line_print(app_command_line, "Layout window ID " BOLD_ON "%s" BOLD_OFF " does not exist\n",text); // NOTRANSLATE: Command-line protocol identifier or output.
 		}
 }
 
@@ -1049,7 +1049,7 @@ void gq_selection_add(GtkApplication *, GApplicationCommandLine *app_command_lin
 
 		if (!fd_to_select)
 			{
-			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not in the current folder " BOLD_ON "%s" BOLD_OFF "%c",
+			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not in the current folder " BOLD_ON "%s" BOLD_OFF "%c", // NOTRANSLATE: Command-line protocol identifier or output.
 			                                 filename, g_application_command_line_get_cwd(app_command_line), print0 ? 0 : '\n');
 			}
 		}
@@ -1138,7 +1138,7 @@ void gq_selection_remove(GtkApplication *, GApplicationCommandLine *app_command_
 			}
 		else
 			{
-			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not selected\n", filename);
+			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not selected\n", filename); // NOTRANSLATE: Command-line protocol identifier or output.
 			}
 		}
 	else
@@ -1302,7 +1302,7 @@ GList *directories_collections_files(GtkApplication *app, GApplicationCommandLin
 				}
 			else
 				{
-				g_application_command_line_print(app_command_line, "%s%s%s%s%s", "Unknown parameter: ", BOLD_ON, current_arg, BOLD_OFF, "\n");
+				g_application_command_line_print(app_command_line, "%s%s%s%s%s", "Unknown parameter: ", BOLD_ON, current_arg, BOLD_OFF, "\n"); // NOTRANSLATE: Command-line protocol identifier or output.
 				if (!remote_instance)
 					{
 					g_application_quit(G_APPLICATION(app));
@@ -1401,7 +1401,7 @@ CommandLineOptionEntry command_line_options[] =
 	{ "dupes-export",                gq_dupes_export,                PRIMARY_REMOTE, TEXT_QUIET },
 	{ "dupes-export-json",           gq_dupes_export_json,           PRIMARY_REMOTE, TEXT_QUIET },
 	{ "dupes-recurse",               gq_dupes<TRUE>,                 PRIMARY_REMOTE, GUI  },
-	{ "File",                        gq_File,                        PRIMARY_REMOTE, GUI  },
+	{ "File",                        gq_File,                        PRIMARY_REMOTE, GUI  }, // NOTRANSLATE: Command-line protocol identifier or output.
 	{ "file-extensions",             gq_file_extensions,             PRIMARY_REMOTE, TEXT_QUIET },
 	{ "first",                       gq_first,                       PRIMARY_REMOTE, GUI  },
 	{ "fullscreen",                  gq_fullscreen,                  PRIMARY_REMOTE, GUI  },

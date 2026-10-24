@@ -461,12 +461,12 @@ static gboolean advanced_exif_delete_cb(GtkWidget *, gpointer data)
 
 static void exif_window_context_help_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	help_window_show("GuideOtherWindowsExif.html");
+	help_window_show("GuideOtherWindowsExif.html"); // NOTRANSLATE: Metadata key defined by the file format.
 }
 
 static void exif_window_help_cb(GtkWidget *, gpointer)
 {
-	help_window_show("GuideOtherWindowsExif.html");
+	help_window_show("GuideOtherWindowsExif.html"); // NOTRANSLATE: Metadata key defined by the file format.
 }
 
 static void exif_window_close(ExifWin *ew)

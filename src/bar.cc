@@ -311,7 +311,7 @@ static void bar_expander_add_action_cb(GSimpleAction *, GVariant *parameter, gpo
 			auto *mpd = static_cast<MetadataPaneDialog *>(data);
 			const gchar *key = gtk_editable_get_text(GTK_EDITABLE(mpd->key_entry));
 			const gchar *title_text = gtk_editable_get_text(GTK_EDITABLE(mpd->title_entry));
-			if (!key || (!g_str_has_prefix(key, "Xmp.") && !g_str_has_prefix(key, "Exif.") && !g_str_has_prefix(key, "Iptc."))) return;
+			if (!key || (!g_str_has_prefix(key, "Xmp.") && !g_str_has_prefix(key, "Exif.") && !g_str_has_prefix(key, "Iptc."))) return; // NOTRANSLATE: Metadata key defined by the file format.
 
 			g_autofree gchar *description = exif_get_description_by_key(key);
 			const gchar *title = (title_text && *title_text) ? title_text : ((description && *description) ? description : key);
@@ -320,27 +320,27 @@ static void bar_expander_add_action_cb(GSimpleAction *, GVariant *parameter, gpo
 			g_autofree gchar *config = g_markup_printf_escaped(
 				"<gq><layout id='_current_'><bar><pane_exif id='%s' title='%s' expanded='true'>"
 				"<entry key='%s' if_set='false' editable='%s' /></pane_exif></bar></layout></gq>",
-				id, title, key, g_str_has_prefix(key, "Xmp.") ? "true" : "false");
+				id, title, key, g_str_has_prefix(key, "Xmp.") ? "true" : "false"); // NOTRANSLATE: Metadata key defined by the file format.
 			load_config_from_buf(config, strlen(config), FALSE);
 			generic_dialog_close(mpd->gd);
 			}, TRUE);
 		generic_dialog_add_button(mpd->gd, GQ_ICON_HELP, _("Help"), +[](GenericDialog *, gpointer)
 			{
-			help_window_show("GuideSidebarsInfo.html#AddingMetadataKeyPane");
+			help_window_show("GuideSidebarsInfo.html#AddingMetadataKeyPane"); // NOTRANSLATE: Documentation filename.
 			}, FALSE);
 
 		GtkWidget *table = pref_table_new(mpd->gd->vbox, 2, 2, FALSE, TRUE);
 		pref_table_label(table, 0, 0, _("Key:"), GTK_ALIGN_END);
 		mpd->key_entry = gtk_entry_new();
-		gtk_entry_set_placeholder_text(GTK_ENTRY(mpd->key_entry), "Xmp.dc.title");
+		gtk_entry_set_placeholder_text(GTK_ENTRY(mpd->key_entry), "Xmp.dc.title"); // NOTRANSLATE: Metadata key defined by the file format.
 		gtk_widget_set_sensitive(mpd->ok_button, FALSE);
 		g_signal_connect(mpd->key_entry, "changed", G_CALLBACK(+[](GtkEditable *editable, gpointer data)
 			{
 			auto *mpd = static_cast<MetadataPaneDialog *>(data);
 			const gchar *key = gtk_editable_get_text(editable);
-			gtk_widget_set_sensitive(mpd->ok_button, g_str_has_prefix(key, "Xmp.") ||
-			                                             g_str_has_prefix(key, "Exif.") ||
-			                                             g_str_has_prefix(key, "Iptc."));
+			gtk_widget_set_sensitive(mpd->ok_button, g_str_has_prefix(key, "Xmp.") || // NOTRANSLATE: Metadata key defined by the file format.
+			                                             g_str_has_prefix(key, "Exif.") || // NOTRANSLATE: Metadata key defined by the file format.
+			                                             g_str_has_prefix(key, "Iptc.")); // NOTRANSLATE: Metadata key defined by the file format.
 			}), mpd);
 		gtk_widget_set_size_request(mpd->key_entry, 320, -1);
 		gtk_grid_attach(GTK_GRID(table), mpd->key_entry, 1, 0, 1, 1);
@@ -782,7 +782,7 @@ GtkWidget *bar_update_from_config(GtkWidget *bar, const gchar **attribute_names,
 		if (READ_BOOL_FULL("enabled", enabled)) continue;
 		if (READ_INT_FULL("width", width)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (startup)
@@ -862,7 +862,7 @@ const gchar *bar_pane_translate_title(PaneType type, const gchar *id, const gcha
 
 	// Saved default titles from before the Description label was introduced.
 	const bool legacy_description_title = type == PANE_COMMENT && strcmp(id, "comment") == 0 &&
-	                                      (g_strcmp0(title, "Comment") == 0 || g_strcmp0(title, _("Comment")) == 0);
+	                                      (g_strcmp0(title, "Comment") == 0 || g_strcmp0(title, _("Comment")) == 0); // NOTRANSLATE: Legacy configuration value.
 	if (title && *title && strcmp(pane->title, title) != 0 && !legacy_description_title) return title;
 
 	return _(pane->title);

@@ -56,7 +56,7 @@ bool parse_npy_header(const gchar* data, size_t& offset, int& height, int& width
 	/* Check for the .npy magic number */
 	if (std::strncmp(data, "\x93NUMPY", 6) != 0)
 		{
-		log_printf("Not a valid .npy file.");
+		log_printf("Not a valid .npy file."); // NOTRANSLATE: Diagnostic message.
 		return false;
 		}
 
@@ -67,7 +67,7 @@ bool parse_npy_header(const gchar* data, size_t& offset, int& height, int& width
 	auto shape_pos = header_str.find("'shape': (");
 	if (shape_pos == std::string::npos)
 		{
-		log_printf("Could not find shape in npy header");
+		log_printf("Could not find shape in npy header"); // NOTRANSLATE: Diagnostic message.
 		return false;
 		}
 
@@ -92,7 +92,7 @@ GdkPixbuf *load_npy_to_pixbuf(gchar *buf)
 
 	if (channels != 3)
 		{
-		log_printf("Only npy RGB images with 3 channels are supported.");
+		log_printf("Only npy RGB images with 3 channels are supported."); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
@@ -101,7 +101,7 @@ GdkPixbuf *load_npy_to_pixbuf(gchar *buf)
 
 	if (!pixbuf)
 		{
-		log_printf("Failed to create GdkPixbuf");
+		log_printf("Failed to create GdkPixbuf"); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return pixbuf;
@@ -112,7 +112,7 @@ gboolean ImageLoaderNPY::write(const guchar *buf, gsize &chunk_size, gsize count
 	g_autoptr(GdkPixbuf) pixbuf_tmp = load_npy_to_pixbuf(reinterpret_cast<gchar *>(const_cast<guchar *>(buf)));
 	if (!pixbuf_tmp)
 		{
-		log_printf("Failed to load image from buffer");
+		log_printf("Failed to load image from buffer"); // NOTRANSLATE: Diagnostic message.
 
 		// @fixme
 		return false;

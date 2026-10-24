@@ -692,20 +692,20 @@ static void config_window_help_cb(GtkWidget *, gpointer data)
 
 	static const gchar *html_section[] =
 	{
-	"GuideOptionsGeneral.html",
-	"GuideOptionsImage.html",
-	"GuideOptionsOSD.html",
-	"GuideOptionsWindow.html",
-	"GuideOptionsKeyboard.html",
-	"GuideOptionsFiltering.html",
-	"GuideOptionsMetadata.html",
-	"GuideOptionsKeywords.html",
-	"GuideOptionsColor.html",
-	"GuideOptionsStereo.html",
-	"GuideOptionsBehavior.html",
-	"GuideOptionsToolbar.html",
-	"GuideOptionsToolbar.html",
-	"GuideOptionsAdvanced.html"
+	"GuideOptionsGeneral.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsImage.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsOSD.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsWindow.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsKeyboard.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsFiltering.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsMetadata.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsKeywords.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsColor.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsStereo.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsBehavior.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsToolbar.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsToolbar.html", // NOTRANSLATE: Documentation filename.
+	"GuideOptionsAdvanced.html" // NOTRANSLATE: Documentation filename.
 	};
 
 	i = gtk_notebook_get_current_page(GTK_NOTEBOOK(notebook));
@@ -1364,7 +1364,7 @@ static void image_overlay_default_template_cb(GtkWidget *widget, gpointer data)
 
 static void image_overlay_help_cb(GtkWidget *, gpointer)
 {
-	help_window_show("GuideOptionsOSD.html");
+	help_window_show("GuideOptionsOSD.html"); // NOTRANSLATE: Documentation filename.
 }
 
 static void font_dialog_done(GObject *source, GAsyncResult *result, gpointer user_data)
@@ -4039,7 +4039,7 @@ void show_about_window(LayoutWindow *lw)
 			}
 		else
 			{
-			log_printf("Error: Init of timezone database %s failed\n", timezone_path);
+			log_printf("Error: Init of timezone database %s failed\n", timezone_path); // NOTRANSLATE: Diagnostic message.
 			}
 		ZDCloseDatabase(cd);
 		}
@@ -4188,7 +4188,7 @@ static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 	if (error)
 		{
 		file_util_warning_dialog(_("Timezone database download failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
-		log_printf("Error: Download timezone database failed:\n%s", error->message);
+		log_printf("Error: Download timezone database failed:\n%s", error->message); // NOTRANSLATE: Diagnostic message.
 		g_clear_object(&tz->tmp_g_file);
 		return;
 		}

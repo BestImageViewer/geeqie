@@ -186,7 +186,7 @@ GType pixbuf_renderer_get_type()
 	    reinterpret_cast<GInstanceInitFunc>(pixbuf_renderer_init_wrapper), /* instance_init */
 	    nullptr,		/* value_table */
 	};
-	static GType pixbuf_renderer_type = g_type_register_static(GTK_TYPE_DRAWING_AREA, "PixbufRenderer",
+	static GType pixbuf_renderer_type = g_type_register_static(GTK_TYPE_DRAWING_AREA, "PixbufRenderer", // NOTRANSLATE: GObject type or property metadata.
 	                                                           &pixbuf_renderer_info, static_cast<GTypeFlags>(0));
 
 	return pixbuf_renderer_type;
@@ -217,7 +217,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_ZOOM_MIN,
 					g_param_spec_double("zoom_min",
-							    "Zoom minimum",
+							    "Zoom minimum", // NOTRANSLATE: GObject type or property metadata.
 							    nullptr,
 							    -1000.0,
 							    1000.0,
@@ -227,7 +227,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_ZOOM_MAX,
 					g_param_spec_double("zoom_max",
-							    "Zoom maximum",
+							    "Zoom maximum", // NOTRANSLATE: GObject type or property metadata.
 							    nullptr,
 							    -1000.0,
 							    1000.0,
@@ -237,7 +237,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_ZOOM_QUALITY,
 					g_param_spec_uint("zoom_quality",
-							  "Zoom quality",
+							  "Zoom quality", // NOTRANSLATE: GObject type or property metadata.
 							  nullptr,
 							  GDK_INTERP_NEAREST,
 							  GDK_INTERP_BILINEAR,
@@ -255,14 +255,14 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_ZOOM_EXPAND,
 					g_param_spec_boolean("zoom_expand",
-							     "Expand image in autozoom.",
+							     "Expand image in autozoom.", // NOTRANSLATE: GObject type or property metadata.
 							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 	g_object_class_install_property(gobject_class,
 	                                PROP_SCROLL_RESET,
 	                                g_param_spec_uint("scroll_reset",
-	                                                  "New image scroll reset",
+	                                                  "New image scroll reset", // NOTRANSLATE: GObject type or property metadata.
 	                                                  nullptr,
 	                                                  ScrollReset::TOPLEFT,
 	                                                  ScrollReset::NOCHANGE,
@@ -272,7 +272,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_DELAY_FLIP,
 					g_param_spec_boolean("delay_flip",
-							     "Delay image update",
+							     "Delay image update", // NOTRANSLATE: GObject type or property metadata.
 							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
@@ -280,7 +280,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_LOADING,
 					g_param_spec_boolean("loading",
-							     "Image actively loading",
+							     "Image actively loading", // NOTRANSLATE: GObject type or property metadata.
 							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
@@ -288,7 +288,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_COMPLETE,
 					g_param_spec_boolean("complete",
-							     "Image rendering complete",
+							     "Image rendering complete", // NOTRANSLATE: GObject type or property metadata.
 							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
@@ -296,7 +296,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_CACHE_SIZE_DISPLAY,
 					g_param_spec_uint("cache_display",
-							  "Display cache size MiB",
+							  "Display cache size MiB", // NOTRANSLATE: GObject type or property metadata.
 							  nullptr,
 							  0,
 							  1024,
@@ -306,8 +306,8 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_CACHE_SIZE_TILES,
 					g_param_spec_uint("cache_tiles",
-							  "Tile cache count",
-							  "Number of tiles to retain in memory at any one time.",
+							  "Tile cache count", // NOTRANSLATE: GObject type or property metadata.
+							  "Number of tiles to retain in memory at any one time.", // NOTRANSLATE: GObject type or property metadata.
 							  0,
 							  256,
 							  PR_CACHE_SIZE_DEFAULT,
@@ -316,7 +316,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_WINDOW_FIT,
 					g_param_spec_boolean("window_fit",
-							     "Fit window to image size",
+							     "Fit window to image size", // NOTRANSLATE: GObject type or property metadata.
 							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
@@ -324,7 +324,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_WINDOW_LIMIT,
 					g_param_spec_boolean("window_limit",
-							     "Limit size of parent window",
+							     "Limit size of parent window", // NOTRANSLATE: GObject type or property metadata.
 							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
@@ -332,7 +332,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_WINDOW_LIMIT_VALUE,
 					g_param_spec_uint("window_limit_value",
-							  "Size limit of parent window",
+							  "Size limit of parent window", // NOTRANSLATE: GObject type or property metadata.
 							  nullptr,
 							  10,
 							  150,
@@ -342,7 +342,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_AUTOFIT_LIMIT,
 					g_param_spec_boolean("autofit_limit",
-							     "Limit size of image when autofitting",
+							     "Limit size of image when autofitting", // NOTRANSLATE: GObject type or property metadata.
 							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
@@ -350,7 +350,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_AUTOFIT_LIMIT_VALUE,
 					g_param_spec_uint("autofit_limit_value",
-							  "Size limit of image when autofitting",
+							  "Size limit of image when autofitting", // NOTRANSLATE: GObject type or property metadata.
 							  nullptr,
 							  10,
 							  150,
@@ -360,7 +360,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 	g_object_class_install_property(gobject_class,
 					PROP_ENLARGEMENT_LIMIT_VALUE,
 					g_param_spec_uint("enlargement_limit_value",
-							  "Size increase limit of image when autofitting",
+							  "Size increase limit of image when autofitting", // NOTRANSLATE: GObject type or property metadata.
 							  nullptr,
 							  100,
 							  999,

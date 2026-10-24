@@ -303,7 +303,7 @@ void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 				fp = popen(cmd_line, "r");
 				if (fp == nullptr)
 					{
-					log_printf("Failed to run command: %s", cmd_line);
+					log_printf("Failed to run command: %s", cmd_line); // NOTRANSLATE: Diagnostic message.
 					}
 				else
 					{
@@ -384,7 +384,7 @@ void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 				pclose(fp);
 				}
 			}
-		log_printf("Backtrace end");
+		log_printf("Backtrace end"); // NOTRANSLATE: Diagnostic message.
 
 		free(bt_syms);
 		}
@@ -408,12 +408,12 @@ void log_print_file_data_dump(const gchar *file, gint line, const gchar *functio
 {
 	g_autofree gchar *exe_path = g_path_get_dirname(gq_executable_path);
 
-	log_printf("FileData dump start");
+	log_printf("FileData dump start"); // NOTRANSLATE: Diagnostic message.
 	log_printf("%s/../%s:%d %s\n", exe_path, file, line, function);
 
 	file_data_dump();
 
-	log_printf("FileData dump end");
+	log_printf("FileData dump end"); // NOTRANSLATE: Diagnostic message.
 }
 
 /**

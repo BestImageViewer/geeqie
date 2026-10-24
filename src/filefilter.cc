@@ -189,24 +189,24 @@ void filter_add_defaults()
 {
 	/* formats supported by custom loaders */
 	/*                     key    description      extensions   file_class   writable   allow_sidecar   enabled */
-	filter_add_if_missing("dds", "DirectDraw Surface", ".dds", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("dds", "DirectDraw Surface", ".dds", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #if HAVE_PDF
-	filter_add_if_missing("pdf", "Portable Document Format", ".pdf", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
+	filter_add_if_missing("pdf", "Portable Document Format", ".pdf", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 #if HAVE_EXR
-	filter_add_if_missing("exr", "Exr Image", ".exr", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
+	filter_add_if_missing("exr", "Exr Image", ".exr", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 #if HAVE_FITS
-	filter_add_if_missing("fits", "Fits Image", ".fits;.fit;.fts", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
+	filter_add_if_missing("fits", "Fits Image", ".fits;.fit;.fts", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 #if HAVE_HEIF
 	filter_add_if_missing("heif/avif", "HEIF/AVIF Image", ".heif;.heic;.avif", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
 #endif
 #if HAVE_WEBP
-	filter_add_if_missing("webp", "WebP Format", ".webp", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
+	filter_add_if_missing("webp", "WebP Format", ".webp", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 #if HAVE_DJVU
-	filter_add_if_missing("djvu", "DjVu Format", ".djvu;.djv", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
+	filter_add_if_missing("djvu", "DjVu Format", ".djvu;.djv", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 #if HAVE_JPEGXL
 	filter_add_if_missing("jxl", "JXL", ".jxl", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
@@ -215,14 +215,14 @@ void filter_add_defaults()
 	filter_add_if_missing("jp2", "JPEG 2000", ".jp2", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
 #endif
 #if HAVE_ARCHIVE
-	filter_add_if_missing("zip", "Archive files", ".zip;.rar;.tar;.tar.gz;.tar.bz2;.tar.xz;.tgz;.tbz;.txz;.cbr;.cbz;.gz;.bz2;.xz;.lzh;.lza;.7z", FORMAT_CLASS_ARCHIVE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("zip", "Archive files", ".zip;.rar;.tar;.tar.gz;.tar.bz2;.tar.xz;.tgz;.tbz;.txz;.cbr;.cbz;.gz;.bz2;.xz;.lzh;.lza;.7z", FORMAT_CLASS_ARCHIVE, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 #if HAVE_NPY
-	filter_add_if_missing("npy", "Numpy image file", ".npy", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("npy", "Numpy image file", ".npy", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 	filter_add_if_missing("scr", "ZX Spectrum screen Format", ".scr", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-	filter_add_if_missing("psd", "Adobe Photoshop Document", ".psd", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-	filter_add_if_missing("apng", "Animated Portable Network Graphic", ".apng", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("psd", "Adobe Photoshop Document", ".psd", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("apng", "Animated Portable Network Graphic", ".apng", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 
 	/* formats supported by gdk-pixbuf */
 	GSList *list = gdk_pixbuf_get_formats();
@@ -231,9 +231,9 @@ void filter_add_defaults()
 		auto *format = static_cast<GdkPixbufFormat *>(work->data);
 
 		g_autofree gchar *name = gdk_pixbuf_format_get_name(format);
-		if (strcmp(name, "Digital camera RAW") == 0)
+		if (strcmp(name, "Digital camera RAW") == 0) // NOTRANSLATE: File-loader format name.
 			{
-			DEBUG_1("Skipped '%s' from loader", name);
+			DEBUG_1("Skipped '%s' from loader", name); // NOTRANSLATE: Diagnostic message.
 			continue;
 			}
 
@@ -260,46 +260,46 @@ void filter_add_defaults()
 
 	/* add defaults even if gdk-pixbuf does not have them, but disabled */
 	filter_add_if_missing("jpeg", "JPEG group", ".jpg;.jpeg;.jpe", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("png", "Portable Network Graphic", ".png", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("tiff", "Tiff", ".tif;.tiff", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("pnm", "Packed Pixel formats", ".pbm;.pgm;.pnm;.ppm", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("gif", "Graphics Interchange Format", ".gif", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("xbm", "X bitmap", ".xbm", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("xpm", "X pixmap", ".xpm", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("bmp", "Bitmap", ".bmp", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("ico", "Icon file", ".ico;.cur", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("ras", "Raster", ".ras", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
-	filter_add_if_missing("svg", "Scalable Vector Graphics", ".svg", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE);
+	filter_add_if_missing("png", "Portable Network Graphic", ".png", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("tiff", "Tiff", ".tif;.tiff", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("pnm", "Packed Pixel formats", ".pbm;.pgm;.pnm;.ppm", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("gif", "Graphics Interchange Format", ".gif", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("xbm", "X bitmap", ".xbm", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("xpm", "X pixmap", ".xpm", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("bmp", "Bitmap", ".bmp", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("ico", "Icon file", ".ico;.cur", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("ras", "Raster", ".ras", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("svg", "Scalable Vector Graphics", ".svg", FORMAT_CLASS_IMAGE, TRUE, FALSE, FALSE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 
 	/* special formats for stereo */
-	filter_add_if_missing("jps", "Stereo side-by-side jpeg", ".jps", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
-	filter_add_if_missing("mpo", "Stereo multi-image jpeg", ".mpo", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
+	filter_add_if_missing("jps", "Stereo side-by-side jpeg", ".jps", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("mpo", "Stereo multi-image jpeg", ".mpo", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 
 	/* non-image files that might be desirable to show */
 	filter_add_if_missing("xmp", "XMP sidecar", ".xmp", FORMAT_CLASS_META, TRUE, FALSE, TRUE);
 	filter_add_if_missing("meta", "GQview legacy metadata", GQ_CACHE_EXT_METADATA, FORMAT_CLASS_META, TRUE, FALSE, TRUE);
 	filter_add_if_missing("gqv", GQ_APPNAME " image collection", GQ_COLLECTION_EXT, FORMAT_CLASS_COLLECTION, FALSE, TRUE, TRUE);
-	filter_add_if_missing("pto", "Panorama script file", ".pto", FORMAT_CLASS_META, FALSE, FALSE, TRUE);
+	filter_add_if_missing("pto", "Panorama script file", ".pto", FORMAT_CLASS_META, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 
 	/* These are the raw camera formats with embedded jpeg/exif.
 	 * (see format-raw.cc and/or exiv2.cc)
 	 */
-	filter_add_if_missing("arw", "Sony raw format", ".arw;.srf;.sr2", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("crw", "Canon raw format", ".crw;.cr2;.cr3", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("kdc", "Kodak raw format", ".kdc;.dcr;.k25", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("raf", "Fujifilm raw format", ".raf", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("mef", "Mamiya raw format", ".mef;.mos", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("mrw", "Minolta raw format", ".mrw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("nef", "Nikon raw format", ".nef;.nrw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("orf", "Olympus raw format", ".orf", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("pef", "Pentax or Samsung raw format", ".pef", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("dng", "Adobe Digital Negative raw format", ".dng", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("raw", "Panasonic raw format", ".raw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("r3d", "Red raw format", ".r3d", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("3fr", "Hasselblad raw format", ".3fr", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("erf", "Epson raw format", ".erf", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("srw", "Samsung raw format", ".srw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
-	filter_add_if_missing("rw2", "Panasonic raw format", ".rw2", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
+	filter_add_if_missing("arw", "Sony raw format", ".arw;.srf;.sr2", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("crw", "Canon raw format", ".crw;.cr2;.cr3", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("kdc", "Kodak raw format", ".kdc;.dcr;.k25", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("raf", "Fujifilm raw format", ".raf", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("mef", "Mamiya raw format", ".mef;.mos", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("mrw", "Minolta raw format", ".mrw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("nef", "Nikon raw format", ".nef;.nrw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("orf", "Olympus raw format", ".orf", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("pef", "Pentax or Samsung raw format", ".pef", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("dng", "Adobe Digital Negative raw format", ".dng", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("raw", "Panasonic raw format", ".raw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("r3d", "Red raw format", ".r3d", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("3fr", "Hasselblad raw format", ".3fr", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("erf", "Epson raw format", ".erf", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("srw", "Samsung raw format", ".srw", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("rw2", "Panasonic raw format", ".rw2", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 
 	/* video files */
 	filter_add_if_missing("mp4", "MP4 video file", ".mp4;.m4v;.3gp;.3g2", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE);
@@ -307,9 +307,9 @@ void filter_add_defaults()
 	filter_add_if_missing("mov", "MOV video file", ".mov;.qt", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE);
 	filter_add_if_missing("avi", "AVI video file", ".avi", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE);
 	filter_add_if_missing("mpg", "MPG video file", ".mpg;.mpeg;.mts;.m2ts", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE);
-	filter_add_if_missing("mkv", "Matroska video file", ".mkv;.webm", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE);
-	filter_add_if_missing("wmv", "Windows Media Video file", ".wmv;.asf", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE);
-	filter_add_if_missing("flv", "Flash Video file", ".flv", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE);
+	filter_add_if_missing("mkv", "Matroska video file", ".mkv;.webm", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("wmv", "Windows Media Video file", ".wmv;.asf", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
+	filter_add_if_missing("flv", "Flash Video file", ".flv", FORMAT_CLASS_VIDEO, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 }
 
 GList *filter_to_list(const gchar *extensions)
@@ -571,7 +571,7 @@ void filter_load_file_type(const gchar **attribute_names, const gchar **attribut
 		if (READ_BOOL(fe, writable)) continue;
 		if (READ_BOOL(fe, allow_sidecar)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 	if (fe.file_class >= FILE_FORMAT_CLASSES) fe.file_class = FORMAT_CLASS_UNKNOWN;
 

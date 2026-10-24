@@ -329,7 +329,7 @@ std::vector<ScreenData> fullscreen_prefs_list()
 		sd.description = std::string(_("Screen")) + " " + name + ", " + subname;
 		sd.geometry = rect;
 
-		DEBUG_1("Screen %d %30s %4d,%4d (%4dx%4d)",
+		DEBUG_1("Screen %d %30s %4d,%4d (%4dx%4d)", // NOTRANSLATE: Diagnostic message.
 		        sd.number, sd.description.c_str(), sd.geometry.x, sd.geometry.y, sd.geometry.width, sd.geometry.height);
 
 		list.push_back(sd);
@@ -559,12 +559,12 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 
 	if (fs->same_region)
 		{
-		DEBUG_2("Original window is not visible, enabling std. fullscreen mode");
+		DEBUG_2("Original window is not visible, enabling std. fullscreen mode"); // NOTRANSLATE: Diagnostic message.
 		image_move_from_image(fs->imd, fs->normal_imd);
 		}
 	else
 		{
-		DEBUG_2("Original window is still visible, enabling presentation fullscreen mode");
+		DEBUG_2("Original window is still visible, enabling presentation fullscreen mode"); // NOTRANSLATE: Diagnostic message.
 		image_copy_from_image(fs->imd, fs->normal_imd);
 		}
 

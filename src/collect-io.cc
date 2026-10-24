@@ -147,7 +147,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	f = fopen(pathl, "r");
 	if (!f)
 		{
-		log_printf("Failed to open collection file: \"%s\"\n", path);
+		log_printf("Failed to open collection file: \"%s\"\n", path); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 
@@ -268,7 +268,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			continue;
 			}
 
-		log_printf("Warning: Collection: %s Invalid file: %s", cd->name, filename);
+		log_printf("Warning: Collection: %s Invalid file: %s", cd->name, filename); // NOTRANSLATE: Diagnostic message.
 		DEBUG_1("collection invalid file: %s", filename);
 
 		fail++;
@@ -839,7 +839,7 @@ void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify collect_manager: %s %04x", fd->path, type);
+	DEBUG_1("Notify collect_manager: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 	switch (fd->change->type)
 		{
 		case FILEDATA_CHANGE_MOVE:

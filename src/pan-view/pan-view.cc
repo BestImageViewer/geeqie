@@ -903,7 +903,7 @@ static gint pan_layout_update_idle_cb(gpointer data)
 		{
 		gdouble align;
 
-		DEBUG_1("Canvas size is %d x %d", width, height);
+		DEBUG_1("Canvas size is %d x %d", width, height); // NOTRANSLATE: Diagnostic message.
 
 		pan_grid_build(pw, width, height, 1000);
 
@@ -1837,7 +1837,7 @@ static GList *pan_view_get_fd_list(PanWindow *pw)
 
 static void pan_window_help_action_cb(GSimpleAction *, GVariant *, gpointer)
 {
-help_window_show("GuideOtherWindowsPanView.html");
+help_window_show("GuideOtherWindowsPanView.html"); // NOTRANSLATE: Documentation filename.
 }
 
 /**

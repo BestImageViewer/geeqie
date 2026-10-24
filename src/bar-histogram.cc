@@ -153,7 +153,7 @@ void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attrib
 		if (READ_INT_FULL("histogram_channel", histogram_channel)) continue;
 		if (READ_INT_FULL("histogram_mode", histogram_mode)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	phd->histogram.set_channel(histogram_channel);
@@ -165,7 +165,7 @@ void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_PIXBUF)) && fd == phd->pane.fd)
 		{
-		DEBUG_1("Notify pane_histogram: %s %04x", fd->path, type);
+		DEBUG_1("Notify pane_histogram: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		bar_pane_histogram_update(phd);
 		}
 }
@@ -400,7 +400,7 @@ GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, con
 		if (READ_INT_FULL("histogram_channel", histogram_channel)) continue;
 		if (READ_INT_FULL("histogram_mode", histogram_mode)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return bar_pane_histogram_new(id, title, height, expanded, histogram_channel, histogram_mode);

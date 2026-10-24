@@ -2164,7 +2164,7 @@ static void vf_marks_filter_on_icon_press(GtkEntry *edit_widget, GtkEntryIconPos
 
 static void vf_marks_tooltip_help_cb(GenericDialog *, gpointer)
 {
-	help_window_show("GuideImageMarks.html");
+	help_window_show("GuideImageMarks.html"); // NOTRANSLATE: Documentation filename.
 }
 
 static void vf_marks_tooltip_open_dialog(GtkWidget *widget, gint mark_no)
@@ -3179,7 +3179,7 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf)
 	GRegex *ret = g_regex_new(file_filter_text, vf->file_filter.case_sensitive ? static_cast<GRegexCompileFlags>(0) : G_REGEX_CASELESS, static_cast<GRegexMatchFlags>(0), &error);
 	if (error)
 		{
-		log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message);
+		log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message); // NOTRANSLATE: Diagnostic message.
 		ret = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
@@ -3331,7 +3331,7 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (refresh)
 		{
-		DEBUG_1("Notify vf: %s %04x", fd->path, type);
+		DEBUG_1("Notify vf: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		vf_refresh_idle(vf);
 		}
 }

@@ -353,7 +353,7 @@ void histogram_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if ((type & NOTIFY_REREAD) && fd->histmap)
 		{
-		DEBUG_1("Notify histogram: %s %04x", fd->path, type);
+		DEBUG_1("Notify histogram: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		histmap_free(fd->histmap);
 		fd->histmap = nullptr;
 		}

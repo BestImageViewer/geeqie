@@ -236,7 +236,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 	ew = g_new0(EditorWindow, 1);
 
-	ew->window = window_new("Desktop", PIXBUF_INLINE_ICON_CONFIG, _("Desktop file"));
+	ew->window = window_new("Desktop", PIXBUF_INLINE_ICON_CONFIG, _("Desktop file")); // NOTRANSLATE: Persistent widget or action identifier.
 	window_close_on_escape(ew->window, GTK_PHASE_CAPTURE);
 	DEBUG_NAME(ew->window);
 
@@ -406,7 +406,7 @@ void editor_list_window_new_cb(GtkWidget *, gpointer)
 
 void editor_list_window_help_cb(GtkWidget *, gpointer)
 {
-	help_window_show("GuidePluginsConfig.html");
+	help_window_show("GuidePluginsConfig.html"); // NOTRANSLATE: Documentation filename.
 }
 
 void editor_list_window_selection_changed_cb(GtkSingleSelection *selection, GParamSpec *, gpointer data)

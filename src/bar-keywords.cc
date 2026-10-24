@@ -326,7 +326,7 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		if (bar_pane_common_update_from_config(pkd->pane, option, value, &title)) continue;
 		if (READ_CHAR(*pkd, key)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (title)
@@ -354,7 +354,7 @@ void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attr
 			continue;
 			}
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 }
 
@@ -467,7 +467,7 @@ void bar_pane_keywords_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pkd->pane.fd)
 		{
-		DEBUG_1("Notify pane_keywords: %s %04x", fd->path, type);
+		DEBUG_1("Notify pane_keywords: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		bar_pane_keywords_update(pkd);
 		}
 }
@@ -1633,7 +1633,7 @@ void autocomplete_keywords_list_load(const gchar *path)
 
 	if (!f)
 		{
-		log_printf("Warning: keywords file %s not loaded", pathl);
+		log_printf("Warning: keywords file %s not loaded", pathl); // NOTRANSLATE: Diagnostic message.
 		return;
 		}
 
@@ -1641,7 +1641,7 @@ void autocomplete_keywords_list_load(const gchar *path)
 	if (!fgets(s_buf, sizeof(s_buf), f) ||
 	    strncmp(s_buf, "#Keywords", 9) != 0)
 		{
-		log_printf("Warning: keywords file %s not loaded", pathl);
+		log_printf("Warning: keywords file %s not loaded", pathl); // NOTRANSLATE: Diagnostic message.
 		return;
 		}
 
@@ -1701,7 +1701,7 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 		if (READ_CHAR_FULL("key", key)) continue;
 		if (READ_INT_FULL("height", height)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return bar_pane_keywords_new(id, title, key, expanded, height);
@@ -1749,7 +1749,7 @@ gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
 		{
 		GApplication *app = g_application_get_default();
 
-		g_autoptr(GNotification) notification = g_notification_new("Geeqie");
+		g_autoptr(GNotification) notification = g_notification_new("Geeqie"); // NOTRANSLATE: Application name.
 
 		g_notification_set_title(notification, _("Keyword Autocomplete"));
 		g_notification_set_body(notification, _("The Info Sidebar has not yet been opened"));

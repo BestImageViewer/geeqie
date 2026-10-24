@@ -87,7 +87,7 @@ gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize cou
 
 	if (count != 6144 && count != 6912)
 		{
-		log_printf("Error: zxscr reader error\n");
+		log_printf("Error: zxscr reader error\n"); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 
@@ -98,7 +98,7 @@ gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize cou
 
 	if (!pixels)
 		{
-		log_printf("Error: zxscr reader error\n");
+		log_printf("Error: zxscr reader error\n"); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 
@@ -107,7 +107,7 @@ gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize cou
 	if (!pixbuf)
 		{
 		g_free(pixels);
-		DEBUG_1("Insufficient memory to open ZXSCR file");
+		DEBUG_1("Insufficient memory to open ZXSCR file"); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 	//let's decode screen

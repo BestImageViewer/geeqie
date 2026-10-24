@@ -253,7 +253,7 @@ void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean &a
 	if (!ee) return;
 
 	g_autofree gchar *text = nullptr;
-	if (g_strcmp0(ee->key, "Xmp.xmp.Rating") == 0)
+	if (g_strcmp0(ee->key, "Xmp.xmp.Rating") == 0) // NOTRANSLATE: Metadata key defined by the file format.
 		{
 		rating = metadata_read_int(ee->ped->pane.fd, ee->key, 0);
 		text = g_strdup_printf("%d", rating);
@@ -314,7 +314,7 @@ void bar_pane_exif_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto ped = static_cast<PaneExifData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == ped->pane.fd)
 		{
-		DEBUG_1("Notify pane_exif: %s %04x", fd->path, type);
+		DEBUG_1("Notify pane_exif: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		bar_pane_exif_update(ped);
 		}
 }
@@ -698,7 +698,7 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 		if (bar_pane_common_update_from_config(ped->pane, option, value, &title)) continue;
 		if (READ_BOOL(*ped, show_all)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (title)
@@ -727,7 +727,7 @@ void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribut
 		if (READ_BOOL_FULL("if_set", if_set)) continue;
 		if (READ_BOOL_FULL("editable", editable)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (key && key[0]) bar_pane_exif_add_entry(ped, key, title, if_set, editable);
@@ -818,7 +818,7 @@ GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gc
 		if (bar_pane_common_read_from_config(option, value, &id, &title, expanded)) continue;
 		if (READ_BOOL_FULL("show_all", show_all)) continue;
 
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return bar_pane_exif_new(id, title, expanded, show_all);

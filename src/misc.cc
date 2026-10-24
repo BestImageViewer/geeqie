@@ -160,19 +160,19 @@ static gchar *decode_geo_script_contents(const gchar *script, const gchar *input
 	                                                                             G_SUBPROCESS_FLAGS_STDOUT_PIPE |
 	                                                                             G_SUBPROCESS_FLAGS_STDERR_PIPE),
 	                                               &error, "awk", "-W", "posix", script, nullptr);
-	if (!process) return g_strdup_printf("Error: %s", error->message);
+	if (!process) return g_strdup_printf("Error: %s", error->message); // NOTRANSLATE: Geographic decoder status token or diagnostic.
 
 	g_autofree gchar *input = g_strconcat(input_text, "\n", nullptr);
 	gchar *output = nullptr;
 	if (!g_subprocess_communicate_utf8(process, input, nullptr, &output, nullptr, &error))
 		{
 		g_free(output);
-		return g_strdup_printf("Error: %s", error->message);
+		return g_strdup_printf("Error: %s", error->message); // NOTRANSLATE: Geographic decoder status token or diagnostic.
 		}
 	if (!g_subprocess_get_successful(process) || !output || !*g_strstrip(output))
 		{
 		g_free(output);
-		return g_strdup("Error: Unable to decode geographic coordinates");
+		return g_strdup("Error: Unable to decode geographic coordinates"); // NOTRANSLATE: Geographic decoder status token or diagnostic.
 		}
 	return output;
 }
@@ -188,21 +188,21 @@ static gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 
 gchar *decode_geo_parameters(const gchar *input_text)
 {
-	if (!input_text || !*input_text) return g_strdup("Error: Empty geographic coordinates");
+	if (!input_text || !*input_text) return g_strdup("Error: Empty geographic coordinates"); // NOTRANSLATE: Geographic decoder status token or diagnostic.
 
 	gchar *message = decode_geo_script(gq_bindir, input_text);
-	if (message && !strstr(message, "Error")) return message;
+	if (message && !strstr(message, "Error")) return message; // NOTRANSLATE: Geographic decoder status token or diagnostic.
 	g_free(message);
 
 	g_autofree gchar *dir = g_build_filename(get_rc_dir(), "applications", nullptr);
 	message = decode_geo_script(dir, input_text);
-	if (message && !strstr(message, "Error")) return message;
+	if (message && !strstr(message, "Error")) return message; // NOTRANSLATE: Geographic decoder status token or diagnostic.
 	g_free(message);
 
 	// Keep the decoder available when running from the build tree.
 	g_autoptr(GBytes) bytes = g_resources_lookup_data(GQ_RESOURCE_PATH_DATA "/geocode-parameters.awk",
 	                                               G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
-	if (!bytes) return g_strdup("Error: Geographic coordinate decoder is unavailable");
+	if (!bytes) return g_strdup("Error: Geographic coordinate decoder is unavailable"); // NOTRANSLATE: Geographic decoder status token or diagnostic.
 	g_autofree gchar *script = g_strndup(static_cast<const gchar *>(g_bytes_get_data(bytes, nullptr)), g_bytes_get_size(bytes));
 	return decode_geo_script_contents(script, input_text);
 }
@@ -218,7 +218,7 @@ int runcmd(const gchar *cmd)
 	int retval = -1;
 	FILE *in;
 
-	DEBUG_1("Running command: %s", cmd);
+	DEBUG_1("Running command: %s", cmd); // NOTRANSLATE: Diagnostic message.
 
 	in = popen(cmd, "r");
 	if (in)
@@ -229,19 +229,19 @@ int runcmd(const gchar *cmd)
 
 		while (fgets(buf, sizeof(buf), in) != NULL )
 			{
-			DEBUG_1("Output: %s", buf);
+			DEBUG_1("Output: %s", buf); // NOTRANSLATE: Diagnostic message.
 			}
 
 		status = pclose(in);
 
 		if (WIFEXITED(status))
 			{
-			msg = "Command terminated with exit code";
+			msg = "Command terminated with exit code"; // NOTRANSLATE: Diagnostic message.
 			retval = WEXITSTATUS(status);
 			}
 		else if (WIFSIGNALED(status))
 			{
-			msg = "Command was killed by signal";
+			msg = "Command was killed by signal"; // NOTRANSLATE: Diagnostic message.
 			retval = WTERMSIG(status);
 			}
 		else

@@ -205,7 +205,7 @@ bool CacheData::write_dimensions(GString *gstring) const
 {
 	if (!dimensions) return false;
 
-	g_string_append_printf(gstring, "Dimensions=[%d x %d]\n", dimensions->width, dimensions->height);
+	g_string_append_printf(gstring, "Dimensions=[%d x %d]\n", dimensions->width, dimensions->height); // NOTRANSLATE: Cache-file format token.
 
 	return true;
 }
@@ -214,7 +214,7 @@ bool CacheData::write_date(GString *gstring) const
 {
 	if (!date) return false;
 
-	g_string_append_printf(gstring, "DateTimeOriginal=[%lld]\n", static_cast<long long int>(*date));
+	g_string_append_printf(gstring, "DateTimeOriginal=[%lld]\n", static_cast<long long int>(*date)); // NOTRANSLATE: Cache-file format token.
 
 	return true;
 }
@@ -232,7 +232,7 @@ bool CacheData::write_similarity(GString *gstring) const
 {
 	if (!image_sim_filled(similarity.get())) return false;
 
-	g_string_append(gstring, "SimilarityGrid[32 x 32]=");
+	g_string_append(gstring, "SimilarityGrid[32 x 32]="); // NOTRANSLATE: Cache-file format token.
 
 	similarity->to_string(gstring);
 
@@ -254,7 +254,7 @@ bool CacheData::write_perceptual_hashes(GString *gstring) const
 		}
 	if (!hashes) return false;
 
-	g_string_append(gstring, "PerceptualHashV1=[");
+	g_string_append(gstring, "PerceptualHashV1=["); // NOTRANSLATE: Cache-file format token.
 	for (guint i = 0; i < hashes->size(); i++)
 		{
 		g_string_append_printf(gstring, "%s%016" G_GINT64_MODIFIER "x", i == 0 ? "" : " ", (*hashes)[i]);
@@ -348,7 +348,7 @@ bool CacheData::read_dimensions(FILE *f, const gchar *buffer, gint s)
 {
 	if (!f || !buffer) return false;
 
-	if (s < 10 || strncmp("Dimensions", buffer, 10) != 0) return false;
+	if (s < 10 || strncmp("Dimensions", buffer, 10) != 0) return false; // NOTRANSLATE: Cache-file format token.
 
 	gchar buf[1024];
 	if (!cache_sim_read_buf(f, s, buf, sizeof(buf))) return false;
@@ -365,7 +365,7 @@ bool CacheData::read_date(FILE *f, const gchar *buffer, gint s)
 {
 	if (!f || !buffer) return false;
 
-	if (s < 18 || strncmp("DateTimeOriginal=[", buffer, 18) != 0) return false;
+	if (s < 18 || strncmp("DateTimeOriginal=[", buffer, 18) != 0) return false; // NOTRANSLATE: Cache-file format token.
 
 	gchar buf[1024];
 	if (!cache_sim_read_buf(f, s, buf, sizeof(buf))) return false;
@@ -393,9 +393,9 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 {
 	if (!f || !buffer) return false;
 
-	if (s < 11 || strncmp("Similarity", buffer, 10) != 0) return false;
+	if (s < 11 || strncmp("Similarity", buffer, 10) != 0) return false; // NOTRANSLATE: Cache-file format token.
 
-	if (strncmp("Grid[32 x 32]", buffer + 10, 13) != 0) return false;
+	if (strncmp("Grid[32 x 32]", buffer + 10, 13) != 0) return false; // NOTRANSLATE: Cache-file format token.
 
 	if (fseek(f, - s, SEEK_CUR) != 0) return false;
 
@@ -431,7 +431,7 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 
 bool CacheData::read_perceptual_hashes(FILE *f, const gchar *buffer, gint s)
 {
-	constexpr gchar prefix[] = "PerceptualHashV1=[";
+	constexpr gchar prefix[] = "PerceptualHashV1=["; // NOTRANSLATE: Cache-file format token.
 	if (!f || !buffer || s < static_cast<gint>(sizeof(prefix) - 1) ||
 	    strncmp(prefix, buffer, sizeof(prefix) - 1) != 0) return false;
 
@@ -575,13 +575,13 @@ gchar *cache_create_location(CacheType cache_type, const gchar *source)
 	if ((cache_type == CacheType::THUMB || cache_type == CacheType::SIM) &&
 	    g_str_has_prefix(path, root) && !cache_prepare_thumbnail_directory(root, true))
 		{
-		log_printf("Refusing to use an unrecognized thumbnail cache directory: %s\n", root);
+		log_printf("Refusing to use an unrecognized thumbnail cache directory: %s\n", root); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
 	if (!recursive_mkdir_if_not_exists(path, mode))
 		{
-		log_printf("Failed to create cache dir %s\n", path);
+		log_printf("Failed to create cache dir %s\n", path); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
