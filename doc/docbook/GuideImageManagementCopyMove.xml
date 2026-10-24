@@ -135,6 +135,7 @@
         </term>
         <listitem>
           <para>This text entry displays the active path of the dialog. The path can be directly edited using this entry. Tab completion is supported, and the drop down arrow will display a list of recently selected folders.</para>
+          <para><keycap>Tab</keycap> completes the path rather than moving focus. Use <keycombo><keycap>Ctrl</keycap><keycap>Tab</keycap></keycombo> to move focus forward out of the path entry, or <keycombo><keycap>Shift</keycap><keycap>Tab</keycap></keycombo> to move backward. Continue keyboard navigation to reach the dialog buttons.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -154,6 +155,7 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <para>Press <keycap>Return</keycap> to activate the default action, either <guilabel>Copy</guilabel>, <guilabel>Move</guilabel>, or <guilabel>With Rename</guilabel>, depending on the operation and preferences. A path completion popup may use Return to accept a completion first. To choose a different action, move focus to its button and press <keycap>Space</keycap>. Press <keycap>Escape</keycap> to cancel; if a completion popup is open, dismiss it first.</para>
     <para />
   </section>
   <section id="Theerrordialog">
