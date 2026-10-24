@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <vector>
 
 #include <sys/mman.h>
@@ -22,6 +23,88 @@
 
 namespace
 {
+
+TEST(RendererTiles, FirstZoomStepFromFitUsesPhysicalScale)
+{
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	const auto saved_style = options->image.zoom_style;
+	std::unique_ptr<GtkWindow, decltype(&gtk_window_destroy)> window(GTK_WINDOW(gtk_window_new()), gtk_window_destroy);
+	auto *pr = pixbuf_renderer_new();
+	pr->zoom_expand = TRUE;
+	pr->enlargement_limit_size = 500;
+	gtk_window_set_default_size(window.get(), 400, 300);
+	gtk_window_set_child(window.get(), GTK_WIDGET(pr));
+	gtk_window_present(window.get());
+	for (int i = 0; i < 1000 && (!gtk_widget_get_mapped(GTK_WIDGET(pr)) || pr->viewport_width <= 0); ++i)
+		{
+		while (g_main_context_iteration(nullptr, FALSE)) {}
+		g_usleep(1000);
+		}
+	ASSERT_TRUE(gtk_widget_get_mapped(GTK_WIDGET(pr)));
+	ASSERT_GT(pr->viewport_width, 0);
+	for (const int size : {160, 2048})
+		{
+		g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, size, size * 3 / 4);
+		gdk_pixbuf_fill(image, 0x123456ff);
+		for (const auto style : {ZOOM_GEOMETRIC, ZOOM_ARITHMETIC})
+			{
+			options->image.zoom_style = style;
+			for (const double increment : {-0.1, 0.1})
+				{
+				SCOPED_TRACE(testing::Message() << "size=" << size << " style=" << style << " increment=" << increment);
+				pixbuf_renderer_set_pixbuf(pr, image, 0.0);
+				const double fit = pixbuf_renderer_zoom_get_scale(pr);
+				const int width = pr->width;
+				pixbuf_renderer_zoom_adjust(pr, increment);
+				const double adjusted = pixbuf_renderer_zoom_get_scale(pr);
+				if (increment > 0)
+					{
+					EXPECT_GT(adjusted, fit);
+					EXPECT_GT(pr->width, width);
+					}
+				else
+					{
+					EXPECT_LT(adjusted, fit);
+					EXPECT_LT(pr->width, width);
+					}
+				const double expected = style == ZOOM_GEOMETRIC ? fit * (increment > 0 ? 1.1 : 1.0 / 1.1)
+				                       : fit >= 1.0 ? fit + increment : 1.0 / (1.0 / fit - increment);
+				EXPECT_NEAR(adjusted, expected, 0.000001);
+				}
+			}
+		}
+	options->image.zoom_style = saved_style;
+}
+
+TEST(RendererTiles, SurfaceScaleNotificationUpdatesRendererAndDisconnectsOnUnrealize)
+{
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	std::unique_ptr<GtkWindow, decltype(&gtk_window_destroy)> window(GTK_WINDOW(gtk_window_new()), gtk_window_destroy);
+	g_autoptr(GtkWidget) widget = GTK_WIDGET(pixbuf_renderer_new());
+	g_object_ref_sink(widget);
+	auto *pr = PIXBUF_RENDERER(widget);
+	g_autoptr(GdkPixbuf) image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 160, 120);
+	gdk_pixbuf_fill(image, 0x123456ff);
+	pixbuf_renderer_set_pixbuf(pr, image, 1.0);
+	gtk_window_set_child(window.get(), GTK_WIDGET(pr));
+	gtk_widget_realize(GTK_WIDGET(window.get()));
+	gtk_widget_realize(GTK_WIDGET(pr));
+	auto *surface = gtk_native_get_surface(GTK_NATIVE(window.get()));
+	ASSERT_NE(surface, nullptr);
+	const double scale = gdk_surface_get_scale(surface);
+	pr->width = 1;
+	g_object_notify(G_OBJECT(surface), "scale");
+	EXPECT_NEAR(pr->width * scale, 160, scale);
+	EXPECT_NE(g_signal_handler_find(surface, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, pr), 0U);
+	gtk_window_set_child(window.get(), nullptr);
+	EXPECT_FALSE(gtk_widget_get_realized(GTK_WIDGET(pr)));
+	EXPECT_EQ(g_signal_handler_find(surface, G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, pr), 0U);
+	g_object_notify(G_OBJECT(surface), "scale");
+}
 
 TEST(RendererTiles, TransferPreservesViewedCenterAcrossViewportAllocation)
 {

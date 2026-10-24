@@ -1357,13 +1357,14 @@ static gdouble pr_zoom_adjust(const PixbufRenderer *pr, gdouble increment)
 
 	if (zoom == 0.0)
 		{
-		if (pr->scale < 1.0)
+		const gdouble scale = pixbuf_renderer_zoom_get_scale(pr);
+		if (scale < 1.0)
 			{
-			zoom = 0.0 - (1.0 / pr->scale);
+			zoom = 0.0 - (1.0 / scale);
 			}
 		else
 			{
-			zoom = pr->scale;
+			zoom = scale;
 			}
 		}
 

@@ -895,6 +895,10 @@ endif
 if unit_tests_enabled and xvfb.found()
     test_args = [xvfb.full_path(), '--auto-servernum', geeqie_exe.full_path(), '--run-unit-tests']
     test('Integration tests', isolate_test_sh, args: test_args, timeout: 100, suite : 'integration')
+    zoom_test_filter = '--gtest_filter=RendererTiles.FirstZoomStepFromFitUsesPhysicalScale:RendererTiles.SurfaceScaleNotificationUpdatesRendererAndDisconnectsOnUnrealize'
+    hidpi_test_args = [xvfb.full_path(), '--auto-servernum', find_program('env').full_path(),
+                      'GDK_SCALE=2', geeqie_exe.full_path(), '--run-unit-tests', zoom_test_filter]
+    test('HiDPI zoom tests', isolate_test_sh, args: hidpi_test_args, timeout: 30, suite : 'integration')
     summary({'integration_tests' : ['Tests run:', true]}, section : 'Testing', bool_yn : true)
 else
     summary({'integration_tests' : ['Tests run:', false]}, section : 'Testing', bool_yn : true)
