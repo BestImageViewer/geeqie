@@ -14,6 +14,7 @@
 #include "actions.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "layout-image.h"
 #include "layout.h"
 #include "options.h"
 #include "trash.h"
@@ -340,6 +341,67 @@ protected:
 	decltype(options->file_ops) saved_file_ops{};
 	gchar *directory = nullptr;
 };
+
+TEST_P(RepeatedDelete, SelectingMarksSynchronizesDisplayedImage)
+{
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	const bool keyboard = std::get<1>(GetParam());
+	if (keyboard && (!xdotool || !g_getenv("DISPLAY"))) GTEST_SKIP() << "Requires xdotool and X11";
+	gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie select marks test");
+	gtk_window_present(GTK_WINDOW(layout->window));
+	const auto settle = []()
+		{
+		const auto deadline = g_get_monotonic_time() + 150 * G_TIME_SPAN_MILLISECOND;
+		while (g_get_monotonic_time() < deadline)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+		};
+	settle();
+	auto *first = vf_index_get_data(layout->vf, 0);
+	auto *second = vf_index_get_data(layout->vf, 1);
+	auto *third = vf_index_get_data(layout->vf, 2);
+	ASSERT_NE(third, nullptr);
+	const auto select_marks = [&]()
+		{
+		if (keyboard)
+			{
+			gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie select marks test");
+			gtk_widget_grab_focus(layout->vf->listview);
+			settle();
+			const gchar *args[] = {xdotool, "search", "--name", "^Geeqie select marks test$",
+			                       "windowfocus", "--sync", "key", "--clearmodifiers", "ctrl+1", nullptr};
+			gint status = 0;
+			ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+			                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+			ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+			}
+		else
+			{
+			ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.main-win-select-mark-1", nullptr));
+			}
+		settle();
+		};
+	file_data_set_mark(second, 0, TRUE);
+	file_data_set_mark(third, 0, TRUE);
+	layout_image_set_fd(layout, first);
+	settle();
+	select_marks();
+	EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 2U);
+	EXPECT_EQ(layout_image_get_fd(layout), second);
+
+	layout_image_set_fd(layout, third);
+	select_marks();
+	EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 2U);
+	EXPECT_EQ(layout_image_get_fd(layout), third);
+
+	file_data_set_mark(second, 0, FALSE);
+	file_data_set_mark(third, 0, FALSE);
+	select_marks();
+	EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 0U);
+	EXPECT_EQ(layout_image_get_fd(layout), third);
+}
 
 GtkWidget *find_rename_entry(GtkWidget *widget)
 {

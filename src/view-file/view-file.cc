@@ -362,6 +362,24 @@ void vf_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 	case FILEVIEW_LIST: vflist_mark_to_selection(vf, mark, mode); break;
 	case FILEVIEW_ICON: vficon_mark_to_selection(vf, mark, mode); break;
 	}
+
+	// The batch determines the displayed image, rather than individual row changes.
+	if (vf->type == FILEVIEW_LIST) VFLIST(vf)->select_fd = nullptr;
+	if (!vf->layout) return;
+
+	vf_send_update(vf);
+	auto *current = layout_image_get_fd(vf->layout);
+	if (current && vf_is_selected(vf, current)) return;
+
+	for (GList *work = vf->list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		if (vf_is_selected(vf, fd))
+			{
+			layout_image_set_fd(vf->layout, fd);
+			break;
+			}
+		}
 }
 
 void vf_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
