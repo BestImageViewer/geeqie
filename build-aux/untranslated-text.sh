@@ -156,6 +156,9 @@ write_char_option
 \"Whether this tag affects the foreground color\",
 \"Width of cell\",
 
+##display-profile.cc
+\"Get\"
+
 ##image.cc
 \"Filename\"
 \"FindDeviceByProperty\"
