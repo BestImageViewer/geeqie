@@ -199,6 +199,12 @@
       of the main window.
     </para>
     <para>The image Dimensions column of the result list will only contain dimension information when comparing by dimensions, or when the data is easily available from memory or has been read from the cache.</para>
+    <section id="SelectingDuplicatesBySize">
+      <title>Selecting duplicates by file size</title>
+      <para>The results context menu's <guimenuitem>Select group 1 duplicates</guimenuitem> command selects the first displayed file in each match group. <guimenuitem>Select group 2 duplicates</guimenuitem> selects all remaining files in each match group, including groups containing more than two files. These commands replace the current selection. Here, group 1 and group 2 refer to row positions within each displayed match group, not the two input file sets used by <guilabel>Compare two file sets</guilabel>.</para>
+      <para>To retain the largest file in each match group, click the <guilabel>Size</guilabel> column header until the largest file appears first in each group, then choose <guimenuitem>Select group 2 duplicates</guimenuitem>. All other files in every match group will be selected. Review the selection before deleting or moving files.</para>
+      <para>To retain the smallest file instead, sort with the smallest file first and use the same selection command. Sorting changes clear the selection, so sort before selecting. Size refers to bytes, not image dimensions. When sizes are equal, one file remains unselected without any quality-based preference; a larger file is not necessarily a higher-quality image.</para>
+    </section>
   </section>
   <section id="DuplicateResultsExport">
     <title>Exporting results for scripts</title>
