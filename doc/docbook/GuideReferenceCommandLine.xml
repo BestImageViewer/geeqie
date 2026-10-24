@@ -4,4 +4,14 @@
   <para>
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="CommandLineOptions.xml" />
   </para>
+  <section id="IndependentInstances">
+    <title>Independent Instances</title>
+    <para>Normally, launching Geeqie again sends the command to the running application instance. Opening another window does not create an independent instance. <keycombo><keycap>Ctrl</keycap><keycap>Q</keycap></keycombo> quits that instance and closes all its windows; <keycombo><keycap>Ctrl</keycap><keycap>W</keycap></keycombo> closes only the current window, quitting the instance if it is the last main window.</para>
+    <para>To start an independent application instance, use:</para>
+    <programlisting>GQ_NEW_INSTANCE=y geeqie /path/to/folder</programlisting>
+    <para>Quitting this instance does not close windows belonging to another instance. By default, independent instances share configuration and state files. Each instance saves configuration on exit, so the last one to exit can overwrite settings saved by another instance.</para>
+    <para>To keep a separate persistent configuration, set a different configuration root:</para>
+    <programlisting>XDG_CONFIG_HOME="$HOME/.config/geeqie-work" GQ_NEW_INSTANCE=y geeqie /path/to/folder</programlisting>
+    <para>This instance uses a separate configuration under <filename>$HOME/.config/geeqie-work/geeqie</filename>. The <literal>XDG_CACHE_HOME</literal> and <literal>XDG_DATA_HOME</literal> environment variables can also be set to separate cache and data locations. Separate configurations do not isolate changes made to image files or their metadata.</para>
+  </section>
 </section>

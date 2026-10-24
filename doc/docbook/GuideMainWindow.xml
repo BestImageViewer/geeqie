@@ -78,7 +78,7 @@
     dialogue.
   </para>
   <para>
-    If several instances of the main window are open, they may be closed individually or simultaneously. If
+    Multiple windows normally belong to one Geeqie application instance, including windows opened by separate command line launches. They may be closed individually or simultaneously. If
     <menuchoice>
       <shortcut>
         <keycombo>
@@ -89,7 +89,7 @@
       <guimenu>File</guimenu>
       <guimenuitem>Quit</guimenuitem>
     </menuchoice>
-    is pressed, all windows will be closed. When Geeqie is re-opened the same windows will be re-displayed.
+    is pressed, all windows belonging to that application instance will be closed. Window restoration at the next startup depends on the <guilabel>Remember session</guilabel> setting in <link linkend="GuideOptionsWindow">Window Options</link>.
     <para />
     If
     <menuchoice>
@@ -102,9 +102,7 @@
       <guimenu>Windows</guimenu>
       <guimenuitem>Close Window</guimenuitem>
     </menuchoice>
-    is pressed, only that window will be closed unless that window is the "main" window, in which case all windows will be closed. When Geeqie is restarted only the main window will be displayed.
-    <para />
-    The main window may be recognised by the word "Geeqie" in the title bar, as opposed to other windows which have the word "geeqie".
+    is pressed, only that window will be closed. Closing the last main window quits the application instance. To start an independent instance, see <link linkend="IndependentInstances">Independent Instances</link>.
     <para />
     Several window layouts may be defined and displayed at any time, as described in the
     <emphasis role="underline"><link linkend="Windowmenu">Windows menu</link></emphasis>

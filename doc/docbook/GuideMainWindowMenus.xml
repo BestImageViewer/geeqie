@@ -245,7 +245,7 @@
           </menuchoice>
         </term>
         <listitem>
-          <para>Quits the Geeqie application, if collections or image metadata have been changed but not saved, the user will be prompted for confirmation.</para>
+          <para>Quits the Geeqie application instance and closes all its windows. If collections or image metadata have been changed but not saved, the user will be prompted for confirmation. Other independent Geeqie instances are not closed.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -1716,7 +1716,7 @@
           </menuchoice>
         </term>
         <listitem>
-          <para>Close the window. If the window is the "main" window, close all windows.</para>
+          <para>Closes the current window. Closing the last main window quits the application instance.</para>
         </listitem>
       </varlistentry>
     </variablelist>
