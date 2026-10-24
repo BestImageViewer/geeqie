@@ -116,6 +116,11 @@ Follow `CODING.md` for authoritative style. Key points:
   `GRAPHENE_POINT_INIT()`. Prefer aggregate initialization, for example
   `graphene_point_t point{x, y};`, or the library's initialization function.
 - Use GLib helpers where appropriate, for example `g_ascii_isspace()`.
+- Do not cast functions to GLib/GTK callback types to bypass signature
+  mismatches. Use a correctly typed wrapper or captureless lambda that calls
+  the function normally. Default arguments are not supplied when calling
+  through a function pointer. Check signatures in debug configurations too,
+  since options such as `DEBUG_FILEDATA` can add function parameters.
 - Do not leave temporary `DEBUG_0()`, `DEBUG_BT()`, `DEBUG_FD()`, or `DEBUG_RU()`
   calls in committed source.
 - In C++ pointer inference, use `auto *var = function();`.
