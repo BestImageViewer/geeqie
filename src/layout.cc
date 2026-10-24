@@ -1039,7 +1039,8 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 			if (s > 0)
 				{
 				g_autofree gchar *sb = text_from_size_abrev(s_bytes);
-				buf = g_strdup_printf(_("%s, %d files (%s, %d)%s"), b, n, sb, s, ss);
+				gint p = layout_list_get_index(lw, lw->image->image_fd) + 1;
+				buf = g_strdup_printf(_("%s, %d / %d files (%s, %d)%s"), b, p, n, sb, s, ss);
 				}
 			else
 				{
