@@ -12,6 +12,7 @@
 #include "filefilter.h"
 #include "layout.h"
 #include "layout-config.h"
+#include "layout-image.h"
 #include "layout-util.h"
 #include "options.h"
 #include "rcfile.h"
@@ -244,6 +245,9 @@ protected:
 		if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
 		if (!options) options = conf_options_new();
 		setup_default_options(options);
+		saved_hamburger = options->hamburger_menu;
+		saved_expand = options->expand_menu_toolbar;
+		saved_menu_settings = true;
 		filter_add_defaults();
 		filter_rebuild();
 		accel_map_load_merged();
@@ -269,6 +273,11 @@ protected:
 	void TearDown() override
 	{
 		if (layout) layout_free(layout);
+		if (saved_menu_settings)
+			{
+			options->hamburger_menu = saved_hamburger;
+			options->expand_menu_toolbar = saved_expand;
+			}
 		if (app)
 			{
 			g_application_set_default(previous_app);
@@ -296,7 +305,68 @@ protected:
 	GApplication *previous_app = nullptr;
 	gchar *directory = nullptr;
 	std::string id;
+	gboolean saved_hamburger = FALSE;
+	gboolean saved_expand = FALSE;
+	bool saved_menu_settings = false;
 };
+
+TEST_F(PartialLayoutConfig, HamburgerMenuFollowsFloatingToolsAndReturnsWhenHiddenOrDocked)
+{
+	options->hamburger_menu = TRUE;
+	for (bool expand : {false, true})
+		{
+		options->expand_menu_toolbar = expand;
+		layout_free(layout);
+		layout = nullptr;
+		const gchar *names[] = {"home_path", "startup_path", nullptr};
+		const gchar *values[] = {directory, "2", nullptr};
+		layout = layout_new_from_config(names, values, FALSE);
+		ASSERT_NE(layout, nullptr);
+		EXPECT_EQ(gtk_widget_get_root(layout->hamburger_menu_button), GTK_ROOT(layout->window));
+		for (int repeat = 0; repeat < 3; ++repeat)
+			{
+			layout_tools_float_set(layout, TRUE, FALSE);
+			ASSERT_NE(layout->tools, nullptr);
+			EXPECT_EQ(gtk_widget_get_root(layout->hamburger_menu_button), GTK_ROOT(layout->tools));
+			g_autoptr(GListModel) controllers = gtk_widget_observe_controllers(layout->tools);
+			guint menu_controllers = 0;
+			for (guint i = 0; i < g_list_model_get_n_items(controllers); ++i)
+				{
+				g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
+				if (controller == g_object_get_data(G_OBJECT(layout->tools), "hamburger-menu-key-controller"))
+					++menu_controllers;
+				}
+			EXPECT_EQ(menu_controllers, 1U);
+			const auto deadline = g_get_monotonic_time() + 2 * G_TIME_SPAN_SECOND;
+			while (!gtk_widget_get_mapped(layout->hamburger_menu_button) && g_get_monotonic_time() < deadline)
+				{
+				while (g_main_context_iteration(nullptr, FALSE)) {}
+				g_usleep(1000);
+				}
+			ASSERT_TRUE(gtk_widget_get_mapped(layout->hamburger_menu_button));
+			auto *keys = g_object_get_data(G_OBJECT(layout->tools), "hamburger-menu-key-controller");
+			auto *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(layout->hamburger_menu_button));
+			gboolean handled = FALSE;
+			g_signal_emit_by_name(keys, "key-pressed", GDK_KEY_F10, 0, static_cast<GdkModifierType>(0), &handled);
+			EXPECT_TRUE(handled);
+			EXPECT_TRUE(gtk_widget_get_visible(GTK_WIDGET(popover)));
+			g_signal_emit_by_name(keys, "key-pressed", GDK_KEY_F10, 0, static_cast<GdkModifierType>(0), &handled);
+			EXPECT_TRUE(handled);
+			EXPECT_FALSE(gtk_widget_get_visible(GTK_WIDGET(popover)));
+			layout_image_full_screen_start(layout);
+			EXPECT_EQ(gtk_widget_get_root(layout->hamburger_menu_button), GTK_ROOT(layout->tools));
+			layout_image_full_screen_stop(layout);
+			EXPECT_EQ(gtk_widget_get_root(layout->hamburger_menu_button), GTK_ROOT(layout->tools));
+			layout_tools_hide_toggle(layout);
+			EXPECT_EQ(gtk_widget_get_root(layout->hamburger_menu_button), GTK_ROOT(layout->window));
+			layout_tools_hide_toggle(layout);
+			EXPECT_EQ(gtk_widget_get_root(layout->hamburger_menu_button), GTK_ROOT(layout->tools));
+			layout_tools_float_set(layout, FALSE, FALSE);
+			EXPECT_EQ(gtk_widget_get_root(layout->hamburger_menu_button), GTK_ROOT(layout->window));
+			EXPECT_EQ(layout->tools, nullptr);
+			}
+		}
+}
 
 TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)
 {

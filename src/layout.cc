@@ -578,7 +578,7 @@ static gboolean layout_hamburger_menu_key_press_cb(GtkEventControllerKey *, guin
 		return TRUE;
 		}
 
-	GtkWidget *focus = gtk_window_get_focus(GTK_WINDOW(lw->window));
+	GtkWidget *focus = gtk_root_get_focus(gtk_widget_get_root(lw->hamburger_menu_button));
 	if (focus)
 		{
 		lw->hamburger_menu_previous_focus = focus;
@@ -588,6 +588,36 @@ static gboolean layout_hamburger_menu_key_press_cb(GtkEventControllerKey *, guin
 
 	gtk_menu_button_popup(GTK_MENU_BUTTON(lw->hamburger_menu_button));
 	return TRUE;
+}
+
+static void layout_hamburger_menu_set_window(LayoutWindow *lw, GtkWidget *window)
+{
+	auto *header = gtk_window_get_titlebar(GTK_WINDOW(window));
+	if (!GTK_IS_HEADER_BAR(header))
+		{
+		header = gtk_header_bar_new();
+		gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
+		gtk_window_set_titlebar(GTK_WINDOW(window), header);
+		}
+
+	auto *button = lw->hamburger_menu_button;
+	auto *old_header = gtk_widget_get_ancestor(button, GTK_TYPE_HEADER_BAR);
+	if (old_header != header)
+		{
+		g_object_ref_sink(button);
+		if (old_header) gtk_header_bar_remove(GTK_HEADER_BAR(old_header), button);
+		gtk_header_bar_pack_end(GTK_HEADER_BAR(header), button);
+		g_object_unref(button);
+		}
+
+	if (!g_object_get_data(G_OBJECT(window), "hamburger-menu-key-controller"))
+		{
+		auto *controller = gtk_event_controller_key_new();
+		gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
+		g_signal_connect(controller, "key-pressed", G_CALLBACK(layout_hamburger_menu_key_press_cb), lw);
+		gtk_widget_add_controller(window, controller);
+		g_object_set_data(G_OBJECT(window), "hamburger-menu-key-controller", controller);
+		}
 }
 
 static GtkWidget *layout_tool_setup(LayoutWindow *lw)
@@ -642,26 +672,18 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 
 	if (options->hamburger_menu)
 		{
-		GtkWidget *header = gtk_header_bar_new();
-		gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
-		gtk_window_set_titlebar(GTK_WINDOW(lw->window), header);
-		GtkWidget *menu_button = gtk_menu_button_new();
-		GtkWidget *image = ui_image_new_from_icon_name(GQ_ICON_MENU);
-		lw->hamburger_menu_button = menu_button;
-
-		gtk_menu_button_set_child(GTK_MENU_BUTTON(menu_button), image);
+		if (!lw->hamburger_menu_button)
+			{
+			lw->hamburger_menu_button = gtk_menu_button_new();
+			gtk_menu_button_set_child(GTK_MENU_BUTTON(lw->hamburger_menu_button), ui_image_new_from_icon_name(GQ_ICON_MENU));
+			}
+		GtkWidget *menu_button = lw->hamburger_menu_button;
+		layout_hamburger_menu_set_window(lw, lw->window);
 
 		gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), lw->menu_model);
 		GtkPopover *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(menu_button));
 		menu_icon_rows_refresh(GTK_WIDGET(popover), lw->menu_model);
 		g_signal_connect(popover, "closed", G_CALLBACK(layout_hamburger_menu_closed_cb), lw);
-
-		GtkEventController *controller = gtk_event_controller_key_new();
-		gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
-		g_signal_connect(controller, "key-pressed", G_CALLBACK(layout_hamburger_menu_key_press_cb), lw);
-		gtk_widget_add_controller(lw->window, controller);
-
-		gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
 		}
 	else if (options->expand_menu_toolbar)
 		{
@@ -2038,6 +2060,10 @@ static void layout_tools_geometry_sync(LayoutWindow *lw)
 static void layout_tools_hide(LayoutWindow *lw, gboolean hide)
 {
 	if (!lw->tools) return;
+	if (options->hamburger_menu)
+		{
+		layout_hamburger_menu_set_window(lw, hide ? lw->window : lw->tools);
+		}
 
 	if (hide)
 		{
