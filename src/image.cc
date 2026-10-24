@@ -30,6 +30,7 @@
 
 #include "collect.h"
 #include "color-man.h"
+#include "display-profile.h"
 #include "exif.h"
 #include "filecache.h"
 #include "filedata.h"
@@ -658,76 +659,12 @@ void image_update_title(ImageWindow *imd)
  * rotation, flip, etc.
  *-------------------------------------------------------------------
  */
-static gchar *image_get_colord_profile_filename(GdkMonitor *monitor)
+static GdkMonitor *image_get_monitor(const ImageWindow *imd)
 {
-	const gchar *connector = gdk_monitor_get_connector(monitor);
-	if (!connector || !*connector) return nullptr;
-
-	g_autoptr(GError) error = nullptr;
-	g_autoptr(GDBusProxy) client = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-	                                                            G_DBUS_PROXY_FLAGS_NONE,
-	                                                            nullptr,
-	                                                            "org.freedesktop.ColorManager",
-	                                                            "/org/freedesktop/ColorManager",
-	                                                            "org.freedesktop.ColorManager",
-	                                                            nullptr, &error);
-	if (!client)
-		{
-		DEBUG_1("Unable to connect to colord: %s", error->message);
-		return nullptr;
-		}
-
-	/* XRandR_name is used by colord on X11. OutputName is used by newer
-	 * desktop integrations and allows the same code to work on Wayland when
-	 * the compositor exposes a connector name.
-	 */
-	const gchar *properties[] = { "OutputName", "XRANDR_name" };
-	g_autofree gchar *device_path = nullptr;
-	for (const gchar *property : properties)
-		{
-		g_clear_error(&error);
-		g_autoptr(GVariant) result = g_dbus_proxy_call_sync(client, "FindDeviceByProperty",
-		                                                     g_variant_new("(ss)", property, connector),
-		                                                     G_DBUS_CALL_FLAGS_NONE, 1000, nullptr, &error);
-		if (result)
-			{
-			const gchar *path;
-			g_variant_get(result, "(&o)", &path);
-			device_path = g_strdup(path);
-			break;
-			}
-		}
-
-	if (!device_path) return nullptr;
-
-	g_clear_error(&error);
-	g_autoptr(GDBusProxy) device = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-	                                                            G_DBUS_PROXY_FLAGS_NONE,
-	                                                            nullptr,
-	                                                            "org.freedesktop.ColorManager",
-	                                                            device_path,
-	                                                            "org.freedesktop.ColorManager.Device",
-	                                                            nullptr, &error);
-	if (!device) return nullptr;
-
-	g_autoptr(GVariant) profiles = g_dbus_proxy_get_cached_property(device, "Profiles");
-	if (!profiles || g_variant_n_children(profiles) == 0) return nullptr;
-
-	g_autoptr(GVariant) profile_path_variant = g_variant_get_child_value(profiles, 0);
-	const gchar *profile_path = g_variant_get_string(profile_path_variant, nullptr);
-
-	g_clear_error(&error);
-	g_autoptr(GDBusProxy) profile = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-	                                                             G_DBUS_PROXY_FLAGS_NONE,
-	                                                             nullptr,
-	                                                             "org.freedesktop.ColorManager",
-	                                                             profile_path,
-	                                                             "org.freedesktop.ColorManager.Profile",
-	                                                             nullptr, &error);
-	if (!profile) return nullptr;
-
-	g_autoptr(GVariant) filename = g_dbus_proxy_get_cached_property(profile, "Filename");
-	return filename ? g_variant_dup_string(filename, nullptr) : nullptr;
+	GtkNative *native = gtk_widget_get_native(imd->widget);
+	GdkSurface *surface = native ? gtk_native_get_surface(native) : nullptr;
+	GdkDisplay *display = gtk_widget_get_display(imd->widget);
+	return surface ? gdk_display_get_monitor_at_surface(display, surface) : nullptr;
 }
 
 static bool image_get_system_screen_profile(const ImageWindow *imd, ColorManMemData &screen_data)
@@ -735,24 +672,40 @@ static bool image_get_system_screen_profile(const ImageWindow *imd, ColorManMemD
 	screen_data.ptr.reset();
 	screen_data.len = 0;
 
-	GtkNative *native = gtk_widget_get_native(imd->widget);
-	GdkSurface *surface = native ? gtk_native_get_surface(native) : nullptr;
-	GdkDisplay *display = gtk_widget_get_display(imd->widget);
-	GdkMonitor *monitor = surface ? gdk_display_get_monitor_at_surface(display, surface) : nullptr;
-	if (!monitor) return false;
+	auto *monitor = image_get_monitor(imd);
+	if (!monitor || !gdk_monitor_is_valid(monitor)) return false;
 
-	g_autofree gchar *filename = image_get_colord_profile_filename(monitor);
-	if (!filename) return false;
-
-	g_autofree gchar *contents = nullptr;
-	gsize length = 0;
-	if (!g_file_get_contents(filename, &contents, &length, nullptr) || length > G_MAXUINT)
+	constexpr auto CACHE_KEY = "geeqie-display-profile-cache";
+	auto *cache = static_cast<DisplayProfileCache *>(g_object_get_data(G_OBJECT(monitor), CACHE_KEY));
+	if (!cache)
 		{
-		DEBUG_1("Unable to read colord screen profile: %s", filename);
-		return false;
+		cache = new DisplayProfileCache;
+		g_object_set_data_full(G_OBJECT(monitor), CACHE_KEY, cache,
+		                      [](gpointer data) { delete static_cast<DisplayProfileCache *>(data); });
+		g_signal_connect(monitor, "invalidate", G_CALLBACK(+[](GdkMonitor *monitor, gpointer)
+			{
+			g_object_set_data(G_OBJECT(monitor), "geeqie-display-profile-cache", nullptr);
+			}), nullptr);
 		}
 
-	screen_data.ptr.reset(reinterpret_cast<guchar *>(g_steal_pointer(&contents)));
+	g_autoptr(GBytes) bytes = cache->get(gdk_monitor_get_connector(monitor), [monitor]()
+		{
+		// Never retain ImageWindow pointers across a lookup. Reload only current users.
+		for (GList *work = image_list; work; work = work->next)
+			{
+			auto *image = static_cast<ImageWindow *>(work->data);
+			auto *layout = layout_find_by_image(image);
+			if (!layout || layout->animation) continue;
+			if (image->image_fd && !image->il && image->color_profile_enable && options->color_profile.use_x11_screen_profile &&
+			    image_get_monitor(image) == monitor)
+				image_reload(image);
+			}
+		});
+	if (!bytes) return false;
+
+	gsize length = 0;
+	const auto *contents = g_bytes_get_data(bytes, &length);
+	screen_data.ptr.reset(static_cast<guchar *>(g_memdup2(contents, length)));
 	screen_data.len = length;
 	return true;
 }
