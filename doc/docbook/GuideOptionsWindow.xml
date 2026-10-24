@@ -10,7 +10,7 @@
           <guilabel>Remember session</guilabel>
         </term>
         <listitem>
-          <para>This will maintain windows size and position between Geeqie sessions.</para>
+          <para>Restores saved window sizes and maximized states between Geeqie sessions. In GTK4, Geeqie does not restore window coordinates or monitor placement; the window manager or compositor controls where windows appear.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -32,7 +32,7 @@
               <guimenu>File</guimenu>
               <guimenuitem>New Window</guimenuitem>
             </menuchoice>
-            will use the saved window positions also.
+            will also use the saved window size and maximized state. This option applies to additional windows, rather than the initial window restored at startup. Window coordinates and monitor placement are not restored.
           </para>
         </listitem>
       </varlistentry>
@@ -44,7 +44,7 @@
         </term>
         <listitem>
           <para>
-            Remember which workspace a window was displayed in.
+            Remember which workspace a window was displayed in. This is supported on X11 and is separate from monitor placement.
           </para>
         </listitem>
       </varlistentry>
@@ -77,7 +77,7 @@
           <guilabel>Remember dialog window positions</guilabel>
         </term>
         <listitem>
-          <para>This will maintain dialog windows size and position between Geeqie sessions.</para>
+          <para>Restores saved dialog window sizes between Geeqie sessions. The window manager or compositor controls dialog placement; Geeqie does not restore dialog coordinates or monitor placement.</para>
         </listitem>
       </varlistentry>
     </variablelist>
