@@ -170,6 +170,12 @@ static gboolean vf_press_key_cb(GtkEventControllerKey *, guint keyval, guint, Gd
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GtkWidget *widget = vf->listview;
+	if (vf->type == FILEVIEW_ICON)
+		{
+		GtkRoot *root = gtk_widget_get_root(widget);
+		GtkWidget *focus = root ? gtk_root_get_focus(root) : nullptr;
+		if (focus && (GTK_IS_CHECK_BUTTON(focus) || gtk_widget_get_ancestor(focus, GTK_TYPE_CHECK_BUTTON))) return FALSE;
+		}
 
 	return vf_press_key_common(vf, widget, keyval, state);
 }
@@ -2727,6 +2733,9 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	auto add_view_controllers = [vf](GtkWidget *view)
 	{
 		GtkEventController *key_controller = gtk_event_controller_key_new();
+		/* Handle icon navigation before GtkGridView's own shortcuts, which
+		 * otherwise consume Ctrl+arrow as scrolling. List view uses GTK navigation. */
+		if (vf->type == FILEVIEW_ICON) gtk_event_controller_set_propagation_phase(key_controller, GTK_PHASE_CAPTURE);
 		g_signal_connect(key_controller, "key-pressed", G_CALLBACK(vf_press_key_cb), vf);
 		gtk_widget_add_controller(view, key_controller);
 

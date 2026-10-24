@@ -894,7 +894,7 @@ endif
 # Integration tests (combined with unit test suite, but require X)
 if unit_tests_enabled and xvfb.found()
     test_args = [xvfb.full_path(), '--auto-servernum', geeqie_exe.full_path(), '--run-unit-tests']
-    test('Integration tests', isolate_test_sh, args: test_args, timeout: 100, suite : 'integration')
+    test('Integration tests', isolate_test_sh, args: test_args, timeout: 120, suite : 'integration')
     zoom_test_filter = '--gtest_filter=RendererTiles.FirstZoomStepFromFitUsesPhysicalScale:RendererTiles.SurfaceScaleNotificationUpdatesRendererAndDisconnectsOnUnrealize'
     hidpi_test_args = [xvfb.full_path(), '--auto-servernum', find_program('env').full_path(),
                       'GDK_SCALE=2', geeqie_exe.full_path(), '--run-unit-tests', zoom_test_filter]

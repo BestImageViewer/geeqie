@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 
 #include <algorithm>
+#include <functional>
 #include <tuple>
 #include <utility>
 
@@ -566,6 +567,7 @@ protected:
 		if (!options) options = conf_options_new();
 		setup_default_options(options);
 		saved_thumbnail_size = options->thumbnails.size;
+		saved_rectangular = options->collections.rectangular_selection;
 		options->thumbnails.size = {128, 96};
 		g_object_get(gtk_settings_get_default(), "gtk-enable-animations", &saved_animations, nullptr);
 		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", FALSE, nullptr);
@@ -599,6 +601,7 @@ protected:
 		if (window) gtk_window_destroy(GTK_WINDOW(window));
 		if (!directory) return;
 		options->thumbnails.size = saved_thumbnail_size;
+		options->collections.rectangular_selection = saved_rectangular;
 		g_object_set(gtk_settings_get_default(), "gtk-enable-animations", saved_animations, nullptr);
 		for (int i = 0; i < 150; ++i)
 			{
@@ -624,6 +627,7 @@ protected:
 	GtkWidget *window = nullptr;
 	GtkWidget *entry = nullptr;
 	GqSize saved_thumbnail_size{};
+	gboolean saved_rectangular = FALSE;
 	gboolean saved_animations = TRUE;
 	gchar *directory = nullptr;
 };
@@ -711,6 +715,265 @@ TEST_P(RevealFile, ScrollsWithoutChangingSelectionOrFocus)
 		ASSERT_TRUE(gtk_widget_compute_bounds(item, vf->scrolled, &bounds));
 		EXPECT_GE(bounds.origin.y, 0);
 		EXPECT_LE(bounds.origin.y + bounds.size.height, gtk_widget_get_height(vf->scrolled));
+		}
+}
+
+TEST_P(RevealFile, DownMovesOneDisplayedIconRowAfterSelectNone)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	g_autoptr(GtkCssProvider) css = gtk_css_provider_new();
+	gtk_css_provider_load_from_string(css, ".view-file-grid-item { min-width: 350px; }");
+	auto *display = gtk_widget_get_display(window);
+	gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(css), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
+	for (const int width : {600, 1000})
+		{
+		SCOPED_TRACE(width);
+		gtk_window_set_default_size(GTK_WINDOW(window), width, 300);
+		settle();
+		auto *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vf->scrolled));
+		gtk_adjustment_set_value(adjustment, 0);
+		settle();
+		auto *first = vf_index_get_data(vf, 0);
+		auto *first_widget = find_file_widget(vf->listview, first);
+		EXPECT_NE(first_widget, nullptr);
+		if (!first_widget) continue;
+		graphene_rect_t first_bounds{};
+		EXPECT_TRUE(gtk_widget_compute_bounds(first_widget, vf->listview, &first_bounds));
+		int next_row = 0;
+		for (int i = 1; i < 12; ++i)
+			{
+			auto *item = find_file_widget(vf->listview, vf_index_get_data(vf, i));
+			graphene_rect_t bounds{};
+			if (item && gtk_widget_compute_bounds(item, vf->listview, &bounds) && bounds.origin.y > first_bounds.origin.y + 1)
+				{
+				next_row = i;
+				break;
+				}
+			}
+		EXPECT_GT(next_row, 0);
+		if (!next_row) continue;
+		auto *below = vf_index_get_data(vf, next_row);
+		vf_select_none(vf);
+		const ViewFileMouseButtonEvent click{vf->listview, GDK_BUTTON_PRIMARY,
+		                                     first_bounds.origin.x + first_bounds.size.width / 2,
+		                                     first_bounds.origin.y + 10, static_cast<GdkModifierType>(0), 1};
+		vficon_press_cb(vf, click);
+		vficon_release_cb(vf, click);
+		EXPECT_TRUE(vficon_is_selected(vf, first));
+		vficon_press_key_cb(vf, vf->listview, GDK_KEY_Down, static_cast<GdkModifierType>(0));
+		EXPECT_EQ(VFICON(vf)->columns, next_row);
+		EXPECT_EQ(VFICON(vf)->focus_fd, below);
+		EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+		EXPECT_TRUE(vficon_is_selected(vf, below));
+		vficon_press_key_cb(vf, vf->listview, GDK_KEY_Up, static_cast<GdkModifierType>(0));
+		EXPECT_EQ(VFICON(vf)->focus_fd, first);
+		vficon_press_key_cb(vf, vf->listview, GDK_KEY_Down, GDK_CONTROL_MASK);
+		EXPECT_EQ(VFICON(vf)->focus_fd, below);
+		EXPECT_TRUE(vficon_is_selected(vf, first));
+		vficon_press_key_cb(vf, vf->listview, GDK_KEY_Down, GDK_CONTROL_MASK);
+		EXPECT_EQ(VFICON(vf)->focus_fd, vf_index_get_data(vf, next_row * 2));
+		EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+		EXPECT_TRUE(vficon_is_selected(vf, first));
+		}
+	gtk_style_context_remove_provider_for_display(display, GTK_STYLE_PROVIDER(css));
+}
+
+TEST_P(RevealFile, CtrlDownMovesIconFocusWithoutChangingSelection)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	if (!xdotool || !g_getenv("DISPLAY")) GTEST_SKIP() << "Requires xdotool and X11";
+	gtk_window_set_title(GTK_WINDOW(window), "Geeqie icon keyboard navigation test");
+	auto *first = vf_index_get_data(vf, 0);
+	vf_select_none(vf);
+	vf_select_by_fd(vf, first);
+	gtk_widget_grab_focus(vf->listview);
+	settle();
+	for (int i = 1; i <= 2; ++i)
+		{
+		const gchar *args[] = {xdotool, "search", "--name", "^Geeqie icon keyboard navigation test$",
+		                       "windowfocus", "--sync", "key", "--clearmodifiers", "ctrl+Down", nullptr};
+		gint status = 0;
+		ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+		                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+		ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+		settle();
+		EXPECT_EQ(VFICON(vf)->focus_fd, vf_index_get_data(vf, VFICON(vf)->columns * i));
+		EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+		EXPECT_TRUE(vficon_is_selected(vf, first));
+		auto *focused = find_file_widget(vf->listview, VFICON(vf)->focus_fd);
+		ASSERT_NE(focused, nullptr);
+		EXPECT_TRUE(gtk_widget_has_css_class(focused, "view-file-grid-focus"));
+		guint outlined = 0;
+		for (GList *work = vf->list; work; work = work->next)
+			{
+			auto *item = find_file_widget(vf->listview, static_cast<FileData *>(work->data));
+			if (item && gtk_widget_has_css_class(item, "view-file-grid-focus")) ++outlined;
+			}
+		EXPECT_EQ(outlined, 1U);
+		}
+	auto *focused = find_file_widget(vf->listview, VFICON(vf)->focus_fd);
+	ASSERT_NE(focused, nullptr);
+	gtk_widget_grab_focus(entry);
+	settle();
+	EXPECT_FALSE(gtk_widget_has_css_class(focused, "view-file-grid-focus"));
+}
+
+TEST_P(RevealFile, IconKeyboardInputSelectsRangesTogglesAndPages)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	if (!xdotool || !g_getenv("DISPLAY")) GTEST_SKIP() << "Requires xdotool and X11";
+	gtk_window_set_title(GTK_WINDOW(window), "Geeqie icon input combinations test");
+	vf_select_none(vf);
+	vf_select_by_fd(vf, vf_index_get_data(vf, 0));
+	vf->click_fd = vf_index_get_data(vf, 0);
+	gtk_widget_grab_focus(vf->listview);
+	settle();
+	const auto send_key = [&](const char *key, const std::function<bool()> &ready)
+		{
+		const gchar *args[] = {xdotool, "search", "--name", "^Geeqie icon input combinations test$",
+		                       "windowfocus", "--sync", "key", "--clearmodifiers", key, nullptr};
+		gint status = 0;
+		if (!g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+		                  nullptr, nullptr, nullptr, nullptr, &status, nullptr) || !g_spawn_check_wait_status(status, nullptr)) return false;
+		const gint64 deadline = g_get_monotonic_time() + 2 * G_TIME_SPAN_SECOND;
+		do
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (ready()) return true;
+			g_usleep(1000);
+			} while (g_get_monotonic_time() < deadline);
+		auto *item = find_file_widget(vf->listview, VFICON(vf)->focus_fd);
+		graphene_rect_t bounds{};
+		if (item) gtk_widget_compute_bounds(item, vf->scrolled, &bounds);
+		ADD_FAILURE() << "Keyboard state did not settle after " << key
+		              << "; focus=" << vf_index_by_fd(vf, VFICON(vf)->focus_fd)
+		              << "; selected=" << vf_selection_count(vf, nullptr)
+		              << "; outlined=" << (item && gtk_widget_has_css_class(item, "view-file-grid-focus"))
+		              << "; y=" << bounds.origin.y << "; height=" << bounds.size.height
+		              << "; viewport=" << gtk_widget_get_height(vf->scrolled);
+		return false;
+		};
+	const auto at = [&](int index) { return VFICON(vf)->focus_fd == vf_index_get_data(vf, index); };
+	const auto only = [&](int index)
+		{
+		return vf_selection_count(vf, nullptr) == 1 && vficon_is_selected(vf, vf_index_get_data(vf, index));
+		};
+	const auto single_visible_outline = [&]()
+		{
+		guint outlines = 0;
+		for (GList *work = vf->list; work; work = work->next)
+			{
+			auto *item = find_file_widget(vf->listview, static_cast<FileData *>(work->data));
+			if (item && gtk_widget_has_css_class(item, "view-file-grid-focus")) ++outlines;
+			}
+		auto *item = find_file_widget(vf->listview, VFICON(vf)->focus_fd);
+		graphene_rect_t bounds{};
+		return outlines == 1 && item && gtk_widget_has_css_class(item, "view-file-grid-focus") &&
+		       gtk_widget_compute_bounds(item, vf->scrolled, &bounds) && bounds.origin.y >= 0 &&
+		       bounds.origin.y + bounds.size.height <= gtk_widget_get_height(vf->scrolled);
+		};
+	ASSERT_TRUE(send_key("Home", [&]() { return at(0) && only(0) && single_visible_outline(); }));
+	ASSERT_TRUE(send_key("Right", [&]() { return at(1) && only(1); }));
+	ASSERT_TRUE(send_key("Left", [&]() { return at(0) && only(0); }));
+	const int columns = VFICON(vf)->columns;
+	ASSERT_TRUE(send_key("Down", [&]() { return at(columns) && only(columns); }));
+	ASSERT_TRUE(send_key("Up", [&]() { return at(0) && only(0); }));
+	ASSERT_TRUE(send_key("ctrl+Right", [&]() { return at(1) && only(0); }));
+	ASSERT_TRUE(send_key("ctrl+space", [&]() { return vf_selection_count(vf, nullptr) == 2; }));
+	EXPECT_TRUE(vficon_is_selected(vf, vf_index_get_data(vf, 0)));
+	EXPECT_TRUE(vficon_is_selected(vf, vf_index_get_data(vf, 1)));
+	ASSERT_TRUE(send_key("ctrl+space", [&]() { return at(1) && only(0); }));
+	ASSERT_TRUE(send_key("space", [&]() { return at(1) && only(1); }));
+
+	for (const bool rectangular : {false, true})
+		{
+		SCOPED_TRACE(rectangular);
+		options->collections.rectangular_selection = rectangular;
+		ASSERT_TRUE(send_key("Home", [&]() { return at(0) && only(0); }));
+		const auto range_selected = [&]()
+			{
+			if (!at(columns) || vf_selection_count(vf, nullptr) != (rectangular ? 2U : columns + 1U)) return false;
+			for (int i = 0; i <= columns; ++i)
+				if (vficon_is_selected(vf, vf_index_get_data(vf, i)) != (!rectangular || i == 0 || i == columns)) return false;
+			return true;
+			};
+		ASSERT_TRUE(send_key("shift+Down", range_selected));
+		ASSERT_TRUE(send_key("shift+Up", [&]() { return at(0) && only(0); }));
+		ASSERT_TRUE(send_key("ctrl+shift+Down", range_selected));
+		ASSERT_TRUE(send_key("ctrl+shift+Up", [&]() { return at(0) && only(0); }));
+		}
+	options->collections.rectangular_selection = FALSE;
+	const int last = vf_count(vf) - 1;
+	ASSERT_TRUE(send_key("ctrl+End", [&]() { return at(last) && only(0) && single_visible_outline(); }));
+	ASSERT_TRUE(send_key("ctrl+Home", [&]() { return at(0) && only(0) && single_visible_outline(); }));
+	ASSERT_TRUE(send_key("shift+End", [&]() { return at(last) && vf_selection_count(vf, nullptr) == vf_count(vf); }));
+	ASSERT_TRUE(send_key("shift+Home", [&]() { return at(0) && only(0); }));
+	ASSERT_TRUE(send_key("End", [&]() { return at(last) && only(last); }));
+	ASSERT_TRUE(send_key("Home", [&]() { return at(0) && only(0); }));
+	ASSERT_TRUE(send_key("ctrl+Next", [&]() { return !at(0) && only(0) && single_visible_outline(); }));
+	const int page_target = vf_index_by_fd(vf, VFICON(vf)->focus_fd);
+	EXPECT_GT(page_target, 0);
+	EXPECT_EQ(page_target % columns, 0);
+	ASSERT_TRUE(send_key("ctrl+Prior", [&]() { return at(0) && only(0); }));
+	ASSERT_TRUE(send_key("Next", [&]() { return at(page_target) && only(page_target); }));
+	ASSERT_TRUE(send_key("Prior", [&]() { return at(0) && only(0); }));
+	ASSERT_TRUE(send_key("shift+Next", [&]() { return at(page_target) && vf_selection_count(vf, nullptr) == page_target + 1U; }));
+	ASSERT_TRUE(send_key("shift+Prior", [&]() { return at(0) && only(0); }));
+
+	// Let GTK bind the replacement rows, then continue without a calibration key.
+	g_autofree gchar *removed = g_build_filename(directory, "000.svg", nullptr);
+	ASSERT_EQ(g_unlink(removed), 0);
+	vf_refresh(vf);
+	settle();
+	ASSERT_TRUE(send_key("Right", [&]() { return at(1) && only(1) && single_visible_outline(); }));
+}
+
+TEST_P(RevealFile, IconNavigationModifierMatrix)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	gtk_widget_grab_focus(vf->listview);
+	settle();
+	vficon_press_key_cb(vf, vf->listview, GDK_KEY_Home, static_cast<GdkModifierType>(0));
+	const int columns = VFICON(vf)->columns;
+	ASSERT_GT(columns, 1);
+	const int anchor = columns * 3 + 1;
+	const std::pair<guint, int> destinations[] = {
+		{GDK_KEY_Left, anchor - 1}, {GDK_KEY_Right, anchor + 1},
+		{GDK_KEY_Up, anchor - columns}, {GDK_KEY_Down, anchor + columns},
+		{GDK_KEY_Home, 0}, {GDK_KEY_End, static_cast<int>(vf_count(vf)) - 1}};
+	const GdkModifierType modifiers_list[] = {static_cast<GdkModifierType>(0), GDK_CONTROL_MASK, GDK_SHIFT_MASK,
+	                                          static_cast<GdkModifierType>(GDK_CONTROL_MASK | GDK_SHIFT_MASK)};
+	for (const bool rectangular : {false, true})
+		{
+		options->collections.rectangular_selection = rectangular;
+		for (const auto modifiers : modifiers_list)
+			{
+			for (const auto &destination : destinations)
+				{
+				SCOPED_TRACE(testing::Message() << "rectangular=" << rectangular << " modifiers=" << modifiers << " key=" << destination.first);
+				vf_select_none(vf);
+				vf_select_by_fd(vf, vf_index_get_data(vf, anchor));
+				vf->click_fd = vf_index_get_data(vf, anchor);
+				vficon_press_key_cb(vf, vf->listview, destination.first, static_cast<GdkModifierType>(modifiers));
+				EXPECT_EQ(VFICON(vf)->focus_fd, vf_index_get_data(vf, destination.second));
+				for (int i = 0; i < static_cast<int>(vf_count(vf)); ++i)
+					{
+					bool selected = i == (modifiers & GDK_CONTROL_MASK ? anchor : destination.second);
+					if (modifiers & GDK_SHIFT_MASK)
+						{
+						selected = rectangular
+						         ? i / columns >= std::min(anchor / columns, destination.second / columns) &&
+						           i / columns <= std::max(anchor / columns, destination.second / columns) &&
+						           i % columns >= std::min(anchor % columns, destination.second % columns) &&
+						           i % columns <= std::max(anchor % columns, destination.second % columns)
+						         : i >= std::min(anchor, destination.second) && i <= std::max(anchor, destination.second);
+						}
+					EXPECT_EQ(vficon_is_selected(vf, vf_index_get_data(vf, i)), selected) << i;
+					}
+				}
+			}
 		}
 }
 

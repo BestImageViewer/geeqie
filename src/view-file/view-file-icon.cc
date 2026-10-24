@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <map>
 #include <utility>
 
 #include <glib-object.h>
@@ -752,7 +753,9 @@ static void vficon_set_focus(ViewFile *vf, FileData *fd)
 
 			return;
 			}
-		vficon_selection_remove(vf, VFICON(vf)->focus_fd, SELECTION_FOCUS, nullptr);
+		FileData *previous = VFICON(vf)->focus_fd;
+		VFICON(vf)->focus_fd = nullptr;
+		vficon_selection_remove(vf, previous, SELECTION_FOCUS, nullptr);
 		}
 
 	if (!vficon_find_position(vf, fd, &row, &col))
@@ -798,8 +801,38 @@ static gint page_height(ViewFile *vf)
  *-------------------------------------------------------------------
  */
 
+static FileData *vficon_widget_file(GtkWidget *widget)
+{
+	if (auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(widget), "view-file-fd"))) return fd;
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		{
+		if (auto *fd = vficon_widget_file(child)) return fd;
+		}
+	return nullptr;
+}
+
+static void vficon_sync_displayed_columns(ViewFile *vf)
+{
+	/* max-columns is only an upper bound. GTK can use fewer columns when
+	 * theme padding, labels, or mark controls require wider cells. */
+	std::map<int, int> row_sizes;
+	for (auto *child = gtk_widget_get_first_child(vf->listview); child; child = gtk_widget_get_next_sibling(child))
+		{
+		if (!gtk_widget_get_mapped(child) || !vficon_widget_file(child) || gtk_widget_get_width(child) <= 0 || gtk_widget_get_height(child) <= 0) continue;
+		graphene_rect_t bounds;
+		if (gtk_widget_compute_bounds(child, vf->listview, &bounds)) ++row_sizes[static_cast<int>(bounds.origin.y)];
+		}
+	int columns = 0;
+	for (const auto &row : row_sizes) columns = std::max(columns, row.second);
+	if (columns == 0) return;
+	VFICON(vf)->columns = columns;
+	VFICON(vf)->rows = (g_list_length(vf->list) + columns - 1) / columns;
+	vficon_find_position(vf, VFICON(vf)->focus_fd, &VFICON(vf)->focus_row, &VFICON(vf)->focus_column);
+}
+
 gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifierType state)
 {
+	vficon_sync_displayed_columns(vf);
 	gint focus_row = 0;
 	gint focus_col = 0;
 	FileData *fd;
@@ -975,6 +1008,7 @@ void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 
 void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
+	vficon_sync_displayed_columns(vf);
 	FileData *fd = nullptr;
 	gboolean was_selected;
 
@@ -1527,11 +1561,12 @@ static void vficon_item_update(ViewFileIconItem *item, GtkWidget *child)
 	gtk_widget_remove_css_class(child, "view-file-grid-focus");
 	if (fd->selected & SELECTION_SELECTED) gtk_widget_add_css_class(child, "view-file-grid-selected");
 	if (fd->selected & SELECTION_PRELIGHT) gtk_widget_add_css_class(child, "view-file-grid-prelight");
-	if (VFICON(vf)->focus_fd == fd && gtk_widget_has_focus(vf->listview))
+	auto *focus = static_cast<GtkEventControllerFocus *>(g_object_get_data(G_OBJECT(vf->listview), "view-file-focus-controller"));
+	if (VFICON(vf)->focus_fd == fd && focus && gtk_event_controller_focus_contains_focus(focus))
 		gtk_widget_add_css_class(child, "view-file-grid-focus");
 }
 
-static void vficon_focus_changed_cb(GtkWidget *, GParamSpec *, gpointer data)
+static void vficon_focus_changed_cb(GObject *, GParamSpec *, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
 	for (guint position = 0; position < g_list_model_get_n_items(G_LIST_MODEL(VFICON(vf)->store)); position++)
@@ -1663,7 +1698,10 @@ ViewFile *vficon_new(ViewFile *vf)
 	gtk_grid_view_set_single_click_activate(GTK_GRID_VIEW(vf->listview), FALSE);
 	gtk_grid_view_set_min_columns(GTK_GRID_VIEW(vf->listview), 1);
 	gtk_grid_view_set_max_columns(GTK_GRID_VIEW(vf->listview), 1);
-	g_signal_connect(vf->listview, "notify::has-focus", G_CALLBACK(vficon_focus_changed_cb), vf);
+	GtkEventController *focus_controller = gtk_event_controller_focus_new();
+	g_object_set_data(G_OBJECT(vf->listview), "view-file-focus-controller", focus_controller);
+	g_signal_connect(focus_controller, "notify::contains-focus", G_CALLBACK(vficon_focus_changed_cb), vf);
+	gtk_widget_add_controller(vf->listview, focus_controller);
 
 	VFICON(vf)->resize_adjustment = GTK_ADJUSTMENT(g_object_ref(gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(vf->scrolled))));
 	g_signal_connect(VFICON(vf)->resize_adjustment, "notify::page-size",

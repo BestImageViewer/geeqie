@@ -61,6 +61,15 @@ To create a new test file, create the file under `src/tests/` with a name that
 matches the file being tested.  **Then make sure to add the file to
 `src/tests/meson.build` or it won't be seen or executed.**
 
+### Keyboard input tests
+
+The icon-pane keyboard tests use `xdotool` to send real X11 key events under
+`xvfb-run`. Install both tools and run `meson test -C build --suite integration`
+with unit tests enabled. The tests check focus, selection, range extension and
+shrinking, paging, and the visible focus outline. Tests that call the navigation
+handler directly cover the remaining modifier combinations. Real-input tests
+are skipped when `xdotool` or an X11 display is unavailable.
+
 ## Functional tests
 
 The Geeqie functional tests rely on `xvfb` in order to be able to start the app

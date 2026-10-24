@@ -75,7 +75,12 @@ button.tab-completion-selected {
 }
 
 .view-file-grid-item.view-file-grid-focus {
-	outline: 1px solid @theme_selected_bg_color;
+	outline: 2px solid @theme_selected_bg_color;
+	outline-offset: -2px;
+}
+
+.view-file-grid-item.view-file-grid-selected.view-file-grid-focus {
+	outline-color: @theme_selected_fg_color;
 }
 
 .view-file-grid-item.collection-drop-before {
