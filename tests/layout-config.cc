@@ -2,9 +2,19 @@
 
 #include "gtest/gtest.h"
 
+#include <string>
+
+#include <glib/gstdio.h>
 #include <gtk/gtk.h>
 
+#include "accelerators.h"
+#include "bar.h"
+#include "filefilter.h"
+#include "layout.h"
 #include "layout-config.h"
+#include "layout-util.h"
+#include "options.h"
+#include "rcfile.h"
 
 namespace
 {
@@ -223,6 +233,118 @@ TEST_F(LayoutConfigKeyboard, DraggingStillMovesAndSelectsTheDraggedPane)
 	expect_order("231");
 	EXPECT_EQ(gtk_single_selection_get_selected(selection), 2);
 	EXPECT_EQ(gtk_single_selection_get_selected_item(selection), source);
+}
+
+class PartialLayoutConfig : public testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+		if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+		if (!options) options = conf_options_new();
+		setup_default_options(options);
+		filter_add_defaults();
+		filter_rebuild();
+		accel_map_load_merged();
+		previous_app = g_application_get_default();
+		if (previous_app) g_object_ref(previous_app);
+		static GtkApplication *test_app = nullptr;
+		if (!test_app)
+			{
+			test_app = gtk_application_new("org.geeqie.PartialLayoutTest", G_APPLICATION_NON_UNIQUE);
+			ASSERT_TRUE(g_application_register(G_APPLICATION(test_app), nullptr, nullptr));
+			}
+		app = GTK_APPLICATION(g_object_ref(test_app));
+		g_application_set_default(G_APPLICATION(app));
+		directory = g_dir_make_tmp("geeqie-partial-layout-XXXXXX", nullptr);
+		ASSERT_NE(directory, nullptr);
+		const gchar *names[] = {"style", "order", "home_path", "startup_path", "show_info_pixel", "show_thumbnails", "animate", nullptr};
+		const gchar *values[] = {"2", "321", directory, "2", "true", "true", "false", nullptr};
+		layout = layout_new_from_config(names, values, FALSE);
+		ASSERT_NE(layout, nullptr);
+		id = layout->options.id;
+	}
+
+	void TearDown() override
+	{
+		if (layout) layout_free(layout);
+		if (app)
+			{
+			g_application_set_default(previous_app);
+			g_clear_object(&app);
+			}
+		g_clear_object(&previous_app);
+		if (directory) g_rmdir(directory);
+		g_free(directory);
+	}
+
+	void expect_preserved(bool info_pixel = true)
+	{
+		EXPECT_EQ(layout->options.style, 2);
+		EXPECT_STREQ(layout->options.order, "321");
+		EXPECT_STREQ(layout->options.id, id.c_str());
+		EXPECT_STREQ(layout->options.home_path, directory);
+		EXPECT_EQ(layout->options.startup_path, STARTUP_PATH_HOME);
+		EXPECT_EQ(layout->options.show_info_pixel, info_pixel);
+		EXPECT_TRUE(layout->options.show_thumbnails);
+		EXPECT_FALSE(layout->options.animate);
+	}
+
+	LayoutWindow *layout = nullptr;
+	GtkApplication *app = nullptr;
+	GApplication *previous_app = nullptr;
+	gchar *directory = nullptr;
+	std::string id;
+};
+
+TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)
+{
+	ASSERT_EQ(layout->bar, nullptr);
+	expect_preserved();
+	layout_bar_toggle(layout);
+	ASSERT_NE(layout->bar, nullptr);
+	EXPECT_NE(bar_find_pane_by_id(layout->bar, PANE_EXIF, "exif"), nullptr);
+	expect_preserved();
+	layout_bar_toggle(layout);
+	layout_bar_toggle(layout);
+	expect_preserved();
+}
+
+TEST_F(PartialLayoutConfig, AddingSidebarPanePreservesWindowOptions)
+{
+	layout_bar_toggle(layout);
+	const gchar fragment[] = "<gq><layout id='_current_'><bar>"
+	                         "<pane_exif id='extra' expanded='true'>"
+	                         "<entry key='Exif.Image.Artist' editable='false'/>"
+	                         "</pane_exif></bar></layout></gq>";
+	ASSERT_TRUE(load_config_from_buf(fragment, sizeof(fragment) - 1, FALSE));
+	EXPECT_NE(bar_find_pane_by_id(layout->bar, PANE_EXIF, "extra"), nullptr);
+	expect_preserved();
+}
+
+TEST_F(PartialLayoutConfig, ExplicitAttributesOverrideOnlyTheirOwnOptions)
+{
+	const gchar *names[] = {"id", "show_info_pixel", nullptr};
+	const gchar *values[] = {"_current_", "false", nullptr};
+	layout_update_from_config(layout, names, values);
+	expect_preserved(false);
+	layout_update_from_config(layout, nullptr, nullptr);
+	expect_preserved(false);
+}
+
+TEST_F(PartialLayoutConfig, NewWindowStillUsesDefaultLayoutOptions)
+{
+	const gchar *names[] = {"home_path", "startup_path", nullptr};
+	const gchar *values[] = {directory, "2", nullptr};
+	auto *other = layout_new_from_config(names, values, FALSE);
+	ASSERT_NE(other, nullptr);
+	EXPECT_EQ(other->options.style, 0);
+	EXPECT_STREQ(other->options.order, "123");
+	EXPECT_FALSE(other->options.show_info_pixel);
+	EXPECT_TRUE(other->options.animate);
+	layout_free(other);
+	expect_preserved();
 }
 
 } // namespace

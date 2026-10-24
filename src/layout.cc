@@ -3280,7 +3280,12 @@ LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar 
 
 void layout_update_from_config(LayoutWindow *lw, const gchar **attribute_names, const gchar **attribute_values)
 {
-	LayoutOptions lop = init_layout_options(attribute_names, attribute_values);
+	if (!layout_valid(&lw)) return;
+
+	/* Sidebar fragments contain only a layout id. Preserve omitted options. */
+	LayoutOptions lop{};
+	copy_layout_options(lop, lw->options);
+	if (attribute_names) layout_load_attributes(lop, attribute_names, attribute_values);
 
 	layout_apply_options(lw, lop);
 
