@@ -27,6 +27,7 @@
     . These operations also appear in the context menu of all images and files.
   </para>
   <para>The Copy and Move operations and dialogs behave the same in Geeqie, with the only difference being the final result. The remaining text of this page applies equally to the Copy and Move operations, for the remainder of this page these will be referred to as a Copy/Move operation.</para>
+  <para>When copying or moving an individual symbolic link, Geeqie preserves the location it points to. Relative links remain relative, with their target path adjusted for the destination folder; absolute links retain their target path. A link to a missing target is preserved as a link. Renaming a link within the same folder retains its original target text. When transferring a whole folder, link target text inside the folder is preserved so that links between files in the transferred tree remain relative to that tree.</para>
   <para>Initiating a Copy/Move operation will display a dialog to select the destination folder to Copy/Move the selected file, after the destination folder is selected Geeqie will proceed to Copy/Move the images to the destination. If an error occurs or a file exists with the same name as one of the files being Copy/Moved, a dialog will appear prompting how to handle the situation.</para>
   <para />
   <section id="CopyAndClipboardCommands">

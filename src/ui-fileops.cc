@@ -26,9 +26,11 @@
 #include <unistd.h>
 #include <utime.h>
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -423,74 +425,81 @@ static gboolean hard_linked(const gchar *a, const gchar *b)
 		sta.st_ino == stb.st_ino);
 }
 
+/* Paths use filesystem encoding. Resolve the containing directories, but never
+ * the target: it may be dangling or contain another symlink followed by "..".
+ */
+static gboolean transfer_symbolic_link(const gchar *source, const gchar *destination, gboolean move)
+{
+	g_autofree gchar *link = g_file_read_link(source, nullptr);
+	if (!link) return FALSE;
+	g_autofree gchar *source_dir = g_path_get_dirname(source);
+	g_autofree gchar *destination_dir = g_path_get_dirname(destination);
+	g_autofree gchar *source_parent = realpath(source_dir, nullptr);
+	g_autofree gchar *destination_parent = realpath(destination_dir, nullptr);
+	if (!source_parent || !destination_parent) return FALSE;
+	const bool same_parent = strcmp(source_parent, destination_parent) == 0;
+	g_autofree gchar *source_name = g_path_get_basename(source);
+	g_autofree gchar *destination_name = g_path_get_basename(destination);
+	if (same_parent && strcmp(source_name, destination_name) == 0) return TRUE;
+
+	std::string target = link;
+	if (!g_path_is_absolute(link) && !same_parent)
+		{
+		auto absolute = std::filesystem::path(source_parent);
+		const auto relative = std::filesystem::path(link);
+		auto component = relative.begin();
+		// Leading dot components refer to the resolved containing directory.
+		// Leave later components intact: a name followed by ".." may be a symlink.
+		while (component != relative.end() && (*component == "." || *component == ".."))
+			{
+			if (*component == "..") absolute = absolute.parent_path();
+			++component;
+			}
+		for (; component != relative.end(); ++component) absolute /= *component;
+		target = absolute.lexically_relative(destination_parent).native();
+		if (target.empty()) return FALSE;
+		}
+
+	if (move && target == link)
+		{
+		if (rename(source, destination) == 0) return TRUE;
+		if (errno != EXDEV) return FALSE;
+		}
+
+	// Publish the complete link atomically without following an existing destination.
+	g_autofree gchar *temporary = g_build_filename(destination_dir, ".geeqie-link-XXXXXX", nullptr);
+	const gint fd = g_mkstemp(temporary);
+	if (fd < 0) return FALSE;
+	close(fd);
+	if (unlink(temporary) != 0) return FALSE;
+	if (symlink(target.c_str(), temporary) != 0) return FALSE;
+	if (rename(temporary, destination) != 0)
+		{
+		unlink(temporary);
+		return FALSE;
+		}
+
+	return !move || unlink(source) == 0;
+}
+
 gboolean copy_file(const gchar *s, const gchar *t)
 {
+	if (!s || !t) return FALSE;
 	gchar buf[16384];
 	size_t b;
 	gint fd = -1;
 
 	g_autofree gchar *sl = path_from_utf8(s);
 	g_autofree gchar *tl = path_from_utf8(t);
+	struct stat source_stat;
+	if (lstat(sl, &source_stat) != 0) return FALSE;
+	if (S_ISLNK(source_stat.st_mode)) return transfer_symbolic_link(sl, tl, FALSE);
 
 	if (hard_linked(sl, tl))
 		{
 		return TRUE;
 		}
 
-	/* Do not dereference absolute symlinks, but copy them "as is".
-	* For a relative symlink, we don't know how to properly change it when
-	* copied/moved to another dir to keep pointing it to same target as
-	* a relative symlink, so we turn it into absolute symlink using
-	* realpath() instead. */
-	auto copy_symlink = [](const gchar *sl, const gchar *tl) -> gboolean
-		{
-		struct stat st;
-		if (!lstat_utf8(sl, &st) && S_ISLNK(st.st_mode))
-			{
-			return FALSE;
-			}
-
-		g_autofree auto *link_target = static_cast<gchar *>(g_malloc(st.st_size + 1));
-		if (readlink(sl, link_target, st.st_size) < 0)
-			{
-			return FALSE;  // try a "normal" copy
-			}
-		link_target[st.st_size] = '\0';
-
-		if (link_target[0] != G_DIR_SEPARATOR) // if it is a relative symlink
-			{
-			gchar *absolute;
-
-			const gchar *lastslash = strrchr(sl, G_DIR_SEPARATOR);
-			gint len = lastslash - sl + 1;
-
-			absolute = static_cast<gchar *>(g_malloc(len + st.st_size + 1));
-			strncpy(absolute, sl, len);
-			strcpy(absolute + len, link_target);
-			g_free(link_target);
-			link_target = absolute;
-
-			gchar *realPath = realpath(link_target, nullptr);
-			if (!realPath) // could not get absolute path, got some error instead
-				{
-				return FALSE;  // so try a "normal" copy
-				}
-
-			g_free(link_target);
-			link_target = realPath; // successfully resolved into an absolute path
-			}
-
-		if (stat_utf8(tl, &st)) unlink(tl); // first try to remove directory entry in destination directory if such entry exists
-
-		return symlink(link_target, tl) == 0;
-		};
-
-	if (copy_symlink(sl, tl))
-		{
-		return TRUE;
-		}
-
-	// if symlink did not succeed, continue on to try a copy procedure
 	g_autoptr(FILE) fi = fopen(sl, "rb");
 	if (!fi)
 		{
@@ -548,6 +557,9 @@ gboolean move_file(const gchar *s, const gchar *t)
 
 	g_autofree gchar *sl = path_from_utf8(s);
 	g_autofree gchar *tl = path_from_utf8(t);
+	struct stat source_stat;
+	if (lstat(sl, &source_stat) != 0) return FALSE;
+	if (S_ISLNK(source_stat.st_mode)) return transfer_symbolic_link(sl, tl, TRUE);
 	if (rename(sl, tl) < 0)
 		{
 		/* this may have failed because moving a file across filesystems

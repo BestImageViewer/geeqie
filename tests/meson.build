@@ -42,6 +42,7 @@ unit_test_sources = files(
 'trash.cc',
 'ui-bookmark.cc',
 'ui-file-chooser.cc',
+'ui-fileops.cc',
 'ui-icon.cc',
 'ui-tree-edit.cc',
 'video-metadata.cc',

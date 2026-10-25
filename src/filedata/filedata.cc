@@ -2107,7 +2107,11 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		return ret;
 		}
 
-	if (!isname(fd->path) && (fd->change->type != FILEDATA_CHANGE_DELETE || !islink(fd->path)))
+	const bool operates_on_link = fd->change->type == FILEDATA_CHANGE_DELETE ||
+	                              fd->change->type == FILEDATA_CHANGE_MOVE ||
+	                              fd->change->type == FILEDATA_CHANGE_RENAME ||
+	                              fd->change->type == FILEDATA_CHANGE_COPY;
+	if (!isname(fd->path) && !(operates_on_link && islink(fd->path)))
 		{
 		/* this probably should not happen */
 		ret |= CHANGE_NO_SRC;
