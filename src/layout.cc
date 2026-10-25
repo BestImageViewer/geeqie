@@ -157,6 +157,7 @@ void layout_load_attributes(LayoutOptions &lop, const gchar **attribute_names, c
 		if (READ_BOOL(lop, main_window.maximized)) continue;
 		if (READ_INT(lop, main_window.hdivider_pos)) continue;
 		if (READ_INT(lop, main_window.vdivider_pos)) continue;
+		if (READ_INT_CLAMP(lop, sort_manager_width, 100, 4096)) continue;
 
 		if (READ_INT_CLAMP(lop, folder_window.vdivider_pos, 1, 1000)) continue;
 		if (READ_INT_CLAMP(lop, file_view_list.vdivider_pos, 1, 1000)) continue;
@@ -249,6 +250,7 @@ LayoutOptions init_layout_options(const gchar **attribute_names, const gchar **a
 		}
 	lop.main_window.hdivider_pos = std::min(480, lop.main_window.rect.width / 2);
 	lop.main_window.vdivider_pos = lop.main_window.rect.height * 2 / 5;
+	lop.sort_manager_width = 280;
 	lop.search_window = {100, 100, 700, 650};
 	lop.dupe_window.rect = {100, 100, 800, 400};
 	lop.advanced_exif_window = {0, 0, 900, 600};
@@ -3161,6 +3163,7 @@ static void layout_write_attributes(const LayoutOptions &lop, RcString &rc)
 	WRITE_NL(); WRITE_BOOL(lop, main_window.maximized);
 	WRITE_NL(); WRITE_INT(lop, main_window.hdivider_pos);
 	WRITE_NL(); WRITE_INT(lop, main_window.vdivider_pos);
+	WRITE_NL(); WRITE_INT(lop, sort_manager_width);
 	WRITE_NL(); WRITE_INT(lop, workspace);
 	WRITE_SEPARATOR();
 

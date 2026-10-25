@@ -2,6 +2,7 @@
 <section id="GuideSidebarsSortManager">
   <title id="titleGuideSidebarsSortManager">Sort Manager Sidebar</title>
   <para>The Sort Manager sidebar provides a convenient method to quickly sort many files into a set of folders or collections.</para>
+  <para>Drag the divider beside the Sort Manager to adjust its width. The chosen width is retained when the sidebar is hidden or the window is resized, and is saved with the window layout. Enable <guilabel>Remember session</guilabel> in <link linkend="GuideOptionsWindow">Window Options</link> to restore it at startup. The Info sidebar has its own divider.</para>
   <para>
     To toggle display of the Sort Manager select
     <menuchoice>

@@ -3890,11 +3890,39 @@ static void layout_bar_sort_set_default(LayoutWindow *lw)
 
 static void layout_bar_sort_close(LayoutWindow *lw)
 {
+	if (lw->sort_manager_restore_id)
+		{
+		gtk_widget_remove_tick_callback(lw->sort_manager_paned, lw->sort_manager_restore_id);
+		lw->sort_manager_restore_id = 0;
+		}
 	if (lw->bar_sort)
 		{
 		bar_sort_close(lw->bar_sort);
 		lw->bar_sort = nullptr;
 		}
+}
+
+static void layout_bar_sort_restore_width(GtkWidget *, GParamSpec *, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	if (lw->sort_manager_restore_id || !layout_bar_sort_enabled(lw)) return;
+
+	lw->sort_manager_restore_id = gtk_widget_add_tick_callback(lw->sort_manager_paned,
+		[](GtkWidget *widget, GdkFrameClock *, gpointer data) -> gboolean
+			{
+			auto *lw = static_cast<LayoutWindow *>(data);
+			if (!layout_bar_sort_enabled(lw))
+				{
+				lw->sort_manager_restore_id = 0;
+				return G_SOURCE_REMOVE;
+				}
+			const int width = gtk_widget_get_width(widget);
+			if (width <= 0 || gtk_widget_get_width(lw->bar_sort) <= 0) return G_SOURCE_CONTINUE;
+			// GtkPaned's end allocation includes the separator, keeping round trips exact.
+			gtk_paned_set_position(GTK_PANED(widget), std::max(0, width - lw->options.sort_manager_width));
+			lw->sort_manager_restore_id = 0;
+			return G_SOURCE_REMOVE;
+			}, lw, nullptr);
 }
 
 void layout_bar_sort_set(LayoutWindow *lw, GtkWidget *bar)
@@ -3909,8 +3937,11 @@ void layout_bar_sort_set(LayoutWindow *lw, GtkWidget *bar)
 	g_signal_connect(G_OBJECT(lw->bar_sort), "destroy",
 			 G_CALLBACK(layout_bar_sort_destroyed), lw);
 
-	gtk_widget_set_halign(lw->bar_sort, GTK_ALIGN_START);
-	gtk_box_append(GTK_BOX(lw->utility_box), lw->bar_sort);
+	gtk_widget_set_halign(lw->bar_sort, GTK_ALIGN_FILL);
+	gtk_widget_set_hexpand(lw->bar_sort, FALSE);
+	gtk_paned_set_end_child(GTK_PANED(lw->sort_manager_paned), lw->bar_sort);
+	g_signal_connect(lw->bar_sort, "notify::visible", G_CALLBACK(layout_bar_sort_restore_width), lw);
+	layout_bar_sort_restore_width(nullptr, nullptr, lw);
 }
 
 void layout_bar_sort_toggle(LayoutWindow *lw)
@@ -3994,11 +4025,28 @@ GtkWidget *layout_bars_prepare(LayoutWindow *lw, GtkWidget *image)
 {
 	if (lw->utility_box) return lw->utility_box;
 	lw->utility_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	lw->sort_manager_paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_set_hexpand(lw->sort_manager_paned, TRUE);
+	gtk_widget_set_vexpand(lw->sort_manager_paned, TRUE);
+	gtk_paned_set_wide_handle(GTK_PANED(lw->sort_manager_paned), TRUE);
+	gtk_paned_set_resize_start_child(GTK_PANED(lw->sort_manager_paned), TRUE);
+	gtk_paned_set_resize_end_child(GTK_PANED(lw->sort_manager_paned), FALSE);
+	gtk_paned_set_shrink_end_child(GTK_PANED(lw->sort_manager_paned), FALSE);
+	g_signal_connect(lw->sort_manager_paned, "notify::position",
+	                 G_CALLBACK(+[](GObject *object, GParamSpec *, gpointer data)
+		{
+		auto *lw = static_cast<LayoutWindow *>(data);
+		if (lw->sort_manager_restore_id || !layout_bar_sort_enabled(lw) ||
+		    !gtk_widget_get_mapped(GTK_WIDGET(object))) return;
+		const int width = gtk_widget_get_width(GTK_WIDGET(object)) - gtk_paned_get_position(GTK_PANED(object));
+		if (width > 0) lw->options.sort_manager_width = width;
+		}), lw);
+	gtk_box_append(GTK_BOX(lw->utility_box), lw->sort_manager_paned);
 	lw->utility_paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(lw->utility_paned);
 	gtk_widget_set_hexpand(lw->utility_paned, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(lw->utility_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(lw->utility_paned, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(lw->utility_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-	gtk_box_append(GTK_BOX(lw->utility_box), lw->utility_paned);
+	gtk_paned_set_start_child(GTK_PANED(lw->sort_manager_paned), lw->utility_paned);
 
 	/* Prevent the info sidebar being minimized to invisible
 	 */

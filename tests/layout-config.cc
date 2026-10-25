@@ -2,18 +2,20 @@
 
 #include "gtest/gtest.h"
 
+#include <functional>
 #include <string>
 
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 
 #include "accelerators.h"
+#include "bar-sort.h"
 #include "bar.h"
 #include "filefilter.h"
-#include "layout.h"
 #include "layout-config.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "options.h"
 #include "rcfile.h"
 
@@ -300,6 +302,25 @@ protected:
 		EXPECT_FALSE(layout->options.animate);
 	}
 
+	static bool wait_layout(const std::function<bool()> &ready)
+	{
+		const auto deadline = g_get_monotonic_time() + (2 * G_TIME_SPAN_SECOND);
+		while (g_get_monotonic_time() < deadline)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (ready()) return true;
+			g_usleep(1000);
+			}
+		return false;
+	}
+
+	bool sort_width_settled()
+	{
+		return layout->sort_manager_restore_id == 0 && layout->bar_sort &&
+		       gtk_widget_get_mapped(layout->bar_sort) && gtk_widget_get_width(layout->bar_sort) > 0 &&
+		       gtk_widget_get_width(layout->utility_paned) == gtk_paned_get_position(GTK_PANED(layout->sort_manager_paned));
+	}
+
 	LayoutWindow *layout = nullptr;
 	GtkApplication *app = nullptr;
 	GApplication *previous_app = nullptr;
@@ -309,6 +330,113 @@ protected:
 	gboolean saved_expand = FALSE;
 	bool saved_menu_settings = false;
 };
+
+TEST_F(PartialLayoutConfig, SortManagerWidthSurvivesWindowResizeAndSidebarToggles)
+{
+	layout_bar_sort_toggle(layout);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	auto *paned = GTK_PANED(layout->sort_manager_paned);
+	EXPECT_EQ(gtk_paned_get_end_child(paned), layout->bar_sort);
+	EXPECT_TRUE(gtk_paned_get_wide_handle(paned));
+	EXPECT_FALSE(gtk_paned_get_resize_end_child(paned));
+
+	gtk_paned_set_position(paned, gtk_widget_get_width(GTK_WIDGET(paned)) - 340);
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled() && layout->options.sort_manager_width == 340; }));
+	const int sidebar_width = gtk_widget_get_width(layout->bar_sort);
+	const int window_width = gtk_widget_get_width(layout->window);
+	gtk_window_set_default_size(GTK_WINDOW(layout->window), window_width + 200, 800);
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_width(layout->window) > window_width && sort_width_settled(); }))
+		<< "Window width: " << gtk_widget_get_width(layout->window) << ", previous: " << window_width
+		<< ", sidebar: " << gtk_widget_get_width(layout->bar_sort);
+	EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), sidebar_width);
+	EXPECT_EQ(layout->options.sort_manager_width, 340);
+
+	layout_bar_sort_toggle(layout);
+	while (g_main_context_iteration(nullptr, FALSE)) {}
+	EXPECT_EQ(layout->options.sort_manager_width, 340);
+	layout_bar_sort_toggle(layout);
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), sidebar_width);
+	layout_bar_toggle(layout);
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled() && gtk_widget_get_mapped(layout->bar); }));
+	EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), sidebar_width);
+}
+
+TEST_F(PartialLayoutConfig, SortManagerWidthIsSavedAndRestoredInWindowConfiguration)
+{
+	const gchar *names[] = {"sort_manager_width", nullptr};
+	const gchar *values[] = {"360", nullptr};
+	layout_update_from_config(layout, names, values);
+	layout_bar_sort_toggle(layout);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	EXPECT_EQ(gtk_widget_get_width(layout->sort_manager_paned) - gtk_paned_get_position(GTK_PANED(layout->sort_manager_paned)), 360);
+	const int sidebar_width = gtk_widget_get_width(layout->bar_sort);
+	g_autoptr(GString) text = g_string_new(nullptr);
+	RcString rc{text, 0};
+	layout_write_config(layout, rc);
+	EXPECT_NE(strstr(text->str, "sort_manager_width = \"360\""), nullptr);
+	layout_free(layout);
+	layout = nullptr;
+	const gchar *restore_names[] = {"sort_manager_width", "home_path", "startup_path", nullptr};
+	const gchar *restore_values[] = {"360", directory, "2", nullptr};
+	layout = layout_new_from_config(restore_names, restore_values, FALSE);
+	layout_bar_sort_toggle(layout);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), sidebar_width);
+	EXPECT_EQ(layout->options.sort_manager_width, 360);
+}
+
+TEST_F(PartialLayoutConfig, SortManagerDividerRespondsToPointerDrag)
+{
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	if (!xdotool || !g_getenv("DISPLAY")) GTEST_SKIP() << "Requires xdotool and X11";
+	layout_bar_sort_toggle(layout);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie Sort Manager divider test");
+	gdk_display_flush(gtk_widget_get_display(layout->window));
+	graphene_rect_t start{};
+	graphene_rect_t end{};
+	ASSERT_TRUE(gtk_widget_compute_bounds(layout->utility_paned, layout->window, &start));
+	ASSERT_TRUE(gtk_widget_compute_bounds(layout->bar_sort, layout->window, &end));
+	const int x = (start.origin.x + start.size.width + end.origin.x) / 2;
+	const int y = start.origin.y + (start.size.height / 2);
+	g_autofree gchar *from_x = g_strdup_printf("%d", x);
+	g_autofree gchar *to_x = g_strdup_printf("%d", x - 70);
+	g_autofree gchar *at_y = g_strdup_printf("%d", y);
+	const int width_before = gtk_widget_get_width(layout->bar_sort);
+	const gchar *args[] = {xdotool, "search", "--name", "^Geeqie Sort Manager divider test$",
+	                       "windowfocus", "--sync", "mousemove", "--window", "%1", from_x, at_y,
+	                       "mousedown", "1", "mousemove", "--window", "%1", to_x, at_y, "mouseup", "1", nullptr};
+	gint status = 0;
+	ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+	                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+	ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled() && gtk_widget_get_width(layout->bar_sort) >= width_before + 40; }));
+	EXPECT_GT(layout->options.sort_manager_width, width_before + 40);
+}
+
+TEST_F(PartialLayoutConfig, SortManagerWidthSurvivesLayoutRebuildAndReplacement)
+{
+	layout_bar_sort_toggle(layout);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	gtk_paned_set_position(GTK_PANED(layout->sort_manager_paned), gtk_widget_get_width(layout->sort_manager_paned) - 350);
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled() && layout->options.sort_manager_width == 350; }));
+	const int sidebar_width = gtk_widget_get_width(layout->bar_sort);
+	layout_style_set(layout, 1, "123");
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), sidebar_width);
+	auto *replacement = bar_sort_new_default(layout);
+	layout_bar_sort_set(layout, replacement);
+	gtk_widget_set_visible(layout->bar_sort, TRUE);
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), sidebar_width);
+	EXPECT_EQ(layout->options.sort_manager_width, 350);
+}
 
 TEST_F(PartialLayoutConfig, HamburgerMenuFollowsFloatingToolsAndReturnsWhenHiddenOrDocked)
 {

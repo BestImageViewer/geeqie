@@ -143,6 +143,7 @@ struct LayoutOptions
 	gint workspace;
 
 	BarSort bar_sort;
+	gint sort_manager_width;
 };
 
 struct LayoutWindow
@@ -240,6 +241,8 @@ GtkBuilder *builder;
 
 	GtkWidget *utility_box; /**< referenced by lw, exist during whole lw lifetime */
 	GtkWidget *utility_paned; /**< between image and bar */
+	GtkWidget *sort_manager_paned; /**< between image/info sidebar and Sort Manager */
+	guint sort_manager_restore_id;
 	GtkWidget *bar_sort;
 	GtkWidget *bar;
 

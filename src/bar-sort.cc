@@ -632,7 +632,7 @@ void bar_sort_close(GtkWidget *bar)
 	sd = static_cast<SortData *>(g_object_get_data(G_OBJECT(bar), "bar_sort_data"));
 	if (!sd) return;
 
-	gtk_box_remove(GTK_BOX(gtk_widget_get_parent(sd->vbox)), sd->vbox);
+	widget_remove_from_parent(sd->vbox);
 }
 
 static void bar_sort_destroy(gpointer data)
@@ -695,6 +695,15 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	gtk_widget_set_tooltip_text(sd->folder_group, _("See the Help file for additional functions"));
 	sd->folder_specific = pref_checkbox_new(sd->folder_group, _("Use destinations for this folder"), FALSE,
 	                                        G_CALLBACK(bar_sort_folder_specific_cb), sd);
+	const auto wrap_button_label = [](GtkWidget *button)
+		{
+		auto *label = gtk_check_button_get_child(GTK_CHECK_BUTTON(button));
+		if (!GTK_IS_LABEL(label)) return;
+		gtk_label_set_wrap(GTK_LABEL(label), TRUE);
+		gtk_label_set_wrap_mode(GTK_LABEL(label), PANGO_WRAP_WORD_CHAR);
+		gtk_label_set_max_width_chars(GTK_LABEL(label), 32);
+		};
+	wrap_button_label(sd->folder_specific);
 
 	buttongrp = pref_radiobutton_new(sd->folder_group, nullptr, _("Copy"), sd->action == BarSort::COPY,
 	                                 G_CALLBACK(bar_sort_set_action_cb<BarSort::COPY>), sd);
@@ -727,6 +736,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 
 		GtkWidget *button = pref_radiobutton_new(sd->folder_group, buttongrp, editor->name, select,
 		                                         G_CALLBACK(bar_sort_set_action_cb<BarSort::FILTER>), sd);
+		wrap_button_label(button);
 		GtkGesture *filter_gesture = gtk_gesture_click_new();
 		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(filter_gesture), GDK_BUTTON_SECONDARY);
 		g_signal_connect(filter_gesture, "pressed", G_CALLBACK(bar_filter_message_cb), NULL);
