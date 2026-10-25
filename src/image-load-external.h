@@ -23,7 +23,13 @@
 
 #include <memory>
 
+#include <glib.h>
+
+struct ImageLoader;
 struct ImageLoaderBackend;
+
+/** Run a serialized external preview command, stopping its process group on cancellation. */
+gint image_loader_run_external(ImageLoader *il, const gchar *const *argv, GError **error);
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_external();
 

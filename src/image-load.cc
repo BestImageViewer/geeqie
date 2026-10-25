@@ -154,6 +154,7 @@ static void image_loader_init(GTypeInstance *instance, gpointer)
 	il->shrunk = FALSE;
 
 	il->can_destroy = TRUE;
+	il->cancellable = g_cancellable_new();
 
 	il->data_mutex = g_new(GMutex, 1);
 	g_mutex_init(il->data_mutex);
@@ -249,6 +250,9 @@ static void image_loader_finalize(GObject *object)
 	auto il = reinterpret_cast<ImageLoader *>(object);
 
 	image_loader_stop(il);
+	g_clear_object(&il->cancellable);
+	g_free(il->external_select);
+	g_free(il->external_extract);
 
 	if (il->error) DEBUG_1("%s", image_loader_get_error(il));
 
@@ -303,6 +307,11 @@ ImageLoader *image_loader_new(FileData *fd)
 	il = static_cast<ImageLoader *>(g_object_new(TYPE_IMAGE_LOADER, nullptr));
 
 	il->fd = file_data_ref(fd);
+	if (options && options->external_preview.enable)
+		{
+		if (options->external_preview.select) il->external_select = expand_tilde(options->external_preview.select);
+		if (options->external_preview.extract) il->external_extract = expand_tilde(options->external_preview.extract);
+		}
 
 	return il;
 }
@@ -601,19 +610,17 @@ static void image_loader_stop_loader(ImageLoader *il)
 	g_mutex_unlock(il->data_mutex);
 }
 
-static void image_loader_setup_loader(ImageLoader *il)
+static gboolean image_loader_setup_loader(ImageLoader *il)
 {
 	gint external_preview = 1;
 
-	g_mutex_lock(il->data_mutex);
-
-	if (options->external_preview.enable)
+	if (il->external_select)
 		{
-		g_autofree gchar *tilde_filename = expand_tilde(options->external_preview.select);
-		g_autofree gchar *cmd_line = g_strdup_printf("\"%s\" \"%s\"", tilde_filename, il->fd->path);
-
-		external_preview = runcmd(cmd_line);
+		const gchar *argv[] = {il->external_select, il->fd->path, nullptr};
+		external_preview = image_loader_run_external(il, argv, nullptr);
 		}
+	if (g_cancellable_is_cancelled(il->cancellable)) return FALSE;
+	g_mutex_lock(il->data_mutex);
 
 	if (external_preview == 0)
 		{
@@ -784,6 +791,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 	il->fd->format_name = il->backend->get_format_name();
 
 	g_mutex_unlock(il->data_mutex);
+	return TRUE;
 }
 
 
@@ -853,7 +861,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 
 	gsize b = std::min(il->read_buffer_size, il->bytes_total - il->bytes_read);
 
-	image_loader_setup_loader(il);
+	if (!image_loader_setup_loader(il)) return FALSE;
 
 	g_assert(il->bytes_read == 0);
 	if (!il->backend->write(il->input_buffer, b, il->bytes_total, &il->error))
@@ -1019,6 +1027,7 @@ static void image_loader_stop(ImageLoader *il)
 	if (!il) return;
 
 	g_clear_handle_id(&il->idle_id, g_source_remove);
+	g_cancellable_cancel(il->cancellable);
 
 	if (il->thread)
 		{
@@ -1131,12 +1140,13 @@ static void image_loader_thread_leave_high()
 	g_mutex_unlock(image_loader_prio_mutex);
 }
 
-static void image_loader_thread_wait_high()
+static void image_loader_thread_wait_high(ImageLoader *il)
 {
 	g_mutex_lock(image_loader_prio_mutex);
-	while (image_loader_prio_num)
+	while (image_loader_prio_num && !g_cancellable_is_cancelled(il->cancellable))
 		{
-		g_cond_wait(image_loader_prio_cond, image_loader_prio_mutex);
+		g_cond_wait_until(image_loader_prio_cond, image_loader_prio_mutex,
+		                  g_get_monotonic_time() + (20 * G_TIME_SPAN_MILLISECOND));
 		}
 
 	g_mutex_unlock(image_loader_prio_mutex);
@@ -1152,7 +1162,7 @@ static void image_loader_thread_run(gpointer data, gpointer)
 	if (il->idle_priority > G_PRIORITY_DEFAULT_IDLE)
 		{
 		/* low prio, wait until high prio tasks finishes */
-		image_loader_thread_wait_high();
+		image_loader_thread_wait_high(il);
 		}
 	else
 		{
@@ -1160,7 +1170,7 @@ static void image_loader_thread_run(gpointer data, gpointer)
 		image_loader_thread_enter_high();
 		}
 
-	err = !image_loader_begin(il);
+	err = g_cancellable_is_cancelled(il->cancellable) || !image_loader_begin(il);
 
 	if (err)
 		{
@@ -1179,7 +1189,7 @@ static void image_loader_thread_run(gpointer data, gpointer)
 		if (il->idle_priority > G_PRIORITY_DEFAULT_IDLE)
 			{
 			/* low prio, wait until high prio tasks finishes */
-			image_loader_thread_wait_high();
+			image_loader_thread_wait_high(il);
 			}
 		cont = image_loader_continue(il);
 		}
@@ -1256,7 +1266,15 @@ static gboolean image_loader_start_deferred_cb(gpointer data)
 gboolean image_loader_start_deferred(ImageLoader *il)
 {
 	if (!il || !il->fd || il->idle_id || il->thread) return FALSE;
-	il->idle_id = g_idle_add_full(il->idle_priority, image_loader_start_deferred_cb, il, nullptr);
+	if (il->external_select)
+		{
+		// Keyboard repeat events can arrive after an idle callback has already run.
+		il->idle_id = g_timeout_add_full(il->idle_priority, 120, image_loader_start_deferred_cb, il, nullptr);
+		}
+	else
+		{
+		il->idle_id = g_idle_add_full(il->idle_priority, image_loader_start_deferred_cb, il, nullptr);
+		}
 	return TRUE;
 }
 

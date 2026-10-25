@@ -26,6 +26,7 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
+#include <gio/gio.h>
 #include <glib-object.h>
 #include <glib.h>
 
@@ -97,6 +98,9 @@ struct ImageLoader
 	gboolean delay_area_ready;
 
 	GMutex *data_mutex;
+	GCancellable *cancellable;
+	gchar *external_select;
+	gchar *external_extract;
 	gboolean stopping;
 	gboolean can_destroy;
 	GCond *can_destroy_cond;

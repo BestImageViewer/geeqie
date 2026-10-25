@@ -19,6 +19,7 @@ unit_test_sources = files(
 'geocode.cc',
 'history-list.cc',
 'image-load.cc',
+'image-load-external.cc',
 'image-load-svg.cc',
 'image-load-heif.cc',
 'image-load-webp.cc',
