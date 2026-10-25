@@ -213,7 +213,7 @@
     <para>The command <literal>geeqie --dupes-export-json</literal> writes JSON from the most recently opened Find Duplicates window to standard output without changing its selection:</para>
     <programlisting>geeqie --dupes-export-json &gt; duplicates.json</programlisting>
     <para>Check <literal>schema</literal> (<literal>org.geeqie.duplicates</literal>), <literal>version</literal> (<literal>1</literal>), and <literal>status</literal> before processing. A status of <literal>ready</literal> means comparison is complete; <literal>incomplete</literal> and <literal>no_window</literal> return an empty groups array. An empty completed search also has status <literal>ready</literal>.</para>
-    <para>Completed exports include stable, untranslated criterion names in <literal>criteria</literal>, the numeric <literal>match_mask</literal> from <literal>DupeMatchType</literal>, <literal>two_sets</literal>, <literal>algorithm</literal> (<literal>standard</literal> or <literal>phash</literal>), <literal>threshold</literal> in percent, and <literal>ignore_orientation</literal>. Algorithm and threshold are null for comparisons that do not use similarity.</para>
+    <para>Completed exports include stable, untranslated criterion names in <literal>criteria</literal>, the numeric <literal>match_mask</literal> from <literal>DupeMatchType</literal>, <literal>two_sets</literal>, <literal>algorithm</literal> (<literal>standard</literal> or <literal>phash</literal>), <literal>threshold</literal> in percent, <literal>ignore_orientation</literal>, and <literal>ignore_same_folder</literal>. Algorithm and threshold are null for comparisons that do not use similarity.</para>
     <para>Each group has an export-local numeric <literal>id</literal>, a <literal>representative_id</literal>, and a <literal>members</literal> array. Each member includes its file URI as <literal>id</literal>, its <literal>path</literal>, source <literal>set</literal> (1 or 2), <literal>selected</literal> flag, byte <literal>size</literal>, modification time <literal>mtime</literal> in seconds since the Unix epoch, and <literal>width</literal> and <literal>height</literal> when known. Unknown dimensions are null. A file may occur in multiple groups and retains the same URI identifier.</para>
     <para>The <literal>similarity_to_representative</literal> value is the numeric percentage stored for that member's match to its group representative. It is null for the representative itself and for comparisons without similarity. It does not describe every possible pair of group members. The root <literal>score_semantics</literal> field is <literal>member_to_representative_percent</literal>. JSON strings escape quotes, backslashes and control characters; numbers do not depend on locale.</para>
     <para>For example, an executable Python script can read the snapshot and print each group's paths:</para>
@@ -259,6 +259,11 @@ for group in results["groups"]:
       <para />
       If this box is checked, groups with the lowest number of matches are placed at the top of the list.
     </para>
+  </section>
+  <section id="IgnoreSameFolderMatches">
+    <title>Ignore matches within the same folder</title>
+    <para>Enable this check box to compare files only when their immediate parent folders differ. This is useful when each folder contains a burst or sequence of similar images and you want to find matches across folders. Subfolders are treated as separate folders. The option applies to all comparison methods and to both single-set and two-file-set searches.</para>
+    <para>The option is off by default in each new Find Duplicates window. Changing it restarts the comparison. Each result group contains files that match its representative in another folder; two members of the same group can still belong to the same folder. A file can appear in more than one group when necessary to show cross-folder matches.</para>
   </section>
   <section id="Comparetwofilesets">
     <title>Compare two file sets</title>

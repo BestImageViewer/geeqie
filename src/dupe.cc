@@ -27,6 +27,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <string_view>
 
 #include <gdk/gdk.h>
 #include <gio/gio.h>
@@ -131,6 +132,7 @@ GList *dupe_window_list = nullptr;	/**< list of open DupeWindow *s */
  */
 
 static void dupe_match_unlink(DupeItem *a, DupeItem *b);
+static void dupe_window_recompare_idle(DupeWindow *dw);
 static DupeItem *dupe_match_find_parent(DupeWindow *dw, DupeItem *child);
 
 static gint dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble *rank, gint fast);
@@ -154,6 +156,14 @@ static gboolean dupe_insert_in_list_cache(DupeWindow *dw, FileData *fd);
 
 static void dupe_match_link(DupeItem *a, DupeItem *b, gdouble rank);
 static gint dupe_match_link_exists(DupeItem *child, DupeItem *parent);
+
+static bool dupe_pair_allowed(const DupeWindow *dw, const DupeItem *a, const DupeItem *b)
+{
+	if (!dw->ignore_same_folder) return true;
+	const std::string_view first{a->fd->path};
+	const std::string_view second{b->fd->path};
+	return first.substr(0, first.find_last_of('/')) != second.substr(0, second.find_last_of('/'));
+}
 
 /**
  * @brief The function run in threads for similarity checks
@@ -191,7 +201,8 @@ static void dupe_comparison_func(gpointer d1, gpointer d2)
 				work = work->prev;
 				}
 
-			if (dupe_match(di, dqi->needle, dqi->dw->match_mask, &rank, TRUE))
+			if (dupe_pair_allowed(dw, di, dqi->needle) &&
+			    dupe_match(di, dqi->needle, dqi->dw->match_mask, &rank, TRUE))
 				{
 				dsm = g_new0(DupeSearchMatch, 1);
 				dsm->a = di;
@@ -663,7 +674,7 @@ static GList *dupe_listview_get_selection(GtkWidget *listview)
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
-		if (di)
+		if (di && !g_list_find(list, di->fd))
 			{
 			list = g_list_prepend(list, file_data_ref(di->fd));
 			}
@@ -1248,12 +1259,49 @@ static GList *dupe_match_totals_sort(GList *source_list)
 	return g_list_reverse(source_list);
 }
 
-/**
- * @brief
- * @param dw
- *
- * Called once.
+/* Cover matched files with existing neighborhoods. Unlike the usual grouping
+ * heuristic, this never invents links between members of different groups.
+ * A member can appear in more than one group when needed to retain matches.
  */
+static GList *dupe_match_group_cover(GList *list)
+{
+	g_autoptr(GHashTable) covered = g_hash_table_new(g_direct_hash, g_direct_equal);
+	GList *groups = nullptr;
+	while (true)
+		{
+		DupeItem *best = nullptr;
+		guint best_count = 0;
+		for (GList *work = list; work; work = work->next)
+			{
+			auto *di = static_cast<DupeItem *>(work->data);
+			// Keep representatives out of other groups' member lists, so selecting
+			// group 2 duplicates always leaves every representative unselected.
+			if (g_hash_table_contains(covered, di)) continue;
+			guint count = 1;
+			for (GList *member = di->group; member; member = member->next)
+				{
+				auto *match = static_cast<DupeMatch *>(member->data);
+				if (!g_hash_table_contains(covered, match->di)) ++count;
+				}
+			if (count > best_count)
+				{
+				best = di;
+				best_count = count;
+				}
+			}
+		if (!best) break;
+		groups = g_list_prepend(groups, best);
+		g_hash_table_add(covered, best);
+		for (GList *member = best->group; member; member = member->next)
+			{
+			auto *match = static_cast<DupeMatch *>(member->data);
+			g_hash_table_add(covered, match->di);
+			}
+		}
+	g_list_free(list);
+	return g_list_reverse(groups);
+}
+
 static void dupe_match_rank(DupeWindow *dw)
 {
 	GList *list;
@@ -1263,7 +1311,7 @@ static void dupe_match_rank(DupeWindow *dw)
 	if (required_debug_level(2)) dupe_match_print_list(list);
 
 	DEBUG_1("Similar items: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
-	list = dupe_match_group_trim(list, dw);
+	list = dw->ignore_same_folder ? dupe_match_group_cover(list) : dupe_match_group_trim(list, dw);
 	DEBUG_1("Unique groups: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
 
 	dupe_match_sort_groups(list);
@@ -1665,6 +1713,34 @@ static void dupe_array_check(DupeWindow *dw)
 
 	GArray *array_set1 = list_to_sorted_array(dw->list);
 
+	if (dw->ignore_same_folder)
+		{
+		g_autoptr(GArray) array_set2 = dw->second_set ? list_to_sorted_array(dw->second_list) : nullptr;
+		GArray *candidates = dw->second_set ? array_set2 : array_set1;
+		for (guint i = 0; i < array_set1->len; ++i)
+			{
+			auto *first = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i));
+			guint start = i + 1;
+			if (dw->second_set)
+				{
+				if (!g_array_binary_search(candidates, first, dupe_match_binary_search_cb, &start)) continue;
+				// Scan the entire equal-key range, even if the first candidate is in the same folder.
+				while (start > 0 && dupe_match_binary_search_cb(&g_array_index(candidates, gpointer, start - 1), first) == 0) --start;
+				}
+			for (guint j = start; j < candidates->len; ++j)
+				{
+				auto *second = static_cast<DupeItem *>(g_array_index(candidates, gpointer, j));
+				if (dupe_match_binary_search_cb(&g_array_index(candidates, gpointer, j), first) != 0) break;
+				if (dupe_pair_allowed(dw, first, second) && dupe_match_check(first, second, dw) == DUPE_MATCH)
+					{
+					dupe_match_link(first, second, 0.0);
+					}
+				}
+			}
+		g_array_free(array_set1, TRUE);
+		return;
+		}
+
 	if (dw->second_set)
 		{
 		/* Two sets - nothing can be done until a second set is loaded */
@@ -1947,6 +2023,7 @@ static void dupe_check_stop(DupeWindow *dw)
 {
 	if (!dw) return;
 
+	g_clear_handle_id(&dw->recompare_id, g_source_remove);
 	g_clear_handle_id(&dw->idle_id, g_source_remove);
 
 	dw->abort = TRUE;
@@ -2346,6 +2423,7 @@ static gboolean dupe_check_cb(gpointer data)
 
 static void dupe_check_start(DupeWindow *dw)
 {
+	g_clear_handle_id(&dw->recompare_id, g_source_remove);
 	dw->comparison_perceptual = options->alternate_similarity_algorithm.enabled;
 	dw->comparison_rotation_invariant = options->rot_invariant_sim;
 	dw->comparison_threshold = dw->match_mask & DUPE_MATCH_SIM_HIGH ? 95 :
@@ -2375,7 +2453,9 @@ static void dupe_check_start(DupeWindow *dw)
 
 static gboolean dupe_check_start_cb(gpointer data)
 {
-	dupe_check_start(static_cast<DupeWindow *>(data));
+	auto *dw = static_cast<DupeWindow *>(data);
+	dw->recompare_id = 0;
+	dupe_check_start(dw);
 
 	return G_SOURCE_REMOVE;
 }
@@ -2410,7 +2490,14 @@ static void dupe_item_remove(DupeWindow *dw, DupeItem *di)
 			}
 		}
 
-	if (di->group && dw->dupes)
+	if (dw->ignore_same_folder)
+		{
+		dupe_check_stop(dw);
+		dupe_match_link_clear(di, TRUE);
+		g_clear_pointer(&dw->dupes, g_list_free);
+		gtk_list_store_clear(GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview))));
+		}
+	else if (di->group && dw->dupes)
 		{
 		/* is a dupe, must remove from group/reset children if a parent */
 		DupeItem *parent;
@@ -2469,6 +2556,7 @@ static void dupe_item_remove(DupeWindow *dw, DupeItem *di)
 		}
 	dupe_item_free(di);
 
+	if (dw->ignore_same_folder) dupe_window_recompare_idle(dw);
 	dupe_window_update_count(dw, FALSE);
 }
 
@@ -2545,7 +2633,8 @@ static gboolean dupe_files_add_queue_cb(gpointer data)
 
 	dw->add_files_queue_id = 0;
 	dupe_destroy_list_cache(dw);
-	g_idle_add(dupe_check_start_cb, dw);
+	g_clear_handle_id(&dw->recompare_id, g_source_remove);
+	dw->recompare_id = g_idle_add(dupe_check_start_cb, dw);
 	gtk_widget_set_sensitive(dw->controls_box, TRUE);
 	return G_SOURCE_REMOVE;
 }
@@ -2761,6 +2850,11 @@ void dupe_window_add_folder(const gchar *path, gboolean recurse)
 
 static void dupe_item_update(DupeWindow *dw, DupeItem *di)
 {
+	if (dw->ignore_same_folder)
+		{
+		dupe_window_recompare_idle(dw);
+		return;
+		}
 	if ( (dw->match_mask & DUPE_MATCH_NAME) || (dw->match_mask & DUPE_MATCH_PATH || (dw->match_mask & DUPE_MATCH_NAME_CI)) )
 		{
 		/* only effects matches on name or path */
@@ -2907,6 +3001,18 @@ static void dupe_window_recompare(DupeWindow *dw)
 	dupe_check_start(dw);
 }
 
+static void dupe_window_recompare_idle(DupeWindow *dw)
+{
+	dupe_check_stop(dw);
+	dw->recompare_id = g_idle_add([](gpointer data) -> gboolean
+		{
+		auto *window = static_cast<DupeWindow *>(data);
+		window->recompare_id = 0;
+		dupe_window_recompare(window);
+		return G_SOURCE_REMOVE;
+		}, dw);
+}
+
 static void dupe_menu_view(DupeItem *di, GtkWidget *listview, gboolean new_window)
 {
 	if (!di) return;
@@ -2952,7 +3058,7 @@ static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 		GtkTreeIter iter;
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
-		if (di) list = g_list_prepend(list, di);
+		if (di && !g_list_find(list, di)) list = g_list_prepend(list, di);
 		}
 
 	dw->color_frozen = TRUE;
@@ -3606,6 +3712,15 @@ static void dupe_second_set_toggle_cb(GtkWidget *widget, gpointer data)
 		dupe_second_clear(dw);
 		}
 
+	dupe_window_recompare(dw);
+}
+
+static void dupe_ignore_same_folder_toggle_cb(GtkCheckButton *button, gpointer data)
+{
+	auto *dw = static_cast<DupeWindow *>(data);
+	// Workers must finish before changing the comparison policy they read.
+	dupe_check_stop(dw);
+	dw->ignore_same_folder = gtk_check_button_get_active(button);
 	dupe_window_recompare(dw);
 }
 
@@ -4444,8 +4559,8 @@ DupeWindow *dupe_window_new()
 		}
 	gtk_box_append(GTK_BOX(status_box), dw->extra_label);
 
-	controls_box = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
-	dw->controls_box = controls_box;
+	dw->controls_box = pref_box_new(vbox, FALSE, GTK_ORIENTATION_VERTICAL, 0);
+	controls_box = pref_box_new(dw->controls_box, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 
 	dw->button_thumbs = gtk_check_button_new_with_label(_("Thumbnails"));
 	g_autofree gchar *thumbs_accel = action_accelerator_label("win.dupe-win-toggle-thumbnails");
@@ -4549,6 +4664,11 @@ DupeWindow *dupe_window_new()
 		gtk_widget_set_margin_bottom(dw->button_rotation_invariant, PREF_PAD_SPACE);
 		}
 	gtk_box_append(GTK_BOX(controls_box), dw->button_rotation_invariant);
+
+	dw->button_ignore_same_folder = gtk_check_button_new_with_label(_("Ignore matches within the same folder"));
+	gtk_widget_set_tooltip_text(dw->button_ignore_same_folder, _("Compare files only when their immediate parent folders differ"));
+	g_signal_connect(dw->button_ignore_same_folder, "toggled", G_CALLBACK(dupe_ignore_same_folder_toggle_cb), dw);
+	gtk_box_append(GTK_BOX(dw->controls_box), dw->button_ignore_same_folder);
 
 	button = gtk_check_button_new_with_label(_("Compare two file sets"));
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(button), dw->second_set);

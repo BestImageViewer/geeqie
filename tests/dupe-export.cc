@@ -38,6 +38,9 @@ TEST(DuplicateExport, EmptyAndIncompleteResultsAreValidJson)
 	window.idle_id = 0;
 	window.add_files_queue_id = 1;
 	EXPECT_FALSE(dupe_export_ready(&window));
+	window.add_files_queue_id = 0;
+	window.recompare_id = 1;
+	EXPECT_FALSE(dupe_export_ready(&window));
 }
 
 TEST(DuplicateExport, GroupsAndScoresDoNotDependOnRowsOrPartialSelection)
@@ -70,11 +73,13 @@ TEST(DuplicateExport, GroupsAndScoresDoNotDependOnRowsOrPartialSelection)
 	window.comparison_threshold = 90;
 	window.comparison_perceptual = TRUE;
 	window.comparison_rotation_invariant = TRUE;
+	window.ignore_same_folder = TRUE;
 	g_autoptr(GString) json = dupe_export_json(&window, &selection);
 	check_json(json->str, R"(
 assert d['schema']=='org.geeqie.duplicates' and d['version']==1
 assert d['status']=='ready' and d['criteria']==['similarity']
 assert d['algorithm']=='phash' and d['threshold']==90 and d['ignore_orientation']
+assert d['ignore_same_folder']
 assert len(d['groups'])==2
 g=d['groups'][0]
 p,c=g['members']

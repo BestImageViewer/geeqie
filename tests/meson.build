@@ -8,6 +8,7 @@ unit_test_sources = files(
 'dnd.cc',
 'display-profile.cc',
 'dupe-export.cc',
+'dupe-folder.cc',
 'editors.cc',
 'exiv2.cc',
 'exif-resolution.cc',

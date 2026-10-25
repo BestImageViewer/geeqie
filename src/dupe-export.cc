@@ -112,7 +112,7 @@ gboolean dupe_run_results_script_finish(GAsyncResult *result, GError **error)
 
 gboolean dupe_export_ready(const DupeWindow *dw)
 {
-	return dw && !dw->idle_id && !dw->img_loader && !dw->add_files_queue_id && !dw->add_files_queue;
+	return dw && !dw->idle_id && !dw->recompare_id && !dw->img_loader && !dw->add_files_queue_id && !dw->add_files_queue;
 }
 
 GString *dupe_export_json(const DupeWindow *dw, const GList *selection)
@@ -148,6 +148,7 @@ GString *dupe_export_json(const DupeWindow *dw, const GList *selection)
 	                       static_cast<unsigned int>(dw->match_mask), dw->second_set ? "true" : "false");
 	if (similarity) append_json_string(output, dw->comparison_perceptual ? "phash" : "standard");
 	else g_string_append(output, "null");
+	g_string_append_printf(output, ",\"ignore_same_folder\":%s", dw->ignore_same_folder ? "true" : "false");
 	g_string_append_printf(output, ",\"ignore_orientation\":%s,\"threshold\":",
 	                       dw->comparison_rotation_invariant ? "true" : "false");
 	if (similarity) g_string_append_printf(output, "%d", dw->comparison_threshold);

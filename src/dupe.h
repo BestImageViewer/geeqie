@@ -112,6 +112,7 @@ struct DupeWindow
 	GtkWidget *extra_label; /**< Progress bar widget */
 	GtkWidget *button_thumbs;
 	GtkWidget *button_rotation_invariant;
+	GtkWidget *button_ignore_same_folder;
 	GtkWidget *custom_threshold;
 	GList *add_files_queue;
 	guint add_files_queue_id;
@@ -122,6 +123,7 @@ struct DupeWindow
 	gboolean show_thumbs;
 
 	guint idle_id; /**< event source id */
+	guint recompare_id; /**< Deferred comparison start or regrouping after results change. */
 	GList *working;
 	gint setup_done; /**< Boolean. Set TRUE when all checksums/dimensions/similarity data have been read or created */
 	gint setup_count; /**< length of set1 or if 2 sets, total length of both */
@@ -143,6 +145,7 @@ struct DupeWindow
 	/* second set comparison stuff */
 
 	gboolean second_set;		/**< second set enabled ? */
+	gboolean ignore_same_folder; /**< Exclude pairs with the same immediate parent path. */
 	GList *second_list;		/**< second set dropped files */
 	gboolean second_drop;		/**< drop is on second set */
 
