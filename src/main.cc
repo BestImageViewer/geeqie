@@ -551,16 +551,15 @@ GdkRGBA theme_background_color(GtkWidget *widget)
 	GdkRGBA theme_color {};
 
 	/* GTK 4 has no non-deprecated API for reading theme-defined symbolic colors. */
-	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 	GtkStyleContext *context = gtk_widget_get_style_context(widget);
 
 	if (gtk_style_context_lookup_color(context, "theme_bg_color", &theme_color) ||
 	    gtk_style_context_lookup_color(context, "theme_base_color", &theme_color))
 		{
-		G_GNUC_END_IGNORE_DEPRECATIONS
 		return theme_color;
 		}
-	G_GNUC_END_IGNORE_DEPRECATIONS
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 	theme_color.alpha = 1.0;
 
