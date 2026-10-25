@@ -174,11 +174,11 @@ void font_dialog_done(GObject *source, GAsyncResult *result, gpointer option)
 		}
 }
 
-template<const gchar *title>
+template<bool is_image>
 void print_set_font_cb(GtkWidget *widget, gpointer data)
 {
 	g_autoptr(GtkFontDialog) dialog = gtk_font_dialog_new();
-	gtk_font_dialog_set_title(dialog, _(title));
+	gtk_font_dialog_set_title(dialog, is_image ? _("Image text font") : _("Page text font"));
 	gtk_font_dialog_set_modal(dialog, TRUE);
 
 	const gchar *font = *static_cast<gchar **>(data);
@@ -320,9 +320,8 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	static constexpr gchar image_text_font_title[] = N_("Image text font");
 	pref_button_new(hbox, GQ_ICON_SELECT_FONT, _("Font"),
-	                G_CALLBACK(print_set_font_cb<image_text_font_title>), &options->printer.image_font);
+	                G_CALLBACK(print_set_font_cb<true>), &options->printer.image_font);
 
 	pref_spacer(group, PREF_PAD_GAP);
 
@@ -382,9 +381,8 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	static constexpr gchar page_text_font_title[] = N_("Page text font");
 	pref_button_new(hbox, GQ_ICON_SELECT_FONT, _("Font"),
-	                G_CALLBACK(print_set_font_cb<page_text_font_title>), &options->printer.page_font);
+	                G_CALLBACK(print_set_font_cb<false>), &options->printer.page_font);
 }
 
 gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
