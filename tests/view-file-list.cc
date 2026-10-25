@@ -414,6 +414,45 @@ TEST_P(RepeatedDelete, RebuildThumbnailsOnlyInvalidatesSelectedFiles)
 	EXPECT_EQ(third->thumb_pixbuf, nullptr);
 }
 
+TEST_P(RepeatedDelete, SelectedImageNavigationPreservesOrderAndWrapping)
+{
+	auto *vf = layout->vf;
+	const auto saved_circular = options->circular_selection_lists;
+	for (const bool all : {false, true})
+		{
+		g_autoptr(FileDataList) selected = nullptr;
+		const std::vector<int> chosen = all ? std::vector<int>{2, 0, 1} : std::vector<int>{2, 0};
+		for (gint index : chosen) selected = g_list_append(selected, file_data_ref(vf_index_get_data(vf, index)));
+		vf_select_none(vf);
+		vf_select_list(vf, selected);
+		auto expected = chosen;
+		if (vf->type == FILEVIEW_LIST) std::sort(expected.begin(), expected.end());
+		EXPECT_EQ(vf_selection_get_list_by_index(vf), expected);
+		for (const bool circular : {false, true})
+			{
+			options->circular_selection_lists = circular;
+			layout_image_set_index(layout, expected.front());
+			layout_image_prev(layout);
+			EXPECT_EQ(layout_image_get_fd(layout), vf_index_get_data(vf, circular ? expected.back() : expected.front()));
+			layout_image_set_index(layout, expected.front());
+			for (guint i = 1; i < expected.size(); ++i)
+				{
+				layout_image_next(layout);
+				EXPECT_EQ(layout_image_get_fd(layout), vf_index_get_data(vf, expected[i]));
+				}
+			layout_image_next(layout);
+			EXPECT_EQ(layout_image_get_fd(layout), vf_index_get_data(vf, circular ? expected.front() : expected.back()));
+			layout_image_set_index(layout, expected.back());
+			for (gint i = static_cast<gint>(expected.size()) - 2; i >= 0; --i)
+				{
+				layout_image_prev(layout);
+				EXPECT_EQ(layout_image_get_fd(layout), vf_index_get_data(vf, expected[i]));
+				}
+			}
+		}
+	options->circular_selection_lists = saved_circular;
+}
+
 TEST_P(RepeatedDelete, SelectingMarksSynchronizesDisplayedImage)
 {
 	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");

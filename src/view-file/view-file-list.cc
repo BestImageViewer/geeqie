@@ -22,6 +22,7 @@
 #include "view-file-list.h"
 
 #include <cstring>
+#include <unordered_map>
 #include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -1432,17 +1433,36 @@ std::vector<int> vflist_selection_get_list_by_index(const ViewFile *vf)
 	GtkTreeModel *store;
 	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
 
-	for (GList *work = slist; work; work = work->next)
+	if (!slist) return list;
+	std::unordered_map<FileData *, gint> indices;
+	indices.reserve(g_list_length(vf->list));
+	gint index = 0;
+	for (GList *work = vf->list; work; work = work->next)
 		{
-		auto tpath = static_cast<GtkTreePath *>(work->data);
-		GtkTreeIter iter;
-		gtk_tree_model_get_iter(store, &iter, tpath);
-
-		FileData *fd;
-		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
-
-		list.push_back(g_list_index(vf->list, fd));
+		indices.emplace(static_cast<FileData *>(work->data), index++);
 		}
+	list.reserve(g_list_length(slist));
+
+	struct SelectedIndices
+	{
+		const std::unordered_map<FileData *, gint> &indices;
+		GList *paths;
+		std::vector<int> &result;
+	};
+	SelectedIndices context{indices, slist, list};
+	// Walk the model once: looking up every selected path separately also walks
+	// GtkTreeStore's siblings repeatedly when many rows are selected.
+	gtk_tree_model_foreach(store, [](GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data) -> gboolean
+		{
+		auto *selected = static_cast<SelectedIndices *>(data);
+		if (gtk_tree_path_compare(path, static_cast<GtkTreePath *>(selected->paths->data)) != 0) return FALSE;
+		FileData *fd;
+		gtk_tree_model_get(model, iter, FILE_COLUMN_POINTER, &fd, -1);
+		const auto position = selected->indices.find(fd);
+		selected->result.push_back(position == selected->indices.end() ? -1 : position->second);
+		selected->paths = selected->paths->next;
+		return selected->paths == nullptr;
+		}, &context);
 
 	return list;
 }

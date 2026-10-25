@@ -49,6 +49,7 @@ unit_test_sources = files(
 'ui-tree-edit.cc',
 'video-metadata.cc',
 'view-dir.cc',
+'view-file-selection.cc',
 'view-file-list.cc')
 
 project_sources += unit_test_sources

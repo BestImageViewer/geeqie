@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstring>
 #include <map>
+#include <unordered_map>
 #include <utility>
 
 #include <glib-object.h>
@@ -536,10 +537,20 @@ GList *vficon_selection_get_list(ViewFile *vf)
 std::vector<int> vficon_selection_get_list_by_index(const ViewFile *vf)
 {
 	std::vector<int> list;
+	if (!VFICON(vf)->selection) return list;
+	std::unordered_map<FileData *, gint> indices;
+	indices.reserve(g_list_length(vf->list));
+	gint index = 0;
+	for (GList *work = vf->list; work; work = work->next)
+		{
+		indices.emplace(static_cast<FileData *>(work->data), index++);
+		}
+	list.reserve(g_list_length(VFICON(vf)->selection));
 
 	for (GList *work = VFICON(vf)->selection; work; work = work->next)
 		{
-		list.push_back(g_list_index(vf->list, work->data));
+		const auto position = indices.find(static_cast<FileData *>(work->data));
+		list.push_back(position == indices.end() ? -1 : position->second);
 		}
 
 	return list;
