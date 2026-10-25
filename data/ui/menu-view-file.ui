@@ -127,6 +127,10 @@
         <attribute name="action">win.view-file-refresh</attribute>
         <attribute name="label" translatable="yes">Refresh</attribute>
       </item>
+      <item>
+        <attribute name="action">win.view-file-rebuild-thumbnails</attribute>
+        <attribute name="label" translatable="yes">Rebuild selected thumbnails</attribute>
+      </item>
     </section>
   </menu>
 </interface>

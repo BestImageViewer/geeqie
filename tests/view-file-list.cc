@@ -12,11 +12,13 @@
 
 #include "accelerators.h"
 #include "actions.h"
+#include "cache.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "layout-image.h"
 #include "layout.h"
 #include "options.h"
+#include "thumb-standard.h"
 #include "trash.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
@@ -341,6 +343,76 @@ protected:
 	decltype(options->file_ops) saved_file_ops{};
 	gchar *directory = nullptr;
 };
+
+TEST_P(RepeatedDelete, RebuildThumbnailsOnlyInvalidatesSelectedFiles)
+{
+	auto *vf = layout->vf;
+	vf_thumb_stop(vf);
+	auto *first = vf_index_get_data(vf, 0);
+	auto *second = vf_index_get_data(vf, 1);
+	auto *third = vf_index_get_data(vf, 2);
+	ASSERT_NE(third, nullptr);
+	g_autoptr(FileDataList) selection = nullptr;
+	selection = g_list_append(selection, file_data_ref(first));
+	selection = g_list_append(selection, file_data_ref(second));
+	vf_select_list(vf, selection);
+	vf->click_fd = first;
+	g_autofree gchar *local_dir = g_build_filename(directory, GQ_CACHE_LOCAL_THUMB, nullptr);
+	ASSERT_EQ(g_mkdir_with_parents(local_dir, 0700), 0);
+	g_autofree gchar *similarity = g_build_filename(local_dir, "0.jpg.sim", nullptr);
+	ASSERT_TRUE(g_file_set_contents(similarity, "similarity", -1, nullptr));
+	const auto standard_path = [](FileData *fd)
+		{
+		g_autofree gchar *uri = g_filename_to_uri(fd->path, nullptr, nullptr);
+		g_autofree gchar *hash = g_compute_checksum_for_string(G_CHECKSUM_MD5, uri, -1);
+		g_autofree gchar *name = g_strconcat(hash, ".png", nullptr);
+		return g_build_filename(get_thumbnails_standard_cache_dir(), THUMB_FOLDER_NORMAL, name, nullptr);
+		};
+	for (auto *fd : {first, second, third})
+		{
+		g_autofree gchar *name = g_strconcat(filename_from_path(fd->path), GQ_CACHE_EXT_THUMB, nullptr);
+		g_autofree gchar *local = g_build_filename(local_dir, name, nullptr);
+		ASSERT_TRUE(g_file_set_contents(local, "stale thumbnail", -1, nullptr));
+		g_autofree gchar *shared_name = g_strconcat(fd->path, GQ_CACHE_EXT_THUMB, nullptr);
+		g_autofree gchar *shared = g_build_filename(get_thumbnails_cache_dir(), shared_name, nullptr);
+		g_autofree gchar *parent = g_path_get_dirname(shared);
+		ASSERT_EQ(g_mkdir_with_parents(parent, 0700), 0);
+		ASSERT_TRUE(g_file_set_contents(shared, "stale thumbnail", -1, nullptr));
+		g_autofree gchar *standard = standard_path(fd);
+		g_autofree gchar *standard_parent = g_path_get_dirname(standard);
+		ASSERT_EQ(g_mkdir_with_parents(standard_parent, 0700), 0);
+		ASSERT_TRUE(g_file_set_contents(standard, "stale thumbnail", -1, nullptr));
+		g_clear_object(&fd->thumb_pixbuf);
+		fd->thumb_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 1, 1);
+		}
+	ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.view-file-rebuild-thumbnails", nullptr));
+	EXPECT_EQ(first->thumb_pixbuf, nullptr);
+	EXPECT_EQ(second->thumb_pixbuf, nullptr);
+	EXPECT_NE(third->thumb_pixbuf, nullptr);
+	EXPECT_NE(vf->refresh_idle_id, 0U);
+	for (auto *fd : {first, second, third})
+		{
+		g_autofree gchar *name = g_strconcat(filename_from_path(fd->path), GQ_CACHE_EXT_THUMB, nullptr);
+		g_autofree gchar *local = g_build_filename(local_dir, name, nullptr);
+		g_autofree gchar *shared_name = g_strconcat(fd->path, GQ_CACHE_EXT_THUMB, nullptr);
+		g_autofree gchar *shared = g_build_filename(get_thumbnails_cache_dir(), shared_name, nullptr);
+		EXPECT_EQ(isfile(local), fd == third);
+		EXPECT_EQ(isfile(shared), fd == third);
+		g_autofree gchar *standard = standard_path(fd);
+		EXPECT_EQ(isfile(standard), fd == third);
+		EXPECT_TRUE(isfile(fd->path));
+		g_remove(local);
+		g_remove(shared);
+		g_remove(standard);
+		}
+	EXPECT_TRUE(isfile(similarity));
+	g_remove(similarity);
+	g_rmdir(local_dir);
+	// Right-clicking an unselected file rebuilds only that file.
+	vf->click_fd = third;
+	ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.view-file-rebuild-thumbnails", nullptr));
+	EXPECT_EQ(third->thumb_pixbuf, nullptr);
+}
 
 TEST_P(RepeatedDelete, SelectingMarksSynchronizesDisplayedImage)
 {

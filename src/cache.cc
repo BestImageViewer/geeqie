@@ -634,6 +634,22 @@ gchar *cache_find_location(CacheType type, const gchar *source)
 	return path;
 }
 
+void cache_remove_thumbnails(const gchar *source)
+{
+	if (!source) return;
+	const CachePathParts cache{CacheType::THUMB};
+	g_autofree gchar *local = cache.build_path_local(source);
+	g_autofree gchar *shared = cache.build_path_rc(source);
+	for (const gchar *path : {local, shared})
+		{
+		if (isfile(path) && !unlink_file(path))
+			{
+			log_printf("Failed to remove thumbnail cache file: %s\n", path); // NOTRANSLATE: Diagnostic message.
+			}
+		}
+	thumb_std_maint_removed(source);
+}
+
 gboolean cache_time_valid(const gchar *cache, const gchar *path)
 {
 	struct stat cache_st;

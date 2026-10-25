@@ -165,6 +165,12 @@
     </para>
     <variablelist>
       <varlistentry>
+        <term><emphasis role="bold">Rebuild selected thumbnails</emphasis></term>
+        <listitem>
+          <para>Removes the cached thumbnails for the selected files and generates new thumbnails from the source images. Use this when a thumbnail is incomplete or outdated. If the right-clicked file is not selected, only that file is processed. Source images, similarity data, and metadata are unchanged. In list view, new thumbnails are loaded when thumbnail display is enabled.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term>
           <emphasis role="bold">View in new window</emphasis>
         </term>

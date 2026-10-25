@@ -312,6 +312,19 @@ static const ActionDef view_file_actions[] =
 		},
 
 		{
+		"win.view-file-rebuild-thumbnails",
+		GQ_ICON_REFRESH,
+		N_("Rebuild selected thumbnails"),
+		vf_pop_menu_rebuild_thumbnails_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.view-file-rename",
 		nullptr,
 		N_("Rename…"),

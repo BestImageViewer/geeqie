@@ -91,6 +91,7 @@ bool cache_source_is_thumbnail(const gchar *source);
 gchar *cache_create_location(CacheType cache_type, const gchar *source);
 gchar *cache_get_location(CacheType cache_type, const gchar *source);
 gchar *cache_find_location(CacheType type, const gchar *source);
+void cache_remove_thumbnails(const gchar *source);
 
 const gchar *get_thumbnails_cache_dir();
 const gchar *get_default_thumbnails_cache_dir();

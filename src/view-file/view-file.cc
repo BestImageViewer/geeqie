@@ -26,6 +26,7 @@
 #include "accelerators.h"
 #include "actions.h"
 #include "archives.h"
+#include "cache.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect.h"
@@ -1599,6 +1600,23 @@ static void vf_pop_menu_refresh_action_cb(GSimpleAction *, GVariant *, gpointer 
 	vf_pop_menu_refresh_cb(nullptr, vf_from_action_data(data));
 }
 
+static void vf_pop_menu_rebuild_thumbnails_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf) return;
+	g_autoptr(FileDataList) files = vf_pop_menu_file_list(vf);
+	if (!files) return;
+
+	vf_thumb_stop(vf);
+	for (GList *work = files; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		cache_remove_thumbnails(fd->path);
+		g_clear_object(&fd->thumb_pixbuf);
+		}
+	vf_refresh_idle(vf);
+}
+
 static void vf_pop_menu_collections_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	auto *vf = vf_from_action_data(data);
@@ -1823,6 +1841,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	vf_pop_menu_set_action_enabled(vf, "view-file-enable-grouping", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-disable-grouping", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-duplicates", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-rebuild-thumbnails", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-collections", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-mark-to-selection", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-selection-to-mark", active);
