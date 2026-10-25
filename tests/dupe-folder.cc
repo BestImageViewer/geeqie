@@ -118,7 +118,7 @@ protected:
 		while (g_get_monotonic_time() < deadline)
 			{
 			g_main_context_iteration(nullptr, FALSE);
-			if (!dw->idle_id && !dw->recompare_id && !dw->add_files_queue_id && !dw->img_loader)
+			if (dupe_export_ready(dw))
 				{
 				if (!quiet_since) quiet_since = g_get_monotonic_time();
 				if (g_get_monotonic_time() - quiet_since > 20 * G_TIME_SPAN_MILLISECOND) return true;

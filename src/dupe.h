@@ -124,6 +124,8 @@ struct DupeWindow
 
 	guint idle_id; /**< event source id */
 	guint recompare_id; /**< Deferred comparison start or regrouping after results change. */
+	guint delete_update_id;
+	GHashTable *pending_deletions; /**< Owned FileData references for successful deletions. */
 	GList *working;
 	gint setup_done; /**< Boolean. Set TRUE when all checksums/dimensions/similarity data have been read or created */
 	gint setup_count; /**< length of set1 or if 2 sets, total length of both */

@@ -112,7 +112,7 @@ gboolean dupe_run_results_script_finish(GAsyncResult *result, GError **error)
 
 gboolean dupe_export_ready(const DupeWindow *dw)
 {
-	return dw && !dw->idle_id && !dw->recompare_id && !dw->img_loader && !dw->add_files_queue_id && !dw->add_files_queue;
+	return dw && !dw->idle_id && !dw->recompare_id && !dw->delete_update_id && !dw->img_loader && !dw->add_files_queue_id && !dw->add_files_queue;
 }
 
 GString *dupe_export_json(const DupeWindow *dw, const GList *selection)

@@ -41,6 +41,9 @@ TEST(DuplicateExport, EmptyAndIncompleteResultsAreValidJson)
 	window.add_files_queue_id = 0;
 	window.recompare_id = 1;
 	EXPECT_FALSE(dupe_export_ready(&window));
+	window.recompare_id = 0;
+	window.delete_update_id = 1;
+	EXPECT_FALSE(dupe_export_ready(&window));
 }
 
 TEST(DuplicateExport, GroupsAndScoresDoNotDependOnRowsOrPartialSelection)

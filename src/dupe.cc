@@ -3080,18 +3080,9 @@ static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 
 static void dupe_window_delete_selected(DupeWindow *dw, gboolean safe_delete)
 {
-	const auto delete_finished_cb = [dw](gboolean success, const gchar *)
-	{
-		if (!success) return;
-
-		/**
-		 * If the window is refreshed after each file of a large set is deleted,
-		 * the UI slows to an unacceptable level. The #FileUtilDoneFunc is used
-		 * to call this function once, when the entire delete operation is completed.
-		 */
-		dupe_window_remove_selection(dw, dw->listview);
-	};
-	file_util_delete_notify_done(nullptr, dupe_listview_get_selection(dw->listview), dw->window, safe_delete, delete_finished_cb);
+	// Successful file-change notifications update every duplicates window, even
+	// after a partial failure or a selection change while the operation runs.
+	file_util_delete(nullptr, dupe_listview_get_selection(dw->listview), dw->window, safe_delete);
 }
 
 static void dupe_window_edit_selected(DupeWindow *dw, const gchar *key)
@@ -4033,6 +4024,8 @@ static void dupe_window_get_geometry(DupeWindow *dw)
 
 void dupe_window_close(DupeWindow *dw)
 {
+	g_clear_handle_id(&dw->delete_update_id, g_source_remove);
+	g_clear_pointer(&dw->pending_deletions, g_hash_table_destroy);
 	dupe_check_stop(dw);
 
 	dupe_window_get_geometry(dw);
@@ -4954,6 +4947,145 @@ static void dupe_dnd_init(DupeWindow *dw)
  *-------------------------------------------------------------------
  */
 
+static gboolean dupe_deleted_files_update_cb(gpointer data)
+{
+	auto *dw = static_cast<DupeWindow *>(data);
+	// Let file-list loading finish rather than discarding its remaining entries.
+	if (dw->add_files_queue_id) return G_SOURCE_CONTINUE;
+	dw->delete_update_id = 0;
+	g_autoptr(GHashTable) deleted = g_steal_pointer(&dw->pending_deletions);
+	g_autoptr(GHashTable) removed = g_hash_table_new(g_direct_hash, g_direct_equal);
+	for (GList *list : {dw->list, dw->second_list})
+		{
+		for (GList *work = list; work; work = work->next)
+			{
+			auto *item = static_cast<DupeItem *>(work->data);
+			if (g_hash_table_contains(deleted, item->fd)) g_hash_table_add(removed, item);
+			}
+		}
+	if (g_hash_table_size(removed) == 0) return G_SOURCE_REMOVE;
+
+	bool restart = dw->idle_id || dw->recompare_id || dw->img_loader;
+	if (!restart && dw->second_set && !dw->ignore_same_folder)
+		{
+		for (GList *group = dw->dupes; group; group = group->next)
+			{
+			auto *parent = static_cast<DupeItem *>(group->data);
+			if (g_hash_table_contains(removed, parent)) restart = true;
+			}
+		}
+	dupe_check_stop(dw);
+	g_autoptr(FileDataList) selected = dupe_listview_get_selection(dw->listview);
+	g_autoptr(FileDataList) second_selected = dupe_listview_get_selection(dw->second_listview);
+
+	if (!restart && !dw->ignore_same_folder)
+		{
+		// A completed ordinary group is a star. Reconnect surviving members if
+		// its representative was deleted, without recomparing the whole search.
+		for (GList *group = dw->dupes; group; group = group->next)
+			{
+			auto *parent = static_cast<DupeItem *>(group->data);
+			if (!g_hash_table_contains(removed, parent)) continue;
+			DupeItem *replacement = nullptr;
+			for (GList *member = parent->group; member; member = member->next)
+				{
+				auto *match = static_cast<DupeMatch *>(member->data);
+				if (g_hash_table_contains(removed, match->di)) continue;
+				if (!replacement) replacement = match->di;
+				else if (!dw->second_set)
+					{
+					gdouble rank = 0;
+					if (dupe_match(replacement, match->di, dw->match_mask, &rank, FALSE))
+						dupe_match_link(replacement, match->di, rank);
+					}
+				}
+			}
+		}
+
+	// Prune all affected edges in one pass before freeing any items.
+	for (GList *list : {dw->list, dw->second_list})
+		{
+		for (GList *work = list; work; work = work->next)
+			{
+			auto *item = static_cast<DupeItem *>(work->data);
+			for (GList *member = item->group; member;)
+				{
+				GList *next = member->next;
+				auto *match = static_cast<DupeMatch *>(member->data);
+				if (g_hash_table_contains(removed, match->di))
+					{
+					g_free(match);
+					item->group = g_list_delete_link(item->group, member);
+					}
+				member = next;
+				}
+			}
+		}
+	g_clear_pointer(&dw->dupes, g_list_free);
+	gtk_list_store_clear(GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview))));
+	auto *second_store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dw->second_listview)));
+	gtk_list_store_clear(second_store);
+	for (GList **list : {&dw->list, &dw->second_list})
+		{
+		for (GList *work = *list; work;)
+			{
+			GList *next = work->next;
+			auto *item = static_cast<DupeItem *>(work->data);
+			if (g_hash_table_contains(removed, item))
+				{
+				if (dw->click_item == item) dw->click_item = nullptr;
+				dupe_match_link_clear(item, FALSE);
+				*list = g_list_delete_link(*list, work);
+				dupe_item_free(item);
+				}
+			work = next;
+			}
+		}
+	dw->thumb_item = nullptr;
+	dw->setup_point = nullptr;
+	dw->working = nullptr;
+	dw->set_count = 0;
+	for (GList *work = dw->second_list; work; work = work->next)
+		{
+		auto *item = static_cast<DupeItem *>(work->data);
+		GtkTreeIter iter;
+		gtk_list_store_append(second_store, &iter);
+		gtk_list_store_set(second_store, &iter, DUPE_COLUMN_POINTER, item, 1, item->fd->path, -1);
+		}
+	dupe_second_update_status(dw);
+	if (restart)
+		{
+		dupe_match_reset_list(dw->list);
+		dupe_match_reset_list(dw->second_list);
+		dupe_check_start(dw);
+		}
+	else
+		{
+		dupe_match_rank(dw);
+		dupe_listview_populate(dw);
+		dupe_window_update_count(dw, FALSE);
+		if (dw->show_thumbs) dupe_thumb_step(dw);
+		}
+	const auto restore_selection = [](GtkWidget *view, GList *files)
+		{
+		g_autoptr(GHashTable) selection = g_hash_table_new(g_direct_hash, g_direct_equal);
+		for (GList *work = files; work; work = work->next) g_hash_table_add(selection, work->data);
+		auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
+		auto *rows = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+		gtk_tree_selection_unselect_all(rows);
+		GtkTreeIter iter;
+		for (gboolean valid = gtk_tree_model_get_iter_first(model, &iter); valid; valid = gtk_tree_model_iter_next(model, &iter))
+			{
+			DupeItem *item = nullptr;
+			gtk_tree_model_get(model, &iter, DUPE_COLUMN_POINTER, &item, -1);
+			if (g_hash_table_contains(selection, item->fd)) gtk_tree_selection_select_iter(rows, &iter);
+			}
+		};
+	if (!restart) restore_selection(dw->listview, selected);
+	restore_selection(dw->second_listview, second_selected);
+	return G_SOURCE_REMOVE;
+}
+
 static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
@@ -4971,7 +5103,13 @@ static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data)
 		case FILEDATA_CHANGE_COPY:
 			break;
 		case FILEDATA_CHANGE_DELETE:
-			/* Update the UI only once, after the operation finishes */
+			if (!dw->pending_deletions)
+				{
+				dw->pending_deletions = g_hash_table_new_full(g_direct_hash, g_direct_equal,
+					[](gpointer item) { file_data_unref(static_cast<FileData *>(item)); }, nullptr);
+				}
+			g_hash_table_add(dw->pending_deletions, file_data_ref(fd));
+			if (!dw->delete_update_id) dw->delete_update_id = g_timeout_add(100, dupe_deleted_files_update_cb, dw);
 			break;
 		case FILEDATA_CHANGE_UNSPECIFIED:
 		case FILEDATA_CHANGE_WRITE_METADATA:
