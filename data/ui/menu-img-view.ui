@@ -93,6 +93,10 @@
         <attribute name="action">win.image-win-rename</attribute>
         <attribute name="label" translatable="yes">Rename…</attribute>
       </item>
+      <item>
+        <attribute name="action">win.image-win-print</attribute>
+        <attribute name="label" translatable="yes">Print image…</attribute>
+      </item>
     </section>
     <section>
       <item>

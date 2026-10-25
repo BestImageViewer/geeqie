@@ -613,6 +613,7 @@ static void view_fullscreen_toggle(ViewWindow *vw, gboolean force_off)
 			if (vw->ss) vw->ss->imd = vw->imd;
 		};
 		vw->fs = fullscreen_start(vw->window, vw->imd, view_fullscreen_stop_func);
+		gtk_widget_insert_action_group(vw->fs->window, "win", G_ACTION_GROUP(vw->window));
 
 		view_image_set_buttons(vw, vw->fs->imd);
 
@@ -927,10 +928,10 @@ static void view_print_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
-	view_fullscreen_toggle(vw, TRUE);
 	ImageWindow *imd = view_window_active_image(vw);
 	FileData *fd = image_get_fd(imd);
-	print_window_new(fd ? g_list_append(nullptr, file_data_ref(fd)) : nullptr, vw->window);
+	if (!fd) return;
+	print_window_new(g_list_append(nullptr, file_data_ref(fd)), vw->fs ? vw->fs->window : vw->window);
 }
 
 static void image_set_desaturate_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -1227,6 +1228,8 @@ static void image_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, 
 
 static void view_popup_menu(ViewWindow *vw, GtkWidget *parent, gdouble x, gdouble y)
 {
+	auto *print_action = G_SIMPLE_ACTION(g_action_map_lookup_action(G_ACTION_MAP(vw->window), "image-win-print"));
+	g_simple_action_set_enabled(print_action, image_get_fd(view_window_active_image(vw)) != nullptr);
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-img-view.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-image"));
 	GList *editmenu_fd_list;

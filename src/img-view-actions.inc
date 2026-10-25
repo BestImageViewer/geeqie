@@ -226,7 +226,7 @@ static const ActionDef image_actions[] =
 		{
 		"win.image-win-print",
 		nullptr,
-		N_("Print"),
+		N_("Print image…"),
 		view_print_cb,
 		nullptr,
 		ActionStateType::NONE,

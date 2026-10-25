@@ -5,9 +5,10 @@
 #include <gtk/gtk.h>
 
 #include "filedata.h"
+#include "fullscreen.h"
 #include "image.h"
-#include "layout.h"
 #include "layout-image.h"
+#include "layout.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "view-file.h"
@@ -195,6 +196,54 @@ TEST_F(LayoutImageSelection, ContextMenusPreferPaneSelectionOverClickedImage)
 	ASSERT_EQ(g_list_length(fallback), 1U);
 	EXPECT_EQ(fallback->data, image_get_fd(layout.image));
 	EXPECT_EQ(vf_pop_menu_file_list(&vf), nullptr);
+}
+
+TEST_F(LayoutImageSelection, PrintingUsesClickedPaneDespiteOtherSelections)
+{
+	for (gint i = 0; i < MAX_SPLIT_IMAGES; ++i)
+		{
+		g_autofree gchar *path = g_strdup_printf("/tmp/geeqie-print-pane-%d.jpg", i);
+		auto fd = FileData::new_simple(path);
+		image_set_fd(layout.split_images[i], fd);
+		}
+	layout.image = layout.split_images[0];
+	for (gint i : {0, 1, 2}) select(i);
+	g_autoptr(FileDataList) files = layout_image_print_list(&layout, layout.split_images[3]->widget);
+	ASSERT_EQ(g_list_length(files), 1U);
+	EXPECT_EQ(files->data, image_get_fd(layout.split_images[3]));
+	EXPECT_EQ(layout.image, layout.split_images[0]);
+	// The print request owns its source even after the pane changes image.
+	image_set_fd(layout.split_images[3], nullptr);
+	EXPECT_STREQ(static_cast<FileData *>(files->data)->path, "/tmp/geeqie-print-pane-3.jpg");
+}
+
+TEST_F(LayoutImageSelection, PrintingEmptyPaneDoesNotUseOtherSelectedImages)
+{
+	auto fd = FileData::new_simple("/tmp/geeqie-print-other-pane.jpg");
+	image_set_fd(layout.split_images[0], fd);
+	layout.image = layout.split_images[0];
+	select(0);
+	g_autoptr(FileDataList) empty = layout_image_print_list(&layout, layout.split_images[1]->widget);
+	EXPECT_EQ(empty, nullptr);
+	g_autoptr(FileDataList) active = layout_image_print_list(&layout);
+	ASSERT_EQ(g_list_length(active), 1U);
+	EXPECT_EQ(active->data, static_cast<FileData *>(fd));
+}
+
+TEST_F(LayoutImageSelection, PrintingFullscreenUsesFullscreenImage)
+{
+	auto normal_fd = FileData::new_simple("/tmp/geeqie-print-normal.jpg");
+	auto fullscreen_fd = FileData::new_simple("/tmp/geeqie-print-fullscreen.jpg");
+	image_set_fd(layout.split_images[0], normal_fd);
+	image_set_fd(layout.split_images[3], fullscreen_fd);
+	layout.image = layout.split_images[0];
+	FullScreenData fullscreen{};
+	fullscreen.imd = layout.split_images[3];
+	layout.full_screen = &fullscreen;
+	g_autoptr(FileDataList) files = layout_image_print_list(&layout);
+	layout.full_screen = nullptr;
+	ASSERT_EQ(g_list_length(files), 1U);
+	EXPECT_EQ(files->data, static_cast<FileData *>(fullscreen_fd));
 }
 
 TEST_F(LayoutImageSelection, CheckboxPreservesActivePaneAndSurvivesFrameChanges)

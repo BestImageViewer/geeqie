@@ -18,7 +18,7 @@
   <para>Geeqie first opens a Print options window for image layout and text settings. Select Continue to open the standard desktop print dialog for printer and paper settings. This also works when the desktop print portal is used.</para>
   <section id="Optionstab">
     <title>Print options</title>
-    <para>Printing uses the current selection in the invoking window. To print every image, use Select All before opening Print.</para>
+    <para>File → Print in the main window uses the file-list selection. To print every image, use Select All before opening Print. To print just the displayed image, right-click the image and choose Print image…. This is also available in fullscreen and standalone image windows. In split view, it prints the image in the pane that was right-clicked, regardless of other selected files or image panes.</para>
     <para>Choose One image per page or Proof sheet. Image size sets the percentage of the available image area for a single image. Proof width and Height set the proof cell dimensions in points (72 points equal one inch). Proof sheets fit as many cells as possible inside the paper margins and continue on additional pages as needed. Oversized cells are reduced to the printable area.</para>
     <para>GTK's standard controls provide paper size, orientation, margins, preview, printer selection, and printing to a PDF file. Layout settings are remembered for future print jobs.</para>
     <variablelist>

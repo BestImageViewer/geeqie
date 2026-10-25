@@ -72,6 +72,10 @@
         <attribute name="action">win.layout-image-rename</attribute>
         <attribute name="label" translatable="yes">Rename…</attribute>
       </item>
+      <item>
+        <attribute name="action">win.layout-image-print</attribute>
+        <attribute name="label" translatable="yes">Print image…</attribute>
+      </item>
     </section>
     <section>
       <item>

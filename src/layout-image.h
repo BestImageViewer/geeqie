@@ -59,6 +59,8 @@ void layout_image_refresh(LayoutWindow *lw);
 void layout_image_selection_clear(LayoutWindow *lw);
 GList *layout_image_selection_list(LayoutWindow *lw);
 GList *layout_image_context_list(LayoutWindow *lw);
+/** @brief Return an owned single-file list for printing the clicked image pane. */
+GList *layout_image_print_list(LayoutWindow *lw, GtkWidget *parent = nullptr);
 
 void layout_image_color_profile_set(LayoutWindow *lw, gint input_type, gboolean use_image);
 gboolean layout_image_color_profile_get(LayoutWindow *lw, gint &input_type, gboolean &use_image);

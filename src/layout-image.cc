@@ -59,6 +59,7 @@
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
+#include "print.h"
 #include "rcfile.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
@@ -576,6 +577,25 @@ GList *layout_image_context_list(LayoutWindow *lw)
 	return fd ? g_list_append(nullptr, file_data_ref(fd)) : nullptr;
 }
 
+GList *layout_image_print_list(LayoutWindow *lw, GtkWidget *parent)
+{
+	if (!lw) return nullptr;
+	auto *source = lw->full_screen ? lw->full_screen->imd : lw->image;
+	if (parent)
+		{
+		for (auto *imd : lw->split_images)
+			{
+			if (imd && (parent == imd->widget || gtk_widget_is_ancestor(parent, imd->widget)))
+				{
+				source = imd;
+				break;
+				}
+			}
+		}
+	auto *fd = source ? image_get_fd(source) : nullptr;
+	return fd ? g_list_append(nullptr, file_data_ref(fd)) : nullptr;
+}
+
 static GList *layout_image_get_fd_list(LayoutWindow *lw)
 {
 	if (auto *selection = layout_image_selection_list(lw)) return selection;
@@ -603,6 +623,17 @@ static GtkWidget *layout_image_popup_click_parent(LayoutWindow *lw)
 		}
 
 	return parent ? parent : lw->window;
+}
+
+static void layout_image_pop_menu_print_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	auto *parent = layout_image_popup_click_parent(lw);
+	g_autoptr(FileDataList) files = layout_image_print_list(lw, parent);
+	if (!files) return;
+	auto *root = gtk_widget_get_root(parent);
+	GtkWidget *window = GTK_IS_WINDOW(root) ? GTK_WIDGET(root) : lw->window;
+	print_window_new(g_steal_pointer(&files), window);
 }
 
 static void layout_image_pop_menu_zoom_in_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -934,6 +965,8 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw, GtkWidget *parent, gdo
 	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-path", has_selection);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-path-unquoted", has_selection);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-copy-image", selection ? !selection->next : has_path);
+	g_autoptr(FileDataList) print_source = layout_image_print_list(lw, popup_parent);
+	layout_image_pop_menu_set_enabled(lw, "layout-image-print", print_source != nullptr);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-cut-path", has_selection);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-delete", has_selection);
 	layout_image_pop_menu_set_enabled(lw, "layout-image-delete-permanent", has_selection);

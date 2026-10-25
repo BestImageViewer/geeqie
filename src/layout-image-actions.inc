@@ -3,6 +3,19 @@
 static const ActionDef layout_image_actions[] =
 {
 		{
+		"win.layout-image-print",
+		GQ_ICON_PRINT,
+		N_("Print image…"),
+		layout_image_pop_menu_print_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.layout-image-alter",
 		nullptr,
 		N_("Orientation"),
