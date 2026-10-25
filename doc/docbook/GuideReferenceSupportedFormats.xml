@@ -16,4 +16,24 @@
     <emphasis role="underline"><link linkend="Behaviour">Play video by left click on image</link></emphasis>
     .
   </para>
+  <section id="RawImagePreviews">
+    <title>RAW image previews</title>
+    <para>
+      Geeqie normally displays an embedded preview from a camera RAW file, rather than developing the RAW sensor data.
+      For main-image display, the Exiv2 preview loader selects the largest available embedded preview.
+      LibRaw support also extracts a preview; it does not enable RAW development.
+    </para>
+    <para>
+      An embedded preview can have a lower resolution than the RAW sensor image. For example, some Sony ARW files
+      do not contain a full-resolution preview. Its colors and detail can also differ from the output of a RAW converter.
+      A zoom level of 100% refers to the displayed preview, not to the resolution of the RAW sensor data.
+    </para>
+    <para>
+      To display a full-resolution rendering, develop the RAW file with an external RAW converter and open its output
+      in Geeqie. Alternatively, configure
+      <link linkend="ExternalPreviewExtraction">External preview extraction</link>
+      to run a converter that develops the RAW data into an image format Geeqie can display. Extracting an embedded
+      preview alone cannot recover detail absent from that preview.
+    </para>
+  </section>
 </section>
