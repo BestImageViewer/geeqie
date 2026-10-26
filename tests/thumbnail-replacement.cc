@@ -14,6 +14,7 @@
 #include "cache.h"
 #include "exif.h"
 #include "filedata.h"
+#include "filefilter.h"
 #include "metadata.h"
 #include "options.h"
 #include "thumb-standard.h"
@@ -42,12 +43,17 @@ protected:
 
 	void TearDown() override
 	{
+		sidecar_ext_parse(options->sidecar.ext);
 		if (path) cache_remove_thumbnails(path);
 		if (path) g_unlink(path);
 		if (directory)
 			{
 			g_autofree gchar *replacement = g_build_filename(directory, "replacement.png", nullptr);
 			g_unlink(replacement);
+			g_autofree gchar *sidecar = g_build_filename(directory, "replacement.xmp", nullptr);
+			g_unlink(sidecar);
+			g_autofree gchar *unrelated = g_build_filename(directory, "unrelated.png", nullptr);
+			g_unlink(unrelated);
 			g_rmdir(directory);
 			}
 		g_free(cache_path);
@@ -132,6 +138,77 @@ TEST_F(ThumbnailReplacement, LegacyThumbnailWithoutSizeRemainsUsable)
 	load(fd);
 	ASSERT_NE(fd->thumb_pixbuf, nullptr);
 	EXPECT_EQ(gdk_pixbuf_read_pixels(fd->thumb_pixbuf)[0], 255);
+}
+
+TEST_F(ThumbnailReplacement, MovingCachedThumbnailsPreservesGroupingWithoutScanningDirectory)
+{
+	filter_add_defaults();
+	filter_rebuild();
+	seed_cache(nullptr);
+	g_autofree gchar *source_name = g_path_get_basename(cache_path);
+	g_autofree gchar *large_source = g_build_filename(get_thumbnails_standard_cache_dir(), THUMB_FOLDER_LARGE, source_name, nullptr);
+	g_autofree gchar *large_directory = g_path_get_dirname(large_source);
+	ASSERT_EQ(g_mkdir_with_parents(large_directory, 0700), 0);
+	g_autofree gchar *source_uri = g_filename_to_uri(path, nullptr, nullptr);
+	struct stat st{};
+	ASSERT_EQ(g_stat(path, &st), 0);
+	const std::string mtime = std::to_string(st.st_mtime);
+	g_autoptr(GdkPixbuf) large = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 256, 128);
+	gdk_pixbuf_fill(large, 0xff0000ff);
+	ASSERT_TRUE(gdk_pixbuf_save(large, large_source, "png", nullptr,
+	                          "tEXt::Thumb::URI", source_uri,
+	                          "tEXt::Thumb::MTime", mtime.c_str(), nullptr));
+
+	g_autofree gchar *destination = g_build_filename(directory, "replacement.png", nullptr);
+	ASSERT_EQ(g_rename(path, destination), 0);
+	g_autofree gchar *sidecar_path = g_build_filename(directory, "replacement.xmp", nullptr);
+	ASSERT_TRUE(g_file_set_contents(sidecar_path, "metadata", -1, nullptr));
+	sidecar_ext_parse(".png;.xmp");
+	auto image = FileData::new_group(destination);
+	ASSERT_NE(image->sidecar_files, nullptr);
+	auto *sidecar = static_cast<FileData *>(image->sidecar_files->data);
+	ASSERT_STREQ(sidecar->path, sidecar_path);
+
+	// A directory scan would discover this newly created file and update its pooled size.
+	g_autofree gchar *unrelated_path = g_build_filename(directory, "unrelated.png", nullptr);
+	auto unrelated = FileData::new_simple(unrelated_path);
+	ASSERT_EQ(unrelated->size, 0);
+	write_image(unrelated_path, 0x00ff00ff);
+
+	thumb_std_maint_moved(path, destination);
+	const gint64 deadline = g_get_monotonic_time() + (5 * G_TIME_SPAN_SECOND);
+	while ((g_file_test(cache_path, G_FILE_TEST_EXISTS) || g_file_test(large_source, G_FILE_TEST_EXISTS)) &&
+	       g_get_monotonic_time() < deadline)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		g_usleep(1000);
+		}
+	EXPECT_FALSE(g_file_test(cache_path, G_FILE_TEST_EXISTS));
+	EXPECT_FALSE(g_file_test(large_source, G_FILE_TEST_EXISTS));
+	EXPECT_EQ(unrelated->size, 0);
+	EXPECT_FALSE(image->disable_grouping);
+	EXPECT_FALSE(sidecar->disable_grouping);
+	EXPECT_EQ(sidecar->parent, static_cast<FileData *>(image));
+	ASSERT_NE(image->sidecar_files, nullptr);
+	EXPECT_EQ(image->sidecar_files->data, sidecar);
+
+	g_autofree gchar *destination_uri = g_filename_to_uri(destination, nullptr, nullptr);
+	g_autofree gchar *hash = g_compute_checksum_for_string(G_CHECKSUM_MD5, destination_uri, -1);
+	g_autofree gchar *name = g_strconcat(hash, ".png", nullptr);
+	for (const gchar *folder : {THUMB_FOLDER_NORMAL, THUMB_FOLDER_LARGE})
+		{
+		g_autofree gchar *cached_path = g_build_filename(get_thumbnails_standard_cache_dir(), folder, name, nullptr);
+		g_autoptr(GdkPixbuf) cached = gdk_pixbuf_new_from_file(cached_path, nullptr);
+		ASSERT_NE(cached, nullptr);
+		EXPECT_STREQ(gdk_pixbuf_get_option(cached, "tEXt::Thumb::URI"), destination_uri);
+		EXPECT_STREQ(gdk_pixbuf_get_option(cached, "tEXt::Thumb::MTime"), mtime.c_str());
+		EXPECT_STREQ(gdk_pixbuf_get_option(cached, "tEXt::Thumb::Size"), std::to_string(image->size).c_str());
+		EXPECT_EQ(gdk_pixbuf_read_pixels(cached)[0], 255);
+		}
+	load(image);
+	ASSERT_NE(image->thumb_pixbuf, nullptr);
+	EXPECT_EQ(gdk_pixbuf_read_pixels(image->thumb_pixbuf)[0], 255);
+	cache_remove_thumbnails(destination);
 }
 
 TEST_F(ThumbnailReplacement, MatchingSizeRemainsUsableAndMalformedSizeIsRejected)

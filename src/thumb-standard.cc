@@ -1001,8 +1001,10 @@ static void thumb_std_maint_move_validate_cb(const gchar *, gboolean, gpointer d
 			tm->tl->cache_hit = FALSE;
 			tm->tl->cache_local = FALSE;
 			file_data_unref(tm->tl->fd);
-			tm->tl->fd = file_data_new_group(tm->dest);
+			// Cache maintenance needs only this file, not a scan of its directory or sidecar groups.
+			tm->tl->fd = file_data_new_simple(tm->dest);
 			tm->tl->source_mtime = strtol(mtime_str, nullptr, 10);
+			tm->tl->source_size = tm->tl->fd->size;
 
 			g_autofree gchar *pathl = path_from_utf8(tm->tl->fd->path);
 			g_free(tm->tl->thumb_uri);
