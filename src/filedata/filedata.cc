@@ -153,19 +153,73 @@ void FileData::file_data_increment_version(FileData *fd)
 		}
 }
 
+namespace
+{
+
+glong stat_mtime_nsec(const struct stat &st)
+{
+#if HAVE_STAT_TIM
+	return st.st_mtim.tv_nsec;
+#elif HAVE_STAT_TIMESPEC
+	return st.st_mtimespec.tv_nsec;
+#else
+	(void)st;
+	return 0;
+#endif
+}
+
+glong stat_ctime_nsec(const struct stat &st)
+{
+#if HAVE_STAT_TIM
+	return st.st_ctim.tv_nsec;
+#elif HAVE_STAT_TIMESPEC
+	return st.st_ctimespec.tv_nsec;
+#else
+	(void)st;
+	return 0;
+#endif
+}
+
+void file_data_set_stat(FileData *fd, const struct stat &st)
+{
+	fd->size = st.st_size;
+	fd->date = st.st_mtime;
+	fd->cdate = st.st_ctime;
+	fd->mtime_nsec = stat_mtime_nsec(st);
+	fd->ctime_nsec = stat_ctime_nsec(st);
+	fd->device = st.st_dev;
+	fd->inode = st.st_ino;
+	fd->mode = st.st_mode;
+}
+
+} // namespace
+
 static gboolean file_data_check_changed_single_file(FileData *fd, struct stat *st)
 {
 	if ((fd->missing && st->st_mode != 0) ||
 	    fd->size != st->st_size ||
-	    fd->date != st->st_mtime)
+	    fd->date != st->st_mtime ||
+	    fd->mtime_nsec != stat_mtime_nsec(*st) ||
+	    fd->cdate != st->st_ctime ||
+	    fd->ctime_nsec != stat_ctime_nsec(*st) ||
+	    fd->device != st->st_dev || fd->inode != st->st_ino)
 		{
 		fd->missing = st->st_mode == 0;
-		fd->size = st->st_size;
-		fd->date = st->st_mtime;
-		fd->cdate = st->st_ctime;
-		fd->mode = st->st_mode;
-		if (fd->thumb_pixbuf) g_object_unref(fd->thumb_pixbuf);
-		fd->thumb_pixbuf = nullptr;
+		// Preserve disk thumbnails for unavailable collection members.
+		if (st->st_mode != 0)
+			{
+			// A reused pathname can retain both size and modification time.
+			if (S_ISREG(fd->mode) || S_ISREG(st->st_mode)) cache_remove_thumbnails(fd->path);
+			fd->exif_orientation = 0;
+			fd->exifdate = 0;
+			fd->exifdate_digitized = 0;
+			fd->media_date = 0;
+			fd->rating = STAR_RATING_NOT_READ;
+			fd->metadata_in_idle_loaded = FALSE;
+			metadata_cache_free(fd);
+			}
+		file_data_set_stat(fd, *st);
+		g_clear_object(&fd->thumb_pixbuf);
 		file_data_increment_version(fd);
 		file_data_send_notification(fd, NOTIFY_REREAD);
 		return TRUE;
@@ -410,10 +464,7 @@ FileDataRef FileData::make_new(const gchar *path_utf8, struct stat *st, gboolean
 #endif
 
 	fd->context = context;
-	fd->size = st->st_size;
-	fd->date = st->st_mtime;
-	fd->cdate = st->st_ctime;
-	fd->mode = st->st_mode;
+	file_data_set_stat(fd, *st);
 	fd->ref = 0;  // Will be reffed by the FileDataRef.
 	fd->magick = FD_MAGICK;
 	fd->exifdate = 0;

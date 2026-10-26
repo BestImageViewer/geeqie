@@ -3,12 +3,13 @@
   <title>Thumbnails</title>
   <note>
     <para>
-      This page only refers the Geeqie thumbnail caching mechanism, the shared thumbnail cache mechanism is described in
+      The storage layout below describes Geeqie's private thumbnail cache. The shared thumbnail cache format is described in
       <emphasis role="underline"><link linkend="GuideReferenceStandards">Thumbnail Standards</link></emphasis>
       .
     </para>
   </note>
-  <para />
+  <para>When Geeqie detects that a tracked source file has changed or been replaced, it discards its cached thumbnails and reloads metadata, including orientation. Detection includes file identity and subsecond modification and status-change timestamps where the platform supports them. Cached thumbnails are retained when a source becomes unavailable, allowing missing collection members to keep their previews.</para>
+  <para>Shared thumbnails written by Geeqie also record the source file size. A cached thumbnail with a different recorded size is rejected even when its modification time matches. Older thumbnails without a size field remain supported. These checks cannot detect every replacement made while a file is not being tracked, particularly when cache-validation values are unchanged. Use <guimenuitem>Rebuild thumbnails</guimenuitem> in the files pane context menu to regenerate previews for selected files.</para>
   <section id="Format">
     <title>Format</title>
     <para>Thumbnails are stored in PNG image format. The thumbnail name is the name of the source image with “.png” appended.</para>

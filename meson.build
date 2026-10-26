@@ -156,6 +156,10 @@ if get_option('fd_verbose_debug').allowed()
     endif
 endif
 
+# Filesystem timestamp precision differs between Unix platforms.
+conf_data.set('HAVE_STAT_TIM', (cc.has_member('struct stat', 'st_mtim.tv_nsec', prefix : '#include <sys/stat.h>') and cc.has_member('struct stat', 'st_ctim.tv_nsec', prefix : '#include <sys/stat.h>')) ? 1 : 0)
+conf_data.set('HAVE_STAT_TIMESPEC', (cc.has_member('struct stat', 'st_mtimespec.tv_nsec', prefix : '#include <sys/stat.h>') and cc.has_member('struct stat', 'st_ctimespec.tv_nsec', prefix : '#include <sys/stat.h>')) ? 1 : 0)
+
 # Detect if mntent.h is available
 conf_data.set('HAVE_MNTENT_H', 0)
 if cc.has_header('mntent.h')

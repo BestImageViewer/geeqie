@@ -123,6 +123,11 @@ TEST_F(SimCache, PrivateThumbnailsAreCachedAtPreferenceSizeAndReusedForPanView)
 			{
 			EXPECT_EQ(gdk_pixbuf_get_width(fd->thumb_pixbuf), size);
 			EXPECT_EQ(gdk_pixbuf_get_height(fd->thumb_pixbuf), size / 2);
+			if (size == 192)
+				{
+				const auto *pixel = gdk_pixbuf_read_pixels(fd->thumb_pixbuf);
+				EXPECT_LT(pixel[0], pixel[1]);
+				}
 			}
 		thumb_loader_free(loader);
 		file_data_unref(fd);
@@ -133,14 +138,14 @@ TEST_F(SimCache, PrivateThumbnailsAreCachedAtPreferenceSizeAndReusedForPanView)
 	ASSERT_NE(cached, nullptr);
 	EXPECT_EQ(gdk_pixbuf_get_width(cached), 96);
 	EXPECT_EQ(gdk_pixbuf_get_height(cached), 48);
+	// Distinct cached pixels prove reuse without changing the source file.
+	gdk_pixbuf_fill(cached, 0x20a040ff);
+	ASSERT_TRUE(gdk_pixbuf_save(cached, thumbnail_path, "png", nullptr, nullptr));
+	ASSERT_TRUE(filetime_set(thumbnail_path, filetime(source)));
 	g_autofree gchar *contents = nullptr;
 	gsize length = 0;
 	ASSERT_TRUE(g_file_get_contents(thumbnail_path, &contents, &length, nullptr));
 
-	// An undecodable source with an unchanged timestamp proves that the cache is reused.
-	const time_t original_time = filetime(source);
-	ASSERT_TRUE(g_file_set_contents(source, "invalid", -1, nullptr));
-	filetime_set(source, original_time);
 	load(192);
 	g_autofree gchar *reloaded = nullptr;
 	gsize reloaded_length = 0;

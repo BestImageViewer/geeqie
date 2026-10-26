@@ -42,6 +42,7 @@ unit_test_sources = files(
 'search.cc',
 'similar.cc',
 'slideshow.cc',
+'thumbnail-replacement.cc',
 'trash.cc',
 'ui-bookmark.cc',
 'ui-file-chooser.cc',

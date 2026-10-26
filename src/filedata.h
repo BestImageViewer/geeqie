@@ -223,6 +223,10 @@ public:
 	gboolean missing; /**< last file check found the source unavailable */
 	time_t date;
 	time_t cdate;
+	glong mtime_nsec;
+	glong ctime_nsec;
+	dev_t device;
+	ino_t inode;
 	mode_t mode; /**< this is needed at least for notification in view_dir because it is preserved after the file/directory is deleted */
 	gint sidecar_priority;
 

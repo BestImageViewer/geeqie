@@ -59,8 +59,8 @@ struct ExifData;
  *   > version of the escaped uri and the thumb's escaped uri. But not all uri
  *   > escape functions escape the same set of chars, comparing the unescaped
  *   > versions may be more accurate. \n
- *   > Only Thumb::URI and Thumb::MTime are stored in a thumb at this time.
- *     Storing the Size, Width, Height should probably be implemented.
+ *   > Thumb::URI, Thumb::MTime, and Thumb::Size are stored for cache validation.
+ *     Older thumbnails without the optional Size field remain supported.
  */
 
 
@@ -199,6 +199,16 @@ static gchar *thumb_loader_std_cache_path(ThumbLoaderStd *tl, gboolean local, Gd
 				    local, folder);
 }
 
+static gboolean thumb_size_matches(GdkPixbuf *pixbuf, off_t source_size)
+{
+	const gchar *text = gdk_pixbuf_get_option(pixbuf, THUMB_MARKER_SIZE);
+	if (!text) return TRUE; // Older and third-party thumbnails may omit this optional field.
+	if (!g_ascii_isdigit(*text)) return FALSE;
+	gchar *end = nullptr;
+	const guint64 size = g_ascii_strtoull(text, &end, 10);
+	return end != text && *end == '\0' && source_size >= 0 && size == static_cast<guint64>(source_size);
+}
+
 static gboolean thumb_loader_std_fail_check(ThumbLoaderStd *tl)
 {
 	g_autofree gchar *fail_path = thumb_loader_std_cache_path(tl, FALSE, nullptr, TRUE);
@@ -218,7 +228,8 @@ static gboolean thumb_loader_std_fail_check(ThumbLoaderStd *tl)
 		const gchar *mtime_str;
 
 		mtime_str = gdk_pixbuf_get_option(pixbuf, THUMB_MARKER_MTIME);
-		if (mtime_str && strtol(mtime_str, nullptr, 10) == tl->source_mtime)
+		if (mtime_str && strtol(mtime_str, nullptr, 10) == tl->source_mtime &&
+		    thumb_size_matches(pixbuf, tl->source_size))
 			{
 			result = TRUE;
 			DEBUG_1("thumb fail valid: %s", tl->fd->path);
@@ -259,7 +270,7 @@ static gboolean thumb_loader_std_validate(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 	if (strcmp(uri, valid_uri) != 0) return FALSE;
 
 	mtime = strtol(mtime_str, nullptr, 10);
-	if (!tl->source_missing && tl->source_mtime != mtime) return FALSE;
+	if (!tl->source_missing && (tl->source_mtime != mtime || !thumb_size_matches(pixbuf, tl->source_size))) return FALSE;
 
 	return TRUE;
 }
@@ -328,10 +339,12 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 
 		g_autofree gchar *mark_app = g_strdup_printf("%s %s", GQ_APPNAME, VERSION);
 		const std::string mark_mtime = std::to_string(static_cast<unsigned long long>(tl->source_mtime));
+		const std::string mark_size = std::to_string(static_cast<unsigned long long>(tl->source_size));
 		g_autofree gchar *pathl = path_from_utf8(tmp_path);
 		success = gdk_pixbuf_save(pixbuf, pathl, "png", nullptr,
 		                          THUMB_MARKER_URI, mark_uri,
 		                          THUMB_MARKER_MTIME, mark_mtime.c_str(),
+		                          THUMB_MARKER_SIZE, mark_size.c_str(),
 		                          THUMB_MARKER_APP, mark_app,
 		                          NULL);
 		if (success)
@@ -823,7 +836,7 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *, gpoin
 
 				g_autofree gchar *target = g_filename_from_uri(uri, nullptr, nullptr);
 				if (stat(target, &st) == 0 &&
-				    st.st_mtime == strtol(mtime_str, nullptr, 10))
+				    st.st_mtime == strtol(mtime_str, nullptr, 10) && thumb_size_matches(pixbuf, st.st_size))
 					{
 					valid = TRUE;
 					}
