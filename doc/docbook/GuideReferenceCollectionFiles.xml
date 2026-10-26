@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="GuideReferenceCollectionFiles">
   <title>Collection file format</title>
-  <para>
-    Collection files have the following format:
-    <programlisting xml:space="preserve">
-      #Geeqie collection
-      #created with Geeqie version 2.6+git20250705-01d997ed
-      "&lt;filepath1&gt;"
-      "&lt;filepath2&gt;"
-      #end
-    </programlisting>
-  </para>
+  <para>A collection is a UTF-8 text file with the <filename>.gqv</filename> extension. Scripts can generate collections directly using the same format as files saved by Geeqie. A minimal example is:</para>
+  <programlisting xml:space="preserve">#Geeqie collection
+"/home/user/Pictures/first.jpg"
+"/home/user/Pictures/Family holiday/second.jpg"
+#end</programlisting>
+  <para>Write one image path per line, enclosed in ordinary double quotation marks. Spaces inside a quoted path are preserved. The <literal>#created with Geeqie version</literal> and <literal>#geometry:</literal> comments found in collections saved by Geeqie are optional; scripts do not need to generate them.</para>
+  <para>Use absolute paths, or relative paths beginning with <filename>./</filename> or <filename>../</filename>. Relative paths are resolved against the folder containing the collection file, not the terminal's working directory. For example, a collection stored in <filename>/home/user/Pictures/example.gqv</filename> can contain:</para>
+  <programlisting xml:space="preserve">#Geeqie collection
+"./first.jpg"
+"./Family holiday/second.jpg"
+"../Scans/third.jpg"
+#end</programlisting>
+  <para>Geeqie recognizes these relative paths and retains relative-path storage when the collection is saved. See <link linkend="GuideCollections" endterm="titleGuideCollections"/> for the Save As option controlling relative paths.</para>
+  <para>Paths are literal: shell expressions such as <literal>~</literal>, <literal>$HOME</literal>, and wildcards are not expanded. A script must expand them before writing the file. Backslashes are not an escape mechanism, and filenames containing double quotation marks cannot be represented reliably by this format.</para>
+  <para>The collection may be stored outside Geeqie's collections folder. Open it using <menuchoice><guimenu>File</guimenu><guimenuitem>Open collection...</guimenuitem></menuchoice>, or supply its path on the command line:</para>
+  <programlisting>geeqie /home/user/Pictures/example.gqv</programlisting>
   <para>
     It is possible to include informational text along with an image. The format is:
     <programlisting xml:space="preserve">
+      #Geeqie collection
       #i Some informational text for the following file
       "&lt;filepath1&gt;"
       #end
