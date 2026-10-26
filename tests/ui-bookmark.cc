@@ -59,6 +59,46 @@ TEST(BookmarkDestination, HighlightSurvivesRefreshAndModeChanges)
 	history_list_free_key(folders_key);
 }
 
+TEST(BookmarkDestination, NumbersMatchVisibleOrderAndStopAtNine)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	constexpr const gchar *key = "test_numbered_destinations";
+	history_list_free_key(key);
+	history_list_add_to_key(key, "Seed[path]/tmp/numbered-seed", 0);
+	g_autoptr(GtkWidget) bookmarks = bookmark_list_new(key, nullptr);
+	g_object_ref_sink(bookmarks);
+	bookmark_list_set_no_defaults(bookmarks, TRUE);
+	history_list_free_key(key);
+	bookmark_list_set_numbered(bookmarks, TRUE);
+	for (guint i = 1; i <= 10; ++i)
+		{
+		g_autofree gchar *name = g_strdup_printf("Folder %u", i);
+		g_autofree gchar *path = g_strdup_printf("/tmp/numbered-destination-%u", i);
+		bookmark_list_add(bookmarks, name, path);
+		}
+	auto *box = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(bookmarks));
+	if (GTK_IS_VIEWPORT(box)) box = gtk_viewport_get_child(GTK_VIEWPORT(box));
+	guint position = 0;
+	for (auto *button = gtk_widget_get_first_child(box); button; button = gtk_widget_get_next_sibling(button))
+		{
+		++position;
+		auto *contents = gtk_button_get_child(GTK_BUTTON(button));
+		auto *label = gtk_widget_get_next_sibling(gtk_widget_get_first_child(contents));
+		g_autofree gchar *expected = position <= 9 ? g_strdup_printf("%u", position) : g_strdup_printf("Folder %u", position);
+		ASSERT_TRUE(GTK_IS_LABEL(label));
+		EXPECT_STREQ(gtk_label_get_text(GTK_LABEL(label)), expected);
+		g_autofree gchar *path = g_strdup_printf("/tmp/numbered-destination-%u", position);
+		EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, position - 1), path);
+		}
+	EXPECT_EQ(position, 10U);
+	EXPECT_EQ(bookmark_list_get_path_at_index(bookmarks, 10), nullptr);
+	// Reordering history changes both the visible numbers and indexed targets.
+	history_list_free_key(key);
+	bookmark_list_add(bookmarks, "Last first", "/tmp/numbered-destination-10");
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/numbered-destination-10");
+	history_list_free_key(key);
+}
+
 TEST(BookmarkDestination, CtrlClickSelectsWithoutActivating)
 {
 	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");

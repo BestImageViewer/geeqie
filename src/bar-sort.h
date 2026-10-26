@@ -58,7 +58,8 @@ struct BarSort
 GtkWidget *bar_sort_new_default(LayoutWindow *lw);
 GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **attribute_names, const gchar **attribute_values);
 void bar_sort_close(GtkWidget *bar);
-void bar_sort_add_selection(GtkWidget *bar);
+/** Process the highlighted destination (0), or visible destination 1–9. */
+void bar_sort_add_selection(GtkWidget *bar, guint destination = 0);
 /** Update folder-specific destinations after navigation. */
 void bar_sort_update(GtkWidget *bar);
 gboolean bar_sort_collection_add(const gchar *path);

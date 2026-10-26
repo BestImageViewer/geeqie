@@ -34,6 +34,10 @@ using BookmarkSelectFunc = std::function<void(const gchar *path)>;
 using BookmarkTooltipFunc = std::function<std::string(const gchar *path)>;
 using BookmarkDropFunc = std::function<void(const gchar *path, GList *list)>;
 GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_func);
+/** Show position numbers 1–9 beside the first nine entries. */
+void bookmark_list_set_numbered(GtkWidget *list, gboolean numbered);
+/** @return Borrowed path at a zero-based visible position, or nullptr. */
+const gchar *bookmark_list_get_path_at_index(GtkWidget *list, guint index);
 void bookmark_list_set_key(GtkWidget *list, const gchar *key);
 void bookmark_list_set_selected_path(GtkWidget *list, const gchar *path);
 void bookmark_list_set_select_only_on_ctrl(GtkWidget *list, gboolean enabled);

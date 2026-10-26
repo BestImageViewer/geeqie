@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <cstring>
 #include <future>
 #include <string>
 #include <vector>
@@ -1711,6 +1712,17 @@ static void layout_menu_bar_sort_add_selection_cb(GSimpleAction *, GVariant *, g
 	if (focus && (GTK_IS_EDITABLE(focus) || GTK_IS_TEXT_VIEW(focus))) return;
 
 	bar_sort_add_selection(lw->bar_sort);
+}
+
+static void layout_menu_bar_sort_destination_cb(GSimpleAction *action, GVariant *, gpointer)
+{
+	auto *lw = get_current_layout();
+	GtkWidget *focus = gtk_window_get_focus(GTK_WINDOW(lw->window));
+	if (focus && (GTK_IS_EDITABLE(focus) || GTK_IS_TEXT_VIEW(focus))) return;
+
+	const gchar *name = g_action_get_name(G_ACTION(action));
+	const guint destination = name[strlen(name) - 1] - '0';
+	bar_sort_add_selection(lw->bar_sort, destination);
 }
 
 static void layout_menu_hide_bars_cb(GSimpleAction *action, GVariant *state, gpointer data)

@@ -445,14 +445,15 @@ static void bar_sort_bookmark_drop_collection(SortData *sd, const gchar *path, G
 	g_list_foreach(list, reinterpret_cast<GFunc>(collect_manager_add), const_cast<gchar *>(path));
 }
 
-void bar_sort_add_selection(GtkWidget *bar)
+void bar_sort_add_selection(GtkWidget *bar, guint destination)
 {
-	if (!bar || !gtk_widget_is_visible(bar)) return;
+	if (!bar || !gtk_widget_is_visible(bar) || destination > 9) return;
 
 	auto *sd = static_cast<SortData *>(g_object_get_data(G_OBJECT(bar), "bar_sort_data"));
 	if (!sd) return;
 
-	g_autofree gchar *path = g_strdup(bookmark_list_get_selected_path(sd->bookmarks));
+	g_autofree gchar *path = g_strdup(destination ? bookmark_list_get_path_at_index(sd->bookmarks, destination - 1)
+	                                           : bookmark_list_get_selected_path(sd->bookmarks));
 	if (!path) return;
 
 	if (sd->mode == BarSort::MODE_FOLDER)
@@ -770,6 +771,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 			}
 	};
 	sd->bookmarks = bookmark_list_new(SORT_KEY_FOLDERS, bar_sort_bookmark_select);
+	bookmark_list_set_numbered(sd->bookmarks, TRUE);
 	bookmark_list_set_tooltip_func(sd->bookmarks, [](const gchar *path) -> std::string
 	{
 		g_autofree gchar *shortcut = action_accelerator_label("win.main-win-sort-add-selection");

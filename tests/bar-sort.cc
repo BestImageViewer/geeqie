@@ -10,8 +10,8 @@
 #include <glib/gstdio.h>
 
 #include "bar-sort.h"
-#include "collect.h"
 #include "collect-io.h"
+#include "collect.h"
 #include "filedata.h"
 #include "history-list.h"
 #include "layout.h"
@@ -197,6 +197,30 @@ protected:
 	std::vector<std::string> keys;
 	std::map<std::string, HistoryList> saved;
 };
+
+TEST_F(SortFolderDestinations, NumberedDestinationsFollowTheActiveList)
+{
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/shared-sort-destination");
+	EXPECT_EQ(bookmark_list_get_path_at_index(bookmarks, 1), nullptr);
+	gtk_check_button_set_active(folder_specific, TRUE);
+	EXPECT_EQ(bookmark_list_get_path_at_index(bookmarks, 0), nullptr);
+	bookmark_list_add(bookmarks, "Nature", "/tmp/nature-sort-destination");
+	bookmark_list_add(bookmarks, "People", "/tmp/people-sort-destination");
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/nature-sort-destination");
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 1), "/tmp/people-sort-destination");
+	navigate("Sports");
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/shared-sort-destination");
+	navigate("Downloads");
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 1), "/tmp/people-sort-destination");
+
+	// Missing destinations and indices must not replace a valid highlight.
+	gtk_widget_set_visible(bar, TRUE);
+	bookmark_list_set_selected_path(bookmarks, "/tmp/nature-sort-destination");
+	bar_sort_add_selection(bar, 2);
+	bar_sort_add_selection(bar, 9);
+	bar_sort_add_selection(bar, 10);
+	EXPECT_STREQ(bookmark_list_get_selected_path(bookmarks), "/tmp/nature-sort-destination");
+}
 
 TEST_F(SortFolderDestinations, NavigationSwitchesListsAndClearsPreviousDestination)
 {

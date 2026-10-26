@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <functional>
+#include <map>
+#include <string>
 #include <tuple>
 #include <utility>
 
@@ -12,14 +14,20 @@
 
 #include "accelerators.h"
 #include "actions.h"
+#include "bar-sort.h"
 #include "cache.h"
+#include "collect-io.h"
+#include "collect.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "history-list.h"
 #include "layout-image.h"
+#include "layout-util.h"
 #include "layout.h"
 #include "options.h"
 #include "thumb-standard.h"
 #include "trash.h"
+#include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-file.h"
@@ -413,6 +421,147 @@ TEST_P(RepeatedDelete, RebuildThumbnailsOnlyInvalidatesSelectedFiles)
 	ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.view-file-rebuild-thumbnails", nullptr));
 	EXPECT_EQ(third->thumb_pixbuf, nullptr);
 }
+
+GtkWidget *find_destination_list(GtkWidget *widget, GType type = GTK_TYPE_SCROLLED_WINDOW)
+{
+	if (G_TYPE_CHECK_INSTANCE_TYPE(widget, type)) return widget;
+	if (GTK_IS_DROP_DOWN(widget)) return nullptr;
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		{
+		if (auto *found = find_destination_list(child, type)) return found;
+		}
+	return nullptr;
+}
+
+class SortDestinationActions : public RepeatedDelete
+{
+protected:
+	void SetUp() override
+	{
+		RepeatedDelete::SetUp();
+		if (HasFatalFailure() || IsSkipped()) return;
+		for (const char *key : {"sort_manager", "sort_manager_selected_folder", "sort_manager_selected_collection", "sort_manager_collections", "sort_manager_external_collections", "collection_history"})
+			{
+			if (auto *history = history_list_find_by_key(key)) saved_history[key] = *history;
+			history_list_free_key(key);
+			}
+		history_changed = true;
+		destination = g_build_filename(directory, "destination", nullptr);
+		ASSERT_EQ(g_mkdir(destination, 0700), 0);
+		layout->options.bar_sort.mode = BarSort::MODE_FOLDER;
+		layout->options.bar_sort.action = std::get<1>(GetParam()) ? BarSort::MOVE : BarSort::COPY;
+		if (!layout->bar_sort) layout_bar_sort_toggle(layout);
+		ASSERT_NE(layout->bar_sort, nullptr);
+		gtk_widget_set_visible(layout->bar_sort, TRUE);
+		bookmarks = find_destination_list(layout->bar_sort);
+		ASSERT_NE(bookmarks, nullptr);
+		bookmark_list_set_no_defaults(bookmarks, TRUE);
+		history_list_free_key("sort_manager");
+		bookmark_list_add(bookmarks, "Missing", "/does/not/exist/geeqie-sort-destination");
+		bookmark_list_add(bookmarks, "Destination", destination);
+		gtk_window_present(GTK_WINDOW(layout->window));
+		gtk_window_set_focus(GTK_WINDOW(layout->window), nullptr);
+	}
+
+	void TearDown() override
+	{
+		collect_manager_flush();
+		if (destination)
+			{
+			g_autofree gchar *output = g_build_filename(destination, "0.jpg", nullptr);
+			g_unlink(output);
+			g_autofree gchar *collection = g_build_filename(destination, "target.gqv", nullptr);
+			g_unlink(collection);
+			g_rmdir(destination);
+			g_clear_pointer(&destination, g_free);
+			}
+		RepeatedDelete::TearDown();
+		if (history_changed)
+			{
+			for (const char *key : {"sort_manager", "sort_manager_selected_folder", "sort_manager_selected_collection", "sort_manager_collections", "sort_manager_external_collections", "collection_history"}) history_list_free_key(key);
+			for (const auto &[key, history] : saved_history)
+				for (auto item = history.crbegin(); item != history.crend(); ++item) history_list_add_to_key(key.c_str(), item->c_str(), 0);
+			}
+	}
+
+	GtkWidget *bookmarks = nullptr;
+	gchar *destination = nullptr;
+	bool history_changed = false;
+	std::map<std::string, HistoryList> saved_history;
+};
+
+TEST_P(SortDestinationActions, NumberedActionUsesSelectedCopyOrMoveOperation)
+{
+	for (guint i = 1; i <= 9; ++i)
+		{
+		g_autofree gchar *name = g_strdup_printf("main-win-sort-destination-%u", i);
+		EXPECT_NE(g_action_map_lookup_action(G_ACTION_MAP(layout->window), name), nullptr);
+		}
+	g_autofree gchar *source = g_build_filename(directory, "0.jpg", nullptr);
+	g_autofree gchar *output = g_build_filename(destination, "0.jpg", nullptr);
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "main-win-sort-destination-2", nullptr);
+	const gint64 deadline = g_get_monotonic_time() + (5 * G_TIME_SPAN_SECOND);
+	while (!g_file_test(output, G_FILE_TEST_EXISTS) && g_get_monotonic_time() < deadline)
+		{
+		while (g_main_context_iteration(nullptr, FALSE)) {}
+		g_usleep(1000);
+		}
+	EXPECT_TRUE(g_file_test(output, G_FILE_TEST_EXISTS));
+	EXPECT_EQ(g_file_test(source, G_FILE_TEST_EXISTS), !std::get<1>(GetParam()));
+	EXPECT_STREQ(bookmark_list_get_selected_path(bookmarks), destination);
+}
+
+TEST_P(SortDestinationActions, HiddenMissingAndEditingDestinationsDoNothing)
+{
+	g_autofree gchar *output = g_build_filename(destination, "0.jpg", nullptr);
+	bookmark_list_set_selected_path(bookmarks, destination);
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "main-win-sort-destination-1", nullptr);
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "main-win-sort-destination-9", nullptr);
+	EXPECT_STREQ(bookmark_list_get_selected_path(bookmarks), destination);
+	gtk_widget_set_visible(layout->bar_sort, FALSE);
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "main-win-sort-destination-2", nullptr);
+	gtk_widget_set_visible(layout->bar_sort, TRUE);
+	gtk_window_set_focus(GTK_WINDOW(layout->window), layout->path_entry);
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "main-win-sort-destination-2", nullptr);
+	gtk_window_set_focus(GTK_WINDOW(layout->window), nullptr);
+	EXPECT_FALSE(g_file_test(output, G_FILE_TEST_EXISTS));
+}
+
+TEST_P(SortDestinationActions, CollectionActionUsesCurrentImageAndKeepsTheSource)
+{
+	g_autofree gchar *path = g_build_filename(destination, "target.gqv", nullptr);
+	ASSERT_TRUE(bar_sort_collection_add(path));
+	auto *mode = GTK_DROP_DOWN(find_destination_list(layout->bar_sort, GTK_TYPE_DROP_DOWN));
+	ASSERT_NE(mode, nullptr);
+	gtk_drop_down_set_selected(mode, BarSort::MODE_COLLECTION);
+	// Isolate the test collection from any installed sample collections.
+	history_list_free_key("sort_manager_collections");
+	bookmark_list_add(bookmarks, "Target", path);
+	auto *image = layout_image_get_fd(layout);
+	ASSERT_NE(image, nullptr);
+	const std::string source = image->path;
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "main-win-sort-destination-1", nullptr);
+	collect_manager_flush();
+	g_autoptr(CollectionData) collection = collection_new(path);
+	ASSERT_TRUE(collection_load(collection, path, COLLECTION_LOAD_NONE));
+	ASSERT_EQ(g_list_length(collection->list), 1U);
+	auto *item = static_cast<CollectInfo *>(collection->list->data);
+	EXPECT_EQ(source, item->fd->path);
+	EXPECT_TRUE(g_file_test(source.c_str(), G_FILE_TEST_EXISTS));
+	EXPECT_STREQ(bookmark_list_get_selected_path(bookmarks), path);
+
+	// Release the loaded collection so the manager writes the next addition to disk.
+	g_clear_pointer(&collection, collection_unref);
+	// The existing action continues to process the highlighted destination.
+	layout_image_set_index(layout, 1);
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "main-win-sort-add-selection", nullptr);
+	collect_manager_flush();
+	g_autoptr(CollectionData) updated = collection_new(path);
+	ASSERT_TRUE(collection_load(updated, path, COLLECTION_LOAD_NONE));
+	EXPECT_EQ(g_list_length(updated->list), 2U);
+}
+
+INSTANTIATE_TEST_SUITE_P(FileViews, SortDestinationActions, testing::Combine(testing::Values(FILEVIEW_LIST, FILEVIEW_ICON), testing::Bool()));
 
 TEST_P(RepeatedDelete, SelectedImageNavigationPreservesOrderAndWrapping)
 {

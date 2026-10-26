@@ -85,6 +85,7 @@ struct BookMarkData
 	gboolean editable;
 	gboolean only_directories;
 	gboolean select_only_on_ctrl;
+	gboolean numbered;
 
 	GtkWidget *active_button;
 };
@@ -537,10 +538,11 @@ static gboolean bookmark_tooltip_cb(GtkWidget *button, gint, gint, gboolean,
 	return TRUE;
 }
 
-static void bookmark_add_button(BookMarkData *bm, const gchar *text)
+static void bookmark_add_button(BookMarkData *bm, const gchar *text, guint &position)
 {
 	BookButtonData *b = bookmark_from_string(text);
 	if (!b) return;
+	++position;
 
 	if (b->name == ".")
 		{
@@ -602,6 +604,11 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 		}
 	gtk_box_append(GTK_BOX(box), image);
 
+	if (bm->numbered && position <= 9)
+		{
+		g_autofree gchar *number = g_strdup_printf("%u", position);
+		pref_label_new(box, number);
+		}
 	pref_label_new(box, b->name.c_str());
 
 	g_signal_connect(G_OBJECT(button), "clicked",
@@ -673,9 +680,10 @@ static void bookmark_populate(BookMarkData *bm)
 	const HistoryList *history_list = history_list_find_by_key(bm->key.c_str());
 	if (!history_list) return;
 
+	guint position = 0;
 	for (auto work = history_list->crbegin(); work != history_list->crend(); ++work)
 		{
-		bookmark_add_button(bm, work->c_str());
+		bookmark_add_button(bm, work->c_str(), position);
 		}
 }
 
@@ -785,6 +793,29 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	bookmark_widget_list.push_back(bm);
 
 	return scrolled;
+}
+
+void bookmark_list_set_numbered(GtkWidget *list, gboolean numbered)
+{
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
+	if (!bm || bm->numbered == numbered) return;
+	bm->numbered = numbered;
+	bookmark_populate(bm);
+}
+
+const gchar *bookmark_list_get_path_at_index(GtkWidget *list, guint index)
+{
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
+	if (!bm) return nullptr;
+	auto *child = gtk_widget_get_first_child(bm->box);
+	while (child && index > 0)
+		{
+		child = gtk_widget_get_next_sibling(child);
+		--index;
+		}
+	if (!child) return nullptr;
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(child), "bookbuttondata"));
+	return b ? b->path.c_str() : nullptr;
 }
 
 void bookmark_list_set_key(GtkWidget *list, const gchar *key)
