@@ -79,7 +79,7 @@
         <para>
           <guilabel>Create sidecar files named image.ext.xmp (as opposed to image.xmp)</guilabel>
           <para />
-          If checked, new sidecar files will use image.ext.xmp naming scheme. This scheme is used by Darktable.
+          If checked, new sidecar files will use the image.ext.xmp naming scheme. This scheme is used by Darktable. Each image has its own sidecar: for example, <filename>photo.jpg.xmp</filename> belongs to <filename>photo.jpg</filename>, and <filename>photo.cr2.xmp</filename> belongs to <filename>photo.cr2</filename>. Grouping the images or changing the group leader does not change these associations. When this option is unchecked, images with the same basename use the shared <filename>photo.xmp</filename> sidecar.
         </para>
       </listitem>
     </itemizedlist>

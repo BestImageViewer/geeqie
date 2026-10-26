@@ -1282,26 +1282,19 @@ gchar *FileData::file_data_get_sidecar_path(FileData *fd, gboolean existing_only
 	if (!file_data_can_write_sidecar(fd)) return nullptr;
 
 	work = fd->parent ? fd->parent->sidecar_files : fd->sidecar_files;
-	g_autofree gchar *extended_extension = g_strconcat(fd->parent ? fd->parent->extension : fd->extension, ".xmp", NULL);
+	const auto basename_length = fd->extension - fd->path;
+	g_autofree gchar *suffix = g_strconcat(options->metadata.sidecar_extended_name ? fd->extension : "", ".xmp", nullptr);
 	while (work)
 		{
-		auto sfd = static_cast<FileData *>(work->data);
+		auto *sfd = static_cast<FileData *>(work->data);
 		work = work->next;
-		if (options->metadata.sidecar_extended_name)
+		// Match the filename: a grouped sidecar's extension can be just ".xmp".
+		// Each image owns its extended-name sidecar, regardless of the group leader.
+		if (strncmp(sfd->path, fd->path, basename_length) == 0 &&
+		    g_ascii_strcasecmp(sfd->path + basename_length, suffix) == 0)
 			{
-			if (g_ascii_strcasecmp(sfd->extension, extended_extension) == 0)
-				{
-				sidecar_path = g_strdup(sfd->path);
-				break;
-				}
-			}
-		else
-			{
-			if (g_ascii_strcasecmp(sfd->extension, ".xmp") == 0)
-				{
-				sidecar_path = g_strdup(sfd->path);
-				break;
-				}
+			sidecar_path = g_strdup(sfd->path);
+			break;
 			}
 		}
 
