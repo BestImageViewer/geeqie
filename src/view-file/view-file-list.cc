@@ -21,6 +21,7 @@
 
 #include "view-file-list.h"
 
+#include <algorithm>
 #include <cstring>
 #include <unordered_map>
 #include <vector>
@@ -45,6 +46,7 @@
 #include "ui-menu.h"
 #include "ui-tree-edit.h"
 #include "utilops.h"
+#include "view-file-thumbnail.h"
 #include "view-file.h"
 
 /* Index to tree store */
@@ -802,6 +804,7 @@ static void vflist_expand_cb(GtkTreeView *listview, GtkTreeIter *iter, GtkTreePa
 			gtk_tree_view_collapse_row(other, path);
 			}
 		VFLIST(vf)->syncing_expansion = FALSE;
+		vf_thumbnail_model_changed(vf);
 		}
 }
 
@@ -1182,60 +1185,53 @@ void vflist_set_thumb_fd(ViewFile *vf, FileData *fd)
 	gtk_tree_store_set(store, &iter, FILE_COLUMN_THUMB, thumb, -1);
 }
 
-FileData *vflist_thumb_next_fd(ViewFile *vf)
+static std::vector<FileData *> vflist_thumb_walk(ViewFile *vf, GtkTreePath *start, GtkTreePath *end)
 {
-	FileData *fd = nullptr;
-
-	/* first check the visible files */
-
-	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
+	std::vector<FileData *> files;
+	auto *tree = GTK_TREE_VIEW(vf->listview);
+	auto *model = gtk_tree_view_get_model(tree);
+	g_autoptr(GtkTreePath) path = start ? gtk_tree_path_copy(start) : gtk_tree_path_new_first();
+	GtkTreeIter iter;
+	while ((!end || gtk_tree_path_compare(path, end) <= 0) && gtk_tree_model_get_iter(model, &iter, path))
 		{
-		GtkTreeModel *store;
-		GtkTreeIter iter;
-		gboolean valid = TRUE;
-
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		gtk_tree_model_get_iter(store, &iter, tpath);
-
-		while (!fd && valid && tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE))
+		FileData *fd = nullptr;
+		gtk_tree_model_get(model, &iter, FILE_COLUMN_POINTER, &fd, -1);
+		if (fd) files.push_back(fd);
+		if (gtk_tree_model_iter_has_child(model, &iter) && gtk_tree_view_row_expanded(tree, path))
+			gtk_tree_path_down(path);
+		else
 			{
-			FileData *nfd;
-
-			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &nfd, -1);
-
-			if (!nfd->thumb_pixbuf) fd = nfd;
-
-			valid = gtk_tree_model_iter_next(store, &iter);
-			}
-		}
-
-	/* then find first undone */
-
-	if (!fd)
-		{
-		GList *work = vf->list;
-		while (work && !fd)
-			{
-			auto fd_p = static_cast<FileData *>(work->data);
-			if (!fd_p->thumb_pixbuf)
-				fd = fd_p;
-			else
+			gtk_tree_path_next(path);
+			while (!gtk_tree_model_get_iter(model, &iter, path) && gtk_tree_path_get_depth(path) > 1)
 				{
-				GList *work2 = fd_p->sidecar_files;
-
-				while (work2 && !fd)
-					{
-					fd_p = static_cast<FileData *>(work2->data);
-					if (!fd_p->thumb_pixbuf) fd = fd_p;
-					work2 = work2->next;
-					}
+				gtk_tree_path_up(path);
+				gtk_tree_path_next(path);
 				}
-			work = work->next;
 			}
 		}
+	return files;
+}
 
-	return fd;
+std::vector<FileData *> vflist_thumb_rows(ViewFile *vf)
+{
+	return vflist_thumb_walk(vf, nullptr, nullptr);
+}
+
+std::vector<FileData *> vflist_thumb_visible(ViewFile *vf)
+{
+	std::vector<FileData *> files;
+	for (auto *tree : {vf->listview, VFLIST(vf)->details_view})
+		{
+		if (!gtk_widget_get_mapped(tree)) continue;
+		g_autoptr(GtkTreePath) first = nullptr;
+		g_autoptr(GtkTreePath) last = nullptr;
+		if (!gtk_tree_view_get_visible_range(GTK_TREE_VIEW(tree), &first, &last)) continue;
+		for (auto *fd : vflist_thumb_walk(vf, first, last))
+			{
+			if (std::find(files.begin(), files.end(), fd) == files.end()) files.push_back(fd);
+			}
+		}
+	return files;
 }
 
 void vflist_set_star_fd(ViewFile *vf, FileData *fd)
@@ -1815,6 +1811,7 @@ static void vflist_populate_view(ViewFile *vf, gboolean force)
 		{
 		vflist_store_clear(vf, FALSE);
 		vf_send_update(vf);
+		vf_thumb_update(vf);
 		return;
 		}
 

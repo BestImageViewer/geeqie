@@ -33,6 +33,7 @@
 #include "view-file.h"
 #include "view-file/view-file-icon.h"
 #include "view-file/view-file-list.h"
+#include "view-file/view-file-thumbnail.h"
 
 namespace
 {
@@ -953,6 +954,215 @@ protected:
 	gboolean saved_animations = TRUE;
 	gchar *directory = nullptr;
 };
+
+class ThumbnailWorkingSet : public RevealFile
+{
+protected:
+	void SetUp() override
+	{
+		RevealFile::SetUp();
+		if (!vf) return;
+		saved_budget = options->thumbnails.memory_cache_size;
+		options->thumbnails.memory_cache_size = 1;
+		if (vf->type == FILEVIEW_LIST) vf_thumb_set(vf, TRUE);
+		vf_refresh(vf);
+		settle();
+	}
+
+	void TearDown() override
+	{
+		if (extra_window) gtk_window_destroy(GTK_WINDOW(extra_window));
+		sidecar_ext_parse(options->sidecar.ext);
+		if (directory)
+			{
+			g_autofree gchar *sidecar = g_build_filename(directory, "075a.xmp", nullptr);
+			g_remove(sidecar);
+			g_autofree gchar *image = g_build_filename(directory, "075a.svg", nullptr);
+			g_remove(image);
+			g_autofree gchar *empty = g_build_filename(directory, "empty", nullptr);
+			g_rmdir(empty);
+			}
+		if (vf) options->thumbnails.memory_cache_size = saved_budget;
+		RevealFile::TearDown();
+	}
+
+	gint saved_budget = 0;
+	GtkWidget *extra_window = nullptr;
+};
+
+TEST_P(ThumbnailWorkingSet, LoadsOnlyNearbyFilesAndResumesAfterScrolling)
+{
+	auto *target = vf_index_get_data(vf, 120);
+	vf_scroll_to_file(vf, target);
+	settle();
+	vf_thumb_stop(vf);
+	for (GList *work = vf->list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		g_clear_object(&fd->thumb_pixbuf);
+		vf_set_thumb_fd(vf, fd);
+		}
+	vf_thumb_update(vf);
+	settle();
+	ASSERT_NE(target->thumb_pixbuf, nullptr);
+	EXPECT_EQ(vf_index_get_data(vf, 0)->thumb_pixbuf, nullptr);
+	EXPECT_FALSE(vf->thumbs_running);
+	const auto visible = vf->type == FILEVIEW_ICON ? vficon_thumb_visible(vf) : vflist_thumb_visible(vf);
+	ASSERT_FALSE(visible.empty());
+	for (auto *fd : visible) EXPECT_NE(fd->thumb_pixbuf, nullptr);
+	vf_scroll_to_file(vf, vf_index_get_data(vf, 0));
+	settle();
+	EXPECT_NE(vf_index_get_data(vf, 0)->thumb_pixbuf, nullptr);
+}
+
+TEST_P(ThumbnailWorkingSet, ChangingToEmptyFolderDiscardsTheOldQueue)
+{
+	g_autofree gchar *empty = g_build_filename(directory, "empty", nullptr);
+	ASSERT_EQ(g_mkdir(empty, 0700), 0);
+	vf_scroll_to_file(vf, vf_index_get_data(vf, 120));
+	vf_thumb_update(vf);
+	auto empty_fd = FileData::new_simple(empty);
+	ASSERT_TRUE(vf_set_fd(vf, empty_fd));
+	settle();
+	EXPECT_EQ(vf_count(vf), 0U);
+	EXPECT_EQ(vf_thumbnail_next(vf), nullptr);
+	EXPECT_FALSE(vf->thumbs_running);
+	auto original = FileData::new_simple(directory);
+	ASSERT_TRUE(vf_set_fd(vf, original));
+	settle();
+	EXPECT_NE(vf_index_get_data(vf, 0)->thumb_pixbuf, nullptr);
+}
+
+TEST_P(ThumbnailWorkingSet, EvictionDropsModelReferencesAndReloadsOnRevisit)
+{
+	auto *old = vf_index_get_data(vf, 80);
+	g_clear_object(&old->thumb_pixbuf);
+	old->thumb_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 512, 512);
+	gdk_pixbuf_fill(old->thumb_pixbuf, 0xff0000ff);
+	GdkPixbuf *retained = old->thumb_pixbuf;
+	g_object_add_weak_pointer(G_OBJECT(retained), reinterpret_cast<gpointer *>(&retained));
+	vf_set_thumb_fd(vf, old);
+	vf_thumbnail_loaded(vf, old);
+	for (int i = 81; i < 90; ++i)
+		{
+		auto *fd = vf_index_get_data(vf, i);
+		g_clear_object(&fd->thumb_pixbuf);
+		fd->thumb_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 512, 512);
+		gdk_pixbuf_fill(fd->thumb_pixbuf, 0x00ff00ff);
+		vf_set_thumb_fd(vf, fd);
+		vf_thumbnail_loaded(vf, fd);
+		}
+	EXPECT_EQ(old->thumb_pixbuf, nullptr);
+	EXPECT_EQ(retained, nullptr);
+	if (retained) g_object_remove_weak_pointer(G_OBJECT(retained), reinterpret_cast<gpointer *>(&retained));
+	if (vf->type == FILEVIEW_LIST)
+		{
+		auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+		GtkTreeIter iter;
+		ASSERT_TRUE(gtk_tree_model_iter_nth_child(model, &iter, nullptr, 80));
+		g_autoptr(GdkPixbuf) model_thumbnail = nullptr;
+		gtk_tree_model_get(model, &iter, 2, &model_thumbnail, -1);
+		EXPECT_EQ(model_thumbnail, nullptr);
+		}
+	EXPECT_LE(vf_thumbnail_resident_bytes(), 1024U * 1024U);
+	const auto visible = vf->type == FILEVIEW_ICON ? vficon_thumb_visible(vf) : vflist_thumb_visible(vf);
+	for (auto *fd : visible) EXPECT_NE(fd->thumb_pixbuf, nullptr);
+	vf_scroll_to_file(vf, old);
+	settle();
+	EXPECT_NE(old->thumb_pixbuf, nullptr);
+}
+
+TEST_P(ThumbnailWorkingSet, RefreshAndDeletionWhileLoadingKeepQueueValid)
+{
+	auto target = FileDataRef(vf_index_get_data(vf, 120));
+	vf_scroll_to_file(vf, target);
+	vf_thumb_update(vf);
+	ASSERT_EQ(g_remove(target->path), 0);
+	vf_refresh(vf);
+	settle();
+	EXPECT_EQ(vf_index_by_fd(vf, target), -1);
+	EXPECT_FALSE(vf->thumbs_running);
+	vf_scroll_to_file(vf, vf_index_get_data(vf, 0));
+	settle();
+	EXPECT_NE(vf_index_get_data(vf, 0)->thumb_pixbuf, nullptr);
+}
+
+TEST_P(ThumbnailWorkingSet, SharedBudgetProtectsVisibleThumbnailsInBothWindows)
+{
+	auto directory_fd = FileData::new_simple(directory);
+	auto *other = vf_new(vf->type, directory_fd);
+	if (other->type == FILEVIEW_LIST) vf_thumb_set(other, TRUE);
+	vf_refresh(other);
+	extra_window = gtk_window_new();
+	gtk_window_set_child(GTK_WINDOW(extra_window), other->widget);
+	gtk_window_set_default_size(GTK_WINDOW(extra_window), 600, 300);
+	gtk_window_present(GTK_WINDOW(extra_window));
+	settle();
+	vf_scroll_to_file(other, vf_index_get_data(other, 120));
+	settle();
+	const auto first_visible = vf->type == FILEVIEW_ICON ? vficon_thumb_visible(vf) : vflist_thumb_visible(vf);
+	const auto second_visible = other->type == FILEVIEW_ICON ? vficon_thumb_visible(other) : vflist_thumb_visible(other);
+	ASSERT_FALSE(first_visible.empty());
+	ASSERT_FALSE(second_visible.empty());
+	for (auto *fd : {first_visible.front(), second_visible.front()})
+		{
+		g_clear_object(&fd->thumb_pixbuf);
+		fd->thumb_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 512, 512);
+		gdk_pixbuf_fill(fd->thumb_pixbuf, 0xff0000ff);
+		vf_set_thumb_fd(vf, fd);
+		vf_set_thumb_fd(other, fd);
+		vf_thumbnail_loaded(vf, fd);
+		}
+	EXPECT_NE(first_visible.front()->thumb_pixbuf, nullptr);
+	EXPECT_NE(second_visible.front()->thumb_pixbuf, nullptr);
+	EXPECT_GE(vf_thumbnail_resident_bytes(), 2U * 1024U * 1024U);
+	gtk_window_destroy(GTK_WINDOW(extra_window));
+	extra_window = nullptr;
+	vf_thumbnail_schedule(vf);
+	settle();
+	EXPECT_NE(first_visible.front()->thumb_pixbuf, nullptr);
+}
+
+TEST_P(ThumbnailWorkingSet, CollectionUsesTheSameBoundedLoading)
+{
+	g_autoptr(CollectionData) collection = collection_new(nullptr);
+	for (GList *work = vf->list; work; work = work->next)
+		ASSERT_TRUE(collection_add(collection, static_cast<FileData *>(work->data), FALSE));
+	ASSERT_TRUE(vf_set_collection(vf, collection));
+	vf_scroll_to_file(vf, vf_index_get_data(vf, 120));
+	settle();
+	EXPECT_NE(vf_index_get_data(vf, 120)->thumb_pixbuf, nullptr);
+	EXPECT_EQ(vf_index_get_data(vf, 60)->thumb_pixbuf, nullptr);
+	EXPECT_FALSE(vf->thumbs_running);
+}
+
+TEST_P(ThumbnailWorkingSet, ExpandedGroupsLoadVisibleSidecars)
+{
+	if (vf->type != FILEVIEW_LIST) GTEST_SKIP() << "Requires list view";
+	g_autofree gchar *sidecar_path = g_build_filename(directory, "075a.xmp", nullptr);
+	g_autofree gchar *image_path = g_build_filename(directory, "075a.svg", nullptr);
+	ASSERT_TRUE(g_file_set_contents(image_path, "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'/>", -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(sidecar_path, "metadata", -1, nullptr));
+	sidecar_ext_parse(".svg;.xmp");
+	auto parent = FileData::new_group(image_path);
+	vf_refresh(vf);
+	ASSERT_NE(parent->sidecar_files, nullptr);
+	auto *sidecar = static_cast<FileData *>(parent->sidecar_files->data);
+	gtk_tree_view_expand_all(GTK_TREE_VIEW(vf->listview));
+	settle();
+	vf_scroll_to_file(vf, sidecar);
+	settle();
+	const auto rows = vflist_thumb_rows(vf);
+	EXPECT_NE(std::find(rows.begin(), rows.end(), sidecar), rows.end());
+	const auto visible = vflist_thumb_visible(vf);
+	EXPECT_NE(std::find(visible.begin(), visible.end(), sidecar), visible.end());
+	EXPECT_NE(sidecar->thumb_pixbuf, nullptr);
+	EXPECT_FALSE(vf->thumbs_running);
+}
+
+INSTANTIATE_TEST_SUITE_P(FileViews, ThumbnailWorkingSet,
+                        testing::Values(std::make_tuple(FILEVIEW_LIST, false),
+                                        std::make_tuple(FILEVIEW_ICON, false)));
 
 TEST_P(RevealFile, NavigationAfterDragMoveReplacesSelection)
 {

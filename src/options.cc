@@ -211,6 +211,7 @@ ConfOptions *conf_options_new()
 	options->thumbnails.cache_into_dirs = FALSE;
 	options->thumbnails.enable_caching = TRUE;
 	options->thumbnails.size = { DEFAULT_THUMB_WIDTH, DEFAULT_THUMB_HEIGHT };
+	options->thumbnails.memory_cache_size = 64;
 	options->thumbnails.quality = GDK_INTERP_TILES;
 	options->thumbnails.spec_standard = TRUE;
 	options->thumbnails.use_exif = FALSE;

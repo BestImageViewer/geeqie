@@ -515,6 +515,7 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 
 	/* Thumbnails Options */
 	WRITE_NL(); WRITE_INT_FULL("thumbnails.max_width", options->thumbnails.size.width);
+	WRITE_NL(); WRITE_INT(*options, thumbnails.memory_cache_size);
 	WRITE_NL(); WRITE_INT_FULL("thumbnails.max_height", options->thumbnails.size.height);
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.enable_caching);
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.cache_into_dirs);
@@ -978,6 +979,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 
 		/* Thumbnails options */
 		if (READ_INT_CLAMP_FULL("thumbnails.max_width", options->thumbnails.size.width, 16, 512)) continue;
+		if (READ_INT_CLAMP(*options, thumbnails.memory_cache_size, 1, 4096)) continue;
 		if (READ_INT_CLAMP_FULL("thumbnails.max_height", options->thumbnails.size.height, 16, 512)) continue;
 
 		if (READ_BOOL(*options, thumbnails.enable_caching)) continue;

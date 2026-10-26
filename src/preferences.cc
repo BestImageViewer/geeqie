@@ -486,6 +486,7 @@ static void config_window_apply(const ConfOptions *c_options)
 		refresh = TRUE;
 		}
 	gchar *cache_dir = options->thumbnails.cache_dir;
+	if (options->thumbnails.memory_cache_size != c_options->thumbnails.memory_cache_size) refresh = TRUE;
 	options->thumbnails = c_options->thumbnails;
 	options->thumbnails.cache_dir = cache_dir;
 	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(thumbnail_cache_default_button)))
@@ -2033,6 +2034,9 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	table = pref_table_new(group, 2, 2, FALSE, FALSE);
 	add_thumb_size_menu(table, 0, 0, _("Size:"), options->thumbnails.size, &c_options->thumbnails.size);
 	add_quality_menu(table, 0, 1, _("Quality:"), options->thumbnails.quality, &c_options->thumbnails.quality);
+	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	pref_spin_new_int(hbox, _("Thumbnail memory (MiB):"), nullptr, 1, 4096, 1,
+	                  options->thumbnails.memory_cache_size, &c_options->thumbnails.memory_cache_size);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Custom size: "));

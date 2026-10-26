@@ -44,6 +44,7 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "utilops.h"
+#include "view-file-thumbnail.h"
 #include "view-file.h"
 
 namespace
@@ -1249,26 +1250,30 @@ void vficon_read_metadata_progress_count(const GList *list, gint &count, gint &d
 
 void vficon_set_thumb_fd(ViewFile *vf, FileData *fd)
 {
-	const gint position = g_list_index(vf->list, fd);
+	const gint indexed = vf_thumbnail_position(vf, fd);
+	const gint position = indexed >= 0 ? indexed : g_list_index(vf->list, fd);
 	if (position < 0 || static_cast<guint>(position) >= g_list_model_get_n_items(G_LIST_MODEL(VFICON(vf)->store))) return;
 	auto *item = static_cast<ViewFileIconItem *>(g_list_model_get_item(G_LIST_MODEL(VFICON(vf)->store), position));
 	g_signal_emit(item, view_file_icon_item_signals[VIEW_FILE_ICON_ITEM_CHANGED], 0);
 	g_object_unref(item);
 }
 
-/* Returns the next fd without a loaded pixbuf, so the thumb-loader can load the pixbuf for it. */
-FileData *vficon_thumb_next_fd(ViewFile *vf)
+std::vector<FileData *> vficon_thumb_visible(ViewFile *vf)
 {
-	for (GList *work = vf->list; work; work = work->next)
+	std::vector<FileData *> files;
+	const int height = gtk_widget_get_height(vf->scrolled);
+	const int width = gtk_widget_get_width(vf->scrolled);
+	for (auto *child = gtk_widget_get_first_child(vf->listview); child; child = gtk_widget_get_next_sibling(child))
 		{
-		auto fd = static_cast<FileData *>(work->data);
-
-		// Note: This implementation differs from view-file-list.cc because sidecar files are not
-		// distinct list elements here, as they are in the list view.
-		if (!fd->thumb_pixbuf) return fd;
+		auto *fd = vficon_widget_file(child);
+		if (!fd || !gtk_widget_get_mapped(child)) continue;
+		graphene_rect_t bounds;
+		if (gtk_widget_compute_bounds(child, vf->scrolled, &bounds) &&
+		    bounds.origin.y < height && bounds.origin.y + bounds.size.height > 0 &&
+		    bounds.origin.x < width && bounds.origin.x + bounds.size.width > 0)
+			files.push_back(fd);
 		}
-
-	return nullptr;
+	return files;
 }
 
 void vficon_set_star_fd(ViewFile *vf, FileData *fd)
@@ -1634,6 +1639,7 @@ static void vficon_factory_bind(GtkSignalListItemFactory *, GtkListItem *list_it
 	const gulong handler_id = g_signal_connect(item, "changed", G_CALLBACK(vficon_item_update), child);
 	g_object_set_data(G_OBJECT(list_item), "view-file-changed-handler", GSIZE_TO_POINTER(handler_id));
 	vficon_item_update(item, child);
+	vf_thumbnail_schedule(static_cast<ViewFile *>(g_object_get_data(G_OBJECT(child), VIEW_FILE_ICON_DATA_KEY)));
 }
 
 static void vficon_factory_unbind(GtkSignalListItemFactory *, GtkListItem *list_item, gpointer)
@@ -1642,7 +1648,10 @@ static void vficon_factory_unbind(GtkSignalListItemFactory *, GtkListItem *list_
 	const gulong handler_id = GPOINTER_TO_SIZE(g_object_get_data(G_OBJECT(list_item), "view-file-changed-handler"));
 	if (item && handler_id) g_signal_handler_disconnect(item, handler_id);
 	g_object_set_data(G_OBJECT(list_item), "view-file-changed-handler", nullptr);
-	g_object_set_data(G_OBJECT(gtk_list_item_get_child(list_item)), "view-file-fd", nullptr);
+	GtkWidget *child = gtk_list_item_get_child(list_item);
+	g_object_set_data(G_OBJECT(child), "view-file-fd", nullptr);
+	auto *picture = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(child), "view-file-picture"));
+	gtk_picture_set_paintable(GTK_PICTURE(picture), nullptr);
 }
 
 /*

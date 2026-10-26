@@ -32,6 +32,7 @@
 
 struct LayoutWindow;
 struct ThumbLoader;
+struct ViewFileThumbnails;
 
 enum FileViewType : guint {
 	FILEVIEW_LIST,
@@ -96,6 +97,7 @@ struct ViewFile
 	gboolean thumbs_running;
 	ThumbLoader *thumbs_loader;
 	FileData *thumbs_filedata;
+	ViewFileThumbnails *thumbnails;
 
 	/* marks */
 	gboolean marks_enabled;
@@ -198,6 +200,8 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data);
 void vf_thumb_update(ViewFile *vf);
 void vf_thumb_cleanup(ViewFile *vf);
 void vf_thumb_stop(ViewFile *vf);
+void vf_set_thumb_fd(ViewFile *vf, FileData *fd);
+void vf_thumb_continue(ViewFile *vf);
 void vf_read_metadata_in_idle(ViewFile *vf);
 void vf_file_filter_set(ViewFile *vf, gboolean enable);
 GRegex *vf_file_filter_get_filter(ViewFile *vf);

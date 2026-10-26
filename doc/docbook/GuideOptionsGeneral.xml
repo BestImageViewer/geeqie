@@ -10,6 +10,8 @@
   </section>
   <section id="PreferencesThumbnails">
     <title>Thumbnails</title>
+    <para>The files pane loads visible thumbnails first, then prefetches approximately one screen of thumbnails on either side. Loading resumes as you scroll or resize the pane; it does not generate thumbnails for the entire folder. This applies to both list and icon views, including collections and expanded file groups.</para>
+    <para><guilabel>Thumbnail memory (MiB)</guilabel> sets the memory budget for retained thumbnail pixels shared by all file panes. The default is 64 MiB. Older thumbnails are released and reloaded from the disk cache or source image when needed. Visible thumbnails and active loads are protected, so they can exceed the budget. This setting does not limit total application memory, image decoding buffers, display textures, or file-list metadata, and does not change the disk cache.</para>
     <variablelist>
       <varlistentry>
         <term>

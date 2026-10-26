@@ -210,6 +210,7 @@ struct ConfOptions
 	/* thumbnails */
 	struct {
 		GqSize size;
+		gint memory_cache_size; /**< Shared file-pane thumbnail budget in MiB. Visible thumbnails are protected. */
 		gboolean enable_caching;
 		gboolean cache_into_dirs;
 		gchar *cache_dir;

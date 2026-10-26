@@ -59,6 +59,7 @@
 #include "view-dir.h"
 #include "view-file/view-file-icon.h"
 #include "view-file/view-file-list.h"
+#include "view-file/view-file-thumbnail.h"
 #include "window.h"
 
 namespace
@@ -2047,6 +2048,7 @@ static void vf_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_marks_load_cancel(vf);
+	vf_thumbnail_destroy(vf);
 	file_data_list_free(vf->drag_selection);
 
 	if (vf->marks_filter_controller && vf->layout && vf->layout->window)
@@ -2796,6 +2798,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vf->scrolled), vf->listview);
 		}
 
+	vf_thumbnail_init(vf);
 	vf_dnd_init(vf);
 
 	if (dir_fd) vf_set_fd(vf, dir_fd);
@@ -2827,21 +2830,6 @@ void vf_thumb_set(ViewFile *vf, gboolean enable)
 
 static gboolean vf_thumb_next(ViewFile *vf);
 
-static gdouble vf_thumb_progress(ViewFile *vf)
-{
-	gint count = 0;
-	gint done = 0;
-
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: vflist_thumb_progress_count(vf->list, count, done); break;
-	case FILEVIEW_ICON: vficon_thumb_progress_count(vf->list, count, done); break;
-	}
-
-	DEBUG_1("thumb progress: %d of %d", done, count);
-	return static_cast<gdouble>(done) / count;
-}
-
 static gdouble vf_read_metadata_in_idle_progress(ViewFile *vf)
 {
 	gint count = 0;
@@ -2856,7 +2844,7 @@ static gdouble vf_read_metadata_in_idle_progress(ViewFile *vf)
 	return static_cast<gdouble>(done) / count;
 }
 
-static void vf_set_thumb_fd(ViewFile *vf, FileData *fd)
+void vf_set_thumb_fd(ViewFile *vf, FileData *fd)
 {
 	switch (vf->type)
 	{
@@ -2878,7 +2866,8 @@ static void vf_thumb_do(ViewFile *vf, FileData *fd)
 	if (!fd) return;
 
 	vf_set_thumb_fd(vf, fd);
-	vf_thumb_status(vf, vf_thumb_progress(vf), _("Loading thumbs…"));
+	vf_thumbnail_loaded(vf, fd);
+	vf_thumb_status(vf, vf_thumbnail_progress(vf), _("Loading thumbs…"));
 }
 
 void vf_thumb_cleanup(ViewFile *vf)
@@ -2891,6 +2880,7 @@ void vf_thumb_cleanup(ViewFile *vf)
 	vf->thumbs_loader = nullptr;
 
 	vf->thumbs_filedata = nullptr;
+	vf_thumbnail_trim();
 }
 
 void vf_thumb_stop(ViewFile *vf)
@@ -2926,15 +2916,11 @@ static gboolean vf_thumb_next(ViewFile *vf)
 
 	if (!gtk_widget_get_realized(vf->listview))
 		{
-		vf_thumb_status(vf, 0.0, nullptr);
+		vf_thumb_cleanup(vf);
 		return FALSE;
 		}
 
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: fd = vflist_thumb_next_fd(vf); break;
-	case FILEVIEW_ICON: fd = vficon_thumb_next_fd(vf); break;
-	}
+	fd = vf_thumbnail_next(vf);
 
 	if (!fd)
 		{
@@ -2981,9 +2967,17 @@ static void vf_thumb_reset_all(ViewFile *vf)
 		}
 }
 
+void vf_thumb_continue(ViewFile *vf)
+{
+	if (vf->thumbs_running || (vf->type == FILEVIEW_LIST && !VFLIST(vf)->thumbs_enabled)) return;
+	vf->thumbs_running = TRUE;
+	while (vf_thumb_next(vf));
+}
+
 void vf_thumb_update(ViewFile *vf)
 {
 	vf_thumb_stop(vf);
+	vf_thumbnail_rebuild(vf);
 
 	if (vf->type == FILEVIEW_LIST && !VFLIST(vf)->thumbs_enabled) return;
 
