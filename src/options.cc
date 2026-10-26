@@ -200,6 +200,7 @@ ConfOptions *conf_options_new()
 	options->show_predefined_keyword_tree = TRUE;
 	options->expand_menu_toolbar = FALSE;
 	options->hamburger_menu = FALSE;
+	options->color_scheme = COLOR_SCHEME_SYSTEM;
 
 	options->slideshow.delay = 50;
 	options->slideshow.random = FALSE;

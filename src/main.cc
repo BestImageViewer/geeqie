@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <optional>
 
 #include <config.h>
 
@@ -141,6 +142,7 @@ GOptionEntry command_line_options[] =
 	{ "cache-shared"              ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("clear or clean shared thumbnail cache")                                       , "clean|clear" },
 	{ "cache-thumbs"              ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("clear or clean thumbnail cache")                                              , "clear|clean" },
 	{ "close-window"              ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("close window")                                                                , nullptr },
+	{ "color-scheme"              ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("override the interface color scheme for this session") , "system|light|dark" },
 	{ "config-load"               ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("load configuration from FILE")                                                , "<FILE>" },
 #ifdef DEBUG
 /* G_OPTION_ARG_STRING and not G_OPTION_ARG_INT is required because of
@@ -546,6 +548,8 @@ void setup_sig_handler()
 	sigaction(SIGSEGV, &sigsegv_action, nullptr);
 }
 
+} // namespace
+
 GdkRGBA theme_background_color(GtkWidget *widget)
 {
 	GdkRGBA theme_color {};
@@ -565,6 +569,9 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 
 	return theme_color;
 }
+
+namespace
+{
 
 void set_theme_bg_color()
 {
@@ -586,16 +593,126 @@ void set_theme_bg_color()
 	view_window_colors_update();
 }
 
-void theme_change_cb(GSettings *iface, gchar, gpointer)
+std::optional<ColorScheme> session_color_scheme;
+GSettings *theme_interface = nullptr;
+gulong theme_settings_handler = 0;
+guint theme_background_idle = 0;
+bool applying_color_scheme = false;
+
+void queue_theme_background_update()
 {
-	g_autofree gchar *scheme = g_settings_get_string(iface, "color-scheme");
-	const gboolean prefer_dark_theme = (g_strcmp0(scheme, "prefer-dark") == 0);
-
-	GtkSettings *settings = gtk_settings_get_default();
-	g_object_set(settings, "gtk-application-prefer-dark-theme", prefer_dark_theme, nullptr);
-
-	set_theme_bg_color();
+	if (theme_background_idle) return;
+	theme_background_idle = g_idle_add_full(G_PRIORITY_LOW, [](gpointer) -> gboolean
+		{
+		theme_background_idle = 0;
+		set_theme_bg_color();
+		return G_SOURCE_REMOVE;
+		}, nullptr, nullptr);
 }
+
+} // namespace
+
+gboolean color_scheme_parse(const gchar *text, ColorScheme &scheme)
+{
+	if (g_strcmp0(text, "system") == 0) scheme = COLOR_SCHEME_SYSTEM;
+	else if (g_strcmp0(text, "light") == 0) scheme = COLOR_SCHEME_LIGHT;
+	else if (g_strcmp0(text, "dark") == 0) scheme = COLOR_SCHEME_DARK;
+	else return FALSE;
+	return TRUE;
+}
+
+void color_scheme_apply()
+{
+	if (!options || applying_color_scheme) return;
+	auto *settings = gtk_settings_get_default();
+	if (!settings) return;
+	applying_color_scheme = true;
+	const auto scheme = session_color_scheme.value_or(options->color_scheme);
+#if GTK_CHECK_VERSION(4, 20, 0)
+	// GTK propagates this setting to its theme CSS provider, including portal preferences.
+	if (scheme == COLOR_SCHEME_SYSTEM) gtk_settings_reset_property(settings, "gtk-interface-color-scheme");
+	else
+		{
+		gint current = 0;
+		g_object_get(settings, "gtk-interface-color-scheme", &current, nullptr);
+		const auto desired = scheme == COLOR_SCHEME_DARK ? GTK_INTERFACE_COLOR_SCHEME_DARK : GTK_INTERFACE_COLOR_SCHEME_LIGHT;
+		if (current != desired) g_object_set(settings, "gtk-interface-color-scheme", desired, nullptr);
+		}
+#else
+	// GTK 4.18 compatibility: newer GTK versions use the interface color scheme above.
+	if (scheme == COLOR_SCHEME_SYSTEM && !theme_interface)
+		{
+		gtk_settings_reset_property(settings, "gtk-application-prefer-dark-theme");
+		}
+	else
+		{
+		g_autofree gchar *desktop_scheme = theme_interface ? g_settings_get_string(theme_interface, "color-scheme") : nullptr;
+		const gboolean dark = scheme == COLOR_SCHEME_DARK || (scheme == COLOR_SCHEME_SYSTEM && g_strcmp0(desktop_scheme, "prefer-dark") == 0);
+		gboolean current = FALSE;
+		g_object_get(settings, "gtk-application-prefer-dark-theme", &current, nullptr);
+		if (current != dark) g_object_set(settings, "gtk-application-prefer-dark-theme", dark, nullptr);
+		}
+#endif
+	applying_color_scheme = false;
+	queue_theme_background_update();
+}
+
+void color_scheme_set_session(ColorScheme scheme)
+{
+	session_color_scheme = scheme;
+	color_scheme_apply();
+}
+
+void color_scheme_init()
+{
+	auto *settings = gtk_settings_get_default();
+	if (!settings || theme_settings_handler) return;
+#if !GTK_CHECK_VERSION(4, 20, 0)
+	auto *source = g_settings_schema_source_get_default();
+	g_autoptr(GSettingsSchema) schema = source ? g_settings_schema_source_lookup(source, "org.gnome.desktop.interface", TRUE) : nullptr;
+	if (schema && g_settings_schema_has_key(schema, "color-scheme"))
+		{
+		theme_interface = g_settings_new_full(schema, nullptr, nullptr);
+		g_signal_connect(theme_interface, "changed::color-scheme", G_CALLBACK(+[](GSettings *, const gchar *, gpointer)
+			{
+			color_scheme_apply();
+			}), nullptr);
+		}
+#endif
+	theme_settings_handler = g_signal_connect(settings, "notify", G_CALLBACK(+[](GObject *, GParamSpec *property, gpointer)
+		{
+		if (g_str_equal(property->name, "gtk-interface-color-scheme") ||
+		    g_str_equal(property->name, "gtk-application-prefer-dark-theme") ||
+		    g_str_equal(property->name, "gtk-theme-name"))
+			{
+			if (session_color_scheme.value_or(options->color_scheme) != COLOR_SCHEME_SYSTEM) color_scheme_apply();
+			queue_theme_background_update();
+			}
+		}), nullptr);
+	color_scheme_apply();
+}
+
+void color_scheme_shutdown()
+{
+	if (theme_background_idle) g_source_remove(theme_background_idle);
+	theme_background_idle = 0;
+	auto *settings = gtk_settings_get_default();
+	if (settings && theme_settings_handler) g_signal_handler_disconnect(settings, theme_settings_handler);
+	theme_settings_handler = 0;
+	g_clear_object(&theme_interface);
+	session_color_scheme.reset();
+	if (settings)
+		{
+#if GTK_CHECK_VERSION(4, 20, 0)
+		gtk_settings_reset_property(settings, "gtk-interface-color-scheme");
+#else
+		gtk_settings_reset_property(settings, "gtk-application-prefer-dark-theme");
+#endif
+		}
+}
+
+namespace
+{
 
 /**
  * @brief Set up the application paths
@@ -850,10 +967,7 @@ void startup_cb(GtkApplication *app, gpointer)
 
 	marks_load();
 
-	GSettings *iface = g_settings_new("org.gnome.desktop.interface");
-	g_signal_connect(iface, "changed::color-scheme", G_CALLBACK(theme_change_cb), nullptr);
-
-	theme_change_cb(iface, 0, nullptr);
+	color_scheme_init();
 
 	auto *provider = gtk_css_provider_new();
 	gtk_css_provider_load_from_resource(provider, "/org/geeqie/geeqie/css/geeqie.css");
@@ -984,6 +1098,7 @@ Version: Geeqie "), VERSION, nullptr);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(config_file_error_notification_action));
 
 	status = g_application_run(G_APPLICATION(app), argc, argv);
+	color_scheme_shutdown();
 	g_object_unref(app);
 
 	return status;

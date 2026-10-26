@@ -32,6 +32,12 @@
 #include "gq-color.h"
 #include "main-defines.h"
 
+enum ColorScheme : guint {
+	COLOR_SCHEME_SYSTEM = 0,
+	COLOR_SCHEME_LIGHT,
+	COLOR_SCHEME_DARK
+};
+
 enum DupeSelectType : guint;
 enum ScrollReset : guint;
 enum TextPosition : gint;
@@ -102,6 +108,7 @@ struct ConfOptions
 	gboolean overunderexposed;
 	gboolean expand_menu_toolbar;
 	gboolean hamburger_menu;
+	ColorScheme color_scheme;
 
 	/* various */
 	gboolean tree_descend_subdirs;

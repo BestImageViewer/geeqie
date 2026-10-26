@@ -448,6 +448,7 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_BOOL(*options, show_window_ids);
 	WRITE_NL(); WRITE_BOOL(*options, expand_menu_toolbar);
 	WRITE_NL(); WRITE_BOOL(*options, hamburger_menu);
+	WRITE_NL(); WRITE_UINT(*options, color_scheme);
 
 	WRITE_NL(); WRITE_UINT(*options, log_window_lines);
 	WRITE_NL(); WRITE_BOOL(*options, log_window.timer_data);
@@ -924,6 +925,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, show_window_ids)) continue;
 		if (READ_BOOL(*options, expand_menu_toolbar)) continue;
 		if (READ_BOOL(*options, hamburger_menu)) continue;
+		if (READ_UINT_ENUM_CLAMP(*options, color_scheme, COLOR_SCHEME_SYSTEM, COLOR_SCHEME_DARK)) continue;
 
 		if (READ_INT(*options, log_window_lines)) continue;
 		if (READ_BOOL(*options, log_window.timer_data)) continue;

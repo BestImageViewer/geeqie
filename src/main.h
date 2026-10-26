@@ -42,6 +42,16 @@ extern gchar *gq_executable_path;
 extern gchar *desktop_file_template;
 extern gchar *instance_identifier;
 
+enum ColorScheme : guint;
+
+gboolean color_scheme_parse(const gchar *text, ColorScheme &scheme);
+/** Apply the saved preference, respecting any session override. */
+void color_scheme_apply();
+void color_scheme_set_session(ColorScheme scheme);
+void color_scheme_init();
+void color_scheme_shutdown();
+GdkRGBA theme_background_color(GtkWidget *widget);
+
 void exit_program();
 
 #define CASE_SORT (options->file_sort.case_sensitive ? strcmp : strcasecmp)

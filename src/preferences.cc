@@ -602,6 +602,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->show_predefined_keyword_tree = c_options->show_predefined_keyword_tree;
 	options->expand_menu_toolbar = c_options->expand_menu_toolbar;
 	options->hamburger_menu = c_options->hamburger_menu;
+	options->color_scheme = c_options->color_scheme;
 
 	options->selectable_bars = c_options->selectable_bars;
 
@@ -660,6 +661,7 @@ static void config_window_apply(const ConfOptions *c_options)
 
 	toolbar_apply(TOOLBAR_MAIN);
 	toolbar_apply(TOOLBAR_STATUS);
+	color_scheme_apply();
 }
 
 static void accel_conflicts_window_update();
@@ -2183,6 +2185,22 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	pref_checkbox_new_int(group, _("Refresh on file change"),
 			      options->update_on_time_change, &c_options->update_on_time_change);
 
+
+	pref_spacer(group, PREF_PAD_GROUP);
+
+	group = pref_group_new(vbox, FALSE, _("Color scheme"), GTK_ORIENTATION_VERTICAL);
+	const char *schemes[] = {_("Follow desktop"), _("Light"), _("Dark"), nullptr};
+	c_options->color_scheme = options->color_scheme;
+	auto *scheme = gtk_drop_down_new_from_strings(schemes);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(scheme), c_options->color_scheme);
+	gtk_widget_set_halign(scheme, GTK_ALIGN_START);
+	gtk_widget_set_tooltip_text(scheme, _("Choose the interface color scheme. A command-line override remains active until Geeqie exits. Custom themes may not provide both variants."));
+	gtk_box_append(GTK_BOX(group), scheme);
+	g_signal_connect(scheme, "notify::selected", G_CALLBACK(+[](GObject *object, GParamSpec *, gpointer data)
+		{
+		auto *value = static_cast<ColorScheme *>(data);
+		*value = static_cast<ColorScheme>(gtk_drop_down_get_selected(GTK_DROP_DOWN(object)));
+		}), &c_options->color_scheme);
 
 	pref_spacer(group, PREF_PAD_GROUP);
 

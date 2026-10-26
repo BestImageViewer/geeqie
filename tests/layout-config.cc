@@ -12,12 +12,19 @@
 #include "bar-sort.h"
 #include "bar.h"
 #include "filefilter.h"
+#include "image.h"
+#include "intl.h"
 #include "layout-config.h"
 #include "layout-image.h"
 #include "layout-util.h"
 #include "layout.h"
+#include "main-defines.h"
+#include "main.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
+#include "preferences.h"
 #include "rcfile.h"
+#include "ui-fileops.h"
 
 namespace
 {
@@ -494,6 +501,132 @@ TEST_F(PartialLayoutConfig, HamburgerMenuFollowsFloatingToolsAndReturnsWhenHidde
 			EXPECT_EQ(layout->tools, nullptr);
 			}
 		}
+}
+
+GtkWidget *find_scheme_dropdown(GtkWidget *widget)
+{
+	if (GTK_IS_DROP_DOWN(widget))
+		{
+		auto *model = gtk_drop_down_get_model(GTK_DROP_DOWN(widget));
+		if (GTK_IS_STRING_LIST(model) && g_list_model_get_n_items(model) == 3 &&
+		    g_strcmp0(gtk_string_list_get_string(GTK_STRING_LIST(model), 0), _("Follow desktop")) == 0) return widget;
+		return nullptr;
+		}
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		if (auto *found = find_scheme_dropdown(child)) return found;
+	return nullptr;
+}
+
+class ColorSchemePreferences : public PartialLayoutConfig
+{
+protected:
+	void SetUp() override
+	{
+		PartialLayoutConfig::SetUp();
+		if (HasFatalFailure() || IsSkipped()) return;
+		config_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, nullptr);
+		if (g_file_test(config_path, G_FILE_TEST_EXISTS)) GTEST_SKIP() << "Requires an unused configuration file";
+		saved_scheme = options->color_scheme;
+		saved_custom = options->image.use_custom_border_color;
+		saved_border = options->image.border_color;
+		changed = true;
+		options->color_scheme = COLOR_SCHEME_LIGHT;
+		color_scheme_init();
+		gtk_window_present(GTK_WINDOW(layout->window));
+	}
+
+	void TearDown() override
+	{
+		if (get_config_window()) gtk_window_close(GTK_WINDOW(get_config_window()));
+		if (changed)
+			{
+			color_scheme_shutdown();
+			options->color_scheme = saved_scheme;
+			options->image.use_custom_border_color = saved_custom;
+			options->image.border_color = saved_border;
+			g_unlink(config_path);
+			}
+		g_free(config_path);
+		PartialLayoutConfig::TearDown();
+	}
+
+	static void settle()
+	{
+		const gint64 deadline = g_get_monotonic_time() + (100 * G_TIME_SPAN_MILLISECOND);
+		while (g_get_monotonic_time() < deadline)
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+	}
+
+	ColorScheme saved_scheme = COLOR_SCHEME_SYSTEM;
+	gboolean saved_custom = FALSE;
+	GdkRGBA saved_border{};
+	gchar *config_path = nullptr;
+	bool changed = false;
+};
+
+TEST_F(ColorSchemePreferences, CancelDiscardsThePendingChoice)
+{
+	show_config_window(layout);
+	auto *dialog = get_config_window();
+	auto *dropdown = find_scheme_dropdown(dialog);
+	ASSERT_NE(dropdown, nullptr);
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(dropdown)), COLOR_SCHEME_LIGHT);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), COLOR_SCHEME_DARK);
+	EXPECT_EQ(options->color_scheme, COLOR_SCHEME_LIGHT);
+	auto *cancel = find_widget(dialog, GTK_TYPE_BUTTON, _("Cancel"));
+	ASSERT_NE(cancel, nullptr);
+	g_signal_emit_by_name(cancel, "clicked");
+	EXPECT_EQ(get_config_window(), nullptr);
+	EXPECT_EQ(options->color_scheme, COLOR_SCHEME_LIGHT);
+	show_config_window(layout);
+	dropdown = find_scheme_dropdown(get_config_window());
+	ASSERT_NE(dropdown, nullptr);
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(dropdown)), COLOR_SCHEME_LIGHT);
+}
+
+TEST_F(ColorSchemePreferences, ConfirmSavesThePreferenceWithoutReplacingASessionOverride)
+{
+	color_scheme_set_session(COLOR_SCHEME_DARK);
+	show_config_window(layout);
+	auto *dialog = get_config_window();
+	auto *dropdown = find_scheme_dropdown(dialog);
+	ASSERT_NE(dropdown, nullptr);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), COLOR_SCHEME_SYSTEM);
+	auto *ok = find_widget(dialog, GTK_TYPE_BUTTON, "OK");
+	ASSERT_NE(ok, nullptr);
+	g_signal_emit_by_name(ok, "clicked");
+	EXPECT_EQ(get_config_window(), nullptr);
+	EXPECT_EQ(options->color_scheme, COLOR_SCHEME_SYSTEM);
+	EXPECT_TRUE(g_file_test(config_path, G_FILE_TEST_EXISTS));
+#if GTK_CHECK_VERSION(4, 20, 0)
+	gint scheme = 0;
+	g_object_get(gtk_settings_get_default(), "gtk-interface-color-scheme", &scheme, nullptr);
+	EXPECT_EQ(scheme, GTK_INTERFACE_COLOR_SCHEME_DARK);
+#else
+	gboolean dark = FALSE;
+	g_object_get(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", &dark, nullptr);
+	EXPECT_TRUE(dark);
+#endif
+}
+
+TEST_F(ColorSchemePreferences, AutomaticImageBackgroundUpdatesAndCustomColorIsPreserved)
+{
+	options->image.use_custom_border_color = FALSE;
+	options->color_scheme = COLOR_SCHEME_DARK;
+	color_scheme_apply();
+	settle();
+	const auto theme = theme_background_color(layout->window);
+	EXPECT_TRUE(gdk_rgba_equal(&PIXBUF_RENDERER(layout->image->pr)->color, &theme));
+	options->image.use_custom_border_color = TRUE;
+	options->image.border_color = GdkRGBA{0.2F, 0.5F, 0.3F, 1.0F};
+	image_background_set_color_from_options(layout->image, FALSE);
+	options->color_scheme = COLOR_SCHEME_LIGHT;
+	color_scheme_apply();
+	settle();
+	EXPECT_TRUE(gdk_rgba_equal(&PIXBUF_RENDERER(layout->image->pr)->color, &options->image.border_color));
 }
 
 TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)

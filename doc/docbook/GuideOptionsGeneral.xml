@@ -2,6 +2,12 @@
 <section id="GuideOptionsGeneral">
   <title>General Options</title>
   <para>This section describes the options presented under the General Tab of the preferences dialog.</para>
+  <section id="PreferencesColorScheme">
+    <title>Color scheme</title>
+    <para>Select <guilabel>Follow desktop</guilabel>, <guilabel>Light</guilabel>, or <guilabel>Dark</guilabel> to control the interface appearance. The default follows the desktop preference. Changes take effect when you confirm the Preferences dialog; Cancel leaves the current scheme unchanged. Custom themes may not provide both light and dark variants.</para>
+    <para>The command-line option <literal>--color-scheme=system|light|dark</literal> overrides this preference for the running application session without changing the saved setting. For example, <command>geeqie --color-scheme=dark</command> requests a dark interface. If Geeqie is already running, the override applies to its existing windows and remains active until it exits. <literal>system</literal> follows the desktop even if the saved preference specifies Light or Dark. Changing the saved preference does not replace an active command-line override.</para>
+    <para>This setting controls the interface theme. Custom image background colors configured in Image preferences remain separate.</para>
+  </section>
   <section id="PreferencesThumbnails">
     <title>Thumbnails</title>
     <variablelist>

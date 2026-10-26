@@ -4,6 +4,7 @@
   <para>
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="CommandLineOptions.xml" />
   </para>
+  <para>Use <literal>--color-scheme=system|light|dark</literal> to override the interface color scheme for the running session. This does not change the saved <link linkend="PreferencesColorScheme">Color scheme preference</link>.</para>
   <section id="IndependentInstances">
     <title>Independent Instances</title>
     <para>Normally, launching Geeqie again sends the command to the running application instance. Opening another window does not create an independent instance. <keycombo><keycap>Ctrl</keycap><keycap>Q</keycap></keycombo> quits that instance and closes all its windows; <keycombo><keycap>Ctrl</keycap><keycap>W</keycap></keycombo> closes only the current window, quitting the instance if it is the last main window.</para>

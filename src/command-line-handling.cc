@@ -315,6 +315,14 @@ void gq_close_window(GtkApplication *, GApplicationCommandLine *, GVariantDict *
 	g_idle_add(close_window_cb, nullptr);
 }
 
+void gq_color_scheme(GtkApplication *, GApplicationCommandLine *, GVariantDict *dict, GList *)
+{
+	const gchar *text = nullptr;
+	g_variant_dict_lookup(dict, "color-scheme", "&s", &text);
+	ColorScheme scheme;
+	if (color_scheme_parse(text, scheme)) color_scheme_set_session(scheme);
+}
+
 void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
 	const gchar *text;
@@ -333,6 +341,7 @@ void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line,
 	if (isfile(filename))
 		{
 		load_config_from_file(filename, FALSE);
+		color_scheme_apply();
 		}
 	else
 		{
@@ -1391,6 +1400,7 @@ CommandLineOptionEntry command_line_options[] =
 	{ "cache-shared",                gq_cache_shared,                PRIMARY_REMOTE, GUI  },
 	{ "cache-thumbs",                gq_cache_thumbs,                PRIMARY_REMOTE, GUI  },
 	{ "close-window",                gq_close_window,                PRIMARY_REMOTE, GUI  },
+	{ "color-scheme",                gq_color_scheme,                PRIMARY_REMOTE, GUI  },
 	{ "config-load",                 gq_config_load,                 PRIMARY_REMOTE, GUI  },
 #ifdef DEBUG
 	{ "debug",                       gq_debug,                       PRIMARY_REMOTE, GUI  },
@@ -1553,6 +1563,16 @@ gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_comm
 	print0 = FALSE;
 
 	command_line_options_dict = g_application_command_line_get_options_dict(app_command_line);
+	const gchar *scheme_text = nullptr;
+	ColorScheme scheme;
+	if (g_variant_dict_lookup(command_line_options_dict, "color-scheme", "&s", &scheme_text) && !color_scheme_parse(scheme_text, scheme))
+		{
+		g_application_command_line_printerr(app_command_line, "%s", _("Invalid color scheme: use system, light, or dark.\n"));
+		result->status = EXIT_FAILURE;
+		if (!g_application_command_line_get_is_remote(app_command_line)) g_application_quit(G_APPLICATION(app));
+		return result->status;
+		}
+
 
 	/* Parse other command line arguments, which should be files, URLs, directories
 	 * or collections.

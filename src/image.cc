@@ -1511,7 +1511,9 @@ void image_attach_window(ImageWindow *imd, GtkWidget *window,
 {
 	LayoutWindow *lw;
 
+	if (imd->top_window) g_object_remove_weak_pointer(G_OBJECT(imd->top_window), reinterpret_cast<gpointer *>(&imd->top_window));
 	imd->top_window = window;
+	if (window) g_object_add_weak_pointer(G_OBJECT(window), reinterpret_cast<gpointer *>(&imd->top_window));
 	g_free(imd->title);
 	imd->title = g_strdup(title);
 	g_free(imd->title_right);
@@ -2430,6 +2432,7 @@ void image_transition_from(ImageWindow *imd, GdkPaintable *outgoing, GtkStackTra
 
 static void image_free(ImageWindow *imd)
 {
+	if (imd->top_window) g_object_remove_weak_pointer(G_OBJECT(imd->top_window), reinterpret_cast<gpointer *>(&imd->top_window));
 	g_clear_handle_id(&imd->transition_source, g_source_remove);
 	g_signal_handlers_disconnect_by_data(imd->view, imd);
 	image_rectangle_clear(imd);
