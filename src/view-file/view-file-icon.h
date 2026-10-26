@@ -29,6 +29,7 @@
 #include "view-file.h"
 
 class FileData;
+struct ViewFileIconScrollAnchor;
 
 struct ViewFileInfoIcon
 {
@@ -38,6 +39,9 @@ struct ViewFileInfoIcon
 	gint rows;
 	guint resize_idle_id;
 	GtkAdjustment *resize_adjustment;
+	guint scroll_tick_id;
+	ViewFileIconScrollAnchor *scroll_anchor;
+	gboolean refreshing;
 
 	GList *selection;
 	FileData *prev_selection;
@@ -58,6 +62,7 @@ void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event);
 FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter);
 
 void vficon_destroy_cb(ViewFile *vf);
+void vficon_scroll_cancel(ViewFile *vf);
 ViewFile *vficon_new(ViewFile *vf);
 
 gboolean vficon_set_fd(ViewFile *vf, FileData *dir_fd);

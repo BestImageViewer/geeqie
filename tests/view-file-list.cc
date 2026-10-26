@@ -1509,6 +1509,126 @@ TEST_P(RevealFile, IconNavigationModifierMatrix)
 		}
 }
 
+TEST_P(RevealFile, IconRefreshPreservesViewportAndModelItems)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	const guint count = vf_count(vf);
+	// Leave a single thumbnail in the final row.
+	const guint remove_count = (count - 1) % VFICON(vf)->columns;
+	for (guint i = 0; i < remove_count; ++i) ASSERT_EQ(g_remove(vf_index_get_data(vf, count - i - 1)->path), 0);
+	vf_refresh(vf);
+	settle();
+	auto *focused = vf_index_get_data(vf, 0);
+	vf_select_by_fd(vf, focused);
+	const guint last_position = vf_count(vf) - 1;
+	auto *last = vf_index_get_data(vf, last_position);
+	vf_scroll_to_file(vf, last);
+	settle();
+	auto *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vf->scrolled));
+	const double before = gtk_adjustment_get_value(adjustment);
+	g_autoptr(GObject) item = G_OBJECT(g_list_model_get_item(G_LIST_MODEL(VFICON(vf)->store), last_position));
+	guint changes = 0;
+	const gulong handler = g_signal_connect(VFICON(vf)->store, "items-changed",
+		G_CALLBACK(+[](GListModel *, guint, guint, guint, gpointer data) { ++*static_cast<guint *>(data); }), &changes);
+	for (int i = 0; i < 3; ++i)
+		{
+		vf_refresh(vf);
+		settle();
+		EXPECT_NEAR(gtk_adjustment_get_value(adjustment), before, 1.0);
+		}
+	EXPECT_TRUE(g_file_set_contents(last->path, "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='red'/></svg>", -1, nullptr));
+	EXPECT_TRUE(file_data_check_changed_files(last));
+	settle();
+	g_signal_handler_disconnect(VFICON(vf)->store, handler);
+	EXPECT_EQ(changes, 0U);
+	EXPECT_NEAR(gtk_adjustment_get_value(adjustment), before, 1.0);
+	EXPECT_EQ(VFICON(vf)->focus_fd, focused);
+	EXPECT_TRUE(vficon_is_selected(vf, focused));
+	g_autoptr(GObject) after = G_OBJECT(g_list_model_get_item(G_LIST_MODEL(VFICON(vf)->store), last_position));
+	EXPECT_EQ(after, item);
+}
+
+TEST_P(RevealFile, IconRefreshAnchorsVisibleImageAcrossInsertionsAndDeletions)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	vf_select_by_fd(vf, vf_index_get_data(vf, 0));
+	auto anchor = FileDataRef(vf_index_get_data(vf, 120));
+	vf_scroll_to_file(vf, anchor);
+	settle();
+	auto *widget = find_file_widget(vf->listview, anchor);
+	ASSERT_NE(widget, nullptr);
+	graphene_rect_t before;
+	ASSERT_TRUE(gtk_widget_compute_bounds(widget, vf->scrolled, &before));
+	// Remove a complete row above the viewport, including the focused image.
+	for (int i = 0; i < VFICON(vf)->columns; ++i)
+		ASSERT_EQ(g_remove(vf_index_get_data(vf, i)->path), 0);
+	vf_refresh(vf);
+	settle();
+	widget = find_file_widget(vf->listview, anchor);
+	ASSERT_NE(widget, nullptr);
+	graphene_rect_t after;
+	ASSERT_TRUE(gtk_widget_compute_bounds(widget, vf->scrolled, &after));
+	EXPECT_NEAR(after.origin.y, before.origin.y, 1.0);
+	// Recreate the row, then refresh again.
+	for (int i = 0; i < VFICON(vf)->columns; ++i)
+		{
+		g_autofree gchar *name = g_strdup_printf("%03d.svg", i);
+		g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+		ASSERT_TRUE(g_file_set_contents(path, "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'/>", -1, nullptr));
+		}
+	vf_refresh(vf);
+	settle();
+	widget = find_file_widget(vf->listview, anchor);
+	ASSERT_NE(widget, nullptr);
+	ASSERT_TRUE(gtk_widget_compute_bounds(widget, vf->scrolled, &after));
+	EXPECT_NEAR(after.origin.y, before.origin.y, 1.0);
+}
+
+TEST_P(RevealFile, ClickingPartlyVisibleIconSelectsThePressedImage)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	if (!xdotool || !g_getenv("DISPLAY")) GTEST_SKIP() << "Requires xdotool and X11";
+	gtk_window_set_title(GTK_WINDOW(window), "Geeqie partial icon click test");
+	auto *target = vf_index_get_data(vf, 120);
+	vf_scroll_to_file(vf, target);
+	settle();
+	auto *widget = find_file_widget(vf->listview, target);
+	ASSERT_NE(widget, nullptr);
+	graphene_rect_t bounds;
+	ASSERT_TRUE(gtk_widget_compute_bounds(widget, vf->scrolled, &bounds));
+	auto *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vf->scrolled));
+	const double visible = bounds.size.height / 2;
+	gtk_adjustment_set_value(adjustment, gtk_adjustment_get_value(adjustment) +
+	                         bounds.origin.y - gtk_widget_get_height(vf->scrolled) + visible);
+	gtk_widget_grab_focus(entry);
+	settle();
+	widget = find_file_widget(vf->listview, target);
+	ASSERT_NE(widget, nullptr);
+	ASSERT_TRUE(gtk_widget_compute_bounds(widget, vf->scrolled, &bounds));
+	ASSERT_LT(bounds.origin.y, gtk_widget_get_height(vf->scrolled));
+	ASSERT_GT(bounds.origin.y + bounds.size.height, gtk_widget_get_height(vf->scrolled));
+	graphene_rect_t window_bounds;
+	ASSERT_TRUE(gtk_widget_compute_bounds(widget, window, &window_bounds));
+	const std::string x = std::to_string(static_cast<int>(window_bounds.origin.x + (window_bounds.size.width / 2)));
+	const std::string y = std::to_string(static_cast<int>(window_bounds.origin.y + (visible / 2)));
+	const gchar *press[] = {xdotool, "search", "--name", "^Geeqie partial icon click test$",
+	                       "mousemove", "--window", "%1", x.c_str(), y.c_str(), "mousedown", "1", nullptr};
+	gint status = 0;
+	ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(press), nullptr, G_SPAWN_DEFAULT,
+	                        nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+	ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+	settle();
+	const gchar *release[] = {xdotool, "mouseup", "1", nullptr};
+	ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(release), nullptr, G_SPAWN_DEFAULT,
+	                        nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+	ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+	settle();
+	EXPECT_EQ(vf_selection_count(vf, nullptr), 1U);
+	EXPECT_TRUE(vficon_is_selected(vf, target));
+	EXPECT_EQ(VFICON(vf)->focus_fd, target);
+}
+
 TEST_P(RevealFile, IconResizeKeepsModelItemsAndDisplaysFiles)
 {
 	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";

@@ -2048,6 +2048,7 @@ static void vf_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_marks_load_cancel(vf);
+	if (vf->type == FILEVIEW_ICON) vficon_scroll_cancel(vf);
 	vf_thumbnail_destroy(vf);
 	file_data_list_free(vf->drag_selection);
 

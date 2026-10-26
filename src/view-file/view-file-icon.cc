@@ -22,8 +22,10 @@
 #include "view-file-icon.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <unordered_map>
 #include <utility>
 
@@ -46,6 +48,14 @@
 #include "utilops.h"
 #include "view-file-thumbnail.h"
 #include "view-file.h"
+
+struct ViewFileIconScrollAnchor
+{
+	std::vector<FileDataRef> owners;
+	std::vector<std::pair<FileData *, float>> files;
+	gint position = 0;
+	guint frames = 0;
+};
 
 namespace
 {
@@ -76,8 +86,16 @@ G_DEFINE_TYPE(ViewFileIconItem, view_file_icon_item, G_TYPE_OBJECT)
 enum { VIEW_FILE_ICON_ITEM_CHANGED, VIEW_FILE_ICON_ITEM_SIGNAL_COUNT };
 guint view_file_icon_item_signals[VIEW_FILE_ICON_ITEM_SIGNAL_COUNT];
 
+void view_file_icon_item_finalize(GObject *object)
+{
+	auto *item = reinterpret_cast<ViewFileIconItem *>(object);
+	file_data_unref(item->fd);
+	G_OBJECT_CLASS(view_file_icon_item_parent_class)->finalize(object);
+}
+
 void view_file_icon_item_class_init(ViewFileIconItemClass *klass)
 {
+	G_OBJECT_CLASS(klass)->finalize = view_file_icon_item_finalize;
 	view_file_icon_item_signals[VIEW_FILE_ICON_ITEM_CHANGED] =
 		g_signal_new("changed", G_TYPE_FROM_CLASS(klass), G_SIGNAL_RUN_LAST,
 		             0, nullptr, nullptr, nullptr, G_TYPE_NONE, 0);
@@ -90,7 +108,7 @@ void view_file_icon_item_init(ViewFileIconItem *)
 ViewFileIconItem *view_file_icon_item_new(FileData *fd)
 {
 	auto *item = static_cast<ViewFileIconItem *>(g_object_new(view_file_icon_item_get_type(), nullptr));
-	item->fd = fd;
+	item->fd = file_data_ref(fd);
 	return item;
 }
 
@@ -101,7 +119,7 @@ constexpr auto VIEW_FILE_ICON_DATA_KEY = "view-file-icon-data";
 static void vficon_toggle_filenames(ViewFile *vf);
 static void vficon_selection_remove(ViewFile *vf, FileData *fd, SelectionType mask, GtkTreeIter *iter);
 static void vficon_move_focus(ViewFile *vf, gint row, gint col, gboolean relative);
-static void vficon_set_focus(ViewFile *vf, FileData *fd);
+static void vficon_set_focus(ViewFile *vf, FileData *fd, gboolean scroll = TRUE);
 static gint vficon_viewport_width(ViewFile *vf);
 static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint h, gboolean force, gboolean keep_position = TRUE);
 
@@ -569,6 +587,8 @@ void vficon_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &f
 
 void vficon_scroll_to_file(ViewFile *vf, FileData *fd)
 {
+	if (VFICON(vf)->refreshing) return;
+	vficon_scroll_cancel(vf);
 	const gint position = vficon_index_by_fd(vf, fd);
 	if (position < 0) return;
 
@@ -749,8 +769,10 @@ static void vficon_move_focus(ViewFile *vf, gint row, gint col, gboolean relativ
 	vficon_set_focus(vf, vficon_find_data(vf, new_row, new_col, nullptr));
 }
 
-static void vficon_set_focus(ViewFile *vf, FileData *fd)
+static void vficon_set_focus(ViewFile *vf, FileData *fd, gboolean scroll)
 {
+	scroll = scroll && !VFICON(vf)->refreshing;
+	if (scroll) vficon_scroll_cancel(vf);
 	gint row;
 	gint col;
 
@@ -761,7 +783,7 @@ static void vficon_set_focus(ViewFile *vf, FileData *fd)
 			/* ensure focus row col are correct */
 			vficon_find_position(vf, VFICON(vf)->focus_fd, &VFICON(vf)->focus_row, &VFICON(vf)->focus_column);
 			const gint position = vficon_index_by_fd(vf, VFICON(vf)->focus_fd);
-			if (position >= 0) gtk_grid_view_scroll_to(GTK_GRID_VIEW(vf->listview), position, GTK_LIST_SCROLL_NONE, nullptr);
+			if (scroll && position >= 0) gtk_grid_view_scroll_to(GTK_GRID_VIEW(vf->listview), position, GTK_LIST_SCROLL_NONE, nullptr);
 
 			return;
 			}
@@ -784,7 +806,7 @@ static void vficon_set_focus(ViewFile *vf, FileData *fd)
 	vficon_selection_add(vf, VFICON(vf)->focus_fd, SELECTION_FOCUS, nullptr);
 
 	const gint position = vficon_index_by_fd(vf, VFICON(vf)->focus_fd);
-	if (position >= 0) gtk_grid_view_scroll_to(GTK_GRID_VIEW(vf->listview), position, GTK_LIST_SCROLL_NONE, nullptr);
+	if (scroll && position >= 0) gtk_grid_view_scroll_to(GTK_GRID_VIEW(vf->listview), position, GTK_LIST_SCROLL_NONE, nullptr);
 }
 
 /* used to figure the page up/down distances */
@@ -844,6 +866,7 @@ static void vficon_sync_displayed_columns(ViewFile *vf)
 
 gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifierType state)
 {
+	vficon_scroll_cancel(vf);
 	vficon_sync_displayed_columns(vf);
 	gint focus_row = 0;
 	gint focus_col = 0;
@@ -970,6 +993,7 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifie
 
 void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
+	vficon_scroll_cancel(vf);
 	FileData *fd = vficon_find_data_by_coord(vf, static_cast<gint>(event.x), static_cast<gint>(event.y), nullptr);
 	if (!fd) return;
 
@@ -1102,43 +1126,135 @@ void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
  *-------------------------------------------------------------------
  */
 
-static void vficon_clear_store(ViewFile *vf)
+void vficon_scroll_cancel(ViewFile *vf)
 {
-	g_list_store_remove_all(VFICON(vf)->store);
+	if (VFICON(vf)->scroll_tick_id && vf->listview)
+		gtk_widget_remove_tick_callback(vf->listview, VFICON(vf)->scroll_tick_id);
+	VFICON(vf)->scroll_tick_id = 0;
+	delete VFICON(vf)->scroll_anchor;
+	VFICON(vf)->scroll_anchor = nullptr;
+}
+
+static void vficon_scroll_capture(ViewFile *vf)
+{
+	// Keep the original anchor if several refreshes arrive before allocation.
+	if (VFICON(vf)->scroll_anchor || !gtk_widget_get_mapped(vf->listview)) return;
+	auto anchor = std::make_unique<ViewFileIconScrollAnchor>();
+	for (auto *fd : vficon_thumb_visible(vf))
+		{
+		for (auto *child = gtk_widget_get_first_child(vf->listview); child; child = gtk_widget_get_next_sibling(child))
+			{
+			if (vficon_widget_file(child) != fd) continue;
+			graphene_rect_t bounds;
+			if (gtk_widget_compute_bounds(child, vf->scrolled, &bounds))
+				{
+				anchor->owners.emplace_back(fd);
+				anchor->files.emplace_back(fd, bounds.origin.y);
+				}
+			break;
+			}
+		}
+	if (anchor->files.empty()) return;
+	std::stable_sort(anchor->files.begin(), anchor->files.end(), [](const auto &a, const auto &b)
+		{ return a.second < b.second; });
+	anchor->position = vficon_index_by_fd(vf, anchor->files.front().first);
+	VFICON(vf)->scroll_anchor = anchor.release();
+}
+
+static gboolean vficon_scroll_restore(GtkWidget *, GdkFrameClock *, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+	auto &anchor = *VFICON(vf)->scroll_anchor;
+	// Tick callbacks run before allocation; let the model change allocate first.
+	if (anchor.frames++ == 0) return G_SOURCE_CONTINUE;
+	FileData *file = nullptr;
+	float offset = 0;
+	for (const auto &candidate : anchor.files)
+		{
+		if (g_list_find(vf->list, static_cast<FileData *>(candidate.first)))
+			{
+			file = candidate.first;
+			offset = candidate.second;
+			break;
+			}
+		}
+	if (!file) file = vf_index_get_data(vf, std::min(anchor.position, static_cast<gint>(vf_count(vf)) - 1));
+	bool finished = !file || anchor.frames > 8;
+	bool found = false;
+	if (!finished)
+		{
+		for (auto *child = gtk_widget_get_first_child(vf->listview); child; child = gtk_widget_get_next_sibling(child))
+			{
+			if (vficon_widget_file(child) != file) continue;
+			graphene_rect_t bounds;
+			if (!gtk_widget_compute_bounds(child, vf->scrolled, &bounds)) break;
+			found = true;
+			auto *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vf->scrolled));
+			const double before = gtk_adjustment_get_value(adjustment);
+			const double delta = bounds.origin.y - offset;
+			gtk_adjustment_set_value(adjustment, before + delta);
+			finished = std::abs(delta) < 1 || std::abs(gtk_adjustment_get_value(adjustment) - before) < 1;
+			break;
+			}
+		if (!found)
+			{
+			auto *scroll = gtk_scroll_info_new();
+			gtk_scroll_info_set_enable_horizontal(scroll, FALSE);
+			gtk_grid_view_scroll_to(GTK_GRID_VIEW(vf->listview), vficon_index_by_fd(vf, file), GTK_LIST_SCROLL_NONE, scroll);
+			}
+		}
+	if (!finished) return G_SOURCE_CONTINUE;
+	VFICON(vf)->scroll_tick_id = 0;
+	delete VFICON(vf)->scroll_anchor;
+	VFICON(vf)->scroll_anchor = nullptr;
+	return G_SOURCE_REMOVE;
 }
 
 static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_position)
 {
 	vficon_verify_selections(vf);
-	GtkAdjustment *vadjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vf->scrolled));
-	const gdouble scroll_value = keep_position ? gtk_adjustment_get_value(vadjustment) : 0.0;
+	if (keep_position) vficon_scroll_capture(vf);
+	else vficon_scroll_cancel(vf);
 
-	vficon_clear_store(vf);
-	if (resize) gtk_grid_view_set_max_columns(GTK_GRID_VIEW(vf->listview), VFICON(vf)->columns);
-
+	// Retain matching items. A pixel or metadata update must not reset GTK's
+	// model, selection machinery, and internal scroll anchor.
+	g_autoptr(GPtrArray) previous = g_ptr_array_new_with_free_func(g_object_unref);
+	std::unordered_map<FileData *, gpointer> by_file;
+	const guint count = g_list_model_get_n_items(G_LIST_MODEL(VFICON(vf)->store));
+	for (guint i = 0; i < count; ++i)
+		{
+		auto *item = static_cast<ViewFileIconItem *>(g_list_model_get_item(G_LIST_MODEL(VFICON(vf)->store), i));
+		g_ptr_array_add(previous, item);
+		by_file.emplace(item->fd, item);
+		}
+	g_autoptr(GPtrArray) items = g_ptr_array_new_with_free_func(g_object_unref);
 	for (GList *work = vf->list; work; work = work->next)
 		{
-		auto *item = view_file_icon_item_new(static_cast<FileData *>(work->data));
-		g_list_store_append(VFICON(vf)->store, item);
-		g_object_unref(item);
+		auto *fd = static_cast<FileData *>(work->data);
+		const auto existing = by_file.find(fd);
+		g_ptr_array_add(items, existing == by_file.end() ? view_file_icon_item_new(fd) : g_object_ref(existing->second));
 		}
-
+	guint first = 0;
+	while (first < count && first < items->len && previous->pdata[first] == items->pdata[first]) ++first;
+	guint tail = 0;
+	while (tail < count - first && tail < items->len - first &&
+	       previous->pdata[count - tail - 1] == items->pdata[items->len - tail - 1]) ++tail;
+	if (first + tail != count || first + tail != items->len)
+		g_list_store_splice(VFICON(vf)->store, first, count - first - tail,
+		                    items->len > first ? items->pdata + first : nullptr, items->len - first - tail);
+	if (resize) gtk_grid_view_set_max_columns(GTK_GRID_VIEW(vf->listview), VFICON(vf)->columns);
 	VFICON(vf)->rows = VFICON(vf)->columns > 0 ?
-		(g_list_length(vf->list) + VFICON(vf)->columns - 1) / VFICON(vf)->columns : 0;
-	if (keep_position)
+		(items->len + VFICON(vf)->columns - 1) / VFICON(vf)->columns : 0;
+
+	for (auto *child = gtk_widget_get_first_child(vf->listview); child; child = gtk_widget_get_next_sibling(child))
 		{
-		const gint focus_position = vficon_index_by_fd(vf, VFICON(vf)->focus_fd);
-		if (focus_position >= 0)
-			{
-			gtk_grid_view_scroll_to(GTK_GRID_VIEW(vf->listview), focus_position, GTK_LIST_SCROLL_NONE, nullptr);
-			}
-		else
-			{
-			gtk_adjustment_set_value(vadjustment, scroll_value);
-			}
+		const auto item = by_file.find(vficon_widget_file(child));
+		if (item != by_file.end()) g_signal_emit(item->second, view_file_icon_item_signals[VIEW_FILE_ICON_ITEM_CHANGED], 0);
 		}
-
-
+	if (VFICON(vf)->scroll_anchor && !VFICON(vf)->scroll_tick_id)
+		VFICON(vf)->scroll_tick_id = gtk_widget_add_tick_callback(vf->listview, vficon_scroll_restore, vf, nullptr);
+	if (!keep_position)
+		gtk_adjustment_set_value(gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(vf->scrolled)), 0.0);
 	vf_send_update(vf);
 	vf_thumb_update(vf);
 	vf_star_update(vf);
@@ -1189,7 +1305,7 @@ static gboolean vficon_resize_idle_cb(gpointer data)
 		VFICON(vf)->columns = columns;
 		VFICON(vf)->rows = (g_list_length(vf->list) + columns - 1) / columns;
 		gtk_grid_view_set_max_columns(GTK_GRID_VIEW(vf->listview), columns);
-		vficon_set_focus(vf, VFICON(vf)->focus_fd);
+		vficon_set_focus(vf, VFICON(vf)->focus_fd, FALSE);
 		}
 	gtk_widget_queue_draw(vf->listview);
 	return G_SOURCE_REMOVE;
@@ -1317,6 +1433,9 @@ gint vficon_index_by_fd(const ViewFile *vf, const FileData *fd)
 
 static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 {
+	if (keep_position) vficon_scroll_capture(vf);
+	const gboolean refreshing = VFICON(vf)->refreshing;
+	VFICON(vf)->refreshing = keep_position;
 	gboolean ret = TRUE;
 	GList *work;
 	GList *new_work;
@@ -1466,10 +1585,11 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 		focus = static_cast<FileData *>(VFICON(vf)->selection ? VFICON(vf)->selection->data :
 		                                vf->list ? vf->list->data : nullptr);
 		}
-	vficon_set_focus(vf, focus);
+	vficon_set_focus(vf, focus, FALSE);
 	if (!g_list_find(vf->list, vf->click_fd)) vf->click_fd = focus;
 	file_data_unref(first_selected);
 
+	VFICON(vf)->refreshing = refreshing;
 	return ret;
 }
 
@@ -1687,6 +1807,7 @@ gboolean vficon_set_fd(ViewFile *vf, FileData *dir_fd)
 
 void vficon_destroy_cb(ViewFile *vf)
 {
+	vficon_scroll_cancel(vf);
 	g_clear_handle_id(&VFICON(vf)->resize_idle_id, g_source_remove);
 	g_signal_handlers_disconnect_by_data(VFICON(vf)->resize_adjustment, vf);
 	g_clear_object(&VFICON(vf)->resize_adjustment);
@@ -1715,6 +1836,17 @@ ViewFile *vficon_new(ViewFile *vf)
 	g_signal_connect(factory, "bind", G_CALLBACK(vficon_factory_bind), nullptr);
 	g_signal_connect(factory, "unbind", G_CALLBACK(vficon_factory_unbind), nullptr);
 	vf->listview = gtk_grid_view_new(GTK_SELECTION_MODEL(selection), factory);
+	auto *scroll_controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	gtk_event_controller_set_propagation_phase(scroll_controller, GTK_PHASE_CAPTURE);
+	g_signal_connect(scroll_controller, "scroll", G_CALLBACK(+[](GtkEventControllerScroll *, gdouble, gdouble, gpointer data) -> gboolean
+		{ vficon_scroll_cancel(static_cast<ViewFile *>(data)); return FALSE; }), vf);
+	gtk_widget_add_controller(vf->scrolled, scroll_controller);
+	auto *press_controller = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(press_controller), 0);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(press_controller), GTK_PHASE_CAPTURE);
+	g_signal_connect(press_controller, "pressed", G_CALLBACK(+[](GtkGestureClick *, gint, gdouble, gdouble, gpointer data)
+		{ vficon_scroll_cancel(static_cast<ViewFile *>(data)); }), vf);
+	gtk_widget_add_controller(vf->scrolled, GTK_EVENT_CONTROLLER(press_controller));
 	gtk_grid_view_set_single_click_activate(GTK_GRID_VIEW(vf->listview), FALSE);
 	gtk_grid_view_set_min_columns(GTK_GRID_VIEW(vf->listview), 1);
 	gtk_grid_view_set_max_columns(GTK_GRID_VIEW(vf->listview), 1);
