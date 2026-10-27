@@ -219,14 +219,31 @@ TEST_F(AdvancedExif, RepeatedDownInputContinuesAcrossRecycledRows)
 		"key", "--clearmodifiers", "--repeat", "180", "--delay", "5", "Down", nullptr);
 	if (process)
 		{
+		struct ProcessResult { bool done = false; bool success = false; };
+		auto result = std::make_shared<ProcessResult>();
+		g_subprocess_wait_check_async(process, nullptr, [](GObject *object, GAsyncResult *res, gpointer data)
+			{
+			std::unique_ptr<std::shared_ptr<ProcessResult>> pending(static_cast<std::shared_ptr<ProcessResult> *>(data));
+			(*pending)->success = g_subprocess_wait_check_finish(G_SUBPROCESS(object), res, nullptr);
+			(*pending)->done = true;
+			}, new std::shared_ptr<ProcessResult>(result));
 		const gint64 deadline = g_get_monotonic_time() + (15 * G_TIME_SPAN_SECOND);
-		while (gtk_single_selection_get_selected(selection) < 150 && g_get_monotonic_time() < deadline)
+		while (!result->done && g_get_monotonic_time() < deadline)
 			{
 			g_main_context_iteration(nullptr, FALSE);
 			g_usleep(1000);
 			}
-		g_subprocess_force_exit(process);
-		g_subprocess_wait(process, nullptr, nullptr);
+		if (!result->done)
+			{
+			g_subprocess_force_exit(process);
+			g_subprocess_wait(process, nullptr, nullptr);
+			}
+		// Always release Down, including after a timeout between key press and release.
+		g_autoptr(GSubprocess) release = g_subprocess_new(G_SUBPROCESS_FLAGS_NONE, nullptr,
+		                                               xdotool, "keyup", "Down", nullptr);
+		EXPECT_TRUE(release && g_subprocess_wait_check(release, nullptr, nullptr));
+		EXPECT_TRUE(result->done);
+		EXPECT_TRUE(result->success);
 		}
 	gtk_widget_remove_tick_callback(view, tick);
 	ASSERT_NE(process, nullptr);
