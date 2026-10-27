@@ -1060,14 +1060,26 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 
 			g_autofree gchar *b = text_from_size_abrev(n_bytes);
 
-			if (s > 0)
+			const gint index = layout_list_get_index(lw, layout_image_get_fd(lw));
+			g_autofree gchar *sb = s > 0 ? text_from_size_abrev(s_bytes) : nullptr;
+			if (index >= 0)
 				{
-				g_autofree gchar *sb = text_from_size_abrev(s_bytes);
-				buf = g_strdup_printf(_("%s, %d files (%s, %d)%s"), b, n, sb, s, ss);
+				if (s > 0)
+					{
+					buf = g_strdup_printf(_("%s, %d / %u files (%s, %u)%s"), b, index + 1, n, sb, s, ss);
+					}
+				else
+					{
+					buf = g_strdup_printf(_("%s, %d / %u files%s"), b, index + 1, n, ss);
+					}
+				}
+			else if (s > 0)
+				{
+				buf = g_strdup_printf(_("%s, %u files (%s, %u)%s"), b, n, sb, s, ss);
 				}
 			else
 				{
-				buf = g_strdup_printf(_("%s, %d files%s"), b, n, ss);
+				buf = g_strdup_printf(_("%s, %u files%s"), b, n, ss);
 				}
 
 			text = buf;

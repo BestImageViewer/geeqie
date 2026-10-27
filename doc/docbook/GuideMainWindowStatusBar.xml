@@ -99,7 +99,8 @@
   </section>
   <section id="Filelist">
     <title>File list</title>
-    <para>This section displays the count of files that appear in the file list, including the total byte size. The number of files selected is displayed in parenthesis, including the total byte size of the selected files. The slide show status is also displayed here; when a slide show is running, “Slideshow” will appear, the text will change to “Paused” when a slide show is in the paused state.</para>
+    <para>This section displays the count of files that appear in the file list, including the total byte size. When the displayed image belongs to the current file list, the count is shown as <literal>X / Y files</literal>, where X is the position of the displayed image in the current file list, starting at 1, and Y is the total number of files in that list. X is not the position within the selection. The position is shown even when no files are selected. If the displayed image is absent from the list, only the total file count is shown. When files are selected, their total byte size and number appear in parentheses. For example, <literal>7 / 100 files (2 MB, 3)</literal> means that the seventh image in a list of 100 files is displayed, and three files totaling 2 MB are selected. The position updates as the displayed image changes.</para>
+    <para>The slide show status is also displayed here; when a slide show is running, “Slideshow” will appear, the text will change to “Paused” when a slide show is in the paused state.</para>
     <para />
   </section>
   <section id="ImageDetails">

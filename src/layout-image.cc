@@ -2362,6 +2362,7 @@ static void layout_image_update_cb(ImageWindow *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	layout_status_update_image(lw);
+	layout_status_update_info(lw, nullptr);
 }
 
 GtkWidget *layout_image_new(LayoutWindow *lw, gint i)

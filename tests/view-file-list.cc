@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 
 #include <algorithm>
+#include <cstring>
 #include <functional>
 #include <map>
 #include <string>
@@ -352,6 +353,80 @@ protected:
 	decltype(options->file_ops) saved_file_ops{};
 	gchar *directory = nullptr;
 };
+
+TEST_P(RepeatedDelete, StatusPositionTracksDisplayedImageWithinSelection)
+{
+	auto *vf = layout->vf;
+	auto *first = vf_index_get_data(vf, 0);
+	auto *third = vf_index_get_data(vf, 2);
+	ASSERT_NE(third, nullptr);
+	layout_image_set_fd(layout, first);
+	vf_select_all(vf);
+	layout_status_update_info(layout, nullptr);
+	ASSERT_NE(std::strstr(gtk_label_get_text(GTK_LABEL(layout->info_status)), "1 / 3 files"), nullptr);
+
+	// Changing the image must refresh the position even when selection stays unchanged.
+	layout_image_set_fd(layout, third);
+	EXPECT_EQ(layout_image_get_fd(layout), third);
+	EXPECT_EQ(layout_selection_count(layout), 3U);
+	EXPECT_NE(std::strstr(gtk_label_get_text(GTK_LABEL(layout->info_status)), "3 / 3 files"), nullptr);
+
+	if (vf->type != FILEVIEW_LIST) return;
+	layout_image_set_fd(layout, first);
+	vf_select_none(vf);
+	vf_select_by_fd(vf, first);
+	const gint64 deadline = g_get_monotonic_time() + (200 * G_TIME_SPAN_MILLISECOND);
+	while (g_get_monotonic_time() < deadline)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		g_usleep(1000);
+		}
+	// The selection idle updates status before it switches to the newly selected row.
+	auto *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+	g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_indices(2, -1);
+	gtk_tree_selection_select_path(selection, path);
+	const gint64 selection_deadline = g_get_monotonic_time() + (200 * G_TIME_SPAN_MILLISECOND);
+	while (g_get_monotonic_time() < selection_deadline)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		g_usleep(1000);
+		}
+	EXPECT_EQ(layout_image_get_fd(layout), third);
+	EXPECT_EQ(layout_selection_count(layout), 2U);
+	EXPECT_NE(std::strstr(gtk_label_get_text(GTK_LABEL(layout->info_status)), "3 / 3 files"), nullptr);
+}
+
+TEST_P(RepeatedDelete, StatusPositionSurvivesSelectNoneAndOmitsAbsentImage)
+{
+	auto *vf = layout->vf;
+	auto *first = vf_index_get_data(vf, 0);
+	layout_image_set_fd(layout, first);
+	vf_select_none(vf);
+	const gint64 deadline = g_get_monotonic_time() + (200 * G_TIME_SPAN_MILLISECOND);
+	while (g_get_monotonic_time() < deadline)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		g_usleep(1000);
+		}
+	ASSERT_EQ(layout_selection_count(layout), 0U);
+	EXPECT_NE(std::strstr(gtk_label_get_text(GTK_LABEL(layout->info_status)), "1 / 3 files"), nullptr);
+
+	vf_select_all(vf);
+	FileDataRef absent = FileData::new_simple("/does/not/exist/status-position.jpg");
+	layout_image_set_fd(layout, absent);
+	ASSERT_EQ(layout_image_get_fd(layout), absent);
+	ASSERT_EQ(layout_selection_count(layout), 3U);
+	const gchar *text = gtk_label_get_text(GTK_LABEL(layout->info_status));
+	EXPECT_EQ(std::strstr(text, " / "), nullptr);
+	EXPECT_NE(std::strstr(text, "3 files ("), nullptr);
+
+	vf_select_none(vf);
+	layout_status_update_info(layout, nullptr);
+	text = gtk_label_get_text(GTK_LABEL(layout->info_status));
+	EXPECT_EQ(std::strstr(text, " / "), nullptr);
+	EXPECT_NE(std::strstr(text, "3 files"), nullptr);
+	EXPECT_EQ(std::strstr(text, "("), nullptr);
+}
 
 TEST_P(RepeatedDelete, RebuildThumbnailsOnlyInvalidatesSelectedFiles)
 {
