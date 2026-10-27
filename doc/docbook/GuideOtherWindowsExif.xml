@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="GuideOtherWindowsExif">
   <title id="titleGuideOtherWindowsExif">Exif Window</title>
-  <para>The Exif window shows the Exif, IPTC and XMP metadata that are present in the image file.</para>
+  <para>The Exif window shows the Exif, IPTC and XMP metadata that are present in the selected image or XMP sidecar file.</para>
+  <para>Use the <guilabel>Source</guilabel> selector to inspect the current file or an associated XMP sidecar. Sidecars named <filename>image.xmp</filename> and <filename>image.ext.xmp</filename> are listed when present, including when grouped with the image. Each source shows only that file's raw metadata; values from different files are not merged. The full path above the selector identifies the displayed source. If no sidecar is available, the selector is disabled. Selecting another image starts with that image's metadata.</para>
   <para>Unlike the other parts of the program, this window shows the "raw" metadata read from the file, without any post-processing. Thus, this window is ideal for metadata debugging.</para>
   <para>
     The Exif pane in the

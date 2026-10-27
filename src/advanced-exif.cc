@@ -21,6 +21,7 @@
 
 #include "advanced-exif.h"
 
+#include <cstring>
 #include <string>
 
 #include <gdk/gdk.h>
@@ -40,6 +41,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "ui-fileops.h"
 #include "ui-misc.h"
 #include "window.h"
 
@@ -83,6 +85,8 @@ struct ExifWin
 	GtkWidget *scrolled;
 	GtkWidget *column_view;
 	GtkWidget *label_file_name;
+	GtkWidget *source;
+	gboolean updating_sources;
 	GtkWidget *search_bar;
 	GtkWidget *search_entry;
 	GtkColumnViewColumn *columns[EXIF_ADVCOL_COUNT];
@@ -94,6 +98,8 @@ struct ExifWin
 };
 
 constexpr gint ADVANCED_EXIF_COLUMN_WIDTHS[] = {90, 260, 200, 100, 80, 260};
+
+constexpr gchar ADVANCED_EXIF_SOURCE_PATHS[] = "advanced-exif-source-paths";
 
 constexpr gchar ADVANCED_EXIF_ROW_DATA[] = "advanced-exif-row-data";
 constexpr gchar ADVANCED_EXIF_COLUMN_DATA[] = "advanced-exif-column-data";
@@ -161,6 +167,34 @@ AdvancedExifRow *advanced_exif_row_new(const gchar *tag, const gchar *name, cons
 
 } // namespace
 
+static const gchar *advanced_exif_source_path(ExifWin *ew)
+{
+	auto *paths = static_cast<GPtrArray *>(g_object_get_data(G_OBJECT(ew->source), ADVANCED_EXIF_SOURCE_PATHS));
+	const guint selected = gtk_drop_down_get_selected(GTK_DROP_DOWN(ew->source));
+	return paths && selected < paths->len ? static_cast<const gchar *>(paths->pdata[selected]) : nullptr;
+}
+
+#if HAVE_EXIV2
+// Inspect sidecars independently of the metadata writing policy for this format.
+static gchar *advanced_exif_sidecar_path(FileData *fd, const gchar *suffix)
+{
+	const gsize basename_length = fd->extension - fd->path;
+	for (GList *work = fd->parent ? fd->parent->sidecar_files : fd->sidecar_files; work; work = work->next)
+		{
+		auto *sidecar = static_cast<FileData *>(work->data);
+		if (std::strncmp(sidecar->path, fd->path, basename_length) == 0 &&
+		    g_ascii_strcasecmp(sidecar->path + basename_length, suffix) == 0 && isfile(sidecar->path))
+			{
+			return g_strdup(sidecar->path);
+			}
+		}
+	g_autofree gchar *basename = g_strndup(fd->path, basename_length);
+	g_autofree gchar *path = g_strconcat(basename, suffix, nullptr);
+	return isfile(path) ? g_steal_pointer(&path) : nullptr;
+}
+
+#endif
+
 static void advanced_exif_update(ExifWin *ew)
 {
 	ExifData *exif;
@@ -168,7 +202,10 @@ static void advanced_exif_update(ExifWin *ew)
 	ExifData *exif_original;
 	ExifItem *item;
 
-	exif = exif_read_fd(ew->fd);
+	const gchar *path = advanced_exif_source_path(ew);
+	gtk_label_set_text(GTK_LABEL(ew->label_file_name), path ? path : "");
+	FileDataRef source = path ? FileData::new_simple(path) : FileDataRef(nullptr);
+	exif = exif_read_fd(source);
 
 	gtk_widget_set_sensitive(ew->scrolled, !!exif);
 
@@ -205,7 +242,7 @@ static void advanced_exif_update(ExifWin *ew)
 		item = exif_get_next_item(exif_original);
 		}
 	g_list_store_splice(ew->store, 0, g_list_model_get_n_items(G_LIST_MODEL(ew->store)), rows->pdata, rows->len);
-	exif_free_fd(ew->fd, exif);
+	exif_free_fd(source, exif);
 
 }
 
@@ -224,6 +261,12 @@ static GdkContentProvider *advanced_exif_dnd_prepare(GtkDragSource *source, gdou
 	return key ? gdk_content_provider_new_typed(G_TYPE_STRING, key) : nullptr;
 }
 
+static void advanced_exif_source_changed(GObject *, GParamSpec *, gpointer data)
+{
+	auto *ew = static_cast<ExifWin *>(data);
+	if (!ew->updating_sources) advanced_exif_update(ew);
+}
+
 void advanced_exif_set_fd(GtkWidget *window, FileData *fd)
 {
 	ExifWin *ew;
@@ -231,12 +274,44 @@ void advanced_exif_set_fd(GtkWidget *window, FileData *fd)
 	ew = static_cast<ExifWin *>(g_object_get_data(G_OBJECT(window), "advanced_exif_data"));
 	if (!ew) return;
 
-	/* store this, advanced view toggle needs to reload data */
+	g_autofree gchar *previous_source = fd && ew->fd && g_strcmp0(fd->path, ew->fd->path) == 0
+	                                  ? g_strdup(advanced_exif_source_path(ew)) : nullptr;
+	// Acquire the new reference before releasing the previous file.
+	FileData *new_fd = file_data_ref(fd);
 	file_data_unref(ew->fd);
-	ew->fd = file_data_ref(fd);
+	ew->fd = new_fd;
 
-	gtk_label_set_text(GTK_LABEL(ew->label_file_name), (ew->fd) ? ew->fd->path : "");
+	g_autoptr(GPtrArray) paths = g_ptr_array_new_with_free_func(g_free);
+	if (fd)
+		{
+		g_ptr_array_add(paths, g_strdup(fd->path));
+#if HAVE_EXIV2
+		if (!file_extension_match(fd->path, ".xmp"))
+			{
+			g_autofree gchar *normal = advanced_exif_sidecar_path(fd, ".xmp");
+			g_autofree gchar *suffix = g_strconcat(fd->extension, ".xmp", nullptr);
+			g_autofree gchar *extended = advanced_exif_sidecar_path(fd, suffix);
+			if (normal) g_ptr_array_add(paths, g_steal_pointer(&normal));
+			if (extended) g_ptr_array_add(paths, g_steal_pointer(&extended));
+			}
+#endif
+		}
 
+	g_autoptr(GtkStringList) names = gtk_string_list_new(nullptr);
+	guint selected = 0;
+	for (guint i = 0; i < paths->len; i++)
+		{
+		auto *path = static_cast<const gchar *>(paths->pdata[i]);
+		gtk_string_list_append(names, filename_from_path(path));
+		if (g_strcmp0(path, previous_source) == 0) selected = i;
+		}
+	ew->updating_sources = TRUE;
+	g_object_set_data_full(G_OBJECT(ew->source), ADVANCED_EXIF_SOURCE_PATHS, g_ptr_array_ref(paths),
+	                      [](gpointer data) { g_ptr_array_unref(static_cast<GPtrArray *>(data)); });
+	gtk_drop_down_set_model(GTK_DROP_DOWN(ew->source), G_LIST_MODEL(names));
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(ew->source), paths->len ? selected : GTK_INVALID_LIST_POSITION);
+	gtk_widget_set_sensitive(ew->source, paths->len > 1);
+	ew->updating_sources = FALSE;
 	advanced_exif_update(ew);
 }
 
@@ -455,6 +530,7 @@ static void advanced_exif_close_cb(GSimpleAction *, GVariant *, gpointer data)
 	if (!ew) return;
 
 	advanced_exif_window_get_geometry(ew);
+	g_signal_handlers_disconnect_by_data(ew->source, ew);
 	file_data_unref(ew->fd);
 	g_clear_object(&ew->selection);
 	g_clear_object(&ew->store);
@@ -471,6 +547,7 @@ static gboolean advanced_exif_delete_cb(GtkWidget *, gpointer data)
 	if (!ew) return FALSE;
 
 	advanced_exif_window_get_geometry(ew);
+	g_signal_handlers_disconnect_by_data(ew->source, ew);
 	file_data_unref(ew->fd);
 	g_clear_object(&ew->selection);
 	g_clear_object(&ew->store);
@@ -492,7 +569,7 @@ static void exif_window_help_cb(GtkWidget *, gpointer)
 
 static void exif_window_close(ExifWin *ew)
 {
-	gtk_window_destroy(GTK_WINDOW(ew->window));
+	gtk_window_close(GTK_WINDOW(ew->window));
 }
 
 static void exif_window_close_cb(GtkWidget *, gpointer data)
@@ -556,6 +633,17 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_box_append(GTK_BOX(box), ew->label_file_name);
 
 	gtk_box_append(GTK_BOX(vbox), box);
+
+	GtkWidget *source_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	GtkWidget *source_label = gtk_label_new_with_mnemonic(_("_Source:"));
+	ew->source = gtk_drop_down_new(nullptr, nullptr);
+	gtk_label_set_mnemonic_widget(GTK_LABEL(source_label), ew->source);
+	gtk_widget_set_sensitive(ew->source, FALSE);
+	gtk_widget_set_tooltip_text(ew->source, _("Choose the file whose raw metadata is displayed"));
+	gtk_box_append(GTK_BOX(source_box), source_label);
+	gtk_box_append(GTK_BOX(source_box), ew->source);
+	gtk_box_append(GTK_BOX(vbox), source_box);
+	g_signal_connect(ew->source, "notify::selected", G_CALLBACK(advanced_exif_source_changed), ew);
 
 	ew->search_bar = gtk_search_bar_new();
 	ew->search_entry = gtk_search_entry_new();

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <config.h>
 #include <glib/gstdio.h>
@@ -15,6 +16,7 @@
 #include "accelerators.h"
 #include "advanced-exif.h"
 #include "filedata.h"
+#include "filefilter.h"
 #include "layout.h"
 #include "options.h"
 
@@ -80,10 +82,21 @@ protected:
 		if (window) gtk_window_close(GTK_WINDOW(window));
 		image.reset(nullptr);
 		g_application_set_default(previous_app);
+		for (const auto &extra : extra_paths) g_remove(extra.c_str());
 		if (path) g_remove(path);
 		if (directory) g_rmdir(directory);
 		g_free(path);
 		g_free(directory);
+	}
+
+	std::string write_sidecar(const gchar *name, const gchar *text)
+	{
+		g_autofree gchar *filename = g_build_filename(directory, name, nullptr);
+		extra_paths.emplace_back(filename);
+		auto metadata = Exiv2::ImageFactory::create(Exiv2::ImageType::xmp, filename);
+		metadata->xmpData()["Xmp.gqscroll.Value000"] = text;
+		metadata->writeMetadata();
+		return filename;
 	}
 
 	static std::string value(int index)
@@ -148,6 +161,7 @@ protected:
 	gchar *directory = nullptr;
 	gchar *path = nullptr;
 	FileDataRef image{nullptr};
+	std::vector<std::string> extra_paths;
 };
 
 TEST_F(AdvancedExif, CellsUseBoundedSingleLinePreviewsAndStableColumnWidths)
@@ -196,6 +210,89 @@ TEST_F(AdvancedExif, ReloadPublishesRowsInOneBatch)
 	EXPECT_EQ(g_list_model_get_n_items(G_LIST_MODEL(model)), 0U);
 }
 
+TEST_F(AdvancedExif, GroupedJpegAndSidecarCanBeInspectedSeparately)
+{
+	filter_add_defaults();
+	filter_rebuild();
+	struct RestoreGrouping
+	{
+		gchar *saved = g_strdup(options->sidecar.ext);
+		~RestoreGrouping() { sidecar_ext_parse(saved); g_free(saved); }
+	} restore;
+	sidecar_ext_parse(".jpg;.xmp");
+	g_autofree gchar *jpeg_path = g_build_filename(directory, "empty.jpg", nullptr);
+	extra_paths.emplace_back(jpeg_path);
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 16, 16);
+	gdk_pixbuf_fill(pixels, 0x123456ff);
+	ASSERT_TRUE(gdk_pixbuf_save(pixels, jpeg_path, "jpeg", nullptr, nullptr));
+	const auto sidecar_path = write_sidecar("empty.xmp", "SIDECAR-ONLY");
+	FileDataRef jpeg = FileData::new_group(jpeg_path);
+	ASSERT_NE(jpeg->sidecar_files, nullptr);
+	ASSERT_TRUE(filter_name_is_writable(jpeg_path));
+	advanced_exif_set_fd(window, jpeg);
+	settle();
+	auto *source = GTK_DROP_DOWN(find_widget(window, GTK_TYPE_DROP_DOWN));
+	ASSERT_NE(source, nullptr);
+	ASSERT_EQ(g_list_model_get_n_items(gtk_drop_down_get_model(source)), 2U);
+	EXPECT_EQ(gtk_drop_down_get_selected(source), 0U);
+	auto *rows = G_LIST_MODEL(gtk_column_view_get_model(GTK_COLUMN_VIEW(view)));
+	EXPECT_EQ(g_list_model_get_n_items(rows), 0U);
+	gtk_drop_down_set_selected(source, 1);
+	settle();
+	auto *label = find_widget(view, GTK_TYPE_LABEL, "SIDECAR-ONLY");
+	ASSERT_NE(label, nullptr);
+	EXPECT_NE(find_widget(window, GTK_TYPE_LABEL, sidecar_path.c_str()), nullptr);
+	copy_value(label);
+	expect_clipboard("SIDECAR-ONLY");
+	gtk_drop_down_set_selected(source, 0);
+	EXPECT_EQ(g_list_model_get_n_items(rows), 0U);
+}
+
+TEST_F(AdvancedExif, BothSidecarNamingSchemesAndSourceResetAreSupported)
+{
+	const auto normal = write_sidecar("metadata.xmp", "NORMAL-SIDECAR");
+	const auto extended = write_sidecar("metadata.png.xmp", "EXTENDED-SIDECAR");
+	advanced_exif_set_fd(window, image);
+	auto *source = GTK_DROP_DOWN(find_widget(window, GTK_TYPE_DROP_DOWN));
+	ASSERT_NE(source, nullptr);
+	ASSERT_EQ(g_list_model_get_n_items(gtk_drop_down_get_model(source)), 3U);
+	gtk_drop_down_set_selected(source, 1);
+	settle();
+	EXPECT_NE(find_widget(view, GTK_TYPE_LABEL, "NORMAL-SIDECAR"), nullptr);
+	advanced_exif_set_fd(window, image);
+	EXPECT_EQ(gtk_drop_down_get_selected(source), 1U);
+	gtk_drop_down_set_selected(source, 2);
+	settle();
+	EXPECT_NE(find_widget(view, GTK_TYPE_LABEL, "EXTENDED-SIDECAR"), nullptr);
+	ASSERT_EQ(g_remove(extended.c_str()), 0);
+	advanced_exif_set_fd(window, image);
+	EXPECT_EQ(gtk_drop_down_get_selected(source), 0U);
+	EXPECT_EQ(g_list_model_get_n_items(gtk_drop_down_get_model(source)), 2U);
+	ASSERT_EQ(g_remove(normal.c_str()), 0);
+	advanced_exif_set_fd(window, image);
+	EXPECT_EQ(g_list_model_get_n_items(gtk_drop_down_get_model(source)), 1U);
+	EXPECT_FALSE(gtk_widget_get_sensitive(GTK_WIDGET(source)));
+	advanced_exif_set_fd(window, nullptr);
+	EXPECT_EQ(g_list_model_get_n_items(gtk_drop_down_get_model(source)), 0U);
+	EXPECT_EQ(g_list_model_get_n_items(G_LIST_MODEL(gtk_column_view_get_model(GTK_COLUMN_VIEW(view)))), 0U);
+}
+
+TEST_F(AdvancedExif, UngroupedSidecarRemainsDirectlyInspectable)
+{
+	const auto sidecar_path = write_sidecar("standalone.xmp", "STANDALONE-SIDECAR");
+	FileDataRef sidecar = FileData::new_simple(sidecar_path.c_str());
+	advanced_exif_set_fd(window, sidecar);
+	settle();
+	auto *source = GTK_DROP_DOWN(find_widget(window, GTK_TYPE_DROP_DOWN));
+	ASSERT_NE(source, nullptr);
+	EXPECT_EQ(g_list_model_get_n_items(gtk_drop_down_get_model(source)), 1U);
+	EXPECT_FALSE(gtk_widget_get_sensitive(GTK_WIDGET(source)));
+	EXPECT_NE(find_widget(view, GTK_TYPE_LABEL, "STANDALONE-SIDECAR"), nullptr);
+	advanced_exif_set_fd(window, image);
+	EXPECT_EQ(gtk_drop_down_get_selected(source), 0U);
+	EXPECT_NE(find_widget(window, GTK_TYPE_LABEL, path), nullptr);
+}
+
 TEST_F(AdvancedExif, RepeatedDownInputContinuesAcrossRecycledRows)
 {
 	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
@@ -216,7 +313,7 @@ TEST_F(AdvancedExif, RepeatedDownInputContinuesAcrossRecycledRows)
 		}, &frames, nullptr);
 	g_autoptr(GSubprocess) process = g_subprocess_new(G_SUBPROCESS_FLAGS_NONE, nullptr, xdotool,
 		"search", "--name", "^Geeqie Exif scrolling test$", "windowfocus", "--sync",
-		"key", "--clearmodifiers", "--repeat", "180", "--delay", "5", "Down", nullptr);
+		"key", "--clearmodifiers", "--repeat", "180", "--delay", "25", "Down", nullptr);
 	if (process)
 		{
 		struct ProcessResult { bool done = false; bool success = false; };
@@ -244,6 +341,13 @@ TEST_F(AdvancedExif, RepeatedDownInputContinuesAcrossRecycledRows)
 		EXPECT_TRUE(release && g_subprocess_wait_check(release, nullptr, nullptr));
 		EXPECT_TRUE(result->done);
 		EXPECT_TRUE(result->success);
+		}
+	// Process any key events still queued after xdotool has exited.
+	const gint64 input_deadline = g_get_monotonic_time() + (2 * G_TIME_SPAN_SECOND);
+	while (process && gtk_single_selection_get_selected(selection) < 150 && g_get_monotonic_time() < input_deadline)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		g_usleep(1000);
 		}
 	gtk_widget_remove_tick_callback(view, tick);
 	ASSERT_NE(process, nullptr);
