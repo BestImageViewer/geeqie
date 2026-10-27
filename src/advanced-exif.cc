@@ -69,6 +69,7 @@ struct AdvancedExifRow
 {
 	GObject parent_instance;
 	gchar *values[EXIF_ADVCOL_COUNT];
+	gchar *display_values[EXIF_ADVCOL_COUNT];
 };
 
 struct AdvancedExifRowClass
@@ -92,7 +93,7 @@ struct ExifWin
 	FileData *fd;
 };
 
-constexpr gint ADVANCED_EXIF_DATA_COLUMN_WIDTH = 200;
+constexpr gint ADVANCED_EXIF_COLUMN_WIDTHS[] = {90, 260, 200, 100, 80, 260};
 
 constexpr gchar ADVANCED_EXIF_ROW_DATA[] = "advanced-exif-row-data";
 constexpr gchar ADVANCED_EXIF_COLUMN_DATA[] = "advanced-exif-column-data";
@@ -107,6 +108,7 @@ void advanced_exif_row_finalize(GObject *object)
 	for (gint n = EXIF_ADVCOL_TAG; n < EXIF_ADVCOL_COUNT; n++)
 		{
 		g_free(row->values[n]);
+		g_free(row->display_values[n]);
 		}
 
 	G_OBJECT_CLASS(advanced_exif_row_parent_class)->finalize(object);
@@ -122,6 +124,21 @@ void advanced_exif_row_init(AdvancedExifRow *)
 {
 }
 
+// Bound Pango layout work when recycled cells contain large metadata values.
+gchar *advanced_exif_preview(const gchar *value)
+{
+	GString *preview = g_string_sized_new(512);
+	const gchar *next = value ? value : "";
+	for (gint count = 0; *next && count < 512; count++)
+		{
+		const gunichar character = g_utf8_get_char(next);
+		g_string_append_unichar(preview, g_unichar_isspace(character) || g_unichar_iscntrl(character) ? ' ' : character);
+		next = g_utf8_next_char(next);
+		}
+	if (*next) g_string_append(preview, "…");
+	return g_string_free(preview, FALSE);
+}
+
 AdvancedExifRow *advanced_exif_row_new(const gchar *tag, const gchar *name, const gchar *value,
                                        const gchar *format, const gchar *elements, const gchar *description)
 {
@@ -133,6 +150,11 @@ AdvancedExifRow *advanced_exif_row_new(const gchar *tag, const gchar *name, cons
 	row->values[EXIF_ADVCOL_FORMAT] = g_strdup(format);
 	row->values[EXIF_ADVCOL_ELEMENTS] = g_strdup(elements);
 	row->values[EXIF_ADVCOL_DESCRIPTION] = g_strdup(description);
+
+	for (gint n = 0; n < EXIF_ADVCOL_COUNT; n++)
+		{
+		row->display_values[n] = advanced_exif_preview(row->values[n]);
+		}
 
 	return row;
 }
@@ -150,11 +172,15 @@ static void advanced_exif_update(ExifWin *ew)
 
 	gtk_widget_set_sensitive(ew->scrolled, !!exif);
 
-	if (!exif) return;
+	if (!exif)
+		{
+		g_list_store_remove_all(ew->store);
+		return;
+		}
 
 	exif_original = exif_get_original(exif);
 
-	g_list_store_remove_all(ew->store);
+	g_autoptr(GPtrArray) rows = g_ptr_array_new_with_free_func(g_object_unref);
 
 	item = exif_get_first_item(exif_original);
 	while (item)
@@ -175,17 +201,12 @@ static void advanced_exif_update(ExifWin *ew)
 		const std::string elements_text = std::to_string(elements);
 		AdvancedExifRow *row = advanced_exif_row_new(tag, tag_name, utf8_text, format,
 		                                                elements_text.c_str(), description);
-		g_list_store_append(ew->store, row);
-		g_object_unref(row);
+		g_ptr_array_add(rows, row);
 		item = exif_get_next_item(exif_original);
 		}
+	g_list_store_splice(ew->store, 0, g_list_model_get_n_items(G_LIST_MODEL(ew->store)), rows->pdata, rows->len);
 	exif_free_fd(ew->fd, exif);
 
-}
-
-static void advanced_exif_clear(ExifWin *ew)
-{
-	g_list_store_remove_all(ew->store);
 }
 
 static GdkContentProvider *advanced_exif_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer data)
@@ -216,7 +237,6 @@ void advanced_exif_set_fd(GtkWidget *window, FileData *fd)
 
 	gtk_label_set_text(GTK_LABEL(ew->label_file_name), (ew->fd) ? ew->fd->path : "");
 
-	advanced_exif_clear(ew);
 	advanced_exif_update(ew);
 }
 
@@ -244,6 +264,7 @@ static void advanced_exif_factory_setup(GtkSignalListItemFactory *factory, GtkLi
 	auto *ew = static_cast<ExifWin *>(data);
 	GtkWidget *label = gtk_label_new(nullptr);
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+	gtk_label_set_single_line_mode(GTK_LABEL(label), TRUE);
 	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
 	gtk_widget_set_hexpand(label, TRUE);
 	g_object_set_data(G_OBJECT(label), ADVANCED_EXIF_COLUMN_DATA,
@@ -269,7 +290,7 @@ static void advanced_exif_factory_bind(GtkSignalListItemFactory *, GtkListItem *
 	auto *row = static_cast<AdvancedExifRow *>(gtk_list_item_get_item(list_item));
 	const gint column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(label), ADVANCED_EXIF_COLUMN_DATA));
 
-	gtk_label_set_text(GTK_LABEL(label), row->values[column]);
+	gtk_label_set_text(GTK_LABEL(label), row->display_values[column]);
 	g_object_set_data(G_OBJECT(label), ADVANCED_EXIF_ROW_DATA, row);
 }
 
@@ -295,7 +316,7 @@ static gint advanced_exif_sort_cb(gconstpointer item_a, gconstpointer item_b, gp
 }
 
 static GtkColumnViewColumn *advanced_exif_add_column(ExifWin *ew, const gchar *title,
-                                                     gint column_id, gboolean sizable)
+                                                     gint column_id)
 {
 	GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
 	g_object_set_data(G_OBJECT(factory), ADVANCED_EXIF_COLUMN_DATA, GINT_TO_POINTER(column_id));
@@ -305,7 +326,7 @@ static GtkColumnViewColumn *advanced_exif_add_column(ExifWin *ew, const gchar *t
 
 	GtkColumnViewColumn *column = gtk_column_view_column_new(title, factory);
 	gtk_column_view_column_set_resizable(column, TRUE);
-	if (sizable) gtk_column_view_column_set_fixed_width(column, ADVANCED_EXIF_DATA_COLUMN_WIDTH);
+	gtk_column_view_column_set_fixed_width(column, ADVANCED_EXIF_COLUMN_WIDTHS[column_id]);
 
 	GtkSorter *sorter = GTK_SORTER(gtk_custom_sorter_new(advanced_exif_sort_cb,
 	                                                   GINT_TO_POINTER(column_id), nullptr));
@@ -565,12 +586,12 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_single_selection_set_can_unselect(ew->selection, TRUE);
 	gtk_column_view_set_model(GTK_COLUMN_VIEW(ew->column_view), GTK_SELECTION_MODEL(ew->selection));
 
-	advanced_exif_add_column(ew, _("Description"), EXIF_ADVCOL_DESCRIPTION, FALSE);
-	advanced_exif_add_column(ew, _("Value"), EXIF_ADVCOL_VALUE, TRUE);
-	GtkColumnViewColumn *name_column = advanced_exif_add_column(ew, _("Name"), EXIF_ADVCOL_NAME, FALSE);
-	advanced_exif_add_column(ew, _("Tag"), EXIF_ADVCOL_TAG, FALSE);
-	advanced_exif_add_column(ew, _("Format"), EXIF_ADVCOL_FORMAT, FALSE);
-	advanced_exif_add_column(ew, _("Elements"), EXIF_ADVCOL_ELEMENTS, FALSE);
+	advanced_exif_add_column(ew, _("Description"), EXIF_ADVCOL_DESCRIPTION);
+	advanced_exif_add_column(ew, _("Value"), EXIF_ADVCOL_VALUE);
+	GtkColumnViewColumn *name_column = advanced_exif_add_column(ew, _("Name"), EXIF_ADVCOL_NAME);
+	advanced_exif_add_column(ew, _("Tag"), EXIF_ADVCOL_TAG);
+	advanced_exif_add_column(ew, _("Format"), EXIF_ADVCOL_FORMAT);
+	advanced_exif_add_column(ew, _("Elements"), EXIF_ADVCOL_ELEMENTS);
 	gtk_column_view_sort_by_column(GTK_COLUMN_VIEW(ew->column_view), name_column, GTK_SORT_ASCENDING);
 
 	ew->scrolled = gtk_scrolled_window_new();

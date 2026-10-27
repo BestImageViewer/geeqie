@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 unit_test_sources = files(
+'advanced-exif.cc',
 'bar-sort.cc',
 'cache.cc',
 'cache-maint.cc',

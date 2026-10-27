@@ -16,5 +16,6 @@
   <para>
     A search of the Exif data can be initiated by clicking anywhere on the column you wish to search, and then type <code>Ctrl + F</code> or press any alpha-numeric key. The search is case-insensitive
   </para>
+  <para>Cells display single-line previews of up to 512 characters. Clicking a cell copies its complete value to the primary selection, including any text omitted from the preview. Searches also use the complete value. Column widths can be adjusted by dragging their header dividers.</para>
   <para />
 </section>
