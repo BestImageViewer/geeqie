@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include <filesystem>
+#include <fstream>
 #include <string>
 
 #include <glib/gstdio.h>
@@ -225,5 +226,61 @@ TEST_P(SymlinkTransfer, RegularFileTransfersStillWork)
 }
 
 INSTANTIATE_TEST_SUITE_P(CopyAndMove, SymlinkTransfer, testing::Bool());
+
+class LongFilenameCopy : public testing::TestWithParam<bool>
+{
+protected:
+	void SetUp() override
+	{
+		g_autofree gchar *directory = g_dir_make_tmp("geeqie-long-filename-XXXXXX", nullptr);
+		ASSERT_NE(directory, nullptr);
+		root = directory;
+		ASSERT_EQ(g_mkdir((root / "destination").c_str(), 0700), 0);
+	}
+
+	void TearDown() override
+	{
+		std::error_code error;
+		if (!root.empty()) std::filesystem::remove_all(root, error);
+	}
+
+	std::filesystem::path root;
+};
+
+TEST_P(LongFilenameCopy, PreservesMaximumLengthNameAndContents)
+{
+	const long limit = pathconf(root.c_str(), _PC_NAME_MAX);
+	if (limit < 32 || limit > 4096) GTEST_SKIP() << "Requires a bounded filename length limit";
+	std::string name;
+	if (GetParam())
+		{
+		// Use complete UTF-8 characters while filling the byte limit exactly.
+		while (name.size() + 2 <= static_cast<size_t>(limit) - 4) name += "é";
+		}
+	name.append(static_cast<size_t>(limit) - 4 - name.size(), 'a');
+	name += ".jpg";
+	const auto source = root / name;
+	const auto destination = root / "destination" / name;
+	std::ofstream stream(source, std::ios::binary);
+	stream << "original contents";
+	stream.close();
+	ASSERT_TRUE(stream.good());
+	ASSERT_TRUE(copy_file(source.c_str(), destination.c_str()));
+	for (const auto &path : {source, destination})
+		{
+		g_autofree gchar *contents = nullptr;
+		ASSERT_TRUE(g_file_get_contents(path.c_str(), &contents, nullptr, nullptr));
+		EXPECT_STREQ(contents, "original contents");
+		}
+	guint entries = 0;
+	for (const auto &entry : std::filesystem::directory_iterator(root / "destination"))
+		{
+		EXPECT_EQ(entry.path().filename().native(), name);
+		++entries;
+		}
+	EXPECT_EQ(entries, 1U);
+}
+
+INSTANTIATE_TEST_SUITE_P(AsciiAndUtf8, LongFilenameCopy, testing::Bool());
 
 } // namespace
