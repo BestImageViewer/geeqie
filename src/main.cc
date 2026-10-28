@@ -36,10 +36,6 @@
 
 #include <config.h>
 
-#if HAVE_EXECINFO_H
-#include <execinfo.h>
-#endif
-
 #include <gdk/gdk.h>
 #include <gio/gio.h>
 #include <glib-object.h>
@@ -76,6 +72,7 @@
 #include "metadata.h"
 #include "options.h"
 #include "pixbuf-util.h"
+#include "signal-handler.h"
 #include "third-party/whereami.h"
 #include "thumb.h"
 #include "ui-bookmark.h"
@@ -204,73 +201,6 @@ GOptionEntry command_line_options_cache_maintenance[] =
 	{ "quit"             , 'q', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("stop cache maintenance")                         , nullptr },
 	{ nullptr            ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, nullptr                                             , nullptr },
 };
-
-const gchar *get_signal_name(int signo)
-{
-	static const struct signals
-	{
-		gint sig_no;
-		const gchar *sig_name;
-	} signals_list[6] = {
-		{ SIGABRT, "Abort" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-		{ SIGBUS, "Bus error" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-		{ SIGFPE, "Floating-point exception" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-		{ SIGILL, "Illegal instruction" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-		{ SIGIOT, "IOT trap" }, // @todo Same value as SIGABRT. Remove SIGIOT?
-		{ SIGSEGV, "Invalid memory reference" }, // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-	};
-	const auto it = std::find_if(std::cbegin(signals_list), std::cend(signals_list),
-	                             [signo](const signals &s){ return s.sig_no == signo; });
-	return (it != std::cend(signals_list)) ? it->sig_name : "Unknown signal"; // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-}
-
-void sig_handler_cb(int signo, siginfo_t *info, void *)
-{
-	[[maybe_unused]] ssize_t len = write(STDERR_FILENO, "Geeqie fatal error\n", 19); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-
-	const gchar *signal_name = get_signal_name(signo);
-	len = write(STDERR_FILENO, "Signal: ", 8); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-	len = write(STDERR_FILENO, signal_name, strlen(signal_name));
-	len = write(STDERR_FILENO, "\n", 1);
-
-	const gchar *code_descr = (info->si_code == SEGV_MAPERR) ? "Address not mapped" : "Invalid permissions"; // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-	len = write(STDERR_FILENO, "Code: ", 6); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-	len = write(STDERR_FILENO, code_descr, strlen(code_descr));
-	len = write(STDERR_FILENO, "\n", 1);
-
-	len = write(STDERR_FILENO, "Address: 0x", 11); // NOTRANSLATE: Command-line identifier or low-level crash diagnostic.
-	if (info->si_addr == nullptr)
-		{
-		len = write(STDERR_FILENO, "0", 1);
-		}
-	else
-		{
-		/* Assume the address is 64-bit */
-		const gchar hex_char[16] = { '0', '1', '2', '3', '4', '5', '6', '7',
-		                             '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-		auto addr = reinterpret_cast<guint64>(info->si_addr);
-
-		for (gint i = 0; i < 16; i++)
-			{
-			guint64 char_index = addr & 0xf000000000000000;
-			char_index = char_index >> 60;
-			addr = addr << 4;
-
-			len = write(STDERR_FILENO, &hex_char[char_index], 1);
-			}
-		}
-	len = write(STDERR_FILENO, "\n", 1);
-
-#if HAVE_EXECINFO_H
-	void *bt[1024];
-	const int bt_size = backtrace(bt, 1024);
-	backtrace_symbols_fd(bt, bt_size, STDERR_FILENO);
-#endif
-
-	BACKTRACE(DEBUG);
-
-	exit(EXIT_FAILURE);
-}
 
 gboolean search_command_line_for_option(const gint argc, const gchar* const argv[], const gchar* option_name)
 {
@@ -504,49 +434,6 @@ void exit_program_write_metadata_cb(gint success, const gchar *)
 	if (success) exit_program();
 }
 
-/* This code attempts to handle situation when a file mmaped by image_loader
- * or by exif loader is truncated by some other process.
- * This code is incorrect according to POSIX, because:
- *
- *   mmap is not async-signal-safe and thus may not be called from a signal handler
- *
- *   mmap must be called with a valid file descriptor.  POSIX requires that
- *   a fildes argument of -1 must cause mmap to return EBADF.
- *
- * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion of
- * an alternative approach.
- */
-/** @FIXME this probably needs some better ifdefs. Please report any compilation problems */
-/** @FIXME This section needs revising */
-
-#if defined(SIGBUS) && defined(SA_SIGINFO)
-[[maybe_unused]] void sigbus_handler_cb(int, [[maybe_unused]] siginfo_t *info, void *)
-{
-	/*
-	 * @FIXME Design and implement a POSIX-acceptable approach,
-	 * after first documenting the sitations where SIGBUS occurs.
-	 * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion
-	 */
-
-	DEBUG_1("SIGBUS %p NOT HANDLED", info->si_addr);
-	exit(EXIT_FAILURE);
-}
-#endif
-
-void setup_sig_handler()
-{
-	struct sigaction sigsegv_action;
-	sigfillset(&sigsegv_action.sa_mask);
-	sigsegv_action.sa_sigaction = sig_handler_cb;
-	sigsegv_action.sa_flags = SA_SIGINFO;
-
-	sigaction(SIGABRT, &sigsegv_action, nullptr);
-	sigaction(SIGBUS, &sigsegv_action, nullptr);
-	sigaction(SIGFPE, &sigsegv_action, nullptr);
-	sigaction(SIGILL, &sigsegv_action, nullptr);
-	sigaction(SIGIOT, &sigsegv_action, nullptr);
-	sigaction(SIGSEGV, &sigsegv_action, nullptr);
-}
 
 } // namespace
 

@@ -42,6 +42,7 @@ unit_test_sources = files(
 'print-image.cc',
 'renderer-tiles.cc',
 'search.cc',
+'signal-handler.cc',
 'similar.cc',
 'slideshow.cc',
 'thumbnail-replacement.cc',

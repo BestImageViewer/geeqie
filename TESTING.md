@@ -198,3 +198,16 @@ are covered in the functional test configuration.
 These checks also require `xvfb` for the GTK UI builder validator to run.
 
 See `build-aux/test-ancillary-files.sh` for more details.
+
+### Fatal-signal handling
+
+Fatal signals print a short diagnostic to standard error, then terminate with
+that signal. The operating system may record a core dump, depending on the
+system configuration. The handler does not run normal exit callbacks or C++
+static destructors, and does not attempt an in-process backtrace: allocator,
+logging, and stack-unwinding code can be unsafe after a crash.
+
+For a backtrace, run a debug build under GDB and use `thread apply all bt` when
+it stops at the fault, or inspect the core dump with a debugger. Signal-handler
+regression tests run in child processes with core dumps disabled and verify
+termination from both the main thread and a worker thread.
