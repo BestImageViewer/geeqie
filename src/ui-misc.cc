@@ -667,13 +667,6 @@ struct DateSelection
 	GtkWidget *calendar;
 };
 
-static void date_selection_popup_hide(DateSelection *ds)
-{
-	if (!ds->popover) return;
-
-	gtk_popover_popdown(GTK_POPOVER(ds->popover));
-}
-
 static void date_selection_popup_sync(DateSelection *ds)
 {
 	g_autoptr(GDateTime) date_selected = gtk_calendar_get_date(GTK_CALENDAR(ds->calendar));
@@ -729,7 +722,7 @@ static void date_selection_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
-	date_selection_popup_hide(ds);
+	// The menu button owns and disposes of its popover.
 
 	g_free(ds);
 }

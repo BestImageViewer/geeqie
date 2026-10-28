@@ -152,6 +152,9 @@ struct SearchUi
 {
 	GtkWidget *window;
 
+	GtkWidget *notebook;
+	GtkWidget *criteria_label;
+	GtkWidget *results_label;
 	GtkWidget *box_search; // main container
 
 	// "Search" row
@@ -541,6 +544,8 @@ static void search_status_update(SearchData *sd)
 	gint64 s_bytes;
 
 	t = search_result_count(sd, &t_bytes);
+	g_autofree gchar *results = g_strdup_printf(_("Results (%d)"), t);
+	gtk_label_set_text(GTK_LABEL(sd->ui.results_label), results);
 	s = search_result_selection_count(sd, &s_bytes);
 
 	g_autofree gchar *tt = text_from_size_abrev(t_bytes);
@@ -708,7 +713,7 @@ static GList *search_result_refine_list(SearchData *sd)
 	return g_list_reverse(list);
 }
 
-static void search_result_clear(SearchData *sd)
+static void search_result_clear(SearchData *sd, gboolean update_status = TRUE)
 {
 	while (g_list_model_get_n_items(G_LIST_MODEL(sd->ui.result_store)) > 0)
 		{
@@ -725,7 +730,7 @@ static void search_result_clear(SearchData *sd)
 	sd->thumb_loader = nullptr;
 	sd->thumb_fd = nullptr;
 
-	search_status_update(sd);
+	if (update_status) search_status_update(sd);
 }
 
 static void search_result_remove_item(SearchData *sd, MatchFileData *mfd, guint position)
@@ -1544,7 +1549,7 @@ static void search_buffer_flush(SearchData *sd)
 	sd->search_buffer_count = 0;
 }
 
-static void search_stop(SearchData *sd, gboolean focus_results = FALSE)
+static void search_stop(SearchData *sd, gboolean focus_results = FALSE, gboolean update_ui = TRUE)
 {
 	g_clear_handle_id(&sd->search_idle_id, g_source_remove);
 
@@ -1566,6 +1571,7 @@ static void search_stop(SearchData *sd, gboolean focus_results = FALSE)
 	sd->search_file_list = nullptr;
 
 	sd->match_broken_enable = FALSE;
+	if (!update_ui) return;
 
 	gtk_widget_set_sensitive(sd->ui.box_search, TRUE);
 	gtk_spinner_stop(GTK_SPINNER(sd->ui.spinner));
@@ -1574,7 +1580,8 @@ static void search_stop(SearchData *sd, gboolean focus_results = FALSE)
 	search_progress_update(sd, TRUE, -1.0);
 	search_status_update(sd);
 
-	if (focus_results && g_list_model_get_n_items(G_LIST_MODEL(sd->ui.result_selection)) > 0)
+	if (focus_results && gtk_notebook_get_current_page(GTK_NOTEBOOK(sd->ui.notebook)) == 1 &&
+	    g_list_model_get_n_items(G_LIST_MODEL(sd->ui.result_selection)) > 0)
 		{
 		gtk_selection_model_select_item(GTK_SELECTION_MODEL(sd->ui.result_selection), 0, TRUE);
 		gtk_widget_grab_focus(sd->ui.result_view);
@@ -2219,6 +2226,8 @@ static void search_similarity_load_done_cb(ImageLoader *, gpointer data)
 
 static GRegex *create_search_regex(const gchar *pattern)
 {
+	if (!pattern) return nullptr;
+
 	g_autoptr(GError) error = nullptr;
 	GRegex *regex = g_regex_new(pattern, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
 	if (error)
@@ -2232,6 +2241,7 @@ static GRegex *create_search_regex(const gchar *pattern)
 
 static void search_start(SearchData *sd)
 {
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(sd->ui.notebook), 1);
 	search_stop(sd);
 	search_result_clear(sd);
 
@@ -2240,7 +2250,7 @@ static void search_start(SearchData *sd)
 		sd->search_folder_list = g_list_prepend(sd->search_folder_list, file_data_ref(sd->search_dir_fd));
 		}
 
-	if (!sd->search_name_match_case)
+	if (sd->search_name && !sd->search_name_match_case)
 		{
 		/* convert to lowercase here, so that this is only done once per search */
 		gchar *tmp = g_utf8_strdown(sd->search_name, -1);
@@ -2248,7 +2258,7 @@ static void search_start(SearchData *sd)
 		sd->search_name = tmp;
 		}
 
-	if (!sd->search_exif_match_case)
+	if (sd->search_exif_value && !sd->search_exif_match_case)
 		{
 		/* convert to lowercase here, so that this is only done once per search */
 		gchar *tmp = g_utf8_strdown(sd->search_exif_value, -1);
@@ -2262,7 +2272,7 @@ static void search_start(SearchData *sd)
 		}
 	sd->search_name_regex = create_search_regex(sd->search_name);
 
-	if (!sd->search_comment_match_case)
+	if (sd->search_comment && !sd->search_comment_match_case)
 		{
 		/* convert to lowercase here, so that this is only done once per search */
 		gchar *tmp = g_utf8_strdown(sd->search_comment, -1);
@@ -2924,12 +2934,30 @@ static GtkWidget *menu_choice(GtkWidget *box, const gchar *text, gboolean *value
 	return hbox;
 }
 
+static void search_criteria_summary(SearchData *sd)
+{
+	guint active = 0;
+	for (auto *row = gtk_widget_get_first_child(sd->ui.box_search); row; row = gtk_widget_get_next_sibling(row))
+		{
+		auto *check = gtk_widget_get_first_child(row);
+		if (GTK_IS_CHECK_BUTTON(check) && gtk_check_button_get_active(GTK_CHECK_BUTTON(check))) ++active;
+		}
+	g_autofree gchar *text = g_strdup_printf(_("Criteria (%u active)"), active);
+	gtk_label_set_text(GTK_LABEL(sd->ui.criteria_label), text);
+}
+
+static void search_criteria_check_cb(GtkCheckButton *, gpointer data)
+{
+	search_criteria_summary(static_cast<SearchData *>(data));
+}
+
 static void search_window_get_geometry(SearchData *sd)
 {
 	LayoutWindow *lw = get_current_layout();
 	if (!sd || !lw) return;
 
 	lw->options.search_window = widget_get_position_geometry(sd->ui.window);
+
 }
 
 static void search_window_close_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -2984,8 +3012,9 @@ static void search_window_destroy_cb(GtkWidget *, gpointer data)
 	g_list_free_full(sd->search_buffer_list, mfd_fd_unref);
 	sd->search_buffer_list = nullptr;
 
-	search_stop(sd);
-	search_result_clear(sd);
+	// Child widgets may already be disposed when the window emits destroy.
+	search_stop(sd, FALSE, FALSE);
+	search_result_clear(sd, FALSE);
 
 	g_idle_remove_by_data(sd);
 
@@ -3127,7 +3156,16 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_margin_end(vbox, PREF_PAD_GAP);
 	gtk_window_set_child(GTK_WINDOW(sd->ui.window), vbox);
 
-	sd->ui.box_search = pref_box_new(vbox, FALSE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	sd->ui.notebook = gtk_notebook_new();
+	gtk_widget_set_vexpand(sd->ui.notebook, TRUE);
+	gtk_widget_set_hexpand(sd->ui.notebook, TRUE);
+	gtk_box_append(GTK_BOX(vbox), sd->ui.notebook);
+	GtkWidget *criteria_scrolled = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(criteria_scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	sd->ui.criteria_label = gtk_label_new(nullptr);
+	gtk_notebook_append_page(GTK_NOTEBOOK(sd->ui.notebook), criteria_scrolled, sd->ui.criteria_label);
+	sd->ui.box_search = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(criteria_scrolled), sd->ui.box_search);
 
 	GtkWidget *hbox = pref_box_new(sd->ui.box_search, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
@@ -3415,6 +3453,12 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.marks_type), 0);
 
 	/* Done the types of searches */
+	for (auto *row = gtk_widget_get_first_child(sd->ui.box_search); row; row = gtk_widget_get_next_sibling(row))
+		{
+		auto *check = gtk_widget_get_first_child(row);
+		if (GTK_IS_CHECK_BUTTON(check)) g_signal_connect(check, "toggled", G_CALLBACK(search_criteria_check_cb), sd);
+		}
+	search_criteria_summary(sd);
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
@@ -3422,7 +3466,8 @@ void search_new(FileData *dir_fd, FileData *example_file)
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
 	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-	gtk_box_append(GTK_BOX(vbox), scrolled);
+	sd->ui.results_label = gtk_label_new(nullptr);
+	gtk_notebook_append_page(GTK_NOTEBOOK(sd->ui.notebook), scrolled, sd->ui.results_label);
 
 	sd->ui.result_store = g_list_store_new(search_result_row_get_type());
 	GtkSortListModel *sort_model = gtk_sort_list_model_new(G_LIST_MODEL(g_object_ref(sd->ui.result_store)), nullptr);

@@ -34,6 +34,7 @@
     <code>Ctrl + Enter</code>
     .
   </para>
+  <para>The <guilabel>Criteria</guilabel> and <guilabel>Results</guilabel> tabs each use the full window area. The Criteria tab shows the number of enabled conditions, and the Results tab shows the number of matches. Starting a search switches to Results automatically. Returning to Criteria preserves your settings and results. Each tab scrolls independently, and search controls and progress remain visible below both tabs.</para>
   <para>The progress of an active search is displayed as a progress bar at the bottom of the window. The progress bar will also display the total files that match the search parameters, and the total number of files searched.</para>
   <para>When a search is completed, the total number of files found and their total size will be displayed in the status bar.</para>
   <para />

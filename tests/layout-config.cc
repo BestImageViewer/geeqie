@@ -11,6 +11,7 @@
 #include "accelerators.h"
 #include "bar-sort.h"
 #include "bar.h"
+#include "filedata.h"
 #include "filefilter.h"
 #include "image.h"
 #include "intl.h"
@@ -24,6 +25,7 @@
 #include "pixbuf-renderer.h"
 #include "preferences.h"
 #include "rcfile.h"
+#include "search.h"
 #include "ui-fileops.h"
 
 namespace
@@ -337,6 +339,157 @@ protected:
 	gboolean saved_expand = FALSE;
 	bool saved_menu_settings = false;
 };
+
+class SearchCriteriaLayout : public PartialLayoutConfig
+{
+protected:
+	void SetUp() override
+	{
+		PartialLayoutConfig::SetUp();
+		if (!layout) return;
+		saved_positions = options->save_window_positions;
+		options->save_window_positions = TRUE;
+		for (const gchar *name : {"match.svg", "other.svg"})
+			{
+			g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+			ASSERT_TRUE(g_file_set_contents(path, "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'/>", -1, nullptr));
+			}
+		ASSERT_NO_FATAL_FAILURE(open_search());
+	}
+
+	void TearDown() override
+	{
+		if (search) gtk_window_close(GTK_WINDOW(search));
+		search = nullptr;
+		if (layout)
+			{
+			options->save_window_positions = saved_positions;
+			for (const gchar *name : {"match.svg", "other.svg"})
+				{
+				g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+				g_remove(path);
+				}
+			}
+		PartialLayoutConfig::TearDown();
+	}
+
+	void open_search()
+	{
+		search_new(layout->dir_fd, nullptr);
+		auto *windows = gtk_window_get_toplevels();
+		for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+			{
+			g_autoptr(GtkWindow) candidate = GTK_WINDOW(g_list_model_get_item(windows, i));
+			const gchar *title = gtk_window_get_title(candidate);
+			if (title && g_str_has_prefix(title, _("Image search")))
+				{
+				search = GTK_WIDGET(candidate);
+				break;
+				}
+			}
+		ASSERT_NE(search, nullptr);
+		auto *box = gtk_window_get_child(GTK_WINDOW(search));
+		notebook = GTK_NOTEBOOK(gtk_widget_get_first_child(box));
+		ASSERT_TRUE(GTK_IS_NOTEBOOK(notebook));
+		ASSERT_EQ(gtk_notebook_get_n_pages(notebook), 2);
+		criteria = gtk_notebook_get_nth_page(notebook, 0);
+		results = gtk_notebook_get_nth_page(notebook, 1);
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(criteria); }));
+	}
+
+	GtkWidget *first_condition()
+	{
+		auto *box = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(criteria));
+		if (GTK_IS_VIEWPORT(box)) box = gtk_viewport_get_child(GTK_VIEWPORT(box));
+		for (auto *row = gtk_widget_get_first_child(box); row; row = gtk_widget_get_next_sibling(row))
+			{
+			auto *check = gtk_widget_get_first_child(row);
+			if (GTK_IS_CHECK_BUTTON(check)) return check;
+			}
+		return nullptr;
+	}
+
+	GtkWidget *search = nullptr;
+	GtkNotebook *notebook = nullptr;
+	GtkWidget *criteria = nullptr;
+	GtkWidget *results = nullptr;
+	gboolean saved_positions = FALSE;
+};
+
+TEST_F(SearchCriteriaLayout, TabsPreserveConditionsAndLeaveControlsVisible)
+{
+	ASSERT_NE(search, nullptr);
+	EXPECT_EQ(gtk_notebook_get_current_page(notebook), 0);
+	auto *check = first_condition();
+	ASSERT_NE(check, nullptr);
+	ASSERT_TRUE(gtk_check_button_get_active(GTK_CHECK_BUTTON(check)));
+	auto *summary = GTK_LABEL(gtk_notebook_get_tab_label(notebook, criteria));
+	g_autofree gchar *enabled = g_strdup(gtk_label_get_text(summary));
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(check), FALSE);
+	EXPECT_STRNE(gtk_label_get_text(summary), enabled);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(check), TRUE);
+	EXPECT_STREQ(gtk_label_get_text(summary), enabled);
+	auto *find = find_widget(search, GTK_TYPE_BUTTON, _("Find"));
+	ASSERT_NE(find, nullptr);
+	for (int page : {1, 0})
+		{
+		gtk_notebook_set_current_page(notebook, page);
+		auto *content = gtk_notebook_get_nth_page(notebook, page);
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(content) && gtk_widget_get_width(content) > 0; }));
+		EXPECT_GE(gtk_widget_get_width(content), gtk_widget_get_width(GTK_WIDGET(notebook)) - 10);
+		graphene_rect_t bounds{};
+		ASSERT_TRUE(gtk_widget_compute_bounds(find, search, &bounds));
+		EXPECT_LE(bounds.origin.y + bounds.size.height, gtk_widget_get_height(search));
+		EXPECT_TRUE(gtk_widget_get_mapped(find));
+		EXPECT_TRUE(gtk_check_button_get_active(GTK_CHECK_BUTTON(check)));
+		}
+}
+
+TEST_F(SearchCriteriaLayout, StartingSearchShowsResultsAndUpdatesMatchCount)
+{
+	ASSERT_NE(search, nullptr);
+	auto *check = first_condition();
+	ASSERT_NE(check, nullptr);
+	auto *entry = find_widget(gtk_widget_get_parent(check), GTK_TYPE_ENTRY);
+	ASSERT_NE(entry, nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "match");
+	auto *find = find_widget(search, GTK_TYPE_BUTTON, _("Find"));
+	ASSERT_NE(find, nullptr);
+	g_signal_emit_by_name(find, "clicked");
+	EXPECT_EQ(gtk_notebook_get_current_page(notebook), 1);
+	gtk_notebook_set_current_page(notebook, 0);
+	auto *view = GTK_COLUMN_VIEW(find_widget(results, GTK_TYPE_COLUMN_VIEW));
+	ASSERT_NE(view, nullptr);
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_sensitive(find) &&
+	                                      g_list_model_get_n_items(G_LIST_MODEL(gtk_column_view_get_model(view))) == 1; }));
+	EXPECT_EQ(gtk_notebook_get_current_page(notebook), 0);
+	gtk_notebook_set_current_page(notebook, 1);
+	ASSERT_TRUE(wait_layout([&]() { return find_widget(results, GTK_TYPE_LABEL, "match.svg") != nullptr; }));
+	g_autofree gchar *expected = g_strdup_printf(_("Results (%d)"), 1);
+	EXPECT_STREQ(gtk_label_get_text(GTK_LABEL(gtk_notebook_get_tab_label(notebook, results))), expected);
+	gtk_notebook_set_current_page(notebook, 0);
+	EXPECT_STREQ(gtk_editable_get_text(GTK_EDITABLE(entry)), "match");
+	EXPECT_EQ(g_list_model_get_n_items(G_LIST_MODEL(gtk_column_view_get_model(view))), 1U);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "absent");
+	g_signal_emit_by_name(find, "clicked");
+	EXPECT_EQ(gtk_notebook_get_current_page(notebook), 1);
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_sensitive(find); }));
+	EXPECT_EQ(g_list_model_get_n_items(G_LIST_MODEL(gtk_column_view_get_model(view))), 0U);
+}
+
+TEST_F(SearchCriteriaLayout, ReopeningStartsOnCriteriaAndKeepsWindowGeometry)
+{
+	ASSERT_NE(search, nullptr);
+	gtk_window_set_default_size(GTK_WINDOW(search), 800, 600);
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_width(search) == 800; }));
+	gtk_notebook_set_current_page(notebook, 1);
+	gtk_window_close(GTK_WINDOW(search));
+	search = nullptr;
+	EXPECT_EQ(layout->options.search_window.width, 800);
+	ASSERT_NO_FATAL_FAILURE(open_search());
+	EXPECT_EQ(gtk_notebook_get_current_page(notebook), 0);
+	EXPECT_EQ(gtk_widget_get_width(search), 800);
+}
 
 TEST_F(PartialLayoutConfig, SortManagerWidthSurvivesWindowResizeAndSidebarToggles)
 {
