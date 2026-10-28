@@ -46,14 +46,16 @@
   <section id="Exportjpeg">
     <title>Export jpeg</title>
     <para>
-      Extracts an embedded jpeg from a raw image to a file in the
+      Extracts an embedded preview (JPEG, TIFF, or PNG, where available) from a RAW image to a file in the
       <code>/tmp</code>
-      folder. If you wish to to keep this image, it must be copied or moved.
+      folder. If you wish to keep this image, it must be copied or moved.
       <para />
       If
       <code>jpgicc</code>
-      is installed, the image will be colour-corrected for the currently selected rendering intent.
+      is installed, the image will be color-corrected for the currently selected rendering intent.
     </para>
+    <para>Requires ExifTool or Exiv2 and Zenity. Files without usable previews are reported without opening an empty selection dialog. Canceling the preview chooser stops the remaining batch. A missing optional <command>jpgicc</command> warning appears at most once per batch, after a preview is selected.</para>
+    <para>To create resized JPEG or PNG copies from a selected file or a grouped RAW/JPEG member, use <link linkend="ConvertImage">Convert image</link> instead.</para>
     <para>
       This item is displayed in the
       <emphasis role="strong">Plugins</emphasis>

@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
 
 ## @file
 ## @brief Extract embedded jpegs from a raw file
@@ -17,217 +18,227 @@
 ## - Set Geeqie focus to the newly generated image
 ##
 
-use_exiftool="false"
-
 if ! [ -x "$(command -v exiftool)" ]
 then
 	if ! [ -x "$(command -v exiv2)" ]
 	then
-		zenity --info --text="Export jpeg from raw file\n\nNeither exiftoool nor exiv2 are installed" --title="Geeqie export jpeg" 2> /dev/null
+		zenity --info --text="Export jpeg from raw file\n\nNeither exiftool nor exiv2 are installed" --title="Geeqie export jpeg" 2> /dev/null
 		exit 1
 	fi
 fi
 
-if ! [ -x "$(command -v jpgicc)" ]
-then
-	zenity --info --text="Export jpeg from raw file\n\njpgicc is not installed\ncolor corrections will not be made\nYou may install via liblcms2-utils" --title="Geeqie export jpeg" 2> /dev/null
-fi
+[ "$#" -gt 0 ] || exit 0
+warned=0
 
-IFS='
+export_image()
+{
+	use_exiftool=false
+	rotation=
+	orientation=0
+	IFS='
 '
 
-exiv2_count=0
-if list=$(exiv2 --print preview "$1")
-then
-	if [ "$(echo "$list" | wc --words)" -gt 1 ]
+	exiv2_count=0
+	if list=$(exiv2 --print preview "$1" 2>/dev/null)
 	then
-		exiv2_count=$(echo "$list" | wc --lines)
-	fi
-fi
-
-exiftool_count=0
-in_list=$(exiftool -veryshort -preview:all -orientation# "$1")
-if echo "$in_list" | grep --quiet Orientation -
-then
-	exiftool_count=$(($(echo "$in_list" | wc --lines) - 1))
-else
-	exiftool_count=$(echo "$in_list" | wc --words)
-fi
-
-if [ "$exiftool_count" -gt "$exiv2_count" ]
-then
-	use_exiftool="true"
-	count="$exiftool_count"
-else
-	count="$exiv2_count"
-fi
-
-if [ "$use_exiftool" = "true" ]
-then
-	# An integer value is returned by a # suffix
-	in_list=$(exiftool -veryshort -preview:all -orientation# "$1")
-
-	if [ "$(echo "$in_list" | wc --lines)" -gt 0 ]
-	then
-		# $in_list is in the form of lines e.g.
-		#
-		# OtherImage: (Binary data 138367 bytes, use -b option to extract)
-		# PreviewImage: (Binary data 138367 bytes, use -b option to extract)
-		# ...
-		# Orientation: 8
-
-		if echo "$in_list" | grep --quiet Orientation -
+		if [ "$(echo "$list" | wc --words)" -gt 1 ]
 		then
-			orientation=$(echo "$in_list" | tail --lines=1 | cut --delimiter=' ' --fields=2)
-			count=$(($(echo "$in_list" | wc --lines) - 1))
-			list=$(echo "$in_list" | head --lines=-1 | sort --field-separator=: --key=2 --sort=human-numeric --reverse)
-		else
-			orientation=0
-			list="$in_list"
+			exiv2_count=$(echo "$list" | wc --lines)
 		fi
-	else
-		count=0
 	fi
-else
-	orientation_str=$(exiv2 -g Exif.Image.Orientation -pv "$1")
 
-	# orientation in the form e.g.
-	# 0x0112 Image        Orientation                 Short       1  8
+	in_list=$(exiftool -veryshort -preview:all -orientation# "$1" 2>/dev/null)
+	exiftool_count=$(printf '%s\n' "$in_list" | grep -c 'Binary data')
 
-	orientation=$(echo "$orientation_str" | tr --squeeze-repeats ' ' | cut --delimiter=' ' --fields=6)
-fi
+	if [ "$exiftool_count" -gt "$exiv2_count" ]
+	then
+		use_exiftool="true"
+		count="$exiftool_count"
+	else
+		count="$exiv2_count"
+	fi
 
-if [ "$count" -eq 0 ]
-then
-	zenity --info --text="Export jpeg from raw file\n\nFile contains no embedded images" --title="Geeqie export jpeg" 2> /dev/null
-	exit 0
-fi
+	if [ "$use_exiftool" = "true" ]
+	then
+		orientation=$(printf '%s\n' "$in_list" | sed -n 's/^Orientation: *//p')
+		list=$(printf '%s\n' "$in_list" | grep 'Binary data')
+	else
+		orientation_str=$(exiv2 -g Exif.Image.Orientation -pv "$1" 2>/dev/null)
 
-case "$orientation" in
-	2)
-		rotation="-flop"
-		;;
-	3)
-		rotation="-rotate 180"
-		;;
-	4)
-		rotation="-flip"
-		;;
-	5)
-		rotation="-transpose"
-		;;
-	6)
-		rotation="-rotate 90"
-		;;
-	7)
-		rotation="-transverse"
-		;;
-	8)
-		rotation="-rotate -90"
-		;;
-	*)
-		rotation=""
-		;;
-esac
+		# orientation in the form e.g.
+		# 0x0112 Image        Orientation                 Short       1  8
 
-n=1
-image_list=""
+		orientation=$(echo "$orientation_str" | tr --squeeze-repeats ' ' | cut --delimiter=' ' --fields=6)
+	fi
 
-for image in $list
+	if [ "$count" -eq 0 ]
+	then
+		zenity --info --text="Export jpeg from raw file\n\nFile contains no embedded images" --title="Geeqie export jpeg" 2> /dev/null
+		return 0
+	fi
+
+	case "$orientation" in
+		2)
+			rotation="-flop"
+			;;
+		3)
+			rotation="-rotate 180"
+			;;
+		4)
+			rotation="-flip"
+			;;
+		5)
+			rotation="-transpose"
+			;;
+		6)
+			rotation="-rotate 90"
+			;;
+		7)
+			rotation="-transverse"
+			;;
+		8)
+			rotation="-rotate -90"
+			;;
+		*)
+			rotation=""
+			;;
+	esac
+
+	n=1
+	image_list=""
+
+	for image in $list
+	do
+		if [ "$use_exiftool" = "true" ]
+		then
+			# $image is in the form of e.g.
+			# OtherImage: (Binary data 138367 bytes, use -b option to extract)
+
+			preview_name_colon=$(echo "$image" | cut --delimiter=' ' --fields=1)
+			preview_name=$(echo "$preview_name_colon" | cut --delimiter=':' --fields=1)
+			bytes=$(echo "$image" | cut --delimiter=' ' --fields=4)
+
+			params=$(exiftool -b -"$preview_name" "$1" | exiftool -veryshort -short -ImageSize -MIMEType -)
+			size=$(echo "$params" | head -1)
+			mime=$(echo "$params" | tail -1)
+
+			case "$mime" in
+				image/jpeg|image/tiff|image/png) ;;
+				*) continue ;;
+			esac
+			if [ "$n" -eq 1 ]
+			then
+				image_list="${image_list:+${image_list}}TRUE\nPreview $n: $mime,\t $size pixels,\t $bytes bytes\n$n:$preview_name:$mime\n"
+			else
+				image_list="${image_list:+${image_list}}FALSE\nPreview $n: $mime,\t $size pixels,\t $bytes bytes\n$n:$preview_name:$mime\n"
+			fi
+		else
+			if [ "$n" -eq 1 ]
+			then
+				image_list="${image_list:+${image_list}}TRUE\n$image\n$n\n"
+			else
+				image_list="${image_list:+${image_list}}FALSE\n$image\n$n\n"
+			fi
+		fi
+
+		n=$((n + 1))
+	done
+
+	if [ -z "$image_list" ]
+	then
+		zenity --info --no-markup --text="No usable embedded images found in: $1" --title="Geeqie export jpeg"
+		return 0
+	fi
+	image_selected=$(printf '%b\n' "$image_list" | zenity --title="Geeqie export jpeg" --list --text "Select embedded image" --radiolist --column "Select" --column "Image" --column "n" --hide-column=3 --print-column=3 2> /dev/null) || return 2
+
+	[ -n "$image_selected" ] || return 2
+
+	if [ -n "$image_selected" ]
+	then
+		if ! command -v jpgicc >/dev/null 2>&1 && [ "$warned" -eq 0 ]
+		then
+			zenity --info --text="jpgicc is not installed; rendering-intent color correction will be skipped." --title="Geeqie export jpeg" || return 2
+			warned=1
+		fi
+		tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX") || return 1
+
+		if [ "$use_exiftool" = "true" ]
+		then
+			# $image_selected is in the form e.g.
+			# 4:jpegfromraw:image/jpeg
+
+			image_no=$(echo "$image_selected" | cut --delimiter=':' --fields=1)
+			image_id=$(echo "$image_selected" | cut --delimiter=':' --fields=2)
+			image_mime=$(echo "$image_selected" | cut --delimiter=':' --fields=3)
+			image_extension=$(echo "$image_mime" | cut --delimiter='/' --fields=2)
+			base_name=$(basename "$1")
+			image_name="${base_name%.*}"
+			exiftool -b -"$image_id" "$1" > "$tmpdir/$image_name-preview$image_no.$image_extension" || return 1
+		else
+			exiv2 --location "$tmpdir" -ep"$image_selected" "$1" || return 1
+		fi
+
+		if [ -n "$rotation" ]
+		then
+			case "$rotation" in
+				-rotate*) mogrify -rotate "${rotation#* }" "$tmpdir/"* || return 1 ;;
+				*) mogrify "$rotation" "$tmpdir/"* || return 1 ;;
+			esac
+		fi
+
+		base_name=$(basename "$tmpdir/"*)
+		image_extension="${base_name##*.}"
+
+		if echo "$base_name" | grep --quiet --ignore-case "\.jpeg$" || echo "$base_name" | grep --quiet --ignore-case "\.jpg$"
+		then
+			render_str=$(geeqie --get-render-intent)
+
+			case $render_str in
+				"Perceptual")
+					render_key=0
+					;;
+				"Relative Colorimetric")
+					render_key=1
+					;;
+				"Saturation")
+					render_key=2
+					;;
+				"Absolute Colorimetric")
+					render_key=3
+					;;
+				*)
+					render_key=0
+					;;
+			esac
+
+			filename=$(basename "$tmpdir/"* ".$image_extension")
+			if [ -x "$(command -v jpgicc)" ]
+			then
+				filename_ri="$tmpdir/""$filename""-ri.jpg"
+				if jpgicc -t "$render_key" "$tmpdir/$filename.$image_extension" "$filename_ri"
+				then
+					rm "$tmpdir/$filename.$image_extension"
+				else
+					return 1
+				fi
+			fi
+		fi
+
+		geeqie --view="$tmpdir/"
+	fi
+
+}
+
+result=0
+for source
 do
-	if [ "$use_exiftool" = "true" ]
-	then
-		# $image is in the form of e.g.
-		# OtherImage: (Binary data 138367 bytes, use -b option to extract)
-
-		preview_name_colon=$(echo "$image" | cut --delimiter=' ' --fields=1)
-		preview_name=$(echo "$preview_name_colon" | cut --delimiter=':' --fields=1)
-		bytes=$(echo "$image" | cut --delimiter=' ' --fields=4)
-
-		params=$(exiftool -b -"$preview_name" "$1" | exiftool -veryshort -short -ImageSize -MIMEType -)
-		size=$(echo "$params" | head -1)
-		mime=$(echo "$params" | tail -1)
-
-		if [ "$n" -eq "$count" ]
-		then
-			image_list="${image_list:+${image_list}}TRUE\nPreview $n: $mime,\t $size pixels,\t $bytes bytes\n$n:$preview_name:$mime"
-		else
-			image_list="${image_list:+${image_list}}FALSE\nPreview $n: $mime,\t $size pixels,\t $bytes bytes\n$n:$preview_name:$mime\n"
-		fi
-	else
-		if [ "$n" -eq "$count" ]
-		then
-			image_list="${image_list:+${image_list}}TRUE\n$image\n$n"
-		else
-			image_list="${image_list:+${image_list}}FALSE\n$image\n$n\n"
-		fi
-	fi
-
-	n=$((n + 1))
+	case "$source" in /*) ;; *) source="$PWD/$source" ;; esac
+	export_image "$source"
+	status=$?
+	case "$status" in
+		2) exit 0 ;;
+		0) ;;
+		*) result=1 ;;
+	esac
 done
-
-image_selected=$(echo "$image_list" | zenity --title="Geeqie export jpeg" --list --text "Select embedded image" --radiolist --column "Select" --column "Image" --column "n" --hide-column=3 --print-column=3 2> /dev/null)
-
-if [ -n "$image_selected" ]
-then
-	tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
-
-	if [ "$use_exiftool" = "true" ]
-	then
-		# $image_selected is in the form e.g.
-		# 4:jpegfromraw:image/jpeg
-
-		image_no=$(echo "$image_selected" | cut --delimiter=':' --fields=1)
-		image_id=$(echo "$image_selected" | cut --delimiter=':' --fields=2)
-		image_mime=$(echo "$image_selected" | cut --delimiter=':' --fields=3)
-		image_extension=$(echo "$image_mime" | cut --delimiter='/' --fields=2)
-		base_name=$(basename "$1")
-		image_name="${base_name%.*}"
-		exiftool -b -"$image_id" "$1" > "$tmpdir/$image_name-preview$image_no.$image_extension"
-	else
-		exiv2 --location "$tmpdir" -ep"$image_selected" "$1"
-	fi
-
-	if [ -n "$rotation" ]
-	then
-		command_str="mogrify $rotation \"$tmpdir/*\""
-		sh -c "$command_str"
-	fi
-
-	base_name=$(basename "$tmpdir/"*)
-	image_extension="${base_name##*.}"
-
-	if echo "$base_name" | grep --quiet --ignore-case "\.jpeg$" || echo "$base_name" | grep --quiet --ignore-case "\.jpg$"
-	then
-		render_str=$(geeqie --get-render-intent)
-
-		case $render_str in
-			"Perceptual")
-				render_key=0
-				;;
-			"Relative Colorimetric")
-				render_key=1
-				;;
-			"Saturation")
-				render_key=2
-				;;
-			"Absolute Colorimetric")
-				render_key=3
-				;;
-			*)
-				render_key=0
-				;;
-		esac
-
-		filename=$(basename "$tmpdir/"* ".$image_extension")
-		if [ -x "$(command -v jpgicc)" ]
-		then
-			filename_ri="$tmpdir/""$filename""-ri.jpg"
-			jpgicc -t "$render_key" "$tmpdir/""$filename"".$image_extension" "$filename_ri"
-
-			rm "$tmpdir/$filename.$image_extension"
-		fi
-	fi
-
-	geeqie --view="$tmpdir/"
-fi
+exit "$result"

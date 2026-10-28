@@ -4,7 +4,7 @@ Type=Application
 Name=Export jpeg
 Comment=Extract embedded jpegs from a raw file
 
-Exec=geeqie-export-jpeg %f
+Exec=geeqie-export-jpeg %F
 
 # show only if these are installed
 #TryExec=exiv2

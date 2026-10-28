@@ -26,6 +26,12 @@ fi
 
 [ "$#" -gt 0 ] || exit 0
 
+source_mode=$(zenity --list --radiolist --title='Conversion source' --text='Choose which member of each selected group to convert.' --column='Select' --column='Source' TRUE Selected FALSE JPEG FALSE RAW) || exit 0
+case "$source_mode" in Selected|JPEG|RAW) ;; *) exit 1 ;; esac
+max_size=$(zenity --entry --title='Output size' --text='Maximum width and height in pixels (0 keeps original size; smaller images are not enlarged).' --entry-text=0) || exit 0
+case "$max_size" in ''|*[!0-9]*) exit 1 ;; *) ;; esac
+[ "$max_size" -le 65535 ] || exit 1
+
 format=$(zenity --list --radiolist --title='Convert image' --text='Choose an output format. Originals are preserved; existing output names are skipped.' --column='Select' --column='Format' TRUE JPEG FALSE PNG) || exit 0
 case "$format" in
 	JPEG) extension=jpg; coder=jpeg ;;
@@ -79,6 +85,10 @@ convert_image()
 	else
 		set --
 	fi
+	if [ "$max_size" -gt 0 ]
+	then
+		set -- "$@" -resize "${max_size}x${max_size}>"
+	fi
 	"$converter" "$work_dir/input[0]" -auto-orient "$@" "$coder:$work_dir/output"
 }
 
@@ -89,6 +99,43 @@ do
 		/*) ;;
 		*) source="$PWD/$source" ;;
 	esac
+	if [ "$source_mode" != Selected ]
+	then
+		# The remote grouping protocol is line-delimited; refuse ambiguous paths.
+		case "$source" in *'
+'*) printf 'Error: Group lookup cannot handle a newline in a filename.\n' >&2; result=1; continue ;; *) ;; esac
+		if ! geeqie --get-sidecars="$source" > "$work_dir/group"
+		then
+			printf 'Error: Cannot query group: %s\n' "$source" >&2
+			result=1
+			continue
+		fi
+		chosen=
+		matches=0
+		while IFS= read -r member || [ -n "$member" ]
+		do
+			ext=$(printf '%s' "${member##*.}" | tr '[:upper:]' '[:lower:]')
+			case "$source_mode:$ext" in
+				JPEG:jpg|JPEG:jpeg|JPEG:jpe|RAW:3fr|RAW:arw|RAW:cr2|RAW:cr3|RAW:crw|RAW:dcr|RAW:k25|RAW:dng|RAW:erf|RAW:fff|RAW:iiq|RAW:kdc|RAW:mef|RAW:mos|RAW:mrw|RAW:nef|RAW:nrw|RAW:orf|RAW:pef|RAW:raf|RAW:raw|RAW:rw2|RAW:rwl|RAW:sr2|RAW:srf|RAW:srw|RAW:x3f)
+					[ -f "$member" ] || continue
+					chosen=$member
+					matches=$((matches + 1)) ;;
+				*) ;;
+			esac
+		done < "$work_dir/group"
+		if [ "$matches" -ne 1 ]
+		then
+			printf 'Error: Expected one %s member in group: %s (found %s)\n' "$source_mode" "$source" "$matches" >&2
+			result=1
+			continue
+		fi
+		source=$chosen
+		if [ -f "$work_dir/processed" ] && grep -F -x -e "$source" "$work_dir/processed" >/dev/null
+		then
+			continue
+		fi
+		printf '%s\n' "$source" >> "$work_dir/processed"
+	fi
 	name=${source##*/}
 	stem=${name%.*}
 	[ -n "$stem" ] || stem=$name

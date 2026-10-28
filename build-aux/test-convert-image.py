@@ -28,7 +28,11 @@ class ConvertImage(unittest.TestCase):
             zenity = tools / 'zenity'
             zenity.write_text('''#!/bin/sh
 case "$1" in
---list) printf '%s\\n' "$CONVERT_TEST_FORMAT" ;;
+--entry) [ "$CONVERT_TEST_CANCEL" = size ] && exit 1; printf '%s\\n' "${CONVERT_TEST_SIZE:-0}" ;;
+--list) case "$*" in
+*'Conversion source'*) [ "$CONVERT_TEST_CANCEL" = source ] && exit 1; printf '%s\\n' "${CONVERT_TEST_SOURCE:-Selected}"; exit 0 ;;
+esac
+printf '%s\\n' "$CONVERT_TEST_FORMAT" ;;
 --file-selection) printf '%s\\n' "$CONVERT_TEST_DESTINATION" ;;
 --scale) [ "$CONVERT_TEST_FORMAT" = JPEG ] || exit 1; printf '90\\n' ;;
 *) exit 1 ;;
@@ -44,6 +48,15 @@ esac
                 return subprocess.run(['sh', PLUGIN, *map(str, sources)],
                                       env=environment, capture_output=True, text=True,
                                       check=False)
+
+            geeqie = tools / 'geeqie'
+            geeqie.write_text('#!/bin/sh\ncat "$CONVERT_TEST_GROUP"\n')
+            geeqie.chmod(0o755)
+            for stage in ('source', 'size'):
+                environment['CONVERT_TEST_CANCEL'] = stage
+                self.assertEqual(run(root / 'unused.png').returncode, 0)
+                self.assertEqual(list(destination.iterdir()), [])
+            environment.pop('CONVERT_TEST_CANCEL')
 
             source = root / 'odd [name] ;$.png'
             subprocess.run([CONVERTER, '-size', '3x2', 'xc:none', str(source)],
@@ -92,6 +105,42 @@ esac
             self.assertEqual(png.read_bytes(), saved_png)
             self.assertEqual(source.read_bytes(), original)
             self.assertEqual(list(destination.glob('.geeqie-convert.*')), [])
+
+            resized = root / 'large.png'
+            subprocess.run([CONVERTER, '-size', '12x8', 'xc:red', str(resized)],
+                           check=True)
+            environment['CONVERT_TEST_SIZE'] = '6'
+            self.assertEqual(run(resized).returncode, 0)
+            dimensions = subprocess.check_output(
+                [CONVERTER, str(destination / 'large.png'), '-format',
+                 '%wx%h', 'info:'], text=True)
+            self.assertEqual(dimensions, '6x4')
+
+            jpeg = root / 'grouped.jpg'
+            raw = root / 'grouped.nef'
+            shutil.copyfile(source, jpeg)
+            shutil.copyfile(resized, raw)
+            group = root / 'group'
+            group.write_text(str(raw) + '\n' + str(jpeg) + '\n')
+            environment.update(CONVERT_TEST_SOURCE='JPEG',
+                               CONVERT_TEST_GROUP=str(group))
+            self.assertEqual(run(raw, jpeg).returncode, 0)
+            dimensions = subprocess.check_output(
+                [CONVERTER, str(destination / 'grouped.png'), '-format',
+                 '%wx%h', 'info:'], text=True)
+            self.assertEqual(dimensions, '3x2')
+            (destination / 'grouped.png').unlink()
+            environment['CONVERT_TEST_SOURCE'] = 'RAW'
+            self.assertEqual(run(jpeg).returncode, 0)
+            dimensions = subprocess.check_output(
+                [CONVERTER, str(destination / 'grouped.png'), '-format',
+                 '%wx%h', 'info:'], text=True)
+            self.assertEqual(dimensions, '6x4')
+            group.write_text(str(jpeg) + '\n')
+            self.assertEqual(run(jpeg).returncode, 1)
+            group.write_text(str(raw) + '\n' + str(raw) + '\n')
+            self.assertEqual(run(jpeg).returncode, 1)
+
 
 
 if __name__ == '__main__':
