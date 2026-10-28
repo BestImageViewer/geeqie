@@ -4063,6 +4063,7 @@ GtkWidget *layout_bars_prepare(LayoutWindow *lw, GtkWidget *image)
 	/* Prevent the info sidebar being minimized to invisible
 	 */
 	gtk_paned_set_wide_handle(GTK_PANED(lw->utility_paned), TRUE);
+	gtk_paned_set_resize_end_child(GTK_PANED(lw->utility_paned), FALSE);
 
 	gtk_paned_set_start_child(GTK_PANED(lw->utility_paned), image);
 

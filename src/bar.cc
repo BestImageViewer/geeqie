@@ -247,7 +247,10 @@ struct BarData
 	GtkWidget *label_file_name;
 
 	LayoutWindow *lw;
-	gint width;
+	gint width; /**< Legacy divider position. */
+	gint sidebar_width; /**< End allocation, including the separator. */
+	guint restore_id;
+	gboolean restore_applied;
 };
 
 template<gboolean expanded>
@@ -587,6 +590,7 @@ void bar_write_config(GtkWidget *bar, RcString &rc)
 	WRITE_NL(); WRITE_STRING("<bar ");
 	WRITE_BOOL_FULL("enabled", gtk_widget_get_visible(bar));
 	WRITE_INT(*bd, width);
+	WRITE_INT(*bd, sidebar_width);
 	WRITE_STRING(">");
 
 	rc.indent++;
@@ -676,13 +680,49 @@ void bar_populate_default(GtkWidget *)
 		}
 }
 
-static void bar_paned_position_changed_cb(GObject *paned, GParamSpec *, gpointer data)
+static void bar_capture_width(BarData *bd)
+{
+	auto *paned = GTK_PANED(bd->lw->utility_paned);
+	bd->width = gtk_paned_get_position(paned);
+	bd->sidebar_width = gtk_widget_get_width(GTK_WIDGET(paned)) - bd->width;
+}
+
+static void bar_paned_position_changed_cb(GObject *, GParamSpec *, gpointer data)
 {
 	auto *bar = static_cast<GtkWidget *>(data);
 	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
-	if (!bd) return;
+	if (!bd || bd->restore_id || !gtk_widget_get_mapped(bar)) return;
+	bar_capture_width(bd);
+}
 
-	bd->width = gtk_paned_get_position(GTK_PANED(paned));
+static void bar_restore_width_cb(GtkWidget *bar, gpointer data)
+{
+	auto *bd = static_cast<BarData *>(data);
+	if (bd->restore_id) return;
+	bd->restore_applied = FALSE;
+	bd->restore_id = gtk_widget_add_tick_callback(bar,
+		[](GtkWidget *, GdkFrameClock *, gpointer data) -> gboolean
+			{
+			auto *bd = static_cast<BarData *>(data);
+			auto *lw = bd->lw;
+			const int width = gtk_widget_get_width(lw->utility_paned);
+			if (width <= 0 || lw->sort_manager_restore_id) return G_SOURCE_CONTINUE;
+			// The Sort Manager is installed after plugin discovery at startup.
+			// Wait for its final allocation before interpreting the saved geometry.
+			if (lw->bar_sort_enabled && !lw->bar_sort) return G_SOURCE_CONTINUE;
+			if (lw->bar_sort && gtk_widget_get_visible(lw->bar_sort) &&
+			    width != gtk_paned_get_position(GTK_PANED(lw->sort_manager_paned))) return G_SOURCE_CONTINUE;
+			if (!bd->restore_applied)
+				{
+				const int position = bd->sidebar_width > 0 ? std::max(0, width - bd->sidebar_width) : bd->width;
+				gtk_paned_set_position(GTK_PANED(lw->utility_paned), position);
+				bd->restore_applied = TRUE;
+				return G_SOURCE_CONTINUE;
+				}
+			bar_capture_width(bd);
+			bd->restore_id = 0;
+			return G_SOURCE_REMOVE;
+			}, bd, nullptr);
 }
 
 void bar_close(GtkWidget *bar)
@@ -722,6 +762,8 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	                        G_CALLBACK(bar_paned_position_changed_cb), bd->widget, GConnectFlags(0));
 
 	bd->width = SIDEBAR_DEFAULT_WIDTH;
+	bd->sidebar_width = SIDEBAR_DEFAULT_WIDTH;
+	g_signal_connect(bd->widget, "map", G_CALLBACK(bar_restore_width_cb), bd);
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	DEBUG_NAME(box);
@@ -769,10 +811,11 @@ GtkWidget *bar_new(LayoutWindow *lw)
 }
 
 
-GtkWidget *bar_update_from_config(GtkWidget *bar, const gchar **attribute_names, const gchar **attribute_values, LayoutWindow *lw, gboolean startup)
+GtkWidget *bar_update_from_config(GtkWidget *bar, const gchar **attribute_names, const gchar **attribute_values, LayoutWindow *, gboolean startup)
 {
 	gboolean enabled = TRUE;
 	gint width = SIDEBAR_DEFAULT_WIDTH;
+	gint sidebar_width = -1;
 
 	while (*attribute_names)
 		{
@@ -781,13 +824,17 @@ GtkWidget *bar_update_from_config(GtkWidget *bar, const gchar **attribute_names,
 
 		if (READ_BOOL_FULL("enabled", enabled)) continue;
 		if (READ_INT_FULL("width", width)) continue;
+		if (READ_INT_FULL("sidebar_width", sidebar_width)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str()); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (startup)
 		{
-		gtk_paned_set_position(GTK_PANED(lw->utility_paned), width);
+		auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
+		bd->width = std::max(0, width);
+		bd->sidebar_width = sidebar_width;
+		if (gtk_widget_get_mapped(bar)) bar_restore_width_cb(bar, bd);
 		}
 
 	gtk_widget_set_visible(bar, enabled);

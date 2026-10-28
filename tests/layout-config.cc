@@ -732,6 +732,112 @@ TEST_F(PartialLayoutConfig, SortManagerWidthIsSavedAndRestoredInWindowConfigurat
 	EXPECT_EQ(layout->options.sort_manager_width, 360);
 }
 
+class SidebarRestart : public PartialLayoutConfig, public testing::WithParamInterface<int>
+{
+protected:
+	void settle()
+	{
+		ASSERT_TRUE(wait_layout([&]()
+			{
+			return gtk_widget_get_mapped(layout->window) && gtk_widget_get_width(layout->window) > 0 &&
+			       (!(GetParam() & 2) || sort_width_settled());
+			}));
+		const auto deadline = g_get_monotonic_time() + (300 * G_TIME_SPAN_MILLISECOND);
+		while (g_get_monotonic_time() < deadline)
+			{
+			g_main_context_iteration(nullptr, FALSE);
+			g_usleep(1000);
+			}
+	}
+
+	static void collapse(GtkWidget *widget)
+	{
+		if (GTK_IS_EXPANDER(widget)) gtk_expander_set_expanded(GTK_EXPANDER(widget), FALSE);
+		for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child)) collapse(child);
+	}
+};
+
+TEST_P(SidebarRestart, RepeatedConfigurationRoundTripsKeepSidebarWidths)
+{
+	if (GetParam() & 1) layout_bar_toggle(layout);
+	if (GetParam() & 2) layout_bar_sort_toggle(layout);
+	if ((GetParam() & 4) && layout->bar) collapse(layout->bar);
+	gtk_window_set_default_size(GTK_WINDOW(layout->window), 1228, 829);
+	gtk_paned_set_position(GTK_PANED(layout->h_pane), 1000);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_NO_FATAL_FAILURE(settle());
+	const int initial_info = layout->bar ? gtk_widget_get_width(layout->bar) : 0;
+	const int initial_sort = layout->bar_sort ? gtk_widget_get_width(layout->bar_sort) : 0;
+	const int initial_window = gtk_widget_get_width(layout->window);
+
+	for (gint cycle = 0; cycle < 5; ++cycle)
+		{
+		EXPECT_EQ(gtk_widget_get_width(layout->window), initial_window) << "cycle " << cycle;
+		if (layout->bar)
+			{
+			EXPECT_EQ(gtk_widget_get_width(layout->bar), initial_info) << "cycle " << cycle;
+			}
+		if (layout->bar_sort)
+			{
+			EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), initial_sort) << "cycle " << cycle;
+			}
+		g_autoptr(GString) text = g_string_new("<gq>");
+		RcString rc{text, 0};
+		layout_write_config(layout, rc);
+		g_string_append(text, "</gq>");
+		if ((GetParam() & 8) && cycle == 0)
+			{
+			// Older configurations stored only the inner divider position.
+			const char *prefix = "sidebar_width = \"";
+			gchar *attribute = strstr(text->str, prefix);
+			ASSERT_NE(attribute, nullptr);
+			gchar *end = strchr(attribute + strlen(prefix), '"');
+			ASSERT_NE(end, nullptr);
+			g_string_erase(text, attribute - text->str, (end - attribute) + 1);
+			}
+		layout_free(layout);
+		layout = nullptr;
+		ASSERT_TRUE(load_config_from_buf(text->str, text->len, TRUE));
+		layout = layout_window_first();
+		gtk_window_present(GTK_WINDOW(layout->window));
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(layout->window); }));
+		// Startup installs the Sort Manager after plugin discovery has completed.
+		if (layout->bar_sort_enabled && !layout->bar_sort) layout_bar_sort_set(layout, bar_sort_new_default(layout));
+		ASSERT_NO_FATAL_FAILURE(settle());
+		}
+	gtk_window_set_default_size(GTK_WINDOW(layout->window), initial_window + 150, 829);
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_width(layout->window) > initial_window; }));
+	ASSERT_NO_FATAL_FAILURE(settle());
+	if (layout->bar)
+		{
+		EXPECT_EQ(gtk_widget_get_width(layout->bar), initial_info);
+		}
+	if (layout->bar_sort)
+		{
+		EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), initial_sort);
+		}
+	if (GetParam() & 1)
+		{
+		layout_bar_toggle(layout);
+		layout_bar_toggle(layout);
+		ASSERT_NO_FATAL_FAILURE(settle());
+		EXPECT_EQ(gtk_widget_get_width(layout->bar), initial_info);
+		}
+	if (GetParam() & 2)
+		{
+		layout_bar_sort_toggle(layout);
+		layout_bar_sort_toggle(layout);
+		ASSERT_NO_FATAL_FAILURE(settle());
+		EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), initial_sort);
+		if (layout->bar)
+			{
+			EXPECT_EQ(gtk_widget_get_width(layout->bar), initial_info);
+			}
+		}
+}
+
+INSTANTIATE_TEST_SUITE_P(Configurations, SidebarRestart, testing::Values(1, 2, 3, 7, 11, 15));
+
 TEST_F(PartialLayoutConfig, SortManagerDividerRespondsToPointerDrag)
 {
 	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
