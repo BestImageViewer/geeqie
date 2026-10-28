@@ -15,6 +15,7 @@ unit_test_sources = files(
 'dupe-delete.cc',
 'editors.cc',
 'exiv2.cc',
+'exif-color-profile.cc',
 'exif-resolution.cc',
 'filecache.cc',
 'filedata/filedata.cc',
