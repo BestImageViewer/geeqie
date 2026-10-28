@@ -296,6 +296,23 @@ TEST_P(GroupedMetadataSidecars, BasenameModeStillUsesTheSharedSidecar)
 	expect_comment(raw, "Shared second");
 }
 
+TEST_P(GroupedMetadataSidecars, ColorLabelsFollowTheGroupedMetadataPreference)
+{
+	options->metadata.sync_grouped_files = TRUE;
+	auto *leader = jpeg->parent ? jpeg->parent : static_cast<FileData *>(jpeg);
+	ASSERT_TRUE(metadata_write_string(leader, COLOR_LABEL_KEY, "Red"));
+	g_autofree gchar *jpeg_label = metadata_read_string(jpeg, COLOR_LABEL_KEY, METADATA_PLAIN);
+	g_autofree gchar *raw_label = metadata_read_string(raw, COLOR_LABEL_KEY, METADATA_PLAIN);
+	EXPECT_STREQ(jpeg_label, "Red");
+	EXPECT_STREQ(raw_label, "Red");
+	options->metadata.sync_grouped_files = FALSE;
+	ASSERT_TRUE(metadata_write_string(jpeg, COLOR_LABEL_KEY, "Blue"));
+	g_autofree gchar *changed_jpeg = metadata_read_string(jpeg, COLOR_LABEL_KEY, METADATA_PLAIN);
+	g_autofree gchar *unchanged_raw = metadata_read_string(raw, COLOR_LABEL_KEY, METADATA_PLAIN);
+	EXPECT_STREQ(changed_jpeg, "Blue");
+	EXPECT_STREQ(unchanged_raw, "Red");
+}
+
 INSTANTIATE_TEST_SUITE_P(GroupLeaders, GroupedMetadataSidecars, testing::Bool());
 
 } // namespace

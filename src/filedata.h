@@ -238,6 +238,8 @@ public:
 	FileData *parent; /**< parent file if this is a sidecar file, NULL otherwise */
 	FileDataChangeInfo *change; /**< for rename, move ... */
 	GdkPixbuf *thumb_pixbuf;
+	gchar *color_label;
+	gint color_label_version;
 
 	GdkPixbuf *pixbuf; /**< full-size image, only complete images, NULL during loading
 			      all FileData with non-NULL pixbuf are referenced by image_cache */

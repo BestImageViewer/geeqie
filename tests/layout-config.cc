@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
@@ -11,6 +12,7 @@
 #include "accelerators.h"
 #include "bar-sort.h"
 #include "bar.h"
+#include "color-label.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "image.h"
@@ -763,6 +765,78 @@ TEST_F(ColorSchemePreferences, ConfirmSavesThePreferenceWithoutReplacingASession
 	g_object_get(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", &dark, nullptr);
 	EXPECT_TRUE(dark);
 #endif
+}
+
+class ColorLabelPreferences : public ColorSchemePreferences
+{
+protected:
+	void SetUp() override
+	{
+		ColorSchemePreferences::SetUp();
+		if (HasFatalFailure() || IsSkipped()) return;
+		saved_enabled = options->color_labels.enabled;
+		for (int i = 0; i < COLOR_LABEL_COUNT; ++i) saved_labels.emplace_back(color_label_name(i + 1));
+	}
+
+	void TearDown() override
+	{
+		if (get_config_window()) gtk_window_close(GTK_WINDOW(get_config_window()));
+		if (!saved_labels.empty())
+			{
+			gchar **names[] = {&options->color_labels.red, &options->color_labels.yellow, &options->color_labels.green,
+			                  &options->color_labels.blue, &options->color_labels.purple};
+			for (int i = 0; i < COLOR_LABEL_COUNT; ++i)
+				{
+				g_free(*names[i]);
+				*names[i] = g_strdup(saved_labels[i].c_str());
+				}
+			options->color_labels.enabled = saved_enabled;
+			}
+		ColorSchemePreferences::TearDown();
+	}
+
+	static GtkWidget *label_entry(GtkWidget *widget, const gchar *text)
+	{
+		if (GTK_IS_ENTRY(widget) && g_strcmp0(gtk_editable_get_text(GTK_EDITABLE(widget)), text) == 0) return widget;
+		for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+			{
+			if (auto *entry = label_entry(child, text)) return entry;
+			}
+		return nullptr;
+	}
+
+	std::vector<std::string> saved_labels;
+	gboolean saved_enabled = FALSE;
+};
+
+TEST_F(ColorLabelPreferences, CancelAndConfirmKeepMappingsSeparateAndSaveThem)
+{
+	show_config_window(layout);
+	auto *dialog = get_config_window();
+	auto *entry = label_entry(dialog, saved_labels[0].c_str());
+	ASSERT_NE(entry, nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "Approved");
+	auto *cancel = find_widget(dialog, GTK_TYPE_BUTTON, _("Cancel"));
+	ASSERT_NE(cancel, nullptr);
+	g_signal_emit_by_name(cancel, "clicked");
+	EXPECT_STREQ(color_label_name(1), saved_labels[0].c_str());
+	show_config_window(layout);
+	dialog = get_config_window();
+	entry = label_entry(dialog, saved_labels[0].c_str());
+	ASSERT_NE(entry, nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "Approved");
+	auto *ok = find_widget(dialog, GTK_TYPE_BUTTON, "OK");
+	ASSERT_NE(ok, nullptr);
+	g_signal_emit_by_name(ok, "clicked");
+	EXPECT_STREQ(color_label_name(1), "Approved");
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(config_path, &contents, nullptr, nullptr));
+	EXPECT_NE(std::string(contents).find("color_labels.red"), std::string::npos);
+	EXPECT_NE(std::string(contents).find("Approved"), std::string::npos);
+	const gchar fragment[] = "<gq><global color_labels.red='Restored' color_labels.enabled='false'/></gq>";
+	ASSERT_TRUE(load_config_from_buf(fragment, sizeof(fragment) - 1, FALSE));
+	EXPECT_STREQ(color_label_name(1), "Restored");
+	EXPECT_FALSE(options->color_labels.enabled);
 }
 
 TEST_F(ColorSchemePreferences, AutomaticImageBackgroundUpdatesAndCustomColorIsPreserved)

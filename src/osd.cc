@@ -35,6 +35,7 @@
 
 #include <config.h>
 
+#include "color-label.h"
 #include "dnd.h"
 #include "exif.h"
 #if HAVE_LUA
@@ -99,6 +100,7 @@ constexpr struct OsdTag
 	{"%formatted.countryname%",			N_("Country name")},
 	{"%formatted.countrycode%",			N_("Country code")},
 	{"%rating%",						N_("Rating")},
+	{"%formatted.Label%", N_("Color label")},
 	{"%formatted.star_rating%",			N_("Star rating")},
 	{"%Xmp.dc.creator%",				N_("© Creator")},
 	{"%Xmp.dc.contributor%",			N_("© Contributor")},
@@ -182,7 +184,7 @@ gchar *get_osd_name(const gchar *start, const gchar *end, guint &limit, gchar **
 	return g_strndup(start + 1, (trunc ? trunc : end) - start - 1);
 }
 
-gchar *get_osd_data(gchar *name, FileData *fd, const OsdTemplate &vars)
+gchar *get_osd_data(gchar *name, FileData *fd, const OsdTemplate &vars, const gchar *&color)
 {
 	if (strcmp(name, "keywords") == 0)
 		{
@@ -210,6 +212,18 @@ gchar *get_osd_data(gchar *name, FileData *fd, const OsdTemplate &vars)
 	if (strcmp(name, "rating") == 0)
 		{
 		return metadata_read_string(fd, RATING_KEY, METADATA_PLAIN);
+		}
+
+	if (strcmp(name, "formatted.Label") == 0)
+		{
+		const gchar *text = color_label_read(fd);
+		const int index = color_label_index(text);
+		if (index > 0 && index <= COLOR_LABEL_COUNT)
+			{
+			color = color_label_color(index);
+			return g_strdup("●");
+			}
+		return g_strdup(text);
 		}
 
 #if HAVE_LUA
@@ -356,7 +370,8 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 
 		guint pos = start - osd_info->str;
 
-		g_autofree gchar *data = get_osd_data(name, fd, vars);
+		const gchar *color = nullptr;
+		g_autofree gchar *data = get_osd_data(name, fd, vars, color);
 
 		if (data && *data && limit > 0 && strlen(data) > limit + 3)
 			{
@@ -369,6 +384,13 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 			/* Since we use pango markup to display, we need to escape here */
 			g_autofree gchar *escaped = g_markup_escape_text(data, -1);
 			std::swap(data, escaped);
+			}
+
+		if (data && *data && color)
+			{
+			// Only the palette supplies markup; metadata text remains escaped.
+			g_autofree gchar *colored = g_strdup_printf("<span foreground=\"%s\">%s</span>", color, data);
+			std::swap(data, colored);
 			}
 
 		if (data && *data && extra)

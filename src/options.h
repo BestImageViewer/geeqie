@@ -101,6 +101,14 @@ struct ConfOptions
 	gchar *image_l_click_video_editor;
 	gboolean show_icon_names;
 	gboolean show_star_rating;
+	struct {
+		gboolean enabled;
+		gchar *red;
+		gchar *yellow;
+		gchar *green;
+		gchar *blue;
+		gchar *purple;
+	} color_labels;
 	gboolean show_collection_infotext;
 	gboolean show_collection_marks;
 	gboolean draw_rectangle;

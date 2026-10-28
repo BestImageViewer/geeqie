@@ -68,7 +68,7 @@ enum MetadataKey {
 /**
  *  @brief Tags that will be written to all files in a group - selected by: options->metadata.sync_grouped_files, Preferences/Metadata/Write The Same Description Tags To All Grouped Sidecars
  */
-constexpr std::array<const gchar *, 22> group_keys{
+constexpr std::array<const gchar *, 23> group_keys{
 	"Xmp.dc.title", // NOTRANSLATE: Metadata key defined by the file format.
 	"Xmp.photoshop.Urgency", // NOTRANSLATE: Metadata key defined by the file format.
 	"Xmp.photoshop.Category", // NOTRANSLATE: Metadata key defined by the file format.
@@ -90,6 +90,7 @@ constexpr std::array<const gchar *, 22> group_keys{
 	"Xmp.dc.rights", // NOTRANSLATE: Metadata key defined by the file format.
 	"Xmp.dc.description", // NOTRANSLATE: Metadata key defined by the file format.
 	"Xmp.photoshop.CaptionWriter", // NOTRANSLATE: Metadata key defined by the file format.
+	COLOR_LABEL_KEY,
 	"Xmp.xmp.Rating", // NOTRANSLATE: Metadata key defined by the file format.
 };
 
@@ -448,6 +449,9 @@ gboolean metadata_write_perform(FileData *fd)
 	if (fd->change->dest &&
 	    g_ascii_strncasecmp(fd->change->dest + strlen(fd->change->dest) - lf, GQ_CACHE_EXT_METADATA, lf) == 0)
 		{
+		// Legacy comment files cannot represent XMP labels. Keep the queued
+		// edit and report a write failure instead of silently discarding it.
+		if (fd->modified_xmp && g_hash_table_contains(fd->modified_xmp, COLOR_LABEL_KEY)) return FALSE;
 		success = metadata_legacy_write(fd);
 		if (success) metadata_legacy_delete(fd, fd->change->dest);
 		return success;

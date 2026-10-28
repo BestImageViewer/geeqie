@@ -195,6 +195,15 @@ ConfOptions *conf_options_new()
 
 	options->show_icon_names = TRUE;
 	options->show_star_rating = FALSE;
+	options->color_labels.enabled = TRUE;
+	gchar **label_names[] = {&options->color_labels.red, &options->color_labels.yellow, &options->color_labels.green,
+	                        &options->color_labels.blue, &options->color_labels.purple};
+	const gchar *label_defaults[] = {"Red", "Yellow", "Green", "Blue", "Purple"}; // NOTRANSLATE: Interoperable XMP label values.
+	for (guint i = 0; i < G_N_ELEMENTS(label_names); ++i)
+		{
+		g_free(*label_names[i]);
+		*label_names[i] = g_strdup(label_defaults[i]);
+		}
 	options->show_collection_infotext = FALSE;
 	options->show_collection_marks = FALSE;
 	options->show_predefined_keyword_tree = TRUE;

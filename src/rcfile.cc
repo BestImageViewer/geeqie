@@ -399,6 +399,12 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	/* General Options */
 	WRITE_NL(); WRITE_BOOL(*options, show_icon_names);
 	WRITE_NL(); WRITE_BOOL(*options, show_star_rating);
+	WRITE_NL(); WRITE_BOOL(*options, color_labels.enabled);
+	WRITE_NL(); WRITE_CHAR(*options, color_labels.red);
+	WRITE_NL(); WRITE_CHAR(*options, color_labels.yellow);
+	WRITE_NL(); WRITE_CHAR(*options, color_labels.green);
+	WRITE_NL(); WRITE_CHAR(*options, color_labels.blue);
+	WRITE_NL(); WRITE_CHAR(*options, color_labels.purple);
 	WRITE_NL(); WRITE_BOOL(*options, show_collection_infotext);
 	WRITE_NL(); WRITE_BOOL(*options, show_collection_marks);
 	WRITE_NL(); WRITE_BOOL(*options, show_predefined_keyword_tree);
@@ -879,6 +885,12 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		/* General options */
 		if (READ_BOOL(*options, show_icon_names)) continue;
 		if (READ_BOOL(*options, show_star_rating)) continue;
+		if (READ_BOOL(*options, color_labels.enabled)) continue;
+		if (READ_CHAR(*options, color_labels.red)) continue;
+		if (READ_CHAR(*options, color_labels.yellow)) continue;
+		if (READ_CHAR(*options, color_labels.green)) continue;
+		if (READ_CHAR(*options, color_labels.blue)) continue;
+		if (READ_CHAR(*options, color_labels.purple)) continue;
 		if (READ_BOOL(*options, show_collection_infotext)) continue;
 		if (READ_BOOL(*options, show_collection_marks)) continue;
 		if (READ_BOOL(*options, show_predefined_keyword_tree)) continue;

@@ -430,6 +430,10 @@
             </entry>
           </row>
           <row>
+            <entry><para>Xmp.xmp.Label</para></entry>
+            <entry><para>Text label displayed using configurable <link linkend="ColorLabels">color-label mappings</link>. Unknown text is preserved. In the OSD template, <literal>%formatted.Label%</literal> displays recognized labels as colored dots and unknown labels as text. This is separate from Xmp.photoshop.LabelColor.</para></entry>
+          </row>
+          <row>
             <entry>
               <para>Xmp.photoshop.Headline</para>
             </entry>

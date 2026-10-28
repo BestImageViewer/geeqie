@@ -45,6 +45,7 @@
 #include "archives.h"
 #include "bar-keywords.h"
 #include "cache.h"
+#include "color-label.h"
 #include "color-man.h"
 #include "editors.h"
 #include "filedata.h"
@@ -336,6 +337,7 @@ GtkWidget *external_preview_select_entry;
 GtkWidget *external_preview_extract_entry;
 
 GtkWidget *sidecar_ext_entry;
+GtkWidget *color_label_entries[COLOR_LABEL_COUNT];
 GtkWidget *help_search_engine_entry;
 
 #ifdef DEBUG
@@ -502,6 +504,16 @@ static void config_window_apply(const ConfOptions *c_options)
 
 	options->file_sort = c_options->file_sort;
 
+	gchar **label_names[] = {&options->color_labels.red, &options->color_labels.yellow, &options->color_labels.green,
+	                        &options->color_labels.blue, &options->color_labels.purple};
+	bool labels_changed = options->color_labels.enabled != c_options->color_labels.enabled;
+	options->color_labels.enabled = c_options->color_labels.enabled;
+	for (int i = 0; i < COLOR_LABEL_COUNT; ++i)
+		{
+		labels_changed |= g_strcmp0(gtk_editable_get_text(GTK_EDITABLE(color_label_entries[i])), color_label_name(i + 1)) != 0;
+		config_entry_to_option(color_label_entries[i], label_names[i], nullptr);
+		}
+	refresh |= labels_changed;
 	config_entry_to_option(sidecar_ext_entry, &options->sidecar.ext, nullptr);
 	sidecar_ext_parse(options->sidecar.ext);
 
@@ -657,7 +669,8 @@ static void config_window_apply(const ConfOptions *c_options)
 	if (refresh)
 		{
 		filter_rebuild();
-		layout_refresh(nullptr);
+		if (labels_changed) layout_window_foreach([](LayoutWindow *lw) { layout_refresh(lw); });
+		else layout_refresh(nullptr);
 		}
 
 	toolbar_apply(TOOLBAR_MAIN);
@@ -2098,6 +2111,20 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 #endif
 
 	pref_spacer(group, PREF_PAD_GROUP);
+
+	group = pref_group_new(vbox, FALSE, _("Color labels"), GTK_ORIENTATION_VERTICAL);
+	pref_checkbox_new_int(group, _("Show color labels"), options->color_labels.enabled, &c_options->color_labels.enabled);
+	GtkWidget *color_label_description = pref_label_new(group, _("Stored label text for each color:"));
+	gtk_label_set_xalign(GTK_LABEL(color_label_description), 0.0);
+	for (int i = 0; i < COLOR_LABEL_COUNT; ++i)
+		{
+		hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+		pref_label_new(hbox, color_label_title(i + 1));
+		color_label_entries[i] = gtk_entry_new();
+		gtk_accessible_update_property(GTK_ACCESSIBLE(color_label_entries[i]), GTK_ACCESSIBLE_PROPERTY_LABEL, color_label_title(i + 1), -1);
+		gtk_editable_set_text(GTK_EDITABLE(color_label_entries[i]), color_label_name(i + 1));
+		gtk_box_append(GTK_BOX(hbox), color_label_entries[i]);
+		}
 
 	group = pref_group_new(vbox, FALSE, _("Star Rating"), GTK_ORIENTATION_VERTICAL);
 

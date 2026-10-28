@@ -749,6 +749,7 @@ void FileData::file_data_free(FileData *fd)
 	if (fd->thumb_pixbuf) g_object_unref(fd->thumb_pixbuf);
 	histmap_free(fd->histmap);
 	g_free(fd->format_name);
+	g_free(fd->color_label);
 	g_assert(fd->sidecar_files == nullptr); /* sidecar files must be freed before calling this */
 
 	::file_data_change_info_free(nullptr, fd);

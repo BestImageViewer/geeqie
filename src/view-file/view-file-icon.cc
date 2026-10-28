@@ -32,6 +32,7 @@
 #include <glib-object.h>
 
 #include "collect.h"
+#include "color-label.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"
@@ -1458,6 +1459,7 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 
 		new_filelist = g_list_first(new_filelist);
 		new_filelist = file_data_filter_rating_list(new_filelist, options->rating_filter);
+		new_filelist = color_label_filter(new_filelist, vf->color_label_filter);
 		}
 
 	vf->list = vf_filelist_sort(vf, vf->list); /* the list might not be sorted if there were renames */
@@ -1617,6 +1619,8 @@ static void vficon_item_update(ViewFileIconItem *item, GtkWidget *child)
 {
 	auto *vf = static_cast<ViewFile *>(g_object_get_data(G_OBJECT(child), VIEW_FILE_ICON_DATA_KEY));
 	FileData *fd = item->fd;
+	auto *color_label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(child), "view-file-color-label"));
+	color_label_widget_update(color_label, fd);
 	g_object_set_data(G_OBJECT(child), "view-file-fd", fd);
 	gtk_widget_set_size_request(child, vficon_get_icon_width(vf), -1);
 	gtk_widget_set_tooltip_text(child, VFICON(vf)->show_text ? nullptr : fd->name);
@@ -1728,7 +1732,15 @@ static void vficon_factory_setup(GtkSignalListItemFactory *, GtkListItem *list_i
 
 	GtkWidget *picture = gtk_picture_new();
 	gtk_picture_set_can_shrink(GTK_PICTURE(picture), TRUE);
-	gtk_box_append(GTK_BOX(box), picture);
+	GtkWidget *overlay = gtk_overlay_new();
+	gtk_overlay_set_child(GTK_OVERLAY(overlay), picture);
+	gtk_box_append(GTK_BOX(box), overlay);
+	GtkWidget *color_label = gtk_label_new(nullptr);
+	gtk_widget_set_size_request(color_label, -1, 14);
+	gtk_widget_set_halign(color_label, GTK_ALIGN_END);
+	gtk_widget_set_valign(color_label, GTK_ALIGN_START);
+	gtk_overlay_add_overlay(GTK_OVERLAY(overlay), color_label);
+	g_object_set_data(G_OBJECT(box), "view-file-color-label", color_label);
 	GtkWidget *label = gtk_label_new(nullptr);
 	gtk_label_set_wrap(GTK_LABEL(label), TRUE);
 	gtk_label_set_wrap_mode(GTK_LABEL(label), PANGO_WRAP_WORD_CHAR);

@@ -30,6 +30,7 @@
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "color-label.h"
 #include "compat.h"
 #include "dnd.h"
 #include "dupe.h"
@@ -1642,6 +1643,16 @@ static void vf_pop_menu_show_star_rating_action_cb(GSimpleAction *action, GVaria
 	g_simple_action_set_state(action, state);
 }
 
+static void vf_color_label_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !parameter) return;
+	const int index = g_variant_get_int32(parameter);
+	g_autoptr(FileDataList) files = vf_pop_menu_file_list(vf);
+	for (GList *work = files; work; work = work->next)
+		color_label_assign(static_cast<FileData *>(work->data), index);
+}
+
 #include "view-file-actions.inc"
 
 static GSimpleAction *vf_pop_menu_action(ViewFile *vf, const gchar *name)
@@ -1778,6 +1789,20 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
 	submenu_add_collections_new(collections_menu, "win.view-file-collections");
 
+	g_autoptr(GMenu) label_menu = g_menu_new();
+	gmenu_append_int32_action_item(label_menu, _("Clear color label"), "win.view-file-color-label", 0);
+	for (int i = 1; i <= COLOR_LABEL_COUNT; ++i)
+		{
+		if (!*color_label_name(i)) continue;
+		g_autofree gchar *title = g_strcmp0(color_label_title(i), color_label_name(i)) == 0 ?
+		                         g_strdup(color_label_title(i)) : g_strdup_printf("%s — %s", color_label_title(i), color_label_name(i));
+		gmenu_append_int32_action_item(label_menu, title, "win.view-file-color-label", i);
+		}
+	g_autoptr(GMenu) label_section = g_menu_new();
+	g_autoptr(GMenuItem) label_item = g_menu_item_new_submenu(_("Color label"), G_MENU_MODEL(label_menu));
+	g_menu_append_item(label_section, label_item);
+	g_menu_append_section(menu_model, nullptr, G_MENU_MODEL(label_section));
+
 	GMenu *sort_menu = G_MENU(gtk_builder_get_object(builder, "sort-submenu"));
 	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
 	                                  SORT_EXIFTIMEDIGITIZED, SORT_MEDIA_TIME, SORT_SIZE, SORT_RATING, SORT_CLASS })
@@ -1830,6 +1855,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	vf_pop_menu_set_action_enabled(vf, "view-file-plugin-run", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-view-new", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-open-archive", active && class_archive);
+	vf_pop_menu_set_action_enabled(vf, "view-file-color-label", active && HAVE_EXIV2);
 	vf_pop_menu_set_action_enabled(vf, "view-file-copy", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-copy-image", pane_selection ? !pane_selection->next : vf->click_fd != nullptr);
 	vf_pop_menu_set_action_enabled(vf, "view-file-move", active);
@@ -2664,6 +2690,38 @@ static void file_filter_clear_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkE
 	gtk_widget_grab_focus(GTK_WIDGET(entry));
 }
 
+static void vf_color_label_filter_cb(GtkCheckButton *button, gpointer data)
+{
+	if (!gtk_check_button_get_active(button)) return;
+	auto *vf = static_cast<ViewFile *>(data);
+	const guint selected = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(button), "color-label-filter"));
+	vf->color_label_filter = selected > 0 && selected <= COLOR_LABEL_OTHER + 1 ? 1U << (selected - 1) : 0;
+	vf_refresh(vf);
+}
+
+static GtkWidget *color_label_filter_popover_new(ViewFile *vf)
+{
+	GtkWidget *popover = gtk_popover_new();
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_popover_set_child(GTK_POPOVER(popover), box);
+	GtkCheckButton *group = nullptr;
+	for (int i = 0; i <= COLOR_LABEL_OTHER + 1; ++i)
+		{
+		GtkWidget *button = gtk_check_button_new_with_label(i ? color_label_title(i - 1) : _("All labels"));
+		if (group) gtk_check_button_set_group(GTK_CHECK_BUTTON(button), group);
+		else group = GTK_CHECK_BUTTON(button);
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(button), i == 0);
+		g_object_set_data(G_OBJECT(button), "color-label-filter", GUINT_TO_POINTER(i));
+		g_signal_connect(button, "toggled", G_CALLBACK(vf_color_label_filter_cb), vf);
+		gtk_widget_set_margin_start(button, PREF_PAD_SPACE);
+		gtk_widget_set_margin_end(button, PREF_PAD_SPACE);
+		gtk_widget_set_margin_top(button, PREF_PAD_GAP);
+		gtk_widget_set_margin_bottom(button, PREF_PAD_GAP);
+		gtk_box_append(GTK_BOX(box), button);
+		}
+	return popover;
+}
+
 static GtkWidget *vf_file_filter_init(ViewFile *vf)
 {
 	GtkWidget *frame = gtk_frame_new(nullptr);
@@ -2723,6 +2781,8 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 
 	GtkWidget *rating_button = file_filter_menu_button_new(_("Rating"), _("Select Rating filter"), rating_filter_popover_new(vf));
 	gtk_box_append(GTK_BOX(hbox), rating_button);
+	GtkWidget *label_filter = file_filter_menu_button_new(_("Label"), _("Filter by color label"), color_label_filter_popover_new(vf));
+	gtk_box_append(GTK_BOX(hbox), label_filter);
 
 	return frame;
 }
@@ -3305,6 +3365,7 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	gboolean refresh;
 
 	auto interested = static_cast<NotifyType>(NOTIFY_CHANGE | NOTIFY_REREAD | NOTIFY_GROUPING);
+	if (options->color_labels.enabled || vf->color_label_filter || options->rating_filter) interested = static_cast<NotifyType>(interested | NOTIFY_METADATA);
 	if (options->show_star_rating)
 		{
 		interested = static_cast<NotifyType>(interested | NOTIFY_METADATA);
@@ -3313,9 +3374,19 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	/** @FIXME NOTIFY_METADATA should be checked by the keyword-to-mark functions and converted to NOTIFY_MARKS only if there was a change */
 
 	if (!(type & interested) || vf->refresh_idle_id) return;
+	const gboolean label_update = type == NOTIFY_METADATA && !vf->color_label_filter && !options->rating_filter && !options->show_star_rating && !vf->marks_enabled;
 	if (vf->collection)
 		{
-		if (g_hash_table_contains(vf->collection_order, fd) || g_list_find(vf->list, fd)) vf_refresh_idle(vf);
+		if (g_hash_table_contains(vf->collection_order, fd) || g_list_find(vf->list, fd))
+			{
+			if (label_update)
+				{
+				if (options->color_labels.enabled) color_label_read(fd);
+				vf_set_thumb_fd(vf, fd);
+				gtk_widget_queue_draw(vf->listview);
+				}
+			else vf_refresh_idle(vf);
+			}
 		return;
 		}
 	if (!vf->dir_fd) return;
@@ -3343,6 +3414,13 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 			}
 		}
 
+	if (refresh && label_update)
+		{
+		if (options->color_labels.enabled) color_label_read(fd);
+		vf_set_thumb_fd(vf, fd);
+		gtk_widget_queue_draw(vf->listview);
+		return;
+		}
 	if (refresh)
 		{
 		DEBUG_1("Notify vf: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.

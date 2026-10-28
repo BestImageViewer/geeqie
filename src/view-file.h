@@ -117,6 +117,7 @@ struct ViewFile
 
 	GList *editmenu_fd_list; /**< file list for edit menu */
 
+	guint color_label_filter;
 	guint read_metadata_in_idle_id;
 	guint marks_load_idle_id;
 	GQueue *marks_load_queue;

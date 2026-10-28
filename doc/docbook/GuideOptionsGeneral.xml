@@ -166,6 +166,14 @@
       </varlistentry>
     </variablelist>
   </section>
+  <section id="ColorLabels">
+    <title>Color labels</title>
+    <para>Color labels identify images using the XMP text field <literal>Xmp.xmp.Label</literal>. Enable <guilabel>Show color labels</guilabel> to display a small indicator over icon thumbnails and beside filenames in list view. The indicator's tooltip shows the stored label text. Color labels are separate from numbered marks and star ratings.</para>
+    <para>The default mappings are Red, Yellow, Green, Blue, and Purple. Each entry specifies the text to store for that color. Change these entries to match the label names used by other applications. Matching ignores letter case; use different names for each color. An empty entry disables assignment for that color. Changing a mapping changes how existing labels are displayed, but does not rewrite their metadata.</para>
+    <para>Unknown label text is preserved and displayed with a neutral indicator. Geeqie uses <literal>Xmp.xmp.Label</literal>, not the separate <literal>Xmp.photoshop.LabelColor</literal> property. Color-label metadata support requires Exiv2.</para>
+    <para>In the files pane, right-click selected images and use <guimenuitem>Color label</guimenuitem> to assign a label or <guimenuitem>Clear color label</guimenuitem> to clear it. Writes follow the existing metadata confirmation, grouped-file, and image or XMP sidecar settings. Legacy comment files cannot store labels; choose image or XMP storage instead.</para>
+    <para>Use the <guilabel>Label</guilabel> drop-down in <guimenuitem>Show File Filter</guimenuitem> to show one color, unlabeled images, or images with other labels. <guilabel>All labels</guilabel> disables the label filter. Filtering may require reading metadata for every image in the folder. With no label filter, indicator metadata is read only for displayed rows.</para>
+  </section>
   <section id="StarRatingCharacters">
     <title>Star Rating</title>
     <para>The characters used to display the Star Rating are defined here. They are defined as a hexadecimal Unicode character. The complete list of Unicode characters can be found in many places on the Internet.</para>

@@ -38,6 +38,7 @@ struct RcString;
 #define KEYWORD_KEY "Xmp.dc.subject"
 #define ORIENTATION_KEY "Xmp.tiff.Orientation"
 #define RATING_KEY "Xmp.xmp.Rating"
+#define COLOR_LABEL_KEY "Xmp.xmp.Label"
 
 enum MetadataFormat : gint {
 	METADATA_PLAIN     = 0, /**< format that can be edited and written back */

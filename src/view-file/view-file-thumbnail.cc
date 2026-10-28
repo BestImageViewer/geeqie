@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "color-label.h"
 #include "filedata.h"
 #include "options.h"
 #include "view-file-icon.h"
@@ -125,6 +126,7 @@ gboolean viewport_idle(gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
 	vf->thumbnails->idle_id = 0;
+	color_label_refresh_visible(vf);
 	if (vf->thumbnails->model_dirty)
 		{
 		vf_thumb_update(vf);

@@ -10,6 +10,7 @@
 #include <tuple>
 #include <utility>
 
+#include <config.h>
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 
@@ -19,12 +20,14 @@
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "color-label.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "history-list.h"
 #include "layout-image.h"
 #include "layout-util.h"
 #include "layout.h"
+#include "metadata.h"
 #include "options.h"
 #include "thumb-standard.h"
 #include "trash.h"
@@ -426,6 +429,49 @@ TEST_P(RepeatedDelete, StatusPositionSurvivesSelectNoneAndOmitsAbsentImage)
 	EXPECT_EQ(std::strstr(text, " / "), nullptr);
 	EXPECT_NE(std::strstr(text, "3 files"), nullptr);
 	EXPECT_EQ(std::strstr(text, "("), nullptr);
+}
+
+TEST_P(RepeatedDelete, ColorLabelActionsUseSelectionAndFilteringPreservesUnknownLabels)
+{
+#if !HAVE_EXIV2
+	GTEST_SKIP() << "Requires Exiv2";
+#endif
+	auto *vf = layout->vf;
+	struct Cleanup
+	{
+		std::vector<FileDataRef> files;
+		~Cleanup()
+			{
+			for (const auto &file : files) if (file->modified_xmp) metadata_write_queue_remove(file);
+			}
+	} cleanup;
+	for (int i = 0; i < 3; ++i) cleanup.files.emplace_back(vf_index_get_data(vf, i));
+	auto *first = static_cast<FileData *>(cleanup.files[0]);
+	auto *second = static_cast<FileData *>(cleanup.files[1]);
+	auto *third = static_cast<FileData *>(cleanup.files[2]);
+	ASSERT_TRUE(metadata_write_string(third, COLOR_LABEL_KEY, "Unfamiliar label"));
+	g_autoptr(FileDataList) selected = g_list_append(nullptr, file_data_ref(first));
+	selected = g_list_append(selected, file_data_ref(second));
+	vf_select_list(vf, selected);
+	vf->click_fd = first;
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "view-file-color-label", g_variant_new_int32(1));
+	EXPECT_STREQ(color_label_read(first), color_label_name(1));
+	EXPECT_STREQ(color_label_read(second), color_label_name(1));
+	EXPECT_STREQ(color_label_read(third), "Unfamiliar label");
+	vf->color_label_filter = 1U << 1;
+	vf_refresh(vf);
+	EXPECT_EQ(vf_count(vf), 2U);
+	vf->color_label_filter = 1U << COLOR_LABEL_OTHER;
+	vf_refresh(vf);
+	ASSERT_EQ(vf_count(vf), 1U);
+	EXPECT_EQ(vf_index_get_data(vf, 0), third);
+	vf_select_by_fd(vf, third);
+	vf->click_fd = third;
+	g_action_group_activate_action(G_ACTION_GROUP(layout->window), "view-file-color-label", g_variant_new_int32(0));
+	EXPECT_STREQ(color_label_read(third), "");
+	vf->color_label_filter = 1U;
+	vf_refresh(vf);
+	EXPECT_EQ(vf_count(vf), 1U);
 }
 
 TEST_P(RepeatedDelete, RebuildThumbnailsOnlyInvalidatesSelectedFiles)
@@ -1582,6 +1628,100 @@ TEST_P(RevealFile, IconNavigationModifierMatrix)
 				}
 			}
 		}
+}
+
+TEST_P(RevealFile, ColorLabelsReadOnlyVisibleMetadataWithoutAFilter)
+{
+	auto *unseen = vf_index_get_data(vf, 100);
+	EXPECT_EQ(unseen->color_label, nullptr);
+	const auto visible = vf->type == FILEVIEW_ICON ? vficon_thumb_visible(vf) : vflist_thumb_visible(vf);
+	ASSERT_FALSE(visible.empty());
+	for (auto *fd : visible) EXPECT_NE(fd->color_label, nullptr);
+	vf_scroll_to_file(vf, unseen);
+	settle();
+	EXPECT_NE(unseen->color_label, nullptr);
+}
+
+TEST_P(RevealFile, ListColorLabelSwatchesShowMappedAndUnknownLabels)
+{
+	if (vf->type != FILEVIEW_LIST) GTEST_SKIP() << "Requires list view";
+	auto *fd = vf_index_get_data(vf, 0);
+	struct Cleanup
+	{
+		FileDataRef file;
+		~Cleanup() { if (file->modified_xmp) metadata_write_queue_remove(file); }
+	} cleanup{FileDataRef(fd)};
+	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, color_label_name(1)));
+	settle();
+	auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	GtkTreeIter iter;
+	ASSERT_TRUE(gtk_tree_model_get_iter_first(model, &iter));
+	GtkTreeViewColumn *column = nullptr;
+	GtkCellRenderer *indicator = nullptr;
+	g_autoptr(GList) columns = gtk_tree_view_get_columns(GTK_TREE_VIEW(vf->listview));
+	for (GList *entry = columns; entry; entry = entry->next)
+		{
+		auto *candidate = GTK_TREE_VIEW_COLUMN(entry->data);
+		if (!gtk_tree_view_column_get_visible(candidate)) continue;
+		g_autoptr(GList) cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(candidate));
+		if (g_list_length(cells) < 2) continue;
+		for (GList *work = cells; work; work = work->next)
+			{
+			if (!GTK_IS_CELL_RENDERER_PIXBUF(work->data)) continue;
+			column = candidate;
+			indicator = GTK_CELL_RENDERER(work->data);
+			}
+		}
+	ASSERT_NE(indicator, nullptr);
+	gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
+	g_autoptr(GdkTexture) texture = nullptr;
+	g_object_get(indicator, "texture", &texture, nullptr);
+	ASSERT_NE(texture, nullptr);
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_get_from_texture(texture);
+	EXPECT_GT(gdk_pixbuf_read_pixels(pixels)[0], gdk_pixbuf_read_pixels(pixels)[1]);
+	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, "Custom label"));
+	settle();
+	gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
+	g_clear_object(&texture);
+	g_object_get(indicator, "texture", &texture, nullptr);
+	ASSERT_NE(texture, nullptr);
+	g_clear_object(&pixels);
+	pixels = gdk_pixbuf_get_from_texture(texture);
+	EXPECT_EQ(gdk_pixbuf_read_pixels(pixels)[0], gdk_pixbuf_read_pixels(pixels)[1]);
+	EXPECT_EQ(gdk_pixbuf_read_pixels(pixels)[1], gdk_pixbuf_read_pixels(pixels)[2]);
+	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, ""));
+	settle();
+	gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
+	g_clear_object(&texture);
+	g_object_get(indicator, "texture", &texture, nullptr);
+	EXPECT_EQ(texture, nullptr);
+}
+
+TEST_P(RevealFile, IconColorLabelsDisplayUnknownTextWithoutInterpretingMarkup)
+{
+	if (vf->type != FILEVIEW_ICON) GTEST_SKIP() << "Requires icon view";
+	auto *fd = vf_index_get_data(vf, 0);
+	struct Cleanup
+	{
+		FileDataRef file;
+		~Cleanup() { if (file->modified_xmp) metadata_write_queue_remove(file); }
+	} cleanup{FileDataRef(fd)};
+	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, color_label_name(1)));
+	settle();
+	auto *item = find_file_widget(vf->listview, fd);
+	ASSERT_NE(item, nullptr);
+	auto *indicator = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(item), "view-file-color-label"));
+	ASSERT_NE(indicator, nullptr);
+	EXPECT_TRUE(gtk_widget_get_visible(indicator));
+	EXPECT_STREQ(gtk_widget_get_tooltip_text(indicator), color_label_name(1));
+	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, "Review <tag> & later"));
+	settle();
+	EXPECT_STREQ(gtk_widget_get_tooltip_text(indicator), "Review <tag> & later");
+	EXPECT_EQ(color_label_index(color_label_read(fd)), COLOR_LABEL_OTHER);
+	EXPECT_STREQ(gtk_label_get_text(GTK_LABEL(indicator)), "●");
+	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, ""));
+	settle();
+	EXPECT_STREQ(gtk_label_get_text(GTK_LABEL(indicator)), "");
 }
 
 TEST_P(RevealFile, IconRefreshPreservesViewportAndModelItems)

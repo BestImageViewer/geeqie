@@ -7,6 +7,7 @@ unit_test_sources = files(
 'cache-maint.cc',
 'collection-file-source.cc',
 'color-scheme.cc',
+'color-label.cc',
 'dnd.cc',
 'display-profile.cc',
 'dupe-export.cc',

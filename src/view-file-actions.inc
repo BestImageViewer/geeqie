@@ -2,6 +2,8 @@
 
 static const ActionDef view_file_actions[] =
 {
+	{"win.view-file-color-label", nullptr, N_("Assign color label"), vf_color_label_action_cb,
+	 G_VARIANT_TYPE_INT32, ActionStateType::NONE, FALSE, nullptr, 0, nullptr},
 	{"win.view-file-collection-append", nullptr, N_("Append from collection…"), vf_collection_append_action_cb,
 	 nullptr, ActionStateType::NONE, FALSE, nullptr, 0, nullptr},
 	{"win.view-file-collection-save-as", nullptr, N_("Save collection as…"), vf_collection_save_as_action_cb,

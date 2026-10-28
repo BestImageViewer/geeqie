@@ -84,6 +84,10 @@
             <entry>JPEG image comment</entry>
           </row>
           <row>
+            <entry>formatted.Label</entry>
+            <entry>A colored dot for a recognized XMP label, using the configured <link linkend="ColorLabels">color-label mappings</link>. Matching is case-insensitive. Unknown label text is displayed as text; an empty label displays nothing. Use <literal>%Xmp.xmp.Label%</literal> to always display the stored text.</entry>
+          </row>
+          <row>
             <entry>rating</entry>
             <entry>Image rating</entry>
           </row>

@@ -132,6 +132,7 @@
           "Xmp.dc.description",
           "Xmp.photoshop.CaptionWriter",
           "Xmp.xmp.Rating",
+          "Xmp.xmp.Label",
         </programlisting>
         <para />
       </listitem>

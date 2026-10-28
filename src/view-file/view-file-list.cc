@@ -31,6 +31,7 @@
 
 #include "cellrenderericon.h"
 #include "collect.h"
+#include "color-label.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"
@@ -215,6 +216,14 @@ static gboolean vflist_filename_tooltip_cb(GtkWidget *widget, gint x, gint y, gb
 	gtk_tree_model_get(model, &iter, FILE_COLUMN_POINTER, &fd, FILE_COLUMN_NAME, &name, -1);
 	if (!fd || !name) return FALSE;
 
+	const gchar *label_text = options->color_labels.enabled ? color_label_read(fd) : "";
+	if (*label_text)
+		{
+		g_autofree gchar *text = g_strdup_printf(_("%s\nColor label: %s"), vf->collection ? fd->path : name, label_text);
+		gtk_tooltip_set_text(tooltip, text);
+		gtk_tree_view_set_tooltip_row(tree_view, tooltip, path);
+		return TRUE;
+		}
 	if (vf->collection)
 		{
 		gtk_tooltip_set_text(tooltip, fd->path);
@@ -1871,6 +1880,7 @@ gboolean vflist_refresh(ViewFile *vf)
 
 		vf->list = g_list_first(vf->list);
 		vf->list = file_data_filter_rating_list(vf->list, options->rating_filter);
+		vf->list = color_label_filter(vf->list, vf->color_label_filter);
 
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 
@@ -1907,6 +1917,13 @@ static void vflist_listview_add_column(GtkTreeView *listview, gint n, const gcha
 	if (!image)
 		{
 		gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
+		if (n == FILE_COLUMN_FORMATTED || n == FILE_COLUMN_FORMATTED_WITH_STARS)
+			{
+			GtkCellRenderer *indicator = gtk_cell_renderer_pixbuf_new();
+			gtk_cell_renderer_set_fixed_size(indicator, 18, -1);
+			gtk_tree_view_column_pack_start(column, indicator, FALSE);
+			gtk_tree_view_column_set_cell_data_func(column, indicator, color_label_cell_data, GINT_TO_POINTER(FILE_COLUMN_POINTER), nullptr);
+			}
 		renderer = gtk_cell_renderer_text_new();
 		if (right_justify)
 			{
