@@ -131,6 +131,7 @@ ConfOptions *conf_options_new()
 	options->image.alpha_color_2.green = static_cast<gdouble>(0x006666) / 65535;
 	options->image.alpha_color_2.blue = static_cast<gdouble>(0x006666) / 65535;
 	options->image.enable_read_ahead = TRUE;
+	options->image.read_ahead_images = 4;
 	options->image.exif_rotate_enable = TRUE;
 	options->image.fit_window_to_image = FALSE;
 	options->image.limit_autofit_size = FALSE;

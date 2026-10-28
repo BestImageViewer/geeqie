@@ -245,12 +245,12 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Preload next image</guilabel>
+          <guilabel>Preload nearby images</guilabel>
         </term>
         <listitem>
-          <para>Enabling this option will cause Geeqie to read the next logical image from disk when idle, it will also retain the previously viewed image in memory. By reading the nearest images into memory, time to display the next image is reduced.</para>
+          <para>Enabling this option preloads nearby full images while idle, following the direction in which you navigate. Images to preload selects the maximum number, from 1 to 32 (default 4). Reversing direction replaces pending work. Preloading follows the displayed order and, when navigating a selection, stays within that selection. It also works with collections. This is separate from thumbnail loading.</para>
           <note>
-            <para>This option will increase Geeqie memory requirements, and may cause performance issues with very large images. If the use of Geeqie results in the system noticeably swapping memory to disk, try disabling this feature.</para>
+            <para>The decoded image cache size limits the preloaded working set, including the current image. Preloading stops when that budget is exhausted; a zero cache size disables preloading. Decoding one candidate and rendering may temporarily require additional memory. Increasing the image count does not guarantee that all candidates will fit in the cache.</para>
           </note>
         </listitem>
       </varlistentry>

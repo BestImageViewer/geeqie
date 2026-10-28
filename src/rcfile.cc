@@ -510,6 +510,7 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_INT(*options, image.image_cache_max);
 	WRITE_NL(); WRITE_INT(*options, image.jpeg_decode_memory_limit);
 	WRITE_NL(); WRITE_BOOL(*options, image.enable_read_ahead);
+	WRITE_NL(); WRITE_INT(*options, image.read_ahead_images);
 	WRITE_NL(); WRITE_BOOL(*options, image.exif_rotate_enable);
 	WRITE_NL(); WRITE_BOOL(*options, image.use_custom_border_color);
 	WRITE_NL(); WRITE_BOOL(*options, image.use_custom_border_color_in_fullscreen);
@@ -980,6 +981,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_UINT_ENUM_CLAMP(*options, image.zoom_quality, GDK_INTERP_NEAREST, GDK_INTERP_BILINEAR)) continue;
 		if (READ_INT(*options, image.zoom_increment)) continue;
 		if (READ_BOOL(*options, image.enable_read_ahead)) continue;
+		if (READ_INT_CLAMP(*options, image.read_ahead_images, 1, 32)) continue;
 		if (READ_BOOL(*options, image.exif_rotate_enable)) continue;
 		if (READ_BOOL(*options, image.use_custom_border_color)) continue;
 		if (READ_BOOL(*options, image.use_custom_border_color_in_fullscreen)) continue;

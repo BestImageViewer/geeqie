@@ -146,6 +146,9 @@ struct ImageWindow
 
 	FileData *read_ahead_fd;
 	ImageLoader *read_ahead_il;
+	GList *read_ahead_queue; /**< Owned FileData references, nearest first. */
+	guint read_ahead_idle_id;
+	gsize read_ahead_bytes;
 
 	gint prev_color_row;
 
@@ -264,6 +267,7 @@ StereoPixbufData image_stereo_pixbuf_get(const ImageWindow *imd);
 void image_stereo_pixbuf_set(ImageWindow *imd, StereoPixbufData stereo_mode);
 
 void image_prebuffer_set(ImageWindow *imd, FileData *fd);
+void image_prebuffer_set_list(ImageWindow *imd, GList *files);
 
 void image_auto_refresh_enable(ImageWindow *imd, gboolean enable);
 

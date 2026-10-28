@@ -1524,7 +1524,35 @@ void layout_image_set_with_ahead(LayoutWindow *lw, FileData *fd, FileData *read_
 		}
 */
 	layout_image_set_fd(lw, fd);
-	if (options->image.enable_read_ahead) image_prebuffer_set(lw->image, read_ahead_fd);
+	g_autoptr(FileDataList) ahead = nullptr;
+	const gint current = layout_list_get_index(lw, fd);
+	const gint next = layout_list_get_index(lw, read_ahead_fd);
+	if (current >= 0 && next >= 0 && current != next)
+		{
+		const auto selected = layout_selection_list_by_index(lw);
+		const auto position = std::find(selected.begin(), selected.end(), current);
+		const auto following = std::find(selected.begin(), selected.end(), next);
+		const gboolean selection = selected.size() > 1 && position != selected.end() && following != selected.end();
+		gint index = selection ? static_cast<gint>(std::distance(selected.begin(), following)) : next;
+		const gint total = selection ? static_cast<gint>(selected.size()) : static_cast<gint>(layout_list_count(lw));
+		gint direction = next > current ? 1 : -1;
+		if (selection)
+			{
+			const gint old = std::distance(selected.begin(), position);
+			if ((old + 1) % total == index) direction = 1;
+			else direction = -1;
+			}
+		for (gint count = 0; count < std::clamp(options->image.read_ahead_images, 1, 32); ++count)
+			{
+			if (index < 0 || index >= total) break;
+			auto *candidate = layout_list_get_fd(lw, selection ? selected[index] : index);
+			if (!candidate || candidate == fd) break;
+			ahead = g_list_append(ahead, file_data_ref(candidate));
+			index += direction;
+			if (selection) index = (index + total) % total;
+			}
+		}
+	image_prebuffer_set_list(lw->image, ahead);
 }
 
 void layout_image_set_index(LayoutWindow *lw, gint index)
@@ -1584,21 +1612,15 @@ static void layout_image_set_collection_real(LayoutWindow *lw, CollectionData *c
 	if (!layout_valid(&lw)) return;
 
 	image_change_from_collection(lw->image, cd, info, image_zoom_get_default(lw->image));
-	if (options->image.enable_read_ahead)
+	g_autoptr(FileDataList) ahead = nullptr;
+	CollectInfo *next = info;
+	for (gint count = 0; count < std::clamp(options->image.read_ahead_images, 1, 32); ++count)
 		{
-		CollectInfo *r_info;
-		if (forward)
-			{
-			r_info = collection_next_by_info(cd, info);
-			if (!r_info) r_info = collection_prev_by_info(cd, info);
-			}
-		else
-			{
-			r_info = collection_prev_by_info(cd, info);
-			if (!r_info) r_info = collection_next_by_info(cd, info);
-			}
-		if (r_info) image_prebuffer_set(lw->image, r_info->fd);
+		next = forward ? collection_next_by_info(cd, next) : collection_prev_by_info(cd, next);
+		if (!next || next == info) break;
+		ahead = g_list_append(ahead, file_data_ref(next->fd));
 		}
+	image_prebuffer_set_list(lw->image, ahead);
 
 	layout_image_slideshow_continue_check(lw);
 	layout_bars_new_image(lw);

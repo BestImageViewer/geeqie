@@ -13,6 +13,7 @@
 #include "bar-sort.h"
 #include "bar.h"
 #include "color-label.h"
+#include "collect.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "image.h"
@@ -29,6 +30,7 @@
 #include "rcfile.h"
 #include "search.h"
 #include "ui-fileops.h"
+#include "view-file.h"
 
 namespace
 {
@@ -341,6 +343,185 @@ protected:
 	gboolean saved_expand = FALSE;
 	bool saved_menu_settings = false;
 };
+
+class DirectionalReadAhead : public PartialLayoutConfig
+{
+protected:
+	void SetUp() override
+	{
+		PartialLayoutConfig::SetUp();
+		if (!layout) return;
+		saved_image = options->image;
+		options->image.enable_read_ahead = FALSE;
+		options->image.read_ahead_images = 3;
+		options->image.image_cache_max = 16;
+		g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 512, 384);
+		gdk_pixbuf_fill(pixels, 0x336699ff);
+		for (gint i = 0; i < 8; ++i)
+			{
+			g_autofree gchar *path = g_strdup_printf("%s/image-%d.png", directory, i);
+			ASSERT_TRUE(gdk_pixbuf_save(pixels, path, "png", nullptr, nullptr));
+			files.push_back(file_data_new_simple(path));
+			}
+		layout_set_path(layout, directory);
+		vf_refresh(layout->vf);
+		ASSERT_EQ(layout_list_count(layout), 8U);
+		gtk_window_present(GTK_WINDOW(layout->window));
+		const gint64 deadline = g_get_monotonic_time() + G_TIME_SPAN_SECOND;
+		while (g_get_monotonic_time() < deadline)
+			{
+			g_main_context_iteration(nullptr, FALSE);
+			g_usleep(1000);
+			}
+		options->image.enable_read_ahead = TRUE;
+	}
+
+	void TearDown() override
+	{
+		if (layout) image_prebuffer_set(layout->image, nullptr);
+		for (auto *fd : files)
+			{
+			g_remove(fd->path);
+			file_data_unref(fd);
+			}
+		if (!files.empty()) options->image = saved_image;
+		PartialLayoutConfig::TearDown();
+	}
+
+	bool finished()
+	{
+		const gint64 settled = g_get_monotonic_time() + (100 * G_TIME_SPAN_MILLISECOND);
+		const gint64 deadline = g_get_monotonic_time() + (10 * G_TIME_SPAN_SECOND);
+		while (g_get_monotonic_time() < deadline)
+			{
+			g_main_context_iteration(nullptr, FALSE);
+			if (!layout->image->il && !layout->image->read_ahead_il &&
+			    !layout->image->read_ahead_idle_id && !layout->image->read_ahead_queue &&
+			    g_get_monotonic_time() >= settled) return true;
+			g_usleep(1000);
+			}
+		return false;
+	}
+
+	decltype(options->image) saved_image{};
+	std::vector<FileData *> files;
+};
+
+TEST_F(DirectionalReadAhead, LoadsSeveralImagesAndReversesDirection)
+{
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	ASSERT_TRUE(finished());
+	for (gint i : {4, 5, 6}) EXPECT_NE(files[i]->pixbuf, nullptr);
+	EXPECT_EQ(files[2]->pixbuf, nullptr);
+	layout_image_set_with_ahead(layout, files[3], files[2]);
+	ASSERT_TRUE(finished());
+	for (gint i : {2, 1, 0}) EXPECT_NE(files[i]->pixbuf, nullptr);
+	EXPECT_EQ(image_get_fd(layout->image), files[3]);
+}
+
+TEST_F(DirectionalReadAhead, ReplacesPendingWorkAndCancelsWhenDisabled)
+{
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	layout_image_set_with_ahead(layout, files[3], files[2]);
+	ASSERT_TRUE(finished());
+	EXPECT_NE(files[0]->pixbuf, nullptr);
+	EXPECT_EQ(files[4]->pixbuf, nullptr);
+	options->image.enable_read_ahead = FALSE;
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	ASSERT_TRUE(finished());
+	EXPECT_EQ(files[4]->pixbuf, nullptr);
+}
+
+TEST_F(DirectionalReadAhead, StopsAtDecodedImageBudget)
+{
+	options->image.image_cache_max = 2;
+	options->image.read_ahead_images = 7;
+	layout_image_set_with_ahead(layout, files[0], files[1]);
+	ASSERT_TRUE(finished());
+	EXPECT_NE(files[1]->pixbuf, nullptr);
+	EXPECT_NE(files[2]->pixbuf, nullptr);
+	EXPECT_EQ(files[3]->pixbuf, nullptr);
+	EXPECT_EQ(files[4]->pixbuf, nullptr);
+}
+
+TEST_F(DirectionalReadAhead, SelectionPreloadsOnlySelectedImages)
+{
+	g_autoptr(FileDataList) selected = nullptr;
+	for (gint i : {1, 3, 6}) selected = g_list_append(selected, file_data_ref(files[i]));
+	options->image.enable_read_ahead = FALSE;
+	layout_select_none(layout);
+	layout_select_list(layout, selected);
+	ASSERT_TRUE(finished());
+	options->image.enable_read_ahead = TRUE;
+	layout_image_set_with_ahead(layout, files[3], files[6]);
+	ASSERT_TRUE(finished());
+	EXPECT_NE(files[6]->pixbuf, nullptr);
+	EXPECT_NE(files[1]->pixbuf, nullptr);
+	EXPECT_EQ(files[4]->pixbuf, nullptr);
+	EXPECT_EQ(files[5]->pixbuf, nullptr);
+}
+
+TEST_F(DirectionalReadAhead, CollectionUsesDisplayedOrder)
+{
+	g_autoptr(CollectionData) collection = collection_new(nullptr);
+	for (gint i : {6, 2, 5, 1}) ASSERT_TRUE(collection_add(collection, files[i], FALSE));
+	collection->changed = FALSE;
+	options->image.enable_read_ahead = FALSE;
+	ASSERT_TRUE(layout_set_collection(layout, collection));
+	auto sort = layout->vf->sort;
+	sort.method = SORT_NONE;
+	sort.ascending = TRUE;
+	vf_sort_set(layout->vf, sort);
+	ASSERT_TRUE(finished());
+	options->image.enable_read_ahead = TRUE;
+	layout_image_set_with_ahead(layout, files[6], files[2]);
+	ASSERT_TRUE(finished());
+	for (gint i : {2, 5, 1}) EXPECT_NE(files[i]->pixbuf, nullptr);
+	EXPECT_EQ(files[7]->pixbuf, nullptr);
+}
+
+TEST_F(DirectionalReadAhead, ZeroBudgetDoesNotPreload)
+{
+	options->image.image_cache_max = 0;
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	ASSERT_TRUE(finished());
+	EXPECT_EQ(files[4]->pixbuf, nullptr);
+}
+
+TEST_F(DirectionalReadAhead, PendingQueueSurvivesImageTransfer)
+{
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	auto *other = image_new(FALSE);
+	auto *window = gtk_window_new();
+	gtk_window_set_child(GTK_WINDOW(window), other->widget);
+	image_move_from_image(other, layout->image);
+	image_move_from_image(layout->image, other);
+	gtk_window_destroy(GTK_WINDOW(window));
+	ASSERT_TRUE(finished());
+	for (gint i : {4, 5, 6}) EXPECT_NE(files[i]->pixbuf, nullptr);
+}
+
+TEST_F(DirectionalReadAhead, ChangedFileListCancelsPendingQueue)
+{
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	ASSERT_EQ(g_remove(files[4]->path), 0);
+	vf_refresh(layout->vf);
+	EXPECT_EQ(layout->image->read_ahead_queue, nullptr);
+	EXPECT_EQ(layout->image->read_ahead_idle_id, 0U);
+	ASSERT_TRUE(finished());
+	EXPECT_EQ(files[5]->pixbuf, nullptr);
+}
+
+TEST_F(DirectionalReadAhead, ChangingSortOrderCancelsPendingQueue)
+{
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	ASSERT_NE(layout->image->read_ahead_queue, nullptr);
+	auto sort = layout->vf->sort;
+	sort.ascending = !sort.ascending;
+	vf_sort_set(layout->vf, sort);
+	EXPECT_EQ(layout->image->read_ahead_queue, nullptr);
+	EXPECT_EQ(layout->image->read_ahead_idle_id, 0U);
+}
 
 class SearchCriteriaLayout : public PartialLayoutConfig
 {

@@ -538,6 +538,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->image.zoom_style = c_options->image.zoom_style;
 
 	options->image.enable_read_ahead = c_options->image.enable_read_ahead;
+	options->image.read_ahead_images = c_options->image.read_ahead_images;
 
 	if (options->image.use_custom_border_color != c_options->image.use_custom_border_color
 	    || options->image.use_custom_border_color_in_fullscreen != c_options->image.use_custom_border_color_in_fullscreen
@@ -2209,8 +2210,11 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	                                           1, 65536, 1, options->image.jpeg_decode_memory_limit, &c_options->image.jpeg_decode_memory_limit);
 	gtk_widget_set_tooltip_text(jpeg_memory_limit,
 	                            _("Maximum estimated memory for decoding one JPEG image. Increase this to open very large images. Additional memory is needed for rendering, caches, and other images. The default is 1024 MiB."));
-	pref_checkbox_new_int(group, _("Preload next image"),
+	pref_checkbox_new_int(group, _("Preload nearby images"),
 			      options->image.enable_read_ahead, &c_options->image.enable_read_ahead);
+
+	pref_spin_new_int(group, _("Images to preload:"), nullptr, 1, 32, 1,
+	                  options->image.read_ahead_images, &c_options->image.read_ahead_images);
 
 	pref_checkbox_new_int(group, _("Refresh on file change"),
 			      options->update_on_time_change, &c_options->update_on_time_change);

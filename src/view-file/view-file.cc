@@ -38,6 +38,7 @@
 #include "filefilter.h"
 #include "history-list.h"
 #include "image-load.h"
+#include "image.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
@@ -89,6 +90,7 @@ void vf_send_update(ViewFile *vf)
 
 void vf_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings)
 {
+	if (vf->layout && vf->layout->image) image_prebuffer_set(vf->layout->image, nullptr);
 	switch (vf->type)
 	{
 	case FILEVIEW_LIST: vflist_sort_set(vf, settings); break;
@@ -2017,6 +2019,7 @@ gboolean vf_set_collection(ViewFile *vf, CollectionData *cd)
 {
 	if (!cd) return FALSE;
 	if (vf->collection == cd) return vf_refresh(vf);
+	if (vf->layout && vf->layout->image) image_prebuffer_set(vf->layout->image, nullptr);
 	collection_ref(cd);
 	vf_thumb_stop(vf);
 	vf_star_stop(vf);
@@ -2035,6 +2038,8 @@ gboolean vf_set_collection(ViewFile *vf, CollectionData *cd)
 
 gboolean vf_refresh(ViewFile *vf)
 {
+	std::vector<FileData *> previous;
+	for (GList *work = vf->list; work; work = work->next) previous.push_back(static_cast<FileData *>(work->data));
 	gboolean ret;
 
 	switch (vf->type)
@@ -2043,6 +2048,11 @@ gboolean vf_refresh(ViewFile *vf)
 	case FILEVIEW_ICON: ret = vficon_refresh(vf); break;
 	default: ret = FALSE;
 	}
+
+	std::vector<FileData *> current_files;
+	for (GList *work = vf->list; work; work = work->next) current_files.push_back(static_cast<FileData *>(work->data));
+	if (previous != current_files && vf->layout && vf->layout->image)
+		image_prebuffer_set(vf->layout->image, nullptr);
 
 	if (vf->collection && vf->layout)
 		{
@@ -2055,6 +2065,7 @@ gboolean vf_refresh(ViewFile *vf)
 gboolean vf_set_fd(ViewFile *vf, FileData *dir_fd)
 {
 	if (!dir_fd) return FALSE;
+	if (vf->dir_fd != dir_fd && vf->layout && vf->layout->image) image_prebuffer_set(vf->layout->image, nullptr);
 	vf_marks_load_cancel(vf);
 	vf_collection_release(vf);
 	vf_collection_actions_update(vf);

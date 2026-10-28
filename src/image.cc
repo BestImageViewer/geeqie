@@ -230,6 +230,7 @@ GdkPixbuf *image_get_complete_pixbuf(FileData *fd)
 
 static void image_read_ahead_start(ImageWindow *imd);
 static void image_cache_set(ImageWindow *imd, FileData *fd);
+static FileCache *image_get_cache();
 
 /*
  *-------------------------------------------------------------------
@@ -944,6 +945,9 @@ static void image_read_ahead_cancel(ImageWindow *imd)
 {
 	DEBUG_1("%s read ahead cancelled for :%s", get_exec_time(), imd->read_ahead_fd ? imd->read_ahead_fd->path : "null");
 
+	g_clear_handle_id(&imd->read_ahead_idle_id, g_source_remove);
+	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
+	imd->read_ahead_bytes = 0;
 	image_loader_free(imd->read_ahead_il);
 	imd->read_ahead_il = nullptr;
 
@@ -951,70 +955,101 @@ static void image_read_ahead_cancel(ImageWindow *imd)
 	imd->read_ahead_fd = nullptr;
 }
 
+static gboolean image_read_ahead_idle_cb(gpointer data)
+{
+	auto *imd = static_cast<ImageWindow *>(data);
+	imd->read_ahead_idle_id = 0;
+	image_read_ahead_start(imd);
+	return G_SOURCE_REMOVE;
+}
+
+static void image_read_ahead_schedule(ImageWindow *imd)
+{
+	if (!imd->read_ahead_idle_id && imd->read_ahead_queue)
+		imd->read_ahead_idle_id = g_idle_add_full(G_PRIORITY_LOW, image_read_ahead_idle_cb, imd, nullptr);
+}
+
 static void image_read_ahead_done_cb(ImageLoader *, gpointer data)
 {
-	auto imd = static_cast<ImageWindow *>(data);
-
+	auto *imd = static_cast<ImageWindow *>(data);
 	if (!imd->read_ahead_fd || !imd->read_ahead_il) return;
-
-	DEBUG_1("%s read ahead done for :%s", get_exec_time(), imd->read_ahead_fd->path);
-
-	if (!imd->read_ahead_fd->pixbuf)
+	auto *pixbuf = image_loader_get_pixbuf(imd->read_ahead_il);
+	const gsize budget = static_cast<gsize>(std::max(0, options->image.image_cache_max)) * 1048576;
+	const gsize bytes = pixbuf ? gdk_pixbuf_get_byte_length(pixbuf) : 0;
+	if (pixbuf && bytes <= budget && imd->read_ahead_bytes <= budget - bytes)
 		{
-		imd->read_ahead_fd->pixbuf = image_loader_get_pixbuf(imd->read_ahead_il);
-		if (imd->read_ahead_fd->pixbuf)
+		imd->read_ahead_bytes += bytes;
+		if (!imd->read_ahead_fd->pixbuf)
 			{
-			g_object_ref(imd->read_ahead_fd->pixbuf);
+			imd->read_ahead_fd->pixbuf = g_object_ref(pixbuf);
 			image_cache_set(imd, imd->read_ahead_fd);
 			}
 		}
+	else if (pixbuf)
+		{
+		// Do not churn the cache by decoding beyond the available working set.
+		g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
+		}
 	image_loader_free(imd->read_ahead_il);
 	imd->read_ahead_il = nullptr;
-
+	file_data_unref(imd->read_ahead_fd);
+	imd->read_ahead_fd = nullptr;
+	image_read_ahead_schedule(imd);
 	image_complete_util(imd, TRUE);
 }
 
 static void image_read_ahead_error_cb(ImageLoader *il, gpointer data)
 {
-	/* we even treat errors as success, maybe at least some of the file was ok */
 	image_read_ahead_done_cb(il, data);
 }
 
 static void image_read_ahead_start(ImageWindow *imd)
 {
-	/* already started ? */
-	if (!imd->read_ahead_fd || imd->read_ahead_il || imd->read_ahead_fd->pixbuf) return;
-
-	/* still loading ?, do later */
-	if (imd->il /*|| imd->cm*/) return;
-
-	DEBUG_1("%s read ahead started for :%s", get_exec_time(), imd->read_ahead_fd->path);
-
-	imd->read_ahead_il = image_loader_new(imd->read_ahead_fd);
-
-	image_loader_delay_area_ready(imd->read_ahead_il, TRUE); /* we will need the area_ready signals later */
-
-	g_signal_connect(G_OBJECT(imd->read_ahead_il), "error", (GCallback)image_read_ahead_error_cb, imd);
-	g_signal_connect(G_OBJECT(imd->read_ahead_il), "done", (GCallback)image_read_ahead_done_cb, imd);
-
-	if (!image_loader_start_deferred(imd->read_ahead_il))
+	if (imd->read_ahead_il || imd->il) return;
+	if (!options->image.enable_read_ahead)
 		{
 		image_read_ahead_cancel(imd);
-		image_complete_util(imd, TRUE);
+		return;
 		}
-}
-
-static void image_read_ahead_set(ImageWindow *imd, FileData *fd)
-{
-	if (imd->read_ahead_fd && fd && imd->read_ahead_fd == fd) return;
-
-	image_read_ahead_cancel(imd);
-
-	imd->read_ahead_fd = file_data_ref(fd);
-
-	DEBUG_1("read ahead set to :%s", imd->read_ahead_fd->path);
-
-	image_read_ahead_start(imd);
+	const gsize budget = static_cast<gsize>(std::max(0, options->image.image_cache_max)) * 1048576;
+	if (!imd->read_ahead_bytes)
+		{
+		if (auto *pixbuf = image_get_pixbuf(imd)) imd->read_ahead_bytes = gdk_pixbuf_get_byte_length(pixbuf);
+		}
+	if (imd->read_ahead_bytes >= budget)
+		{
+		image_read_ahead_cancel(imd);
+		return;
+		}
+	while (imd->read_ahead_queue)
+		{
+		file_data_unref(imd->read_ahead_fd);
+		imd->read_ahead_fd = static_cast<FileData *>(imd->read_ahead_queue->data);
+		imd->read_ahead_queue = g_list_delete_link(imd->read_ahead_queue, imd->read_ahead_queue);
+		if (!file_cache_get(image_get_cache(), imd->read_ahead_fd)) break;
+		const gsize bytes = gdk_pixbuf_get_byte_length(imd->read_ahead_fd->pixbuf);
+		imd->read_ahead_bytes += std::min(bytes, budget - imd->read_ahead_bytes);
+		file_data_unref(imd->read_ahead_fd);
+		imd->read_ahead_fd = nullptr;
+		if (imd->read_ahead_bytes >= budget)
+			{
+			image_read_ahead_cancel(imd);
+			return;
+			}
+		}
+	if (!imd->read_ahead_fd) return;
+	imd->read_ahead_il = image_loader_new(imd->read_ahead_fd);
+	image_loader_delay_area_ready(imd->read_ahead_il, TRUE);
+	g_signal_connect(imd->read_ahead_il, "error", G_CALLBACK(image_read_ahead_error_cb), imd);
+	g_signal_connect(imd->read_ahead_il, "done", G_CALLBACK(image_read_ahead_done_cb), imd);
+	if (!image_loader_start_deferred(imd->read_ahead_il))
+		{
+		image_loader_free(imd->read_ahead_il);
+		imd->read_ahead_il = nullptr;
+		file_data_unref(imd->read_ahead_fd);
+		imd->read_ahead_fd = nullptr;
+		image_read_ahead_schedule(imd);
+		}
 }
 
 /*
@@ -1771,6 +1806,11 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 
 	image_transition_cancel(imd);
 	image_transition_cancel(source);
+	g_clear_handle_id(&source->read_ahead_idle_id, g_source_remove);
+	g_clear_handle_id(&imd->read_ahead_idle_id, g_source_remove);
+	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
+	imd->read_ahead_queue = g_steal_pointer(&source->read_ahead_queue);
+	imd->read_ahead_bytes = source->read_ahead_bytes;
 
 	imd->unknown = source->unknown;
 
@@ -1801,8 +1841,11 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 		std::swap(imd->cm, source->cm);
 		}
 
+	image_loader_free(imd->read_ahead_il);
+	imd->read_ahead_il = g_steal_pointer(&source->read_ahead_il);
+	if (imd->read_ahead_il) image_loader_sync_read_ahead_data(imd->read_ahead_il, source, imd);
 	file_data_unref(imd->read_ahead_fd);
-	source->read_ahead_fd = nullptr;
+	imd->read_ahead_fd = g_steal_pointer(&source->read_ahead_fd);
 
 	imd->orientation = source->orientation;
 	imd->desaturate = source->desaturate;
@@ -1812,6 +1855,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_move(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	image_set_pixbuf_renderer_post_process_func(imd);
+	image_read_ahead_schedule(imd);
 }
 
 /* this is  a copy function
@@ -1823,6 +1867,11 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 
 	image_transition_cancel(imd);
 	image_transition_cancel(source);
+	g_clear_handle_id(&source->read_ahead_idle_id, g_source_remove);
+	g_clear_handle_id(&imd->read_ahead_idle_id, g_source_remove);
+	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
+	imd->read_ahead_queue = g_steal_pointer(&source->read_ahead_queue);
+	imd->read_ahead_bytes = source->read_ahead_bytes;
 
 	imd->unknown = source->unknown;
 
@@ -1853,6 +1902,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	file_data_unref(imd->read_ahead_fd);
 	imd->read_ahead_fd = source->read_ahead_fd;
 	source->read_ahead_fd = nullptr;
+	image_read_ahead_schedule(imd);
 
 	imd->completed = source->completed;
 	imd->state = source->state;
@@ -2125,21 +2175,19 @@ void image_stereo_pixbuf_set(ImageWindow *imd, StereoPixbufData stereo_mode)
 /**
  * @brief Read ahead, pass NULL to cancel
  */
+void image_prebuffer_set_list(ImageWindow *imd, GList *files)
+{
+	image_read_ahead_cancel(imd);
+	if (!options->image.enable_read_ahead || pixbuf_renderer_get_tiles(PIXBUF_RENDERER(imd->pr))) return;
+	imd->read_ahead_queue = filelist_copy(files);
+	image_read_ahead_schedule(imd);
+}
+
 void image_prebuffer_set(ImageWindow *imd, FileData *fd)
 {
-	if (pixbuf_renderer_get_tiles(PIXBUF_RENDERER(imd->pr))) return;
-
-	if (fd)
-		{
-		if (!file_cache_get(image_get_cache(), fd))
-			{
-			image_read_ahead_set(imd, fd);
-			}
-		}
-	else
-		{
-		image_read_ahead_cancel(imd);
-		}
+	GList *files = fd ? g_list_append(nullptr, fd) : nullptr;
+	image_prebuffer_set_list(imd, files);
+	g_list_free(files);
 }
 
 static void image_notify_cb(FileData *fd, NotifyType type, gpointer data)
