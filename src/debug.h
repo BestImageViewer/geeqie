@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _DEBUG_H
-#define _DEBUG_H
+#ifndef DEBUG_H
+#define DEBUG_H
 
 #include <glib.h>
 
@@ -142,5 +142,5 @@ void log_print_ru(const gchar *file, gint line_number, const gchar *function_nam
 #define DEBUG_3(...) DEBUG_N(3, __VA_ARGS__)
 #define DEBUG_4(...) DEBUG_N(4, __VA_ARGS__)
 
-#endif /* _DEBUG_H */
+#endif /* DEBUG_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
