@@ -87,7 +87,6 @@ ConfOptions *conf_options_new()
 	options->file_filter.disable_file_extension_checks = FALSE;
 
 	options->save_window_positions = TRUE;
-	options->use_saved_window_positions_for_new_windows = FALSE;
 	options->save_window_workspace = FALSE;
 	options->tools_restore_state = TRUE;
 	options->save_dialog_window_positions = TRUE;

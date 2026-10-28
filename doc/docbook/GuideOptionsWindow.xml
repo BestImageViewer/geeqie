@@ -17,29 +17,6 @@
     <variablelist>
       <varlistentry>
         <term>
-          <guilabel>Use saved window positions also for new windows</guilabel>
-        </term>
-        <listitem>
-          <para>
-            A new window opened by menu
-            <menuchoice>
-              <shortcut>
-                <keycombo>
-                  <keycap>Ctrl</keycap>
-                  <keycap>N</keycap>
-                </keycombo>
-              </shortcut>
-              <guimenu>File</guimenu>
-              <guimenuitem>New Window</guimenuitem>
-            </menuchoice>
-            will also use the saved window size and maximized state. This option applies to additional windows, rather than the initial window restored at startup. Window coordinates and monitor placement are not restored.
-          </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-    <variablelist>
-      <varlistentry>
-        <term>
           <guilabel>Remember window workspace</guilabel>
         </term>
         <listitem>

@@ -461,7 +461,6 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->file_ops.safe_delete_folder_maxsize = c_options->file_ops.safe_delete_folder_maxsize;
 	options->tools_restore_state = c_options->tools_restore_state;
 	options->save_window_positions = c_options->save_window_positions;
-	options->use_saved_window_positions_for_new_windows = c_options->use_saved_window_positions_for_new_windows;
 	options->save_window_workspace = c_options->save_window_workspace;
 	options->save_dialog_window_positions = c_options->save_dialog_window_positions;
 	options->hide_window_decorations = c_options->hide_window_decorations;
@@ -2471,10 +2470,6 @@ static void config_tab_windows(GtkWidget *notebook, ConfOptions *c_options)
 
 	ct_button = pref_checkbox_new_int(group, _("Remember session"),
 					  options->save_window_positions, &c_options->save_window_positions);
-
-	checkbox = pref_checkbox_new_int(group, _("Use saved window positions also for new windows"),
-				       options->use_saved_window_positions_for_new_windows, &c_options->use_saved_window_positions_for_new_windows);
-	pref_checkbox_link_sensitivity(ct_button, checkbox);
 
 	checkbox = pref_checkbox_new_int(group, _("Remember window workspace"),
 			      options->save_window_workspace, &c_options->save_window_workspace);

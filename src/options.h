@@ -146,7 +146,6 @@ struct ConfOptions
 	gboolean rectangle_draw_portrait;
 
 	gboolean save_window_positions;
-	gboolean use_saved_window_positions_for_new_windows;
 	gboolean save_window_workspace;
 	gboolean tools_restore_state;
 	gboolean save_dialog_window_positions;
