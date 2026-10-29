@@ -4459,6 +4459,7 @@ DupeWindow *dupe_window_new()
 
 	store = gtk_list_store_new(DUPE_COLUMN_COUNT, G_TYPE_POINTER, G_TYPE_STRING, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_INT, G_TYPE_INT);
 	dw->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	gtk_widget_add_css_class(dw->listview, "geeqie-file-list");
 	g_object_unref(store);
 
 	GtkTreeSortable *sortable = GTK_TREE_SORTABLE(store);
@@ -4509,6 +4510,7 @@ DupeWindow *dupe_window_new()
 
 	store = gtk_list_store_new(2, G_TYPE_POINTER, G_TYPE_STRING);
 	dw->second_listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	gtk_widget_add_css_class(dw->second_listview, "geeqie-file-list");
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->second_listview));
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);

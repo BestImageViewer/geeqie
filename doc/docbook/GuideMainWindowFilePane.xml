@@ -43,7 +43,7 @@
 }</programlisting>
     <para>If <envar>XDG_CONFIG_HOME</envar> is set, use <filename>gtk-4.0/gtk.css</filename> inside that directory instead. Create the directory and file if they do not exist, and preserve any existing rules.</para>
     <para>You can replace <literal>monospace</literal> with an installed font name, such as <literal>"DejaVu Sans Mono"</literal>, and optionally add <literal>font-size: 11pt;</literal> inside the braces.</para>
-    <para>Restart Geeqie to apply the change. This rule applies only to the file list; the folder pane and icon view keep their usual fonts. To restore the default font, remove the rule and restart Geeqie.</para>
+    <para>Restart Geeqie to apply the change. This rule applies to the main file pane in list view, search results, and both file lists in the Find Duplicates window. The folder pane, icon view, metadata tables, and keyword trees keep their usual fonts. To restore the default font, remove the rule and restart Geeqie.</para>
   </section>
   <section id="Iconview">
     <title id="titleIconview">Icon view</title>

@@ -3473,6 +3473,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	GtkSortListModel *sort_model = gtk_sort_list_model_new(G_LIST_MODEL(g_object_ref(sd->ui.result_store)), nullptr);
 	sd->ui.result_selection = gtk_multi_selection_new(G_LIST_MODEL(sort_model));
 	sd->ui.result_view = gtk_column_view_new(GTK_SELECTION_MODEL(g_object_ref(sd->ui.result_selection)));
+	gtk_widget_add_css_class(sd->ui.result_view, "geeqie-file-list");
 	gtk_sort_list_model_set_sorter(sort_model, gtk_column_view_get_sorter(GTK_COLUMN_VIEW(sd->ui.result_view)));
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), sd->ui.result_view);
 
