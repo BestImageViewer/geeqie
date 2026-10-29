@@ -21,6 +21,7 @@
 
 #include "bar-sort.h"
 
+#include <map>
 #include <set>
 #include <string>
 
@@ -87,31 +88,36 @@ static void bar_sort_collection_list_build(GtkWidget *bookmarks)
 	history_list_free_key(SORT_KEY_COLLECTIONS);
 	bookmark_list_set_key(bookmarks, SORT_KEY_COLLECTIONS);
 
-	auto *dir_fd = file_data_new_dir(get_collections_dir());
-	g_autoptr(FileDataList) list = nullptr;
-	filelist_read(dir_fd, &list, nullptr);
-	file_data_unref(dir_fd);
-
 	std::set<std::string> paths;
-	for (GList *work = list; work; work = work->next)
+	const auto add_path = [&paths](const gchar *path)
 		{
-		auto *fd = static_cast<FileData *>(work->data);
-		paths.emplace(fd->path);
-		}
+		if (!file_extension_match(path, GQ_COLLECTION_EXT)) return;
+		g_autofree gchar *canonical = g_canonicalize_filename(path, nullptr);
+		if (isfile(canonical) && is_readable_file(canonical)) paths.emplace(canonical);
+		};
+	GList *collections = collect_manager_list_with_history();
+	for (GList *work = collections; work; work = work->next) add_path(static_cast<const gchar *>(work->data));
+	g_list_free_full(collections, g_free);
 	if (const HistoryList *external = history_list_find_by_key("sort_manager_external_collections"))
 		{
-		for (const auto &path : *external)
-			{
-			if (isfile(path.c_str())) paths.emplace(path);
-			}
+		for (const auto &path : *external) add_path(path.c_str());
 		}
+	std::map<std::string, unsigned int> counts;
+	for (const auto &path : paths) ++counts[filename_from_path(path.c_str())];
 	for (const auto &path : paths)
 		{
 		const gchar *filename = filename_from_path(path.c_str());
-		g_autofree gchar *name = file_extension_match(path.c_str(), GQ_COLLECTION_EXT)
-		                       ? remove_extension_from_path(filename) : g_strdup(filename);
+		g_autofree gchar *base = remove_extension_from_path(filename);
+		g_autofree gchar *name = counts[filename] > 1 ? g_strdup_printf("%s (%s)", base, path.c_str()) : g_strdup(base);
 		bookmark_list_add(bookmarks, name, path.c_str());
 		}
+}
+
+void bar_sort_refresh_collections(GtkWidget *bar)
+{
+	if (!bar) return;
+	auto *sd = static_cast<SortData *>(g_object_get_data(G_OBJECT(bar), "bar_sort_data"));
+	if (sd && sd->mode == BarSort::MODE_COLLECTION) bar_sort_collection_list_build(sd->bookmarks);
 }
 
 static const gchar *bar_sort_destination_key(BarSort::Mode mode)

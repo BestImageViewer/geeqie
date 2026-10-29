@@ -2,7 +2,9 @@
 
 #include "gtest/gtest.h"
 
+#include <algorithm>
 #include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -13,9 +15,11 @@
 #include "bar-sort.h"
 #include "bar.h"
 #include "color-label.h"
+#include "collect-io.h"
 #include "collect.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "history-list.h"
 #include "image.h"
 #include "intl.h"
 #include "layout-config.h"
@@ -29,6 +33,7 @@
 #include "preferences.h"
 #include "rcfile.h"
 #include "search.h"
+#include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "view-file.h"
 
@@ -343,6 +348,129 @@ protected:
 	gboolean saved_expand = FALSE;
 	bool saved_menu_settings = false;
 };
+
+class SortCollectionHistory : public PartialLayoutConfig
+{
+protected:
+	void SetUp() override
+	{
+		PartialLayoutConfig::SetUp();
+		if (!layout) return;
+		for (const char *key : {"collection_history", "sort_manager_external_collections", "sort_manager_collections", "sort_manager_selected_collection"})
+			{
+			if (const auto *items = history_list_find_by_key(key)) saved_history[key] = *items;
+			else saved_history[key] = {};
+			history_list_free_key(key);
+			}
+		for (const char *name : {"a", "b"})
+			{
+			g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+			ASSERT_EQ(g_mkdir(path, 0700), 0);
+			}
+		layout->bar_sort_enabled = TRUE;
+		layout->options.bar_sort.mode = BarSort::MODE_COLLECTION;
+		layout_bar_sort_set(layout, bar_sort_new_default(layout));
+		ASSERT_NE(layout->bar_sort, nullptr);
+		// The dropdown also contains an internal scroller; use the pane's direct child.
+		for (auto *child = gtk_widget_get_first_child(layout->bar_sort); child; child = gtk_widget_get_next_sibling(child))
+			if (GTK_IS_SCROLLED_WINDOW(child)) bookmarks = child;
+		ASSERT_NE(bookmarks, nullptr);
+	}
+
+	void TearDown() override
+	{
+		if (layout) collect_manager_flush();
+		for (const auto &path : paths)
+			{
+			g_chmod(path.c_str(), 0600);
+			g_unlink(path.c_str());
+			}
+		if (directory)
+			for (const char *name : {"a", "b"})
+				{
+				g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+				g_rmdir(path);
+				}
+		PartialLayoutConfig::TearDown();
+		for (const auto &[key, items] : saved_history)
+			{
+			history_list_free_key(key.c_str());
+			for (auto item = items.crbegin(); item != items.crend(); ++item) history_list_add_to_key(key.c_str(), item->c_str(), 0);
+			}
+	}
+
+	std::string save(const char *name)
+	{
+		std::string path = std::string(directory) + "/" + name;
+		paths.push_back(path);
+		g_autoptr(CollectionData) cd = collection_new(nullptr);
+		EXPECT_TRUE(collection_save(cd, path.c_str()));
+		return path;
+	}
+
+	unsigned int occurrences(const char *path)
+	{
+		unsigned int count = 0;
+		for (unsigned int i = 0; const char *destination = bookmark_list_get_path_at_index(bookmarks, i); ++i)
+			if (g_strcmp0(destination, path) == 0) ++count;
+		return count;
+	}
+
+	GtkWidget *bookmarks = nullptr;
+	std::vector<std::string> paths;
+	std::map<std::string, HistoryList> saved_history;
+};
+
+TEST_F(SortCollectionHistory, OpenAndSaveRefreshDestinationsAndPreserveSelection)
+{
+	const auto first = save("a/same.gqv");
+	EXPECT_EQ(occurrences(first.c_str()), 1U);
+	bookmark_list_set_selected_path(bookmarks, first.c_str());
+	const auto second = save("b/same.gqv");
+	EXPECT_EQ(occurrences(second.c_str()), 1U);
+	EXPECT_STREQ(bookmark_list_get_selected_path(bookmarks), first.c_str());
+	for (const auto &path : {first, second})
+		{
+		g_autofree gchar *label = g_strdup_printf("same (%s)", path.c_str());
+		EXPECT_NE(find_widget(bookmarks, GTK_TYPE_LABEL, label), nullptr);
+		}
+
+	// A collection opened after it leaves history is discovered immediately.
+	history_list_free_key("collection_history");
+	bar_sort_refresh_collections(layout->bar_sort);
+	EXPECT_EQ(occurrences(second.c_str()), 0U);
+	g_autoptr(CollectionData) cd = collection_new(second.c_str());
+	ASSERT_TRUE(collection_load(cd, second.c_str(), COLLECTION_LOAD_NONE));
+	EXPECT_EQ(occurrences(second.c_str()), 1U);
+}
+
+TEST_F(SortCollectionHistory, DeduplicatesAndRetainsExplicitDestinations)
+{
+	const auto path = save("a/same.gqv");
+	ASSERT_TRUE(bar_sort_collection_add(path.c_str()));
+	g_autofree gchar *alias = g_build_filename(directory, "a", "..", "a", "same.gqv", nullptr);
+	history_list_add_to_key("collection_history", alias, 0);
+	bar_sort_refresh_collections(layout->bar_sort);
+	EXPECT_EQ(occurrences(path.c_str()), 1U);
+	history_list_free_key("collection_history");
+	bar_sort_refresh_collections(layout->bar_sort);
+	EXPECT_EQ(occurrences(path.c_str()), 1U);
+
+	g_autofree gchar *missing = g_build_filename(directory, "missing.gqv", nullptr);
+	history_list_add_to_key("collection_history", missing, 0);
+	bar_sort_refresh_collections(layout->bar_sort);
+	EXPECT_EQ(occurrences(missing), 0U);
+	const auto *history = history_list_find_by_key("collection_history");
+	ASSERT_NE(history, nullptr);
+	EXPECT_NE(std::find(history->begin(), history->end(), missing), history->end());
+
+	ASSERT_EQ(g_chmod(path.c_str(), 0000), 0);
+	bar_sort_refresh_collections(layout->bar_sort);
+	EXPECT_EQ(occurrences(path.c_str()), 0U);
+	ASSERT_EQ(g_chmod(path.c_str(), 0600), 0);
+	bar_sort_refresh_collections(layout->bar_sort);
+	EXPECT_EQ(occurrences(path.c_str()), 1U);
+}
 
 class DirectionalReadAhead : public PartialLayoutConfig
 {

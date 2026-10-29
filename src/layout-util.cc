@@ -2650,6 +2650,7 @@ void layout_recent_add_path(const gchar *path)
 
 	history_list_add_to_key("collection_history", path, options->recent_collections_list_maxsize);
 	recent_file_add(path);
+	layout_window_foreach([](LayoutWindow *lw) { bar_sort_refresh_collections(lw->bar_sort); });
 }
 
 /*

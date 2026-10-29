@@ -62,6 +62,8 @@ void bar_sort_close(GtkWidget *bar);
 void bar_sort_add_selection(GtkWidget *bar, guint destination = 0);
 /** Update folder-specific destinations after navigation. */
 void bar_sort_update(GtkWidget *bar);
+/** Refresh available collections while preserving the highlighted destination. */
+void bar_sort_refresh_collections(GtkWidget *bar);
 gboolean bar_sort_collection_add(const gchar *path);
 
 void bar_sort_write_config(GtkWidget *bar, RcString &rc);
