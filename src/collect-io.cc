@@ -941,17 +941,4 @@ GList *collect_manager_list_with_history()
 	return g_list_reverse(list);
 }
 
-gchar *collection_manager_path_by_index(gint index)
-{
-	if (index < 0) return nullptr;
-
-	GList *collection_list = nullptr;
-	collect_manager_list(&collection_list, nullptr, nullptr);
-
-	auto *collection_name = static_cast<gchar *>(g_list_nth_data(collection_list, index));
-	gchar *path = collection_path(collection_name);
-	g_list_free_full(collection_list, g_free);
-
-	return path;
-}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

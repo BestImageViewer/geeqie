@@ -3093,7 +3093,7 @@ static void dupe_window_edit_selected(DupeWindow *dw, const gchar *key)
 static void dupe_window_collection_from_selection(DupeWindow *dw)
 {
 	g_autoptr(FileDataList) list = dupe_listview_get_selection(dw->listview);
-	collection_by_index_add_filelist(-1, list);
+	collection_by_path_add_filelist(nullptr, list);
 }
 
 static void dupe_window_append_file_list(DupeWindow *dw, gint on_second)
@@ -3366,10 +3366,10 @@ static GList *dupe_window_get_fd_list(DupeWindow *dw)
 static void dupe_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	auto *dw = static_cast<DupeWindow *>(data);
-		int index = g_variant_get_int32(parameter);
+	const gchar *path = g_variant_get_string(parameter, nullptr);
 
 	g_autoptr(FileDataList) selection_list = dupe_listview_get_selection(dw->listview);
-	collection_by_index_add_filelist(index, selection_list);
+	collection_by_path_add_filelist(path, selection_list);
 }
 
 static void dupe_popup_menu_centered(GMenu *menu_model, DupeWindow *dw, GtkWidget *pane)

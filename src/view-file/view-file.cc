@@ -1627,7 +1627,7 @@ static void vf_pop_menu_collections_action_cb(GSimpleAction *, GVariant *paramet
 	if (!vf || !parameter) return;
 
 	g_autoptr(FileDataList) selection_list = vf_pop_menu_file_list(vf);
-	collection_by_index_add_filelist(g_variant_get_int32(parameter), selection_list);
+	collection_by_path_add_filelist(g_variant_get_string(parameter, nullptr), selection_list);
 }
 
 static void vf_pop_menu_show_star_rating_action_cb(GSimpleAction *action, GVariant *state, gpointer data)

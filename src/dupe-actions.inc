@@ -59,7 +59,7 @@ static const ActionDef dupe_main_actions[] =
 		nullptr,
 		N_("Collection"),
 		dupe_pop_menu_collections_cb,
-		G_VARIANT_TYPE_INT32,
+		G_VARIANT_TYPE_STRING,
 		ActionStateType::NONE,
 		FALSE,
 		nullptr,

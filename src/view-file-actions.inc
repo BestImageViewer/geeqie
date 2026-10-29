@@ -71,7 +71,7 @@ static const ActionDef view_file_actions[] =
 		nullptr,
 		N_("Collection"),
 		vf_pop_menu_collections_action_cb,
-		G_VARIANT_TYPE_INT32,
+		G_VARIANT_TYPE_STRING,
 		ActionStateType::NONE,
 		FALSE,
 		nullptr,

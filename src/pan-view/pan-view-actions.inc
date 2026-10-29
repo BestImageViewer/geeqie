@@ -44,7 +44,7 @@ static const ActionDef pan_actions[] =
 		nullptr,
 		N_("Collection"),
 		pan_pop_menu_collections_cb,
-		G_VARIANT_TYPE_INT32,
+		G_VARIANT_TYPE_STRING,
 		ActionStateType::NONE,
 		FALSE,
 		nullptr,

@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,8 @@
 #include "history-list.h"
 #include "intl.h"
 #include "layout.h"
+#include "main-defines.h"
+#include "menu.h"
 #include "options.h"
 #include "sort-type.h"
 #include "thumb.h"
@@ -161,6 +164,100 @@ TEST_F(CollectionFileSource, CollectionListCombinesDefaultDirectoryAndHistory)
 	EXPECT_EQ(std::count(actual.begin(), actual.end(), first->path), 0);
 	EXPECT_EQ(std::count(actual.begin(), actual.end(), folder), 1);
 	g_rmdir(folder);
+}
+
+void check_collection_menu_targets(GMenuModel *model, const gchar *expected_action, int &found)
+{
+	for (int i = 0; i < g_menu_model_get_n_items(model); ++i)
+		{
+		g_autofree gchar *action = nullptr;
+		if (g_menu_model_get_item_attribute(model, i, G_MENU_ATTRIBUTE_ACTION, "s", &action) && g_strcmp0(action, expected_action) == 0)
+			{
+			g_autoptr(GVariant) target = g_menu_model_get_item_attribute_value(model, i, G_MENU_ATTRIBUTE_TARGET, G_VARIANT_TYPE_STRING);
+			ASSERT_NE(target, nullptr);
+			EXPECT_STREQ(g_variant_get_string(target, nullptr), "");
+			++found;
+			}
+		for (const gchar *link : {G_MENU_LINK_SECTION, G_MENU_LINK_SUBMENU})
+			{
+			g_autoptr(GMenuModel) child = g_menu_model_get_item_link(model, i, link);
+			if (child) check_collection_menu_targets(child, expected_action, found);
+			}
+		}
+}
+
+TEST(CollectionMenus, NewCollectionTargetsAreEmptyStrings)
+{
+	const struct
+	{
+		const char *resource;
+		const char *action;
+	} menus[] = {
+		{"menu-layout-image.ui", "win.layout-image-collections"},
+		{"menu-view-file.ui", "win.view-file-collections"},
+		{"menu-img-view.ui", "win.image-win-collections"},
+		{"menu-search.ui", "win.search-win-collections"},
+		{"menu-dupe-main.ui", "win.dupe-win-collections"},
+		{"menu-pan-view.ui", "win.pan-win-collections"}};
+	for (const auto &menu : menus)
+		{
+		SCOPED_TRACE(menu.resource);
+		g_autoptr(GtkBuilder) builder = gtk_builder_new();
+		g_autofree gchar *resource = g_strconcat(GQ_RESOURCE_PATH_UI "/", menu.resource, nullptr);
+		g_autoptr(GError) error = nullptr;
+		ASSERT_TRUE(gtk_builder_add_from_resource(builder, resource, &error)) << (error ? error->message : "");
+		g_autoptr(GSList) objects = gtk_builder_get_objects(builder);
+		int found = 0;
+		for (GSList *work = objects; work; work = work->next)
+			{
+			if (!G_IS_MENU_MODEL(work->data)) continue;
+			check_collection_menu_targets(G_MENU_MODEL(work->data), menu.action, found);
+			}
+		EXPECT_GT(found, 0);
+		}
+}
+
+TEST_F(CollectionFileSource, AddMenuUsesAvailableCollectionPaths)
+{
+	g_autofree gchar *left = g_build_filename(directory, "a", "same.gqv", nullptr);
+	g_autofree gchar *right = g_build_filename(directory, "b", "same.gqv", nullptr);
+	g_autofree gchar *missing = g_build_filename(directory, "missing.gqv", nullptr);
+	for (const gchar *path : {left, right})
+		{
+		ASSERT_TRUE(g_file_set_contents(path, "#Geeqie collection\n#end\n", -1, nullptr));
+		paths.emplace_back(path);
+		}
+	history_list_free_key("collection_history");
+	for (const gchar *path : {left, right, missing, left})
+		history_list_add_to_key("collection_history", path, 0);
+	g_autoptr(GMenu) menu = g_menu_new();
+	submenu_add_collections_new(menu, "win.test-collection");
+
+	// Changing history after building the menu must not change its targets.
+	history_list_free_key("collection_history");
+	history_list_add_to_key("collection_history", missing, 0);
+	std::vector<std::string> targets;
+	std::vector<std::string> labels;
+	for (int i = 0; i < g_menu_model_get_n_items(G_MENU_MODEL(menu)); ++i)
+		{
+		g_autoptr(GVariant) target = g_menu_model_get_item_attribute_value(G_MENU_MODEL(menu), i, G_MENU_ATTRIBUTE_TARGET, G_VARIANT_TYPE_STRING);
+		ASSERT_NE(target, nullptr);
+		const gchar *path = g_variant_get_string(target, nullptr);
+		EXPECT_STRNE(path, missing);
+		if (g_strcmp0(path, left) != 0 && g_strcmp0(path, right) != 0) continue;
+		targets.emplace_back(path);
+		g_autofree gchar *label = nullptr;
+		g_autofree gchar *action = nullptr;
+		ASSERT_TRUE(g_menu_model_get_item_attribute(G_MENU_MODEL(menu), i, G_MENU_ATTRIBUTE_LABEL, "s", &label));
+		ASSERT_TRUE(g_menu_model_get_item_attribute(G_MENU_MODEL(menu), i, G_MENU_ATTRIBUTE_ACTION, "s", &action));
+		EXPECT_STREQ(action, "win.test-collection");
+		EXPECT_NE(strstr(label, path), nullptr);
+		labels.emplace_back(label);
+		}
+	ASSERT_EQ(targets.size(), 2U);
+	EXPECT_EQ(targets[0], left);
+	EXPECT_EQ(targets[1], right);
+	EXPECT_NE(labels[0], labels[1]);
 }
 
 TEST_F(CollectionFileSource, ManagerUpdatesExternalCollectionsFromHistory)

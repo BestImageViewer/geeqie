@@ -23,6 +23,7 @@
 
 #include "collect-io.h"
 #include "main-defines.h"
+#include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
@@ -34,17 +35,16 @@
 
 void submenu_add_collections_new(GMenu *menu, const gchar *action_name)
 {
-	GList *collection_list = nullptr;
-	collect_manager_list(&collection_list,nullptr,nullptr);
+	GList *collection_list = collect_manager_list_with_history();
 
-	int index = 0; /* index to existing collection list menu item selected */
-	for (GList *work = collection_list; work; work = work->next, index++)
+	for (GList *work = collection_list; work; work = work->next)
 		{
-		auto *collection_name = static_cast<gchar *>(work->data);
+		const auto *path = static_cast<const gchar *>(work->data);
+		if (!isfile(path) || !is_readable_file(path)) continue;
 
-		g_autoptr(GMenuItem) item = g_menu_item_new(collection_name, nullptr);
-		g_menu_item_set_action_and_target_value(item, action_name, g_variant_new_int32(index));
-
+		g_autofree gchar *label = g_strdup_printf("%s (%s)", filename_from_path(path), path);
+		g_autoptr(GMenuItem) item = g_menu_item_new(label, nullptr);
+		g_menu_item_set_action_and_target_value(item, action_name, g_variant_new_string(path));
 		g_menu_append_item(menu, item);
 		}
 

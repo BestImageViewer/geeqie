@@ -29,6 +29,7 @@
 #include <ctime>
 #include <list>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -332,14 +333,14 @@ GList *collection_contents_fd(const gchar *name)
 
 /**
  * @brief Add file selection list to a collection
- * @param[in] index Index to the collection list, or -1 for new collection
+ * @param[in] path Collection path, or null/empty for a new collection
  * @param[in] list List of ::_FileData
  *
  */
-void collection_by_index_add_filelist(gint index, GList *list)
+void collection_by_path_add_filelist(const gchar *path, GList *list)
 {
 	if (!list) return;
-	if (index < 0)
+	if (!path || !*path)
 		{
 		LayoutWindow *lw = layout_new_from_default();
 		g_autoptr(CollectionData) cd = collection_new(nullptr);
@@ -350,20 +351,20 @@ void collection_by_index_add_filelist(gint index, GList *list)
 		}
 	LayoutWindow *lw = get_current_layout();
 	if (!lw) return;
-	g_autofree gchar *path = collection_manager_path_by_index(index);
+	if (!isfile(path) || !is_readable_file(path)) return;
 	CollectionData *current = lw->vf ? lw->vf->collection : nullptr;
-	if (current && (index < 0 || g_strcmp0(current->path, path) != 0))
+	if (current && g_strcmp0(current->path, path) != 0)
 		{
 			auto files = std::shared_ptr<GList>(filelist_copy(list), [](GList *items) { file_data_list_free(items); });
-			if (!layout_confirm_collection_leave(lw, [index, files]() { collection_by_index_add_filelist(index, files.get()); }, FALSE)) return;
+			if (!layout_confirm_collection_leave(lw, [path = std::string(path), files]() { collection_by_path_add_filelist(path.c_str(), files.get()); }, FALSE)) return;
 		}
-	g_autoptr(CollectionData) cd = path ? collection_find(path) : nullptr;
+	g_autoptr(CollectionData) cd = collection_find(path);
 	if (cd)
 		collection_ref(cd);
 	else
 		{
 		cd = collection_new(path);
-		if (path && isfile(path) && !collection_load(cd, path, COLLECTION_LOAD_NONE))
+		if (!collection_load(cd, path, COLLECTION_LOAD_NONE))
 			{
 			return;
 			}

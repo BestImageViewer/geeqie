@@ -7,7 +7,7 @@ static const ActionDef search_actions[] =
 		nullptr,
 		N_("Collection"),
 		search_pop_menu_collections_cb,
-		G_VARIANT_TYPE_INT32,
+		G_VARIANT_TYPE_STRING,
 		ActionStateType::NONE,
 		FALSE,
 		nullptr,

@@ -46,7 +46,7 @@ static const ActionDef layout_image_actions[] =
 		nullptr,
 		N_("Add to Collection"),
 		layout_image_pop_menu_collections_cb,
-		G_VARIANT_TYPE_INT32,
+		G_VARIANT_TYPE_STRING,
 		ActionStateType::NONE,
 		FALSE,
 		nullptr,

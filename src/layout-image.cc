@@ -809,7 +809,7 @@ static void layout_image_pop_menu_collections_cb(GSimpleAction *, GVariant *para
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	g_autoptr(FileDataList) selection_list = layout_image_context_list(lw);
-	collection_by_index_add_filelist(g_variant_get_int32(parameter), selection_list);
+	collection_by_path_add_filelist(g_variant_get_string(parameter, nullptr), selection_list);
 }
 
 static void layout_image_pop_menu_slideshow_cb(GSimpleAction *, GVariant *, gpointer data)

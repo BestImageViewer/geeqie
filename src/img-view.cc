@@ -1217,13 +1217,13 @@ static void image_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, 
 	FileData *fd;
 
  	auto *vw = static_cast<ViewWindow *>(data);
-	int index = g_variant_get_int32(parameter);
+	const gchar *path = g_variant_get_string(parameter, nullptr);
 
 	imd = view_window_active_image(vw);
 	fd = image_get_fd(imd);
 
 	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, file_data_ref(fd));
-	collection_by_index_add_filelist(index, selection_list);
+	collection_by_path_add_filelist(path, selection_list);
 }
 
 static void view_popup_menu(ViewWindow *vw, GtkWidget *parent, gdouble x, gdouble y)

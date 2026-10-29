@@ -80,7 +80,7 @@
           <item>
             <attribute name="action">win.view-file-collections</attribute>
             <attribute name="label" translatable="yes">New collection</attribute>
-            <attribute name="target" type="i">-1</attribute>
+            <attribute name="target" type="s">''</attribute>
           </item>
         </section>
         <section id="collections-submenu" />

@@ -1851,10 +1851,10 @@ static void pan_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gp
 {
 	auto *pw = static_cast<PanWindow *>(data);
 
-	gint32 index = g_variant_get_int32(parameter);
+	const gchar *path = g_variant_get_string(parameter, nullptr);
 
 	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, pan_menu_click_fd(pw));
-	collection_by_index_add_filelist(index, selection_list);
+	collection_by_path_add_filelist(path, selection_list);
 }
 
 /* static const ActionDef pan_actions[]

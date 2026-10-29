@@ -96,7 +96,7 @@ gboolean is_collection(const gchar *param);
 gchar *collection_path(const gchar *param);
 [[nodiscard]] GString *collection_contents(const gchar *name, GString *contents);
 GList *collection_contents_fd(const gchar *name);
-void collection_by_index_add_filelist(gint index, GList *list);
+void collection_by_path_add_filelist(const gchar *path, GList *list);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

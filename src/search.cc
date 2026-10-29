@@ -795,7 +795,7 @@ static void search_result_collection_from_selection_cb(GSimpleAction *, GVariant
 	auto sd = static_cast<SearchData *>(data);
 
 	g_autoptr(FileDataList) list = search_result_selection_list(sd);
-	collection_by_index_add_filelist(-1, list);
+	collection_by_path_add_filelist(nullptr, list);
 }
 
 static gboolean search_result_update_idle_cb(gpointer data)
@@ -1077,10 +1077,10 @@ static void search_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter,
 {
 	auto *sd = static_cast<SearchData *>(data);
 
-	int index = g_variant_get_int32(parameter);
+	const gchar *path = g_variant_get_string(parameter, nullptr);
 
 	g_autoptr(FileDataList) selection_list = search_result_selection_list(sd);
-	collection_by_index_add_filelist(index, selection_list);
+	collection_by_path_add_filelist(path, selection_list);
 }
 
 static void search_thumbnails_cb(GSimpleAction *, GVariant *, gpointer data)
