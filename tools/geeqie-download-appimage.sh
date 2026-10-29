@@ -59,7 +59,12 @@ packaged release.
 
 If the extract option is selected, a symbolic link from
 \$HOME/.local/share/bash-completion/completions/geeqie
-to the extracted executable will be set to enable command line completion.
+to the extracted completion script will be set to enable command line completion.
+
+Completion can also be used without extracting the AppImage by installing
+the data/completions/geeqie file from the matching Geeqie source release in
+the directory above. Enable bash-completion on the host and start a new
+Bash shell. See Bash Completion in the manual's Command Line Options page.
 \n\n"
 }
 
