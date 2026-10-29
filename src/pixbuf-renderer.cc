@@ -2811,8 +2811,15 @@ void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, const PixbufRende
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 
+	const bool changed_render_path = static_cast<bool>(pr->func_post_process) != static_cast<bool>(func);
 	pr->func_post_process = func;
 	pr->post_process_slow = func && slow;
+	if (changed_render_path && (pr->pixbuf || pr->source_tiles_enabled))
+		{
+		// Cached images can queue source-texture rendering before color correction
+		// is installed. Switching to post-processing must also queue tile rendering.
+		pixbuf_renderer_update_zoom(pr, FALSE);
+		}
 }
 
 /**

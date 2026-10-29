@@ -24,6 +24,76 @@
 namespace
 {
 
+TEST(RendererTilesTexture, PostProcessingRebuildsQueuedSourceTexture)
+{
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	std::unique_ptr<GtkWindow, decltype(&gtk_window_destroy)> window(GTK_WINDOW(gtk_window_new()), gtk_window_destroy);
+	const int saved_tile_size = options->image.tile_size;
+	options->image.tile_size = 64;
+	auto *pr = pixbuf_renderer_new();
+	options->image.tile_size = saved_tile_size;
+	gtk_window_set_default_size(window.get(), 512, 384);
+	gtk_window_set_child(window.get(), GTK_WIDGET(pr));
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 64, 48);
+	gdk_pixbuf_fill(pixels, 0x2040ffff);
+	pixbuf_renderer_set_pixbuf(pr, pixels, 8.0);
+	gtk_window_present(window.get());
+	const auto finish = [&]()
+		{
+		const auto deadline = g_get_monotonic_time() + (5 * G_TIME_SPAN_SECOND);
+		do
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (gtk_widget_get_mapped(GTK_WIDGET(pr)) && pr->viewport_width > 0 &&
+			    renderer_tiles_is_ready(pr->renderer)) return true;
+			g_usleep(1000);
+			} while (g_get_monotonic_time() < deadline);
+		return false;
+		};
+	ASSERT_TRUE(finish());
+	auto *renderer = gtk_native_get_renderer(GTK_NATIVE(window.get()));
+	if (GSK_IS_CAIRO_RENDERER(renderer) || gdk_surface_get_scale(gtk_native_get_surface(GTK_NATIVE(window.get()))) != 1.0)
+		GTEST_SKIP() << "Requires a GL or Vulkan renderer at 100% display scaling";
+	const auto check_frame = [&](guint32 expected)
+		{
+		auto *snapshot = gtk_snapshot_new();
+		renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
+		g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
+		ASSERT_NE(node, nullptr);
+		const graphene_rect_t bounds{{0, 0}, {static_cast<float>(pr->viewport_width), static_cast<float>(pr->viewport_height)}};
+		g_autoptr(GdkTexture) rendered = gsk_renderer_render_texture(renderer, node, &bounds);
+		ASSERT_NE(rendered, nullptr);
+		const int width = gdk_texture_get_width(rendered);
+		const int height = gdk_texture_get_height(rendered);
+		std::vector<guint32> output(width * height);
+		gdk_texture_download(rendered, reinterpret_cast<guchar *>(output.data()), width * 4);
+		for (const int y : {height / 4, height / 2, height * 3 / 4})
+			for (const int x : {width / 4, width / 2, width * 3 / 4})
+				EXPECT_EQ(output[(y * width) + x] & 0xffffffU, expected);
+		};
+	ASSERT_NO_FATAL_FAILURE(check_frame(0x2040ffU));
+	pixbuf_renderer_set_pixbuf(pr, pixels, 8.0);
+	// Match cache promotion: install color correction before the queued draw runs.
+	guint corrected_tiles = 0;
+	pixbuf_renderer_set_post_process_func(pr, [&](PixbufRenderer *, GdkPixbuf **tile, gint, gint, gint, gint)
+		{
+		// Force slow multi-tile processing and inspect intermediate frames.
+		g_usleep(20000);
+		check_frame(0x2040ffU);
+		++corrected_tiles;
+		gdk_pixbuf_fill(*tile, 0x20ff40ff);
+		}, TRUE);
+	for (bool processed : {true, false})
+		{
+		if (!processed) pixbuf_renderer_set_post_process_func(pr, nullptr, FALSE);
+		ASSERT_TRUE(finish());
+		ASSERT_NO_FATAL_FAILURE(check_frame(processed ? 0x20ff40U : 0x2040ffU));
+		}
+	EXPECT_GT(corrected_tiles, 1U);
+}
+
 TEST(RendererTiles, FirstZoomStepFromFitUsesPhysicalScale)
 {
 	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";

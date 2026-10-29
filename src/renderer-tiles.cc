@@ -1837,8 +1837,13 @@ void renderer_update_pixbuf(void *renderer, gboolean)
 	auto *rt = static_cast<RendererTiles *>(renderer);
 	g_clear_object(&rt->source_texture);
 	g_clear_object(&rt->composite_texture);
-	g_clear_pointer(&rt->image_node, gsk_render_node_unref);
-	rt->preserve_image = FALSE;
+	// Keep the previous complete frame while a cached image is rebuilt in tiles.
+	// Progressive loading still replaces the preview as new image data arrives.
+	if (!rt->pr->pixbuf || rt->pr->loading)
+		{
+		g_clear_pointer(&rt->image_node, gsk_render_node_unref);
+		}
+	rt->preserve_image = rt->image_node != nullptr;
 	rt_queue_clear(rt);
 }
 
@@ -1999,9 +2004,11 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 
 
 	graphene_rect_t bounds;
-	if (!rt_texture_scaling_available(rt) && rt->preserve_image && !g_queue_is_empty(&rt->draw_queue))
+	const bool pending_color_pass = rt->pr->post_process_slow && !rt->pr->loading && !g_queue_is_empty(&rt->draw_queue_2pass);
+	if (!rt_texture_scaling_available(rt) && rt->preserve_image &&
+	    (!g_queue_is_empty(&rt->draw_queue) || pending_color_pass))
 		{
-		// Do not show a background-only or partially rebuilt zoom frame.
+		// Retain complete frames through both passes of slow color correction.
 		if (rt->pr->zoom == 0.0 && rt->preview_width > 0 && rt->preview_height > 0)
 			{
 			// Resize the retained fit preview immediately while new tiles render.
