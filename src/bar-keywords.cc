@@ -1348,7 +1348,7 @@ gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, 
 			gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
 			return TRUE;
 			}
-		return bar_pane_focus_files(&pkd->pane);
+		return layout_focus_files(pkd->pane.lw);
 		}
 
 	if (keyval == GDK_KEY_Down || keyval == GDK_KEY_Up)

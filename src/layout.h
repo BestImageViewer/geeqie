@@ -359,5 +359,7 @@ void layout_window_foreach(const LayoutWindowCallback &lw_cb);
 
 gboolean layout_window_is_displayed(const gchar *id);
 
+gboolean layout_focus_files(LayoutWindow *lw);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
