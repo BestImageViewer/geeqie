@@ -102,4 +102,8 @@ _filedir $file_types
 
 } &&  complete -F _geeqie geeqie
 
+if [[ ${SNAP_NAME-} == geeqie ]]; then
+	complete -F _geeqie geeqie.wayland geeqie.x11
+fi
+
 # ex: filetype=sh

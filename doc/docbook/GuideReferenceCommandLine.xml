@@ -5,6 +5,14 @@
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="CommandLineOptions.xml" />
   </para>
   <para>Use <literal>--color-scheme=system|light|dark</literal> to override the interface color scheme for the running session. This does not change the saved <link linkend="PreferencesColorScheme">Color scheme preference</link>.</para>
+  <section id="BashCompletion">
+    <title>Bash Completion</title>
+    <para>Geeqie provides Bash completion for command line options, action names, and image filenames. Type <literal>geeqie --</literal> and press <keycap>Tab</keycap> twice to list available options.</para>
+    <para>The Snap package registers completion for <command>geeqie</command>, <command>geeqie.wayland</command>, and <command>geeqie.x11</command>. Install the <literal>bash-completion</literal> package on the host and ensure it is enabled in your interactive Bash shell. On Ubuntu, install it with:</para>
+    <programlisting>sudo apt install bash-completion</programlisting>
+    <para>Start a new Bash shell after installing or updating the Snap. Use the command directly, such as <literal>geeqie --</literal>, rather than <literal>snap run geeqie --</literal>. Snap manages the completion script; you do not need to copy or source files from <filename>/snap/geeqie/current</filename>.</para>
+    <para>If completion does not work, type <literal>geeqie --</literal>, press <keycap>Tab</keycap>, and then run <literal>complete -p geeqie</literal>. Snap's completion handler is named <literal>_complete_from_snap</literal>. An older completion script from another Geeqie installation can take precedence; try a fresh shell after removing obsolete manual completion setup.</para>
+  </section>
   <section id="IndependentInstances">
     <title>Independent Instances</title>
     <para>Normally, launching Geeqie again sends the command to the running application instance. Opening another window does not create an independent instance. <keycombo><keycap>Ctrl</keycap><keycap>Q</keycap></keycombo> quits that instance and closes all its windows; <keycombo><keycap>Ctrl</keycap><keycap>W</keycap></keycombo> closes only the current window, quitting the instance if it is the last main window.</para>
