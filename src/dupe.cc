@@ -2019,6 +2019,15 @@ static void dupe_thumb_step(DupeWindow *dw)
  * ------------------------------------------------------------------
  */
 
+static void dupe_add_actions_set_enabled(DupeWindow *dw, gboolean enabled)
+{
+	for (const gchar *name : {"dupe-win-append-file-list", "dupe-win-add-folder", "dupe-win-second-append-file-list", "dupe-win-second-add-folder"})
+		{
+		auto *action = g_action_map_lookup_action(G_ACTION_MAP(dw->window), name);
+		if (action) g_simple_action_set_enabled(G_SIMPLE_ACTION(action), enabled);
+		}
+}
+
 static void dupe_check_stop(DupeWindow *dw)
 {
 	if (!dw) return;
@@ -2049,6 +2058,7 @@ static void dupe_check_stop(DupeWindow *dw)
 		g_clear_handle_id(&dw->add_files_queue_id, g_source_remove);
 		dupe_destroy_list_cache(dw);
 		gtk_widget_set_sensitive(dw->controls_box, TRUE);
+		dupe_add_actions_set_enabled(dw, TRUE);
 		if (g_list_length(dw->add_files_queue) > 0)
 			{
 			file_data_list_free(dw->add_files_queue);
@@ -2636,6 +2646,7 @@ static gboolean dupe_files_add_queue_cb(gpointer data)
 	g_clear_handle_id(&dw->recompare_id, g_source_remove);
 	dw->recompare_id = g_idle_add(dupe_check_start_cb, dw);
 	gtk_widget_set_sensitive(dw->controls_box, TRUE);
+	dupe_add_actions_set_enabled(dw, TRUE);
 	return G_SOURCE_REMOVE;
 }
 
@@ -2831,6 +2842,7 @@ void dupe_window_add_files(DupeWindow *dw, GList *list, gboolean recurse)
 		dupe_init_list_cache(dw);
 		dw->add_files_queue_id = g_idle_add(dupe_files_add_queue_cb, dw);
 		gtk_widget_set_sensitive(dw->controls_box, FALSE);
+		dupe_add_actions_set_enabled(dw, FALSE);
 		}
 }
 
@@ -3306,9 +3318,49 @@ static void dupe_menu_collection_from_selection_cb(GSimpleAction *, GVariant *, 
 	dupe_window_collection_from_selection(dw);
 }
 
+template<bool second>
 static void dupe_menu_append_file_list_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	dupe_window_append_file_list(static_cast<DupeWindow *>(data), FALSE);
+	dupe_window_append_file_list(static_cast<DupeWindow *>(data), second);
+}
+
+struct DupeFolderDialog
+{
+	GtkWidget *window;
+	bool second;
+	gboolean recursive = FALSE;
+
+	~DupeFolderDialog() { g_object_unref(window); }
+};
+
+static void dupe_add_folder_selected_cb(GFile *file, gpointer data)
+{
+	std::unique_ptr<DupeFolderDialog> dialog(static_cast<DupeFolderDialog *>(data));
+	auto *dw = static_cast<DupeWindow *>(g_object_get_data(G_OBJECT(dialog->window), DUPE_WINDOW_DATA_KEY));
+	if (!file || !dw) return;
+	g_autofree gchar *path = g_file_get_path(file);
+	if (!path) return;
+	g_autoptr(FileDataList) list = g_list_append(nullptr, file_data_new_dir(path));
+	dw->second_drop = dw->second_set && dialog->second;
+	dupe_window_add_files(dw, list, dialog->recursive);
+}
+
+template<bool second>
+static void dupe_menu_add_folder_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *dw = static_cast<DupeWindow *>(data);
+	auto *dialog = new DupeFolderDialog{GTK_WIDGET(g_object_ref(dw->window)), second};
+	FileDialogData fdd{};
+	fdd.action = FileDialogAction::SELECT_FOLDER;
+	fdd.title = _("Add folder to duplicate search");
+	fdd.accept_text = _("Add");
+	fdd.history_key = "dupe_add_folder";
+	fdd.checkbox_text = _("Include subfolders");
+	fdd.checkbox_value = &dialog->recursive;
+	fdd.callback = dupe_add_folder_selected_cb;
+	fdd.data = dialog;
+	fdd.parent = GTK_WINDOW(dw->window);
+	file_dialog_show(fdd);
 }
 
 static void dupe_menu_popup_focused_cb(GSimpleAction *, GVariant *, gpointer data)

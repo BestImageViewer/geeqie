@@ -3,10 +3,23 @@
 static const ActionDef dupe_main_actions[] =
 {
 		{
+		"win.dupe-win-add-folder",
+		nullptr,
+		N_("Add folder…"),
+		dupe_menu_add_folder_cb<false>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.dupe-win-append-file-list",
 		nullptr,
 		N_("Append list"),
-		dupe_menu_append_file_list_cb,
+		dupe_menu_append_file_list_cb<false>,
 		nullptr,
 		ActionStateType::NONE,
 		FALSE,
@@ -486,6 +499,32 @@ static const ActionDef dupe_main_actions[] =
 
 static const ActionDef dupe_second_actions[] =
 {
+		{
+		"win.dupe-win-second-add-folder",
+		nullptr,
+		N_("Add folder…"),
+		dupe_menu_add_folder_cb<true>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.dupe-win-second-append-file-list",
+		nullptr,
+		N_("Append list"),
+		dupe_menu_append_file_list_cb<true>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
 		{
 		"win.dupe-win-second-view",
 		nullptr,

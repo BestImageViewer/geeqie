@@ -12,6 +12,7 @@
   </para>
   <section id="Addingfilestobecompared">
     <title>Adding files to be compared</title>
+    <para>Right-click either comparison pane and choose <guimenuitem>Append list</guimenuitem> to add the file list currently displayed in the main window, including a filtered folder list or collection. Choose <guimenuitem>Add folder…</guimenuitem> to select a folder directly; enable <guilabel>Include subfolders</guilabel> to add its contents recursively. Files are added to the pane whose menu you opened. These commands are unavailable while another file list is being added.</para>
     <para>Add files to be compared using drag and drop. Drop files or folders onto the Find Duplicates window to add them to the list of files to compare. When one or more folders are dropped onto the window a menu will appear allowing you to choose the desired action:</para>
     <variablelist>
       <varlistentry>

@@ -17,6 +17,7 @@
 #include "color-label.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "dupe.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "history-list.h"
@@ -348,6 +349,169 @@ protected:
 	gboolean saved_expand = FALSE;
 	bool saved_menu_settings = false;
 };
+
+class DuplicateAddCommands : public PartialLayoutConfig
+{
+protected:
+	void SetUp() override
+	{
+		PartialLayoutConfig::SetUp();
+		if (!layout) return;
+		if (const auto *items = history_list_find_by_key("dupe_add_folder")) saved_folder_history = *items;
+		history_list_add_to_key("dupe_add_folder", directory, 0);
+		options->duplicates_match = DUPE_MATCH_NAME;
+		options->duplicates_thumbnails = FALSE;
+		g_autofree gchar *nested = g_build_filename(directory, "nested", nullptr);
+		ASSERT_EQ(g_mkdir(nested, 0700), 0);
+		for (const char *name : {"top.png", "nested/child.png"})
+			{
+			g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+			g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 8, 8);
+			gdk_pixbuf_fill(pixels, 0x4080c0ff);
+			ASSERT_TRUE(gdk_pixbuf_save(pixels, path, "png", nullptr, nullptr));
+			}
+		ASSERT_TRUE(layout_set_path(layout, directory));
+		ASSERT_TRUE(vf_refresh(layout->vf));
+	}
+
+	void TearDown() override
+	{
+		if (dw) dupe_window_close(dw);
+		if (layout && layout->vf->collection) layout->vf->collection->changed = FALSE;
+		if (directory)
+			{
+			for (const char *name : {"top.png", "nested/child.png", "nested"})
+				{
+				g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+				g_remove(path);
+				}
+			}
+		const bool restore_history = layout != nullptr;
+		PartialLayoutConfig::TearDown();
+		if (restore_history)
+			{
+			history_list_free_key("dupe_add_folder");
+			for (auto item = saved_folder_history.crbegin(); item != saved_folder_history.crend(); ++item) history_list_add_to_key("dupe_add_folder", item->c_str(), 0);
+			}
+	}
+
+	void open()
+	{
+		dw = dupe_window_new();
+		ASSERT_NE(dw, nullptr);
+		dw->second_set = TRUE;
+	}
+
+	GAction *action(bool second, const char *suffix)
+	{
+		g_autofree gchar *name = g_strdup_printf("dupe-win-%s%s", second ? "second-" : "", suffix);
+		return g_action_map_lookup_action(G_ACTION_MAP(dw->window), name);
+	}
+
+	GtkWidget *dialog()
+	{
+		auto *windows = gtk_window_get_toplevels();
+		for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+			{
+			g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+			if (GTK_IS_DIALOG(window) && gtk_window_get_transient_for(window) == GTK_WINDOW(dw->window)) return GTK_WIDGET(window);
+			}
+		return nullptr;
+	}
+
+	void wait_for_folder_dialog()
+	{
+		// Finish asynchronous folder loading before closing the chooser and removing its directory.
+		// Otherwise GTK can open a late error dialog that blocks input in subsequent tests.
+		ASSERT_NE(dialog(), nullptr);
+		auto *chooser = GTK_FILE_CHOOSER(find_widget(dialog(), GTK_TYPE_FILE_CHOOSER_WIDGET));
+		ASSERT_NE(chooser, nullptr);
+		g_autoptr(GFile) folder = g_file_new_for_path(directory);
+		ASSERT_TRUE(wait_layout([&]()
+			{
+			g_autoptr(GFile) current = gtk_file_chooser_get_current_folder(chooser);
+			return gtk_widget_get_mapped(GTK_WIDGET(chooser)) && current && g_file_equal(current, folder);
+			}));
+	}
+
+	DupeWindow *dw = nullptr;
+	HistoryList saved_folder_history;
+};
+
+TEST_F(DuplicateAddCommands, FolderChooserTargetsBothSetsAndSupportsRecursion)
+{
+	for (const bool second : {false, true})
+		for (const bool recursive : {false, true})
+			{
+			SCOPED_TRACE(testing::Message() << "second=" << second << " recursive=" << recursive);
+			open();
+			auto *add = action(second, "add-folder");
+			ASSERT_NE(add, nullptr);
+			g_action_activate(add, nullptr);
+			GtkWidget *chooser_dialog = dialog();
+			ASSERT_NE(chooser_dialog, nullptr);
+			auto *recursive_label = find_widget(chooser_dialog, GTK_TYPE_LABEL, _("Include subfolders"));
+			auto *recursive_button = recursive_label ? gtk_widget_get_ancestor(recursive_label, GTK_TYPE_CHECK_BUTTON) : nullptr;
+			ASSERT_NE(recursive_button, nullptr);
+			gtk_check_button_set_active(GTK_CHECK_BUTTON(recursive_button), recursive);
+			ASSERT_NO_FATAL_FAILURE(wait_for_folder_dialog());
+			g_signal_emit_by_name(chooser_dialog, "response", GTK_RESPONSE_ACCEPT);
+			EXPECT_FALSE(g_action_get_enabled(add));
+			ASSERT_TRUE(wait_layout([this]() { return dupe_export_ready(dw); }));
+			EXPECT_TRUE(g_action_get_enabled(add));
+			EXPECT_EQ(g_list_length(second ? dw->second_list : dw->list), recursive ? 2U : 1U);
+			EXPECT_EQ(g_list_length(second ? dw->list : dw->second_list), 0U);
+			dupe_window_close(dw);
+			dw = nullptr;
+			}
+}
+
+TEST_F(DuplicateAddCommands, AppendUsesMainWindowFolderOrCollection)
+{
+	for (const bool second : {false, true})
+		{
+		open();
+		auto *append = action(second, "append-file-list");
+		ASSERT_NE(append, nullptr);
+		g_action_activate(append, nullptr);
+		ASSERT_TRUE(wait_layout([this]() { return dupe_export_ready(dw); }));
+		ASSERT_EQ(g_list_length(second ? dw->second_list : dw->list), 1U);
+		auto *item = static_cast<DupeItem *>((second ? dw->second_list : dw->list)->data);
+		EXPECT_STREQ(item->fd->name, "top.png");
+		EXPECT_EQ(g_list_length(second ? dw->list : dw->second_list), 0U);
+		dupe_window_close(dw);
+		dw = nullptr;
+		}
+	g_autofree gchar *child = g_build_filename(directory, "nested", "child.png", nullptr);
+	auto file = FileData::new_group(child);
+	g_autoptr(CollectionData) cd = collection_new(nullptr);
+	ASSERT_TRUE(collection_add(cd, file, FALSE));
+	ASSERT_TRUE(layout_set_collection(layout, cd));
+	open();
+	g_action_activate(action(false, "append-file-list"), nullptr);
+	ASSERT_TRUE(wait_layout([this]() { return dupe_export_ready(dw); }));
+	ASSERT_EQ(g_list_length(dw->list), 1U);
+	EXPECT_STREQ(static_cast<DupeItem *>(dw->list->data)->fd->path, child);
+}
+
+TEST_F(DuplicateAddCommands, CancelAndCloseDoNotAddFiles)
+{
+	open();
+	g_action_activate(action(false, "add-folder"), nullptr);
+	ASSERT_NO_FATAL_FAILURE(wait_for_folder_dialog());
+	g_signal_emit_by_name(dialog(), "response", GTK_RESPONSE_CANCEL);
+	EXPECT_EQ(dw->list, nullptr);
+	EXPECT_EQ(dw->second_list, nullptr);
+	g_action_activate(action(true, "add-folder"), nullptr);
+	ASSERT_NO_FATAL_FAILURE(wait_for_folder_dialog());
+	GtkWidget *chooser_dialog = dialog();
+	ASSERT_NE(chooser_dialog, nullptr);
+	g_object_ref(chooser_dialog);
+	dupe_window_close(dw);
+	dw = nullptr;
+	gtk_window_destroy(GTK_WINDOW(chooser_dialog));
+	g_object_unref(chooser_dialog);
+}
 
 class SortCollectionHistory : public PartialLayoutConfig
 {
