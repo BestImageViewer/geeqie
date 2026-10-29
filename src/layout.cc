@@ -3353,4 +3353,10 @@ LayoutWindow *layout_new_from_default()
 	return lw;
 }
 
+gboolean layout_focus_files(LayoutWindow *lw)
+{
+	if (!lw || !lw->vf) return FALSE;
+	return gtk_widget_grab_focus(lw->vf->listview);
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

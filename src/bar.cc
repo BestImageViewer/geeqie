@@ -38,7 +38,6 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"
-#include "view-file.h"
 #include "window.h"
 
 
@@ -47,19 +46,13 @@ namespace
 
 constexpr gint SIDEBAR_DEFAULT_WIDTH = 250;
 
-} // namespace
-
-gboolean bar_pane_focus_files(PaneData *pane)
-{
-	if (!pane->lw || !pane->lw->vf) return FALSE;
-	return gtk_widget_grab_focus(pane->lw->vf->listview);
-}
-
-static gboolean bar_pane_text_escape_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+gboolean bar_pane_text_escape_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	if (keyval != GDK_KEY_Escape || (state & gtk_accelerator_get_default_mod_mask())) return FALSE;
-	return bar_pane_focus_files(static_cast<PaneData *>(data));
+	return layout_focus_files(static_cast<PaneData *>(data)->lw);
 }
+
+} // namespace
 
 void bar_pane_text_escape_to_files(GtkWidget *widget, PaneData *pane)
 {
