@@ -22,6 +22,7 @@
 #include "layout.h"
 #include "main.h"
 #include "options.h"
+#include "search-and-run.h"
 #include "toolbar.h"
 #include "ui-menu.h"
 
@@ -81,6 +82,111 @@ protected:
 	std::vector<std::string> paths;
 	std::vector<std::string> saved_disabled;
 };
+
+GtkWidget *find_command_widget(GtkWidget *widget, GType type)
+{
+	if (G_TYPE_CHECK_INSTANCE_TYPE(widget, type)) return widget;
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		if (auto *found = find_command_widget(child, type)) return found;
+	return nullptr;
+}
+
+class SearchAndRunPlugins : public PluginDiscovery
+{
+protected:
+	void SetUp() override
+	{
+		PluginDiscovery::SetUp();
+		if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+		if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+		previous_app = g_application_get_default();
+		if (previous_app) g_object_ref(previous_app);
+		app = gtk_application_new("org.geeqie.SearchAndRunTest", G_APPLICATION_NON_UNIQUE);
+		ASSERT_TRUE(g_application_register(G_APPLICATION(app), nullptr, nullptr));
+		g_application_set_default(G_APPLICATION(app));
+		layout.window = gtk_application_window_new(app);
+		g_autoptr(GSimpleAction) action = g_simple_action_new("main-win-plugin-run", G_VARIANT_TYPE_STRING);
+		g_signal_connect(action, "activate", G_CALLBACK(+[](GSimpleAction *, GVariant *target, gpointer data)
+			{
+			auto *test = static_cast<SearchAndRunPlugins *>(data);
+			test->activated = g_variant_get_string(target, nullptr);
+			}), this);
+		g_action_map_add_action(G_ACTION_MAP(layout.window), G_ACTION(action));
+	}
+
+	void TearDown() override
+	{
+		if (layout.sar_window) gtk_window_close(GTK_WINDOW(layout.sar_window));
+		if (layout.window) gtk_window_destroy(GTK_WINDOW(layout.window));
+		if (app) g_application_set_default(previous_app);
+		g_clear_object(&app);
+		g_clear_object(&previous_app);
+		PluginDiscovery::TearDown();
+	}
+
+	GtkWidget *search(const char *text)
+	{
+		if (!layout.sar_window) layout.sar_window = search_and_run_new(&layout);
+		auto *entry = find_command_widget(layout.sar_window, GTK_TYPE_ENTRY);
+		if (!entry) return nullptr;
+		gtk_editable_set_text(GTK_EDITABLE(entry), text);
+		return find_command_widget(layout.sar_window, GTK_TYPE_LIST_BOX);
+	}
+
+	LayoutWindow layout{};
+	GtkApplication *app = nullptr;
+	GApplication *previous_app = nullptr;
+	std::string activated;
+};
+
+TEST_F(SearchAndRunPlugins, NamesTargetsAndReload)
+{
+	const auto first = write_plugin("camera'&.desktop", "Name=Camera _import <&>\n");
+	const auto second = write_plugin("another.desktop", "Name=Camera _import <&>\n");
+	write_plugin("hidden.desktop", "Name=Camera _import <&>\nHidden=true\n");
+	write_plugin("unavailable.desktop", "Name=Camera _import <&>\nTryExec=/geeqie-missing-program\n");
+	options->disabled_plugins.push_back(write_plugin("disabled.desktop", "Name=Camera _import <&>\n"));
+	install(editor_load_desktop_files({folder()}, nullptr));
+	auto *list = search("camera _IMPORT <&>");
+	ASSERT_NE(list, nullptr);
+	int count = 0;
+	std::string expected;
+	for (auto *row = gtk_widget_get_first_child(list); row; row = gtk_widget_get_next_sibling(row))
+		{
+		++count;
+		auto *label = GTK_LABEL(gtk_list_box_row_get_child(GTK_LIST_BOX_ROW(row)));
+		EXPECT_STREQ(gtk_label_get_text(label), "Camera _import <&>");
+		const auto *detailed = static_cast<const gchar *>(g_object_get_data(G_OBJECT(row), "action-name"));
+		g_autofree gchar *name = nullptr;
+		g_autoptr(GVariant) target = nullptr;
+		ASSERT_TRUE(g_action_parse_detailed_name(detailed, &name, &target, nullptr));
+		EXPECT_STREQ(name, "win.main-win-plugin-run");
+		ASSERT_TRUE(g_variant_is_of_type(target, G_VARIANT_TYPE_STRING));
+		const gchar *key = g_variant_get_string(target, nullptr);
+		EXPECT_TRUE(g_strcmp0(key, "camera'&.desktop") == 0 || g_strcmp0(key, "another.desktop") == 0);
+		if (expected.empty()) expected = key;
+		}
+	ASSERT_EQ(count, 2);
+	auto *entry = find_command_widget(layout.sar_window, GTK_TYPE_ENTRY);
+	g_signal_emit_by_name(entry, "activate");
+	EXPECT_EQ(activated, expected);
+	EXPECT_EQ(layout.sar_window, nullptr);
+
+	list = search("camera _IMPORT <&>");
+	ASSERT_NE(list, nullptr);
+	ASSERT_TRUE(g_file_set_contents(first.c_str(), "[Desktop Entry]\nType=Application\nName=Reloaded Camera\nCategories=X-Geeqie;\nExec=/bin/true %f\n", -1, nullptr));
+	ASSERT_EQ(g_unlink(second.c_str()), 0);
+	editor_table_clear();
+	install(editor_load_desktop_files({folder()}, nullptr));
+	search_and_run_refresh(&layout);
+	EXPECT_EQ(gtk_widget_get_first_child(list), nullptr);
+	list = search("reloaded camera");
+	ASSERT_NE(gtk_widget_get_first_child(list), nullptr);
+	EXPECT_EQ(gtk_widget_get_next_sibling(gtk_widget_get_first_child(list)), nullptr);
+	entry = find_command_widget(layout.sar_window, GTK_TYPE_ENTRY);
+	g_signal_emit_by_name(entry, "activate");
+	EXPECT_EQ(activated, "camera'&.desktop");
+}
 
 TEST_F(PluginDiscovery, ToolbarChoosersIncludePluginsAndTheirIcons)
 {

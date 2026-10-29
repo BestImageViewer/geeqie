@@ -1752,7 +1752,7 @@
         </term>
         <listitem>
           <para>
-            Opens a text box in which you may type characters to find a command. The characters you type will be matched to the first characters of any word in all the commands in Geeqie - both built-in commands and plugins - and matching actions will be displayed in a pop-up. You may scroll to any of the matching commands and press
+            Opens a text box in which you may type characters to find a command. The text you type is matched anywhere in command names, without regard to case. Both built-in commands and enabled plugins are included; plugins are found by their localized names from their desktop files. Matching actions are displayed in a pop-up. You may scroll to any of the matching commands and press
             <code>Enter</code>
             to execute the command. Pressing
             <code>Enter</code>

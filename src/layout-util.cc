@@ -3055,6 +3055,7 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 	layout_window_foreach([](LayoutWindow *lw)
 	{
 		layout_actions_setup_editors(lw);
+		search_and_run_refresh(lw);
 		if (lw->bar_sort_enabled)
 			{
 			layout_bar_sort_toggle(lw);

@@ -26,6 +26,7 @@
 struct LayoutWindow;
 
 GtkWidget *search_and_run_new(LayoutWindow *lw);
+void search_and_run_refresh(LayoutWindow *lw);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

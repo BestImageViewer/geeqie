@@ -32,7 +32,9 @@
 #include <pango/pango.h>
 
 #include "actions.h"
+#include "editors.h"
 #include "intl.h"
+#include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
 #include "ui-misc.h"
@@ -43,6 +45,7 @@ namespace
 struct SearchAndRunAction
 {
 	gchar *label;
+	gchar *search_text;
 	gchar *action_name;
 };
 
@@ -63,6 +66,7 @@ void search_and_run_action_free(SearchAndRunAction *action)
 	if (!action) return;
 
 	g_free(action->label);
+	g_free(action->search_text);
 	g_free(action->action_name);
 	g_free(action);
 }
@@ -80,11 +84,11 @@ gchar *action_label_from_description(const gchar *description, const gchar *targ
 	return target ? g_strdup_printf("%s %s", description, target) : g_strdup(description);
 }
 
-void append_action_to_list(std::vector<SearchAndRunAction *> &actions, const gchar *action_name, const gchar *description, const gchar *target)
+void append_action_to_list(std::vector<SearchAndRunAction *> &actions, const gchar *action_name, const gchar *description, const gchar *target, bool literal = false)
 {
 	if (!action_name || !action_name[0]) return;
 
-	g_autofree gchar *label = action_label_from_description(description, target);
+	g_autofree gchar *label = literal ? g_strdup(description) : action_label_from_description(description, target);
 	if (!label) return;
 
 	for (const SearchAndRunAction *action : actions)
@@ -94,11 +98,12 @@ void append_action_to_list(std::vector<SearchAndRunAction *> &actions, const gch
 
 	g_autofree gchar *accelerator = action_accelerator_label(action_name);
 	g_autofree gchar *command = accelerator
-	                            ? g_strdup_printf("%s : <b>%s</b>", label, accelerator)
-	                            : g_strdup(label);
+	                            ? g_markup_printf_escaped("%s : <b>%s</b>", label, accelerator)
+	                            : g_markup_escape_text(label, -1);
 
 	auto *action = g_new0(SearchAndRunAction, 1);
 	action->label = g_steal_pointer(&command);
+	action->search_text = accelerator ? g_strdup_printf("%s %s", label, accelerator) : g_strdup(label);
 	action->action_name = g_strdup(action_name);
 
 	actions.push_back(action);
@@ -127,6 +132,8 @@ void append_actions_from_table(std::vector<SearchAndRunAction *> &actions, const
 
 void command_list_populate(SarData *sar)
 {
+	for (auto *action : sar->actions) search_and_run_action_free(action);
+	sar->actions.clear();
 	const ActionDef *action_sets[] =
 		{
 		get_app_actions(),
@@ -137,6 +144,13 @@ void command_list_populate(SarData *sar)
 	for (const ActionDef **action_set = action_sets; *action_set != nullptr; action_set++)
 		{
 		append_actions_from_table(sar->actions, *action_set);
+		}
+
+	for (const auto *editor : editor_list_get())
+		{
+		g_autoptr(GVariant) target = g_variant_ref_sink(g_variant_new_string(editor->key));
+		g_autofree gchar *detailed_action = g_action_print_detailed_name("win.main-win-plugin-run", target);
+		append_action_to_list(sar->actions, detailed_action, editor->name, nullptr, true);
 		}
 
 	std::sort(sar->actions.begin(), sar->actions.end(), [](const SearchAndRunAction *a, const SearchAndRunAction *b)
@@ -295,7 +309,7 @@ gboolean keypress_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierTy
 
 gboolean action_matches(const SearchAndRunAction *action, const gchar *key)
 {
-	g_autofree gchar *normalized_label = g_utf8_normalize(action->label, -1, G_NORMALIZE_DEFAULT);
+	g_autofree gchar *normalized_label = g_utf8_normalize(action->search_text, -1, G_NORMALIZE_DEFAULT);
 	g_autofree gchar *normalized_key = g_utf8_normalize(key, -1, G_NORMALIZE_DEFAULT);
 	if (!normalized_label || !normalized_key) return FALSE;
 
@@ -389,11 +403,13 @@ gboolean window_close_cb(GtkWidget *, gpointer data)
 
 GtkWidget *search_and_run_new(LayoutWindow *lw)
 {
+	layout_editors_reload_finish();
 	auto *sar = new SarData();
 	sar->lw = lw;
 	command_list_populate(sar);
 
 	sar->window = gtk_window_new();
+	g_object_set_data(G_OBJECT(sar->window), "search-and-run-data", sar);
 	DEBUG_NAME(sar->window);
 	gtk_window_set_title(GTK_WINDOW(sar->window), _("Search and Run command - Geeqie"));
 	gtk_window_set_resizable(GTK_WINDOW(sar->window), FALSE);
@@ -434,6 +450,15 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 	gtk_widget_grab_focus(sar->entry);
 
 	return sar->window;
+}
+
+void search_and_run_refresh(LayoutWindow *lw)
+{
+	if (!lw || !lw->sar_window) return;
+	auto *sar = static_cast<SarData *>(g_object_get_data(G_OBJECT(lw->sar_window), "search-and-run-data"));
+	if (!sar) return;
+	command_list_populate(sar);
+	command_list_filter(sar, gtk_editable_get_text(GTK_EDITABLE(sar->entry)));
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
