@@ -1632,11 +1632,26 @@ TEST_P(RevealFile, IconNavigationModifierMatrix)
 
 TEST_P(RevealFile, ColorLabelsReadOnlyVisibleMetadataWithoutAFilter)
 {
-	auto *unseen = vf_index_get_data(vf, 100);
-	EXPECT_EQ(unseen->color_label, nullptr);
 	const auto visible = vf->type == FILEVIEW_ICON ? vficon_thumb_visible(vf) : vflist_thumb_visible(vf);
 	ASSERT_FALSE(visible.empty());
 	for (auto *fd : visible) EXPECT_NE(fd->color_label, nullptr);
+
+	// Startup allocations may temporarily expose other files. Test a fresh
+	// refresh against the settled viewport rather than that layout history.
+	FileData *unseen = nullptr;
+	for (GList *work = vf->list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		g_clear_pointer(&fd->color_label, g_free);
+		if (std::find(visible.begin(), visible.end(), fd) == visible.end()) unseen = fd;
+		}
+	ASSERT_NE(unseen, nullptr);
+	color_label_refresh_visible(vf);
+	for (GList *work = vf->list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		EXPECT_EQ(fd->color_label != nullptr, std::find(visible.begin(), visible.end(), fd) != visible.end()) << fd->name;
+		}
 	vf_scroll_to_file(vf, unseen);
 	settle();
 	EXPECT_NE(unseen->color_label, nullptr);
