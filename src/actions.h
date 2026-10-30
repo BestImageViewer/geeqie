@@ -34,6 +34,8 @@ struct ActionDef
 	gint32 int32_state;
 
 	const gchar * const *targets;
+	// Matched by the owning view, rather than as an application-wide accelerator.
+	bool context_shortcut = false;
 };
 
 const gchar *get_description_for_action_name(const gchar *action_name);
@@ -48,6 +50,11 @@ const ActionDef *get_main_actions();
 const ActionDef *get_pan_view_actions();
 const ActionDef *get_search_actions();
 const ActionDef *get_view_file_actions();
+const ActionDef *get_log_actions();
+
+bool activate_context_shortcut(GtkWidget *window, const ActionDef *defs, guint keyval, GdkModifierType state);
+bool action_uses_context_shortcut(const gchar *name);
+void register_context_shortcuts(GtkApplication *app, GtkWidget *window, const ActionDef *defs);
 
 void register_actions_from_table(GtkApplication *app, GtkWidget *window, const ActionDef *defs, GKeyFile *accels_keyfile, gpointer user_data);
 void register_accels_for_action(GtkApplication *app, const char *detailed_action, GStrv accels);

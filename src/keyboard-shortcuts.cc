@@ -158,12 +158,12 @@ void shortcuts_xml_append_section(GString *xml, GKeyFile *kf, const ActionTableD
 					}
 
 				g_autofree gchar *normalized = gtk_accelerator_name(key, modifiers);
-				if (!normalized || g_hash_table_contains(used_accels, normalized))
+				if (!normalized || (!table->actions[i].context_shortcut && g_hash_table_contains(used_accels, normalized)))
 					{
 					continue;
 					}
 
-				g_hash_table_add(used_accels, g_strdup(normalized));
+				if (!table->actions[i].context_shortcut) g_hash_table_add(used_accels, g_strdup(normalized));
 
 				if (joined_accels->len > 0)
 					{
@@ -330,6 +330,7 @@ ActionTableDef shortcut_tables[] =
 	{ nullptr, "pan", N_("Pan View Window") },
 	{ nullptr, "search", N_("Search Window") },
 	{ nullptr, "view-file", N_("Files Pane") },
+	{ nullptr, "log", N_("Log Window") },
 };
 
 void shortcut_tables_set_actions()
@@ -343,6 +344,7 @@ void shortcut_tables_set_actions()
 	shortcut_tables[6].actions = get_pan_view_actions();
 	shortcut_tables[7].actions = get_search_actions();
 	shortcut_tables[8].actions = get_view_file_actions();
+	shortcut_tables[9].actions = get_log_actions();
 }
 
 } // namespace

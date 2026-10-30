@@ -442,48 +442,27 @@ static void view_window_press_cb(GtkGestureClick *gesture, gint n_press, gdouble
 		}
 }
 
+template<int x_step, int y_step, GdkModifierType modifiers>
+static void view_pan_action_cb(GSimpleAction *action, GVariant *, gpointer data)
+{
+	auto *vw = static_cast<ViewWindow *>(data);
+	gint x = x_step;
+	gint y = y_step;
+	keyboard_scroll_calc(x, y, modifiers, g_str_hash(g_action_get_name(G_ACTION(action))),
+	                     static_cast<guint32>(g_get_monotonic_time() / 1000));
+	image_scroll(view_window_active_image(vw), x, y);
+}
+
 static gboolean view_window_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
 {
-	auto vw = static_cast<ViewWindow *>(data);
-	ImageWindow *imd = view_window_active_image(vw);
-
-	gint stop_signal = TRUE;
-	gint x = 0;
-	gint y = 0;
-
-	switch (keyval)
-		{
-		case GDK_KEY_Left: case GDK_KEY_KP_Left:
-			x -= 1;
-			break;
-		case GDK_KEY_Right: case GDK_KEY_KP_Right:
-			x += 1;
-			break;
-		case GDK_KEY_Up: case GDK_KEY_KP_Up:
-			y -= 1;
-			break;
-		case GDK_KEY_Down: case GDK_KEY_KP_Down:
-			y += 1;
-			break;
-		default:
-			stop_signal = FALSE;
-			break;
-		}
-
-	if (x != 0 || y != 0)
-		{
-		guint32 event_time = GDK_CURRENT_TIME;
-
-		if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller)))
-			{
-			event_time = gdk_event_get_time(event);
-			}
-
-		keyboard_scroll_calc(x, y, state, keyval, event_time);
-		image_scroll(imd, x, y);
-		}
-
-	return stop_signal;
+	auto *vw = static_cast<ViewWindow *>(data);
+	auto *image = view_window_active_image(vw);
+	auto *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	auto *root = gtk_widget_get_root(widget);
+	auto *focus = root ? gtk_root_get_focus(root) : nullptr;
+	if (image && focus && (focus == image->frame || focus == image->pr || focus == image->view || focus == image->widget))
+		return activate_context_shortcut(vw->window, get_image_actions(), keyval, state);
+	return FALSE;
 }
 
 /*
@@ -618,8 +597,11 @@ static void view_fullscreen_toggle(ViewWindow *vw, gboolean force_off)
 		view_image_set_buttons(vw, vw->fs->imd);
 
 		GtkEventController *controller = gtk_event_controller_key_new();
+		gtk_event_controller_set_name(controller, "image-panning-shortcuts");
+		gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
 		g_signal_connect(controller, "key-pressed", G_CALLBACK(view_window_key_press_cb), vw);
 		gtk_widget_add_controller(vw->fs->window, controller);
+		register_context_shortcuts(GTK_APPLICATION(g_application_get_default()), vw->fs->window, get_image_actions());
 
 		if (vw->ss) vw->ss->imd = vw->fs->imd;
 
@@ -1035,6 +1017,8 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 			 G_CALLBACK(view_window_delete_cb), vw);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_name(controller, "image-panning-shortcuts");
+	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(view_window_key_press_cb), vw);
 	gtk_widget_add_controller(vw->window, controller);
 

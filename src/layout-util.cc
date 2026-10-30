@@ -211,6 +211,17 @@ void keyboard_scroll_calc(gint &x, gint &y, GdkModifierType state, guint keyval,
 	y *= delta * options->keyboard_scroll_step;
 }
 
+template<int x_step, int y_step, GdkModifierType modifiers>
+static void layout_pan_action_cb(GSimpleAction *action, GVariant *, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	gint x = x_step;
+	gint y = y_step;
+	keyboard_scroll_calc(x, y, modifiers, g_str_hash(g_action_get_name(G_ACTION(action))),
+	                     static_cast<guint32>(g_get_monotonic_time() / 1000));
+	layout_image_scroll(lw, x, y, modifiers & GDK_SHIFT_MASK);
+}
+
 static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModifierType state, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -239,56 +250,7 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 			}
 		}
 
-	const bool image_has_focus = lw->image && focus &&
-		(focus == lw->image->frame || focus == lw->image->pr || gtk_widget_is_ancestor(focus, lw->image->view));
-
-	gboolean stop_signal = FALSE;
-	gint x = 0;
-	gint y = 0;
-
-	if (lw->image &&
-	    (image_has_focus ||
-	     (lw->tools && widget == lw->window) ||
-	     (lw->full_screen && widget == lw->full_screen->window)))
-		{
-		stop_signal = TRUE;
-
-		switch (keyval)
-			{
-			case GDK_KEY_Left:
-			case GDK_KEY_KP_Left:
-				x -= 1;
-				break;
-
-			case GDK_KEY_Right:
-			case GDK_KEY_KP_Right:
-				x += 1;
-				break;
-
-			case GDK_KEY_Up:
-			case GDK_KEY_KP_Up:
-				y -= 1;
-				break;
-
-			case GDK_KEY_Down:
-			case GDK_KEY_KP_Down:
-				y += 1;
-				break;
-
-			default:
-				stop_signal = FALSE;
-				break;
-			}
-
-		}
-
-	if (x != 0 || y != 0)
-		{
-		keyboard_scroll_calc(x, y, state, keyval, static_cast<guint32>(g_get_monotonic_time() / 1000));
-		layout_image_scroll(lw, x, y, (state & GDK_SHIFT_MASK));
-		}
-
-	return stop_signal;
+	return FALSE;
 }
 
 static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer data)
@@ -296,6 +258,20 @@ static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint key
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	(void)keycode;
 	return layout_key_press_common(widget, keyval, state, data);
+}
+
+static gboolean layout_image_shortcut_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	auto *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	auto *root = gtk_widget_get_root(widget);
+	auto *focus = root ? gtk_root_get_focus(root) : nullptr;
+	auto *image = lw->full_screen && widget == lw->full_screen->window ? lw->full_screen->imd : lw->image;
+	// Popovers and controls embedded in the image pane keep their own keys.
+	if (image && ((focus && (focus == image->pr || focus == image->frame || focus == image->view || focus == image->widget)) ||
+	              (!focus && lw->full_screen && widget == lw->full_screen->window)))
+		return activate_context_shortcut(lw->window, get_main_actions(), keyval, state);
+	return FALSE;
 }
 
 static gboolean layout_rectangle_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
@@ -310,10 +286,17 @@ static gboolean layout_rectangle_key_press_cb(GtkEventControllerKey *, guint key
 
 void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 {
+	register_context_shortcuts(GTK_APPLICATION(g_application_get_default()), window, get_main_actions());
 	auto *rectangle_controller = gtk_event_controller_key_new();
 	gtk_event_controller_set_propagation_phase(rectangle_controller, GTK_PHASE_CAPTURE);
 	g_signal_connect(rectangle_controller, "key-pressed", G_CALLBACK(layout_rectangle_key_press_cb), lw);
 	gtk_widget_add_controller(window, rectangle_controller);
+
+	auto *pan_controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_name(pan_controller, "image-panning-shortcuts");
+	gtk_event_controller_set_propagation_phase(pan_controller, GTK_PHASE_CAPTURE);
+	g_signal_connect(pan_controller, "key-pressed", G_CALLBACK(layout_image_shortcut_cb), lw);
+	gtk_widget_add_controller(window, pan_controller);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(layout_key_press_cb), lw);
@@ -2072,6 +2055,7 @@ static constexpr KeyboardMapScope keyboard_map_scopes[] =
 	{ N_("Search Window"), "win.search-win-", "search_window" },
 	{ N_("Advanced EXIF Window"), "win.advanced-exif-win-", "advanced_exif_window" },
 	{ N_("Files Pane"), "win.view-file-", "view_file_window" },
+	{ N_("Log Window"), "win.log-win-", "log_window" },
 	{ N_("All Windows"), nullptr, "all_windows" },
 };
 

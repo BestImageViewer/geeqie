@@ -341,7 +341,7 @@ GtkWidget *color_label_entries[COLOR_LABEL_COUNT];
 GtkWidget *help_search_engine_entry;
 
 #ifdef DEBUG
-GtkWidget *log_window_f1_entry;
+GtkWidget *log_window_command_entry;
 #endif
 
 enum {
@@ -639,7 +639,7 @@ static void config_window_apply(const ConfOptions *c_options)
 
 #ifdef DEBUG
 	set_debug_level(debug_c);
-	config_entry_to_option(log_window_f1_entry, &options->log_window.action, nullptr);
+	config_entry_to_option(log_window_command_entry, &options->log_window.action, nullptr);
 	options->log_window.timer_data = c_options->log_window.timer_data;
 	options->log_window_lines = c_options->log_window_lines;
 #endif
@@ -1605,6 +1605,8 @@ static gchar *accel_action_window(const gchar *action)
 
 static bool accel_actions_share_window(const gchar *action1, const gchar *action2)
 {
+	// View-specific shortcuts take precedence only while their view has focus.
+	if (action_uses_context_shortcut(action1) != action_uses_context_shortcut(action2)) return false;
 	/* Application actions are active in every Geeqie window. */
 	if (g_str_has_prefix(action1, "app.") || g_str_has_prefix(action2, "app.")) return true;
 
@@ -3630,11 +3632,11 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 			  1, 99999, 1, options->log_window_lines, &options->log_window_lines);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	pref_label_new(hbox, _("Log Window F1 command: "));
-	log_window_f1_entry = gtk_entry_new();
-	entry_set_text(GTK_ENTRY(log_window_f1_entry), options->log_window.action);
-	gtk_box_append(GTK_BOX(hbox), log_window_f1_entry);
-	gtk_editable_set_width_chars(GTK_EDITABLE(log_window_f1_entry), 15);
+	pref_label_new(hbox, _("Log Window command: "));
+	log_window_command_entry = gtk_entry_new();
+	entry_set_text(GTK_ENTRY(log_window_command_entry), options->log_window.action);
+	gtk_box_append(GTK_BOX(hbox), log_window_command_entry);
+	gtk_editable_set_width_chars(GTK_EDITABLE(log_window_command_entry), 15);
 #endif
 }
 

@@ -372,7 +372,7 @@ struct ConfOptions
 		gboolean paused;
 		bool line_wrap;
 		gboolean timer_data;
-		gchar *action; /** Used with F1 key */
+		gchar *action; /** Command for selected log text or the current line. */
 	} log_window;
 
 	/* star rating */

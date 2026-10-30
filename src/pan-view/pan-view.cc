@@ -998,80 +998,34 @@ static FileData *pan_menu_click_fd(PanWindow *pw)
 	return nullptr;
 }
 
-static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+template<int x_step, int y_step, GdkModifierType modifiers>
+static void pan_scroll_action_cb(GSimpleAction *action, GVariant *, gpointer data)
 {
-	auto pw = static_cast<PanWindow *>(data);
-	PixbufRenderer *pr;
-	gboolean stop_signal = FALSE;
-	GtkWidget *imd_widget;
-	gint x = 0;
-	gint y = 0;
-	gint focused;
+	auto *pw = static_cast<PanWindow *>(data);
+	gint x = x_step;
+	gint y = y_step;
+	keyboard_scroll_calc(x, y, modifiers, g_str_hash(g_action_get_name(G_ACTION(action))),
+	                     static_cast<guint32>(g_get_monotonic_time() / 1000));
+	image_scroll(pw->imd, x, y);
+}
 
-	pr = PIXBUF_RENDERER(pw->imd->pr);
+template<int x_step, int y_step>
+static void pan_page_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *pw = static_cast<PanWindow *>(data);
+	auto *pr = PIXBUF_RENDERER(pw->imd->pr);
+	image_scroll(pw->imd, x_step * (pr->vis_width / 2), y_step * (pr->vis_height / 2));
+}
 
-	imd_widget = nullptr;
-	if (GtkRoot *root = gtk_widget_get_root(pw->imd->widget))
-		{
-		GtkWidget *focus = gtk_root_get_focus(root);
-		for (GtkWidget *work = focus; work; work = gtk_widget_get_parent(work))
-			{
-			if (work == pw->imd->widget)
-				{
-				imd_widget = focus;
-				break;
-				}
-			}
-		}
-	focused = (pw->fs || (imd_widget && gtk_widget_has_focus(imd_widget)));
-
-	if (focused)
-		{
-		stop_signal = TRUE;
-		switch (keyval)
-			{
-			case GDK_KEY_Left: case GDK_KEY_KP_Left:
-				x -= 1;
-				break;
-			case GDK_KEY_Right: case GDK_KEY_KP_Right:
-				x += 1;
-				break;
-			case GDK_KEY_Up: case GDK_KEY_KP_Up:
-				y -= 1;
-				break;
-			case GDK_KEY_Down: case GDK_KEY_KP_Down:
-				y += 1;
-				break;
-			case GDK_KEY_Page_Up: case GDK_KEY_KP_Page_Up:
-				pixbuf_renderer_scroll(pr, 0, 0 - (pr->vis_height / 2));
-				break;
-			case GDK_KEY_Page_Down: case GDK_KEY_KP_Page_Down:
-				pixbuf_renderer_scroll(pr, 0, pr->vis_height / 2);
-				break;
-			case GDK_KEY_Home: case GDK_KEY_KP_Home:
-				pixbuf_renderer_scroll(pr, 0 - (pr->vis_width / 2), 0);
-				break;
-			case GDK_KEY_End: case GDK_KEY_KP_End:
-				pixbuf_renderer_scroll(pr, pr->vis_width / 2, 0);
-				break;
-			default:
-				stop_signal = FALSE;
-				break;
-			}
-
-		if (x != 0 || y != 0)
-			{
-			keyboard_scroll_calc(x, y, state, keyval, 0);
-			pixbuf_renderer_scroll(pr, x, y);
-			}
-		}
-
-	if (stop_signal)
-		{
-		return GDK_EVENT_STOP;
-		}
-
-	return GDK_EVENT_PROPAGATE;
+static gboolean pan_window_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	auto *pw = static_cast<PanWindow *>(data);
+	auto *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	auto *root = gtk_widget_get_root(widget);
+	auto *focus = root ? gtk_root_get_focus(root) : nullptr;
+	if (focus && (focus == pw->imd->frame || focus == pw->imd->pr || focus == pw->imd->view || focus == pw->imd->widget))
+		return activate_context_shortcut(pw->window, get_pan_view_actions(), keyval, state);
+	return FALSE;
 }
 
 /*
@@ -1349,8 +1303,11 @@ static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off)
 		pw->fs = fullscreen_start(pw->window, pw->imd, pan_fullscreen_stop_func);
 		pan_image_set_buttons(pw, pw->fs->imd);
 		GtkEventController *controller = gtk_event_controller_key_new();
+		gtk_event_controller_set_name(controller, "pan-panning-shortcuts");
+		gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
 		g_signal_connect(controller, "key-pressed", G_CALLBACK(pan_window_key_press_cb), pw);
 		gtk_widget_add_controller(pw->fs->window, controller);
+		register_context_shortcuts(GTK_APPLICATION(g_application_get_default()), pw->fs->window, get_pan_view_actions());
 
 		pw->imd = pw->fs->imd;
 		}
@@ -2047,6 +2004,8 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	g_signal_connect(G_OBJECT(pw->window), "close-request", G_CALLBACK(pan_window_delete_cb), pw);
 	GtkEventController *controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_name(controller, "pan-panning-shortcuts");
+	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(pan_window_key_press_cb), pw);
 	gtk_widget_add_controller(pw->window, controller);
 
@@ -2059,7 +2018,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	auto *date_action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-sort-by-exif-date");
 	g_simple_action_set_state(G_SIMPLE_ACTION(date_action), g_variant_new_boolean(pw->exif_date_enable));
 
-	gtk_widget_grab_focus(pw->imd->widget);
+	image_grab_focus(pw->imd);
 	gtk_window_present(GTK_WINDOW(pw->window));
 }
 

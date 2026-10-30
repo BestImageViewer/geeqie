@@ -6,6 +6,7 @@
 #include <glib.h>
 
 #include "accelerators.h"
+#include "actions.h"
 #include "keyboard-shortcuts.h"
 
 namespace
@@ -129,6 +130,23 @@ TEST(KeyboardMap, FiltersSelectedWindowAndKeepsAppActions)
 	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 0)), "help");
 	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 2)), "delete");
 	EXPECT_EQ(g_ptr_array_index(shortcuts, 4), nullptr);
+}
+
+TEST(KeyboardMap, ViewSpecificBindingTakesPrecedenceInSelectedWindow)
+{
+	g_autoptr(GKeyFile) key_file = g_key_file_new();
+	g_autoptr(GPtrArray) shortcuts = g_ptr_array_new_with_free_func(g_free);
+	g_key_file_set_string(key_file, "app.help-contents", "accels", "F1");
+	g_key_file_set_string(key_file, "win.log-win-run-command", "accels", "F1");
+	get_actions_and_accelerators(key_file, shortcuts, "win.log-win-");
+	ASSERT_EQ(shortcuts->len, 3U);
+	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 0)), "run-command");
+	EXPECT_TRUE(action_uses_context_shortcut("win.main-win-pan-right"));
+	EXPECT_TRUE(action_uses_context_shortcut("win.image-win-pan-left-fast"));
+	EXPECT_TRUE(action_uses_context_shortcut("win.pan-win-pan-half-up"));
+	EXPECT_FALSE(action_uses_context_shortcut("app.help-contents"));
+	g_autofree gchar *xml = shortcuts_xml_from_keyfile(key_file);
+	EXPECT_NE(g_strstr_len(xml, -1, "Run command on selected log text"), nullptr); // NOTRANSLATE: Expected shortcut description.
 }
 
 } // namespace

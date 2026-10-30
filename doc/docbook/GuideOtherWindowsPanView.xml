@@ -31,6 +31,10 @@
   </note>
   <para>Enable thumbnail caching to reuse thumbnails in Pan View. Both Geeqie's own cache and the shared thumbnail cache are supported. With Geeqie's own cache, new thumbnails are saved at the size configured in Preferences and scaled to the selected Pan View size. Changing the Pan View size does not regenerate valid cached thumbnails.</para>
   <para />
+  <section id="PanViewKeyboardPanning">
+    <title>Keyboard Panning</title>
+    <para>With the image view focused, arrow keys pan the view, Shift increases the step, and Ctrl moves to an edge. Page Up and Page Down move vertically by half a viewport; Home and End move horizontally by half a viewport. These are the default bindings for the Pan View panning commands in <link linkend="GuideOptionsKeyboard">Keyboard Options</link>. Keys in the search field retain their editing behavior.</para>
+  </section>
   <section id="Selectafolder">
     <title>Select a folder</title>
     <variablelist>

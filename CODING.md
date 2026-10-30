@@ -67,7 +67,7 @@ Use only for temporary debugging i.e. not in code in the repository
 
 ### Log Window
 
-When the Log Window has focus, the F1 key executes the action specified in `Edit/Preferences/Behavior/Log Window F1 Command` with the selected text as a parameter.
+When the log text has focus, the configurable `Run command on selected log text` shortcut (F1 by default) executes the command specified in `Edit/Preferences/Behavior/Log Window command` with the selected text as a parameter.
 If no text is selected, the entire line is passed to the command.
 This feature may be used to open an editor at a file location in the text string.
 

@@ -393,6 +393,10 @@
           <para>The maximum number of data lines to be displayed. The window will show the most recent data.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><guilabel>Log Window command</guilabel></term>
+        <listitem><para>The command to run on selected log text, or the current line if nothing is selected. The text is passed as one argument. Activate it with <keycap>F1</keycap> by default while the log text has focus, or change the <guilabel>Run command on selected log text</guilabel> binding in <link linkend="GuideOptionsKeyboard">Keyboard Options</link>.</para></listitem>
+      </varlistentry>
     </variablelist>
   </section>
 </section>

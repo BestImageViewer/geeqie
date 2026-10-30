@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -12,6 +13,7 @@
 #include <gtk/gtk.h>
 
 #include "accelerators.h"
+#include "actions.h"
 #include "bar-sort.h"
 #include "bar.h"
 #include "color-label.h"
@@ -23,14 +25,17 @@
 #include "fullscreen.h"
 #include "history-list.h"
 #include "image.h"
+#include "img-view.h"
 #include "intl.h"
 #include "layout-config.h"
 #include "layout-image.h"
 #include "layout-util.h"
 #include "layout.h"
+#include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
 #include "options.h"
+#include "pan-view.h"
 #include "pixbuf-renderer.h"
 #include "preferences.h"
 #include "rcfile.h"
@@ -258,6 +263,32 @@ TEST_F(LayoutConfigKeyboard, DraggingStillMovesAndSelectsTheDraggedPane)
 	EXPECT_EQ(gtk_single_selection_get_selected_item(selection), source);
 }
 
+struct ShortcutOverride
+{
+	const char *name;
+	gchar *previous;
+	explicit ShortcutOverride(const char *action) : name(action), previous(g_key_file_get_value(get_keyfile_merged(), action, "accels", nullptr)) {}
+	~ShortcutOverride()
+	{
+		if (previous) g_key_file_set_value(get_keyfile_merged(), name, "accels", previous);
+		else g_key_file_remove_key(get_keyfile_merged(), name, "accels", nullptr);
+		g_free(previous);
+	}
+	void set(const char *binding) const { g_key_file_set_string(get_keyfile_merged(), name, "accels", binding); }
+};
+
+GtkEventControllerKey *context_controller(GtkWidget *window, const char *name)
+{
+	g_autoptr(GListModel) controllers = gtk_widget_observe_controllers(window);
+	for (guint i = 0; i < g_list_model_get_n_items(controllers); ++i)
+		{
+		g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
+		if (GTK_IS_EVENT_CONTROLLER_KEY(controller) && g_strcmp0(gtk_event_controller_get_name(GTK_EVENT_CONTROLLER(controller)), name) == 0)
+			return GTK_EVENT_CONTROLLER_KEY(controller);
+		}
+	return nullptr;
+}
+
 class PartialLayoutConfig : public testing::Test
 {
 protected:
@@ -383,7 +414,7 @@ TEST_F(PartialLayoutConfig, ImageArrowKeysPanOnlyWithImageFocus)
 			{
 			g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
 			if (GTK_IS_EVENT_CONTROLLER_KEY(controller) &&
-			    gtk_event_controller_get_propagation_phase(GTK_EVENT_CONTROLLER(controller)) == GTK_PHASE_BUBBLE)
+			    g_strcmp0(gtk_event_controller_get_name(GTK_EVENT_CONTROLLER(controller)), "image-panning-shortcuts") == 0)
 				return GTK_EVENT_CONTROLLER_KEY(controller);
 			}
 		return nullptr;
@@ -453,28 +484,235 @@ TEST_F(PartialLayoutConfig, ImageArrowKeysPanOnlyWithImageFocus)
 		EXPECT_EQ(pr->y_scroll, pr->height - pr->vis_height);
 		ASSERT_TRUE(key(GDK_KEY_Up, GDK_CONTROL_MASK));
 		EXPECT_EQ(pr->y_scroll, 0);
-		g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
-		if (!fullscreen && xdotool && g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY"))
+		if (!fullscreen)
 			{
+			ShortcutOverride binding("win.main-win-pan-right");
+			binding.set("F8;z");
 			image_scroll(image, G_MININT / 2, G_MININT / 2);
-			ASSERT_TRUE(gtk_widget_grab_focus(layout->path_entry));
-			gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie image panning test");
-			gdk_display_flush(gtk_widget_get_display(layout->window));
-			graphene_rect_t bounds;
-			ASSERT_TRUE(gtk_widget_compute_bounds(image->pr, layout->window, &bounds));
-			g_autofree gchar *x = g_strdup_printf("%d", static_cast<int>(bounds.origin.x + (bounds.size.width / 2)));
-			g_autofree gchar *y = g_strdup_printf("%d", static_cast<int>(bounds.origin.y + (bounds.size.height / 2)));
-			const gchar *args[] = {xdotool, "search", "--name", "^Geeqie image panning test$", "windowfocus", "--sync",
-			                       "mousemove", "--window", "%1", x, y, "click", "1", "key", "--clearmodifiers", "Right", nullptr};
-			gint status = 0;
-			ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
-			                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
-			ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
-			ASSERT_TRUE(wait_layout([&]() { return pr->x_scroll == 8; }));
-			EXPECT_EQ(gtk_root_get_focus(GTK_ROOT(layout->window)), image->pr);
+			EXPECT_FALSE(key(GDK_KEY_Right));
+			EXPECT_TRUE(key(GDK_KEY_z));
+			EXPECT_EQ(pr->x_scroll, 8);
+			g_auto(GStrv) global_bindings = gtk_application_get_accels_for_action(app, "win.main-win-pan-right");
+			EXPECT_TRUE(!global_bindings || !global_bindings[0]);
+			for (auto *widget : {layout->path_entry, layout->vf->listview})
+				{
+				ASSERT_TRUE(gtk_widget_grab_focus(widget));
+				EXPECT_FALSE(key(GDK_KEY_F8));
+				EXPECT_EQ(pr->x_scroll, 8);
+				}
+			image_grab_focus(image);
+			int global_activations = 0;
+			g_autoptr(GSimpleAction) global = g_simple_action_new("pan-test-global", nullptr);
+			g_signal_connect(global, "activate", G_CALLBACK(+[](GSimpleAction *, GVariant *, gpointer data)
+				{
+				++*static_cast<int *>(data);
+				}), &global_activations);
+			g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(global));
+			g_auto(GStrv) accels = g_strsplit("z", ";", -1);
+			register_accels_for_action(app, "app.pan-test-global", accels);
+			struct RemoveGlobal
+			{
+				GtkApplication *app;
+				~RemoveGlobal()
+					{
+					gchar *empty[] = {nullptr};
+					register_accels_for_action(app, "app.pan-test-global", empty);
+					g_action_map_remove_action(G_ACTION_MAP(app), "pan-test-global");
+					}
+			} remove_global{app};
+			g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+			if (xdotool && g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY"))
+				{
+				image_scroll(image, G_MININT / 2, G_MININT / 2);
+				ASSERT_TRUE(gtk_widget_grab_focus(layout->path_entry));
+				gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie image panning test");
+				gdk_display_flush(gtk_widget_get_display(layout->window));
+				graphene_rect_t bounds;
+				ASSERT_TRUE(gtk_widget_compute_bounds(image->pr, layout->window, &bounds));
+				g_autofree gchar *x = g_strdup_printf("%d", static_cast<int>(bounds.origin.x + (bounds.size.width / 2)));
+				g_autofree gchar *y = g_strdup_printf("%d", static_cast<int>(bounds.origin.y + (bounds.size.height / 2)));
+				const gchar *args[] = {xdotool, "search", "--name", "^Geeqie image panning test$", "windowfocus", "--sync",
+				                       "mousemove", "--window", "%1", x, y, "click", "1", "key", "--clearmodifiers", "z", nullptr};
+				gint status = 0;
+				ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+				                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+				ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+				ASSERT_TRUE(wait_layout([&]() { return pr->x_scroll == 8; })) << "scroll=" << pr->x_scroll << " global=" << global_activations;
+				EXPECT_EQ(gtk_root_get_focus(GTK_ROOT(layout->window)), image->pr);
+				ASSERT_TRUE(gtk_widget_grab_focus(layout->vf->listview));
+				g_auto(GStrv) restored = gtk_application_get_accels_for_action(app, "app.pan-test-global");
+				ASSERT_NE(restored[0], nullptr);
+				EXPECT_STREQ(restored[0], "z");
+				}
+			EXPECT_EQ(global_activations, 0);
+			binding.set("");
+			image_grab_focus(image);
+			EXPECT_FALSE(key(GDK_KEY_F8));
+			EXPECT_FALSE(key(GDK_KEY_Right));
 			}
+
 		}
 	layout_image_full_screen_stop(layout);
+}
+
+GtkWindow *window_with_action(const char *name)
+{
+	auto *windows = gtk_window_get_toplevels();
+	for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+		{
+		g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+		if (G_IS_ACTION_MAP(window) && g_action_map_lookup_action(G_ACTION_MAP(window), name)) return window;
+		}
+	return nullptr;
+}
+
+TEST_F(PartialLayoutConfig, StandaloneAndPanViewUseConfiguredPanningBindings)
+{
+	const auto progressive = options->progressive_key_scrolling;
+	options->progressive_key_scrolling = FALSE;
+	struct Restore
+	{
+		gboolean progressive;
+		gint step = options->keyboard_scroll_step;
+		~Restore() { options->progressive_key_scrolling = progressive; options->keyboard_scroll_step = step; }
+	} restore{progressive};
+	options->keyboard_scroll_step = 1;
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 1600, 1200);
+	gdk_pixbuf_fill(pixels, 0x4080c0ff);
+	struct ImageFile
+	{
+		gchar *path;
+		~ImageFile() { g_unlink(path); g_free(path); }
+	} image_file{g_build_filename(directory, "panning.png", nullptr)};
+	ASSERT_TRUE(gdk_pixbuf_save(pixels, image_file.path, "png", nullptr, nullptr));
+	for (bool pan : {false, true})
+		{
+		SCOPED_TRACE(pan);
+		if (pan)
+			{
+			auto dir = FileData::new_dir(directory);
+			pan_window_new(dir);
+			}
+		else
+			{
+			auto file = FileData::new_simple(image_file.path);
+			view_window_new(file);
+			}
+		const char *action = pan ? "win.pan-win-pan-right" : "win.image-win-pan-right";
+		std::unique_ptr<GtkWindow, decltype(&gtk_window_close)> window(window_with_action(action + 4), gtk_window_close);
+		ASSERT_NE(window, nullptr);
+		auto *pr = PIXBUF_RENDERER(find_widget(GTK_WIDGET(window.get()), TYPE_PIXBUF_RENDERER));
+		ASSERT_NE(pr, nullptr);
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(GTK_WIDGET(pr)) && pr->viewport_width > 0; }));
+		pixbuf_renderer_set_pixbuf(pr, pixels, 2.0);
+		pixbuf_renderer_scroll(pr, G_MININT / 2, G_MININT / 2);
+		ASSERT_GT(pr->width, pr->vis_width);
+		ASSERT_TRUE(gtk_widget_grab_focus(GTK_WIDGET(pr)));
+		auto *controller = context_controller(GTK_WIDGET(window.get()), pan ? "pan-panning-shortcuts" : "image-panning-shortcuts");
+		ASSERT_NE(controller, nullptr);
+		const auto key = [&](guint value)
+			{
+			gboolean handled = FALSE;
+			g_signal_emit_by_name(controller, "key-pressed", value, 0, GDK_NO_MODIFIER_MASK, &handled);
+			return handled;
+			};
+		ShortcutOverride binding(action);
+		binding.set("F8");
+		EXPECT_FALSE(key(GDK_KEY_Right));
+		EXPECT_TRUE(key(GDK_KEY_F8));
+		EXPECT_EQ(pr->x_scroll, 8);
+		auto *entry = gtk_entry_new();
+		// Include a text field inside the image's widget subtree, like an overlay control.
+		auto *image_box = gtk_widget_get_parent(gtk_widget_get_parent(GTK_WIDGET(pr)));
+		while (image_box && !GTK_IS_BOX(image_box)) image_box = gtk_widget_get_parent(image_box);
+		ASSERT_NE(image_box, nullptr);
+		gtk_box_append(GTK_BOX(image_box), entry);
+		ASSERT_TRUE(gtk_widget_grab_focus(entry));
+		EXPECT_FALSE(key(GDK_KEY_F8));
+		EXPECT_EQ(pr->x_scroll, 8);
+		gtk_box_remove(GTK_BOX(image_box), entry);
+		ASSERT_TRUE(gtk_widget_grab_focus(GTK_WIDGET(pr)));
+		binding.set("");
+		EXPECT_FALSE(key(GDK_KEY_F8));
+		EXPECT_FALSE(key(GDK_KEY_Right));
+		if (pan)
+			{
+			EXPECT_TRUE(key(GDK_KEY_Page_Down));
+			EXPECT_EQ(pr->y_scroll, pr->vis_height / 2);
+			EXPECT_TRUE(key(GDK_KEY_End));
+			EXPECT_EQ(pr->x_scroll, 8 + (pr->vis_width / 2));
+			}
+		}
+}
+
+TEST_F(PartialLayoutConfig, ConfiguredPanningKeepsSplitPaneSynchronization)
+{
+	layout_split_change(layout, SPLIT_HOR);
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 1600, 1200);
+	gdk_pixbuf_fill(pixels, 0x4080c0ff);
+	for (int i = 0; i < 2; ++i) image_change_pixbuf(layout->split_images[i], pixels, 2.0, FALSE);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return PIXBUF_RENDERER(layout->split_images[1]->pr)->vis_width > 0; }));
+	for (int i = 0; i < 2; ++i) image_scroll(layout->split_images[i], G_MININT / 2, G_MININT / 2);
+	ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.main-win-pan-right", nullptr));
+	EXPECT_EQ(PIXBUF_RENDERER(layout->split_images[1]->pr)->x_scroll, 0);
+	ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.main-win-pan-right-edge-all", nullptr));
+	for (int i = 0; i < 2; ++i)
+		{
+		auto *pr = PIXBUF_RENDERER(layout->split_images[i]->pr);
+		EXPECT_EQ(pr->x_scroll, pr->width - pr->vis_width);
+		}
+}
+
+TEST_F(PartialLayoutConfig, LogCommandBindingUsesSelectionOrCurrentLine)
+{
+	log_window_new(layout);
+	auto *window = window_with_action("log-win-run-command");
+	ASSERT_NE(window, nullptr);
+	struct Hide { GtkWindow *window; ~Hide() { gtk_widget_set_visible(GTK_WIDGET(window), FALSE); } } hide{window};
+	auto *text = find_widget(GTK_WIDGET(window), GTK_TYPE_TEXT_VIEW);
+	ASSERT_NE(text, nullptr);
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(text); }));
+	g_autofree gchar *command = g_find_program_in_path("true");
+	ASSERT_NE(command, nullptr);
+	struct RestoreCommand
+	{
+		gchar *command = options->log_window.action;
+		~RestoreCommand() { g_free(options->log_window.action); options->log_window.action = command; }
+	} restore;
+	options->log_window.action = g_shell_quote(command);
+	auto *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+	gtk_text_buffer_set_text(buffer, "first line\nsecond 'quoted' line\n", -1);
+	GtkTextIter cursor;
+	gtk_text_buffer_get_iter_at_line(buffer, &cursor, 1);
+	gtk_text_buffer_place_cursor(buffer, &cursor);
+	ASSERT_TRUE(gtk_widget_grab_focus(text));
+	auto *controller = context_controller(GTK_WIDGET(window), "log-command-shortcut");
+	ASSERT_NE(controller, nullptr);
+	const auto key = [&](guint value)
+		{
+		gboolean handled = FALSE;
+		g_signal_emit_by_name(controller, "key-pressed", value, 0, GDK_NO_MODIFIER_MASK, &handled);
+		return handled;
+		};
+	EXPECT_TRUE(key(GDK_KEY_F1));
+	GtkTextIter start;
+	GtkTextIter end;
+	ASSERT_TRUE(gtk_text_buffer_get_selection_bounds(buffer, &start, &end));
+	g_autofree gchar *line = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+	EXPECT_STREQ(line, "second 'quoted' line");
+	gtk_text_buffer_get_iter_at_offset(buffer, &start, 0);
+	gtk_text_buffer_get_iter_at_offset(buffer, &end, 5);
+	gtk_text_buffer_select_range(buffer, &start, &end);
+	ShortcutOverride binding("win.log-win-run-command");
+	binding.set("F8");
+	EXPECT_FALSE(key(GDK_KEY_F1));
+	EXPECT_TRUE(key(GDK_KEY_F8));
+	ASSERT_TRUE(gtk_text_buffer_get_selection_bounds(buffer, &start, &end));
+	g_autofree gchar *selected = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+	EXPECT_STREQ(selected, "first");
+	binding.set("");
+	EXPECT_FALSE(key(GDK_KEY_F8));
 }
 
 class DuplicateAddCommands : public PartialLayoutConfig

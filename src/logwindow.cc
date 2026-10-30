@@ -32,6 +32,8 @@
 
 #include <config.h>
 
+#include "accelerators.h"
+#include "actions.h"
 #include "intl.h"
 #include "layout.h"
 #ifdef DEBUG
@@ -62,57 +64,54 @@ struct LogWindow
 
 static LogWindow *logwindow = nullptr;
 
-/**
- * @brief Handle escape and F1 keys
- * @param window
- * @param event
- * @param user_data
- * @returns
- *
- * If escape key pressed, hide log window. \n
- * If no text selected, select the entire line. \n
- * If F1 pressed, execute command line program: \n
- * <options->log_window.action> <selected text>
- *
-*/
-static gboolean log_window_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint  /*keycode*/, GdkModifierType  /*state*/, gpointer user_data)
+static void log_run_command_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	if (keyval == GDK_KEY_Escape)
+	if (!options->log_window.action || !*options->log_window.action) return;
+	auto *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(data));
+	if (!gtk_text_buffer_get_has_selection(buffer))
 		{
-		gtk_widget_set_visible(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller)), FALSE);
+		GtkTextIter cursor;
+		gtk_text_buffer_get_iter_at_mark(buffer, &cursor, gtk_text_buffer_get_insert(buffer));
+		GtkTextIter start = cursor;
+		gtk_text_iter_set_line_offset(&start, 0);
+		gtk_text_iter_forward_to_line_end(&cursor);
+		gtk_text_buffer_select_range(buffer, &start, &cursor);
 		}
-	else if (keyval == GDK_KEY_F1 && options->log_window.action[0] != '\0')
-		{
-		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(user_data));
+	GtkTextIter start;
+	GtkTextIter end;
+	if (!gtk_text_buffer_get_selection_bounds(buffer, &start, &end)) return;
+	g_autofree gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+	g_autofree gchar *quoted = g_shell_quote(text);
+	g_autofree gchar *command = g_strdup_printf("%s %s", options->log_window.action, quoted);
+	runcmd(command);
+}
 
-		if (!gtk_text_buffer_get_has_selection(buffer))
-			{
-			GtkTextMark *cursor_mark = gtk_text_buffer_get_insert(buffer);
-			GtkTextIter cursor_iter;
-			gtk_text_buffer_get_iter_at_mark(buffer, &cursor_iter, cursor_mark);
+static const ActionDef log_actions[] =
+{
+	{"win.log-win-run-command", nullptr, N_("Run command on selected log text"), log_run_command_cb,
+	 nullptr, ActionStateType::NONE, FALSE, nullptr, 0, nullptr, true},
+	{nullptr, nullptr, nullptr, nullptr, nullptr, ActionStateType::NONE, FALSE, nullptr, 0, nullptr}
+};
 
-			GtkTextIter line_start = cursor_iter;
-			gtk_text_iter_set_line_offset(&line_start, 0);
+const ActionDef *get_log_actions()
+{
+	return log_actions;
+}
 
-			GtkTextIter line_end = cursor_iter;
-			gtk_text_iter_forward_to_line_end(&line_end);
-
-			gtk_text_buffer_select_range(buffer, &line_start, &line_end);
-			}
-
-		GtkTextIter chr_start;
-		GtkTextIter chr_end;
-		if (gtk_text_buffer_get_selection_bounds(buffer, &chr_start, &chr_end))
-			{
-			g_autofree gchar *sel_text = gtk_text_buffer_get_text(buffer, &chr_start, &chr_end, FALSE);
-
-			g_autofree gchar *cmd_line = g_strdup_printf("%s \"%s\"", options->log_window.action, sel_text);
-
-			runcmd(cmd_line);
-			}
-		}
-
+static gboolean log_command_shortcut_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
+{
+	auto *window = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	auto *root = gtk_widget_get_root(window);
+	if (root && gtk_root_get_focus(root) == data)
+		return activate_context_shortcut(window, log_actions, keyval, state);
 	return FALSE;
+}
+
+static gboolean log_window_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType, gpointer)
+{
+	if (keyval != GDK_KEY_Escape) return FALSE;
+	gtk_widget_set_visible(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller)), FALSE);
+	return TRUE;
 }
 
 static void text_view_set_line_wrap(GtkTextView *text_view, bool line_wrap)
@@ -351,6 +350,12 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_text_buffer_create_mark(buffer, "end", &iter, FALSE);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolledwin), text);
 
+	auto *command_controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_name(command_controller, "log-command-shortcut");
+	gtk_event_controller_set_propagation_phase(command_controller, GTK_PHASE_CAPTURE);
+	g_signal_connect(command_controller, "key-pressed", G_CALLBACK(log_command_shortcut_cb), text);
+	gtk_widget_add_controller(window, command_controller);
+
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(log_window_key_pressed_cb), text);
 	gtk_widget_add_controller(window, controller);
@@ -433,6 +438,8 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 		                                                   "family", "MonoSpace", // NOTRANSLATE: Font description.
 		                                                   NULL);
 		}
+
+	register_actions_from_table(GTK_APPLICATION(g_application_get_default()), window, log_actions, get_keyfile_merged(), text);
 
 	logwin->window = window;
 	logwin->text = text;

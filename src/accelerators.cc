@@ -5,6 +5,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "actions.h"
 #include "convert-configuration.h"
 #include "layout-util.h"
 #include "main-defines.h"
@@ -274,7 +275,7 @@ void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array, const gc
 	g_auto(GStrv) actions = g_key_file_get_groups(key_file, &n_actions);
 	g_autoptr(GHashTable) used_accels = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
 
-	for (guint priority = 0; priority < 3; priority++)
+	for (guint priority = 0; priority < 4; priority++)
 		{
 		for (size_t i = 0; i < n_actions; i++)
 			{
@@ -289,14 +290,18 @@ void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array, const gc
 				continue;
 				}
 
-			guint action_priority = 2;
-			if (g_str_has_prefix(action, "app."))
+			guint action_priority = 3;
+			if (window_prefix && g_str_has_prefix(action, window_prefix) && action_uses_context_shortcut(action))
 				{
 				action_priority = 0;
 				}
-			else if (g_str_has_prefix(action, "win.main-win-"))
+			else if (g_str_has_prefix(action, "app."))
 				{
 				action_priority = 1;
+				}
+			else if (g_str_has_prefix(action, "win.main-win-"))
+				{
+				action_priority = 2;
 				}
 
 			if (action_priority != priority)
