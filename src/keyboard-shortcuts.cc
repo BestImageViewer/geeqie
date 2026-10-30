@@ -331,6 +331,7 @@ ActionTableDef shortcut_tables[] =
 	{ nullptr, "search", N_("Search Window") },
 	{ nullptr, "view-file", N_("Files Pane") },
 	{ nullptr, "log", N_("Log Window") },
+	{ nullptr, "bookmarks", N_("Bookmarks and Destinations") },
 };
 
 void shortcut_tables_set_actions()
@@ -345,6 +346,7 @@ void shortcut_tables_set_actions()
 	shortcut_tables[7].actions = get_search_actions();
 	shortcut_tables[8].actions = get_view_file_actions();
 	shortcut_tables[9].actions = get_log_actions();
+	shortcut_tables[10].actions = get_bookmark_actions();
 }
 
 } // namespace

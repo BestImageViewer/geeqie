@@ -1544,6 +1544,161 @@ TEST_F(PartialLayoutConfig, SortManagerWidthSurvivesLayoutRebuildAndReplacement)
 	EXPECT_EQ(layout->options.sort_manager_width, 350);
 }
 
+TEST_F(PartialLayoutConfig, HamburgerMenuShortcutCanBeChangedAndDisabled)
+{
+	options->hamburger_menu = TRUE;
+	layout_free(layout);
+	layout = nullptr;
+	const gchar *names[] = {"home_path", "startup_path", nullptr};
+	const gchar *values[] = {directory, "2", nullptr};
+	layout = layout_new_from_config(names, values, FALSE);
+	ASSERT_NE(layout, nullptr);
+	ShortcutOverride binding("win.main-win-hamburger-menu");
+	for (bool floating : {false, true, false})
+		{
+		layout_tools_float_set(layout, floating, FALSE);
+		auto *window = floating ? layout->tools : layout->window;
+		gtk_window_present(GTK_WINDOW(window));
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(layout->hamburger_menu_button); }));
+		auto *keys = g_object_get_data(G_OBJECT(window), "hamburger-menu-key-controller");
+		ASSERT_NE(keys, nullptr);
+		auto *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(layout->hamburger_menu_button));
+		const auto key = [&](guint value)
+			{
+			gboolean handled = FALSE;
+			g_signal_emit_by_name(keys, "key-pressed", value, 0, GDK_NO_MODIFIER_MASK, &handled);
+			return handled;
+			};
+		binding.set("F9;z");
+		reload_registered_accels(app, get_keyfile_merged());
+		EXPECT_FALSE(key(GDK_KEY_F10));
+		EXPECT_FALSE(gtk_widget_get_visible(GTK_WIDGET(popover)));
+		EXPECT_TRUE(key(GDK_KEY_F9));
+		EXPECT_TRUE(gtk_widget_get_visible(GTK_WIDGET(popover)));
+		EXPECT_TRUE(key(GDK_KEY_z));
+		EXPECT_FALSE(gtk_widget_get_visible(GTK_WIDGET(popover)));
+		if (!floating)
+			{
+			binding.set("Right"); // NOTRANSLATE: Accelerator name.
+			image_grab_focus(layout->image);
+			EXPECT_FALSE(key(GDK_KEY_Right));
+			EXPECT_FALSE(gtk_widget_get_visible(GTK_WIDGET(popover)));
+			}
+		binding.set("");
+		reload_registered_accels(app, get_keyfile_merged());
+		EXPECT_FALSE(key(GDK_KEY_F9));
+		EXPECT_FALSE(key(GDK_KEY_F10));
+		EXPECT_FALSE(gtk_widget_get_visible(GTK_WIDGET(popover)));
+		}
+}
+
+TEST_F(PartialLayoutConfig, BookmarkReorderingShortcutsFollowFocusAndConfiguration)
+{
+	const gchar *key = "test_configurable_bookmark_shortcuts";
+	history_list_free_key(key);
+	history_list_add_to_key(key, "Seed[path]/tmp/seed", 0); // NOTRANSLATE: Test history entry.
+	auto *window = gtk_application_window_new(app);
+	struct DestroyWindow { GtkWidget *window; ~DestroyWindow() { gtk_window_destroy(GTK_WINDOW(window)); } } destroy{window};
+	auto *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_window_set_child(GTK_WINDOW(window), box);
+	int activations = 0;
+	auto *bookmarks = bookmark_list_new(key, [&](const gchar *) { ++activations; });
+	bookmark_list_set_no_defaults(bookmarks, TRUE);
+	history_list_free_key(key);
+	bookmark_list_add(bookmarks, "First", "/tmp/first"); // NOTRANSLATE: Test bookmark label and path.
+	bookmark_list_add(bookmarks, "Second", "/tmp/second"); // NOTRANSLATE: Test bookmark label and path.
+	bookmark_list_add(bookmarks, "Third", "/tmp/third"); // NOTRANSLATE: Test bookmark label and path.
+	gtk_box_append(GTK_BOX(box), bookmarks);
+	auto *other = gtk_button_new();
+	gtk_box_append(GTK_BOX(box), other);
+	gtk_window_present(GTK_WINDOW(window));
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(bookmarks) && gtk_window_is_active(GTK_WINDOW(window)); }));
+	auto *buttons = gtk_scrolled_window_get_child(GTK_SCROLLED_WINDOW(bookmarks));
+	if (GTK_IS_VIEWPORT(buttons)) buttons = gtk_viewport_get_child(GTK_VIEWPORT(buttons));
+	auto *second = gtk_widget_get_next_sibling(gtk_widget_get_first_child(buttons));
+	ASSERT_TRUE(gtk_widget_grab_focus(second));
+	auto *keys = context_controller(second, "bookmark-shortcuts");
+	ASSERT_NE(keys, nullptr);
+	const auto press = [&](guint value, GdkModifierType mods = GDK_SHIFT_MASK)
+		{
+		gboolean handled = FALSE;
+		g_signal_emit_by_name(keys, "key-pressed", value, 0, mods, &handled);
+		return handled;
+		};
+	EXPECT_TRUE(press(GDK_KEY_Up));
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/second");
+	EXPECT_TRUE(press(GDK_KEY_Up));
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/second");
+	EXPECT_TRUE(press(GDK_KEY_Down));
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 1), "/tmp/second");
+	EXPECT_EQ(gtk_root_get_focus(GTK_ROOT(window)), second);
+	EXPECT_EQ(activations, 0);
+
+	int global_activations = 0;
+	g_autoptr(GSimpleAction) global = g_simple_action_new("test-bookmark-global", nullptr);
+	g_signal_connect(global, "activate", G_CALLBACK(+[](GSimpleAction *, GVariant *, gpointer data)
+		{
+		++*static_cast<int *>(data);
+		}), &global_activations);
+	g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(global));
+	g_auto(GStrv) global_keys = g_strsplit("<Control>o;z", ";", -1);
+	register_accels_for_action(app, "app.test-bookmark-global", global_keys);
+	struct RemoveGlobal
+	{
+		GtkApplication *app;
+		~RemoveGlobal()
+			{
+			gchar *empty[] = {nullptr};
+			register_accels_for_action(app, "app.test-bookmark-global", empty);
+			g_action_map_remove_action(G_ACTION_MAP(app), "test-bookmark-global");
+			}
+	} remove_global{app};
+	ShortcutOverride binding("bookmark.move-up");
+	binding.set("<Control>o;z");
+	// Refresh focus to apply the new reservation of the competing application shortcut.
+	ASSERT_TRUE(gtk_widget_grab_focus(other));
+	ASSERT_TRUE(gtk_widget_grab_focus(second));
+	EXPECT_TRUE(focused_context_shortcut_matches(window, GDK_KEY_o, GDK_CONTROL_MASK));
+	g_auto(GStrv) reserved = gtk_application_get_accels_for_action(app, "app.test-bookmark-global");
+	EXPECT_EQ(reserved[0], nullptr);
+	EXPECT_FALSE(press(GDK_KEY_Up));
+	EXPECT_TRUE(press(GDK_KEY_o, GDK_CONTROL_MASK));
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/second");
+	EXPECT_TRUE(press(GDK_KEY_Down));
+
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	if (xdotool && g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY"))
+		{
+		gtk_window_set_title(GTK_WINDOW(window), "Geeqie bookmark shortcut test"); // NOTRANSLATE: X11 test window identifier.
+		gdk_display_flush(gtk_widget_get_display(window));
+		const gchar *args[] = {xdotool, "search", "--name", "^Geeqie bookmark shortcut test$", "windowfocus", "--sync",
+		                       "key", "--clearmodifiers", "z", nullptr};
+		gint status;
+		ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+		                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+		ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+		EXPECT_TRUE(wait_layout([&]() { return g_strcmp0(bookmark_list_get_path_at_index(bookmarks, 0), "/tmp/second") == 0; }));
+		EXPECT_TRUE(press(GDK_KEY_Down));
+		}
+	binding.set("");
+	EXPECT_FALSE(press(GDK_KEY_z, GDK_NO_MODIFIER_MASK));
+	EXPECT_FALSE(press(GDK_KEY_Up));
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 1), "/tmp/second");
+	binding.set("z");
+	bookmark_list_set_editable(bookmarks, FALSE);
+	press(GDK_KEY_z, GDK_NO_MODIFIER_MASK);
+	EXPECT_STREQ(bookmark_list_get_path_at_index(bookmarks, 1), "/tmp/second");
+	bookmark_list_set_editable(bookmarks, TRUE);
+	ASSERT_TRUE(gtk_widget_grab_focus(other));
+	EXPECT_FALSE(press(GDK_KEY_z, GDK_NO_MODIFIER_MASK));
+	EXPECT_FALSE(focused_context_shortcut_matches(window, GDK_KEY_z, GDK_NO_MODIFIER_MASK));
+	g_auto(GStrv) restored = gtk_application_get_accels_for_action(app, "app.test-bookmark-global");
+	ASSERT_NE(restored[0], nullptr);
+	EXPECT_EQ(activations, 0);
+	EXPECT_EQ(global_activations, 0);
+	history_list_free_key(key);
+}
+
 TEST_F(PartialLayoutConfig, HamburgerMenuFollowsFloatingToolsAndReturnsWhenHiddenOrDocked)
 {
 	options->hamburger_menu = TRUE;

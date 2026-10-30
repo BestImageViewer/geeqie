@@ -32,6 +32,7 @@
 #include <glib-object.h>
 #include <pango/pango.h>
 
+#include "actions.h"
 #include "compat.h"
 #include "dnd.h"
 #include "history-list.h"
@@ -489,12 +490,32 @@ static void bookmark_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble, g
 	bookmark_press_common(button, gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)), data);
 }
 
+template<int direction>
+static void bookmark_move_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *bm = static_cast<BookMarkData *>(data);
+	auto *root = gtk_widget_get_root(bm->box);
+	auto *focus = root ? gtk_root_get_focus(root) : nullptr;
+	if (focus && gtk_widget_get_parent(focus) == bm->box) bookmark_move(bm, focus, direction);
+}
+
+const ActionDef bookmark_actions[] =
+{
+	{"bookmark.move-up", nullptr, N_("Move bookmark or destination up"), bookmark_move_action_cb<-1>,
+	 nullptr, ActionStateType::NONE, FALSE, nullptr, 0, nullptr, true},
+	{"bookmark.move-down", nullptr, N_("Move bookmark or destination down"), bookmark_move_action_cb<1>,
+	 nullptr, ActionStateType::NONE, FALSE, nullptr, 0, nullptr, true},
+	{nullptr, nullptr, nullptr, nullptr, nullptr, ActionStateType::NONE, FALSE, nullptr, 0, nullptr}
+};
+
 static gboolean bookmark_keypress_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	GtkWidget *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	if (b) b->suppress_activation = FALSE;
 	auto bm = static_cast<BookMarkData *>(data);
+
+	if (gtk_widget_has_focus(button) && activate_context_shortcut(button, bookmark_actions, keyval, state)) return TRUE;
 
 	switch (keyval)
 		{
@@ -504,20 +525,6 @@ static gboolean bookmark_keypress_cb(GtkEventControllerKey *controller, guint ke
 		case GDK_KEY_Menu:
 			bookmark_menu_popup(bm, button);
 			return TRUE;
-			break;
-		case GDK_KEY_Up:
-			if (state & GDK_SHIFT_MASK)
-				{
-				bookmark_move(bm, button, -1);
-				return TRUE;
-				}
-			break;
-		case GDK_KEY_Down:
-			if (state & GDK_SHIFT_MASK)
-				{
-				bookmark_move(bm, button, 1);
-				return TRUE;
-				}
 			break;
 		default:
 			break;
@@ -626,6 +633,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text, guint &posi
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bookmark_gesture_press_cb), bm);
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
 	GtkEventController *controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_name(controller, "bookmark-shortcuts");
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(bookmark_keypress_cb), bm);
 	gtk_widget_add_controller(button, controller);
 
@@ -761,6 +769,11 @@ static void bookmark_data_destroy(gpointer data)
 	delete bm;
 }
 
+const ActionDef *get_bookmark_actions()
+{
+	return bookmark_actions;
+}
+
 GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_func)
 {
 	auto *bm = new BookMarkData();
@@ -781,6 +794,7 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 	bm->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	register_widget_context_shortcuts(bm->box, "bookmark", bookmark_actions, bm);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), bm->box);
 
 	bookmark_populate(bm);

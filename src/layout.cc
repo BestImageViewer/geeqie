@@ -36,6 +36,7 @@
 #include <glib-object.h>
 #include <pango/pango.h>
 
+#include "actions.h"
 #include "bar-sort.h"
 #include "bar.h"
 #include "collect-dlg.h"
@@ -566,18 +567,16 @@ static void layout_hamburger_menu_closed_cb(GtkPopover *, gpointer data)
 	                g_object_ref(previous_focus), g_object_unref);
 }
 
-static gboolean layout_hamburger_menu_key_press_cb(GtkEventControllerKey *, guint keyval, guint,
-	                                                GdkModifierType state, gpointer data)
+bool layout_hamburger_menu_toggle(LayoutWindow *lw)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	if (keyval != GDK_KEY_F10 || state & gtk_accelerator_get_default_mod_mask()) return FALSE;
+	if (!options->hamburger_menu || !lw->hamburger_menu_button ||
+	    !gtk_widget_get_mapped(lw->hamburger_menu_button)) return false;
 
 	GtkPopover *popover = gtk_menu_button_get_popover(GTK_MENU_BUTTON(lw->hamburger_menu_button));
 	if (gtk_widget_get_visible(GTK_WIDGET(popover)))
 		{
 		gtk_popover_popdown(GTK_POPOVER(popover));
-		return TRUE;
+		return true;
 		}
 
 	GtkWidget *focus = gtk_root_get_focus(gtk_widget_get_root(lw->hamburger_menu_button));
@@ -589,7 +588,18 @@ static gboolean layout_hamburger_menu_key_press_cb(GtkEventControllerKey *, guin
 		}
 
 	gtk_menu_button_popup(GTK_MENU_BUTTON(lw->hamburger_menu_button));
-	return TRUE;
+	return true;
+}
+
+static gboolean layout_hamburger_menu_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint,
+	                                                GdkModifierType state, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	auto *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	if (!lw->hamburger_menu_button || gtk_widget_get_root(lw->hamburger_menu_button) != GTK_ROOT(widget) ||
+	    !action_matches_shortcut("win.main-win-hamburger-menu", keyval, state) ||
+	    focused_context_shortcut_matches(widget, keyval, state)) return FALSE;
+	return layout_hamburger_menu_toggle(lw);
 }
 
 static void layout_hamburger_menu_set_window(LayoutWindow *lw, GtkWidget *window)
@@ -671,6 +681,9 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		widget_remove_from_parent(lw->scrolled_window);
 		gtk_box_prepend(GTK_BOX(lw->main_box), lw->scrolled_window);
 		}
+
+	if (auto *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-hamburger-menu"))
+		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), options->hamburger_menu);
 
 	if (options->hamburger_menu)
 		{

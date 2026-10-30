@@ -149,6 +149,21 @@ TEST(KeyboardMap, ViewSpecificBindingTakesPrecedenceInSelectedWindow)
 	EXPECT_NE(g_strstr_len(xml, -1, "Run command on selected log text"), nullptr); // NOTRANSLATE: Expected shortcut description.
 }
 
+TEST(KeyboardMap, BookmarkBindingsHaveTheirOwnScope)
+{
+	g_autoptr(GKeyFile) key_file = g_key_file_new();
+	g_autoptr(GPtrArray) shortcuts = g_ptr_array_new_with_free_func(g_free);
+	g_key_file_set_string(key_file, "win.main-win-pan-up-fast", "accels", "<Shift>Up");
+	g_key_file_set_string(key_file, "bookmark.move-up", "accels", "<Shift>Up");
+	get_actions_and_accelerators(key_file, shortcuts, "bookmark.");
+	ASSERT_EQ(shortcuts->len, 3U);
+	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 0)), "bookmark.move-up");
+	EXPECT_TRUE(action_uses_context_shortcut("bookmark.move-up"));
+	EXPECT_TRUE(action_uses_context_shortcut("bookmark.move-down"));
+	g_autofree gchar *xml = shortcuts_xml_from_keyfile(key_file);
+	EXPECT_NE(g_strstr_len(xml, -1, "Move bookmark or destination up"), nullptr); // NOTRANSLATE: Expected shortcut description.
+}
+
 } // namespace
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

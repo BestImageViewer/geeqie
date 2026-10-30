@@ -1598,6 +1598,7 @@ static gchar *accel_remove_conflicts(const gchar *accelerators, GHashTable *conf
 
 static gchar *accel_action_window(const gchar *action)
 {
+	if (g_str_has_prefix(action, "bookmark.")) return g_strdup("bookmark.");
 	if (!g_str_has_prefix(action, "win.")) return nullptr;
 	const gchar *window_end = g_strstr_len(action, -1, "-win-");
 	return window_end ? g_strndup(action, window_end + strlen("-win-") - action) : nullptr;

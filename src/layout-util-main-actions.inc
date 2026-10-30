@@ -64,6 +64,19 @@ static const gchar *const histogram_mode_targets[] =
 const ActionDef main_actions[] =
 {
 		{
+		"win.main-win-hamburger-menu",
+		nullptr,
+		N_("Toggle hamburger menu"),
+		layout_hamburger_menu_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-pan-left",
 		nullptr,
 		N_("Pan left"),

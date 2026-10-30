@@ -330,6 +330,7 @@ void layout_status_update(LayoutWindow *lw, const gchar *text);
 void layout_style_set(LayoutWindow *lw, gint style, const gchar *order);
 
 void layout_menu_update_edit();
+bool layout_hamburger_menu_toggle(LayoutWindow *lw);
 void layout_styles_update();
 void layout_colors_update();
 

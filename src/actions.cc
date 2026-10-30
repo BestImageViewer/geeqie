@@ -31,7 +31,8 @@ const char *get_description_for_action_name(const char *action_name)
 		get_pan_view_actions(),
 		get_search_actions(),
 		get_view_file_actions(),
-		get_log_actions()
+		get_log_actions(),
+		get_bookmark_actions()
 		};
 
 	g_autofree gchar *base_name = nullptr;
@@ -166,18 +167,28 @@ void registered_accels_set(GtkApplication *app, const char *detailed_action, GSt
 	                                      registered_accels_suppressed ? empty_accels : const_cast<const char * const *>(accels));
 }
 
+const ActionDef *focused_context_actions(GtkWindow *window)
+{
+	auto *focus = window ? gtk_root_get_focus(GTK_ROOT(window)) : nullptr;
+	for (auto *widget = focus; widget; widget = gtk_widget_get_parent(widget))
+		{
+		const auto *defs = static_cast<const ActionDef *>(g_object_get_data(G_OBJECT(widget), CONTEXT_SHORTCUT_ACTIONS));
+		if (defs && (widget != GTK_WIDGET(window) || IS_PIXBUF_RENDERER(focus) ||
+		             (defs == get_log_actions() && GTK_IS_TEXT_VIEW(focus)))) return defs;
+		}
+	return nullptr;
+}
+
 void registered_accels_apply(GtkApplication *app, GtkWindow *window)
 {
 	if (!app || !registered_accels) return;
 	const bool suppress = focus_is_editable(window);
 	g_autoptr(GHashTable) reserved = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
 	g_autoptr(GString) context = g_string_new(suppress ? "editable" : "view");
-	auto *focus = window ? gtk_root_get_focus(GTK_ROOT(window)) : nullptr;
-	const auto *defs = window ? static_cast<const ActionDef *>(g_object_get_data(G_OBJECT(window), CONTEXT_SHORTCUT_ACTIONS)) : nullptr;
+	const auto *defs = focused_context_actions(window);
 	// GTK application shortcuts run before view key handlers. Reserve matching keys
 	// while the view has focus, and restore the original bindings when focus leaves.
-	if (!suppress && defs && focus &&
-	    (IS_PIXBUF_RENDERER(focus) || (defs == get_log_actions() && GTK_IS_TEXT_VIEW(focus))))
+	if (!suppress && defs)
 		{
 		for (const auto *def = defs; def->action_name; ++def)
 			{
@@ -419,34 +430,68 @@ void register_actions_from_table(GtkApplication *app, GtkWidget *window, const A
 
 bool action_uses_context_shortcut(const gchar *name)
 {
-	const ActionDef *tables[] = {get_main_actions(), get_image_actions(), get_pan_view_actions(), get_log_actions()};
+	const ActionDef *tables[] = {get_main_actions(), get_image_actions(), get_pan_view_actions(), get_log_actions(), get_bookmark_actions()};
 	for (const auto *table : tables)
 		for (const auto *def = table; def->action_name; ++def)
 			if (g_strcmp0(name, def->action_name) == 0) return def->context_shortcut;
 	return false;
 }
 
-bool activate_context_shortcut(GtkWidget *window, const ActionDef *defs, guint keyval, GdkModifierType state)
+bool action_matches_shortcut(const gchar *action, guint keyval, GdkModifierType state)
 {
-	GKeyFile *key_file = get_keyfile_merged();
-	if (!window || !key_file) return false;
+	auto *key_file = get_keyfile_merged();
+	if (!key_file) return false;
 	const auto modifiers = static_cast<GdkModifierType>(state & gtk_accelerator_get_default_mod_mask());
-	for (const ActionDef *def = defs; def->action_name; ++def)
+	g_auto(GStrv) accels = g_key_file_get_string_list(key_file, action, "accels", nullptr, nullptr);
+	for (gchar **accel = accels; accel && *accel; ++accel)
 		{
-		if (!def->context_shortcut) continue;
-		g_auto(GStrv) accels = g_key_file_get_string_list(key_file, def->action_name, "accels", nullptr, nullptr);
-		for (gchar **accel = accels; accel && *accel; ++accel)
-			{
-			guint key = 0;
-			GdkModifierType mods = GDK_NO_MODIFIER_MASK;
-			if (!gtk_accelerator_parse(*accel, &key, &mods) || !key ||
-			    gdk_keyval_to_lower(keyval) != key || modifiers != mods) continue;
-			const char *name = strchr(def->action_name, '.') + 1;
-			auto *action = g_action_map_lookup_action(G_ACTION_MAP(window), name);
-			if (!action || !g_action_get_enabled(action)) continue;
-			g_action_activate(action, nullptr);
-			return true;
-			}
+		guint key = 0;
+		GdkModifierType mods = GDK_NO_MODIFIER_MASK;
+		if (gtk_accelerator_parse(*accel, &key, &mods) && key &&
+		    gdk_keyval_to_lower(keyval) == key && modifiers == mods) return true;
+		}
+	return false;
+}
+
+bool focused_context_shortcut_matches(GtkWidget *window, guint keyval, GdkModifierType state)
+{
+	if (!GTK_IS_WINDOW(window) || focus_is_editable(GTK_WINDOW(window))) return false;
+	const auto *defs = focused_context_actions(GTK_WINDOW(window));
+	if (!defs) return false;
+	for (const auto *def = defs; def->action_name; ++def)
+		if (def->context_shortcut && action_matches_shortcut(def->action_name, keyval, state)) return true;
+	return false;
+}
+
+void register_widget_context_shortcuts(GtkWidget *widget, const char *prefix, const ActionDef *defs, gpointer data)
+{
+	g_autoptr(GSimpleActionGroup) group = g_simple_action_group_new();
+	for (const auto *def = defs; def->action_name; ++def)
+		{
+		const auto *name = strchr(def->action_name, '.') + 1;
+		g_autoptr(GSimpleAction) action = g_simple_action_new(name, nullptr);
+		g_signal_connect(action, "activate", G_CALLBACK(def->callback), data);
+		g_action_map_add_action(G_ACTION_MAP(group), G_ACTION(action));
+		}
+	gtk_widget_insert_action_group(widget, prefix, G_ACTION_GROUP(group));
+	g_object_set_data(G_OBJECT(widget), CONTEXT_SHORTCUT_ACTIONS, const_cast<ActionDef *>(defs));
+	g_signal_connect(widget, "map", G_CALLBACK(+[](GtkWidget *mapped, gpointer)
+		{
+		auto *root = gtk_widget_get_root(mapped);
+		auto *app = GTK_APPLICATION(g_application_get_default());
+		if (!GTK_IS_WINDOW(root) || !app) return;
+		attach_accel_focus_handler(app, GTK_WIDGET(root));
+		registered_accels_apply(app, gtk_application_get_active_window(app));
+		}), nullptr);
+}
+
+bool activate_context_shortcut(GtkWidget *widget, const ActionDef *defs, guint keyval, GdkModifierType state)
+{
+	if (!widget) return false;
+	for (const auto *def = defs; def->action_name; ++def)
+		{
+		if (def->context_shortcut && action_matches_shortcut(def->action_name, keyval, state) &&
+		    gtk_widget_activate_action(widget, def->action_name, nullptr)) return true;
 		}
 	return false;
 }
@@ -463,7 +508,8 @@ const char *get_icon_for_action_name(const char *action_name)
 		get_pan_view_actions(),
 		get_search_actions(),
 		get_view_file_actions(),
-		get_log_actions()
+		get_log_actions(),
+		get_bookmark_actions()
 		};
 
 	for (const ActionDef *action_table : action_sets)

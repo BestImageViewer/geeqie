@@ -111,7 +111,7 @@
             </shortcut>
             , select “Add bookmark” from the folder's context menu, or drag a folder onto the bookmark list.
             <para />
-            The bookmark has a context menu that can be displayed by clicking the right mouse button, or pressing the Menu key when a bookmark has the focus. From the context menu you can edit a bookmark, move it up or down in the list, or remove the bookmark from the list. A bookmark can also be moved by pressing Shift + Up or Shift + Down while it has the focus.
+            The bookmark has a context menu that can be displayed by clicking the right mouse button, or pressing the Menu key when a bookmark has the focus. From the context menu you can edit a bookmark, move it up or down in the list, or remove the bookmark from the list. A bookmark can also be moved by pressing Shift + Up or Shift + Down while it has the focus. These default bindings can be changed using the bookmark and destination commands in <link linkend="GuideOptionsKeyboard">Keyboard Options</link>.
           </para>
           <para>A bookmark with the name "." is treated as a special case. Each time this bookmark is displayed, its path is loaded with Geeqie's current working folder. This bookmark, like any other, can be deleted and re-created at any time.</para>
         </listitem>

@@ -51,8 +51,12 @@ const ActionDef *get_pan_view_actions();
 const ActionDef *get_search_actions();
 const ActionDef *get_view_file_actions();
 const ActionDef *get_log_actions();
+const ActionDef *get_bookmark_actions();
 
-bool activate_context_shortcut(GtkWidget *window, const ActionDef *defs, guint keyval, GdkModifierType state);
+bool action_matches_shortcut(const gchar *action, guint keyval, GdkModifierType state);
+bool focused_context_shortcut_matches(GtkWidget *window, guint keyval, GdkModifierType state);
+void register_widget_context_shortcuts(GtkWidget *widget, const char *prefix, const ActionDef *defs, gpointer data);
+bool activate_context_shortcut(GtkWidget *widget, const ActionDef *defs, guint keyval, GdkModifierType state);
 bool action_uses_context_shortcut(const gchar *name);
 void register_context_shortcuts(GtkApplication *app, GtkWidget *window, const ActionDef *defs);
 

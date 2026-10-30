@@ -211,6 +211,11 @@ void keyboard_scroll_calc(gint &x, gint &y, GdkModifierType state, guint keyval,
 	y *= delta * options->keyboard_scroll_step;
 }
 
+static void layout_hamburger_menu_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	layout_hamburger_menu_toggle(static_cast<LayoutWindow *>(data));
+}
+
 template<int x_step, int y_step, GdkModifierType modifiers>
 static void layout_pan_action_cb(GSimpleAction *action, GVariant *, gpointer data)
 {
@@ -2056,6 +2061,7 @@ static constexpr KeyboardMapScope keyboard_map_scopes[] =
 	{ N_("Advanced EXIF Window"), "win.advanced-exif-win-", "advanced_exif_window" },
 	{ N_("Files Pane"), "win.view-file-", "view_file_window" },
 	{ N_("Log Window"), "win.log-win-", "log_window" },
+	{ N_("Bookmarks and Destinations"), "bookmark.", "bookmarks" },
 	{ N_("All Windows"), nullptr, "all_windows" },
 };
 
@@ -3144,6 +3150,8 @@ void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window)
 	GApplication *app = g_application_get_default();
 
 	register_actions_from_table(GTK_APPLICATION(app), window, get_main_actions(), get_keyfile_merged(), lw);
+	auto *menu_action = g_action_map_lookup_action(G_ACTION_MAP(window), "main-win-hamburger-menu");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(menu_action), options->hamburger_menu);
 }
 
 static void layout_menu_bar_use_sliding_submenus(GtkWidget *widget)
