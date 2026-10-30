@@ -74,6 +74,12 @@
       </note>
       <para />
     </section>
+    <section id="ImageKeyboardPanning">
+      <title>Keyboard Panning</title>
+      <para>Click the image to give it keyboard focus, then use the arrow keys to pan an image that extends beyond the visible area. These controls work in the main window and fullscreen mode. When the files pane, folder pane, or a text field has focus, arrow keys retain their normal navigation or editing behavior.</para>
+      <para>Hold <keycap>Shift</keycap> while pressing an arrow key to pan three times faster and pan the other split image panes together. Hold <keycap>Ctrl</keycap> to pan to the corresponding edge; <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap></keycombo> also applies this to the other split panes. Numeric keypad arrow keys work in the same way when Num Lock is off.</para>
+      <para>The <guilabel>Progressive keyboard scrolling</guilabel> and <guilabel>Keyboard scrolling step multiplier</guilabel> settings in <link linkend="Navigation3">Behavior Options</link> control panning speed. These arrow-key controls are built in and do not appear as configurable actions in the keyboard shortcut preferences.</para>
+    </section>
     <section id="Mouse">
       <title>Mouse</title>
       <para>

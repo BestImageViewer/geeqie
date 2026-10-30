@@ -2339,6 +2339,11 @@ static gboolean pr_mouse_press_common(GtkWidget *widget,
 	PixbufRenderer *pr = PIXBUF_RENDERER(widget);
 
 	if (pr->scroller_id) return TRUE;
+	GtkWidget *focus = gtk_widget_get_focusable(widget) ? widget : gtk_widget_get_parent(widget);
+	if (focus && gtk_widget_get_can_focus(focus))
+		{
+		gtk_widget_grab_focus(focus);
+		}
 
 	switch (button)
 		{
@@ -2360,12 +2365,6 @@ static gboolean pr_mouse_press_common(GtkWidget *widget,
 
 		default:
 			break;
-		}
-
-	GtkWidget *parent = gtk_widget_get_parent(widget);
-	if (parent && gtk_widget_get_can_focus(parent))
-		{
-		gtk_widget_grab_focus(parent);
 		}
 
 	return FALSE;

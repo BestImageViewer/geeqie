@@ -2359,14 +2359,7 @@ void image_set_selectable(ImageWindow *imd, gboolean selectable)
 
 void image_grab_focus(ImageWindow *imd)
 {
-	if (imd->has_frame)
-		{
-		gtk_widget_grab_focus(imd->frame);
-		}
-	else
-		{
-		gtk_widget_grab_focus(imd->widget);
-		}
+	gtk_widget_grab_focus(imd->pr);
 }
 
 
@@ -2563,6 +2556,7 @@ ImageWindow *image_new(gboolean frame)
 	imd->orientation = 1;
 
 	imd->pr = GTK_WIDGET(pixbuf_renderer_new());
+	gtk_widget_set_focusable(imd->pr, TRUE);
 	DEBUG_NAME(imd->pr);
 
 	image_options_set(imd, options);

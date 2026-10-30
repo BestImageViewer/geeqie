@@ -239,16 +239,17 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 			}
 		}
 
-	GtkWidget *focused = nullptr;
+	const bool image_has_focus = lw->image && focus &&
+		(focus == lw->image->frame || focus == lw->image->pr || gtk_widget_is_ancestor(focus, lw->image->view));
 
 	gboolean stop_signal = FALSE;
 	gint x = 0;
 	gint y = 0;
 
 	if (lw->image &&
-	    ((focused && gtk_widget_has_focus(focused)) ||
+	    (image_has_focus ||
 	     (lw->tools && widget == lw->window) ||
-	     lw->full_screen))
+	     (lw->full_screen && widget == lw->full_screen->window)))
 		{
 		stop_signal = TRUE;
 

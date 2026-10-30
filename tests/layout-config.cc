@@ -20,6 +20,7 @@
 #include "dupe.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "fullscreen.h"
 #include "history-list.h"
 #include "image.h"
 #include "intl.h"
@@ -349,6 +350,132 @@ protected:
 	gboolean saved_expand = FALSE;
 	bool saved_menu_settings = false;
 };
+
+TEST_F(PartialLayoutConfig, ImageArrowKeysPanOnlyWithImageFocus)
+{
+	struct Restore
+	{
+		gboolean progressive = options->progressive_key_scrolling;
+		gint step = options->keyboard_scroll_step;
+		gboolean saver = options->fullscreen.disable_saver;
+		gboolean click_nav = options->image_lm_click_nav;
+		~Restore()
+			{
+			options->progressive_key_scrolling = progressive;
+			options->keyboard_scroll_step = step;
+			options->fullscreen.disable_saver = saver;
+			options->image_lm_click_nav = click_nav;
+			}
+	} restore;
+	options->progressive_key_scrolling = FALSE;
+	options->keyboard_scroll_step = 1;
+	options->fullscreen.disable_saver = FALSE;
+	options->image_lm_click_nav = FALSE;
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 2400, 1800);
+	gdk_pixbuf_fill(pixels, 0x4080c0ff);
+	image_change_pixbuf(layout->image, pixels, 1.0, FALSE);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([this]() { return gtk_widget_get_mapped(layout->image->pr); }));
+	const auto keys_for = [](GtkWidget *window) -> GtkEventControllerKey *
+		{
+		g_autoptr(GListModel) controllers = gtk_widget_observe_controllers(window);
+		for (guint i = 0; i < g_list_model_get_n_items(controllers); ++i)
+			{
+			g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
+			if (GTK_IS_EVENT_CONTROLLER_KEY(controller) &&
+			    gtk_event_controller_get_propagation_phase(GTK_EVENT_CONTROLLER(controller)) == GTK_PHASE_BUBBLE)
+				return GTK_EVENT_CONTROLLER_KEY(controller);
+			}
+		return nullptr;
+		};
+	auto *keys = keys_for(layout->window);
+	ASSERT_NE(keys, nullptr);
+	const auto key = [&](guint value, GdkModifierType modifiers = GDK_NO_MODIFIER_MASK)
+		{
+		gboolean handled = FALSE;
+		g_signal_emit_by_name(keys, "key-pressed", value, 0, modifiers, &handled);
+		return handled;
+		};
+	for (auto *widget : {layout->path_entry, layout->vf->listview})
+		{
+		ASSERT_TRUE(gtk_widget_grab_focus(widget));
+		auto *pr = PIXBUF_RENDERER(layout->image->pr);
+		const int x = pr->x_scroll;
+		const int y = pr->y_scroll;
+		EXPECT_FALSE(key(GDK_KEY_Down));
+		EXPECT_FALSE(key(GDK_KEY_Right, GDK_CONTROL_MASK));
+		EXPECT_EQ(pr->x_scroll, x);
+		EXPECT_EQ(pr->y_scroll, y);
+		}
+	// Exercise the renderer's click controller, including focus through GtkStack.
+	ASSERT_TRUE(gtk_widget_grab_focus(layout->path_entry));
+	guint skip = 0;
+	g_autoptr(GObject) click = find_controller(layout->image->pr, GTK_TYPE_GESTURE_CLICK, skip);
+	ASSERT_NE(click, nullptr);
+	g_signal_emit_by_name(click, "pressed", 1, 20.0, 20.0);
+	EXPECT_EQ(gtk_root_get_focus(GTK_ROOT(layout->window)), layout->image->pr);
+	ASSERT_TRUE(gtk_widget_grab_focus(layout->vf->listview));
+	image_grab_focus(layout->image);
+	EXPECT_EQ(gtk_root_get_focus(GTK_ROOT(layout->window)), layout->image->pr);
+	for (bool fullscreen : {false, true})
+		{
+		SCOPED_TRACE(fullscreen);
+		if (fullscreen)
+			{
+			layout_image_full_screen_start(layout);
+			ASSERT_NE(layout->full_screen, nullptr);
+			keys = keys_for(layout->full_screen->window);
+			ASSERT_NE(keys, nullptr);
+			}
+		auto *image = fullscreen ? layout->full_screen->imd : layout->image;
+		if (fullscreen) image_change_pixbuf(image, pixels, 1.0, FALSE);
+		auto *pr = PIXBUF_RENDERER(image->pr);
+		ASSERT_TRUE(wait_layout([&]() { return pr->vis_width > 0 && pr->width > pr->vis_width && pr->height > pr->vis_height; }));
+		image_grab_focus(image);
+		image_scroll(image, G_MININT / 2, G_MININT / 2);
+		ASSERT_TRUE(key(GDK_KEY_Right));
+		EXPECT_EQ(pr->x_scroll, 8);
+		ASSERT_TRUE(key(GDK_KEY_Right, GDK_SHIFT_MASK));
+		EXPECT_EQ(pr->x_scroll, 32);
+		ASSERT_TRUE(key(GDK_KEY_KP_Left));
+		EXPECT_EQ(pr->x_scroll, 24);
+		ASSERT_TRUE(key(GDK_KEY_Right, GDK_CONTROL_MASK));
+		EXPECT_EQ(pr->x_scroll, pr->width - pr->vis_width);
+		ASSERT_TRUE(key(GDK_KEY_Left, GDK_CONTROL_MASK));
+		EXPECT_EQ(pr->x_scroll, 0);
+		ASSERT_TRUE(key(GDK_KEY_Down));
+		EXPECT_EQ(pr->y_scroll, 8);
+		ASSERT_TRUE(key(GDK_KEY_Down, GDK_SHIFT_MASK));
+		EXPECT_EQ(pr->y_scroll, 32);
+		ASSERT_TRUE(key(GDK_KEY_KP_Up));
+		EXPECT_EQ(pr->y_scroll, 24);
+		ASSERT_TRUE(key(GDK_KEY_Down, GDK_CONTROL_MASK));
+		EXPECT_EQ(pr->y_scroll, pr->height - pr->vis_height);
+		ASSERT_TRUE(key(GDK_KEY_Up, GDK_CONTROL_MASK));
+		EXPECT_EQ(pr->y_scroll, 0);
+		g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+		if (!fullscreen && xdotool && g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY"))
+			{
+			image_scroll(image, G_MININT / 2, G_MININT / 2);
+			ASSERT_TRUE(gtk_widget_grab_focus(layout->path_entry));
+			gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie image panning test");
+			gdk_display_flush(gtk_widget_get_display(layout->window));
+			graphene_rect_t bounds;
+			ASSERT_TRUE(gtk_widget_compute_bounds(image->pr, layout->window, &bounds));
+			g_autofree gchar *x = g_strdup_printf("%d", static_cast<int>(bounds.origin.x + (bounds.size.width / 2)));
+			g_autofree gchar *y = g_strdup_printf("%d", static_cast<int>(bounds.origin.y + (bounds.size.height / 2)));
+			const gchar *args[] = {xdotool, "search", "--name", "^Geeqie image panning test$", "windowfocus", "--sync",
+			                       "mousemove", "--window", "%1", x, y, "click", "1", "key", "--clearmodifiers", "Right", nullptr};
+			gint status = 0;
+			ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+			                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+			ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+			ASSERT_TRUE(wait_layout([&]() { return pr->x_scroll == 8; }));
+			EXPECT_EQ(gtk_root_get_focus(GTK_ROOT(layout->window)), image->pr);
+			}
+		}
+	layout_image_full_screen_stop(layout);
+}
 
 class DuplicateAddCommands : public PartialLayoutConfig
 {
