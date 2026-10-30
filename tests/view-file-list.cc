@@ -1657,7 +1657,7 @@ TEST_P(RevealFile, ColorLabelsReadOnlyVisibleMetadataWithoutAFilter)
 	EXPECT_NE(unseen->color_label, nullptr);
 }
 
-TEST_P(RevealFile, ListColorLabelSwatchesShowMappedAndUnknownLabels)
+TEST_P(RevealFile, ListColorLabelExpanderBackgroundPreservesSelectionAndClearsReusedCells)
 {
 	if (vf->type != FILEVIEW_LIST) GTEST_SKIP() << "Requires list view";
 	auto *fd = vf_index_get_data(vf, 0);
@@ -1668,48 +1668,125 @@ TEST_P(RevealFile, ListColorLabelSwatchesShowMappedAndUnknownLabels)
 	} cleanup{FileDataRef(fd)};
 	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, color_label_name(1)));
 	settle();
-	auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+
+	auto *view = GTK_TREE_VIEW(vf->listview);
+	auto *model = gtk_tree_view_get_model(view);
+	auto *selection = gtk_tree_view_get_selection(view);
+	gtk_tree_selection_unselect_all(selection);
 	GtkTreeIter iter;
 	ASSERT_TRUE(gtk_tree_model_get_iter_first(model, &iter));
 	GtkTreeViewColumn *column = nullptr;
-	GtkCellRenderer *indicator = nullptr;
-	g_autoptr(GList) columns = gtk_tree_view_get_columns(GTK_TREE_VIEW(vf->listview));
+	GtkCellRenderer *text = nullptr;
+	g_autoptr(GList) columns = gtk_tree_view_get_columns(view);
 	for (GList *entry = columns; entry; entry = entry->next)
 		{
 		auto *candidate = GTK_TREE_VIEW_COLUMN(entry->data);
 		if (!gtk_tree_view_column_get_visible(candidate)) continue;
 		g_autoptr(GList) cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(candidate));
-		if (g_list_length(cells) < 2) continue;
 		for (GList *work = cells; work; work = work->next)
 			{
-			if (!GTK_IS_CELL_RENDERER_PIXBUF(work->data)) continue;
+			if (!GTK_IS_CELL_RENDERER_TEXT(work->data)) continue;
 			column = candidate;
-			indicator = GTK_CELL_RENDERER(work->data);
+			text = GTK_CELL_RENDERER(work->data);
+			}
+		if (text)
+			{
+			EXPECT_EQ(g_list_length(cells), 1U);
+			break;
 			}
 		}
-	ASSERT_NE(indicator, nullptr);
-	gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
-	g_autoptr(GdkTexture) texture = nullptr;
-	g_object_get(indicator, "texture", &texture, nullptr);
-	ASSERT_NE(texture, nullptr);
-	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_get_from_texture(texture);
-	EXPECT_GT(gdk_pixbuf_read_pixels(pixels)[0], gdk_pixbuf_read_pixels(pixels)[1]);
+	ASSERT_NE(text, nullptr);
+	EXPECT_EQ(column, gtk_tree_view_get_column(view, 0));
+	EXPECT_EQ(column, gtk_tree_view_get_expander_column(view));
+	for (GList *entry = columns; entry; entry = entry->next)
+		{
+		auto *other = GTK_TREE_VIEW_COLUMN(entry->data);
+		if (other == column) continue;
+		gtk_tree_view_column_cell_set_cell_data(other, model, &iter, FALSE, FALSE);
+		g_autoptr(GList) cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(other));
+		for (GList *work = cells; work; work = work->next)
+			{
+			gboolean background = FALSE;
+			g_object_get(work->data, "cell-background-set", &background, nullptr);
+			EXPECT_FALSE(background);
+			}
+		}
+	const auto tinted = [&]()
+		{
+		gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
+		gboolean enabled = FALSE;
+		gboolean visible = FALSE;
+		g_object_get(text, "cell-background-set", &enabled, "visible", &visible, nullptr);
+		EXPECT_TRUE(visible);
+		return enabled;
+		};
+	ASSERT_TRUE(tinted());
+	settle();
+	g_autoptr(GdkPaintable) paintable = gtk_widget_paintable_new(GTK_WIDGET(view));
+	auto *snapshot = gtk_snapshot_new();
+	const int width = gtk_widget_get_width(GTK_WIDGET(view));
+	const int height = gtk_widget_get_height(GTK_WIDGET(view));
+	gdk_paintable_snapshot(paintable, GDK_SNAPSHOT(snapshot), width, height);
+	g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
+	ASSERT_NE(node, nullptr);
+	const graphene_rect_t bounds{{0, 0}, {static_cast<float>(width), static_cast<float>(height)}};
+	g_autoptr(GdkTexture) rendered = gsk_renderer_render_texture(gtk_native_get_renderer(GTK_NATIVE(window)), node, &bounds);
+	ASSERT_NE(rendered, nullptr);
+	g_autoptr(GdkPixbuf) frame = gdk_pixbuf_get_from_texture(rendered);
+	g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(model, &iter);
+	GdkRectangle row;
+	gtk_tree_view_get_background_area(view, path, column, &row);
+	int x;
+	int y;
+	gtk_tree_view_convert_bin_window_to_widget_coords(view, row.x + (row.width / 2), row.y + (row.height / 2), &x, &y);
+	ASSERT_GE(x, 0);
+	ASSERT_LT(x, gdk_pixbuf_get_width(frame));
+	ASSERT_GE(y, 0);
+	ASSERT_LT(y, gdk_pixbuf_get_height(frame));
+	const auto *pixel = gdk_pixbuf_read_pixels(frame) + (y * gdk_pixbuf_get_rowstride(frame)) + (x * gdk_pixbuf_get_n_channels(frame));
+	EXPECT_GT(pixel[0], pixel[1]);
+	g_autoptr(GtkTooltip) tooltip = GTK_TOOLTIP(g_object_new(GTK_TYPE_TOOLTIP, nullptr));
+	const auto has_tooltip = [&]()
+		{
+		gboolean handled = FALSE;
+		g_signal_emit_by_name(view, "query-tooltip", x, y, FALSE, tooltip, &handled);
+		return handled;
+		};
+	EXPECT_TRUE(has_tooltip());
+	g_autoptr(GdkRGBA) color = nullptr;
+	g_object_get(text, "cell-background-rgba", &color, nullptr);
+	ASSERT_NE(color, nullptr);
+	EXPECT_GT(color->red, color->green);
+	EXPECT_NEAR(color->alpha, 0.18, 0.001);
+	gtk_tree_selection_select_iter(selection, &iter);
+	EXPECT_FALSE(tinted());
+	EXPECT_TRUE(has_tooltip());
+	gtk_tree_selection_unselect_all(selection);
+	EXPECT_TRUE(tinted());
+	options->color_labels.enabled = FALSE;
+	EXPECT_FALSE(tinted());
+	EXPECT_FALSE(has_tooltip());
+	options->color_labels.enabled = TRUE;
+	EXPECT_TRUE(tinted());
+	const auto version = fd->color_label_version;
+	fd->color_label_version = fd->version - 1;
+	EXPECT_FALSE(tinted());
+	EXPECT_FALSE(has_tooltip());
+	EXPECT_NE(fd->color_label_version, fd->version);
+	fd->color_label_version = version;
 	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, "Custom label"));
 	settle();
-	gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
-	g_clear_object(&texture);
-	g_object_get(indicator, "texture", &texture, nullptr);
-	ASSERT_NE(texture, nullptr);
-	g_clear_object(&pixels);
-	pixels = gdk_pixbuf_get_from_texture(texture);
-	EXPECT_EQ(gdk_pixbuf_read_pixels(pixels)[0], gdk_pixbuf_read_pixels(pixels)[1]);
-	EXPECT_EQ(gdk_pixbuf_read_pixels(pixels)[1], gdk_pixbuf_read_pixels(pixels)[2]);
+	ASSERT_TRUE(tinted());
+	EXPECT_TRUE(has_tooltip());
+	g_clear_pointer(&color, gdk_rgba_free);
+	g_object_get(text, "cell-background-rgba", &color, nullptr);
+	ASSERT_NE(color, nullptr);
+	EXPECT_EQ(color->red, color->green);
+	EXPECT_EQ(color->green, color->blue);
 	ASSERT_TRUE(metadata_write_string(fd, COLOR_LABEL_KEY, ""));
 	settle();
-	gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
-	g_clear_object(&texture);
-	g_object_get(indicator, "texture", &texture, nullptr);
-	EXPECT_EQ(texture, nullptr);
+	EXPECT_FALSE(tinted());
+	EXPECT_FALSE(has_tooltip());
 }
 
 TEST_P(RevealFile, IconColorLabelsDisplayUnknownTextWithoutInterpretingMarkup)

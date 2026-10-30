@@ -14,17 +14,9 @@
 
 namespace
 {
-struct LabelColor
+const gchar *label_color(int index)
 {
-	const gchar *css;
-	guint32 pixels;
-};
-
-const LabelColor &label_color(int index)
-{
-	static constexpr LabelColor colors[] = {{"#888888", 0x888888ff}, {"#d43c3c", 0xd43c3cff},
-	                                       {"#bd9700", 0xbd9700ff}, {"#328448", 0x328448ff},
-	                                       {"#3979c3", 0x3979c3ff}, {"#9956b8", 0x9956b8ff}, {"#888888", 0x888888ff}};
+	static constexpr const gchar *colors[] = {"#888888", "#d43c3c", "#bd9700", "#328448", "#3979c3", "#9956b8", "#888888"};
 	return colors[index >= 0 && index <= COLOR_LABEL_OTHER ? index : COLOR_LABEL_OTHER];
 }
 } // namespace
@@ -44,7 +36,7 @@ const gchar *color_label_title(int index)
 
 const gchar *color_label_color(int index)
 {
-	return label_color(index).css;
+	return label_color(index);
 }
 
 int color_label_index(const gchar *text)
@@ -116,23 +108,24 @@ void color_label_widget_update(GtkWidget *label, FileData *fd)
 	gtk_accessible_update_property(GTK_ACCESSIBLE(label), GTK_ACCESSIBLE_PROPERTY_LABEL, index ? text : _("Unlabeled"), -1);
 }
 
-void color_label_cell_data(GtkTreeViewColumn *, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer column)
+void color_label_cell_data(GtkTreeViewColumn *view_column, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer column)
 {
-	g_object_set(renderer, "visible", options->color_labels.enabled, nullptr);
+	g_object_set(renderer, "cell-background-set", FALSE, nullptr);
 	if (!options->color_labels.enabled) return;
+	auto *view = gtk_tree_view_column_get_tree_view(view_column);
+	if (view && gtk_tree_selection_iter_is_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)), iter)) return;
 	FileData *fd = nullptr;
 	gtk_tree_model_get(model, iter, GPOINTER_TO_INT(column), &fd, -1);
 	// GTK also invokes cell-data functions while measuring offscreen rows.
 	// Never read metadata here; the viewport idle loads visible labels instead.
 	const int index = color_label_index(fd && fd->color_label_version == fd->version ? fd->color_label : nullptr);
-	g_autoptr(GdkPixbuf) pixels = nullptr;
 	if (index)
 		{
-		pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 10, 10);
-		gdk_pixbuf_fill(pixels, label_color(index).pixels);
+		GdkRGBA color;
+		gdk_rgba_parse(&color, color_label_color(index));
+		color.alpha = 0.18;
+		g_object_set(renderer, "cell-background-rgba", &color, nullptr);
 		}
-	g_autoptr(GdkTexture) texture = pixels ? gdk_texture_new_for_pixbuf(pixels) : nullptr;
-	g_object_set(renderer, "texture", texture, nullptr);
 }
 
 void color_label_refresh_visible(ViewFile *vf)

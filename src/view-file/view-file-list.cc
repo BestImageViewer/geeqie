@@ -92,15 +92,16 @@ static GdkPixbuf *vflist_scale_thumb(GdkPixbuf *pixbuf)
 
 /* Index to tree view */
 enum {
-	FILE_VIEW_COLUMN_MARKS = 0,
+	FILE_VIEW_COLUMN_EXPANDER = 0,
+	FILE_VIEW_COLUMN_MARKS = 1,
 	FILE_VIEW_COLUMN_MARKS_LAST = FILE_VIEW_COLUMN_MARKS + FILEDATA_MARKS_SIZE - 1,
-	FILE_VIEW_COLUMN_THUMB = 10,
-	FILE_VIEW_COLUMN_FORMATTED = 11,
-	FILE_VIEW_COLUMN_FORMATTED_WITH_STARS = 12,
-	FILE_VIEW_COLUMN_STAR_RATING = 13,
-	FILE_VIEW_COLUMN_SIZE = 14,
-	FILE_VIEW_COLUMN_DATE = 15,
-	FILE_VIEW_COLUMN_COUNT = 16
+	FILE_VIEW_COLUMN_THUMB = 11,
+	FILE_VIEW_COLUMN_FORMATTED = 12,
+	FILE_VIEW_COLUMN_FORMATTED_WITH_STARS = 13,
+	FILE_VIEW_COLUMN_STAR_RATING = 14,
+	FILE_VIEW_COLUMN_SIZE = 15,
+	FILE_VIEW_COLUMN_DATE = 16,
+	FILE_VIEW_COLUMN_COUNT = 17
 };
 
 
@@ -201,10 +202,11 @@ static gboolean vflist_filename_tooltip_cb(GtkWidget *widget, gint x, gint y, gb
 		}
 	else if (!gtk_tree_view_get_path_at_pos(tree_view, tree_x, tree_y, &path, &column, nullptr, nullptr)) return FALSE;
 
+	const gint column_store_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
 	if (!vf->collection)
 		{
-		const gint column_store_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
-		if (column_store_idx != FILE_COLUMN_FORMATTED && column_store_idx != FILE_COLUMN_FORMATTED_WITH_STARS) return FALSE;
+		if (column_store_idx != FILE_COLUMN_EXPANDED &&
+		    column_store_idx != FILE_COLUMN_FORMATTED && column_store_idx != FILE_COLUMN_FORMATTED_WITH_STARS) return FALSE;
 		}
 
 	GtkTreeIter iter;
@@ -215,6 +217,14 @@ static gboolean vflist_filename_tooltip_cb(GtkWidget *widget, gint x, gint y, gb
 	g_autofree gchar *name = nullptr;
 	gtk_tree_model_get(model, &iter, FILE_COLUMN_POINTER, &fd, FILE_COLUMN_NAME, &name, -1);
 	if (!fd || !name) return FALSE;
+	if (column_store_idx == FILE_COLUMN_EXPANDED)
+		{
+		if (!options->color_labels.enabled || fd->color_label_version != fd->version ||
+		    !fd->color_label || !*fd->color_label) return FALSE;
+		gtk_tooltip_set_text(tooltip, fd->color_label);
+		gtk_tree_view_set_tooltip_cell(tree_view, tooltip, path, column, nullptr);
+		return TRUE;
+		}
 
 	const gchar *label_text = options->color_labels.enabled ? color_label_read(fd) : "";
 	if (*label_text)
@@ -1766,21 +1776,15 @@ static void vflist_listview_set_columns(ViewFile *vf)
 	             NULL);
 
 	gtk_tree_view_column_set_visible(column, VFLIST(vf)->thumbs_enabled);
+	gtk_tree_view_set_expander_column(GTK_TREE_VIEW(vf->listview),
+	                                 gtk_tree_view_get_column(GTK_TREE_VIEW(vf->listview), FILE_VIEW_COLUMN_EXPANDER));
 
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(vf->listview), FILE_VIEW_COLUMN_FORMATTED);
 	if (!column) return;
-	if (!options->show_star_rating)
-		{
-		gtk_tree_view_set_expander_column(GTK_TREE_VIEW(vf->listview), column);
-		}
 	gtk_tree_view_column_set_visible(column, !options->show_star_rating);
 
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(vf->listview), FILE_VIEW_COLUMN_FORMATTED_WITH_STARS);
 	if (!column) return;
-	if (options->show_star_rating)
-		{
-		gtk_tree_view_set_expander_column(GTK_TREE_VIEW(vf->listview), column);
-		}
 	gtk_tree_view_column_set_visible(column, options->show_star_rating);
 
 	const gboolean multiline = vflist_is_multiline(vf);
@@ -1917,20 +1921,23 @@ static void vflist_listview_add_column(GtkTreeView *listview, gint n, const gcha
 	if (!image)
 		{
 		gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
-		if (n == FILE_COLUMN_FORMATTED || n == FILE_COLUMN_FORMATTED_WITH_STARS)
-			{
-			GtkCellRenderer *indicator = gtk_cell_renderer_pixbuf_new();
-			gtk_cell_renderer_set_fixed_size(indicator, 18, -1);
-			gtk_tree_view_column_pack_start(column, indicator, FALSE);
-			gtk_tree_view_column_set_cell_data_func(column, indicator, color_label_cell_data, GINT_TO_POINTER(FILE_COLUMN_POINTER), nullptr);
-			}
 		renderer = gtk_cell_renderer_text_new();
 		if (right_justify)
 			{
 			g_object_set(renderer, "xalign", 1.0, NULL);
 			}
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
-		gtk_tree_view_column_add_attribute(column, renderer, "text", n);
+		if (n == FILE_COLUMN_EXPANDED)
+			{
+			gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
+			g_object_set(renderer, "text", "", "xpad", 0, nullptr);
+			gtk_cell_renderer_set_fixed_size(renderer, 1, -1);
+			gtk_tree_view_column_set_cell_data_func(column, renderer, color_label_cell_data, GINT_TO_POINTER(FILE_COLUMN_POINTER), nullptr);
+			}
+		else
+			{
+			gtk_tree_view_column_add_attribute(column, renderer, "text", n);
+			}
 		if (expand)
 			gtk_tree_view_column_set_expand(column, TRUE);
 		}
@@ -2146,6 +2153,9 @@ ViewFile *vflist_new(ViewFile *vf)
 	g_signal_connect(VFLIST(vf)->details_view, "query-tooltip", G_CALLBACK(vflist_filename_tooltip_cb), vf);
 
 	column = 0;
+	vflist_listview_add_column(GTK_TREE_VIEW(vf->listview), FILE_COLUMN_EXPANDED, "", FALSE, FALSE, FALSE);
+	g_assert(column == FILE_VIEW_COLUMN_EXPANDER);
+	column++;
 
 	for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
 		{
