@@ -418,6 +418,7 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_BOOL(*options, update_on_time_change);
 	WRITE_SEPARATOR();
 
+	WRITE_NL(); WRITE_CHAR(*options, date_time_format);
 	WRITE_NL(); WRITE_BOOL(*options, progressive_key_scrolling);
 	WRITE_NL(); WRITE_UINT(*options, keyboard_scroll_step);
 
@@ -909,6 +910,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, rot_invariant_sim)) continue;
 		if (READ_BOOL(*options, sort_totals)) continue;
 
+		if (READ_CHAR(*options, date_time_format)) continue;
 		if (READ_BOOL(*options, progressive_key_scrolling)) continue;
 		if (READ_UINT_CLAMP(*options, keyboard_scroll_step, 1, 32)) continue;
 

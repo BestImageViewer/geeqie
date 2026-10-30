@@ -19,6 +19,7 @@
 #include "color-label.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "date-time.h"
 #include "dupe.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -1820,6 +1821,56 @@ protected:
 	gchar *config_path = nullptr;
 	bool changed = false;
 };
+
+TEST_F(ColorSchemePreferences, DateFormatPreviewCancelAndSave)
+{
+	struct RestoreFormat
+	{
+		gchar *format = g_strdup(options->date_time_format);
+		~RestoreFormat() { g_free(options->date_time_format); options->date_time_format = format; }
+	} restore;
+	g_free(options->date_time_format);
+	options->date_time_format = g_strdup("");
+	const auto find_entry = [](GtkWidget *root)
+		{
+		std::function<GtkWidget *(GtkWidget *)> visit = [&](GtkWidget *widget) -> GtkWidget *
+			{
+			if (GTK_IS_ENTRY(widget) && g_strcmp0(gtk_entry_get_placeholder_text(GTK_ENTRY(widget)), _("Locale default")) == 0) return widget;
+			for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+				if (auto *found = visit(child)) return found;
+			return nullptr;
+			};
+		return visit(root);
+		};
+	show_config_window(layout);
+	auto *dialog = get_config_window();
+	auto *entry = find_entry(dialog);
+	ASSERT_NE(entry, nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "%Q");
+	EXPECT_TRUE(gtk_widget_has_css_class(entry, "error"));
+	EXPECT_NE(find_widget(dialog, GTK_TYPE_LABEL, _("Invalid date and time format")), nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "Preview ✓ %Y"); // NOTRANSLATE: Test format and preview prefix.
+	EXPECT_FALSE(gtk_widget_has_css_class(entry, "error"));
+	g_autofree gchar *preview = date_time_format(time(nullptr), "Preview ✓ %Y"); // NOTRANSLATE: Test format and preview prefix.
+	EXPECT_NE(find_widget(dialog, GTK_TYPE_LABEL, preview), nullptr);
+	auto *cancel = find_widget(dialog, GTK_TYPE_BUTTON, _("Cancel"));
+	ASSERT_NE(cancel, nullptr);
+	g_signal_emit_by_name(cancel, "clicked");
+	EXPECT_STREQ(options->date_time_format, "");
+	show_config_window(layout);
+	dialog = get_config_window();
+	entry = find_entry(dialog);
+	ASSERT_NE(entry, nullptr);
+	gtk_editable_set_text(GTK_EDITABLE(entry), "%Y-%m-%d %H:%M:%S");
+	auto *ok = find_widget(dialog, GTK_TYPE_BUTTON, "OK"); // NOTRANSLATE: Existing button label under the test locale.
+	ASSERT_NE(ok, nullptr);
+	g_signal_emit_by_name(ok, "clicked");
+	EXPECT_EQ(get_config_window(), nullptr);
+	EXPECT_STREQ(options->date_time_format, "%Y-%m-%d %H:%M:%S");
+	g_autofree gchar *contents = nullptr;
+	ASSERT_TRUE(g_file_get_contents(config_path, &contents, nullptr, nullptr));
+	EXPECT_NE(std::string(contents).find("date_time_format = \"%Y-%m-%d %H:%M:%S\""), std::string::npos);
+}
 
 TEST_F(ColorSchemePreferences, CancelDiscardsThePendingChoice)
 {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="GuideReferenceFileDates">
   <title>File date types</title>
+  <para>The presentation of dates can be changed with <link linkend="DateTimeFormat">Date and Time</link> in Behavior Options. This does not change the timestamps or their sort order.</para>
   <para>Geeqie understands 4 types of file dates:</para>
   <itemizedlist spacing="compact">
     <listitem>

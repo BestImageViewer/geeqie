@@ -39,6 +39,7 @@
 #include "cache.h"
 #include "color-man-heif.h"
 #include "color-man.h"
+#include "date-time.h"
 #include "filecache.h"
 #include "filedata.h"
 #if HAVE_JPEGXL
@@ -225,24 +226,12 @@ gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_key, cons
 		}
 
 	/* Convert the stuff into a tm struct */
-	std::tm tm{}; /* Uh, strptime could let garbage in tm! */
+	std::tm tm{};
+	tm.tm_isdst = -1; // Camera wall-clock fields do not specify a timezone.
 	if (strptime(text, "%Y:%m:%d %H:%M:%S", &tm))
 		{
-		gchar buf[128];
-		const gint buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
-		if (buflen > 0)
-			{
-			g_autoptr(GError) error = nullptr;
-			g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
-			if (error)
-				{
-				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
-				}
-			else
-				{
-				std::swap(text, tmp);
-				}
-			}
+		g_free(text);
+		return date_time_format(tm, nullptr, subsec);
 		}
 
 	if (subsec)
@@ -729,22 +718,8 @@ gchar *exif_build_formatted_localtime(ExifData *exif)
 
 			std::tm *tm_local = localtime(&stamp);
 
-			/* Convert to localtime using locale */
-			gchar buf[128];
-			const gint buflen = strftime(buf, sizeof(buf), "%x %X", tm_local);
-			if (buflen > 0)
-				{
-				g_autoptr(GError) error = nullptr;
-				g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
-				if (error)
-					{
-					log_printf("Error converting locale strftime to UTF-8: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
-					}
-				else
-					{
-					std::swap(exif_date_time, tmp);
-					}
-				}
+			g_free(exif_date_time);
+			exif_date_time = date_time_format(*tm_local);
 			}
 
 		if (time_zone_org)

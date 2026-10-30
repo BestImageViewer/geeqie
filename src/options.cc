@@ -174,6 +174,7 @@ ConfOptions *conf_options_new()
 	options->recent_folder_image_list_maxsize = 10;
 	options->place_dialogs_under_mouse = FALSE;
 
+	options->date_time_format = g_strdup("");
 	options->progressive_key_scrolling = TRUE;
 	options->keyboard_scroll_step = 1;
 

@@ -90,6 +90,7 @@ enum ZoomStyle {
 struct ConfOptions
 {
 	/* ui */
+	gchar *date_time_format;
 	gboolean progressive_key_scrolling;
 	guint keyboard_scroll_step;
 	gboolean place_dialogs_under_mouse;

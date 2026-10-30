@@ -40,6 +40,7 @@
 #include <config.h>
 
 #include "cache.h"
+#include "date-time.h"
 #include "exif.h"
 #include "filefilter.h"
 #include "histogram.h"
@@ -114,24 +115,8 @@ gchar *FileData::text_from_size_abrev(gint64 size)
 const gchar *FileData::text_from_time(time_t t)
 {
 	static gchar *ret = nullptr;
-	gchar buf[128];
-	gint buflen;
-	struct tm *btime;
-
-	btime = localtime(&t);
-
-	/* the %x warning about 2 digit years is not an error */
-	buflen = strftime(buf, sizeof(buf), "%x %X", btime);
-	if (buflen < 1) return "";
-
 	g_free(ret);
-	g_autoptr(GError) error = nullptr;
-	ret = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
-	if (error)
-		{
-		log_printf("Error converting locale strftime to UTF-8: %s\n", error->message); // NOTRANSLATE: Diagnostic message.
-		return "";
-		}
+	ret = date_time_format(t);
 
 	return ret;
 }

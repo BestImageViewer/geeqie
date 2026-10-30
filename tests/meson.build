@@ -8,6 +8,7 @@ unit_test_sources = files(
 'collection-file-source.cc',
 'color-scheme.cc',
 'color-label.cc',
+'date-time.cc',
 'dnd.cc',
 'display-profile.cc',
 'dupe-export.cc',

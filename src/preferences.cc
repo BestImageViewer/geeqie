@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <string>
 #include <vector>
 
@@ -47,6 +48,7 @@
 #include "cache.h"
 #include "color-label.h"
 #include "color-man.h"
+#include "date-time.h"
 #include "editors.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -325,6 +327,7 @@ GListStore *accel_store = nullptr;
 guint accel_reload_idle_id = 0;
 bool accel_reloading = false;
 
+GtkWidget *date_time_format_entry;
 GtkWidget *safe_delete_path_entry;
 GtkWidget *thumbnail_cache_path_entry;
 GtkWidget *thumbnail_cache_default_button;
@@ -440,6 +443,12 @@ static gchar *thumbnail_cache_parent_normalize(const gchar *text)
 static void config_window_apply(const ConfOptions *c_options)
 {
 	gboolean refresh = FALSE;
+	const bool date_format_changed = g_strcmp0(options->date_time_format, gtk_editable_get_text(GTK_EDITABLE(date_time_format_entry))) != 0;
+	if (date_format_changed)
+		{
+		config_entry_to_option(date_time_format_entry, &options->date_time_format, nullptr);
+		refresh = TRUE;
+		}
 
 	config_entry_to_option(safe_delete_path_entry, &options->file_ops.safe_delete_path, remove_trailing_slash);
 
@@ -669,7 +678,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	if (refresh)
 		{
 		filter_rebuild();
-		if (labels_changed) layout_window_foreach([](LayoutWindow *lw) { layout_refresh(lw); });
+		if (labels_changed || date_format_changed) layout_window_foreach([](LayoutWindow *lw) { layout_refresh(lw); });
 		else layout_refresh(nullptr);
 		}
 
@@ -742,6 +751,14 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 
 	lw->options.preferences_window.rect = widget_get_root_origin_geometry(widget);
 	lw->options.preferences_window.page_number = gtk_notebook_get_current_page(notebook);
+
+	if (!date_time_format_is_valid(gtk_editable_get_text(GTK_EDITABLE(date_time_format_entry))))
+		{
+		warning_dialog(_("Invalid date and time format"),
+		               _("Use supported strftime conversions, or leave the format empty to use the locale default."),
+		               GQ_ICON_DIALOG_WARNING, configwindow);
+		return;
+		}
 
 	const gchar *cache_parent = gtk_editable_get_text(GTK_EDITABLE(thumbnail_cache_path_entry));
 	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(thumbnail_cache_custom_button)) && !*cache_parent)
@@ -3456,6 +3473,21 @@ static void use_no_trash_cb(GtkWidget *widget, gpointer data)
 		}
 }
 
+static void date_time_format_preview_cb(GtkEditable *editable, gpointer data)
+{
+	auto *preview = GTK_LABEL(data);
+	const auto *format = gtk_editable_get_text(editable);
+	if (!date_time_format_is_valid(format))
+		{
+		gtk_widget_add_css_class(GTK_WIDGET(editable), "error");
+		gtk_label_set_text(preview, _("Invalid date and time format"));
+		return;
+		}
+	gtk_widget_remove_css_class(GTK_WIDGET(editable), "error");
+	g_autofree gchar *text = date_time_format(time(nullptr), format);
+	gtk_label_set_text(preview, text);
+}
+
 static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 {
 	GtkWidget *hbox;
@@ -3472,6 +3504,23 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *tmp;
 
 	vbox = scrolled_notebook_page(notebook, _("Behavior"));
+
+	group = pref_group_new(vbox, FALSE, _("Date and time"), GTK_ORIENTATION_VERTICAL);
+	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	pref_label_new(hbox, _("Date and time format:"));
+	date_time_format_entry = gtk_entry_new();
+	gtk_widget_set_hexpand(date_time_format_entry, TRUE);
+	gtk_entry_set_placeholder_text(GTK_ENTRY(date_time_format_entry), _("Locale default"));
+	gtk_widget_set_tooltip_text(date_time_format_entry, _("Use POSIX strftime conversions, for example %Y-%m-%d %H:%M:%S. Leave empty to use the locale default."));
+	entry_set_text(GTK_ENTRY(date_time_format_entry), options->date_time_format);
+	gtk_box_append(GTK_BOX(hbox), date_time_format_entry);
+	auto *preview = gtk_label_new(nullptr);
+	gtk_label_set_xalign(GTK_LABEL(preview), 0.0);
+	gtk_label_set_selectable(GTK_LABEL(preview), TRUE);
+	gtk_box_append(GTK_BOX(group), preview);
+	g_signal_connect(date_time_format_entry, "changed", G_CALLBACK(date_time_format_preview_cb), preview);
+	date_time_format_preview_cb(GTK_EDITABLE(date_time_format_entry), preview);
+
 
 	group = pref_group_new(vbox, FALSE, _("Delete"), GTK_ORIENTATION_VERTICAL);
 

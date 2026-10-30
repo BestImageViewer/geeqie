@@ -2,6 +2,12 @@
 <section id="GuideOptionsBehavior">
   <title>Behavior Options</title>
   <para>This section describes the options presented under the Behavior Tab of the preferences dialog.</para>
+  <section id="DateTimeFormat">
+    <title>Date and Time</title>
+    <para><guilabel>Date and time format</guilabel> controls displayed dates in file and folder lists, search and duplicate results, tooltips, OSD, and formatted metadata fields. Leave it empty to retain the locale's date and time format. The preview updates as you type. Existing search and duplicate results may need to be reopened to show a changed format.</para>
+    <para>Use POSIX <literal>strftime</literal> conversions, with optional literal text. For example, <literal>%Y-%m-%d %H:%M:%S</literal> displays <literal>2026-10-30 14:05:09</literal>, and <literal>%Y-%m-%d</literal> displays only the date. Common conversions include <literal>%Y</literal> (year), <literal>%m</literal> (month number), <literal>%d</literal> (day), <literal>%H</literal> (24-hour clock), <literal>%M</literal> (minutes), <literal>%S</literal> (seconds), <literal>%a</literal> (weekday), <literal>%b</literal> (month name), <literal>%x</literal> (locale date), <literal>%X</literal> (locale time), and <literal>%%</literal> (percent sign). Nonstandard padding flags such as <literal>%-d</literal> are not supported.</para>
+    <para>This changes presentation only. Raw EXIF/XMP values, saved metadata, timestamps, and sorting are unchanged. EXIF camera times retain their original wall-clock values, with fractional seconds attached to time conversions containing seconds; a date-only format omits the fraction. Pan View calendar headings keep their abbreviated formats. An invalid format read from the configuration file falls back to the locale default.</para>
+  </section>
   <section id="Delete">
     <title>Delete</title>
     <variablelist>
