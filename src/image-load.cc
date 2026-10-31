@@ -1381,7 +1381,7 @@ gboolean image_loader_get_shrunk(ImageLoader *il)
  */
 gboolean image_load_dimensions(FileData *fd, GqSize &dimensions)
 {
-	ImageLoader *il = image_loader_new(fd);
+	g_autoptr(ImageLoader) il = image_loader_new(fd);
 
 	gboolean success = image_loader_start_idle(il);
 
@@ -1394,8 +1394,6 @@ gboolean image_load_dimensions(FileData *fd, GqSize &dimensions)
 		{
 		dimensions = {-1, -1};
 		}
-
-	g_object_unref(il);
 
 	return success;
 }

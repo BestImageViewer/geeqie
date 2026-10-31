@@ -55,8 +55,8 @@ TEST_P(ImageLoaderSource, TruncationDoesNotInvalidatePreparedInput)
 	ASSERT_TRUE(gdk_pixbuf_save_to_buffer(source, &encoded, &length, GetParam(), nullptr, nullptr));
 	ASSERT_TRUE(g_file_set_contents(path, encoded, length, nullptr));
 	auto fd = FileData::new_simple(path);
-	std::unique_ptr<ImageLoader, decltype(&g_object_unref)> loader(image_loader_new(fd), g_object_unref);
-	ASSERT_TRUE(image_loader_start(loader.get()));
+	g_autoptr(ImageLoader) loader = image_loader_new(fd);
+	ASSERT_TRUE(image_loader_start(loader));
 	ASSERT_EQ(loader->bytes_total, length);
 
 	// Truncate the same inode, rather than atomically replacing the path.
@@ -68,15 +68,15 @@ TEST_P(ImageLoaderSource, TruncationDoesNotInvalidatePreparedInput)
 	}
 	EXPECT_EQ(std::memcmp(loader->input_buffer, encoded, length), 0);
 	const gint64 deadline = g_get_monotonic_time() + 5 * G_TIME_SPAN_SECOND;
-	while (!image_loader_get_is_done(loader.get()) && g_get_monotonic_time() < deadline)
+	while (!image_loader_get_is_done(loader) && g_get_monotonic_time() < deadline)
 		{
 		while (g_main_context_iteration(nullptr, FALSE)) {}
 		g_usleep(1000);
 		}
-	ASSERT_TRUE(image_loader_get_is_done(loader.get()));
-	g_autoptr(GError) error = image_loader_dup_error(loader.get());
+	ASSERT_TRUE(image_loader_get_is_done(loader));
+	g_autoptr(GError) error = image_loader_dup_error(loader);
 	EXPECT_EQ(error, nullptr);
-	GdkPixbuf *decoded = image_loader_get_pixbuf(loader.get());
+	GdkPixbuf *decoded = image_loader_get_pixbuf(loader);
 	ASSERT_NE(decoded, nullptr);
 	EXPECT_EQ(gdk_pixbuf_get_width(decoded), 256);
 	EXPECT_EQ(gdk_pixbuf_get_height(decoded), 128);
@@ -99,10 +99,10 @@ TEST(ImageLoader, EmptySourceReportsReadFailure)
 	g_autofree gchar *path = g_build_filename(directory, "empty.jpg", nullptr);
 	ASSERT_TRUE(g_file_set_contents(path, "", 0, nullptr));
 	auto fd = FileData::new_simple(path);
-	std::unique_ptr<ImageLoader, decltype(&g_object_unref)> loader(image_loader_new(fd), g_object_unref);
-	EXPECT_FALSE(image_loader_start(loader.get()));
+	g_autoptr(ImageLoader) loader = image_loader_new(fd);
+	EXPECT_FALSE(image_loader_start(loader));
 	EXPECT_EQ(loader->input_buffer, nullptr);
-	g_autoptr(GError) error = image_loader_dup_error(loader.get());
+	g_autoptr(GError) error = image_loader_dup_error(loader);
 	EXPECT_NE(error, nullptr);
 	g_remove(path);
 	g_rmdir(directory);
@@ -214,7 +214,7 @@ TEST(ImageLoader, CancelPendingStart)
 TEST(ImageLoader, DeferredStartReportsFailure)
 {
 	auto *fd = file_data_new_simple("/nonexistent/geeqie-pending-image.jpg");
-	auto *il = image_loader_new(fd);
+	g_autoptr(ImageLoader) il = image_loader_new(fd);
 	file_data_unref(fd);
 	gboolean failed = FALSE;
 	g_signal_connect(il, "error", G_CALLBACK(+[](ImageLoader *, gpointer data)
@@ -229,7 +229,6 @@ TEST(ImageLoader, DeferredStartReportsFailure)
 		}
 	EXPECT_TRUE(failed);
 	EXPECT_EQ(il->idle_id, 0U);
-	g_object_unref(il);
 }
 
 } // namespace
