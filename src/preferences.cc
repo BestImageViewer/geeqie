@@ -469,6 +469,8 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->file_ops.no_trash = c_options->file_ops.no_trash;
 	options->file_ops.safe_delete_folder_maxsize = c_options->file_ops.safe_delete_folder_maxsize;
 	options->tools_restore_state = c_options->tools_restore_state;
+	const bool sidebar_location_changed = options->sidebars_with_tools != c_options->sidebars_with_tools;
+	options->sidebars_with_tools = c_options->sidebars_with_tools;
 	options->save_window_positions = c_options->save_window_positions;
 	options->save_window_workspace = c_options->save_window_workspace;
 	options->save_dialog_window_positions = c_options->save_dialog_window_positions;
@@ -674,6 +676,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	config_tab_keywords_save();
 
 	image_options_sync();
+	if (sidebar_location_changed) layout_window_foreach([](LayoutWindow *lw) { layout_style_set(lw, -1, nullptr); });
 
 	if (refresh)
 		{
@@ -2501,6 +2504,8 @@ static void config_tab_windows(GtkWidget *notebook, ConfOptions *c_options)
 
 	pref_checkbox_new_int(group, _("Remember tool state (float/hidden)"),
 			      options->tools_restore_state, &c_options->tools_restore_state);
+	pref_checkbox_new_int(group, _("Keep sidebars with floating tools"),
+	                      options->sidebars_with_tools, &c_options->sidebars_with_tools);
 
 	pref_checkbox_new_int(group, _("Remember dialog window positions"),
 			      options->save_dialog_window_positions, &c_options->save_dialog_window_positions);

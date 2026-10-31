@@ -3164,6 +3164,8 @@ void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window)
 	register_actions_from_table(GTK_APPLICATION(app), window, get_main_actions(), get_keyfile_merged(), lw);
 	auto *menu_action = g_action_map_lookup_action(G_ACTION_MAP(window), "main-win-hamburger-menu");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(menu_action), options->hamburger_menu);
+	auto *float_action = g_action_map_lookup_action(G_ACTION_MAP(window), "main-win-float-tools");
+	g_simple_action_set_state(G_SIMPLE_ACTION(float_action), g_variant_new_boolean(lw->options.tools_float));
 }
 
 static void layout_menu_bar_use_sliding_submenus(GtkWidget *widget)
@@ -3674,15 +3676,12 @@ static void layout_util_sync_views(LayoutWindow *lw)
 			{
 			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("1"));
 			}
-	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-float-tools");
-		if (lw->options.tools_float)
-			{
-			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(TRUE));
-			}
-		else
-			{
-			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(FALSE));
-			}
+	for (auto *window : {lw->window, lw->tools})
+		{
+		if (!window) continue;
+		action = g_action_map_lookup_action(G_ACTION_MAP(window), "main-win-float-tools");
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.tools_float));
+		}
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-info-sidebar");
 		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_bar_enabled(lw)));
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-sort-manager");

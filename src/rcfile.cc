@@ -447,6 +447,7 @@ static void write_global_attributes(const ConfOptions *options, RcString &rc)
 	WRITE_NL(); WRITE_BOOL(*options, rectangle_draw_portrait);
 
 	WRITE_NL(); WRITE_BOOL(*options, save_window_positions);
+	WRITE_NL(); WRITE_BOOL(*options, sidebars_with_tools);
 	WRITE_NL(); WRITE_BOOL(*options, save_window_workspace);
 	WRITE_NL(); WRITE_BOOL(*options, tools_restore_state);
 	WRITE_NL(); WRITE_BOOL(*options, save_dialog_window_positions);
@@ -932,6 +933,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, rectangle_draw_portrait)) continue;
 
 		if (READ_BOOL(*options, save_window_positions)) continue;
+		if (READ_BOOL(*options, sidebars_with_tools)) continue;
 		if (g_ascii_strcasecmp(option, "use_saved_window_positions_for_new_windows") == 0) continue; // NOTRANSLATE: Ignore obsolete configuration key for compatibility.
 		if (READ_BOOL(*options, save_window_workspace)) continue;
 		if (READ_BOOL(*options, tools_restore_state)) continue;

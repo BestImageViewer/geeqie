@@ -149,6 +149,7 @@ struct ConfOptions
 	gboolean save_window_positions;
 	gboolean save_window_workspace;
 	gboolean tools_restore_state;
+	gboolean sidebars_with_tools;
 	gboolean save_dialog_window_positions;
 	gboolean hide_window_decorations;
 	gboolean show_window_ids;

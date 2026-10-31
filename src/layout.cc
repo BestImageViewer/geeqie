@@ -2041,7 +2041,7 @@ static gboolean layout_geometry_get_tools(LayoutWindow *lw, GdkRectangle &rect, 
 {
 	if (!layout_valid(&lw)) return FALSE;
 
-	if (!lw->tools || !gtk_widget_get_visible(lw->tools))
+	if (!lw->tools || !lw->tools_pane || !gtk_widget_get_visible(lw->tools))
 		{
 		/* use the stored values (sort of breaks success return value) */
 
@@ -2296,6 +2296,9 @@ if (!lw)
 	{
 		return;
 	}
+	// Floating sidebars contain the tools, while the split image stays in the
+	// main window. Keep its container alive until its image widgets are detached.
+	g_autoptr(GtkWidget) floating_image = lw->sidebars_in_tools ? GTK_WIDGET(g_object_ref(lw->split_image_widget)) : nullptr;
 	for (i = 0; i < MAX_SPLIT_IMAGES; i++)
 		{
 		if (lw->split_images[i])
@@ -2304,6 +2307,17 @@ if (!lw)
 			if (gtk_widget_get_parent(lw->split_images[i]->widget) != lw->utility_paned)
 				widget_remove_from_parent(lw->split_images[i]->widget);
 			}
+		}
+	if (lw->sidebars_in_tools)
+		{
+		widget_remove_from_parent(floating_image);
+		image = layout_image_setup_split(lw, mode);
+		gtk_box_append(GTK_BOX(lw->group_box), image);
+		gtk_widget_set_hexpand(image, TRUE);
+		gtk_widget_set_vexpand(image, TRUE);
+		gtk_widget_set_visible(image, TRUE);
+		layout_util_sync(lw);
+		return;
 		}
 	if (gtk_paned_get_start_child(GTK_PANED(lw->utility_paned)) == lw->split_image_widget)
 		{
@@ -2381,6 +2395,24 @@ static void layout_grid_setup(LayoutWindow *lw)
 		gtk_box_append(GTK_BOX(lw->group_box), image_sb);
 
 		layout_tools_setup(lw, tools, files);
+		if (lw->options.tools_float && options->sidebars_with_tools)
+			{
+			g_autoptr(GtkWidget) image = GTK_WIDGET(g_object_ref(lw->split_image_widget));
+			g_autoptr(GtkWidget) tools_content = GTK_WIDGET(g_object_ref(lw->tools_pane));
+			auto *tools_box = gtk_widget_get_parent(lw->tools_pane);
+			auto *previous = gtk_widget_get_prev_sibling(lw->tools_pane);
+			widget_remove_from_parent(image);
+			widget_remove_from_parent(tools_content);
+			widget_remove_from_parent(lw->utility_box);
+			gtk_paned_set_start_child(GTK_PANED(lw->utility_paned), tools_content);
+			gtk_box_insert_child_after(GTK_BOX(tools_box), lw->utility_box, previous);
+			gtk_widget_set_hexpand(lw->utility_box, TRUE);
+			gtk_widget_set_vexpand(lw->utility_box, TRUE);
+			gtk_box_append(GTK_BOX(lw->group_box), image);
+			gtk_widget_set_hexpand(image, TRUE);
+			gtk_widget_set_vexpand(image, TRUE);
+			lw->sidebars_in_tools = true;
+			}
 
 		if (lw->options.tools_hidden || !lw->vf)
 			{
@@ -2491,6 +2523,21 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 
 	/* layout_image_slideshow_stop(lw); slideshow should survive */
 	layout_image_full_screen_stop(lw);
+	g_autoptr(GtkWidget) old_tools_content = nullptr;
+	if (lw->sidebars_in_tools)
+		{
+		layout_tools_geometry_sync(lw);
+		// Image allocation callbacks still consult the old file view and status
+		// widgets while reparenting. Release them only after clearing those pointers.
+		old_tools_content = GTK_WIDGET(g_object_ref(lw->tools_pane));
+		g_autoptr(GtkWidget) image = GTK_WIDGET(g_object_ref(lw->split_image_widget));
+		widget_remove_from_parent(image);
+		widget_remove_from_parent(lw->utility_box);
+		gtk_paned_set_start_child(GTK_PANED(lw->utility_paned), image);
+		lw->tools_pane = nullptr;
+		gtk_box_append(GTK_BOX(lw->group_box), lw->utility_box);
+		lw->sidebars_in_tools = false;
+		}
 
 	dir_fd = lw->dir_fd;
 	if (dir_fd) file_data_unregister_real_time_monitor(dir_fd);
@@ -2539,6 +2586,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 
 	gtk_box_remove(GTK_BOX(lw->main_box), lw->group_box);
 	lw->group_box = nullptr;
+	g_clear_object(&old_tools_content);
 
 	/* re-fill */
 

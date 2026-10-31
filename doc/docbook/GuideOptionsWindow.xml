@@ -51,6 +51,14 @@
     <variablelist>
       <varlistentry>
         <term>
+          <guilabel>Keep sidebars with floating tools</guilabel>
+        </term>
+        <listitem>
+          <para>When enabled, the Info sidebar and Sort Manager stay with the folders and files in the floating tools window. The main window contains the image or split images. Docking the tools returns the sidebars beside the image. This option is disabled by default and applies to open windows when you apply Preferences. Hiding floating tools also hides their sidebars.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Remember dialog window positions</guilabel>
         </term>
         <listitem>

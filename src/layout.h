@@ -240,6 +240,7 @@ GtkBuilder *builder;
 	/* misc */
 
 	GtkWidget *utility_box; /**< referenced by lw, exist during whole lw lifetime */
+	bool sidebars_in_tools = false;
 	GtkWidget *utility_paned; /**< between image and bar */
 	GtkWidget *sort_manager_paned; /**< between image/info sidebar and Sort Manager */
 	guint sort_manager_restore_id;

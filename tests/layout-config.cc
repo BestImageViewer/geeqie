@@ -2166,6 +2166,98 @@ TEST_F(ColorSchemePreferences, AutomaticImageBackgroundUpdatesAndCustomColorIsPr
 	EXPECT_TRUE(gdk_rgba_equal(&PIXBUF_RENDERER(layout->image->pr)->color, &options->image.border_color));
 }
 
+TEST_F(PartialLayoutConfig, SidebarsCanFollowFloatingTools)
+{
+	struct Sample
+	{
+		gchar *path;
+		~Sample() { g_unlink(path); g_free(path); }
+	} sample{g_build_filename(directory, "sidebar-test.png", nullptr)};
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 32, 24);
+	gdk_pixbuf_fill(pixels, 0x204060ff);
+	ASSERT_TRUE(gdk_pixbuf_save(pixels, sample.path, "png", nullptr, nullptr));
+	layout_set_path(layout, directory);
+	layout_refresh(layout);
+	ASSERT_TRUE(wait_layout([&]() { return layout_list_count(layout) > 0; }));
+	layout_image_set_index(layout, 0);
+	struct Restore
+	{
+		gboolean previous = options->sidebars_with_tools;
+		~Restore() { options->sidebars_with_tools = previous; }
+	} restore;
+	layout->options.sort_manager_width = 360;
+	layout_bar_toggle(layout);
+	layout_bar_sort_toggle(layout);
+	auto *bar = layout->bar;
+	auto *sort = layout->bar_sort;
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+	for (int scenario = 0; scenario < 4; ++scenario)
+		{
+		const bool enabled = scenario & 1;
+		layout_views_set(layout, layout->options.dir_view_type, (scenario & 2) ? FILEVIEW_ICON : FILEVIEW_LIST);
+		SCOPED_TRACE(scenario);
+		SCOPED_TRACE(enabled);
+		options->sidebars_with_tools = enabled;
+		for (int repeat = 0; repeat < 2; ++repeat)
+			{
+			ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.main-win-float-tools", nullptr));
+			ASSERT_TRUE(layout->options.tools_float);
+			ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(layout->tools) && sort_width_settled(); }));
+			EXPECT_EQ(layout->options.sort_manager_width, 360);
+			EXPECT_EQ(layout->bar, bar);
+			EXPECT_EQ(layout->bar_sort, sort);
+			auto *sidebar_root = GTK_ROOT(enabled ? layout->tools : layout->window);
+			EXPECT_EQ(gtk_widget_get_root(bar), sidebar_root);
+			EXPECT_EQ(gtk_widget_get_root(sort), sidebar_root);
+			EXPECT_EQ(gtk_widget_get_root(layout->image->widget), GTK_ROOT(layout->window));
+			layout_split_change(layout, SPLIT_HOR);
+			EXPECT_EQ(gtk_widget_get_root(layout->split_images[1]->widget), GTK_ROOT(layout->window));
+			EXPECT_EQ(gtk_widget_get_root(bar), sidebar_root);
+			layout_image_full_screen_start(layout);
+			EXPECT_EQ(gtk_widget_get_root(bar), sidebar_root);
+			layout_image_full_screen_stop(layout);
+			layout_tools_float_set(layout, TRUE, TRUE);
+			EXPECT_FALSE(gtk_widget_get_visible(layout->tools));
+			EXPECT_EQ(gtk_widget_get_root(sort), sidebar_root);
+			layout_tools_float_set(layout, TRUE, FALSE);
+			// Rebuilding a floating layout must preserve both sidebar instances.
+			layout_style_set(layout, -1, nullptr);
+			EXPECT_EQ(layout->bar, bar);
+			EXPECT_EQ(layout->bar_sort, sort);
+			EXPECT_EQ(gtk_widget_get_root(bar), GTK_ROOT(enabled ? layout->tools : layout->window));
+			ASSERT_TRUE(gtk_widget_activate_action(layout->tools, "win.main-win-float-tools", nullptr));
+			ASSERT_FALSE(layout->options.tools_float);
+			ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
+			EXPECT_EQ(layout->options.sort_manager_width, 360);
+			EXPECT_EQ(gtk_widget_get_root(bar), GTK_ROOT(layout->window));
+			EXPECT_EQ(gtk_widget_get_root(sort), GTK_ROOT(layout->window));
+			layout_split_change(layout, SPLIT_NONE);
+			}
+		}
+	// Applying the preference to an already floating window needs no restart.
+	layout_tools_float_set(layout, TRUE, FALSE);
+	options->sidebars_with_tools = FALSE;
+	layout_style_set(layout, -1, nullptr);
+	EXPECT_EQ(gtk_widget_get_root(bar), GTK_ROOT(layout->window));
+	options->sidebars_with_tools = TRUE;
+	layout_style_set(layout, -1, nullptr);
+	EXPECT_EQ(gtk_widget_get_root(bar), GTK_ROOT(layout->tools));
+	g_autofree gchar *config_path = g_build_filename(directory, "sidebars.xml", nullptr);
+	ASSERT_TRUE(save_config_to_file(config_path, options, nullptr));
+	g_autofree gchar *config = nullptr;
+	ASSERT_TRUE(g_file_get_contents(config_path, &config, nullptr, nullptr));
+	g_unlink(config_path);
+	EXPECT_NE(strstr(config, "sidebars_with_tools = \"true\""), nullptr);
+	const gchar disabled[] = "<gq><global sidebars_with_tools='false'/></gq>";
+	ASSERT_TRUE(load_config_from_buf(disabled, sizeof(disabled) - 1, FALSE));
+	EXPECT_FALSE(options->sidebars_with_tools);
+	const gchar enabled[] = "<gq><global sidebars_with_tools='true'/></gq>";
+	ASSERT_TRUE(load_config_from_buf(enabled, sizeof(enabled) - 1, FALSE));
+	EXPECT_TRUE(options->sidebars_with_tools);
+	layout_tools_float_set(layout, FALSE, FALSE);
+}
+
 TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)
 {
 	ASSERT_EQ(layout->bar, nullptr);
