@@ -69,8 +69,8 @@ TEST(RendererTilesTexture, PostProcessingRebuildsQueuedSourceTexture)
 		const int height = gdk_texture_get_height(rendered);
 		std::vector<guint32> output(width * height);
 		gdk_texture_download(rendered, reinterpret_cast<guchar *>(output.data()), width * 4);
-		for (const int y : {height / 4, height / 2, height * 3 / 4})
-			for (const int x : {width / 4, width / 2, width * 3 / 4})
+		for (const int y : {pr->y_offset + (pr->vis_height / 4), pr->y_offset + (pr->vis_height / 2), pr->y_offset + (pr->vis_height * 3 / 4)})
+			for (const int x : {pr->x_offset + (pr->vis_width / 4), pr->x_offset + (pr->vis_width / 2), pr->x_offset + (pr->vis_width * 3 / 4)})
 				EXPECT_EQ(output[(y * width) + x] & 0xffffffU, expected);
 		};
 	ASSERT_NO_FATAL_FAILURE(check_frame(0x2040ffU));
@@ -92,6 +92,41 @@ TEST(RendererTilesTexture, PostProcessingRebuildsQueuedSourceTexture)
 		ASSERT_NO_FATAL_FAILURE(check_frame(processed ? 0x20ff40U : 0x2040ffU));
 		}
 	EXPECT_GT(corrected_tiles, 1U);
+
+	// A cached next image can have a different aspect ratio. Its queued color
+	// pass must not resize and display the previous image's retained frame.
+	g_autoptr(GdkPixbuf) next = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 128, 48);
+	gdk_pixbuf_fill(next, 0xff4020ff);
+	pr->zoom_expand = TRUE;
+	pr->enlargement_limit_size = 1000;
+	for (bool two_pass : {false, true})
+		{
+		SCOPED_TRACE(two_pass);
+		pr->zoom_2pass = two_pass;
+		pixbuf_renderer_set_post_process_func(pr, nullptr, FALSE);
+		pixbuf_renderer_set_pixbuf(pr, pixels, 0.0);
+		ASSERT_TRUE(finish());
+		ASSERT_NO_FATAL_FAILURE(check_frame(0x2040ffU));
+		pixbuf_renderer_set_post_process_func(pr,
+			[](PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint) {}, TRUE);
+		pixbuf_renderer_set_pixbuf(pr, next, 0.0);
+		// Snapshot before servicing the queued tiles: no previous blue pixels
+		// may appear inside the new image, even while its first frame is pending.
+		auto *snapshot = gtk_snapshot_new();
+		renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
+		g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
+		ASSERT_NE(node, nullptr);
+		const graphene_rect_t bounds{{0, 0}, {static_cast<float>(pr->viewport_width), static_cast<float>(pr->viewport_height)}};
+		g_autoptr(GdkTexture) frame = gsk_renderer_render_texture(renderer, node, &bounds);
+		ASSERT_NE(frame, nullptr);
+		const int width = gdk_texture_get_width(frame);
+		const int height = gdk_texture_get_height(frame);
+		std::vector<guint32> output(width * height);
+		gdk_texture_download(frame, reinterpret_cast<guchar *>(output.data()), width * 4);
+		EXPECT_EQ(std::count_if(output.begin(), output.end(), [](guint32 pixel) { return (pixel & 0xffffffU) == 0x2040ffU; }), 0);
+		ASSERT_TRUE(finish());
+		ASSERT_NO_FATAL_FAILURE(check_frame(0xff4020U));
+		}
 }
 
 TEST(RendererTiles, FirstZoomStepFromFitUsesPhysicalScale)

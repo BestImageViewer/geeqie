@@ -155,6 +155,7 @@ struct RendererTiles
 	GQueue draw_queue_2pass;/* queue when 2 pass is enabled */
 
 	GskRenderNode *image_node; /* Last complete image, retained during a zoom first pass. */
+	GdkPixbuf *image_pixbuf; /* Owned reference identifying the retained image's source. */
 	GdkTexture *composite_texture; /* Visible tiles joined before fractional display scaling. */
 	GdkTexture *source_texture; /* Immutable source pixels reused across magnification changes. */
 	gboolean preserve_image;
@@ -1837,12 +1838,13 @@ void renderer_update_pixbuf(void *renderer, gboolean)
 	auto *rt = static_cast<RendererTiles *>(renderer);
 	g_clear_object(&rt->source_texture);
 	g_clear_object(&rt->composite_texture);
-	// Keep the previous complete frame while a cached image is rebuilt in tiles.
-	// Progressive loading still replaces the preview as new image data arrives.
-	if (!rt->pr->pixbuf || rt->pr->loading)
+	// Retain complete frames only while rebuilding the same source image.
+	// A different cached image must not inherit the previous image's preview.
+	if (!rt->pr->pixbuf || rt->pr->loading || rt->image_pixbuf != rt->pr->pixbuf)
 		{
 		g_clear_pointer(&rt->image_node, gsk_render_node_unref);
 		}
+	g_set_object(&rt->image_pixbuf, rt->pr->pixbuf);
 	rt->preserve_image = rt->image_node != nullptr;
 	rt_queue_clear(rt);
 }
@@ -1937,6 +1939,7 @@ void renderer_stereo_set(void *renderer, gint stereo_mode)
 void renderer_free(void *renderer)
 {
 	auto rt = static_cast<RendererTiles *>(renderer);
+	g_clear_object(&rt->image_pixbuf);
 	g_clear_object(&rt->source_texture);
 	rt_queue_clear(rt);
 	rt_tile_free_all(rt);
