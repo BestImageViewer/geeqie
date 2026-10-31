@@ -146,6 +146,8 @@ FileData *image_loader_get_fd(ImageLoader *il);
 gboolean image_loader_get_shrunk(ImageLoader *il);
 GError *image_loader_dup_error(ImageLoader *il);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(ImageLoader, g_object_unref)
+
 gboolean image_load_dimensions(FileData *fd, GqSize &dimensions);
 
 void free_pixels(guchar *pixels, gpointer data);
