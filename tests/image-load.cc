@@ -55,7 +55,7 @@ TEST_P(ImageLoaderSource, TruncationDoesNotInvalidatePreparedInput)
 	ASSERT_TRUE(gdk_pixbuf_save_to_buffer(source, &encoded, &length, GetParam(), nullptr, nullptr));
 	ASSERT_TRUE(g_file_set_contents(path, encoded, length, nullptr));
 	auto fd = FileData::new_simple(path);
-	std::unique_ptr<ImageLoader, decltype(&image_loader_free)> loader(image_loader_new(fd), image_loader_free);
+	std::unique_ptr<ImageLoader, decltype(&g_object_unref)> loader(image_loader_new(fd), g_object_unref);
 	ASSERT_TRUE(image_loader_start(loader.get()));
 	ASSERT_EQ(loader->bytes_total, length);
 
@@ -99,7 +99,7 @@ TEST(ImageLoader, EmptySourceReportsReadFailure)
 	g_autofree gchar *path = g_build_filename(directory, "empty.jpg", nullptr);
 	ASSERT_TRUE(g_file_set_contents(path, "", 0, nullptr));
 	auto fd = FileData::new_simple(path);
-	std::unique_ptr<ImageLoader, decltype(&image_loader_free)> loader(image_loader_new(fd), image_loader_free);
+	std::unique_ptr<ImageLoader, decltype(&g_object_unref)> loader(image_loader_new(fd), g_object_unref);
 	EXPECT_FALSE(image_loader_start(loader.get()));
 	EXPECT_EQ(loader->input_buffer, nullptr);
 	g_autoptr(GError) error = image_loader_dup_error(loader.get());
@@ -207,7 +207,7 @@ TEST(ImageLoader, CancelPendingStart)
 	const guint source_id = il->idle_id;
 	EXPECT_NE(g_main_context_find_source_by_id(nullptr, source_id), nullptr);
 	EXPECT_FALSE(image_loader_start_deferred(il));
-	image_loader_free(il);
+	g_object_unref(il);
 	EXPECT_EQ(g_main_context_find_source_by_id(nullptr, source_id), nullptr);
 }
 
@@ -229,7 +229,7 @@ TEST(ImageLoader, DeferredStartReportsFailure)
 		}
 	EXPECT_TRUE(failed);
 	EXPECT_EQ(il->idle_id, 0U);
-	image_loader_free(il);
+	g_object_unref(il);
 }
 
 } // namespace

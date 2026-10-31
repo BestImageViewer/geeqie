@@ -117,8 +117,7 @@ void thumb_loader_std_set_callbacks(ThumbLoaderStd *tl,
 
 static void thumb_loader_std_reset(ThumbLoaderStd *tl)
 {
-	image_loader_free(tl->il);
-	tl->il = nullptr;
+	g_clear_object(&tl->il);
 
 	file_data_unref(tl->fd);
 	tl->fd = nullptr;
@@ -534,8 +533,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 
 static gboolean thumb_loader_std_next_source(ThumbLoaderStd *tl, gboolean remove_broken)
 {
-	image_loader_free(tl->il);
-	tl->il = nullptr;
+	g_clear_object(&tl->il);
 
 	if (tl->thumb_path)
 		{
@@ -667,8 +665,7 @@ static gboolean thumb_loader_std_setup(ThumbLoaderStd *tl, FileData *fd)
 		return TRUE;
 		}
 
-	image_loader_free(tl->il);
-	tl->il = nullptr;
+	g_clear_object(&tl->il);
 	return FALSE;
 }
 

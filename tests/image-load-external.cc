@@ -18,7 +18,7 @@
 namespace
 {
 
-using Loader = std::unique_ptr<ImageLoader, decltype(&image_loader_free)>;
+using Loader = std::unique_ptr<ImageLoader, decltype(&g_object_unref)>;
 
 class ExternalPreview : public testing::Test
 {
@@ -105,7 +105,7 @@ protected:
 	Loader loader(int index)
 	{
 		auto *fd = file_data_new_simple(paths[index].c_str());
-		Loader result(image_loader_new(fd), image_loader_free);
+		Loader result(image_loader_new(fd), g_object_unref);
 		file_data_unref(fd);
 		return result;
 	}

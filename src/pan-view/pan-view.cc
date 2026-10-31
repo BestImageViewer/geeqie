@@ -213,7 +213,7 @@ static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 	};
 	pan_queue_pi_done(pw, get_pixbuf);
 
-	g_clear_pointer(&pw->il, image_loader_free);
+	g_clear_object(&pw->il);
 
 	while (pan_queue_step(pw))
 		;
@@ -234,8 +234,7 @@ static gboolean pan_queue_step(PanWindow *pw)
 		return TRUE;
 		}
 
-	image_loader_free(pw->il);
-	pw->il = nullptr;
+	g_clear_object(&pw->il);
 	thumb_loader_free(pw->tl);
 	pw->tl = nullptr;
 
@@ -253,8 +252,7 @@ static gboolean pan_queue_step(PanWindow *pw)
 
 		if (image_loader_start(pw->il)) return FALSE;
 
-		image_loader_free(pw->il);
-		pw->il = nullptr;
+		g_clear_object(&pw->il);
 		}
 	else if (pi->is_type(PAN_ITEM_THUMB))
 		{
@@ -690,8 +688,7 @@ static void pan_window_items_free(PanWindow *pw)
 	pw->queue.clear();
 	pw->queue_pi = nullptr;
 
-	image_loader_free(pw->il);
-	pw->il = nullptr;
+	g_clear_object(&pw->il);
 
 	thumb_loader_free(pw->tl);
 	pw->tl = nullptr;

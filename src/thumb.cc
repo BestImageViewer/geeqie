@@ -195,8 +195,7 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 
 		if (!image_loader_start(tl->il))
 			{
-			image_loader_free(tl->il);
-			tl->il = nullptr;
+			g_clear_object(&tl->il);
 
 			DEBUG_1("regeneration failure: %s", tl->fd->path);
 			thumb_loader_error_cb(tl->il, tl);
@@ -253,8 +252,7 @@ static void thumb_loader_error_cb(ImageLoader *il, gpointer data)
 
 	DEBUG_1("thumb error: %s", tl->fd->path);
 
-	image_loader_free(tl->il);
-	tl->il = nullptr;
+	g_clear_object(&tl->il);
 
 	thumb_loader_set_fallback(tl);
 
@@ -263,7 +261,7 @@ static void thumb_loader_error_cb(ImageLoader *il, gpointer data)
 
 static void thumb_loader_setup(ThumbLoader *tl, FileData *fd)
 {
-	image_loader_free(tl->il);
+	g_clear_object(&tl->il);
 	tl->il = image_loader_new(fd);
 	image_loader_set_priority(tl->il, G_PRIORITY_LOW);
 
@@ -390,8 +388,7 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 			thumb_loader_save_thumbnail(tl, TRUE);
 			}
 
-		image_loader_free(tl->il);
-		tl->il = nullptr;
+		g_clear_object(&tl->il);
 		thumb_loader_set_fallback(tl);
 		return FALSE;
 		}
@@ -453,7 +450,7 @@ void thumb_loader_free(ThumbLoader *tl)
 		return;
 		}
 
-	image_loader_free(tl->il);
+	g_clear_object(&tl->il);
 	file_data_unref(tl->fd);
 
 	if (tl->idle_done_id) g_source_remove(tl->idle_done_id);
