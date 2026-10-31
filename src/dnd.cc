@@ -32,6 +32,26 @@
 #include "ui-fileops.h"
 #include "uri-utils.h"
 
+GdkDragAction dnd_action_from_modifiers(GdkModifierType state)
+{
+	if (state & GDK_CONTROL_MASK) return GDK_ACTION_COPY;
+	if (state & GDK_SHIFT_MASK) return GDK_ACTION_MOVE;
+	if (options->dnd_default_action == DND_ACTION_COPY) return GDK_ACTION_COPY;
+	if (options->dnd_default_action == DND_ACTION_MOVE) return GDK_ACTION_MOVE;
+	return GDK_ACTION_NONE;
+}
+
+GdkDragAction dnd_requested_action(GtkDropTargetAsync *target, GdkDrop *drop)
+{
+	auto state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(target));
+	auto *device = gdk_drop_get_device(drop);
+	auto *seat = device ? gdk_device_get_seat(device) : nullptr;
+	auto *keyboard = seat ? gdk_seat_get_keyboard(seat) : nullptr;
+	// Capture modifiers before the asynchronous transfer; DND events may omit them.
+	if (keyboard) state = gdk_device_get_modifier_state(keyboard);
+	return dnd_action_from_modifiers(state);
+}
+
 namespace
 {
 

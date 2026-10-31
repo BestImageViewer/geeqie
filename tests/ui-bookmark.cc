@@ -10,6 +10,43 @@
 namespace
 {
 
+TEST(BookmarkDestination, DropDeliveryPreservesContextAndRejectsClosedWindows)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	constexpr const gchar *key = "test_bookmark_drop";
+	history_list_free_key(key);
+	g_autoptr(GtkWidget) bookmarks = bookmark_list_new(key, nullptr);
+	g_object_ref_sink(bookmarks);
+	auto *window = gtk_window_new();
+	gtk_window_set_child(GTK_WINDOW(window), bookmarks);
+	guint deliveries = 0;
+	bookmark_list_set_drop_func(bookmarks, [&](const gchar *path, GList *, const BookmarkDropInfo &info)
+		{
+		++deliveries;
+		EXPECT_STREQ(path, "/tmp/bookmark-target");
+		EXPECT_EQ(info.action, GDK_ACTION_MOVE);
+		EXPECT_EQ(info.allowed_actions, GDK_ACTION_MOVE);
+		EXPECT_EQ(info.position.x, 17);
+		EXPECT_EQ(info.position.y, 23);
+		return GDK_ACTION_MOVE;
+		});
+	gtk_window_present(GTK_WINDOW(window));
+	for (int i = 0; i < 1000 && !gtk_widget_get_mapped(bookmarks); ++i)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		g_usleep(1000);
+		}
+	GList files{nullptr, nullptr, nullptr};
+	BookmarkDropInfo info{bookmarks, GDK_ACTION_MOVE, GDK_ACTION_MOVE, {17, 23}};
+	EXPECT_EQ(bookmark_list_receive_drop("/tmp/bookmark-target", &files, info), GDK_ACTION_MOVE);
+	EXPECT_EQ(deliveries, 1U);
+	gtk_window_destroy(GTK_WINDOW(window));
+	// Match asynchronous delivery after the owning window has been destroyed.
+	EXPECT_EQ(bookmark_list_receive_drop("/tmp/bookmark-target", &files, info), GDK_ACTION_NONE);
+	EXPECT_EQ(deliveries, 1U);
+	history_list_free_key(key);
+}
+
 TEST(BookmarkDestination, HighlightSurvivesRefreshAndModeChanges)
 {
 	if (!gtk_init_check() || !gdk_display_get_default())

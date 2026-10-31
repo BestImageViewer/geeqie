@@ -202,6 +202,7 @@
       <title>Shortcuts</title>
       <para>This is a list of shortcuts (bookmarks) to commonly used folders, images and collections. A context menu will appear by right clicking on an item, or pressing the menu key when the item has the focus.</para>
       <para>Folders or images can be added to the list by activating the Add button at the bottom of the pane, or dragging a folder or image onto the list.</para>
+      <para>Drop files onto a folder shortcut to copy or move them to that folder. Ctrl requests Copy and Shift requests Move; without either modifier, the drag-and-drop preference determines whether to ask or perform an action. Dropping files onto a collection shortcut appends them to the collection without moving the source files. Image shortcuts and missing destinations do not accept files. Drop onto an empty area of the list to add a new shortcut.</para>
       <para>
         Collections may be added by opening the
         <menuchoice>

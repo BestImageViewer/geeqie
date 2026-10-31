@@ -32,7 +32,16 @@
 
 using BookmarkSelectFunc = std::function<void(const gchar *path)>;
 using BookmarkTooltipFunc = std::function<std::string(const gchar *path)>;
-using BookmarkDropFunc = std::function<void(const gchar *path, GList *list)>;
+struct BookmarkDropInfo
+{
+	GtkWidget *widget; /**< Borrowed bookmark list, valid during the callback. */
+	GdkDragAction action; /**< Requested Copy/Move, or NONE to ask. */
+	GdkDragAction allowed_actions;
+	graphene_point_t position;
+};
+using BookmarkDropFunc = std::function<GdkDragAction(const gchar *path, GList *list, const BookmarkDropInfo &info)>;
+/** Deliver borrowed files only while the bookmark destination is still mapped. */
+GdkDragAction bookmark_list_receive_drop(const gchar *path, GList *list, const BookmarkDropInfo &info);
 GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_func);
 /** Show position numbers 1–9 beside the first nine entries. */
 void bookmark_list_set_numbered(GtkWidget *list, gboolean numbered);

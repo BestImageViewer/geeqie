@@ -95,6 +95,7 @@ struct BookmarkDropData
 {
 	GtkWidget *list;
 	gchar *path;
+	BookmarkDropInfo info;
 };
 
 struct BookPropData
@@ -237,20 +238,13 @@ static void bookmark_drop_data_free(BookmarkDropData *drop_data)
 static void bookmark_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
 	auto *drop_data = static_cast<BookmarkDropData *>(data);
-	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(drop_data->list), BOOKMARK_DATA_KEY));
-	auto action = GDK_ACTION_NONE;
-
-	if (bm && bm->drop_func && list)
-		{
-		bm->drop_func(drop_data->path, list);
-		action = GDK_ACTION_COPY;
-		}
+	const auto action = bookmark_list_receive_drop(drop_data->path, list, drop_data->info);
 
 	gdk_drop_finish(drop, action);
 	bookmark_drop_data_free(drop_data);
 }
 
-static gboolean bookmark_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble, gdouble, gpointer data)
+static gboolean bookmark_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto *bm = static_cast<BookMarkData *>(data);
 	GtkWidget *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
@@ -261,6 +255,12 @@ static gboolean bookmark_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdo
 	auto *drop_data = g_new(BookmarkDropData, 1);
 	drop_data->list = GTK_WIDGET(g_object_ref(bm->widget));
 	drop_data->path = g_strdup(b->path.c_str());
+	drop_data->info = {bm->widget, dnd_requested_action(target, drop), gdk_drop_get_actions(drop), {0, 0}};
+	graphene_point_t point{static_cast<float>(x), static_cast<float>(y)};
+	if (!gtk_widget_compute_point(button, bm->widget, &point, &drop_data->info.position))
+		{
+		drop_data->info.position = point;
+		}
 
 	dnd_read_file_list_async(drop, bookmark_dnd_file_received, drop_data);
 
@@ -934,6 +934,16 @@ void bookmark_list_set_drop_func(GtkWidget *list, const BookmarkDropFunc &drop_f
 
 	bm->drop_func = drop_func;
 	bookmark_populate(bm);
+}
+
+GdkDragAction bookmark_list_receive_drop(const gchar *path, GList *list, const BookmarkDropInfo &info)
+{
+	if (!path || !list || !gtk_widget_get_mapped(info.widget)) return GDK_ACTION_NONE;
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(info.widget), BOOKMARK_DATA_KEY));
+	if (!bm || !bm->drop_func) return GDK_ACTION_NONE;
+	// A transfer can rebuild the bookmark list while the callback is running.
+	const auto drop_func = bm->drop_func;
+	return drop_func(path, list, info);
 }
 
 void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)

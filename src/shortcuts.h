@@ -25,8 +25,11 @@
 #include <gtk/gtk.h>
 
 struct LayoutWindow;
+struct BookmarkDropInfo;
 
 GtkWidget *shortcuts_new(LayoutWindow *lw);
+/** Dispatch borrowed files to a shortcut destination; NONE rejects the drop. */
+GdkDragAction shortcuts_drop_files(const gchar *path, GList *list, const BookmarkDropInfo &info);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -14,6 +14,24 @@
 namespace
 {
 
+TEST(DropAction, ModifiersOverrideTheConfiguredDefault)
+{
+	if (!options) options = conf_options_new();
+	struct Restore
+	{
+		DnDAction previous = options->dnd_default_action;
+		~Restore() { options->dnd_default_action = previous; }
+	} restore;
+	for (const auto setting : {DND_ACTION_ASK, DND_ACTION_COPY, DND_ACTION_MOVE})
+		{
+		options->dnd_default_action = setting;
+		EXPECT_EQ(dnd_action_from_modifiers(GDK_CONTROL_MASK), GDK_ACTION_COPY);
+		EXPECT_EQ(dnd_action_from_modifiers(GDK_SHIFT_MASK), GDK_ACTION_MOVE);
+		EXPECT_EQ(dnd_action_from_modifiers(static_cast<GdkModifierType>(GDK_CONTROL_MASK | GDK_SHIFT_MASK)), GDK_ACTION_COPY);
+		EXPECT_EQ(dnd_action_from_modifiers(GDK_NO_MODIFIER_MASK), setting == DND_ACTION_COPY ? GDK_ACTION_COPY : setting == DND_ACTION_MOVE ? GDK_ACTION_MOVE : GDK_ACTION_NONE);
+		}
+}
+
 class GroupedDrop : public ::testing::TestWithParam<bool>
 {
 protected:

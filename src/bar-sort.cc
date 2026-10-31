@@ -790,9 +790,10 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 		                                 shortcut_hint, nullptr);
 		return text;
 	});
-	bookmark_list_set_drop_func(sd->bookmarks, [sd](const gchar *path, GList *list)
+	bookmark_list_set_drop_func(sd->bookmarks, [sd](const gchar *path, GList *list, const BookmarkDropInfo &)
 	{
 		bar_sort_bookmark_drop(sd, path, list);
+		return GDK_ACTION_COPY;
 	});
 	DEBUG_NAME(sd->bookmarks);
 	gtk_widget_set_hexpand(sd->bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);

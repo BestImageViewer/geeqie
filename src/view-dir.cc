@@ -1229,17 +1229,12 @@ static GdkDragAction vd_dnd_select_action(GdkDrop *drop)
 
 static DnDAction vd_dnd_requested_action(GtkDropTargetAsync *target, GdkDrop *drop)
 {
-	GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(target));
-	// DND events may omit modifiers. Read the keyboard associated with the drop
-	// before starting the asynchronous data transfer, while the keys are held.
-	GdkDevice *device = gdk_drop_get_device(drop);
-	GdkSeat *seat = device ? gdk_device_get_seat(device) : nullptr;
-	GdkDevice *keyboard = seat ? gdk_seat_get_keyboard(seat) : nullptr;
-	if (keyboard) state = gdk_device_get_modifier_state(keyboard);
-	if (state & GDK_CONTROL_MASK) return DND_ACTION_COPY;
-	if (state & GDK_SHIFT_MASK) return DND_ACTION_MOVE;
-
-	return options->dnd_default_action;
+	switch (dnd_requested_action(target, drop))
+		{
+		case GDK_ACTION_COPY: return DND_ACTION_COPY;
+		case GDK_ACTION_MOVE: return DND_ACTION_MOVE;
+		default: return DND_ACTION_ASK;
+		}
 }
 
 static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)

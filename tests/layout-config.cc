@@ -43,6 +43,7 @@
 #include "preferences.h"
 #include "rcfile.h"
 #include "search.h"
+#include "shortcuts.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "view-file.h"
@@ -2256,6 +2257,82 @@ TEST_F(PartialLayoutConfig, SidebarsCanFollowFloatingTools)
 	ASSERT_TRUE(load_config_from_buf(enabled, sizeof(enabled) - 1, FALSE));
 	EXPECT_TRUE(options->sidebars_with_tools);
 	layout_tools_float_set(layout, FALSE, FALSE);
+}
+
+TEST_F(PartialLayoutConfig, ShortcutsAcceptFolderAndCollectionDrops)
+{
+	struct Files
+	{
+		std::vector<std::string> files;
+		std::string folder;
+		~Files()
+			{
+			for (const auto &path : files) g_unlink(path.c_str());
+			g_rmdir(folder.c_str());
+			}
+	} cleanup{{}, std::string(directory) + "/destination"};
+	ASSERT_EQ(g_mkdir(cleanup.folder.c_str(), 0700), 0);
+	const std::string source = std::string(directory) + "/source.png";
+	const std::string target = cleanup.folder + "/source.png";
+	const std::string collection = std::string(directory) + "/drop.gqv";
+	cleanup.files = {source, target, collection};
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 2, 2);
+	gdk_pixbuf_fill(pixels, 0x204060ff);
+	ASSERT_TRUE(gdk_pixbuf_save(pixels, source.c_str(), "png", nullptr, nullptr));
+	auto fd = FileData::new_simple(source.c_str());
+	GList files{static_cast<FileData *>(fd), nullptr, nullptr};
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(layout->window); }));
+	BookmarkDropInfo info{layout->window, GDK_ACTION_COPY, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE), {20, 20}};
+	EXPECT_EQ(shortcuts_drop_files(source.c_str(), &files, info), GDK_ACTION_NONE);
+	EXPECT_EQ(shortcuts_drop_files("/missing/shortcut-destination", &files, info), GDK_ACTION_NONE);
+	EXPECT_EQ(shortcuts_drop_files(cleanup.folder.c_str(), nullptr, info), GDK_ACTION_NONE);
+
+	// Deferred choices keep the borrowed source list alive and are cancellable.
+	info.action = GDK_ACTION_NONE;
+	const auto menu = [&]() -> GtkWidget *
+		{
+		for (auto *child = gtk_widget_get_first_child(layout->window); child; child = gtk_widget_get_next_sibling(child))
+			if (g_object_get_data(G_OBJECT(child), "shortcut-drop-data")) return child;
+		return nullptr;
+		};
+	ASSERT_EQ(shortcuts_drop_files(cleanup.folder.c_str(), &files, info), GDK_ACTION_COPY);
+	ASSERT_NE(menu(), nullptr);
+	gtk_popover_popdown(GTK_POPOVER(menu()));
+	ASSERT_TRUE(wait_layout([&]() { return menu() == nullptr; }));
+	EXPECT_FALSE(isfile(target.c_str()));
+	ASSERT_EQ(shortcuts_drop_files(cleanup.folder.c_str(), &files, info), GDK_ACTION_COPY);
+	ASSERT_NE(menu(), nullptr);
+	ASSERT_TRUE(gtk_widget_activate_action(menu(), "shortcut-drop.copy", nullptr));
+	ASSERT_TRUE(wait_layout([&]() { return isfile(target.c_str()); }));
+	EXPECT_TRUE(isfile(source.c_str()));
+	if (menu()) gtk_popover_popdown(GTK_POPOVER(menu()));
+	ASSERT_TRUE(wait_layout([&]() { return menu() == nullptr; }));
+	g_unlink(target.c_str());
+	info.action = GDK_ACTION_COPY;
+	ASSERT_EQ(shortcuts_drop_files(cleanup.folder.c_str(), &files, info), GDK_ACTION_COPY);
+	ASSERT_TRUE(wait_layout([&]() { return isfile(target.c_str()); }));
+	g_unlink(target.c_str());
+
+	{
+		g_autoptr(CollectionData) cd = collection_new(nullptr);
+		ASSERT_TRUE(collection_save(cd, collection.c_str()));
+	}
+	info.action = GDK_ACTION_MOVE;
+	// Collection drops always append, even when Shift requested a move.
+	ASSERT_EQ(shortcuts_drop_files(collection.c_str(), &files, info), GDK_ACTION_COPY);
+	collect_manager_flush();
+	g_autoptr(CollectionData) loaded = collection_new(collection.c_str());
+	ASSERT_TRUE(collection_load(loaded, collection.c_str(), COLLECTION_LOAD_NONE));
+	ASSERT_EQ(g_list_length(loaded->list), 1U);
+	EXPECT_STREQ(static_cast<CollectInfo *>(loaded->list->data)->fd->path, source.c_str());
+	EXPECT_TRUE(isfile(source.c_str()));
+	info.allowed_actions = GDK_ACTION_MOVE;
+	EXPECT_EQ(shortcuts_drop_files(collection.c_str(), &files, info), GDK_ACTION_NONE);
+	ASSERT_EQ(shortcuts_drop_files(cleanup.folder.c_str(), &files, info), GDK_ACTION_MOVE);
+	ASSERT_TRUE(wait_layout([&]() { return isfile(target.c_str()) && !isfile(source.c_str()); }));
+	gtk_widget_set_visible(layout->window, FALSE);
+	EXPECT_EQ(shortcuts_drop_files(cleanup.folder.c_str(), &files, info), GDK_ACTION_NONE);
 }
 
 TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)
