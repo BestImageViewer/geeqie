@@ -948,8 +948,7 @@ static void image_read_ahead_cancel(ImageWindow *imd)
 	g_clear_handle_id(&imd->read_ahead_idle_id, g_source_remove);
 	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
 	imd->read_ahead_bytes = 0;
-	image_loader_free(imd->read_ahead_il);
-	imd->read_ahead_il = nullptr;
+	g_clear_object(&imd->read_ahead_il);
 
 	file_data_unref(imd->read_ahead_fd);
 	imd->read_ahead_fd = nullptr;
@@ -990,8 +989,7 @@ static void image_read_ahead_done_cb(ImageLoader *, gpointer data)
 		// Do not churn the cache by decoding beyond the available working set.
 		g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
 		}
-	image_loader_free(imd->read_ahead_il);
-	imd->read_ahead_il = nullptr;
+	g_clear_object(&imd->read_ahead_il);
 	file_data_unref(imd->read_ahead_fd);
 	imd->read_ahead_fd = nullptr;
 	image_read_ahead_schedule(imd);
@@ -1044,8 +1042,7 @@ static void image_read_ahead_start(ImageWindow *imd)
 	g_signal_connect(imd->read_ahead_il, "done", G_CALLBACK(image_read_ahead_done_cb), imd);
 	if (!image_loader_start_deferred(imd->read_ahead_il))
 		{
-		image_loader_free(imd->read_ahead_il);
-		imd->read_ahead_il = nullptr;
+		g_clear_object(&imd->read_ahead_il);
 		file_data_unref(imd->read_ahead_fd);
 		imd->read_ahead_fd = nullptr;
 		image_read_ahead_schedule(imd);
@@ -1153,8 +1150,8 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 		image_change_pixbuf(imd, image_loader_get_pixbuf(imd->il), image_zoom_get(imd), FALSE);
 		}
 
-	image_loader_free(imd->il);
-	imd->il = nullptr;
+	g_clear_object(&imd->il);
+
 	if (imd->image_fd && !imd->unknown && image_get_pixbuf(imd))
 		file_data_send_notification(imd->image_fd, NOTIFY_PIXBUF);
 
@@ -1298,8 +1295,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 
 		g_object_set(imd->pr, "loading", FALSE, NULL);
 
-		image_loader_free(imd->il);
-		imd->il = nullptr;
+		g_clear_object(&imd->il);
 
 		image_complete_util(imd, FALSE);
 
@@ -1325,9 +1321,7 @@ static void image_reset(ImageWindow *imd)
 
 	g_object_set(imd->pr, "loading", FALSE, NULL);
 
-	image_loader_free(imd->il);
-	imd->il = nullptr;
-
+	g_clear_object(&imd->il);
 	g_clear_pointer(&imd->cm, delete_cb<ColorMan>);
 
 	image_state_set(imd, IMAGE_STATE_NONE);
@@ -1817,8 +1811,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->collection = source->collection;
 	imd->collection_info = source->collection_info;
 
-	image_loader_free(imd->il);
-	imd->il = nullptr;
+	g_clear_object(&imd->il);
 
 	image_set_fd(imd, image_get_fd(source));
 
@@ -1841,7 +1834,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 		std::swap(imd->cm, source->cm);
 		}
 
-	image_loader_free(imd->read_ahead_il);
+	g_clear_object(&imd->read_ahead_il);
 	imd->read_ahead_il = g_steal_pointer(&source->read_ahead_il);
 	if (imd->read_ahead_il) image_loader_sync_read_ahead_data(imd->read_ahead_il, source, imd);
 	file_data_unref(imd->read_ahead_fd);
@@ -1878,8 +1871,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->collection = source->collection;
 	imd->collection_info = source->collection_info;
 
-	image_loader_free(imd->il);
-	imd->il = nullptr;
+	g_clear_object(&imd->il);
 
 	image_set_fd(imd, image_get_fd(source));
 
@@ -1894,7 +1886,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 		std::swap(imd->cm, source->cm);
 		}
 
-	image_loader_free(imd->read_ahead_il);
+	g_clear_object(&imd->read_ahead_il);
 	imd->read_ahead_il = source->read_ahead_il;
 	source->read_ahead_il = nullptr;
 	if (imd->read_ahead_il) image_loader_sync_read_ahead_data(imd->read_ahead_il, source, imd);

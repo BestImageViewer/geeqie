@@ -2071,8 +2071,7 @@ static void dupe_check_stop(DupeWindow *dw)
 	thumb_loader_free(dw->thumb_loader);
 	dw->thumb_loader = nullptr;
 
-	image_loader_free(dw->img_loader);
-	dw->img_loader = nullptr;
+	g_clear_object(&dw->img_loader);
 }
 
 static void dupe_check_stop_cb(GtkWidget *, gpointer data)
@@ -2112,8 +2111,7 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 
 		}
 
-	image_loader_free(dw->img_loader);
-	dw->img_loader = nullptr;
+	g_clear_object(&dw->img_loader);
 
 	dw->idle_id = g_idle_add(dupe_check_cb, dw);
 }
@@ -2305,8 +2303,7 @@ static gboolean dupe_check_cb(gpointer data)
 					if (!image_loader_start(dw->img_loader))
 						{
 						di->simd = std::make_unique<ImageSimilarityData>();
-						image_loader_free(dw->img_loader);
-						dw->img_loader = nullptr;
+						g_clear_object(&dw->img_loader);
 						return G_SOURCE_CONTINUE;
 						}
 					dw->idle_id = 0;
@@ -2494,8 +2491,7 @@ static void dupe_item_remove(DupeWindow *dw, DupeItem *di)
 		dw->setup_point = dupe_setup_point_step(dw, dw->setup_point);
 		if (dw->img_loader)
 			{
-			image_loader_free(dw->img_loader);
-			dw->img_loader = nullptr;
+			g_clear_object(&dw->img_loader);
 			dw->idle_id = g_idle_add(dupe_check_cb, dw);
 			}
 		}

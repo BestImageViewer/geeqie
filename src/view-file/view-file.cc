@@ -987,7 +987,7 @@ static void vf_pop_menu_copy_image_done_cb(ImageLoader *loader, gpointer data)
 		}
 
 	g_object_unref(copy_data->clipboard);
-	image_loader_free(copy_data->loader);
+	g_clear_object(&copy_data->loader);
 	g_free(copy_data);
 }
 

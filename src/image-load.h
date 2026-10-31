@@ -126,8 +126,6 @@ GType image_loader_get_type();
 
 ImageLoader *image_loader_new(FileData *fd);
 
-void image_loader_free(ImageLoader *il);
-
 void image_loader_delay_area_ready(ImageLoader *il, gboolean enable);
 
 void image_loader_set_requested_size(ImageLoader *il, gint width, gint height);

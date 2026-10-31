@@ -1553,8 +1553,7 @@ static void search_stop(SearchData *sd, gboolean focus_results = FALSE, gboolean
 {
 	g_clear_handle_id(&sd->search_idle_id, g_source_remove);
 
-	image_loader_free(sd->img_loader);
-	sd->img_loader = nullptr;
+	g_clear_object(&sd->img_loader);
 	sd->img_cd.reset();
 
 	sd->search_similarity_cd.reset();
@@ -1630,8 +1629,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 			}
 		}
 
-	image_loader_free(sd->img_loader);
-	sd->img_loader = nullptr;
+	g_clear_object(&sd->img_loader);
 
 	sd->search_idle_id = g_idle_add(search_step_cb, sd);
 }
@@ -1663,8 +1661,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 				return TRUE;
 				}
 
-			image_loader_free(sd->img_loader);
-			sd->img_loader = nullptr;
+			g_clear_object(&sd->img_loader);
 			}
 		}
 
@@ -2323,8 +2320,8 @@ static void search_start(SearchData *sd)
 				{
 				return;
 				}
-			image_loader_free(sd->img_loader);
-			sd->img_loader = nullptr;
+
+			g_clear_object(&sd->img_loader);
 			}
 		}
 

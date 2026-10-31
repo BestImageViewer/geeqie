@@ -99,8 +99,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 				}
 			}
 
-		image_loader_free(cl->il);
-		cl->il = nullptr;
+		g_clear_object(&cl->il);
 
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_SIMILARITY);
 		}
@@ -221,7 +220,7 @@ void cache_loader_free(CacheLoader *cl)
 		cl->idle_id = 0;
 		}
 
-	image_loader_free(cl->il);
+	g_clear_object(&cl->il);
 
 	file_data_unref(cl->fd);
 	delete cl;

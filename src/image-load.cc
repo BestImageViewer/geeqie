@@ -291,12 +291,6 @@ static void image_loader_finalize(GObject *object)
 	g_free(il->can_destroy_cond);
 }
 
-void image_loader_free(ImageLoader *il)
-{
-	if (!il) return;
-	g_object_unref(G_OBJECT(il));
-}
-
 
 ImageLoader *image_loader_new(FileData *fd)
 {
@@ -1279,7 +1273,7 @@ gboolean image_loader_start_deferred(ImageLoader *il)
 }
 
 
-/* don't forget to gdk_pixbuf_ref() it if you want to use it after image_loader_free() */
+/* don't forget to gdk_pixbuf_ref() it if you want to use it after g_object_unref(il) */
 GdkPixbuf *image_loader_get_pixbuf(ImageLoader *il)
 {
 	GdkPixbuf *ret;
@@ -1401,7 +1395,7 @@ gboolean image_load_dimensions(FileData *fd, GqSize &dimensions)
 		dimensions = {-1, -1};
 		}
 
-	image_loader_free(il);
+	g_object_unref(il);
 
 	return success;
 }
