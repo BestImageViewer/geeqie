@@ -633,7 +633,6 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	if (!pd) return;
 
 	pd->lw = bd->lw;
-	pd->bar = bar;
 
 	GtkWidget *expander = gtk_expander_new(nullptr);
 	DEBUG_NAME(expander);

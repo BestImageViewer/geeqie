@@ -58,7 +58,6 @@ struct PaneData {
 	GtkWidget *widget; /**< filled in by pane */
 	FileData *fd; /**< filled in by pane */
 
-	GtkWidget *bar; /**< filled in by bar */
 	LayoutWindow *lw; /**< filled in by bar */
 };
 
