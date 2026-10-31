@@ -20,6 +20,63 @@ meson test -C build --suite analysis --suite unit
 
 See the Unit tests section for how to enable unit tests.
 
+## Previewing documentation changes
+
+To preview documentation changes, install `yelp-tools`
+(which provides `yelp-build`) and the Python `lxml` module, then run:
+
+```sh
+python3 tools/preview-doc-changes.py
+```
+
+With no commit argument, this compares uncommitted changes under `doc/` with
+`HEAD`, including staged, unstaged, and non-ignored untracked files. Supply a commit argument
+to compare that commit with its first parent instead.
+
+Add `--open` to launch the preview in your default browser using `xdg-open`.
+The preview path is always printed, and the generated files remain available
+if the browser cannot be opened.
+
+If the desktop launcher cannot open the preview, use `--browser firefox` to
+invoke Firefox directly. `--browser` accepts an executable name or path and
+opens the preview without requiring `--open`.
+
+Short options are `-d` for `--dir`, `-o` for `--open`, and `-b` for
+`--browser`. Use `-h` or `--help` for all options. For example:
+
+```sh
+python3 tools/preview-doc-changes.py HEAD -d ~/my-previews -b firefox
+```
+
+The command prints a local HTML link. Open it in a browser to see the changed
+files and open a page to review its changes. Git-detected renames are
+identified separately, including whether their content changed. Each page
+highlights inserted text in green and deleted text in red with a
+strikethrough. Removed pages are retained to show their deleted content.
+Highlights compare rendered text; formatting-only changes may not be marked.
+Changes to graphics are listed,
+but do not have standalone manual page comparisons.
+
+The preview reads committed files or copies the current documentation into a
+temporary directory, leaving the working tree, index, and stashes alone.
+Output defaults to `~/geeqie-doc-previews/`. A visible home directory avoids the
+private `/tmp` directories used by some sandboxed browsers. To choose the
+directory instead, use:
+
+```sh
+python3 tools/preview-doc-changes.py HEAD --dir ~/my-previews --open
+```
+
+The directory may already exist and is
+created if needed. Each run creates a uniquely named HTML file inside it,
+such as `preview-abc123456789-random.html`, and a matching folder containing
+the supporting pages and images. Existing previews are preserved.
+
+Keep the HTML file and matching folder together when sharing the preview. The
+baseline version is built temporarily and discarded. An explicitly supplied
+merge commit is compared with its first parent; an explicitly supplied root
+commit cannot be previewed.
+
 ## Unit tests
 
 Unit tests live under `./tests`.  Because they include a lot of extra code in
