@@ -37,6 +37,8 @@
 #include "main.h"
 #include "options.h"
 #include "pan-view.h"
+#include "pan-view/pan-types.h"
+#include "pan-view/pan-view-search.h"
 #include "pixbuf-renderer.h"
 #include "preferences.h"
 #include "rcfile.h"
@@ -663,6 +665,66 @@ GtkWindow *window_with_action(const char *name)
 		if (G_IS_ACTION_MAP(window) && g_action_map_lookup_action(G_ACTION_MAP(window), name)) return window;
 		}
 	return nullptr;
+}
+
+TEST_F(PartialLayoutConfig, PanCloseShortcutWorksFromTextFields)
+{
+	ShortcutOverride binding("win.pan-win-close-window");
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	for (bool search : {false, true})
+		for (bool remapped : {false, true})
+			{
+			SCOPED_TRACE(search);
+			SCOPED_TRACE(remapped);
+			auto dir = FileData::new_dir(directory);
+			pan_window_new(dir);
+			const auto close = [](GtkWindow *window)
+				{
+				if (g_object_get_data(G_OBJECT(window), "pan-window")) gtk_window_close(window);
+				g_object_unref(window);
+				};
+			std::unique_ptr<GtkWindow, decltype(close)> window(window_with_action("pan-win-close-window"), close);
+			ASSERT_NE(window, nullptr);
+			g_object_ref(window.get());
+			auto *pw = static_cast<PanWindow *>(g_object_get_data(G_OBJECT(window.get()), "pan-window"));
+			ASSERT_NE(pw, nullptr);
+			if (search) pan_search_toggle_visible(pw, TRUE);
+			auto *entry = search ? pw->search_ui->search_entry : pw->path_entry;
+			ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(entry); }));
+			ASSERT_TRUE(gtk_widget_grab_focus(entry));
+			auto *controller = context_controller(GTK_WIDGET(window.get()), "pan-panning-shortcuts");
+			ASSERT_NE(controller, nullptr);
+			ASSERT_EQ(gtk_event_controller_get_propagation_phase(GTK_EVENT_CONTROLLER(controller)), GTK_PHASE_CAPTURE);
+			const auto key = [&](guint value, GdkModifierType modifiers)
+				{
+				gboolean handled = FALSE;
+				g_signal_emit_by_name(controller, "key-pressed", value, 0, modifiers, &handled);
+				return handled;
+				};
+			binding.set("");
+			EXPECT_FALSE(key(GDK_KEY_w, GDK_CONTROL_MASK));
+			binding.set(remapped ? "<Control><Alt>w" : "<Control>w");
+			EXPECT_FALSE(key(GDK_KEY_w, GDK_NO_MODIFIER_MASK));
+			EXPECT_FALSE(key(GDK_KEY_a, GDK_CONTROL_MASK));
+			if (remapped) EXPECT_FALSE(key(GDK_KEY_w, GDK_CONTROL_MASK));
+			g_autoptr(GtkWindow) closed = GTK_WINDOW(g_object_ref(window.get()));
+			if (xdotool && g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY"))
+				{
+				gtk_window_set_title(window.get(), "Geeqie Pan close test"); // NOTRANSLATE: X11 test window identifier.
+				gdk_display_flush(gtk_widget_get_display(GTK_WIDGET(window.get())));
+				const gchar *args[] = {xdotool, "search", "--name", "^Geeqie Pan close test$", "windowfocus", "--sync",
+				                       "key", "--clearmodifiers", remapped ? "ctrl+alt+w" : "ctrl+w", nullptr};
+				gint status;
+				ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+				                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+				ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+				EXPECT_TRUE(wait_layout([&]() { return !g_object_get_data(G_OBJECT(closed), "pan-window"); }));
+				}
+			else
+				{
+				EXPECT_TRUE(key(GDK_KEY_w, remapped ? static_cast<GdkModifierType>(GDK_CONTROL_MASK | GDK_ALT_MASK) : GDK_CONTROL_MASK));
+				}
+			}
 }
 
 TEST_F(PartialLayoutConfig, StandaloneAndPanViewUseConfiguredPanningBindings)

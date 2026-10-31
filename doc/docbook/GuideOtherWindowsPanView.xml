@@ -33,6 +33,7 @@
   <para />
   <section id="PanViewKeyboardPanning">
     <title>Keyboard Panning</title>
+    <para>The Close window shortcut (Ctrl+W by default) also works while the location or search field has focus. You can change this shortcut in <link linkend="GuideOptionsKeyboard">Keyboard Options</link>.</para>
     <para>With the image view focused, arrow keys pan the view, Shift increases the step, and Ctrl moves to an edge. Page Up and Page Down move vertically by half a viewport; Home and End move horizontally by half a viewport. These are the default bindings for the Pan View panning commands in <link linkend="GuideOptionsKeyboard">Keyboard Options</link>. Keys in the search field retain their editing behavior.</para>
   </section>
   <section id="Selectafolder">

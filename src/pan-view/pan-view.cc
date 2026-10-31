@@ -1021,6 +1021,10 @@ static gboolean pan_window_key_press_cb(GtkEventControllerKey *controller, guint
 {
 	auto *pw = static_cast<PanWindow *>(data);
 	auto *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	if (action_matches_shortcut("win.pan-win-close-window", keyval, state) &&
+	    !focused_context_shortcut_matches(widget, keyval, state))
+		return gtk_widget_activate_action(pw->window, "win.pan-win-close-window", nullptr);
+
 	auto *root = gtk_widget_get_root(widget);
 	auto *focus = root ? gtk_root_get_focus(root) : nullptr;
 	if (focus && (focus == pw->imd->frame || focus == pw->imd->pr || focus == pw->imd->view || focus == pw->imd->widget))
