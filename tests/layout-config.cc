@@ -383,6 +383,104 @@ protected:
 	bool saved_menu_settings = false;
 };
 
+TEST_F(PartialLayoutConfig, FocusImagePreservesTheViewAndEnablesKeyboardPanning)
+{
+	struct Restore
+	{
+		gboolean progressive = options->progressive_key_scrolling;
+		guint step = options->keyboard_scroll_step;
+		gboolean saver = options->fullscreen.disable_saver;
+		~Restore()
+			{
+			options->progressive_key_scrolling = progressive;
+			options->keyboard_scroll_step = step;
+			options->fullscreen.disable_saver = saver;
+			}
+	} restore;
+	options->progressive_key_scrolling = FALSE;
+	options->keyboard_scroll_step = 1;
+	options->fullscreen.disable_saver = FALSE;
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 1600, 1200);
+	gdk_pixbuf_fill(pixels, 0x4080c0ff);
+	ShortcutOverride binding("win.main-win-focus-image");
+	binding.set("<Control><Alt>i");
+	for (auto split : {SPLIT_NONE, SPLIT_HOR})
+		for (bool floating : {false, true})
+			{
+			SCOPED_TRACE(split);
+			SCOPED_TRACE(floating);
+			layout_split_change(layout, split);
+			layout_tools_float_set(layout, floating, FALSE);
+			if (split == SPLIT_HOR) layout_image_activate(layout, 1, TRUE);
+			for (bool fullscreen : {false, true})
+				{
+				SCOPED_TRACE(fullscreen);
+				if (fullscreen) layout_image_full_screen_start(layout);
+				auto *image = fullscreen ? layout->full_screen->imd : layout->image;
+				image_change_pixbuf(image, pixels, 2.0, FALSE);
+				gtk_window_present(GTK_WINDOW(gtk_widget_get_root(image->pr)));
+				ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(image->pr); }));
+				image_change_pixbuf(image, pixels, 2.0, FALSE);
+				auto *pr = PIXBUF_RENDERER(image->pr);
+				ASSERT_TRUE(wait_layout([&]() { return pr->width > pr->vis_width && pr->vis_width > 0; }));
+				image_scroll(image, G_MININT / 2, G_MININT / 2);
+				image_scroll(image, 80, 48);
+				auto *source = GTK_WIDGET(gtk_widget_get_root(layout->path_entry));
+				gtk_window_present(GTK_WINDOW(source));
+				ASSERT_TRUE(gtk_widget_grab_focus(layout->path_entry));
+				const auto selected = vf_selection_get_list_by_index(layout->vf);
+				auto *displayed = image_get_fd(image);
+				const auto zoom = image_zoom_get(image);
+				const auto x = pr->x_scroll;
+				const auto y = pr->y_scroll;
+				const auto active = layout->active_split_image;
+				auto *source_keys = context_controller(source, "image-panning-shortcuts");
+				ASSERT_NE(source_keys, nullptr);
+				gboolean focused = FALSE;
+				g_signal_emit_by_name(source_keys, "key-pressed", GDK_KEY_i, 0,
+				                      static_cast<GdkModifierType>(GDK_CONTROL_MASK | GDK_ALT_MASK), &focused);
+				EXPECT_TRUE(focused);
+				ASSERT_TRUE(gtk_widget_activate_action(source, "win.main-win-focus-image", nullptr));
+				auto *root = gtk_widget_get_root(image->pr);
+				EXPECT_EQ(gtk_root_get_focus(root), image->pr);
+				EXPECT_EQ(image_get_fd(image), displayed);
+				EXPECT_EQ(pr->pixbuf, pixels);
+				EXPECT_EQ(image_zoom_get(image), zoom);
+				EXPECT_EQ(pr->x_scroll, x);
+				EXPECT_EQ(pr->y_scroll, y);
+				EXPECT_EQ(layout->active_split_image, active);
+				EXPECT_EQ(vf_selection_get_list_by_index(layout->vf), selected);
+				g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+				if (xdotool && g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY") && split == SPLIT_NONE && !floating && !fullscreen)
+					{
+					ASSERT_TRUE(gtk_widget_grab_focus(layout->path_entry));
+					gtk_window_set_title(GTK_WINDOW(source), "Geeqie focus image test"); // NOTRANSLATE: X11 test window identifier.
+					gdk_display_flush(gtk_widget_get_display(source));
+					const gchar *args[] = {xdotool, "search", "--name", "^Geeqie focus image test$", "windowfocus", "--sync",
+					                       "key", "--clearmodifiers", "ctrl+alt+i", nullptr};
+					gint status;
+					ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+					                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+					ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+					ASSERT_TRUE(wait_layout([&]() { return gtk_root_get_focus(root) == image->pr; }));
+					EXPECT_EQ(image_get_fd(image), displayed);
+					}
+				auto *keys = context_controller(GTK_WIDGET(root), "image-panning-shortcuts");
+				ASSERT_NE(keys, nullptr);
+				gboolean handled = FALSE;
+				g_signal_emit_by_name(keys, "key-pressed", GDK_KEY_Right, 0, GDK_NO_MODIFIER_MASK, &handled);
+				EXPECT_TRUE(handled);
+				EXPECT_EQ(pr->x_scroll, x + 8);
+				if (fullscreen) layout_image_full_screen_stop(layout);
+				}
+			}
+	layout_tools_float_set(layout, FALSE, TRUE);
+	ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.main-win-focus-image", nullptr));
+	EXPECT_TRUE(layout->options.tools_hidden);
+	layout_tools_float_set(layout, FALSE, FALSE);
+	layout_split_change(layout, SPLIT_NONE);
+}
+
 TEST_F(PartialLayoutConfig, ImageArrowKeysPanOnlyWithImageFocus)
 {
 	struct Restore

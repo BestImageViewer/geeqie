@@ -269,6 +269,10 @@ static gboolean layout_image_shortcut_cb(GtkEventControllerKey *controller, guin
 {
 	auto *lw = static_cast<LayoutWindow *>(data);
 	auto *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	// Focus navigation must also work while the address bar is editing text.
+	if (action_matches_shortcut("win.main-win-focus-image", keyval, state) &&
+	    !focused_context_shortcut_matches(widget, keyval, state))
+		return gtk_widget_activate_action(lw->window, "win.main-win-focus-image", nullptr);
 	auto *root = gtk_widget_get_root(widget);
 	auto *focus = root ? gtk_root_get_focus(root) : nullptr;
 	auto *image = lw->full_screen && widget == lw->full_screen->window ? lw->full_screen->imd : lw->image;
@@ -2445,7 +2449,8 @@ enum class LayoutFocusTarget
 {
 	DIRECTORIES,
 	FILES,
-	ADDRESS_BAR
+	ADDRESS_BAR,
+	IMAGE
 };
 
 template<LayoutFocusTarget target>
@@ -2453,7 +2458,8 @@ static void layout_menu_focus_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *lw = static_cast<LayoutWindow *>(data);
 
-	layout_tools_float_set(lw, lw->options.tools_float, FALSE);
+	if constexpr (target != LayoutFocusTarget::IMAGE)
+		layout_tools_float_set(lw, lw->options.tools_float, FALSE);
 
 	GtkWidget *widget = nullptr;
 	switch (target)
@@ -2464,6 +2470,12 @@ static void layout_menu_focus_cb(GSimpleAction *, GVariant *, gpointer data)
 		case LayoutFocusTarget::FILES:
 			if (lw->vf) widget = lw->vf->listview;
 			break;
+		case LayoutFocusTarget::IMAGE:
+			{
+			auto *image = lw->full_screen ? lw->full_screen->imd : lw->image;
+			if (image) widget = image->pr;
+			break;
+			}
 		case LayoutFocusTarget::ADDRESS_BAR:
 			widget = lw->path_entry;
 			break;

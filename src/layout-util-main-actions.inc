@@ -1406,6 +1406,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-focus-image",
+		GQ_ICON_FILE,
+		N_("Focus image pane"),
+		layout_menu_focus_cb<LayoutFocusTarget::IMAGE>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-folder-tree",
 		PIXBUF_INLINE_ICON_FLOAT,
 		N_("Toggle Folder View"),
