@@ -1,3 +1,21 @@
+Geeqie 3.4
+============
+
+- Performance: configurable multi-image preloading that follows navigation direction, bounded thumbnail loading and memory use, faster selection navigation, smoother Exif scrolling, and asynchronous display-profile loading.
+- Pan View: background directory scanning, incremental layout and spatial indexing, progress reporting, cancellation, and support for Geeqie’s private thumbnail cache.
+- Rendering and zoom: faster magnification through reusable textures; corrected high-DPI, 100% zoom, and fullscreen behavior; fixes for blank images, stale previews, tiling artifacts, and color correction.
+- File operations: directory drag-and-drop copying and moving, folder merging, “Duplicate” conflict handling, and fixes for cancellation, symlink targets, and maximum-length filenames.
+- Floating tools and shortcuts: an option to keep Info and Sort Manager with floating tools; corrected menu placement and docking; file drops onto folder and collection shortcuts.
+- Sort Manager and collections: folder-specific destination lists, numbered destination shortcuts, external collections in destination menus, a draggable divider, and fixes for sidebar width growth.
+- Metadata: configurable XMP color labels with OSD and list-view indicators, corrected grouped-sidecar associations, image/XMP source selection in the Exif window, keyword-tree autosaving, and restored batch metadata application.
+- Search and duplicates: separate Criteria and Results tabs, perceptual-hash matching, a same-folder exclusion filter, smallest/largest-file selection, JSON export and script integration, and improved synchronization after deletion.
+- Slideshow: configurable transitions, improved high-DPI rendering, and rescanning of recursive folders or saved collections between cycles.
+- Export and printing: cropped-copy export with an adjustable selection, JPEG/PNG conversion, restored proof-sheet printing, and Print Image in context menus.
+- Keyboard and customization: configurable panning and other formerly hard-coded shortcuts, an action to focus the image pane, improved icon-view selection and focus, configurable date/time formatting, and interface color-scheme preferences.
+- GPS and format support: restored map interactions and direction lines; fixes for animated WebP, AVIF crashes, JPEG XL profiles and alpha, large JPEGs, full-resolution ARW viewing, SVGZ loading, and metadata-preserving rotation.
+- Packaging and maintenance: AppImage workflow and GTK 4.18 compatibility fixes, Snap Bash completion, AppImage/Flatpak completion documentation, clearer PDF-manual dependency diagnostics, highlighted documentation previews, and expanded automated tests.
+- Multiple code improvements
+
 Geeqie 3.3
 ============
 
