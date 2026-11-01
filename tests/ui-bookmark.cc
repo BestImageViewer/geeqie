@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 
+#include "compat.h"
 #include "history-list.h"
 #include "ui-bookmark.h"
 

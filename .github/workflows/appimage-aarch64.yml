@@ -33,6 +33,7 @@ jobs:
             yes | sudo apt-get install libffmpegthumbnailer-dev
             yes | sudo apt-get install libgexiv2-dev
             yes | sudo apt-get install libgtk-4-dev
+            yes | sudo apt-get install librsvg2-bin
             yes | sudo apt-get install libheif-dev
             yes | sudo apt-get install libimath-dev
             yes | sudo apt-get install liblcms2-dev
@@ -71,6 +72,10 @@ jobs:
             wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
             chmod +x linuxdeploy-plugin-gtk.sh
             sed -i '/GDK_BACKEND/d' linuxdeploy-plugin-gtk.sh
+            rsvg-convert --width=256 --height=256 \
+              --output="$GITHUB_WORKSPACE/AppDir/geeqie.png" \
+              "$GITHUB_WORKSPACE/AppDir/usr/share/icons/hicolor/scalable/apps/geeqie.svg"
+            cp "$GITHUB_WORKSPACE/AppDir/geeqie.png" "$GITHUB_WORKSPACE/AppDir/.DirIcon"
             DEPLOY_GTK_VERSION=4 \
               LDAI_OUTPUT=Geeqie-latest-aarch64.AppImage \
               LDAI_UPDATE_INFORMATION="gh-releases-zsync|BestImageViewer|geeqie|continuous|Geeqie-latest-aarch64.AppImage.zsync" \

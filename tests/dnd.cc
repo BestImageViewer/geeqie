@@ -7,6 +7,7 @@
 
 #include "gtest/gtest.h"
 
+#include "compat.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "options.h"

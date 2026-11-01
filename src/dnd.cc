@@ -26,6 +26,7 @@
 
 #include <gio/gio.h>
 
+#include "compat.h"
 #include "filedata.h"
 #include "options.h"
 #include "pixbuf-util.h"

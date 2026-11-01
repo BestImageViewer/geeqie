@@ -19,6 +19,7 @@
 #include "color-label.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "compat.h"
 #include "date-time.h"
 #include "dupe.h"
 #include "filedata.h"

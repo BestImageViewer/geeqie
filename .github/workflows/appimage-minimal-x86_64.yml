@@ -77,7 +77,7 @@ jobs:
             -Dyelp_build=disabled
 
       - name: Ninja compile
-        run: DESTDIR=${{ github.workspace }}/AppDir ninja -C build install
+        run: DESTDIR="$GITHUB_WORKSPACE/AppDir" ninja -C build install
 
 # The linuxdeploy-plugin-gtk forces the backend to be X11, as it was considered
 # that Wayland has problems. Delete this and let the user choose.
@@ -104,8 +104,8 @@ jobs:
           DEPLOY_GTK_VERSION=4 \
             LDAI_OUTPUT=Geeqie-minimal-latest-x86_64.AppImage \
             LDAI_UPDATE_INFORMATION="gh-releases-zsync|BestImageViewer|geeqie|continuous|Geeqie-minimal-latest-x86_64.AppImage.zsync" \
-            ./linuxdeploy/AppRun --appdir ${{ github.workspace }}/AppDir \
-            --desktop-file ${{ github.workspace }}/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop \
+            ./linuxdeploy/AppRun --appdir "$GITHUB_WORKSPACE/AppDir" \
+            --desktop-file "$GITHUB_WORKSPACE/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop" \
             --plugin gtk \
             --output appimage
 
