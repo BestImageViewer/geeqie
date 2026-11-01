@@ -63,13 +63,28 @@ if not option.disabled()
     pdftotext_exe = find_program('pdftotext', required : false)
     xsltproc_exe = find_program('xsltproc', required : false)
 
-    if awk_exe.found() and fop_exe.found() and pdfoutline_exe.found() and pdftotext_exe.found() and xsltproc_exe.found() and fs.is_file('/usr/share/xml/docbook/stylesheet/docbook-xsl/fo/docbook.xsl')
+    pdf_stylesheet = get_option('help_pdf_stylesheet')
+    missing_pdf_dependencies = []
+    foreach name, program : {'awk': awk_exe, 'fop': fop_exe, 'pdfoutline': pdfoutline_exe, 'pdftotext': pdftotext_exe, 'xsltproc': xsltproc_exe}
+        if not program.found()
+            missing_pdf_dependencies += [name]
+            message('Missing PDF help dependency:', name)
+        endif
+    endforeach
+    if fs.is_file(pdf_stylesheet)
+        message('PDF help DocBook stylesheet:', pdf_stylesheet)
+    else
+        missing_pdf_dependencies += ['DocBook XSL-FO stylesheet: ' + pdf_stylesheet]
+        message('Missing PDF help DocBook stylesheet:', pdf_stylesheet)
+    endif
+
+    if missing_pdf_dependencies.length() == 0
 
         intermediate_fo = custom_target(
             'create .fo file',
             input : guideindex_xml,
             output : 'output.fo',
-            command : [xsltproc_exe, '--path', xmldir, '--stringparam', 'img.src.path',  graphicsdir, '--output', '@OUTPUT@', '--stringparam', 'paper.type', 'A4', '--xinclude', '/usr/share/xml/docbook/stylesheet/docbook-xsl/fo/docbook.xsl', '@INPUT@'],
+            command : [xsltproc_exe, '--path', xmldir, '--stringparam', 'img.src.path',  graphicsdir, '--output', '@OUTPUT@', '--stringparam', 'paper.type', 'A4', '--xinclude', pdf_stylesheet, '@INPUT@'],
             )
 
         # Create intermediate .pdf file - no ToC in sidebar',
@@ -110,7 +125,11 @@ if not option.disabled()
 
         summary({'help_pdf' : ['Help file in pdf created:', true]}, section : 'Documentation', bool_yn : true)
     else
-        summary({'help-pdf' : ['Required files not found - Help file in pdf created:', false]}, section : 'Documentation', bool_yn : true)
+        if option.enabled()
+            error('PDF help was explicitly enabled, but dependencies are missing: ' + ', '.join(missing_pdf_dependencies))
+        endif
+        summary({'help_pdf' : ['Help file in pdf created:', false]}, section : 'Documentation', bool_yn : true)
+        summary({'Missing PDF help dependencies': missing_pdf_dependencies}, section : 'Documentation')
     endif
 else
     summary({'help-pdf' : ['disabled - Help file in pdf created:', false]}, section : 'Documentation', bool_yn : true)

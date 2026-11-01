@@ -63,7 +63,7 @@ done << EOF
 $(find "./data/plugins" "./build-aux" "./packaging" "./tools" "./snap/local" -type f -executable)
 EOF
 
-# Check if all options are in the disabled checks
+# Check if all feature and boolean options are in the disabled checks
 while read -r line
 do
 	if [ -n "$line" ]
@@ -76,10 +76,10 @@ do
 		fi
 	fi
 done << EOF
-$(awk -W posix 'BEGIN {LINT = "fatal"; FS="\047"} /option\(/ { if (substr($2, 1, 2) != "gq") { print $2 } }' meson_options.txt)
+$(awk -W posix 'BEGIN {LINT = "fatal"; FS="\047"} /option\(/ { if ($4 == "feature" || $4 == "boolean") { print $2 } }' meson_options.txt)
 EOF
 
-# Check if all options are in the disabled checks in a GitHub run
+# Check feature and boolean options in the disabled checks in a GitHub run
 # Directory .github is not in the source tar
 if [ -d ".github" ]
 then
@@ -95,7 +95,7 @@ then
 			fi
 		fi
 	done << EOF
-$(awk -W posix 'BEGIN {LINT = "fatal"; FS="\047"} /option\(/ { if (substr($2, 1, 2) != "gq") { print $2 } }' meson_options.txt)
+$(awk -W posix 'BEGIN {LINT = "fatal"; FS="\047"} /option\(/ { if ($4 == "feature" || $4 == "boolean") { print $2 } }' meson_options.txt)
 EOF
 fi
 

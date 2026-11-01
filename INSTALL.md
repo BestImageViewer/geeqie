@@ -183,6 +183,34 @@ when building from Git. PDF help (`help_pdf`) uses Apache FOP, libxslt's
 These tools are not needed to compile the viewer. Unit tests (`unit_tests`)
 use GoogleTest and GoogleMock, with a Meson subproject fallback; see [TESTING.md](TESTING.md).
 
+### PDF manual
+
+Building the PDF manual (`help_pdf`) is separate from displaying PDF images
+(`pdf`). The manual requires all the tools listed above and the DocBook XSL-FO
+stylesheet `fo/docbook.xsl`. Meson checks this default location:
+
+```text
+/usr/share/xml/docbook/stylesheet/docbook-xsl/fo/docbook.xsl
+```
+
+The stylesheets are supplied by
+[`docbook-xsl` on Debian](https://packages.debian.org/sid/docbook-xsl) and
+[`docbook-style-xsl` on Fedora](https://packages.fedoraproject.org/pkgs/docbook-style-xsl/docbook-style-xsl/).
+If your distribution installs them elsewhere, specify the absolute path to its
+`fo/docbook.xsl` file:
+
+```sh
+meson configure build -Dhelp_pdf=enabled \
+    -Dhelp_pdf_stylesheet=/path/to/docbook-xsl/fo/docbook.xsl
+ninja -C build
+```
+
+With `help_pdf=auto` (the default), missing dependencies disable PDF manual
+generation; Meson lists the missing programs and stylesheet in its output and
+configuration summary. With `help_pdf=enabled`, missing dependencies cause
+configuration to fail with their names and the stylesheet path. With
+`help_pdf=disabled`, these checks are skipped.
+
 ### Distribution examples
 
 Package names vary between distributions. The Debian-based installation script
@@ -259,7 +287,8 @@ meson configure build -Dpdf=enabled -Dwebp=disabled
 ninja -C build
 ```
 
-Check Meson's configuration summary for the features actually enabled. Some
+Check Meson's configuration summary for the features actually enabled. PDF
+manual generation (`help_pdf`) also treats `enabled` as a strict requirement. Some
 documentation and debugging options use additional availability checks rather
 than treating `enabled` as a strict requirement. Boolean options take `true`
 or `false`, rather than these feature values.
