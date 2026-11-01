@@ -24,6 +24,7 @@ jobs:
           apt install -y git
           apt install -y libgtk-4-dev
           apt install -y librsvg2-dev
+          apt install -y librsvg2-bin
           apt install -y pandoc
           apt install -y patchelf
           apt install -y wget
@@ -96,6 +97,10 @@ jobs:
 
       - name: Build AppImage
         run: |
+          rsvg-convert --width=256 --height=256 \
+            --output="$GITHUB_WORKSPACE/AppDir/geeqie.png" \
+            "$GITHUB_WORKSPACE/AppDir/usr/share/icons/hicolor/scalable/apps/geeqie.svg"
+          cp "$GITHUB_WORKSPACE/AppDir/geeqie.png" "$GITHUB_WORKSPACE/AppDir/.DirIcon"
           DEPLOY_GTK_VERSION=4 \
             LDAI_OUTPUT=Geeqie-minimal-latest-x86_64.AppImage \
             LDAI_UPDATE_INFORMATION="gh-releases-zsync|BestImageViewer|geeqie|continuous|Geeqie-minimal-latest-x86_64.AppImage.zsync" \
