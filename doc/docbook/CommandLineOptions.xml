@@ -7,8 +7,8 @@
 <refmeta>
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>October 2026</refmiscinfo>
-<refmiscinfo class='manual'>Geeqie 3.3 GTK4</refmiscinfo>
+<refmiscinfo class='source'>November 2026</refmiscinfo>
+<refmiscinfo class='manual'>Geeqie 3.4 GTK4</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -28,7 +28,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <para>Geeqie is an image viewer.</para>
 
-<para>Version: Geeqie 3.3</para>
+<para>Version: Geeqie 3.4</para>
 </refsect2>
 
 <refsect2 id='help_options'><title>Help Options:</title>
@@ -123,6 +123,12 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   </listitem>
   </varlistentry>
   <varlistentry>
+  <term><emphasis role='strong' remap='B'>--color-scheme</emphasis>=<emphasis remap='I'>system</emphasis>|light|dark</term>
+  <listitem>
+<para>override the interface color scheme for this session</para>
+  </listitem>
+  </varlistentry>
+  <varlistentry>
   <term><emphasis role='strong' remap='B'>--config-load=</emphasis>&lt;FILE&gt;</term>
   <listitem>
 <para>load configuration from FILE</para>
@@ -144,6 +150,12 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   <term><emphasis role='strong' remap='B'>--dupes-export</emphasis></term>
   <listitem>
 <para>export duplicates search result</para>
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term><emphasis role='strong' remap='B'>--dupes-export-json</emphasis></term>
+  <listitem>
+<para>export duplicate groups as JSON</para>
   </listitem>
   </varlistentry>
   <varlistentry>
