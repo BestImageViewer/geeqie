@@ -22,10 +22,12 @@
 #ifndef PAN_VIEW_PAN_TIMELINE_H
 #define PAN_VIEW_PAN_TIMELINE_H
 
+#include <functional>
+
 #include <glib.h>
 
 struct PanWindow;
 
-void pan_timeline_compute(PanWindow *pw, gint &width, gint &height);
+std::function<bool()> pan_timeline_compute(PanWindow *pw, gint &width, gint &height);
 
 #endif

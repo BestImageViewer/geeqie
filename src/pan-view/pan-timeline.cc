@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <unordered_map>
 
 #include "filedata.h"
 #include "pan-item.h"
@@ -35,155 +36,136 @@ namespace
 
 constexpr gint PAN_GROUP_MAX = 16;
 
-} // namespace
-
-void pan_timeline_compute(PanWindow *pw, gint &width, gint &height)
+gint64 timeline_day(time_t date)
 {
-	GList *work;
-	gint x;
-	gint y;
-	time_t group_start_date;
-	gint total;
-	gint count;
-	PanItem *pi_month = nullptr;
-	PanItem *pi_day = nullptr;
-	gint month_start;
-	gint day_start;
-	gint x_width;
-	gint y_height;
+	std::tm value{};
+	if (!localtime_r(&date, &value)) return 0;
+	return (static_cast<gint64>(value.tm_year) * 372) + (value.tm_mon * 31) + value.tm_mday;
+}
 
-	g_autoptr(GList) list = pan_list_tree_filtered(pw, SORT_NONE);
-	list = pan_cache_sync_list(pw, list);
+}  // namespace
 
+std::function<bool()> pan_timeline_compute(PanWindow *pw, gint &width, gint &height)
+{
+	struct State
+	{
+		PanLayoutFiles files;
+		GList *counting;
+		std::unordered_map<gint64, gint> day_counts;
+		gint x = 0, y = 0;
+		time_t group_start_date = 0;
+		gint total = 0, count = 0;
+		PanItem *pi_month = nullptr, *pi_day = nullptr;
+		gint month_start = 0, day_start = 0, x_width = 0, y_height = 0;
+		explicit State(GList *list) : files(list), counting(list) {}
+	};
+	auto state = std::make_shared<State>(pan_cache_sync_list(pw, pan_list_tree_filtered(pw, SORT_NONE)));
 	width = PAN_BOX_BORDER * 2;
 	height = PAN_BOX_BORDER * 2;
-
-	x = 0;
-	y = 0;
-	month_start = y;
-	day_start = month_start;
-	x_width = 0;
-	y_height = 0;
-	group_start_date = 0;
-	// total and count are used to enforce a stride of PAN_GROUP_MAX thumbs.
-	total = 0;
-	count = 0;
-	work = list;
-	while (work)
+	return [pw, state, &width, &height]()
 		{
+		auto &s = *state;
+		if (s.counting)
+			{
+			++s.day_counts[timeline_day(static_cast<FileData *>(s.counting->data)->date)];
+			s.counting = s.counting->next;
+			return false;
+			}
+		if (!s.files.list) return true;
 		FileData *fd;
 		PanItem *pi;
 
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
+		fd = state->files.take();
 
-		if (!pan_date_compare(fd->date, group_start_date, PAN_DATE_LENGTH_DAY))
+		if (!pan_date_compare(fd->date, s.group_start_date, PAN_DATE_LENGTH_DAY))
 			{
 			// FD starts a new day group.
-			GList *needle;
 
-			if (!pan_date_compare(fd->date, group_start_date, PAN_DATE_LENGTH_MONTH))
+			if (!pan_date_compare(fd->date, s.group_start_date, PAN_DATE_LENGTH_MONTH))
 				{
 				// FD starts a new month group.
-				pi_day = nullptr;
+				s.pi_day = nullptr;
 
-				if (pi_month)
+				if (s.pi_month)
 					{
-					x = pi_month->x + pi_month->width + PAN_BOX_BORDER;
+					s.x = s.pi_month->x + s.pi_month->width + PAN_BOX_BORDER;
 					}
 				else
 					{
-					x = PAN_BOX_BORDER;
+					s.x = PAN_BOX_BORDER;
 					}
 
-				y = PAN_BOX_BORDER;
+				s.y = PAN_BOX_BORDER;
 
 				g_autofree gchar *month_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_MONTH);
-				pi = pan_item_text_new(pw, x, y, month_buf, PAN_TEXT_ATTR_BOLD_HEADING,
-				                       PAN_TEXT_BORDER, PAN_TEXT_COLOR);
-				y += pi->height;
+				pi = pan_item_text_new(pw, s.x, s.y, month_buf, PAN_TEXT_ATTR_BOLD_HEADING, PAN_TEXT_BORDER,
+									   PAN_TEXT_COLOR);
+				s.y += pi->height;
 
-				pi_month = pan_item_box_new(pw, file_data_ref(fd), x, y, 0, 0, PAN_BOX_COLOR,
-				                            PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
+				s.pi_month = pan_item_box_new(pw, file_data_ref(fd), s.x, s.y, 0, 0, PAN_BOX_COLOR,
+											  PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
 
-				x += PAN_BOX_BORDER;
-				y += PAN_BOX_BORDER;
-				month_start = y;
+				s.x += PAN_BOX_BORDER;
+				s.y += PAN_BOX_BORDER;
+				s.month_start = s.y;
 				}
 
-			if (pi_day) x = pi_day->x + pi_day->width + PAN_BOX_BORDER;
+			if (s.pi_day) s.x = s.pi_day->x + s.pi_day->width + PAN_BOX_BORDER;
 
-			group_start_date = fd->date;
-			total = 1;
-			count = 0;
-
-			needle = work;
-			while (needle)
-				{
-				FileData *nfd;
-
-				nfd = static_cast<FileData *>(needle->data);
-				if (pan_date_compare(nfd->date, group_start_date, PAN_DATE_LENGTH_DAY))
-					{
-					needle = needle->next;
-					total++;
-					}
-				else
-					{
-					needle = nullptr;
-					}
-				}
+			s.group_start_date = fd->date;
+			s.total = s.day_counts[timeline_day(fd->date)];
+			s.count = 0;
 
 			g_autofree gchar *week_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_WEEK);
-			pi = pan_item_text_new(pw, x, y, week_buf, PAN_TEXT_ATTR_NONE,
-			                       PAN_TEXT_BORDER, PAN_TEXT_COLOR);
+			pi = pan_item_text_new(pw, s.x, s.y, week_buf, PAN_TEXT_ATTR_NONE, PAN_TEXT_BORDER, PAN_TEXT_COLOR);
 
-			y += pi->height;
+			s.y += pi->height;
 
-			pi_day = pan_item_box_new(pw, file_data_ref(fd), x, y, 0, 0, PAN_BOX_COLOR,
-			                          PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
+			s.pi_day = pan_item_box_new(pw, file_data_ref(fd), s.x, s.y, 0, 0, PAN_BOX_COLOR, PAN_BOX_OUTLINE_THICKNESS,
+										PAN_BOX_OUTLINE_COLOR);
 
-			x += PAN_BOX_BORDER;
-			y += PAN_BOX_BORDER;
-			day_start = y;
+			s.x += PAN_BOX_BORDER;
+			s.y += PAN_BOX_BORDER;
+			s.day_start = s.y;
 			}
 
 		if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
 			{
-			pi = pan_item_image_new(pw, fd, x, y, 10, 10);
-			x_width = std::max(pi->width, x_width);
-			y_height = pi->height;
+			pi = pan_item_image_new(pw, fd, s.x, s.y, 10, 10);
+			s.x_width = std::max(pi->width, s.x_width);
+			s.y_height = pi->height;
 			}
 		else
 			{
-			pi = pan_item_thumb_new(pw, fd, x, y);
-			x_width = pw->thumb_size;
-			y_height = pw->thumb_size;
+			pi = pan_item_thumb_new(pw, fd, s.x, s.y);
+			s.x_width = pw->thumb_size;
+			s.y_height = pw->thumb_size;
 			}
 
-		if (pi_day) pi_day->set_size_by_item(pi, PAN_BOX_BORDER);
-		if (pi_month) pi_month->set_size_by_item(pi_day, PAN_BOX_BORDER);
+		if (s.pi_day) s.pi_day->set_size_by_item(pi, PAN_BOX_BORDER);
+		if (s.pi_month) s.pi_month->set_size_by_item(s.pi_day, PAN_BOX_BORDER);
 
-		total--;
-		count++;
+		s.total--;
+		s.count++;
 
-		if (total > 0 && count < PAN_GROUP_MAX)
+		if (s.total > 0 && s.count < PAN_GROUP_MAX)
 			{
-			y += y_height + pw->thumb_gap;
+			s.y += s.y_height + pw->thumb_gap;
 			}
 		else
 			{
-			x += x_width + pw->thumb_gap;
-			x_width = 0;
-			count = 0;
+			s.x += s.x_width + pw->thumb_gap;
+			s.x_width = 0;
+			s.count = 0;
 
-			if (total > 0)
-				y = day_start;
+			if (s.total > 0)
+				s.y = s.day_start;
 			else
-				y = month_start;
+				s.y = s.month_start;
 			}
 
-		if (pi_month) pi_month->adjust_size(PAN_BOX_BORDER, width, height);
-		}
+		if (s.pi_month) s.pi_month->adjust_size(PAN_BOX_BORDER, width, height);
+		return false;
+		};
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

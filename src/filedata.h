@@ -294,6 +294,8 @@ public:
 	 */
 	static FileDataRef new_dir(const gchar *path_utf8, FileDataContext *context = nullptr);
 
+	/** Create from an already collected stat result, on the main thread. */
+	static FileDataRef new_from_stat(const gchar *path_utf8, const struct stat &attributes);
 	static FileDataRef new_simple(const gchar *path_utf8, FileDataContext *context = nullptr);
 
 #ifdef DEBUG_FILEDATA
@@ -471,6 +473,8 @@ class FileData::FileList
 	static gboolean read_list(FileData *dir_fd, GList **files, GList **dirs);
 	static gboolean read_list_lstat(FileData *dir_fd, GList **files, GList **dirs);
 	static gboolean read_list_lstat_all(FileData *dir_fd, GList **files, GList **dirs);
+	/** Group an owned list using the same sidecar rules as read_list(). */
+	static GList *group_sidecars(GList *list);
 	static void free_list(GList *list);
 	static GList *copy(GList *list);
 	static GList *from_path_list(GList *list);

@@ -23,6 +23,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
+#include <vector>
 
 #include <gdk/gdk.h>
 
@@ -32,6 +34,7 @@
 #include "pan-types.h"
 #include "pan-util.h"
 #include "pan-view-filter.h"
+#include "pan-view.h"
 
 static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 {
@@ -148,222 +151,195 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 	delete group;
 }
 
-static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gint y)
+namespace
 {
-	g_autoptr(GList) f = nullptr;
-	g_autoptr(FileDataList) d = nullptr;
-	GList *work;
-	PanItem *pi_box;
-	gint x_start;
-	gint y_height;
-	gint grid_size;
-	gint grid_count;
 
-	if (!filelist_read(dir_fd, &f, &d)) return nullptr;
-	if (!f && !d) return nullptr;
-
-	f = filelist_sort(f, {SORT_NAME, TRUE, TRUE});
-	d = filelist_sort(d, {SORT_NAME, TRUE, TRUE});
-
-	f = pan_filter_fd_list(f, pw->filter_ui);
-
-	pi_box = pan_item_text_new(pw, x, y, dir_fd->path, PAN_TEXT_ATTR_NONE,
-	                           PAN_TEXT_BORDER, PAN_TEXT_COLOR);
-
-	y += pi_box->height;
-
-	pi_box = pan_item_box_new(pw, file_data_ref(dir_fd),
-	                          x, y, PAN_BOX_BORDER * 2, PAN_BOX_BORDER * 2, PAN_BOX_COLOR,
-	                          PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
-
-	x += PAN_BOX_BORDER;
-	y += PAN_BOX_BORDER;
-
-	grid_size = static_cast<gint>(sqrt(g_list_length(f)) + 0.9);
-	grid_count = 0;
-	x_start = x;
-	y_height = y;
-
-	work = f;
-	while (work)
+void flower_group_free(FlowerGroup *group)
+{
+	if (!group) return;
+	std::vector<FlowerGroup *> pending{group};
+	while (!pending.empty())
 		{
-		FileData *fd;
-		PanItem *pi;
+		auto *current = pending.back();
+		pending.pop_back();
+		for (auto *child : current->children) pending.push_back(child);
+		pan_item_list_clear(current->items);
+		delete current;
+		}
+}
 
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
+struct FolderFrame
+{
+	FileDataRef folder;
+	PanLayoutFiles files;
+	PanLayoutFiles dirs;
+	PanItem *box = nullptr;
+	FlowerGroup *group = nullptr;
+	gint level;
+	gint x = 0, y = 0, start_x = 0, row_height = 0, columns = 0, column = 0;
+	bool initialized = false, has_files = false, files_done = false;
+	FolderFrame(FileData *fd, gint level) : folder(fd), level(level) {}
+	~FolderFrame()
+	{
+		flower_group_free(group);
+	}
 
+	bool initialize(PanWindow *pw, bool flower, gint top)
+	{
+		initialized = true;
+		if (!pan_read_directory(pw, folder, &files.list, &dirs.list) || (!files.list && !dirs.list)) return false;
+		files.list = pan_filter_fd_list(files.list, pw->filter_ui);
+		has_files = files.list != nullptr;
+		x = flower ? 0 : PAN_BOX_BORDER + (level * std::max(PAN_BOX_BORDER, pw->thumb_gap));
+		y = flower ? 0 : top;
+		auto *text = pan_item_text_new(pw, x, y, folder->path, PAN_TEXT_ATTR_NONE, PAN_TEXT_BORDER, PAN_TEXT_COLOR);
+		y += text->height;
+		box = pan_item_box_new(pw, file_data_ref(folder), x, y, PAN_BOX_BORDER * (flower ? 2 : 1),
+							   PAN_BOX_BORDER * (flower ? 2 : 1), PAN_BOX_COLOR, PAN_BOX_OUTLINE_THICKNESS,
+							   PAN_BOX_OUTLINE_COLOR);
+		x += PAN_BOX_BORDER;
+		y += PAN_BOX_BORDER;
+		start_x = x;
+		columns = static_cast<gint>(sqrt(g_list_length(files.list)) + 0.9);
+		return true;
+	}
+
+	void add_file(PanWindow *pw, FileData *fd, bool flower)
+	{
+		PanItem *item;
 		if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
 			{
-			pi = pan_item_image_new(pw, fd, x, y, 10, 10);
-			x += pi->width + pw->thumb_gap;
-			y_height = std::max(pi->height, y_height);
+			item = pan_item_image_new(pw, fd, x, y, 10, 10);
+			x += item->width + pw->thumb_gap;
+			row_height = std::max(item->height, row_height);
 			}
 		else
 			{
-			pi = pan_item_thumb_new(pw, fd, x, y);
+			item = pan_item_thumb_new(pw, fd, x, y);
 			x += pw->thumb_size + pw->thumb_gap;
-			y_height = pw->thumb_size;
+			row_height = pw->thumb_size;
 			}
-
-		grid_count++;
-		if (grid_count >= grid_size)
+		if (flower && ++column >= columns)
 			{
-			grid_count = 0;
-			x = x_start;
-			y += y_height + pw->thumb_gap;
-			y_height = 0;
+			column = 0;
+			x = start_x;
+			y += row_height + pw->thumb_gap;
+			row_height = 0;
 			}
+		box->set_size_by_item(item, PAN_BOX_BORDER);
+	}
+};
 
-		pi_box->set_size_by_item(pi, PAN_BOX_BORDER);
-		}
-
-	auto group = std::make_unique<FlowerGroup>();
-	group->items.splice(group->items.cend(), pw->list);
-
-	group->width = pi_box->width;
-	group->height = pi_box->y + pi_box->height;
-	group->diameter = static_cast<gint>(hypot(group->width, group->height));
-
-	work = d;
-	while (work)
-		{
-		FileData *fd;
-		FlowerGroup *child;
-
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
-
-		if (!pan_is_ignored(fd->path, pw->ignore_symlinks))
-			{
-			child = pan_flower_group(pw, fd, 0, 0);
-			if (child) group->children.push_back(child);
-			}
-		}
-
-	if (!f && group->children.empty())
-		{
-		pan_item_list_clear(group->items);
-		return nullptr;
-		}
-
-	return group.release();
-}
-
-void pan_flower_compute(PanWindow *pw, gint &width, gint &height,
-                        gint &scroll_x, gint &scroll_y)
+struct FolderState
 {
-	FlowerGroup *group = pan_flower_group(pw, pw->dir_fd, 0, 0);
-	if (group)
-		{
-		pan_flower_build(pw, group, nullptr);
-		}
+	std::vector<std::unique_ptr<FolderFrame>> stack;
+	gint y = PAN_BOX_BORDER;
+	explicit FolderState(FileData *root)
+	{
+		stack.push_back(std::make_unique<FolderFrame>(root, 0));
+	}
+	void descend(FolderFrame &frame)
+	{
+		auto *fd = frame.dirs.take();
+		stack.push_back(std::make_unique<FolderFrame>(fd, frame.level + 1));
+		file_data_unref(fd);
+	}
+};
 
-	pan_flower_size(pw, width, height);
+}  // namespace
 
-	PanItem *pi = pan_item_find_by_fd(pw, PAN_ITEM_BOX, pw->dir_fd, FALSE, FALSE);
-	if (pi)
-		{
-		scroll_x = pi->x + (pi->width / 2);
-		scroll_y = pi->y + (pi->height / 2);
-		}
-}
-
-static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
-                                 gint &x, gint &y, gint level,
-                                 PanItem *parent,
-                                 gint &width, gint &height)
+std::function<bool()> pan_flower_compute(PanWindow *pw, gint &width, gint &height, gint &scroll_x, gint &scroll_y)
 {
-	GList *f;
-	GList *d;
-	GList *work;
-	PanItem *pi_box;
-	gint y_height = 0;
-
-	if (!filelist_read(dir_fd, &f, &d)) return;
-	if (!f && !d) return;
-
-	f = filelist_sort(f, {SORT_NAME, TRUE, TRUE});
-	d = filelist_sort(d, {SORT_NAME, TRUE, TRUE});
-
-	f = pan_filter_fd_list(f, pw->filter_ui);
-
-	x = PAN_BOX_BORDER + (level * std::max(PAN_BOX_BORDER, pw->thumb_gap));
-
-	pi_box = pan_item_text_new(pw, x, y, dir_fd->path, PAN_TEXT_ATTR_NONE,
-	                           PAN_TEXT_BORDER, PAN_TEXT_COLOR);
-
-	y += pi_box->height;
-
-	pi_box = pan_item_box_new(pw, file_data_ref(dir_fd),
-	                          x, y, PAN_BOX_BORDER, PAN_BOX_BORDER, PAN_BOX_COLOR,
-	                          PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
-
-	x += PAN_BOX_BORDER;
-	y += PAN_BOX_BORDER;
-
-	work = f;
-	while (work)
-		{
-		FileData *fd;
-		PanItem *pi;
-
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
-
-		if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
-			{
-			pi = pan_item_image_new(pw, fd, x, y, 10, 10);
-			x += pi->width + pw->thumb_gap;
-			y_height = std::max(pi->height, y_height);
-			}
-		else
-			{
-			pi = pan_item_thumb_new(pw, fd, x, y);
-			x += pw->thumb_size + pw->thumb_gap;
-			y_height = pw->thumb_size;
-			}
-
-		pi_box->set_size_by_item(pi, PAN_BOX_BORDER);
-		}
-
-	if (f) y = pi_box->y + pi_box->height;
-
-	g_list_free(f);
-
-	work = d;
-	while (work)
-		{
-		FileData *fd;
-
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
-
-		if (!pan_is_ignored(fd->path, pw->ignore_symlinks))
-			{
-			pan_folder_tree_path(pw, fd, x, y, level + 1, pi_box, width, height);
-			}
-		}
-
-	file_data_list_free(d);
-
-	if (parent) parent->set_size_by_item(pi_box, PAN_BOX_BORDER);
-
-	y = std::max(y, pi_box->y + pi_box->height + PAN_BOX_BORDER);
-
-	pi_box->adjust_size(PAN_BOX_BORDER, width, height);
-}
-
-void pan_folder_tree_compute(PanWindow *pw, gint &width, gint &height)
-{
-	gint x;
-	gint y;
-
-	x = PAN_BOX_BORDER;
-	y = PAN_BOX_BORDER;
+	auto state = std::make_shared<FolderState>(pw->dir_fd);
 	width = PAN_BOX_BORDER * 2;
 	height = PAN_BOX_BORDER * 2;
+	return [pw, state, &width, &height, &scroll_x, &scroll_y]()
+		{
+		if (state->stack.empty()) return true;
+		auto &frame = *state->stack.back();
+		if (!frame.initialized)
+			{
+			if (!frame.initialize(pw, true, 0)) state->stack.pop_back();
+			return false;
+			}
+		if (auto *fd = frame.files.take())
+			{
+			frame.add_file(pw, fd, true);
+			return false;
+			}
+		if (!frame.group)
+			{
+			frame.group = new FlowerGroup();
+			frame.group->items.splice(frame.group->items.cend(), pw->list);
+			frame.group->width = frame.box->width;
+			frame.group->height = frame.box->y + frame.box->height;
+			frame.group->diameter = static_cast<gint>(hypot(frame.group->width, frame.group->height));
+			}
+		if (frame.dirs.list)
+			{
+			state->descend(frame);
+			return false;
+			}
+		auto *group = frame.group;
+		frame.group = nullptr;
+		const bool empty = !frame.has_files && group->children.empty();
+		state->stack.pop_back();
+		if (empty)
+			{
+			flower_group_free(group);
+			return false;
+			}
+		if (!state->stack.empty())
+			{
+			state->stack.back()->group->children.push_back(group);
+			return false;
+			}
+		pan_flower_build(pw, group, nullptr);
+		pan_flower_size(pw, width, height);
+		if (auto *item = pan_item_find_by_fd(pw, PAN_ITEM_BOX, pw->dir_fd, FALSE, FALSE))
+			{
+			scroll_x = item->x + (item->width / 2);
+			scroll_y = item->y + (item->height / 2);
+			}
+		return true;
+		};
+}
 
-	pan_folder_tree_path(pw, pw->dir_fd, x, y, 0, nullptr, width, height);
+std::function<bool()> pan_folder_tree_compute(PanWindow *pw, gint &width, gint &height)
+{
+	auto state = std::make_shared<FolderState>(pw->dir_fd);
+	width = PAN_BOX_BORDER * 2;
+	height = PAN_BOX_BORDER * 2;
+	return [pw, state, &width, &height]()
+		{
+		if (state->stack.empty()) return true;
+		auto &frame = *state->stack.back();
+		if (!frame.initialized)
+			{
+			if (!frame.initialize(pw, false, state->y)) state->stack.pop_back();
+			return false;
+			}
+		if (auto *fd = frame.files.take())
+			{
+			frame.add_file(pw, fd, false);
+			return false;
+			}
+		if (!frame.files_done)
+			{
+			frame.files_done = true;
+			state->y = frame.has_files ? frame.box->y + frame.box->height : frame.y;
+			}
+		if (frame.dirs.list)
+			{
+			state->descend(frame);
+			return false;
+			}
+		if (state->stack.size() > 1)
+			state->stack[state->stack.size() - 2]->box->set_size_by_item(frame.box, PAN_BOX_BORDER);
+		state->y = std::max(state->y, frame.box->y + frame.box->height + PAN_BOX_BORDER);
+		frame.box->adjust_size(PAN_BOX_BORDER, width, height);
+		state->stack.pop_back();
+		return false;
+		};
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

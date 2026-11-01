@@ -268,3 +268,12 @@ For a backtrace, run a debug build under GDB and use `thread apply all bt` when
 it stops at the fault, or inspect the core dump with a debugger. Signal-handler
 regression tests run in child processes with core dumps disabled and verify
 termination from both the main thread and a worker thread.
+
+### Pan View indexing
+
+With unit tests enabled, run the `PanIndexing.*` tests under `xvfb-run`.
+They create a temporary tree containing 6,001 images and build every Pan View
+layout while a main-loop heartbeat checks responsiveness. The tests also compare
+spatial-index queries against a full item scan, check sidecar grouping and hidden
+file rules, and cancel, restart, and close windows with indexing pending.
+Temporary trees are removed by the fixtures.

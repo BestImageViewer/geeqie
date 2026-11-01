@@ -22,12 +22,14 @@
 #ifndef PAN_VIEW_PAN_FOLDER_H
 #define PAN_VIEW_PAN_FOLDER_H
 
+#include <functional>
+
 #include <glib.h>
 
 struct PanWindow;
 
-void pan_flower_compute(PanWindow *pw, gint &width, gint &height,
+std::function<bool()> pan_flower_compute(PanWindow *pw, gint &width, gint &height,
                         gint &scroll_x, gint &scroll_y);
-void pan_folder_tree_compute(PanWindow *pw, gint &width, gint &height);
+std::function<bool()> pan_folder_tree_compute(PanWindow *pw, gint &width, gint &height);
 
 #endif

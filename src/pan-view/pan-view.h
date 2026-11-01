@@ -32,6 +32,26 @@
 struct GqSize;
 
 void pan_layout_update(PanWindow *pw);
+void pan_layout_cancel(PanWindow *pw);
+bool pan_read_directory(PanWindow *pw, FileData *directory, GList **files, GList **dirs);
+
+/** Own the unconsumed references of an incremental layout. take() transfers one reference. */
+class PanLayoutFiles
+{
+public:
+	explicit PanLayoutFiles(GList *files = nullptr) : list(files) {}
+	~PanLayoutFiles() { file_data_list_free(list); }
+	PanLayoutFiles(const PanLayoutFiles &) = delete;
+	PanLayoutFiles &operator=(const PanLayoutFiles &) = delete;
+	FileData *take()
+		{
+		if (!list) return nullptr;
+		auto *fd = static_cast<FileData *>(list->data);
+		list = g_list_delete_link(list, list);
+		return fd;
+		}
+	GList *list;
+};
 PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height);
 void pan_layout_resize(PanWindow *pw);
 

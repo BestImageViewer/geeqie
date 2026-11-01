@@ -22,7 +22,10 @@
 #ifndef PAN_VIEW_PAN_TYPES_H
 #define PAN_VIEW_PAN_TYPES_H
 
+#include <functional>
 #include <list>
+#include <memory>
+#include <unordered_map>
 
 #include <gtk/gtk.h>
 
@@ -30,6 +33,8 @@
 #include "gq-color.h"
 #include "filedata.h"
 
+class PanIndex;
+struct PanCacheData;
 struct FullScreenData;
 struct ImageWindow;
 struct PanViewFilterUi;
@@ -144,6 +149,8 @@ struct PanItem {
 
 using PanItemList = std::list<PanItem *>;
 
+enum class PanBuildPhase { Scanning, Cache, Layout, Grid, Complete, Cancelled };
+
 struct PanWindow
 {
 	GtkWidget *window;
@@ -154,6 +161,7 @@ struct PanWindow
 	GtkWidget *path_entry;
 
 	GtkWidget *label_message;
+	GtkWidget *cancel_button;
 	GtkWidget *label_zoom;
 
 	GtkWidget *menu;
@@ -198,6 +206,15 @@ struct PanWindow
 	PanItem *click_pi;
 	PanItem *search_pi;
 
+	std::shared_ptr<PanIndex> index;
+	std::function<bool()> layout_step;
+	std::function<bool()> grid_step;
+	std::unordered_map<const FileData *, PanCacheData *> cache_by_file;
+	PanBuildPhase build_phase = PanBuildPhase::Scanning;
+	gint layout_width = 0;
+	gint layout_height = 0;
+	gint layout_scroll_x = 0;
+	gint layout_scroll_y = 0;
 	gint idle_id;
 };
 

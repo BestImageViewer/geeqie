@@ -37,6 +37,8 @@
 
 #include "filedata.h"
 #include "geometry.h"
+#include <sys/stat.h>
+
 #include "pan-item.h"
 #include "pan-types.h"
 #include "pan-util.h"
@@ -207,225 +209,164 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	pan_layout_resize(pw);
 }
 
-void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
+std::function<bool()> pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 {
-	GList *work;
-	gint x;
-	gint y;
-	time_t tc;
-	gint count;
-	gint day_max;
-	gint grid;
-	gint year = 0;
-	gint month = 0;
-	gint end_year = 0;
-	gint end_month = 0;
-	gint day_of_week;
-
-	g_autoptr(GList) list = pan_list_tree_filtered(pw, SORT_NONE);
-	list = pan_cache_sync_list(pw, list);
-
-	day_max = 0;
-	count = 0;
-	tc = 0;
-	work = list;
-	while (work)
-		{
-		FileData *fd;
-
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
-
-		if (!pan_date_compare(fd->date, tc, PAN_DATE_LENGTH_DAY))
-			{
-			count = 0;
-			tc = fd->date;
-			}
-		else
-			{
-			count++;
-			day_max = std::max(day_max, count);
-			}
-		}
-
-	DEBUG_1("biggest day contains %d images", day_max);
-
-	grid = static_cast<gint>(sqrt(static_cast<gdouble>(day_max)) + 0.5) * (pw->thumb_size + PAN_SHADOW_OFFSET * 2 + pw->thumb_gap);
-
-	if (list)
-		{
-		auto fd = static_cast<FileData *>(list->data);
-
-		year = pan_date_value(fd->date, PAN_DATE_LENGTH_YEAR);
-		month = pan_date_value(fd->date, PAN_DATE_LENGTH_MONTH);
-		}
-
-	work = g_list_last(list);
-	if (work)
-		{
-		auto fd = static_cast<FileData *>(work->data);
-		end_year = pan_date_value(fd->date, PAN_DATE_LENGTH_YEAR);
-		end_month = pan_date_value(fd->date, PAN_DATE_LENGTH_MONTH);
-		}
-
+	struct State
+	{
+		PanLayoutFiles files;
+		GList *counting;
+		time_t previous = 0;
+		gint count = 0, day_max = 0, grid = 0;
+		gint year = 0, month = 0, end_year = 0, end_month = 0;
+		gint x = PAN_BOX_BORDER, y = PAN_BOX_BORDER;
+		gint day = 1, days = 0, col = 0, dx = 0, dy = 0, n = 0;
+		time_t date = 0;
+		PanItem *pi_day = nullptr;
+		gint phase = 0;
+		explicit State(GList *list) : files(list), counting(list) {}
+	};
+	auto state = std::make_shared<State>(pan_cache_sync_list(pw, pan_list_tree_filtered(pw, SORT_NONE)));
 	width = PAN_BOX_BORDER * 2;
 	height = PAN_BOX_BORDER * 2;
-
-	x = PAN_BOX_BORDER;
-	y = PAN_BOX_BORDER;
-
-	work = list;
-	while (work && (year < end_year || (year == end_year && month <= end_month)))
+	return [pw, state, &width, &height]()
 		{
-		PanItem *pi_month;
-		PanItem *pi_text;
-		PanItem *pi_day_number;
-		gint day;
-		gint days;
-		gint col;
-		time_t dt;
-
-		/* figure last second of this month */
-		dt = pan_date_to_time((month == 12) ? year + 1 : year, (month == 12) ? 1 : month + 1, 1);
-		dt -= 60 * 60 * 24;
-
-		/* anything to show this month? */
-		if (!pan_date_compare((static_cast<FileData *>(work->data))->date, dt, PAN_DATE_LENGTH_MONTH))
+		auto &s = *state;
+		if (s.phase == 0)
 			{
-			month ++;
-			if (month > 12)
+			if (s.counting)
 				{
-				year++;
-				month = 1;
-				}
-			continue;
-			}
-
-		days = pan_date_value(dt, PAN_DATE_LENGTH_DAY);
-		dt = pan_date_to_time(year, month, 1);
-		col = pan_date_value(dt, PAN_DATE_LENGTH_WEEK);
-		col = col - (date_get_first_day_of_week() - 1);
-		if (col < 0) col = col + 7;
-
-		x = PAN_BOX_BORDER;
-
-		pi_month = pan_item_box_new(pw, nullptr, x, y, PAN_CAL_DAY_WIDTH * 7, PAN_CAL_DAY_HEIGHT / 4,
-		                            PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_BORDER, PAN_CAL_MONTH_BORDER_COLOR);
-		g_autofree gchar *month_buf = pan_date_value_string(dt, PAN_DATE_LENGTH_MONTH);
-		pi_text = pan_item_text_new(pw, x, y, month_buf, PAN_TEXT_ATTR_BOLD_HEADING,
-		                            PAN_TEXT_BORDER, PAN_CAL_MONTH_TEXT_COLOR);
-		pi_text->x = pi_month->x + ((pi_month->width - pi_text->width) / 2);
-
-		pi_month->height = pi_text->y + pi_text->height - pi_month->y;
-
-		x = PAN_BOX_BORDER + (col * PAN_CAL_DAY_WIDTH);
-		y = pi_month->y + pi_month->height + PAN_BOX_BORDER;
-
-		for (day = 1; day <= days; day++)
-			{
-			FileData *fd;
-			PanItem *pi_day;
-			gint dx;
-			gint dy;
-			gint n = 0;
-			gchar fake_path[20];
-
-			dt = pan_date_to_time(year, month, day);
-
-			/*
-			 * Create a FileData entry that represents the given day.
-			 * It does not correspond to any real file
-			 */
-
-			g_snprintf(fake_path, sizeof(fake_path), "//%04d-%02d-%02d", year, month, day);
-			fd = file_data_new_no_grouping(fake_path);
-			fd->date = dt;
-			pi_day = pan_item_box_new(pw, fd, x, y, PAN_CAL_DAY_WIDTH, PAN_CAL_DAY_HEIGHT,
-			                          PAN_CAL_DAY_COLOR, PAN_CAL_DAY_BORDER, PAN_CAL_DAY_BORDER_COLOR);
-			pi_day->set_key(PanKey::Day);
-
-			dx = x + (PAN_CAL_DOT_GAP * 2);
-			dy = y + (PAN_CAL_DOT_GAP * 2);
-
-			fd = static_cast<FileData *>((work) ? work->data : nullptr);
-			while (fd && pan_date_compare(fd->date, dt, PAN_DATE_LENGTH_DAY))
-				{
-				PanItem *pi;
-
-				pi = pan_item_box_new(pw, fd, dx, dy, PAN_CAL_DOT_SIZE, PAN_CAL_DOT_SIZE,
-				                      PAN_CAL_DOT_COLOR, 0, {0, 0, 0, 0});
-				pi->set_key(PanKey::Dot);
-
-				dx += PAN_CAL_DOT_SIZE + PAN_CAL_DOT_GAP;
-				if (dx + PAN_CAL_DOT_SIZE > pi_day->x + pi_day->width - (PAN_CAL_DOT_GAP * 2))
+				auto *fd = static_cast<FileData *>(s.counting->data);
+				s.counting = s.counting->next;
+				if (!pan_date_compare(fd->date, s.previous, PAN_DATE_LENGTH_DAY))
 					{
-					dx = x + (PAN_CAL_DOT_GAP * 2);
-					dy += PAN_CAL_DOT_SIZE + PAN_CAL_DOT_GAP;
+					s.count = 0;
+					s.previous = fd->date;
 					}
-				if (dy + PAN_CAL_DOT_SIZE > pi_day->y + pi_day->height - (PAN_CAL_DOT_GAP * 2))
-					{
-					/* must keep all dots within respective day even if it gets ugly */
-					dy = y + (PAN_CAL_DOT_GAP * 2);
-					}
-
-				n++;
-
-				work = work->next;
-				fd = static_cast<FileData *>((work) ? work->data : nullptr);
+				else
+					s.day_max = std::max(s.day_max, ++s.count);
+				return false;
 				}
-
-			if (n > 0)
+			s.grid = static_cast<gint>(sqrt(static_cast<gdouble>(s.day_max)) + 0.5) *
+					 (pw->thumb_size + PAN_SHADOW_OFFSET * 2 + pw->thumb_gap);
+			if (s.files.list)
 				{
-				PanItem *pi;
-
-				pi_day->color.r = std::max(pi_day->color.r - 61 - (n * 3), 80);
-				pi_day->color.g = pi_day->color.r;
-
-				g_autofree gchar *day_buf = g_strdup_printf("( %d )", n);
-				pi = pan_item_text_new(pw, x, y, day_buf, PAN_TEXT_ATTR_NONE,
-				                       PAN_TEXT_BORDER, PAN_CAL_DAY_TEXT_COLOR);
-
-				pi->x = pi_day->x + ((pi_day->width - pi->width) / 2);
-				pi->y = pi_day->y + ((pi_day->height - pi->height) / 2);
+				auto *first = static_cast<FileData *>(s.files.list->data);
+				auto *last = static_cast<FileData *>(g_list_last(s.files.list)->data);
+				s.year = pan_date_value(first->date, PAN_DATE_LENGTH_YEAR);
+				s.month = pan_date_value(first->date, PAN_DATE_LENGTH_MONTH);
+				s.end_year = pan_date_value(last->date, PAN_DATE_LENGTH_YEAR);
+				s.end_month = pan_date_value(last->date, PAN_DATE_LENGTH_MONTH);
 				}
-
-			pi_day_number = pan_item_text_new(pw, x + 4, y + 4, std::to_string(day).c_str(),
-			                                  PAN_TEXT_ATTR_BOLD_HEADING, PAN_TEXT_BORDER, PAN_CAL_DAY_TEXT_COLOR);
-
-			day_of_week = date_get_first_day_of_week() + col;
-			if (day_of_week > 7) day_of_week = day_of_week - 7;
-
-			const gchar *abbr_day_of_week = date_get_abbreviated_day_name(day_of_week);
-			pan_item_text_new(pw, x + 4 + pi_day_number->width + 4, y + 4, abbr_day_of_week,
-			                  PAN_TEXT_ATTR_NONE, PAN_TEXT_BORDER, PAN_CAL_DAY_OF_WEEK_COLOR);
-
-			pi_day->adjust_size(PAN_BOX_BORDER, width, height);
-
-			col++;
-			if (col > 6)
-				{
-				col = 0;
-				x = PAN_BOX_BORDER;
-				y += PAN_CAL_DAY_HEIGHT;
-				}
-			else
-				{
-				x += PAN_CAL_DAY_WIDTH;
-				}
+			s.phase = 1;
 			}
-
-		if (col > 0) y += PAN_CAL_DAY_HEIGHT;
-		y += PAN_BOX_BORDER * 2;
-
-		month ++;
-		if (month > 12)
+		if (s.phase == 1)
 			{
-			year++;
-			month = 1;
+			if (!s.files.list || s.year > s.end_year || (s.year == s.end_year && s.month > s.end_month))
+				{
+				width += s.grid;
+				height = std::max(height, s.grid + (PAN_BOX_BORDER * 4));
+				return true;
+				}
+			time_t last_day =
+				pan_date_to_time(s.month == 12 ? s.year + 1 : s.year, s.month == 12 ? 1 : s.month + 1, 1) - 86400;
+			if (!pan_date_compare(static_cast<FileData *>(s.files.list->data)->date, last_day, PAN_DATE_LENGTH_MONTH))
+				{
+				if (++s.month > 12)
+					{
+					++s.year;
+					s.month = 1;
+					}
+				return false;
+				}
+			s.days = pan_date_value(last_day, PAN_DATE_LENGTH_DAY);
+			s.date = pan_date_to_time(s.year, s.month, 1);
+			s.col = pan_date_value(s.date, PAN_DATE_LENGTH_WEEK) - (date_get_first_day_of_week() - 1);
+			if (s.col < 0) s.col += 7;
+			auto *month =
+				pan_item_box_new(pw, nullptr, PAN_BOX_BORDER, s.y, PAN_CAL_DAY_WIDTH * 7, PAN_CAL_DAY_HEIGHT / 4,
+								 PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_BORDER, PAN_CAL_MONTH_BORDER_COLOR);
+			g_autofree gchar *label = pan_date_value_string(s.date, PAN_DATE_LENGTH_MONTH);
+			auto *text = pan_item_text_new(pw, PAN_BOX_BORDER, s.y, label, PAN_TEXT_ATTR_BOLD_HEADING, PAN_TEXT_BORDER,
+										   PAN_CAL_MONTH_TEXT_COLOR);
+			text->x = month->x + ((month->width - text->width) / 2);
+			month->height = text->y + text->height - month->y;
+			s.x = PAN_BOX_BORDER + (s.col * PAN_CAL_DAY_WIDTH);
+			s.y = month->y + month->height + PAN_BOX_BORDER;
+			s.day = 1;
+			s.phase = 2;
+			return false;
 			}
-		}
-
-	width += grid;
-	height = std::max(height, grid + (PAN_BOX_BORDER * 2 * 2));
+		if (s.phase == 2)
+			{
+			s.date = pan_date_to_time(s.year, s.month, s.day);
+			g_autofree gchar *path = g_strdup_printf("//%04d-%02d-%02d", s.year, s.month, s.day);
+			// These calendar entries are synthetic and never require filesystem access.
+			struct stat attributes{};
+			auto fd = FileData::new_from_stat(path, attributes);
+			fd->date = s.date;
+			s.pi_day = pan_item_box_new(pw, fd.release(), s.x, s.y, PAN_CAL_DAY_WIDTH, PAN_CAL_DAY_HEIGHT,
+										PAN_CAL_DAY_COLOR, PAN_CAL_DAY_BORDER, PAN_CAL_DAY_BORDER_COLOR);
+			s.pi_day->set_key(PanKey::Day);
+			s.dx = s.x + (PAN_CAL_DOT_GAP * 2);
+			s.dy = s.y + (PAN_CAL_DOT_GAP * 2);
+			s.n = 0;
+			s.phase = 3;
+			return false;
+			}
+		if (s.files.list &&
+			pan_date_compare(static_cast<FileData *>(s.files.list->data)->date, s.date, PAN_DATE_LENGTH_DAY))
+			{
+			auto *dot = pan_item_box_new(pw, s.files.take(), s.dx, s.dy, PAN_CAL_DOT_SIZE, PAN_CAL_DOT_SIZE,
+										 PAN_CAL_DOT_COLOR, 0, {0, 0, 0, 0});
+			dot->set_key(PanKey::Dot);
+			s.dx += PAN_CAL_DOT_SIZE + PAN_CAL_DOT_GAP;
+			if (s.dx + PAN_CAL_DOT_SIZE > s.pi_day->x + s.pi_day->width - (PAN_CAL_DOT_GAP * 2))
+				{
+				s.dx = s.x + (PAN_CAL_DOT_GAP * 2);
+				s.dy += PAN_CAL_DOT_SIZE + PAN_CAL_DOT_GAP;
+				}
+			if (s.dy + PAN_CAL_DOT_SIZE > s.pi_day->y + s.pi_day->height - (PAN_CAL_DOT_GAP * 2))
+				s.dy = s.y + (PAN_CAL_DOT_GAP * 2);
+			++s.n;
+			return false;
+			}
+		if (s.n)
+			{
+			s.pi_day->color.r = std::max(s.pi_day->color.r - 61 - (s.n * 3), 80);
+			s.pi_day->color.g = s.pi_day->color.r;
+			g_autofree gchar *label = g_strdup_printf("( %d )", s.n);
+			auto *text =
+				pan_item_text_new(pw, s.x, s.y, label, PAN_TEXT_ATTR_NONE, PAN_TEXT_BORDER, PAN_CAL_DAY_TEXT_COLOR);
+			text->x = s.pi_day->x + ((s.pi_day->width - text->width) / 2);
+			text->y = s.pi_day->y + ((s.pi_day->height - text->height) / 2);
+			}
+		auto *number = pan_item_text_new(pw, s.x + 4, s.y + 4, std::to_string(s.day).c_str(),
+										 PAN_TEXT_ATTR_BOLD_HEADING, PAN_TEXT_BORDER, PAN_CAL_DAY_TEXT_COLOR);
+		gint weekday = date_get_first_day_of_week() + s.col;
+		if (weekday > 7) weekday -= 7;
+		pan_item_text_new(pw, s.x + 4 + number->width + 4, s.y + 4, date_get_abbreviated_day_name(weekday),
+						  PAN_TEXT_ATTR_NONE, PAN_TEXT_BORDER, PAN_CAL_DAY_OF_WEEK_COLOR);
+		s.pi_day->adjust_size(PAN_BOX_BORDER, width, height);
+		if (++s.col > 6)
+			{
+			s.col = 0;
+			s.x = PAN_BOX_BORDER;
+			s.y += PAN_CAL_DAY_HEIGHT;
+			}
+		else
+			s.x += PAN_CAL_DAY_WIDTH;
+		s.phase = 2;
+		if (++s.day > s.days)
+			{
+			if (s.col > 0) s.y += PAN_CAL_DAY_HEIGHT;
+			s.y += PAN_BOX_BORDER * 2;
+			if (++s.month > 12)
+				{
+				++s.year;
+				s.month = 1;
+				}
+			s.phase = 1;
+			}
+		return false;
+		};
 }
-/* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

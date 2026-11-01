@@ -49,6 +49,21 @@
  *-----------------------------------------------------------------------------
  */
 
+GList *FileData::FileList::group_sidecars(GList *list)
+{
+	auto *hash = file_data_basename_hash_new();
+	for (bool xmp : {false, true})
+		for (auto *work = list; work; work = work->next)
+			{
+			auto *fd = static_cast<FileData *>(work->data);
+			if (fd->sidecar_priority && !fd->disable_grouping && (strcmp(fd->extension, ".xmp") == 0) == xmp)
+				file_data_basename_hash_insert(hash, fd);
+			}
+	g_hash_table_foreach(hash, file_data_basename_hash_to_sidecars, nullptr);
+	file_data_basename_hash_free(hash);
+	return filter_out_sidecars(list);
+}
+
 GList *FileData::FileList::filter_out_sidecars(GList *flist)
 {
 	GList *work = flist;

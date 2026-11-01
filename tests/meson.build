@@ -39,6 +39,7 @@ unit_test_sources = files(
 'layout-image-selection.cc',
 'metadata-description.cc',
 'metadata-template.cc',
+'pan-view.cc',
 'pixbuf-util.cc',
 'print.cc',
 'print-image.cc',

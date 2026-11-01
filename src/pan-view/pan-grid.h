@@ -22,10 +22,12 @@
 #ifndef PAN_VIEW_PAN_GRID_H
 #define PAN_VIEW_PAN_GRID_H
 
+#include <functional>
+
 #include <glib.h>
 
 struct PanWindow;
 
-void pan_grid_compute(PanWindow *pw, gint &width, gint &height);
+std::function<bool()> pan_grid_compute(PanWindow *pw, gint &width, gint &height);
 
 #endif

@@ -24,6 +24,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <utility>
+#include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -58,6 +60,7 @@
 #include "pan-calendar.h"
 #include "pan-folder.h"
 #include "pan-grid.h"
+#include "pan-index.h"
 #include "pan-item.h"
 #include "pan-timeline.h"
 #include "pan-types.h"
@@ -75,13 +78,13 @@
 #include "utilops.h"
 #include "window.h"
 
-namespace
-{
-
 struct PanCacheData {
 	FileDataRef fd_ref{nullptr};
 	std::unique_ptr<CacheData> cd;
 };
+
+namespace
+{
 
 struct PanGrid {
 	GdkRectangle rect;
@@ -431,21 +434,9 @@ static void pan_window_zoom_limit(PanWindow *pw)
  *-----------------------------------------------------------------------------
  */
 
-static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b, gpointer data)
-{
-	auto pca = static_cast<const PanCacheData *>(a);
-	auto pcb = static_cast<const PanCacheData *>(b);
-	auto settings = static_cast<FileData::FileList::SortSettings *>(data);
-	return filelist_sort_compare_filedata(pca->fd_ref, pcb->fd_ref, settings);
-}
-
-static void pan_cache_sort(PanWindow *pw, FileData::FileList::SortSettings settings)
-{
-	pw->cache_list = g_list_sort_with_data(pw->cache_list, pan_cache_sort_file_cb, &settings);
-}
-
 static void pan_cache_free(PanWindow *pw)
 {
+	pw->cache_by_file.clear();
 	g_clear_list(&pw->cache_list, delete_cb<PanCacheData>);
 
 	file_data_list_free(pw->cache_todo);
@@ -502,6 +493,8 @@ static gboolean pan_cache_step(PanWindow *pw)
 
 	auto *pc = new PanCacheData();
 	pc->fd_ref.reset(fd);
+	file_data_unref(fd);
+	pw->cache_by_file[fd] = pc;
 
 	pw->cache_list = g_list_prepend(pw->cache_list, pc);
 
@@ -518,52 +511,19 @@ static gboolean pan_cache_step(PanWindow *pw)
 /* This sync date function is optimized for lists with a common sort */
 static void pan_cache_sync_date(const PanWindow *pw, GList *list)
 {
-	static const auto pan_cache_data_compare_fd = [](gconstpointer data, gconstpointer user_data)
-	{
-		auto *pc = static_cast<const PanCacheData *>(data);
-		return (*(pc->fd_ref) == user_data) ? 0 : 1;
-	};
-
-	g_autoptr(GList) haystack = g_list_copy(pw->cache_list);
-
-	for (GList *work = list; work; work = work->next)
+	for (auto *work = list; work; work = work->next)
 		{
 		auto *fd = static_cast<FileData *>(work->data);
-
-		GList *needle = g_list_find_custom(haystack, fd, pan_cache_data_compare_fd);
-		if (needle)
-			{
-			auto *pc = static_cast<PanCacheData *>(needle->data);
-
-			if (pc->cd)
-				{
-				const time_t date = pc->cd->date.value_or(-1);
-
-				if (date >= 0)
-					{
-					fd->date = date;
-					}
-				}
-
-			haystack = g_list_delete_link(haystack, needle);
-			}
+		auto found = pw->cache_by_file.find(fd);
+		if (found == pw->cache_by_file.end() || !found->second->cd) continue;
+		const auto date = found->second->cd->date;
+		if (date && *date >= 0) fd->date = *date;
 		}
 }
 
 GList *pan_cache_sync_list(PanWindow *pw, GList *list)
 {
-	if (pw->cache_list)
-		{
-		if (pw->exif_date_enable)
-			{
-			pan_cache_sort(pw, {SORT_NAME, TRUE, TRUE});
-			list = filelist_sort(list, {SORT_NAME, TRUE, TRUE});
-
-			pan_cache_sync_date(pw, list);
-			}
-
-		pan_cache_sort(pw, {SORT_TIME, TRUE, TRUE});
-		}
+	if (pw->exif_date_enable) pan_cache_sync_date(pw, list);
 
 	return filelist_sort(list, {SORT_TIME, TRUE, TRUE});
 }
@@ -572,24 +532,9 @@ std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd
 {
 	if (!fd) return {};
 
-	const auto pan_cache_data_cd_dimensions_compare_fd = [](gconstpointer data, gconstpointer user_data)
-	{
-		auto *pc = static_cast<const PanCacheData *>(data);
-		return (pc->cd && pc->cd->dimensions && *(pc->fd_ref) == user_data) ? 0 : 1;
-	};
-
-	GList *work = g_list_find_custom(pw->cache_list, fd, pan_cache_data_cd_dimensions_compare_fd);
-	if (!work) return {};
-
-	auto *pc = static_cast<PanCacheData *>(work->data);
-
-	// pc->cd->dimensions was checked in pan_cache_data_cd_dimensions_compare_fd()
-	const GqSize size = pc->cd->dimensions.value(); // NOLINT(bugprone-unchecked-optional-access)
-
-	pw->cache_list = g_list_remove(pw->cache_list, pc);
-	delete pc;
-
-	return size;
+	auto found = pw->cache_by_file.find(fd);
+	if (found == pw->cache_by_file.end() || !found->second->cd) return {};
+	return found->second->cd->dimensions;
 }
 
 /*
@@ -606,70 +551,56 @@ static void pan_grid_clear(PanWindow *pw)
 	pw->list.splice(pw->list.end(), pw->list_static);
 }
 
-static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_size)
+static std::function<bool()> pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_size)
 {
-	gint col;
-	gint row;
-	gint cw;
-	gint ch;
-	gint i;
-	gint j;
-
 	pan_grid_clear(pw);
-
-	if (pw->list.empty()) return;
-
-	const gint l = pw->list.size();
-
-	col = static_cast<gint>((sqrt(static_cast<gdouble>(l) / grid_size) * width / height) + 0.999);
-	col = std::clamp(col, 1, (l / grid_size) + 1);
-	row = static_cast<gint>(static_cast<gdouble>(l) / grid_size / col);
-	row = std::max(row, 1);
-
-	/* limit minimum size of grid so that a tile will always fit regardless of position */
-	cw = std::max<gint>(ceil(static_cast<gdouble>(width) / col), PAN_TILE_SIZE * 2);
-	ch = std::max<gint>(ceil(static_cast<gdouble>(height) / row), PAN_TILE_SIZE * 2);
-
-	row = (row * 2) - 1;
-	col = (col * 2) - 1;
-
-	DEBUG_1("intersect speedup grid is %dx%d, based on %d average per grid", col, row, grid_size);
-
-	for (j = 0; j < row; j++)
-	    for (i = 0; i < col; i++)
-		{
-		if ((i + 1) * cw / 2 < width && (j + 1) * ch / 2 < height)
+	if (pw->list.empty()) return []() { return true; };
+	const auto count = static_cast<gint>(pw->list.size());
+	gint cols = std::clamp(static_cast<gint>((sqrt(static_cast<gdouble>(count) / grid_size) * width / height) + 0.999), 1, (count / grid_size) + 1);
+	gint rows = std::max(static_cast<gint>(static_cast<gdouble>(count) / grid_size / cols), 1);
+	const gint cw = std::max<gint>(ceil(static_cast<gdouble>(width) / cols), PAN_TILE_SIZE * 2);
+	const gint ch = std::max<gint>(ceil(static_cast<gdouble>(height) / rows), PAN_TILE_SIZE * 2);
+	rows = (rows * 2) - 1;
+	cols = (cols * 2) - 1;
+	struct State
+	{
+		std::vector<PanGrid *> cells;
+		PanItemList::iterator item;
+	};
+	auto state = std::make_shared<State>();
+	state->cells.resize(static_cast<std::size_t>(rows) * cols);
+	state->item = pw->list.begin();
+	for (gint row = 0; row < rows; ++row)
+		for (gint col = 0; col < cols; ++col)
 			{
-			auto *pg = new PanGrid();
-			pg->rect.x = i * cw / 2;
-			pg->rect.y = j * ch / 2;
-			pg->rect.width = cw;
-			pg->rect.height = ch;
-
-			pw->list_grid = g_list_prepend(pw->list_grid, pg);
-
-			DEBUG_1("grid section: %d,%d (%dx%d)", pg->rect.x, pg->rect.y, pg->rect.width, pg->rect.height);
+			if ((col + 1) * cw / 2 >= width || (row + 1) * ch / 2 >= height) continue;
+			auto *grid = new PanGrid();
+			grid->rect = {col * cw / 2, row * ch / 2, cw, ch};
+			pw->list_grid = g_list_prepend(pw->list_grid, grid);
+			state->cells[(static_cast<std::size_t>(row) * cols) + col] = grid;
 			}
-		}
-
-	for (PanItem *pi : pw->list)
+	return [pw, state, cols, rows, cw, ch]()
 		{
-		// @todo use GdkRectangle in PanItem
-		const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
-
-		for (GList *grid = pw->list_grid; grid; grid = grid->next)
+		if (state->item == pw->list.end())
 			{
-			auto *pg = static_cast<PanGrid *>(grid->data);
-
-			if (gdk_rectangle_intersect(&pi_rect, &pg->rect, nullptr))
+			pw->list_static.splice(pw->list_static.end(), pw->list);
+			return true;
+			}
+		auto *item = *state->item++;
+		const GdkRectangle rect{item->x, item->y, item->width, item->height};
+		// Conservative index bounds include cells overlapping odd-sized boundaries.
+		const gint left = std::clamp(static_cast<gint>(((static_cast<gint64>(item->x) - cw) * 2 / cw) - 1), 0, cols - 1);
+		const gint right = std::clamp(static_cast<gint>(((static_cast<gint64>(item->x) + item->width) * 2 / cw) + 1), 0, cols - 1);
+		const gint top = std::clamp(static_cast<gint>(((static_cast<gint64>(item->y) - ch) * 2 / ch) - 1), 0, rows - 1);
+		const gint bottom = std::clamp(static_cast<gint>(((static_cast<gint64>(item->y) + item->height) * 2 / ch) + 1), 0, rows - 1);
+		for (gint row = top; row <= bottom; ++row)
+			for (gint col = left; col <= right; ++col)
 				{
-				pg->list.push_back(pi);
+				auto *grid = state->cells[(static_cast<std::size_t>(row) * cols) + col];
+				if (grid && gdk_rectangle_intersect(&rect, &grid->rect, nullptr)) grid->list.push_back(item);
 				}
-			}
-		}
-
-	pw->list_static = pw->list;
-	pw->list.clear();
+		return false;
+		};
 }
 
 
@@ -763,25 +694,22 @@ static void pan_layout_compute(PanWindow *pw, gint &width, gint &height,
 		{
 		case PAN_LAYOUT_GRID:
 		default:
-			pan_grid_compute(pw, width, height);
+			pw->layout_step = pan_grid_compute(pw, width, height);
 			break;
 		case PAN_LAYOUT_FOLDERS_LINEAR:
-			pan_folder_tree_compute(pw, width, height);
+			pw->layout_step = pan_folder_tree_compute(pw, width, height);
 			break;
 		case PAN_LAYOUT_FOLDERS_FLOWER:
-			pan_flower_compute(pw, width, height, scroll_x, scroll_y);
+			pw->layout_step = pan_flower_compute(pw, width, height, scroll_x, scroll_y);
 			break;
 		case PAN_LAYOUT_CALENDAR:
-			pan_calendar_compute(pw, width, height);
+			pw->layout_step = pan_calendar_compute(pw, width, height);
 			break;
 		case PAN_LAYOUT_TIMELINE:
-			pan_timeline_compute(pw, width, height);
+			pw->layout_step = pan_timeline_compute(pw, width, height);
 			break;
 		}
 
-	pan_cache_free(pw);
-
-	DEBUG_1("computed %u objects", pw->list.size());
 }
 
 PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height)
@@ -850,49 +778,71 @@ void pan_layout_resize(PanWindow *pw)
 
 static gint pan_layout_update_idle_cb(gpointer data)
 {
-	auto pw = static_cast<PanWindow *>(data);
-	gint width;
-	gint height;
-	gint scroll_x;
-	gint scroll_y;
-
-	if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE ||
-	    (pw->exif_date_enable && (pw->layout == PAN_LAYOUT_TIMELINE || pw->layout == PAN_LAYOUT_CALENDAR)))
+	auto *pw = static_cast<PanWindow *>(data);
+	auto &width = pw->layout_width;
+	auto &height = pw->layout_height;
+	auto &scroll_x = pw->layout_scroll_x;
+	auto &scroll_y = pw->layout_scroll_y;
+	if (!pw->index || pw->index->scanning())
 		{
-		if (!pw->cache_list && !pw->cache_todo)
-			{
-			pan_cache_fill(pw);
-			if (pw->cache_todo)
-				{
-				pan_window_message(pw, _("Reading image data…"));
-				return G_SOURCE_CONTINUE;
-				}
-			}
-		if (pw->cache_todo)
-			{
-			pw->cache_count++;
-			pw->cache_tick++;
-			if (pw->cache_count == pw->cache_total)
-				{
-				pan_window_message(pw, _("Sorting…"));
-				}
-			else if (pw->cache_tick > 9)
-				{
-				g_autofree gchar *buf = g_strdup_printf("%s %d / %d", _("Reading image data…"),
-				                                        pw->cache_count, pw->cache_total);
-				pan_window_message(pw, buf);
-
-				pw->cache_tick = 0;
-				}
-
-			if (pan_cache_step(pw)) return G_SOURCE_CONTINUE;
-
-			pw->idle_id = 0;
-			return G_SOURCE_REMOVE;
-			}
+		pw->idle_id = 0;
+		return G_SOURCE_REMOVE;
 		}
-
-	pan_layout_compute(pw, width, height, scroll_x, scroll_y);
+	if (!pw->index->step()) return G_SOURCE_CONTINUE;
+	if (pw->build_phase == PanBuildPhase::Scanning)
+		{
+		pw->build_phase = PanBuildPhase::Cache;
+		if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE ||
+		    (pw->exif_date_enable && (pw->layout == PAN_LAYOUT_TIMELINE || pw->layout == PAN_LAYOUT_CALENDAR))) pan_cache_fill(pw);
+		}
+	if (pw->build_phase == PanBuildPhase::Cache && pw->cache_todo)
+		{
+		g_autofree gchar *message = g_strdup_printf(_("Reading image data… %d / %d"), ++pw->cache_count, pw->cache_total);
+		if (++pw->cache_tick >= 10)
+			{
+			pan_window_message(pw, message);
+			pw->cache_tick = 0;
+			}
+		if (pan_cache_step(pw)) return G_SOURCE_CONTINUE;
+		pw->idle_id = 0;
+		return G_SOURCE_REMOVE;
+		}
+	if (pw->build_phase == PanBuildPhase::Cache)
+		{
+		pw->build_phase = PanBuildPhase::Layout;
+		pan_window_message(pw, _("Building layout…"));
+		gtk_widget_set_sensitive(pw->imd->widget, FALSE);
+		// Dispose the old canvas before yielding with a partially constructed layout.
+		pixbuf_renderer_set_pixbuf(PIXBUF_RENDERER(pw->imd->pr), nullptr, 1.0);
+		pan_layout_compute(pw, width, height, scroll_x, scroll_y);
+		}
+	const auto deadline = g_get_monotonic_time() + 4000;
+	unsigned int steps = 0;
+	while (pw->layout_step)
+		{
+		if (pw->layout_step())
+			{
+			pw->layout_step = nullptr;
+			break;
+			}
+		if (++steps >= 128 || g_get_monotonic_time() >= deadline) return G_SOURCE_CONTINUE;
+		}
+	if (pw->build_phase == PanBuildPhase::Layout)
+		{
+		pan_cache_free(pw);
+		pw->build_phase = PanBuildPhase::Grid;
+		pan_window_message(pw, _("Building image index…"));
+		if (width > 0 && height > 0) pw->grid_step = pan_grid_build(pw, width, height, 1000);
+		}
+	while (pw->grid_step)
+		{
+		if (pw->grid_step())
+			{
+			pw->grid_step = nullptr;
+			break;
+			}
+		if (++steps >= 128 || g_get_monotonic_time() >= deadline) return G_SOURCE_CONTINUE;
+		}
 
 	pan_window_zoom_limit(pw);
 
@@ -902,7 +852,6 @@ static gint pan_layout_update_idle_cb(gpointer data)
 
 		DEBUG_1("Canvas size is %d x %d", width, height); // NOTRANSLATE: Diagnostic message.
 
-		pan_grid_build(pw, width, height, 1000);
 
 		const auto tile_request_func = [pw](PixbufRenderer *pr, gint x, gint y, gint width, gint height, GdkPixbuf *pixbuf)
 		{
@@ -947,6 +896,9 @@ static gint pan_layout_update_idle_cb(gpointer data)
 	g_autofree gchar *ss = text_from_size_abrev(size);
 	g_autofree gchar *buf = g_strdup_printf(_("%d images, %s"), count, ss);
 	pan_window_message(pw, buf);
+	gtk_widget_set_visible(pw->cancel_button, FALSE);
+	gtk_widget_set_sensitive(pw->imd->widget, TRUE);
+	pw->build_phase = PanBuildPhase::Complete;
 
 	pw->idle_id = 0;
 	return G_SOURCE_REMOVE;
@@ -956,14 +908,38 @@ static void pan_layout_update_idle(PanWindow *pw)
 {
 	if (!pw->idle_id)
 		{
-		pw->idle_id = g_idle_add(pan_layout_update_idle_cb, pw);
+		pw->idle_id = g_timeout_add_full(G_PRIORITY_DEFAULT_IDLE, 1, pan_layout_update_idle_cb, pw, nullptr);
 		}
+}
+
+void pan_layout_cancel(PanWindow *pw)
+{
+	if (pw->idle_id) g_source_remove(std::exchange(pw->idle_id, 0));
+	if (pw->index) pw->index->cancel();
+	pw->layout_step = nullptr;
+	pw->grid_step = nullptr;
+	pan_cache_free(pw);
+	pan_window_items_free(pw);
+	pixbuf_renderer_set_pixbuf(PIXBUF_RENDERER(pw->imd->pr), nullptr, 1.0);
+	gtk_widget_set_sensitive(pw->imd->widget, TRUE);
+	gtk_widget_set_visible(pw->cancel_button, FALSE);
+	pw->build_phase = PanBuildPhase::Cancelled;
+	pw->index.reset();
+	pan_window_message(pw, _("Indexing canceled"));
 }
 
 void pan_layout_update(PanWindow *pw)
 {
-	pan_window_message(pw, _("Sorting images…"));
-	pan_layout_update_idle(pw);
+	if (pw->idle_id) g_source_remove(std::exchange(pw->idle_id, 0));
+	if (pw->index) pw->index->cancel();
+	pw->layout_step = nullptr;
+	pw->grid_step = nullptr;
+	pan_cache_free(pw);
+	pw->build_phase = PanBuildPhase::Scanning;
+	gtk_widget_set_sensitive(pw->imd->widget, TRUE);
+	gtk_widget_set_visible(pw->cancel_button, TRUE);
+	pan_window_message(pw, _("Scanning folders…"));
+	pw->index = PanIndex::start(pw, [pw]() { pan_layout_update_idle(pw); });
 }
 
 static void pan_layout_set_fd(PanWindow *pw, FileData *dir_fd)
@@ -1429,6 +1405,9 @@ static void pan_window_close(PanWindow *pw)
 	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_INFO_EXIF, pw->info_includes_exif);
 
 	if (pw->idle_id) g_source_remove(pw->idle_id);
+	if (pw->index) pw->index->cancel();
+	pw->layout_step = nullptr;
+	pw->grid_step = nullptr;
 
 	pan_fullscreen_toggle(pw, TRUE);
 	pan_search_ui_destroy(g_steal_pointer(&pw->search_ui));
@@ -1981,6 +1960,10 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	pref_spacer(hbox, 0);
 	pw->label_message = pref_label_new(hbox, "");
+	pw->cancel_button = gtk_button_new_with_label(_("Cancel"));
+	g_signal_connect(pw->cancel_button, "clicked", G_CALLBACK(+[](GtkButton *, gpointer data)
+		{ pan_layout_cancel(static_cast<PanWindow *>(data)); }), pw);
+	gtk_box_append(GTK_BOX(hbox), pw->cancel_button);
 
 	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_set_hexpand(end_box, TRUE);
@@ -2174,46 +2157,15 @@ static void pan_window_dnd_init(PanWindow *pw)
 	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drop_target));
 }
 
+bool pan_read_directory(PanWindow *pw, FileData *directory, GList **files, GList **dirs)
+{
+	if (pw->index) return pw->index->directory(directory->path, files, dirs);
+	return filelist_read(directory, files, dirs);
+}
+
 FileDataList *pan_list_tree(PanWindow *pw, SortType method)
 {
-	const FileData::FileList::SortSettings settings{ method, TRUE, TRUE };
-
-	FileDataList *flist;
-	FileDataList *dlist;
-	filelist_read(pw->dir_fd, &flist, &dlist);
-
-	if (settings.method != SORT_NONE)
-		{
-		flist = filelist_sort(flist, settings);
-		dlist = filelist_sort(dlist, settings);
-		}
-
-	FileDataList *result = flist;
-
-	FileDataList *folders = dlist;
-	while (folders)
-		{
-		auto *fd = static_cast<FileData *>(folders->data);
-
-		folders = g_list_remove(folders, fd);
-
-		if (!pan_is_ignored(fd->path, pw->ignore_symlinks) &&
-		    filelist_read(fd, &flist, &dlist))
-			{
-			if (settings.method != SORT_NONE)
-				{
-				flist = filelist_sort(flist, settings);
-				dlist = filelist_sort(dlist, settings);
-				}
-
-			result = g_list_concat(result, flist);
-			folders = g_list_concat(dlist, folders);
-			}
-
-		file_data_unref(fd);
-		}
-
-	return result;
+	return pw->index ? pw->index->files(method) : nullptr;
 }
 
 FileDataList *pan_list_tree_filtered(PanWindow *pw, SortType method)

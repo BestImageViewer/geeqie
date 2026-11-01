@@ -472,6 +472,12 @@ FileDataRef FileData::make_new_local(const gchar *path, struct stat *st, gboolea
 	return make_new(path_utf8, st, disable_sidecars, context);
 }
 
+FileDataRef FileData::new_from_stat(const gchar *path_utf8, const struct stat &attributes)
+{
+	auto copy = attributes;
+	return make_new(path_utf8, &copy, FALSE);
+}
+
 // static
 FileDataRef FileData::new_simple(const gchar *path_utf8, FileDataContext *context)
 {
