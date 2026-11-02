@@ -73,6 +73,35 @@ gint print_proof_page_count(gint image_count, const PrintProofLayout &layout)
 	return (image_count / per_page) + (image_count % per_page != 0);
 }
 
+GtkPrintSettings *print_settings_load(const gchar *path, const gchar *output_directory, GError **error)
+{
+	g_autoptr(GError) load_error = nullptr;
+	auto *settings = gtk_print_settings_new_from_file(path, &load_error);
+	if (!settings)
+		{
+		settings = gtk_print_settings_new();
+		if (!g_error_matches(load_error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
+			g_propagate_error(error, g_steal_pointer(&load_error));
+		}
+	if (!gtk_print_settings_get(settings, GTK_PRINT_SETTINGS_OUTPUT_URI))
+		{
+		g_autofree gchar *filename = g_build_filename(output_directory, "geeqie-file.pdf", nullptr);
+		g_autofree gchar *uri = g_filename_to_uri(filename, nullptr, nullptr);
+		if (uri) gtk_print_settings_set(settings, GTK_PRINT_SETTINGS_OUTPUT_URI, uri);
+		}
+	return settings;
+}
+
+GtkPageSetup *print_page_setup_load(const gchar *path, GError **error)
+{
+	g_autoptr(GError) load_error = nullptr;
+	auto *setup = gtk_page_setup_new_from_file(path, &load_error);
+	if (setup) return setup;
+	if (!g_error_matches(load_error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
+		g_propagate_error(error, g_steal_pointer(&load_error));
+	return gtk_page_setup_new();
+}
+
 namespace
 {
 
@@ -595,19 +624,14 @@ void print_layout_menu(GtkWidget *box, PrintWindow *pw)
 
 GtkPrintSettings *load_print_settings()
 {
-	GtkPrintSettings *settings = gtk_print_settings_new();
-
 	const gchar *dir = g_get_user_special_dir(G_USER_DIRECTORY_DOCUMENTS);
 	if (dir == nullptr)
 		{
 		dir = g_get_home_dir();
 		}
-	g_autofree gchar *uri = g_build_filename("file:/", dir, "geeqie-file.pdf", NULL);
-	gtk_print_settings_set(settings, GTK_PRINT_SETTINGS_OUTPUT_URI, uri);
-
 	g_autofree gchar *print_settings_path = g_build_filename(get_rc_dir(), PRINT_SETTINGS, NULL);
 	g_autoptr(GError) error = nullptr;
-	gtk_print_settings_load_file(settings, print_settings_path, &error);
+	auto *settings = print_settings_load(print_settings_path, dir, &error);
 	if (error)
 		{
 		log_printf("Error: Printer settings load failed:\n%s", error->message); // NOTRANSLATE: Diagnostic message.
@@ -631,11 +655,9 @@ void save_print_settings(GtkPrintOperation *operation)
 
 GtkPageSetup *load_page_setup()
 {
-	GtkPageSetup *page_setup = gtk_page_setup_new();
-
 	g_autofree gchar *page_setup_path = g_build_filename(get_rc_dir(), PAGE_SETUP, NULL);
 	g_autoptr(GError) error = nullptr;
-	gtk_page_setup_load_file(page_setup, page_setup_path, &error);
+	auto *page_setup = print_page_setup_load(page_setup_path, &error);
 	if (error)
 		{
 		log_printf("Error: Print page setup load failed:\n%s", error->message); // NOTRANSLATE: Diagnostic message.

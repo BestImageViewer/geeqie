@@ -44,6 +44,11 @@ struct PrintProofLayout
 PrintProofLayout print_proof_layout(gdouble width, gdouble height, gdouble proof_width, gdouble proof_height);
 gint print_proof_page_count(gint image_count, const PrintProofLayout &layout);
 
+/** @brief Return owned settings, using defaults for missing files and reporting other load errors. */
+GtkPrintSettings *print_settings_load(const gchar *path, const gchar *output_directory, GError **error);
+/** @brief Return an owned page setup, using defaults for missing files and reporting other load errors. */
+GtkPageSetup *print_page_setup_load(const gchar *path, GError **error);
+
 void print_window_new(GList *selection, GtkWidget *parent);
 
 #endif
