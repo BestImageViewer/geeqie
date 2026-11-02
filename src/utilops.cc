@@ -35,7 +35,7 @@
 
 #include <config.h>
 
-#include "cache.h"
+#include "date-time.h"
 #include "editors.h"
 #include "exif.h"
 #include "file-tree-task.h"

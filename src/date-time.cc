@@ -95,3 +95,13 @@ gchar *date_time_format(time_t timestamp, const gchar *format)
 	if (!localtime_r(&timestamp, &time)) return g_strdup("");
 	return date_time_format(time, format);
 }
+
+/* note: returned string is valid until next call to text_from_time() */
+const gchar *text_from_time(time_t timestamp)
+{
+	static gchar *ret = nullptr;
+	g_free(ret);
+	ret = date_time_format(timestamp);
+
+	return ret;
+}

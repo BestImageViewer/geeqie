@@ -31,6 +31,7 @@
 #include <glib-object.h>
 #include <graphene.h>
 
+#include "date-time.h"
 #include "filedata.h"
 #include "layout.h"
 #include "main-defines.h"

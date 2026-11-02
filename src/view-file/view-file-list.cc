@@ -32,6 +32,7 @@
 #include "cellrenderericon.h"
 #include "collect.h"
 #include "color-label.h"
+#include "date-time.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"

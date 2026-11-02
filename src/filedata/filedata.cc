@@ -111,16 +111,6 @@ gchar *FileData::text_from_size_abrev(gint64 size)
 	return g_format_size_full(size, G_FORMAT_SIZE_IEC_UNITS);
 }
 
-/* note: returned string is valid until next call to text_from_time() */
-const gchar *FileData::text_from_time(time_t t)
-{
-	static gchar *ret = nullptr;
-	g_free(ret);
-	ret = date_time_format(t);
-
-	return ret;
-}
-
 /*
  *-----------------------------------------------------------------------------
  * changed files detection and notification
