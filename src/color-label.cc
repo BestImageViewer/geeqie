@@ -108,6 +108,10 @@ void color_label_widget_update(GtkWidget *label, FileData *fd)
 	gtk_accessible_update_property(GTK_ACCESSIBLE(label), GTK_ACCESSIBLE_PROPERTY_LABEL, index ? text : _("Unlabeled"), -1);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void color_label_cell_data(GtkTreeViewColumn *view_column, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer column)
 {
 	g_object_set(renderer, "cell-background-set", FALSE, nullptr);
@@ -127,6 +131,9 @@ void color_label_cell_data(GtkTreeViewColumn *view_column, GtkCellRenderer *rend
 		g_object_set(renderer, "cell-background-rgba", &color, nullptr);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void color_label_refresh_visible(ViewFile *vf)
 {

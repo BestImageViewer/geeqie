@@ -56,6 +56,10 @@ struct AutoScrollData
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean tree_edit_close_idle_cb(gpointer data)
 {
 	auto *ted = static_cast<TreeEditData *>(data);
@@ -76,6 +80,9 @@ static gboolean tree_edit_close_idle_cb(gpointer data)
 	g_free(ted);
 	return G_SOURCE_REMOVE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void tree_edit_close(TreeEditData *ted)
 {
@@ -148,6 +155,10 @@ static gboolean tree_edit_key_press_cb(GtkEventControllerKey *, guint keyval, gu
 	return FALSE;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean tree_edit_by_path_idle_cb(gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
@@ -187,10 +198,17 @@ static gboolean tree_edit_by_path_idle_cb(gpointer data)
 
 	return G_SOURCE_REMOVE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /**
  * @brief edit_func: return TRUE if rename successful, FALSE on failure.
  */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, const gchar *text,
 		           gboolean (*edit_func)(TreeEditData *, const gchar *, const gchar *, gpointer), gpointer data)
 {
@@ -265,6 +283,9 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 
 	return TRUE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-------------------------------------------------------------------
@@ -277,6 +298,10 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
  * if fully_visible is TRUE, the behavior changes to return -1/1 if _any_ part of the cell is out of view
  * An implementation that uses gtk_tree_view_get_visible_range
  */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gint tree_view_row_get_visibility(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible)
 {
 	g_autoptr(GtkTreePath) start_path = nullptr;
@@ -294,6 +319,9 @@ static gint tree_view_row_get_visibility(GtkTreeView *widget, GtkTreeIter *iter,
 
 	return 0;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 bool tree_view_row_is_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible)
 {
@@ -303,6 +331,10 @@ bool tree_view_row_is_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean f
 /**
  * @brief Scrolls to make row visible, if necessary
  */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean center)
 {
 	gint vis = tree_view_row_get_visibility(widget, iter, TRUE);
@@ -323,10 +355,17 @@ void tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean
 		gtk_tree_view_scroll_to_cell(widget, tpath, nullptr, TRUE, 1.0, 0.0);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /**
  * @brief If iter is location of cursor, moves cursor to nearest row
  */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboolean only_selected)
 {
 	if (!iter) return FALSE;
@@ -363,6 +402,9 @@ gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboo
 
 	return move;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 
 /*

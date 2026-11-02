@@ -20,6 +20,10 @@ namespace
 class SelectedIndices : public testing::TestWithParam<FileViewType>
 {
 protected:
+	// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	void SetUp() override
 	{
 		vf.type = GetParam();
@@ -49,6 +53,9 @@ protected:
 			gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(vf.listview)), GTK_SELECTION_MULTIPLE);
 			}
 	}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	void TearDown() override
 	{
@@ -58,6 +65,10 @@ protected:
 		file_data_list_free(vf.list);
 	}
 
+	// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	void select(const std::vector<int> &indices)
 	{
 		if (vf.type == FILEVIEW_ICON)
@@ -77,6 +88,9 @@ protected:
 				}
 			}
 	}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	ViewFile vf{};
 	ViewFileInfoIcon icons{};
@@ -120,6 +134,10 @@ TEST_P(SelectedIndices, MissingSelectedFileRetainsInvalidIndex)
 	EXPECT_EQ(vf_selection_get_list_by_index(&vf), (std::vector<int>{-1}));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(SelectedIndices, ExpandedChildRowsPreserveTheirSelectionPosition)
 {
 	if (vf.type != FILEVIEW_LIST) GTEST_SKIP() << "Requires a tree model";
@@ -136,6 +154,9 @@ TEST_P(SelectedIndices, ExpandedChildRowsPreserveTheirSelectionPosition)
 	gtk_tree_selection_select_path(gtk_tree_view_get_selection(GTK_TREE_VIEW(vf.listview)), child_path);
 	EXPECT_EQ(vf_selection_get_list_by_index(&vf), (std::vector<int>{-1, 5999}));
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(SelectedIndices, DISABLED_BenchmarkSixThousandSelectedFiles)
 {

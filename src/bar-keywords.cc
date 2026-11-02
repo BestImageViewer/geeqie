@@ -168,6 +168,10 @@ void bar_pane_keywords_write(PaneKeywordsData *pkd)
 	g_list_free_full(list, g_free);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean bar_keyword_tree_expand_if_set_cb(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
@@ -216,6 +220,9 @@ void bar_keyword_tree_sync(PaneKeywordsData *pkd)
 	if (pkd->expand_checked) gtk_tree_model_foreach(model, bar_keyword_tree_expand_if_set_cb, pkd);
 	if (pkd->collapse_unchecked) gtk_tree_model_foreach(model, bar_keyword_tree_collapse_if_unset_cb, pkd);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void bar_pane_keywords_update(PaneKeywordsData *pkd)
 {
@@ -258,6 +265,10 @@ void bar_pane_keywords_update(GtkWidget *pane)
 	bar_pane_keywords_update(pkd);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_keyword_tree_get_expanded_cb(GtkTreeView *keyword_treeview, GtkTreePath *path,  gpointer data)
 {
 	auto expanded = static_cast<GList **>(data);
@@ -272,6 +283,9 @@ void bar_keyword_tree_get_expanded_cb(GtkTreeView *keyword_treeview, GtkTreePath
 
 	*expanded = g_list_append(*expanded, path_string);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void bar_pane_keywords_set_height(GtkWidget *pane)
 {
@@ -282,6 +296,10 @@ void bar_pane_keywords_set_height(GtkWidget *pane)
 	gtk_widget_get_size_request(pane, &w, &pkd->height);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
 {
 	auto *pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
@@ -310,6 +328,9 @@ void bar_pane_keywords_write_config(GtkWidget *pane, RcString &rc)
 	WRITE_NL();
 	WRITE_STRING("</pane_keywords>");
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
@@ -335,6 +356,10 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto *pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
@@ -432,6 +457,9 @@ void bar_pane_keywords_filter_modify(GtkTreeModel *model, GtkTreeIter *iter, GVa
 			break;
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 gboolean bar_pane_keywords_filter_visible(GtkTreeModel *keyword_tree, GtkTreeIter *iter, gpointer data)
 {
@@ -527,6 +555,10 @@ void bar_pane_keywords_set_extra_menu(PaneKeywordsData *pkd)
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 GdkContentProvider *bar_pane_keywords_dnd_prepare(GtkDragSource *, gdouble x, gdouble y, gpointer data)
 {
 	auto *pkd = static_cast<PaneKeywordsData *>(data);
@@ -624,6 +656,9 @@ gboolean bar_pane_keywords_dnd_drop(GtkDropTarget *, const GValue *value, gdoubl
 
 	return added;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-------------------------------------------------------------------
@@ -631,6 +666,10 @@ gboolean bar_pane_keywords_dnd_drop(GtkDropTarget *, const GValue *value, gdoubl
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_pane_keywords_edit_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto cdd = static_cast<ConfDialogData *>(data);
@@ -710,6 +749,9 @@ void bar_pane_keywords_edit_ok_cb(GenericDialog *, gpointer data)
 		}
 	g_list_free_full(keywords, g_free);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 template<gboolean is_keyword>
 void bar_pane_keywords_conf_set_is_keyword_cb(GtkWidget *, gpointer data)
@@ -725,6 +767,10 @@ void bar_pane_keywords_conf_set_is_keyword_cb(GtkWidget *, gpointer data)
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 template<gboolean edit_existing>
 void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 {
@@ -822,6 +868,9 @@ void bar_pane_keywords_connect_mark_cb(GtkWidget *menu_widget, gpointer data)
 
 	meta_data_connect_mark_with_keyword(keyword_tree, &kw_iter, mark);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void bar_pane_keywords_disconnect_marks_ok_cb(GenericDialog *, gpointer)
 {
@@ -840,6 +889,10 @@ void bar_pane_keywords_disconnect_marks_cb(GtkWidget *menu_widget, gpointer data
 	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_pane_keywords_delete_cb(GtkWidget *, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
@@ -985,6 +1038,9 @@ void bar_pane_keywords_hide_unchecked_cb(GtkWidget *, gpointer data)
 	g_list_free_full(keywords, g_free);
 	bar_keyword_tree_sync(pkd);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void bar_pane_keywords_expand_checked_toggle_cb(GtkWidget *, gpointer data)
 {
@@ -1010,6 +1066,10 @@ void bar_pane_keywords_hide_unchecked_toggle_cb(GtkWidget *, gpointer data)
 /**
  * @brief Callback for adding selected keyword to all selected images.
  */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_pane_keywords_add_to_selected_cb(GtkWidget *, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
@@ -1063,10 +1123,17 @@ void bar_pane_keywords_add_to_selected_cb(GtkWidget *, gpointer data)
 	file_data_list_free(list);
 	g_list_free_full(keywords, g_free);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /**
  * @brief Callback for removing the selected keyword from all selected images.
  */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_pane_keywords_remove_from_selected_cb(GtkWidget *, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
@@ -1204,6 +1271,9 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 
 	popover_box_popup(menu);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 gboolean bar_pane_keywords_menu_common(GtkWidget *widget, gdouble x, gdouble y, guint button, gpointer data)
 {
@@ -1230,6 +1300,10 @@ void bar_pane_keywords_gesture_menu_cb(GtkGestureClick *gesture, gint, gdouble x
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void bar_pane_keywords_destroy(gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
@@ -1247,6 +1321,9 @@ void bar_pane_keywords_destroy(gpointer data)
 
 	g_free(pkd);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 gboolean autocomplete_match(const std::string &keyword, const gchar *text)
 {
@@ -1405,6 +1482,10 @@ gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, 
 }
 
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gchar *key, gboolean expanded, gint height)
 {
 	PaneKeywordsData *pkd;
@@ -1577,6 +1658,9 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	return pkd->pane.widget;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-----------------------------------------------------------------------------

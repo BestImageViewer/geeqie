@@ -169,6 +169,10 @@ TEST_P(ViewDirNewFolder, KnownPathThroughExecuteOnlyAncestorSurvivesRefresh)
 	EXPECT_FALSE(vd_find_row(vd, sibling_fd, &iter));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(ViewDirNewFolder, KnownHiddenPathSurvivesRefreshWithoutDuplicates)
 {
 	if (GetParam() != DIRVIEW_TREE) GTEST_SKIP() << "Requires the folder tree";
@@ -234,6 +238,9 @@ TEST_P(ViewDirNewFolder, DescendChecksExistingUnexpandedSubfolders)
 	EXPECT_FALSE(gtk_tree_model_iter_has_child(model, &iter));
 	file_data_unref(fd);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(ViewDirNewFolder, LongNamesDoNotHideNewFolderText)
 {
@@ -304,6 +311,10 @@ TEST_P(ViewDirNewFolder, CreatesOnlyAfterReturnAndRetainsInvalidNames)
 	EXPECT_TRUE(g_file_test(default_path, G_FILE_TEST_IS_DIR));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(ViewDirNewFolder, FocusMovesToCreatedFolderWithoutEnteringIt)
 {
 	auto *entry = start();
@@ -338,6 +349,9 @@ TEST_P(ViewDirNewFolder, FocusMovesToCreatedFolderWithoutEnteringIt)
 		EXPECT_STREQ(name, "created");
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(ViewDirNewFolder, RefreshRetainsCreatedFolderFocusAndScroll)
 {

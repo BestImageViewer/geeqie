@@ -73,6 +73,10 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 					    const GdkRectangle *cell_area,
 					    GtkCellRendererState flags);
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gint gqv_cell_renderer_icon_mark_at(GtkCellRenderer *cell, GtkWidget *widget,
 	                                const GdkRectangle *cell_area, gdouble x, gdouble y)
 {
@@ -105,6 +109,9 @@ gint gqv_cell_renderer_icon_mark_at(GtkCellRenderer *cell, GtkWidget *widget,
 	return std::clamp(static_cast<gint>(std::floor(((x - first_center) / TOGGLE_SPACING) + 0.5)),
 	                  0, cellicon->num_marks - 1);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 						GdkEvent             *event,
@@ -170,12 +177,19 @@ gqv_cell_renderer_icon_init_wrapper(void *data, void *)
 	gqv_cell_renderer_icon_init(static_cast<GQvCellRendererIcon *>(data));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void
 gqv_cell_renderer_icon_init(GQvCellRendererIcon *cellicon)
 {
 	g_object_set(cellicon, "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE, NULL);
 	gtk_cell_renderer_set_padding(GTK_CELL_RENDERER(cellicon), 2, 2);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void
 gqv_cell_renderer_icon_class_init_wrapper(void *data, void *)
@@ -183,6 +197,10 @@ gqv_cell_renderer_icon_class_init_wrapper(void *data, void *)
 	gqv_cell_renderer_icon_class_init(static_cast<GQvCellRendererIconClass *>(data));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void
 gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 {
@@ -337,6 +355,9 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 		G_TYPE_STRING);
 
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void
 gqv_cell_renderer_icon_finalize(GObject *object)
@@ -637,6 +658,10 @@ gqv_cell_renderer_icon_get_preferred_height(GtkCellRenderer *cell,
 	if (natural_size) *natural_size = height;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 					    GtkWidget          *widget,
 					    const GdkRectangle *cell_area,
@@ -896,6 +921,9 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 
 	cairo_destroy(cr);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 						GdkEvent             *event,

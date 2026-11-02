@@ -20,6 +20,32 @@ meson test -C build --suite analysis --suite unit
 
 See the Unit tests section for how to enable unit tests.
 
+## Deprecation warnings
+
+Enable warnings for deprecated APIs with:
+
+```sh
+meson configure build -Ddeprecated_warnings=true
+```
+
+Intentionally retained calls with no suitable replacement or needed for the
+minimum supported GTK version have narrow, documented warning suppressions.
+Tests inspecting intentionally retained widgets may use the same suppression.
+These suppressions must be conditional on `#ifndef SHOW_ALL_DEPRECATED_WARNINGS`
+so that a complete audit can expose them with:
+
+```sh
+meson configure build -Dall_deprecated_warnings=true
+```
+
+Retained tree-view APIs and tests inspecting those widgets are also suppressed
+in normal warning mode until their migration to GTK list models. They remain
+visible with `all_deprecated_warnings=true`.
+The same applies to retained GdkPixbuf animation APIs and GLib mount-table
+APIs whose replacements require a newer GLib version.
+Use a clean rebuild for a complete warning inventory; an incremental build
+only reports warnings from files it recompiles.
+
 ## Previewing documentation changes
 
 To preview documentation changes, install `yelp-tools`

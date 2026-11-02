@@ -120,6 +120,10 @@ protected:
 		ASSERT_TRUE(wait_for([dw]() { return dupe_export_ready(dw); }));
 	}
 
+	// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	static void select(DupeWindow *dw, const std::string &path)
 	{
 		auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview));
@@ -139,6 +143,9 @@ protected:
 			}
 		ASSERT_TRUE(found);
 	}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	static void expect_count(DupeWindow *dw, guint count)
 	{
@@ -197,6 +204,10 @@ TEST_P(DuplicateDeletion, MainWindowDeletionUpdatesEveryDuplicatesWindow)
 	EXPECT_NE(b->dupes, nullptr);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(DuplicateDeletion, ChangingSelectionDoesNotRemoveUndeletedFiles)
 {
 	const auto first = create("0.png");
@@ -214,6 +225,9 @@ TEST_P(DuplicateDeletion, ChangingSelectionDoesNotRemoveUndeletedFiles)
 	auto *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(a->listview));
 	EXPECT_EQ(gtk_tree_selection_count_selected_rows(selection), 1);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(DuplicateDeletion, DeletingRepresentativeRetainsSurvivingMatches)
 {
@@ -326,6 +340,10 @@ TEST_P(DuplicateDeletion, DeletionDuringFileLoadingKeepsOtherQueuedFiles)
 	expect_count(dw, 9);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(DuplicateDeletion, LargeBurstUsesOnePendingBatchAndOneModelClear)
 {
 	std::vector<std::string> files;
@@ -353,6 +371,9 @@ TEST_P(DuplicateDeletion, LargeBurstUsesOnePendingBatchAndOneModelClear)
 	EXPECT_EQ(removed_rows, static_cast<guint>(original_rows));
 	g_signal_handler_disconnect(model, handler);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 INSTANTIATE_TEST_SUITE_P(TrashAndPermanent, DuplicateDeletion, testing::Bool());
 

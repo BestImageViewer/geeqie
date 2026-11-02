@@ -359,6 +359,10 @@ static gboolean animation_should_continue(AnimationData *fd)
 	return fd->valid;
 }
 
+// Retained GdkPixbuf animation API pending migration of GIF/WebP playback.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean show_next_frame(gpointer data)
 {
 	auto fd = static_cast<AnimationData*>(data);
@@ -400,6 +404,9 @@ static gboolean show_next_frame(gpointer data)
 
 	return G_SOURCE_CONTINUE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static gboolean layout_image_animate_check(LayoutWindow *lw)
 {
@@ -436,6 +443,10 @@ static void layout_image_animate_update_image(LayoutWindow *lw)
 }
 
 
+// Retained GdkPixbuf animation API pending migration of GIF/WebP playback.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void animation_async_ready_cb(GObject *, GAsyncResult *res, gpointer data)
 {
 	auto animation = static_cast<AnimationData *>(data);
@@ -515,6 +526,9 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 
 	return TRUE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void layout_image_animate_toggle(LayoutWindow *lw)
 {

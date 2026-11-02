@@ -95,6 +95,10 @@ static void vdtree_busy_pop(ViewDir *vd)
 	if (VDTREE(vd)->busy_ref > 0) VDTREE(vd)->busy_ref--;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean vdtree_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter, GtkTreeIter *parent)
 {
 	GtkTreeModel *store;
@@ -180,6 +184,9 @@ static void vdtree_expand_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean expan
 		gtk_tree_view_collapse_row(GTK_TREE_VIEW(vd->view), tpath);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vdtree_expand_by_data(ViewDir *vd, FileData *fd, gboolean expand)
 {
@@ -237,6 +244,10 @@ static void vdtree_dnd_drop_expand(ViewDir *vd)
  *----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static GList *parts_list(const gchar *path, const ViewDir *vd)
 {
 	if (*path != G_DIR_SEPARATOR) return nullptr;
@@ -286,6 +297,9 @@ static GList *parts_list(const gchar *path, const ViewDir *vd)
 
 	return g_list_reverse(list);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 
 /*
@@ -294,6 +308,10 @@ static GList *parts_list(const gchar *path, const ViewDir *vd)
  *----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean vdtree_find_iter_by_data(ViewDir *vd, GtkTreeIter *parent, NodeData *nd, GtkTreeIter *iter)
 {
 	GtkTreeModel *store;
@@ -587,6 +605,9 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 
 	return TRUE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand, gboolean force)
 {
@@ -677,6 +698,10 @@ static gboolean vdtree_select_cb(GtkTreeSelection *, GtkTreeModel *, GtkTreePath
 	return selection_is_ok;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd)
 {
 	FileData *fd;
@@ -723,12 +748,19 @@ gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd)
 
 	return TRUE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void vdtree_refresh(ViewDir *vd)
 {
 	vdtree_populate_path(vd, vd->dir_fd, FALSE, TRUE);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void vdtree_set_collection(ViewDir *vd, const gchar *path)
 {
 	struct CollectionIconData
@@ -751,6 +783,9 @@ void vdtree_set_collection(ViewDir *vd, const gchar *path)
 		return FALSE;
 		}, &data);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *----------------------------------------------------------------------------
@@ -758,6 +793,10 @@ void vdtree_set_collection(ViewDir *vd, const gchar *path)
  *----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean vdtree_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
@@ -908,6 +947,9 @@ static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTre
 	auto *vd = static_cast<ViewDir *>(data);
 	vdtree_update_row(vd, treeview, iter, tpath, vd->pf->open);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vdtree_row_collapsed(GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, gpointer data)
 {
@@ -915,6 +957,10 @@ static void vdtree_row_collapsed(GtkTreeView *treeview, GtkTreeIter *iter, GtkTr
 	vdtree_update_row(vd, treeview, iter, tpath, vd->pf->close);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gint vdtree_sort_cb(GtkTreeModel *store, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	NodeData *nda;
@@ -952,6 +998,9 @@ static gint vdtree_sort_cb(GtkTreeModel *store, GtkTreeIter *a, GtkTreeIter *b, 
 
 	return strcmp(nda->fd->collate_key_name_nocase, ndb->fd->collate_key_name_nocase);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *----------------------------------------------------------------------------
@@ -972,6 +1021,10 @@ static void vdtree_setup_root(ViewDir *vd)
 	vdtree_populate_path(vd, fd, FALSE, FALSE);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean vdtree_destroy_node_cb(GtkTreeModel *store, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	NodeData *nd;
@@ -1048,4 +1101,7 @@ ViewDir *vdtree_new(ViewDir *vd)
 
 	return vd;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

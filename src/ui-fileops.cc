@@ -1020,6 +1020,10 @@ gboolean tree_progress(GFile *file, FileTreeOperation *operation, GError **error
 	return !g_cancellable_set_error_if_cancelled(tree_cancellable(operation), error);
 }
 
+// Retained for GLib 2.66 compatibility; the renamed mount APIs require 2.84.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean tree_mount_check(GFile *file, GFileInfo *info, guint32 root_device, GError **error)
 {
 	if (g_file_info_get_file_type(info) == G_FILE_TYPE_SYMBOLIC_LINK) return TRUE;
@@ -1044,6 +1048,9 @@ gboolean tree_mount_check(GFile *file, GFileInfo *info, guint32 root_device, GEr
 	g_set_error(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, _("Refusing to cross or remove a mount point:\n%s"), display);
 	return FALSE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 gboolean tree_scan(GFile *file, FileTreeStats &stats, TreePlan *plan, guint32 root_device,
                    FileTreeOperation *operation, GError **error)

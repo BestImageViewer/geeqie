@@ -382,6 +382,10 @@ static void dupe_window_update_progress(DupeWindow *dw, const gchar *status, gdo
  * ------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_listview_realign_colors(DupeWindow *dw)
 {
 	GtkTreeModel *store;
@@ -417,6 +421,9 @@ static void dupe_listview_realign_colors(DupeWindow *dw)
 		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  * ------------------------------------------------------------------
@@ -495,6 +502,10 @@ static void dupe_item_write_cache(DupeItem *di)
  * ------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gint dupe_listview_find_item(GtkListStore *store, DupeItem *item, GtkTreeIter *iter)
 {
 	gboolean valid;
@@ -605,9 +616,16 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 	                   DUPE_COLUMN_SET, dw->set_count,
 	                   -1);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_listview_select_dupes(DupeWindow *dw, DupeSelectType parents);
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_listview_populate(DupeWindow *dw)
 {
 	GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview)));
@@ -741,6 +759,9 @@ static void dupe_listview_select_dupes(DupeWindow *dw, DupeSelectType parents)
 		valid = gtk_tree_model_iter_next(store, &iter);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  * ------------------------------------------------------------------
@@ -1899,6 +1920,10 @@ static GdkPixbuf *dupe_scale_thumb(GdkPixbuf *pixbuf)
 	return gdk_pixbuf_scale_simple(pixbuf, width, height, options->thumbnails.quality);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_listview_set_thumb(DupeWindow *dw, DupeItem *di, GtkTreeIter *iter)
 {
 	GtkListStore *store;
@@ -1919,6 +1944,9 @@ static void dupe_listview_set_thumb(DupeWindow *dw, DupeItem *di, GtkTreeIter *i
 		gtk_list_store_set(store, iter, DUPE_COLUMN_THUMB, thumb, -1);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_thumb_do(DupeWindow *dw)
 {
@@ -1949,6 +1977,10 @@ static void dupe_thumb_done_cb(ThumbLoader *, gpointer data)
 	dupe_thumb_step(dw);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_thumb_step(DupeWindow *dw)
 {
 	GtkTreeModel *store;
@@ -2012,6 +2044,9 @@ static void dupe_thumb_step(DupeWindow *dw)
 		dupe_thumb_step(dw);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  * ------------------------------------------------------------------
@@ -2473,6 +2508,10 @@ static gboolean dupe_check_start_cb(gpointer data)
  * ------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_item_remove(DupeWindow *dw, DupeItem *di)
 {
 	if (!di) return;
@@ -2565,6 +2604,9 @@ static void dupe_item_remove(DupeWindow *dw, DupeItem *di)
 	if (dw->ignore_same_folder) dupe_window_recompare_idle(dw);
 	dupe_window_update_count(dw, FALSE);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static gboolean dupe_files_add_queue_cb(gpointer data)
 {
@@ -2856,6 +2898,10 @@ void dupe_window_add_folder(const gchar *path, gboolean recurse)
 	file_data_unref(fd);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_item_update(DupeWindow *dw, DupeItem *di)
 {
 	if (dw->ignore_same_folder)
@@ -2909,6 +2955,9 @@ static void dupe_item_update(DupeWindow *dw, DupeItem *di)
 		}
 
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_item_update_fd_in_list(DupeWindow *dw, FileData *fd, GList *work)
 {
@@ -2990,6 +3039,10 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_window_recompare(DupeWindow *dw)
 {
 	GtkListStore *store;
@@ -3008,6 +3061,9 @@ static void dupe_window_recompare(DupeWindow *dw)
 
 	dupe_check_start(dw);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_window_recompare_idle(DupeWindow *dw)
 {
@@ -3050,6 +3106,10 @@ static void dupe_menu_view(DupeItem *di, GtkWidget *listview, gboolean new_windo
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 {
 	GList *list = nullptr;
@@ -3085,6 +3145,9 @@ static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 
 	dupe_listview_realign_colors(dw);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_window_delete_selected(DupeWindow *dw, gboolean safe_delete)
 {
@@ -3126,6 +3189,10 @@ static void dupe_menu_view_cb(GSimpleAction *, GVariant *, gpointer data)
 	if (dw->click_item) dupe_menu_view(dw->click_item, dw->listview, new_window);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_menu_select_all_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
@@ -3164,6 +3231,9 @@ static void dupe_menu_select_all_focused_cb(GSimpleAction *, GVariant *, gpointe
 		gtk_tree_selection_unselect_all(selection);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 template<DupeSelectType parents>
 static void dupe_menu_select_dupes_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -3278,6 +3348,10 @@ static void dupe_menu_clear_focused_cb(GSimpleAction *, GVariant *, gpointer dat
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static DupeItem *dupe_listview_get_last_selected_item(GtkWidget *listview)
 {
 	GtkTreeModel *store;
@@ -3295,6 +3369,9 @@ static DupeItem *dupe_listview_get_last_selected_item(GtkWidget *listview)
 
 	return di;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 template<gboolean new_window>
 static void dupe_menu_view_focused_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -3452,6 +3529,10 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw)
 	return nullptr;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
@@ -3617,6 +3698,9 @@ static void dupe_listview_release_cb(GtkGestureClick *gesture, gint, gdouble x, 
 		return;
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-------------------------------------------------------------------
@@ -3630,6 +3714,10 @@ static void dupe_second_update_status(DupeWindow *dw)
 	gtk_label_set_text(GTK_LABEL(dw->second_status_label), buf);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_second_add(DupeWindow *dw, DupeItem *di)
 {
 	GtkListStore *store;
@@ -3682,6 +3770,9 @@ static void dupe_second_clear(DupeWindow *dw)
 
 	dupe_second_update_status(dw);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 template<gboolean new_window>
 static void dupe_second_menu_view_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -3691,6 +3782,10 @@ static void dupe_second_menu_view_cb(GSimpleAction *, GVariant *, gpointer data)
 	if (dw->click_item) dupe_menu_view(dw->click_item, dw->second_listview, new_window);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_second_menu_select_all_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	GtkTreeSelection *selection;
@@ -3708,6 +3803,9 @@ static void dupe_second_menu_select_none_cb(GSimpleAction *, GVariant *, gpointe
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->second_listview));
 	gtk_tree_selection_unselect_all(selection);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_second_menu_remove_cb(GSimpleAction *, GVariant *, gpointer data)
 {
@@ -3845,6 +3943,10 @@ static GtkWidget *dupe_menu_setup(DupeWindow *dw)
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
                                  GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
@@ -3939,6 +4041,9 @@ static void dupe_listview_show_rank(GtkWidget *listview, gboolean rank)
 
 	gtk_tree_view_column_set_visible(column, rank);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-------------------------------------------------------------------
@@ -3946,6 +4051,10 @@ static void dupe_listview_show_rank(GtkWidget *listview, gboolean rank)
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_window_show_thumb_cb(GtkWidget *widget, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
@@ -3979,6 +4088,9 @@ static void dupe_window_show_thumb_cb(GtkWidget *widget, gpointer data)
 
 	dupe_listview_set_height(dw->listview, dw->show_thumbs);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_algorithm_label_setup(GtkSignalListItemFactory *, GtkListItem *item, gpointer)
 {
@@ -4038,6 +4150,10 @@ static void dupe_window_custom_threshold_cb(GtkSpinButton *custom_threshold, gpo
 	dupe_window_recompare(dw);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void dupe_window_clear(DupeWindow *dw)
 {
 	GtkListStore *store;
@@ -4060,6 +4176,9 @@ void dupe_window_clear(DupeWindow *dw)
 	dupe_window_update_count(dw, FALSE);
 	dupe_window_update_progress(dw, nullptr, 0.0, FALSE);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_window_get_geometry(DupeWindow *dw)
 {
@@ -4126,6 +4245,10 @@ static gint default_sort_cb(GtkTreeModel *, GtkTreeIter *, GtkTreeIter *, gpoint
 	return 0;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gint column_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	gint sort_column_id;
@@ -4181,6 +4304,9 @@ static gint column_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, 
 
 	return 0;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void column_clicked_cb(GtkWidget *,  gpointer data)
 {
@@ -4202,6 +4328,10 @@ struct ExportDupesData
 };
 
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static GString *export_duplicates_data(DupeWindow *dw, const char *sep)
 {
 	bool color_old = FALSE;
@@ -4291,12 +4421,19 @@ static GString *export_duplicates_data(DupeWindow *dw, const char *sep)
 
 	return output_string;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-------------------------------------------------------------------
  * Export duplicates data
  *-------------------------------------------------------------------
  */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 GString *export_duplicates_data_command_line()
 {
 	if (!dupe_window_list) return g_string_new(_("No duplicates windows open"));
@@ -4310,6 +4447,9 @@ GString *export_duplicates_data_command_line()
 
 	return export_duplicates_data(dw, "\t");
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 GString *export_duplicates_json_command_line()
 {
@@ -4430,6 +4570,10 @@ static void dupe_run_script_cb(GSimpleAction *, GVariant *, gpointer data)
 #include "dupe-actions.inc"
 
 /* collection and files can be NULL */
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 DupeWindow *dupe_window_new()
 {
 	DupeWindow *dw;
@@ -4799,6 +4943,9 @@ DupeWindow *dupe_window_new()
 
 	return dw;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-------------------------------------------------------------------
@@ -4886,6 +5033,10 @@ static void dupe_confirm_dir_list(DupeWindow *dw, GList *list)
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void dupe_dnd_select_click_item(DupeWindow *dw, GtkWidget *widget)
 {
 	if (!dw->click_item || dupe_listview_item_is_selected(dw->click_item, widget)) return;
@@ -4902,6 +5053,9 @@ static void dupe_dnd_select_click_item(DupeWindow *dw, GtkWidget *widget)
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static GdkContentProvider *dupe_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer data)
 {
@@ -4997,6 +5151,10 @@ static void dupe_dnd_init(DupeWindow *dw)
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean dupe_deleted_files_update_cb(gpointer data)
 {
 	auto *dw = static_cast<DupeWindow *>(data);
@@ -5135,6 +5293,9 @@ static gboolean dupe_deleted_files_update_cb(gpointer data)
 	restore_selection(dw->second_listview, second_selected);
 	return G_SOURCE_REMOVE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {

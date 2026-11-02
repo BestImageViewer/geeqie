@@ -2,6 +2,8 @@
 
 #include <functional>
 
+#include <config.h>
+
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 
@@ -70,7 +72,10 @@ TEST(FileChooserDestination, BreadcrumbClearsChildButExplicitSelectionRemains)
 		auto *chooser_widget = find_widget(dialog, [](GtkWidget *widget) { return GTK_IS_FILE_CHOOSER(widget); });
 		ASSERT_NE(chooser_widget, nullptr);
 		auto *chooser = GTK_FILE_CHOOSER(chooser_widget);
+		// Inspect the intentionally retained embedded file chooser.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
 		G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 		ASSERT_TRUE(wait_for([&]()
 			{
 			g_autoptr(GFile) current = gtk_file_chooser_get_current_folder(chooser);
@@ -134,7 +139,9 @@ TEST(FileChooserDestination, BreadcrumbClearsChildButExplicitSelectionRemains)
 				}) != nullptr;
 			}));
 		gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
 		G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 		ASSERT_NE(result, nullptr);
 		EXPECT_TRUE(g_file_equal(result, selection_mode ? child : folder));
 		g_object_unref(result);
@@ -180,7 +187,10 @@ TEST(FileChooserDestination, AcceptExistingReturnsExistingOrNewPathWithoutReplac
 		auto *chooser = GTK_FILE_CHOOSER(find_widget(dialog, [](GtkWidget *widget) { return GTK_IS_FILE_CHOOSER(widget); }));
 		ASSERT_NE(chooser, nullptr);
 		g_autoptr(GFile) folder = g_file_new_for_path(directory);
+		// Exercise the intentionally retained embedded file chooser.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
 		G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 		ASSERT_TRUE(wait_for([&]()
 			{
 			g_autoptr(GFile) current = gtk_file_chooser_get_current_folder(chooser);
@@ -188,7 +198,9 @@ TEST(FileChooserDestination, AcceptExistingReturnsExistingOrNewPathWithoutReplac
 			}));
 		gtk_file_chooser_set_current_name(chooser, name);
 		gtk_dialog_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
 		G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 		ASSERT_NE(result, nullptr);
 		g_autofree gchar *actual = g_file_get_path(result);
 		g_autofree gchar *expected = g_build_filename(directory, name, nullptr);

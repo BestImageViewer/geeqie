@@ -81,6 +81,10 @@ protected:
 		g_free(path);
 	}
 
+	// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	GtkTreeIter append(const gchar *name, GtkTreeIter *parent = nullptr)
 	{
 		GtkTreeIter iter;
@@ -94,6 +98,9 @@ protected:
 		GtkTreeIter iter;
 		while (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(tree), &iter)) keyword_delete(tree, &iter);
 	}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	std::string contents()
 	{
@@ -111,6 +118,10 @@ protected:
 	bool initialized = false;
 };
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_F(KeywordTreeAutosave, SavesEditsAndSubsequentReorderingAndDeletion)
 {
 	keyword_tree_autosave_set_enabled(TRUE);
@@ -149,6 +160,9 @@ TEST_F(KeywordTreeAutosave, DoesNotSaveLoadingDefaultsOrDisplayOnlyChanges)
 	wait_for_autosave();
 	EXPECT_EQ(contents(), "Unchanged");
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_F(KeywordTreeAutosave, FailedSaveRetainsUnsavedState)
 {

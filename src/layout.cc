@@ -2937,7 +2937,14 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 
 			if (surface)
 				{
+				// GTK has no replacement for X11 workspace restoration.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+				G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 				lw->options.workspace = gdk_x11_surface_get_desktop(surface);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+				G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 				}
 			}
 		}
@@ -3032,7 +3039,14 @@ static gboolean move_window_to_workspace_cb(gpointer data)
 				GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(lw->window));
 				if (surface)
 					{
+					// GTK has no replacement for X11 workspace restoration.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+					G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 					gdk_x11_surface_move_to_desktop(surface, lw->options.workspace);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+					G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 					}
 				}
 			}

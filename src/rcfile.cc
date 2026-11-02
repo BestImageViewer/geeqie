@@ -1432,11 +1432,18 @@ static void options_parse_filter_end(gpointer data)
 	filter_rebuild();
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void options_parse_keyword_end(gpointer data)
 {
 	auto iter_ptr = static_cast<GtkTreeIter *>(data);
 	gtk_tree_iter_free(iter_ptr);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 
 static void options_parse_keyword(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
@@ -1456,6 +1463,10 @@ static void options_parse_keyword(GQParserData *parser_data, const gchar *elemen
 
 
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void options_parse_keyword_tree(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
 {
 	if (g_ascii_strcasecmp(element_name, "keyword") == 0)
@@ -1469,6 +1480,9 @@ static void options_parse_keyword_tree(GQParserData *parser_data, const gchar *e
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 
 static void options_parse_global(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)

@@ -14,6 +14,10 @@ void drain_events()
 	while (g_main_context_iteration(nullptr, FALSE)) {}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void check_editor_close(bool activate)
 {
 	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
@@ -73,6 +77,9 @@ void check_editor_close(bool activate)
 	drain_events();
 	g_log_set_always_fatal(old_fatal);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST(TreeEdit, FocusOutsideClosesEditor)
 {

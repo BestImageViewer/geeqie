@@ -483,6 +483,10 @@ static void vf_dnd_begin(GtkDragSource *, GdkDrag *drag, gpointer data)
 	g_object_set_data(G_OBJECT(drag), VIEW_FILE_DATA_KEY, data);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vf_dnd_clear_marker(ViewFile *vf)
 {
 	if (vf->type == FILEVIEW_LIST)
@@ -493,6 +497,9 @@ static void vf_dnd_clear_marker(ViewFile *vf)
 	gtk_widget_remove_css_class(marker, "collection-drop-after");
 	g_object_set_data(G_OBJECT(vf->listview), "collection-drop-marker", nullptr);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vf_dnd_drop_leave(GtkDropTargetAsync *, GdkDrop *, gpointer data)
 {
@@ -601,6 +608,10 @@ void vf_collection_move(ViewFile *vf, const FileDataList *files, FileData *befor
 	vf_refresh_idle(vf);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static FileData *vf_dnd_collection_insert_before(ViewFile *vf, gdouble x, gdouble y)
 {
 	vf_dnd_clear_marker(vf);
@@ -642,6 +653,9 @@ static FileData *vf_dnd_collection_insert_before(ViewFile *vf, gdouble x, gdoubl
 		}
 	return nullptr;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static GdkDragAction vf_dnd_drop_motion(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {

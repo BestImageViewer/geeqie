@@ -96,6 +96,10 @@ TEST_F(DeferredMarks, DisplayDefersAndDeduplicatesReads)
 	EXPECT_EQ(vf.marks_load_idle_id, 0U);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_F(DeferredMarks, ResolvedMarksUpdateListRow)
 {
 	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
@@ -125,6 +129,9 @@ TEST_F(DeferredMarks, ResolvedMarksUpdateListRow)
 	vf.info = nullptr;
 	vf.listview = nullptr;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_F(DeferredMarks, CancellationDropsPendingReads)
 {
@@ -146,6 +153,10 @@ TEST_F(DeferredMarks, HiddenMarksDoNotReadMetadata)
 	EXPECT_EQ(vf.marks_load_idle_id, 0U);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void check_startup_selection(bool show_details)
 {
 	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
@@ -268,6 +279,9 @@ TEST(FileList, AdditiveRangesPreserveOtherBlocksInBothViews)
 		g_rmdir(directory);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST(FileList, StartupSelectionIsVisibleWithDetails)
 {
@@ -357,6 +371,10 @@ protected:
 	gchar *directory = nullptr;
 };
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(RepeatedDelete, StatusPositionTracksDisplayedImageWithinSelection)
 {
 	auto *vf = layout->vf;
@@ -398,6 +416,9 @@ TEST_P(RepeatedDelete, StatusPositionTracksDisplayedImageWithinSelection)
 	EXPECT_EQ(layout_selection_count(layout), 2U);
 	EXPECT_NE(std::strstr(gtk_label_get_text(GTK_LABEL(layout->info_status)), "3 / 3 files"), nullptr);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(RepeatedDelete, StatusPositionSurvivesSelectNoneAndOmitsAbsentImage)
 {
@@ -1154,6 +1175,10 @@ TEST_P(ThumbnailWorkingSet, ChangingToEmptyFolderDiscardsTheOldQueue)
 	EXPECT_NE(vf_index_get_data(vf, 0)->thumb_pixbuf, nullptr);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(ThumbnailWorkingSet, EvictionDropsModelReferencesAndReloadsOnRevisit)
 {
 	auto *old = vf_index_get_data(vf, 80);
@@ -1192,6 +1217,9 @@ TEST_P(ThumbnailWorkingSet, EvictionDropsModelReferencesAndReloadsOnRevisit)
 	settle();
 	EXPECT_NE(old->thumb_pixbuf, nullptr);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(ThumbnailWorkingSet, RefreshAndDeletionWhileLoadingKeepQueueValid)
 {
@@ -1257,6 +1285,10 @@ TEST_P(ThumbnailWorkingSet, CollectionUsesTheSameBoundedLoading)
 	EXPECT_FALSE(vf->thumbs_running);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(ThumbnailWorkingSet, ExpandedGroupsLoadVisibleSidecars)
 {
 	if (vf->type != FILEVIEW_LIST) GTEST_SKIP() << "Requires list view";
@@ -1280,6 +1312,9 @@ TEST_P(ThumbnailWorkingSet, ExpandedGroupsLoadVisibleSidecars)
 	EXPECT_NE(sidecar->thumb_pixbuf, nullptr);
 	EXPECT_FALSE(vf->thumbs_running);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 INSTANTIATE_TEST_SUITE_P(FileViews, ThumbnailWorkingSet,
                         testing::Values(std::make_tuple(FILEVIEW_LIST, false),
@@ -1326,6 +1361,10 @@ TEST_P(RevealFile, NavigationAfterDragMoveReplacesSelection)
 	EXPECT_TRUE(vflist_is_selected(vf, next));
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(RevealFile, ScrollsWithoutChangingSelectionOrFocus)
 {
 	auto *first = vf_index_get_data(vf, 0);
@@ -1370,6 +1409,9 @@ TEST_P(RevealFile, ScrollsWithoutChangingSelectionOrFocus)
 		EXPECT_LE(bounds.origin.y + bounds.size.height, gtk_widget_get_height(vf->scrolled));
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(RevealFile, DownMovesOneDisplayedIconRowAfterSelectNone)
 {
@@ -1657,6 +1699,10 @@ TEST_P(RevealFile, ColorLabelsReadOnlyVisibleMetadataWithoutAFilter)
 	EXPECT_NE(unseen->color_label, nullptr);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(RevealFile, ListColorLabelExpanderBackgroundPreservesSelectionAndClearsReusedCells)
 {
 	if (vf->type != FILEVIEW_LIST) GTEST_SKIP() << "Requires list view";
@@ -1788,6 +1834,9 @@ TEST_P(RevealFile, ListColorLabelExpanderBackgroundPreservesSelectionAndClearsRe
 	EXPECT_FALSE(tinted());
 	EXPECT_FALSE(has_tooltip());
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(RevealFile, IconColorLabelsDisplayUnknownTextWithoutInterpretingMarkup)
 {

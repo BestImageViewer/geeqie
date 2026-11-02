@@ -685,7 +685,14 @@ static void date_selection_popup(DateSelection *ds)
 	if (ds->popover)
 		{
 		g_autoptr(GDateTime) date = date_selection_get(ds->box);
+		// Retained for GTK 4.18 compatibility; gtk_calendar_set_date() requires 4.20.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+		G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 		gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+		G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 		return;
 		}
 
@@ -697,7 +704,14 @@ static void date_selection_popup(DateSelection *ds)
 
 	g_autoptr(GDateTime) date = date_selection_get(ds->box);
 
+	// Retained for GTK 4.18 compatibility; gtk_calendar_set_date() requires 4.20.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	g_signal_connect_swapped(ds->calendar,
 	                         "day-selected",

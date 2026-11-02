@@ -1107,6 +1107,10 @@ GList *string_to_keywords_list(const gchar *text)
  */
 
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean meta_data_get_keyword_mark(FileData *fd, gint, gpointer data)
 {
 	/** @FIXME do not use global keyword_tree */
@@ -1189,6 +1193,9 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
 		                   -1);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 
 /*
@@ -1197,6 +1204,10 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
  *-------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gchar *keyword_get_name(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
 {
 	gchar *name;
@@ -1402,6 +1413,9 @@ static gboolean keyword_tree_is_set_casefull(GtkTreeModel *keyword_tree, GtkTree
 		iter = parent;
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 gboolean keyword_tree_is_set(GtkTreeModel *keyword_tree, GtkTreeIter *iter, GList *kw_list)
 {
@@ -1432,6 +1446,10 @@ gboolean keyword_tree_is_set(GtkTreeModel *keyword_tree, GtkTreeIter *iter, GLis
 	return ret;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void keyword_tree_set(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr, GList **kw_list)
 {
 	GtkTreeIter iter = *iter_ptr;
@@ -1472,6 +1490,9 @@ GList *keyword_tree_get(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr)
 		iter = parent;
 		}
 } // GList *keyword_tree_get(GtkTre...
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void keyword_tree_reset1(GtkTreeModel *keyword_tree, GtkTreeIter *iter, GList **kw_list)
 {
@@ -1487,6 +1508,10 @@ static void keyword_tree_reset1(GtkTreeModel *keyword_tree, GtkTreeIter *iter, G
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void keyword_tree_reset_recursive(GtkTreeModel *keyword_tree, GtkTreeIter *iter, GList **kw_list)
 {
 	GtkTreeIter child;
@@ -1657,6 +1682,9 @@ void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keyword
 	gtk_tree_model_foreach(GTK_TREE_MODEL(keyword_tree), keyword_show_set_in_cb, keywords);
 	keywords = g_list_delete_link(keywords, keywords);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 
 KeywordTreeAutosaveBlock::KeywordTreeAutosaveBlock()
@@ -1681,6 +1709,10 @@ void keyword_tree_autosave_set_enabled(gboolean enabled)
 	keyword_tree_saved_state = keyword_tree_state();
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 GtkTreeStore *keyword_tree_get_or_new()
 {
 	if (!keyword_tree)
@@ -1702,6 +1734,9 @@ static GtkTreeIter keyword_tree_default_append(GtkTreeStore *keyword_tree, GtkTr
 	keyword_set(keyword_tree, &iter, name, is_keyword);
 	return iter;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void keyword_tree_set_default(GtkTreeStore *keyword_tree)
 {
@@ -1774,6 +1809,10 @@ void keyword_tree_set_default(GtkTreeStore *keyword_tree)
 }
 
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void keyword_tree_node_write_config(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr, RcString &rc)
 {
 	GtkTreeIter iter = *iter_ptr;
@@ -1892,5 +1931,8 @@ GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *pa
 
 	return nullptr;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

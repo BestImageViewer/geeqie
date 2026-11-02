@@ -239,6 +239,10 @@ TEST_P(DuplicateFolders, SubfoldersAreSeparateFolders)
 	expect_cross_folder_results({first, second});
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(DuplicateFolders, MixedGroupsRetainEveryCrossFolderPair)
 {
 	toggle(true);
@@ -269,6 +273,9 @@ TEST_P(DuplicateFolders, MixedGroupsRetainEveryCrossFolderPair)
 		EXPECT_EQ(g_list_find(dw->dupes, item), nullptr);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(DuplicateFolders, EqualKeysInOneFolderDoNotHideOtherCandidates)
 {
@@ -292,6 +299,10 @@ TEST_P(DuplicateFolders, EqualKeysInOneFolderDoNotHideOtherCandidates)
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(DuplicateFolders, RemovingSharedMatchDoesNotCreateSameFolderMatches)
 {
 	toggle(true);
@@ -327,6 +338,9 @@ TEST_P(DuplicateFolders, RemovingSharedMatchDoesNotCreateSameFolderMatches)
 	EXPECT_EQ(g_list_length(dw->list) + g_list_length(dw->second_list), 2U);
 	for (const auto &path : paths) EXPECT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_IS_REGULAR));
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(DuplicateFolders, ClosingWindowCancelsDeferredComparison)
 {

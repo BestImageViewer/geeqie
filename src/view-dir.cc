@@ -119,6 +119,10 @@ struct NewFolderData
 	guint start_id = 0;
 };
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vd_new_folder_cancel(ViewDir *vd)
 {
 	auto *pending = vd->new_folder;
@@ -182,6 +186,9 @@ static gboolean vd_new_folder_finish(gpointer data)
 		}
 	return G_SOURCE_REMOVE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vd_new_folder_queue_finish(ViewDir *vd)
 {
@@ -387,6 +394,10 @@ gboolean vd_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter)
 	return vd->type == DIRVIEW_TREE && vdtree_find_row(vd, fd, iter, nullptr);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static FileData *vd_get_fd_from_tree_path(ViewDir *vd, GtkTreeView *tview, GtkTreePath *tpath)
 {
 	GtkTreeIter iter;
@@ -473,6 +484,9 @@ void vd_color_set(ViewDir *vd, FileData *fd, gint color_set)
 
 	gtk_tree_store_set(GTK_TREE_STORE(store), &iter, DIR_COLUMN_COLOR, color_set, -1);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void vd_popup_destroy_cb(GtkWidget *, gpointer data)
 {
@@ -1025,6 +1039,10 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean vd_new_folder_start(GtkWidget *, GdkFrameClock *, gpointer data)
 {
 	auto *vd = static_cast<ViewDir *>(data);
@@ -1132,6 +1150,9 @@ void vd_new_folder(ViewDir *vd, FileData *dir_fd)
 	// Start after the context menu has finished closing.
 	pending->start_id = gtk_widget_add_tick_callback(vd->widget, vd_new_folder_start, vd, nullptr);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -1196,6 +1217,10 @@ void vd_dnd_drop_scroll_cancel(ViewDir *vd)
 	g_clear_handle_id(&vd->drop_scroll_id, g_source_remove);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
 {
 	FileData *fd = vd->type == DIRVIEW_LIST ? vdlist_fd_at_point(vd, x, y) : nullptr;
@@ -1230,6 +1255,9 @@ static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
 		vd->dnd_drop_update_func(vd);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static GdkDragAction vd_dnd_select_action(GdkDrop *drop)
 {
@@ -1425,6 +1453,10 @@ void vd_dnd_init(ViewDir *vd)
  *----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
@@ -1442,6 +1474,9 @@ void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_
 	             "cell-background-set", set,
 	             nullptr);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *, gpointer data)
 {
@@ -1451,6 +1486,10 @@ void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *,
 	vd_select_row(vd, fd);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vd_gesture_release_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 {
 	auto *vd = static_cast<ViewDir *>(data);
@@ -1492,6 +1531,9 @@ static void vd_gesture_release_cb(GtkGestureClick *gesture, gint n_press, gdoubl
 
 	if (fd && vd->click_fd == fd) vd_select_row(vd, vd->click_fd);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static gboolean vd_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType, gpointer data)
 {
@@ -1509,6 +1551,10 @@ static gboolean vd_key_pressed_cb(GtkEventControllerKey *controller, guint keyva
 	return ret;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
@@ -1555,6 +1601,9 @@ static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdoub
 
 	if (ret) gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {

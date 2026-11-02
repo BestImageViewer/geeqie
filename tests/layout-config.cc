@@ -967,7 +967,14 @@ protected:
 		g_autoptr(GFile) folder = g_file_new_for_path(directory);
 		ASSERT_TRUE(wait_layout([&]()
 			{
+			// Inspect the intentionally retained embedded file chooser.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 			g_autoptr(GFile) current = gtk_file_chooser_get_current_folder(chooser);
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+			G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 			return gtk_widget_get_mapped(GTK_WIDGET(chooser)) && current && g_file_equal(current, folder);
 			}));
 	}

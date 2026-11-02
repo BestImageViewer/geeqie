@@ -137,6 +137,10 @@ struct ViewFileFindRowData {
 	bool found;
 };
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean vflist_find_row_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
 {
 	FileData *fd;
@@ -312,6 +316,9 @@ static void vflist_move_cursor(ViewFile *vf, GtkTreeIter *iter)
 	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
 	gtk_tree_view_set_cursor(GTK_TREE_VIEW(vf->listview), tpath, nullptr, FALSE);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 
 /*
@@ -326,6 +333,10 @@ static void vflist_move_cursor(ViewFile *vf, GtkTreeIter *iter)
  *-----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 GList *vflist_selection_get_one(ViewFile *vf, FileData *fd)
 {
 	GList *list = nullptr;
@@ -366,6 +377,9 @@ gboolean vflist_rename_in_place(ViewFile *vf, FileData *fd)
 	                         FILE_VIEW_COLUMN_FORMATTED, fd->name,
 	                         vflist_row_rename_cb, vf);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void vflist_pop_menu_rename_cb(ViewFile *vf)
 {
@@ -396,6 +410,10 @@ void vflist_pop_menu_add_items(ViewFile *vf, GtkWidget *menu)
 	                    G_CALLBACK(vflist_pop_menu_thumbs_cb), vf);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vflist_star_rating_set(ViewFile *vf, gboolean enable)
 {
 	GList *columns;
@@ -431,6 +449,9 @@ static void vflist_star_rating_set(ViewFile *vf, gboolean enable)
 		}
 	g_list_free(columns);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void vflist_pop_menu_show_star_rating_cb(ViewFile *vf)
 {
@@ -440,12 +461,19 @@ void vflist_pop_menu_show_star_rating_cb(ViewFile *vf)
 	vflist_star_rating_set(vf, options->show_star_rating);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void vflist_pop_menu_refresh_cb(ViewFile *vf)
 {
 	vflist_color_set(vf, vf->click_fd, FALSE);
 	vflist_refresh(vf);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(vf->listview));
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 void vflist_popup_destroy_cb(ViewFile *vf)
 {
@@ -484,6 +512,10 @@ static gboolean vflist_row_rename_cb(TreeEditData *, const gchar *old_name, cons
 	return FALSE;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkModifierType)
 {
 	if (keyval != GDK_KEY_Menu)
@@ -707,6 +739,9 @@ void vflist_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 		vflist_move_cursor(vf, &iter);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vflist_select_image(ViewFile *vf, FileData *sel_fd)
 {
@@ -757,6 +792,10 @@ static gboolean vflist_select_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static gboolean vflist_select_cb(GtkTreeSelection *, GtkTreeModel *store, GtkTreePath *tpath, gboolean path_currently_selected, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -826,6 +865,9 @@ static void vflist_expand_cb(GtkTreeView *listview, GtkTreeIter *iter, GtkTreePa
 		vf_thumbnail_model_changed(vf);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -875,6 +917,10 @@ static time_t vflist_display_date(const ViewFile *vf, const FileData *fd)
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *iter, FileData *fd)
 {
 	const time_t date = vflist_display_date(vf, fd);
@@ -1141,6 +1187,9 @@ void vflist_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings)
 		return FALSE;
 		}, vf);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -1181,6 +1230,10 @@ void vflist_read_metadata_progress_count(const GList *list, gint &count, gint &d
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void vflist_set_marks_fd(ViewFile *vf, FileData *fd)
 {
 	GtkTreeIter iter;
@@ -1230,12 +1283,19 @@ static std::vector<FileData *> vflist_thumb_walk(ViewFile *vf, GtkTreePath *star
 		}
 	return files;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 std::vector<FileData *> vflist_thumb_rows(ViewFile *vf)
 {
 	return vflist_thumb_walk(vf, nullptr, nullptr);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 std::vector<FileData *> vflist_thumb_visible(ViewFile *vf)
 {
 	std::vector<FileData *> files;
@@ -1328,6 +1388,9 @@ FileData *vflist_star_next_fd(ViewFile *vf)
 
 	return nullptr;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -1362,6 +1425,10 @@ gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd)
  *-----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 bool vflist_is_selected(const ViewFile *vf, const FileData *fd)
 {
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
@@ -1651,6 +1718,9 @@ void vflist_select_list(ViewFile *vf, const FileDataList *list)
 			}
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vflist_select_closest(ViewFile *vf, FileData *sel_fd)
 {
@@ -1675,6 +1745,10 @@ static void vflist_select_closest(ViewFile *vf, FileData *sel_fd)
 
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void vflist_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 {
 	GtkTreeModel *store;
@@ -1743,6 +1817,9 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 		}
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -1750,6 +1827,10 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
  *-----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vflist_listview_set_columns(ViewFile *vf)
 {
 	GtkTreeViewColumn *column;
@@ -1801,6 +1882,9 @@ static void vflist_listview_set_columns(ViewFile *vf)
 	if (!column) return;
 	gtk_tree_view_column_set_visible(column, !multiline && !split_details);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static gboolean vflist_is_multiline(ViewFile *vf)
 {
@@ -1808,6 +1892,10 @@ static gboolean vflist_is_multiline(ViewFile *vf)
 }
 
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vflist_populate_view(ViewFile *vf, gboolean force)
 {
 	GtkTreeStore *store;
@@ -1844,6 +1932,9 @@ static void vflist_populate_view(ViewFile *vf, gboolean force)
 	vf_thumb_update(vf);
 	vf_star_update(vf);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 gboolean vflist_refresh(ViewFile *vf)
 {
@@ -1909,6 +2000,10 @@ gboolean vflist_refresh(ViewFile *vf)
 }
 
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 static void vflist_listview_add_column(GtkTreeView *listview, gint n, const gchar *title, gboolean image, gboolean right_justify, gboolean expand)
 {
 	GtkTreeViewColumn *column;
@@ -2013,6 +2108,9 @@ static void vflist_listview_add_column_toggle(ViewFile *vf, gint n, const gchar 
 
 	g_signal_connect(G_OBJECT(renderer), "toggled", G_CALLBACK(vflist_listview_mark_toggled_cb), vf);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -2020,6 +2118,10 @@ static void vflist_listview_add_column_toggle(ViewFile *vf, gint n, const gchar 
  *-----------------------------------------------------------------------------
  */
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 {
 	gboolean ret;
@@ -2078,6 +2180,9 @@ static void vflist_selection_sync_cb(GtkTreeSelection *source, gpointer data)
 		}
 	VFLIST(vf)->syncing_selection = FALSE;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 static void vflist_divider_position_changed_cb(GObject *paned, GParamSpec *, gpointer data)
 {
@@ -2088,6 +2193,10 @@ static void vflist_divider_position_changed_cb(GObject *paned, GParamSpec *, gpo
 		}
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 ViewFile *vflist_new(ViewFile *vf)
 {
 	GtkTreeStore *store;
@@ -2216,6 +2325,9 @@ ViewFile *vflist_new(ViewFile *vf)
 	file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 	return vf;
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 GtkWidget *vflist_get_view_widget(ViewFile *vf)
 {
@@ -2234,6 +2346,10 @@ void vflist_restore_divider_position(ViewFile *vf)
 	gtk_paned_set_position(GTK_PANED(VFLIST(vf)->paned), vf->layout->options.file_view_list.vdivider_pos);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 void vflist_thumb_set(ViewFile *vf, gboolean enable)
 {
 	if (VFLIST(vf)->thumbs_enabled == enable) return;
@@ -2281,5 +2397,8 @@ void vflist_marks_set(ViewFile *vf, gboolean enable)
 
 	g_list_free(columns);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
