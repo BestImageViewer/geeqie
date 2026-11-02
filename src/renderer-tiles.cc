@@ -2112,7 +2112,7 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 		auto *od = static_cast<OverlayData *>(work->data);
 		GdkRectangle rect = rt_overlay_get_position(rt, od);
 		const int scale = (od->flags & OVL_DEVICE_SCALE) ? gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr)) : 1;
-		GdkTexture *overlay = gdk_texture_new_for_pixbuf(od->pixbuf);
+		GdkTexture *overlay = pixbuf_to_texture(od->pixbuf);
 		graphene_rect_init(&bounds, rect.x, rect.y,
 		                   static_cast<float>(gdk_texture_get_width(overlay)) / scale,
 		                   static_cast<float>(gdk_texture_get_height(overlay)) / scale);
