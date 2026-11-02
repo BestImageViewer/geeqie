@@ -39,6 +39,7 @@
 #include <config.h>
 
 #include "cache.h"
+#include "date-time.h"
 #include "exif.h"
 #include "filedata.h"
 #if HAVE_LUA
@@ -220,7 +221,7 @@ gchar *metadata_file_info(const FileData *fd, const gchar *key)
 		}
 	if (strcmp(key, "file.date") == 0)
 		{
-		return g_strdup(text_from_time(fd->date));
+		return date_time_format(fd->date);
 		}
 	if (strcmp(key, "file.mode") == 0)
 		{
@@ -228,7 +229,7 @@ gchar *metadata_file_info(const FileData *fd, const gchar *key)
 		}
 	if (strcmp(key, "file.ctime") == 0)
 		{
-		return g_strdup(text_from_time(fd->cdate));
+		return date_time_format(fd->cdate);
 		}
 	if (strcmp(key, "file.class") == 0)
 		{
@@ -810,7 +811,7 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 	else if (strcmp(key, "formatted.MediaDate") == 0)
 		{
 		read_media_time_data(fd);
-		return g_list_append(nullptr, g_strdup(text_from_time(fd->media_date)));
+		return g_list_append(nullptr, date_time_format(fd->media_date));
 		}
 #if HAVE_LUA
 	else if (strncmp(key, "lua.", 4) == 0)

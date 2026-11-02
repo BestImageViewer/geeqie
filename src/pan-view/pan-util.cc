@@ -27,7 +27,7 @@
 
 #include <cstring>
 
-#include "filedata.h"
+#include "date-time.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "ui-fileops.h"
@@ -136,7 +136,7 @@ gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 			break;
 		case PAN_DATE_LENGTH_EXACT:
 		default:
-			return g_strdup(text_from_time(d));
+			return date_time_format(d);
 			break;
 		}
 

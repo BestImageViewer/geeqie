@@ -270,11 +270,10 @@ public:
 
 	static gchar *text_from_size(gint64 size);
 	static gchar *text_from_size_abrev(gint64 size);
-	static const gchar *text_from_time(time_t t);
 
-	#if FD_VERBOSE_DEBUG
+#if FD_VERBOSE_DEBUG
 	FileDataDebugInfo debug_info;
-	#endif
+#endif
 
 	/**
 	 * @headerfile file_data_new_group
@@ -502,7 +501,6 @@ class FileData::FileList
 // C-style compatibility API.
 gchar *text_from_size(gint64 size);
 gchar *text_from_size_abrev(gint64 size);
-const gchar *text_from_time(time_t t);
 
 FileData *file_data_new_group(const gchar *path_utf8);
 

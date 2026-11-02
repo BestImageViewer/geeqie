@@ -17,4 +17,6 @@ gchar *date_time_format(const std::tm &time, const gchar *format = nullptr, cons
 /** Format a Unix timestamp in the local timezone. */
 gchar *date_time_format(time_t timestamp, const gchar *format = nullptr);
 
+const gchar *text_from_time(time_t timestamp);
+
 #endif

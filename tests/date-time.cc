@@ -2,7 +2,6 @@
 
 #include "date-time.h"
 
-#include <cstring>
 #include <memory>
 #include <string>
 

@@ -31,11 +31,6 @@ gchar *text_from_size_abrev(gint64 size)
 	return FileData::text_from_size_abrev(size);
 }
 
-const gchar *text_from_time(time_t t)
-{
-	return FileData::text_from_time(t);
-}
-
 /**
  * @brief Scan for sidecar files - expensive
  */

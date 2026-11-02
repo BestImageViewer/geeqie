@@ -22,7 +22,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <cstring>
 
@@ -33,6 +32,7 @@
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
 
+#include "date-time.h"
 #include "exif.h"
 #include "filedata.h"
 #include "image-load.h"

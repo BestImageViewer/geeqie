@@ -44,6 +44,7 @@ extern "C" {
 
 #include "bar.h"
 #include "compat.h"
+#include "date-time.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"

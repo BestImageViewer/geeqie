@@ -21,7 +21,6 @@
 
 #include "dupe.h"
 
-#include <array>
 #include <chrono>
 #include <cinttypes>
 #include <cmath>
@@ -39,6 +38,7 @@
 #include "cellrenderericon.h"
 #include "collect.h"
 #include "compat.h"
+#include "date-time.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "history-list.h"
@@ -63,7 +63,6 @@
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "ui-utildlg.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
 

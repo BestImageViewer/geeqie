@@ -42,6 +42,7 @@
 #include "cache.h"
 #include "collect.h"
 #include "compat.h"
+#include "date-time.h"
 #include "dnd.h"
 #include "editors.h"
 #include "filedata.h"
