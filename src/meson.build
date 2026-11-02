@@ -209,6 +209,10 @@ main_sources = files('accelerators.cc',
 'window.cc',
 'window.h')
 
+if conf_data.get('HAVE_ARCHIVE', 0) == 1
+    main_sources += files('image-load-ora.cc', 'image-load-ora.h')
+endif
+
 if conf_data.get('HAVE_DJVU', 0) == 1
     main_sources += files(
         'image-load-djvu.cc',

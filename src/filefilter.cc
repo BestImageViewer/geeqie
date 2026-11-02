@@ -215,6 +215,7 @@ void filter_add_defaults()
 	filter_add_if_missing("jp2", "JPEG 2000", ".jp2", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
 #endif
 #if HAVE_ARCHIVE
+	filter_add_if_missing("ora", "OpenRaster", ".ora", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 	filter_add_if_missing("zip", "Archive files", ".zip;.rar;.tar;.tar.gz;.tar.bz2;.tar.xz;.tgz;.tbz;.txz;.cbr;.cbz;.gz;.bz2;.xz;.lzh;.lza;.7z", FORMAT_CLASS_ARCHIVE, FALSE, FALSE, TRUE); // NOTRANSLATE: Stable file-filter description stored in configuration.
 #endif
 #if HAVE_NPY

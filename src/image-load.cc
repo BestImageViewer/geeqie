@@ -64,6 +64,9 @@
 #if HAVE_NPY
 #  include "image-load-npy.h"
 #endif
+#if HAVE_ARCHIVE
+#  include "image-load-ora.h"
+#endif
 #if HAVE_PDF
 #  include "image-load-pdf.h"
 #endif
@@ -623,6 +626,13 @@ static gboolean image_loader_setup_loader(ImageLoader *il)
 		}
 	else
 		{
+#if HAVE_ARCHIVE
+		if (file_extension_match(il->fd->path, ".ora"))
+			{
+			il->backend = get_image_loader_backend_ora(il->cancellable);
+			}
+		else
+#endif
 #if HAVE_FFMPEGTHUMBNAILER
 		if (il->fd->format_class == FORMAT_CLASS_VIDEO)
 			{

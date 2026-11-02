@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="GuideReferenceSupportedFormats">
   <title id="titleGuideReferenceSupportedFormats">Supported File Formats</title>
-  <para>3FR ANI ARW AVIF BMP CR2 CR3 CRW CUR DDS DJVU DNG ERF EXR GIF GQV HEIC HEIF ICO JP2 JPE JPEG JPG JPS JXL KDC MEF MOS MPO MRW NEF NPY NRW ORF PBM PDF PEF PGM PNG PNM PPM PSD QIF QTIF RAF RAW RW2 SCR SR2 SRF SVG SVGZ TGA TIF TIFF WEBP XBM XPM </para>
+  <para>3FR ANI ARW AVIF BMP CR2 CR3 CRW CUR DDS DJVU DNG ERF EXR GIF GQV HEIC HEIF ICO JP2 JPE JPEG JPG JPS JXL KDC MEF MOS MPO MRW NEF NPY NRW ORA ORF PBM PDF PEF PGM PNG PNM PPM PSD QIF QTIF RAF RAW RW2 SCR SR2 SRF SVG SVGZ TGA TIF TIFF WEBP XBM XPM </para>
+  <para>OpenRaster (.ora) support requires libarchive and a PNG loader. Geeqie displays the flattened artwork stored in mergedimage.png; individual layers are not rendered. Archives without a readable composite cannot be displayed. The composite PNG is limited to 512 MiB of decompressed archive data and 134,217,728 pixels.</para>
   <para>Images in archive files (.ZIP, .TAR etc) can be displayed.
   </para>
   <para>Animated GIF and WEBP files are supported.
