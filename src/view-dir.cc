@@ -686,7 +686,12 @@ static void vd_pop_menu_dupe_cb(GSimpleAction *, GVariant *, gpointer data)
 static void vd_pop_menu_delete_default_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *vd = static_cast<ViewDir *>(data);
-	if (vd->click_fd) file_util_delete_dir(vd->click_fd, vd->widget);
+	FileDataRef fd(vd->click_fd);
+	if (!fd) return;
+	if (vd_is_collection(fd))
+		file_util_delete_single(fd, vd->widget, options->file_ops.safe_delete_enable && !options->file_ops.no_trash);
+	else
+		file_util_delete_dir(fd, vd->widget);
 }
 
 template<gboolean trash>
@@ -694,8 +699,12 @@ static void vd_pop_menu_delete_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
-	if (!vd->click_fd) return;
-	file_util_delete_dir(vd->click_fd, vd->widget, trash);
+	FileDataRef fd(vd->click_fd);
+	if (!fd) return;
+	if (vd_is_collection(fd))
+		file_util_delete_single(fd, vd->widget, trash);
+	else
+		file_util_delete_dir(fd, vd->widget, trash);
 }
 
 template<gboolean move>
@@ -853,6 +862,7 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 	gboolean active;
 	gboolean rename_delete_active = FALSE;
 	gboolean new_folder_active = FALSE;
+	const bool collection = vd_is_collection(fd);
 
 	active = (fd != nullptr && !vd_is_collection(fd));
 	switch (vd->type)
@@ -882,8 +892,11 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 			break;
 		}
 
-	if (vd_is_collection(fd))
+	gboolean delete_active = rename_delete_active;
+	if (collection)
 		{
+		g_autofree gchar *parent = remove_level_from_path(fd->path);
+		delete_active = access_file(parent, W_OK | X_OK);
 		rename_delete_active = FALSE;
 		new_folder_active = FALSE;
 		}
@@ -898,11 +911,13 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 		const gchar *label;
 		if (g_strcmp0(name, "win.dir-win-trash") == 0)
 			{
-			label = options->file_ops.confirm_move_dir_to_trash ? _("_Move to Trash…") : _("_Move to Trash");
+			const bool confirm = collection ? options->file_ops.confirm_move_to_trash : options->file_ops.confirm_move_dir_to_trash;
+			label = confirm ? _("_Move to Trash…") : _("_Move to Trash");
 			}
 		else if (g_strcmp0(name, "win.dir-win-delete-permanent") == 0)
 			{
-			label = options->file_ops.confirm_delete_dir ? _("_Permanently Delete…") : _("_Permanently Delete");
+			const bool confirm = collection ? options->file_ops.confirm_delete : options->file_ops.confirm_delete_dir;
+			label = confirm ? _("_Permanently Delete…") : _("_Permanently Delete");
 			}
 		else continue;
 		g_autoptr(GMenuItem) item = g_menu_item_new_from_model(G_MENU_MODEL(folder_actions), i);
@@ -942,13 +957,13 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), rename_delete_active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-trash");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), rename_delete_active);
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), delete_active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-delete-permanent");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), rename_delete_active);
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), delete_active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-delete");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), rename_delete_active);
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), delete_active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-sort-ascending");
 	if (vd->layout->options.dir_view_type == DIRVIEW_LIST)

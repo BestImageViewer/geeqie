@@ -192,6 +192,7 @@
     <section id="folders">
       <title>Folders</title>
       <para>This displays a list of sub folders contained in the active folder, or a tree that includes all folders in the file system.</para>
+      <para>Collection files also appear as virtual folders. Their context menu offers Move to Trash and Permanently Delete when the containing folder is writable. These commands remove only the collection file; images referenced by the collection are unaffected. Collection deletion uses the file confirmation preferences, rather than the folder confirmation preferences.</para>
       <para>
         A
         <emphasis role="strong">context menu</emphasis>

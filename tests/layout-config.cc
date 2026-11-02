@@ -48,8 +48,10 @@
 #include "rcfile.h"
 #include "search.h"
 #include "shortcuts.h"
+#include "trash.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
+#include "view-dir.h"
 #include "view-file.h"
 
 #if HAVE_ARCHIVE
@@ -2481,6 +2483,108 @@ TEST_F(PartialLayoutConfig, OpenArchiveHandlesValidAndCorruptArchives)
 		}
 	EXPECT_TRUE(warned);
 #endif
+}
+
+TEST_F(PartialLayoutConfig, CollectionContextDeletionPreservesReferencedImages)
+{
+	struct Cleanup
+	{
+		decltype(options->file_ops) previous = options->file_ops;
+		std::vector<std::string> files;
+		std::string trash;
+		~Cleanup()
+			{
+			g_free(options->file_ops.safe_delete_path);
+			options->file_ops = previous;
+			for (const auto &path : files) g_unlink(path.c_str());
+			std::error_code error;
+			std::filesystem::remove_all(trash, error);
+			sidecar_ext_parse(options->sidecar.ext);
+			}
+	} cleanup;
+	cleanup.trash = std::string(directory) + "/collection-trash";
+	options->file_ops.safe_delete_path = g_strdup(cleanup.trash.c_str());
+	options->file_ops.use_system_trash = FALSE;
+	options->file_ops.safe_delete_folder_maxsize = 0;
+	options->file_ops.confirm_delete_dir = FALSE;
+	options->file_ops.confirm_move_dir_to_trash = FALSE;
+	sidecar_ext_parse(".jpg;.gqv");
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 2, 2);
+	gdk_pixbuf_fill(pixels, 0x204060ff);
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(layout->window); }));
+	for (const auto view : {DIRVIEW_LIST, DIRVIEW_TREE})
+		for (bool trash : {false, true})
+			for (bool cancel : {true, false})
+				{
+				SCOPED_TRACE(testing::Message() << view << ", trash=" << trash << ", cancel=" << cancel);
+				const auto base = std::string(directory) + "/collection-" + std::to_string(view) +
+				                  std::to_string(trash) + std::to_string(cancel);
+				const auto image_path = base + ".jpg";
+				const auto collection_path = base + ".gqv";
+				cleanup.files.push_back(image_path);
+				cleanup.files.push_back(collection_path);
+				ASSERT_TRUE(gdk_pixbuf_save(pixels, image_path.c_str(), "png", nullptr, nullptr));
+				auto image = FileData::new_simple(image_path.c_str());
+				g_autoptr(CollectionData) cd = collection_new(nullptr);
+				ASSERT_TRUE(collection_add(cd, image, FALSE));
+				ASSERT_TRUE(collection_save(cd, collection_path.c_str()));
+				auto grouped = FileData::new_group(image_path.c_str());
+				auto fd = FileData::new_simple(collection_path.c_str());
+				ASSERT_TRUE(vd_is_collection(fd));
+				ASSERT_EQ(g_chmod(collection_path.c_str(), 0444), 0);
+				layout_views_set(layout, view, FILEVIEW_LIST);
+				ASSERT_TRUE(layout_set_collection(layout, cd));
+				auto *vd = layout->vd;
+				vd->click_fd = fd;
+				options->file_ops.confirm_delete = cancel;
+				options->file_ops.confirm_move_to_trash = cancel;
+				// Explicit commands must override the opposite default without changing it.
+				options->file_ops.no_trash = trash;
+				options->file_ops.safe_delete_enable = !trash;
+				vd_pop_menu(vd, fd, layout->window, 20, 20);
+				for (const auto *name : {"dir-win-trash", "dir-win-delete-permanent"})
+					EXPECT_TRUE(g_action_group_get_action_enabled(G_ACTION_GROUP(layout->window), name));
+				for (const auto *name : {"dir-win-rename", "dir-win-new-folder", "dir-win-slideshow-recursive"})
+					EXPECT_FALSE(g_action_group_get_action_enabled(G_ACTION_GROUP(layout->window), name));
+				// The read-only file remains removable from a writable directory.
+				// Restore its mode before execution to avoid the separate read-only warning.
+				ASSERT_EQ(g_chmod(collection_path.c_str(), 0644), 0);
+				auto *action = g_action_map_lookup_action(G_ACTION_MAP(layout->window), trash ? "dir-win-trash" : "dir-win-delete-permanent");
+				g_action_activate(action, nullptr);
+				// Real menu activation dismisses the popover before the operation finishes.
+				for (auto *child = gtk_widget_get_first_child(layout->window); child;)
+					{
+					auto *next = gtk_widget_get_next_sibling(child);
+					if (GTK_IS_POPOVER(child)) gtk_popover_popdown(GTK_POPOVER(child));
+					child = next;
+					}
+				if (cancel)
+					{
+					GtkWindow *confirmation = nullptr;
+					ASSERT_TRUE(wait_layout([&]()
+						{
+						auto *windows = gtk_window_get_toplevels();
+						for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+							{
+							g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+							if (find_widget(GTK_WIDGET(window), GTK_TYPE_LABEL, trash ? "Move file to Trash?" : "Permanently delete file?"))
+								{ confirmation = window; return true; }
+							}
+						return false;
+						}));
+					gtk_window_close(confirmation);
+					}
+				ASSERT_TRUE(wait_layout([&]() { return fd->change == nullptr; }));
+				EXPECT_EQ(isfile(collection_path.c_str()), cancel);
+				EXPECT_TRUE(isfile(image_path.c_str()));
+				EXPECT_EQ(g_list_length(cd->list), 1U);
+				const auto trashed = cleanup.trash + "/files/" + filename_from_path(collection_path.c_str());
+				EXPECT_EQ(isfile(trashed.c_str()), trash && !cancel);
+				EXPECT_EQ(options->file_ops.no_trash, trash);
+				EXPECT_EQ(options->file_ops.safe_delete_enable, !trash);
+				layout_set_path(layout, directory);
+				}
 }
 
 TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)
