@@ -72,6 +72,10 @@ OnlyShowIn=X-Geeqie;
 # for example:
 #X-Geeqie-File-Extensions=.jpg; .cr2
 
+# Pass every matching member of each selected group, once, to a %F or %U command.
+# This is not supported with %f, %u, or X-Geeqie-Filter=true.
+#X-Geeqie-Expand-Groups=true
+
 # The key or key combination to execute this function can be set as
 # in this example:
 # N.B. This value may conflict with a setting in Keyboard Options

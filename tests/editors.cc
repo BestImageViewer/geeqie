@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <future>
+#include <initializer_list>
 #include <memory>
 #include <string>
 #include <utility>
@@ -599,6 +600,152 @@ TEST_F(PluginDiscovery, AsyncReloadPublishesOnMainThread)
 	g_signal_handler_disconnect(desktop_file_list, handler);
 	EXPECT_TRUE(found);
 	layout_editors_reload_finish();
+}
+
+class PluginGroups : public PluginDiscovery
+{
+protected:
+	void SetUp() override
+	{
+		PluginDiscovery::SetUp();
+		filter_add_defaults();
+		filter_rebuild();
+		sidecar_ext_parse(".cr2;.jpg;.xmp");
+		for (const auto *extension : {".cr2", ".jpg", ".xmp"})
+			{
+			const auto path = folder() + "/photo 'quoted' $cash `literal` ; &" + extension;
+			ASSERT_TRUE(g_file_set_contents(path.c_str(), "test", -1, nullptr));
+			paths.push_back(path);
+			members.push_back(path);
+			}
+		group = file_data_new_group(members.front().c_str());
+		ASSERT_NE(group, nullptr);
+		ASSERT_EQ(g_list_length(group->sidecar_files), 2U);
+		child = static_cast<FileData *>(group->sidecar_files->data);
+	}
+
+	void TearDown() override
+	{
+		file_data_unref(group);
+		sidecar_ext_parse(options->sidecar.ext);
+		PluginDiscovery::TearDown();
+	}
+
+	EditorDescription *plugin(const std::string &exec, const std::string &extra = "X-Geeqie-Expand-Groups=true\n")
+	{
+		const auto key = "groups-" + std::to_string(counter++) + ".desktop";
+		write_plugin(key.c_str(), ("Exec=" + exec + "\n" + extra).c_str());
+		install(editor_load_desktop_files({folder()}, nullptr));
+		return get_editor_by_command(key.c_str());
+	}
+
+	static GList *selection(std::initializer_list<FileData *> files)
+	{
+		GList *list = nullptr;
+		for (auto *fd : files) list = g_list_append(list, file_data_ref(fd));
+		return list;
+	}
+
+	static std::vector<std::string> run(EditorDescription *editor, GList *files, gboolean consider_sidecars = TRUE)
+	{
+		g_autofree gchar *command = nullptr;
+		const auto flags = editor_command_parse(editor, files, consider_sidecars, &command);
+		EXPECT_EQ(editor_errors(flags), 0);
+		if (editor_errors(flags)) return {};
+		g_autofree gchar *output = nullptr;
+		g_autoptr(GError) error = nullptr;
+		gint status = 0;
+		const gchar *argv[] = {"/bin/sh", "-c", command, nullptr};
+		EXPECT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(argv), nullptr, G_SPAWN_DEFAULT, nullptr, nullptr,
+		                         &output, nullptr, &status, &error));
+		EXPECT_TRUE(g_spawn_check_wait_status(status, nullptr));
+		if (!output) return {};
+		g_auto(GStrv) lines = g_strsplit(output, "\n", -1);
+		std::vector<std::string> result;
+		for (gchar **line = lines; *line; ++line)
+			if (**line) result.emplace_back(*line);
+		return result;
+	}
+
+	FileData *group = nullptr;
+	FileData *child = nullptr;
+	std::vector<std::string> members;
+	int counter = 0;
+};
+
+TEST_F(PluginGroups, ExpandsGroupsAndDeduplicatesOverlappingSelections)
+{
+	auto *editor = plugin("printf '%%s\\n' %F");
+	ASSERT_NE(editor, nullptr);
+	ASSERT_TRUE(editor->expand_groups);
+	for (auto *first : {group, child})
+		{
+		g_autoptr(FileDataList) list = selection({first, child, group, first});
+		const auto files = run(editor, list);
+		ASSERT_EQ(files.size(), 3U);
+		EXPECT_EQ(files.front(), group->path);
+		for (const auto &path : members) EXPECT_EQ(std::count(files.begin(), files.end(), path), 1);
+		}
+}
+
+TEST_F(PluginGroups, FiltersIndividualMembersWithoutSubstitution)
+{
+	g_autoptr(FileDataList) list = selection({group, child});
+	auto *editor = plugin("printf '%%s\\n' %F", "X-Geeqie-Expand-Groups=true\nX-Geeqie-File-Extensions=.JPG;.xmp\n");
+	ASSERT_NE(editor, nullptr);
+	EXPECT_EQ(run(editor, list), (std::vector<std::string>{members[1], members[2]}));
+	auto *mime = plugin("printf '%%s\\n' %F", "X-Geeqie-Expand-Groups=true\nMimeType=image/jpeg;\n");
+	ASSERT_NE(mime, nullptr);
+	EXPECT_EQ(run(mime, list), (std::vector<std::string>{members[1]}));
+	auto *missing = plugin("printf '%%s\\n' %F", "X-Geeqie-Expand-Groups=true\nX-Geeqie-File-Extensions=.png\n");
+	ASSERT_NE(missing, nullptr);
+	EXPECT_EQ(editor_errors(editor_command_parse(missing, list, TRUE, nullptr)), EDITOR_ERROR_NO_FILE);
+	g_autofree gchar *output = nullptr;
+	EXPECT_EQ(editor_errors(editor_command_parse(missing, list, TRUE, &output)), EDITOR_ERROR_NO_FILE);
+	EXPECT_EQ(output, nullptr);
+}
+
+TEST_F(PluginGroups, ProducesEscapedFileUris)
+{
+	auto *editor = plugin("printf '%%s\\n' %U");
+	ASSERT_NE(editor, nullptr);
+	g_autoptr(FileDataList) list = selection({child});
+	const auto uris = run(editor, list);
+	ASSERT_EQ(uris.size(), 3U);
+	for (size_t i = 0; i < members.size(); ++i)
+		{
+		g_autofree gchar *path = g_filename_from_uri(uris[i].c_str(), nullptr, nullptr);
+		EXPECT_STREQ(path, members[i].c_str());
+		EXPECT_EQ(uris[i].find(' '), std::string::npos);
+		}
+}
+
+TEST_F(PluginGroups, LegacyPluginsAndExplicitNoSidecarParsingAreUnchanged)
+{
+	g_autoptr(FileDataList) list = selection({group});
+	auto *legacy = plugin("printf '%%s\\n' %F", "");
+	ASSERT_NE(legacy, nullptr);
+	EXPECT_FALSE(legacy->expand_groups);
+	EXPECT_EQ(run(legacy, list), (std::vector<std::string>{members[0]}));
+	auto *substitute = plugin("printf '%%s\\n' %F", "X-Geeqie-File-Extensions=.jpg\n");
+	ASSERT_NE(substitute, nullptr);
+	EXPECT_EQ(run(substitute, list), (std::vector<std::string>{members[1]}));
+	auto *expanded = plugin("printf '%%s\\n' %F");
+	ASSERT_NE(expanded, nullptr);
+	EXPECT_EQ(run(expanded, list, FALSE), (std::vector<std::string>{members[0]}));
+}
+
+TEST_F(PluginGroups, RejectsSingleFileAndDestinationCommands)
+{
+	for (const auto *exec : {"/bin/true %f", "/bin/true %u", "/bin/true", "/bin/true %F %f"})
+		{
+		auto *editor = plugin(exec);
+		ASSERT_NE(editor, nullptr);
+		EXPECT_NE(editor->flags & EDITOR_ERROR_INCOMPATIBLE, 0);
+		}
+	auto *editor = plugin("/bin/true %F", "X-Geeqie-Expand-Groups=true\nX-Geeqie-Filter=true\n");
+	ASSERT_NE(editor, nullptr);
+	EXPECT_NE(editor->flags & EDITOR_ERROR_INCOMPATIBLE, 0);
 }
 
 } // namespace

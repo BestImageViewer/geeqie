@@ -222,6 +222,20 @@
       The entries are case insensitive.
     </para>
     <para>
+      By default, a plugin receives one file per selected entry. An extension filter can select a matching
+      grouped file instead. To pass all matching members of each selected group, add:
+      <programlisting>X-Geeqie-Expand-Groups=true
+Exec=my-script %F</programlisting>
+      This option requires <literal>%F</literal> (filenames) or <literal>%U</literal> (file URIs).
+      Selecting a group member expands its whole group. Each group is passed parent first, followed by
+      its grouped files; duplicate paths are removed when selections overlap.
+      <literal>X-Geeqie-File-Extensions</literal> or <literal>MimeType</literal> restrictions apply to
+      each member individually. If no members match, the plugin cannot run for that selection.
+      The option is disabled by default and is incompatible with <literal>%f</literal>,
+      <literal>%u</literal>, and <literal>X-Geeqie-Filter=true</literal> destination operations.
+      Quote filename arguments normally in the script, for example <literal>"$@"</literal>.
+    </para>
+    <para>
       The key or key combination to execute this function can be set with:
       <programlisting>X-Geeqie-Hotkey=</programlisting>
       Key combinations are of the form:

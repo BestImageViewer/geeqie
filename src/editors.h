@@ -65,6 +65,7 @@ struct EditorDescription {
 	gchar *file;
 	gchar *comment;		/**< .desktop Comment key, used to show a tooltip */
 	EditorFlags flags;
+	gboolean expand_groups; /**< Pass all matching group members to %F/%U plugins. */
 	gboolean hidden;	/**< explicitly hidden, shown in configuration dialog */
 	gboolean ignored;	/**< not interesting, do not show at all */
 	gboolean disabled;	/**< display disabled by user */

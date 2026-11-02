@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <unordered_set>
 #include <utility>
 
 #include <gio/gio.h>
@@ -377,6 +378,7 @@ gboolean editor_add_desktop_file(const EditorDesktopFile &file)
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE);
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose-Multi", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE_MULTI);
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Filter", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_DEST);
+	editor->expand_groups = g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Expand-Groups", nullptr);
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Terminal", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_TERMINAL); // NOTRANSLATE: Configuration key defined by the file format.
 
 	editor->flags = static_cast<EditorFlags>(editor->flags | editor_command_parse(editor, nullptr, FALSE, nullptr));
@@ -894,6 +896,8 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 		return static_cast<EditorFlags>(flags | EDITOR_ERROR_EMPTY);
 		}
 
+	if (editor->expand_groups && (editor->flags & EDITOR_DEST)) return EDITOR_ERROR_INCOMPATIBLE;
+
 	p = editor->exec;
 	/* skip leading whitespaces if any */
 	while (g_ascii_isspace(*p)) p++;
@@ -936,6 +940,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 				{
 				case 'f': /* single file */
 				case 'u': /* single url */
+					if (editor->expand_groups) return EDITOR_ERROR_INCOMPATIBLE;
 					flags = static_cast<EditorFlags>(flags | EDITOR_FOR_EACH);
 					if (flags & EDITOR_SINGLE_COMMAND)
 						{
@@ -988,28 +993,46 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 
 					if (list)
 						{
-						/* use whole list */
-						GList *work = list;
+						// Expand only opted-in plugins; preserve the legacy selection otherwise.
+						std::vector<const FileData *> files;
+						std::unordered_set<std::string> seen;
+						const bool expand = editor->expand_groups && consider_sidecars;
+						const auto append = [&](const FileData *fd)
+							{
+							if (fd && (!expand || seen.emplace(fd->path).second)) files.push_back(fd);
+							};
+						for (GList *work = list; work; work = work->next)
+							{
+							auto *fd = static_cast<FileData *>(work->data);
+							if (!fd) continue;
+							if (expand && fd->parent) fd = fd->parent;
+							append(fd);
+							if (expand)
+								{
+								for (GList *sidecar = fd->sidecar_files; sidecar; sidecar = sidecar->next)
+									append(static_cast<FileData *>(sidecar->data));
+								}
+							}
 						gboolean ok = FALSE;
 						PathType path_type = (*p == 'F') ? PATH_FILE : PATH_FILE_URL;
 
-						while (work)
+						for (const auto *fd : files)
 							{
-							g_autofree gchar *pathl = editor_command_path_parse(static_cast<FileData *>(work->data),
-							                                                    consider_sidecars,
-							                                                    path_type,
+							g_autofree gchar *pathl = editor_command_path_parse(fd,
+							                                                    expand ? FALSE : consider_sidecars,
+							                                                    expand ? PATH_FILE : path_type,
 							                                                    editor);
+							if (pathl && expand && path_type == PATH_FILE_URL)
+								{
+								g_autofree gchar *file_path = g_steal_pointer(&pathl);
+								pathl = g_filename_to_uri(file_path, nullptr, nullptr);
+								}
 							if (pathl)
 								{
+								if (ok) result.append_c(' ');
 								ok = TRUE;
-
-								if (work != list)
-									{
-									result.append_c(' ');
-									}
 								result.append_quoted(pathl, single_quotes, double_quotes);
 								}
-							work = work->next;
 							}
 						if (!ok)
 							{
@@ -1054,6 +1077,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 		}
 
 	if (!(flags & (EDITOR_FOR_EACH | EDITOR_SINGLE_COMMAND))) flags = static_cast<EditorFlags>(flags | EDITOR_NO_PARAM);
+	if (editor->expand_groups && !(flags & EDITOR_SINGLE_COMMAND)) return static_cast<EditorFlags>(flags | EDITOR_ERROR_INCOMPATIBLE);
 
 	if (output)
 		{
