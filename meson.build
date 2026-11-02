@@ -891,7 +891,8 @@ endif
 
 # Unit tests
 if unit_tests_enabled
-    test('Unit tests', isolate_test_sh, args: [geeqie_exe.full_path(), '--run-unit-tests'], suite : 'unit')
+    # Autosave and cancellation tests include real waits; allow time on busy runners.
+    test('Unit tests', isolate_test_sh, args: [geeqie_exe.full_path(), '--run-unit-tests'], timeout: 120, suite : 'unit')
     summary({'unit_tests' : ['Tests run:', true]}, section : 'Testing', bool_yn : true)
 else
     summary({'unit_tests' : ['Tests run:', false]}, section : 'Testing', bool_yn : true)

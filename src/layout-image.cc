@@ -2383,6 +2383,7 @@ static void layout_image_selection_pressed_cb(GtkGestureClick *gesture, gint, gd
 static void layout_image_update_cb(ImageWindow *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
+	layout_util_sync_archive(lw);
 	layout_status_update_image(lw);
 	layout_status_update_info(lw, nullptr);
 }
@@ -2494,6 +2495,7 @@ void layout_image_activate(LayoutWindow *lw, gint i, gboolean force)
 		layout_set_fd(lw, fd);
 		}
 	layout_status_update_image(lw);
+	layout_util_sync_archive(lw);
 }
 
 

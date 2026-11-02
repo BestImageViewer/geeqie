@@ -46,6 +46,7 @@ void layout_util_sync_marks(LayoutWindow *lw);
 void layout_util_sync_file_filter(LayoutWindow *lw);
 void layout_util_sync_color(LayoutWindow *lw);
 void layout_util_sync(LayoutWindow *lw);
+void layout_util_sync_archive(LayoutWindow *lw);
 
 void layout_util_status_update_write(LayoutWindow *lw);
 void layout_util_status_update_write_all();

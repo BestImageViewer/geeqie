@@ -3,11 +3,14 @@
 #include "gtest/gtest.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <config.h>
 
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
@@ -48,6 +51,11 @@
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "view-file.h"
+
+#if HAVE_ARCHIVE
+#include <archive.h>
+#include <archive_entry.h>
+#endif
 
 namespace
 {
@@ -2334,6 +2342,145 @@ TEST_F(PartialLayoutConfig, ShortcutsAcceptFolderAndCollectionDrops)
 	ASSERT_TRUE(wait_layout([&]() { return isfile(target.c_str()) && !isfile(source.c_str()); }));
 	gtk_widget_set_visible(layout->window, FALSE);
 	EXPECT_EQ(shortcuts_drop_files(cleanup.folder.c_str(), &files, info), GDK_ACTION_NONE);
+}
+
+TEST_F(PartialLayoutConfig, OpenArchiveRejectsMissingAndNonArchiveImages)
+{
+	ASSERT_EQ(layout_image_get_fd(layout), nullptr);
+	const auto check = [&](GtkWidget *window, bool enabled)
+		{
+		auto *action = g_action_map_lookup_action(G_ACTION_MAP(window), "main-win-open-archive");
+		ASSERT_NE(action, nullptr);
+		EXPECT_EQ(g_action_get_enabled(action), enabled);
+		// Exercise the callback guard even if activation bypasses menu sensitivity.
+		if (!enabled)
+			{
+			g_simple_action_set_enabled(G_SIMPLE_ACTION(action), TRUE);
+			g_action_activate(action, nullptr);
+			layout_util_sync_archive(layout);
+			EXPECT_FALSE(g_action_get_enabled(action));
+			}
+		};
+	layout_util_sync_archive(layout);
+	check(layout->window, false);
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 20, 20);
+	gdk_pixbuf_fill(pixels, 0x204060ff);
+	image_change_pixbuf(layout->image, pixels, 1.0, FALSE);
+	check(layout->window, false);
+	const std::string path = std::string(directory) + "/ordinary.png";
+	ASSERT_TRUE(gdk_pixbuf_save(pixels, path.c_str(), "png", nullptr, nullptr));
+	auto fd = FileData::new_simple(path.c_str());
+	image_change_fd(layout->image, fd, 1.0);
+	EXPECT_NE(layout_image_get_fd(layout), nullptr);
+	check(layout->window, false);
+	layout_tools_float_set(layout, TRUE, FALSE);
+	check(layout->tools, false);
+	layout_image_full_screen_start(layout);
+	check(layout->full_screen->window, false);
+	layout_image_full_screen_stop(layout);
+	layout_tools_float_set(layout, FALSE, FALSE);
+	image_change_fd(layout->image, nullptr, 1.0);
+	check(layout->window, false);
+	EXPECT_EQ(layout_window_count(), 1U);
+	g_unlink(path.c_str());
+}
+
+TEST_F(PartialLayoutConfig, ArchiveActionUpdateIgnoresClosedLayouts)
+{
+	auto *closed = layout;
+	layout_free(layout);
+	layout = nullptr;
+	// Renderer updates may arrive after the owning layout was closed.
+	layout_util_sync_archive(closed);
+	layout_util_sync_archive(nullptr);
+}
+
+TEST_F(PartialLayoutConfig, OpenArchiveHandlesValidAndCorruptArchives)
+{
+#if !HAVE_ARCHIVE
+	GTEST_SKIP() << "Requires libarchive";
+#else
+	FilterEntry *archive_filter = nullptr;
+	for (auto *work = filter_get_list(); work; work = work->next)
+		{
+		auto *entry = static_cast<FilterEntry *>(work->data);
+		if (g_str_equal(entry->key, "zip")) archive_filter = entry;
+		}
+	ASSERT_NE(archive_filter, nullptr);
+	struct RestoreFilter
+	{
+		FilterEntry *entry;
+		gboolean enabled;
+		~RestoreFilter() { entry->enabled = enabled; filter_rebuild(); }
+	} restore_filter{archive_filter, archive_filter->enabled};
+	archive_filter->enabled = TRUE;
+	filter_rebuild();
+	struct Cleanup
+	{
+		std::vector<std::string> files;
+		gchar *previous;
+		gchar *identifier;
+		~Cleanup()
+			{
+			std::vector<LayoutWindow *> opened;
+			layout_window_foreach([&](LayoutWindow *lw) { if (lw != keep) opened.push_back(lw); });
+			for (auto *lw : opened) layout_free(lw);
+			for (const auto &path : files) g_unlink(path.c_str());
+			std::error_code error;
+			std::filesystem::remove_all(std::filesystem::path(g_get_tmp_dir()) / GQ_ARCHIVE_DIR / identifier, error);
+			instance_identifier = previous;
+			g_free(identifier);
+			}
+		LayoutWindow *keep;
+	} cleanup{{}, instance_identifier, g_uuid_string_random(), layout};
+	instance_identifier = cleanup.identifier;
+	const auto good = std::string(directory) + "/good.tar";
+	const auto bad = std::string(directory) + "/bad.zip";
+	cleanup.files = {good, bad};
+	std::unique_ptr<struct archive, decltype(&archive_write_free)> writer(archive_write_new(), archive_write_free);
+	archive_write_set_format_pax_restricted(writer.get());
+	ASSERT_EQ(archive_write_open_filename(writer.get(), good.c_str()), ARCHIVE_OK);
+	std::unique_ptr<archive_entry, decltype(&archive_entry_free)> entry(archive_entry_new(), archive_entry_free);
+	archive_entry_set_pathname(entry.get(), "member.txt");
+	archive_entry_set_size(entry.get(), 4);
+	archive_entry_set_filetype(entry.get(), AE_IFREG);
+	archive_entry_set_perm(entry.get(), 0600);
+	ASSERT_EQ(archive_write_header(writer.get(), entry.get()), ARCHIVE_OK);
+	ASSERT_EQ(archive_write_data(writer.get(), "test", 4), 4);
+	writer.reset();
+	auto good_fd = FileData::new_simple(good.c_str());
+	ASSERT_EQ(good_fd->format_class, FORMAT_CLASS_ARCHIVE);
+	image_change_fd(layout->image, good_fd, 1.0);
+	auto *action = g_action_map_lookup_action(G_ACTION_MAP(layout->window), "main-win-open-archive");
+	EXPECT_TRUE(g_action_get_enabled(action));
+	g_action_activate(action, nullptr);
+	ASSERT_EQ(layout_window_count(), 2U);
+	LayoutWindow *opened = nullptr;
+	layout_window_foreach([&](LayoutWindow *lw) { if (lw != layout) opened = lw; });
+	ASSERT_NE(opened, nullptr);
+	const std::string extracted = std::string(opened->dir_fd->path) + "/member.txt";
+	EXPECT_TRUE(isfile(extracted.c_str()));
+	layout_free(opened);
+	ASSERT_TRUE(g_file_set_contents(bad.c_str(), "not an archive", -1, nullptr));
+	auto bad_fd = FileData::new_simple(bad.c_str());
+	image_change_fd(layout->image, bad_fd, 1.0);
+	g_action_activate(action, nullptr);
+	EXPECT_EQ(layout_window_count(), 1U);
+	auto *windows = gtk_window_get_toplevels();
+	bool warned = false;
+	for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+		{
+		g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+		const auto *title = gtk_window_get_title(window);
+		if (title && g_str_has_prefix(title, "Cannot open archive file"))
+			{
+			warned = true;
+			gtk_window_close(window);
+			break;
+			}
+		}
+	EXPECT_TRUE(warned);
+#endif
 }
 
 TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)

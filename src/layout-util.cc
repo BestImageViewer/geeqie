@@ -1012,17 +1012,15 @@ static void layout_menu_open_with_cb(GSimpleAction *, GVariant *, gpointer)
 		}
 }
 
-static void layout_menu_open_archive_cb(GSimpleAction *, GVariant *, gpointer)
+static void layout_menu_open_archive_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	auto lw = get_current_layout();
-	FileData *fd;
+	auto *lw = static_cast<LayoutWindow *>(data);
+	if (!layout_valid(&lw)) return;
+	FileDataRef fd(layout_image_get_fd(lw));
+	if (!fd || fd->format_class != FORMAT_CLASS_ARCHIVE) return;
 
 	layout_exit_fullscreen(lw);
-	fd = layout_image_get_fd(lw);
-
-	if (fd->format_class != FORMAT_CLASS_ARCHIVE) return;
-
-	g_autofree gchar *dest_dir = open_archive(layout_image_get_fd(lw));
+	g_autofree gchar *dest_dir = open_archive(fd);
 	if (!dest_dir)
 		{
 		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
@@ -3166,6 +3164,7 @@ void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window)
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(menu_action), options->hamburger_menu);
 	auto *float_action = g_action_map_lookup_action(G_ACTION_MAP(window), "main-win-float-tools");
 	g_simple_action_set_state(G_SIMPLE_ACTION(float_action), g_variant_new_boolean(lw->options.tools_float));
+	layout_util_sync_archive(lw);
 }
 
 static void layout_menu_bar_use_sliding_submenus(GtkWidget *widget)
@@ -3545,6 +3544,19 @@ void layout_util_sync_color(LayoutWindow *lw)
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-grayscale");
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_image_get_desaturate(lw)));
+}
+
+void layout_util_sync_archive(LayoutWindow *lw)
+{
+	if (!layout_valid(&lw)) return;
+	auto *fd = lw->image ? layout_image_get_fd(lw) : nullptr;
+	const bool enabled = HAVE_ARCHIVE && fd && fd->format_class == FORMAT_CLASS_ARCHIVE;
+	for (auto *window : {lw->window, lw->tools, lw->full_screen ? lw->full_screen->window : nullptr})
+		{
+		if (!window) continue;
+		auto *action = g_action_map_lookup_action(G_ACTION_MAP(window), "main-win-open-archive");
+		if (action) g_simple_action_set_enabled(G_SIMPLE_ACTION(action), enabled);
+		}
 }
 
 void layout_util_sync_file_filter(LayoutWindow *lw)
