@@ -205,6 +205,113 @@ protected:
 	gboolean saved_animations = TRUE;
 };
 
+TEST_F(SlideshowTransitions, ReversingPreservesPauseAndChangesAutomaticDirection)
+{
+	ASSERT_NO_FATAL_FAILURE(start_show());
+	options->slideshow.delay = 5;
+	ss->pause_toggle();
+	ss->next();
+	ASSERT_TRUE(wait_until([this]() { return ready(); }));
+	FileDataRef middle(ss->slide_fd);
+	layout->slideshow = ss;
+	const bool activated = gtk_widget_activate_action(layout->window, "win.main-win-slideshow-reverse", nullptr);
+	layout->slideshow = nullptr;
+	ASSERT_TRUE(activated);
+	EXPECT_TRUE(ss->paused);
+	EXPECT_TRUE(ss->reversed);
+	EXPECT_EQ(ss->slide_fd, *middle);
+	ss->pause_toggle();
+	ASSERT_TRUE(wait_until([this]() { return ss && ss->slide_fd->name[0] == '0'; }));
+	ss->pause_toggle();
+	ss->reverse_toggle();
+	EXPECT_TRUE(ss->paused);
+	EXPECT_FALSE(ss->reversed);
+	ss->pause_toggle();
+	ASSERT_TRUE(wait_until([this, &middle]() { return ss && ss->slide_fd == *middle; }));
+	ss->pause_toggle();
+	ss->prev();
+	EXPECT_FALSE(ss->reversed);
+}
+
+TEST_F(SlideshowTransitions, ReverseRepeatWrapsAndKeepsHistoryAtTheLastImage)
+{
+	ASSERT_NO_FATAL_FAILURE(start_show());
+	options->slideshow.delay = 5;
+	ss->pause_toggle();
+	ss->next();
+	ss->next();
+	ASSERT_EQ(ss->slide_fd->name[0], '2');
+	ss->prev();
+	ASSERT_EQ(ss->slide_fd->name[0], '1');
+	ss->prev();
+	ASSERT_EQ(ss->slide_fd->name[0], '0');
+	ss->reverse_toggle();
+	ss->pause_toggle();
+	ASSERT_TRUE(wait_until([this]() { return ss && ss->slide_fd->name[0] == '2'; }));
+	ss->pause_toggle();
+	ss->prev();
+	EXPECT_EQ(ss->slide_fd->name[0], '1');
+}
+
+TEST_F(SlideshowTransitions, ReverseWithoutRepeatStopsAtTheFirstImage)
+{
+	ASSERT_NO_FATAL_FAILURE(start_show());
+	ss->pause_toggle();
+	ss->next();
+	options->slideshow.repeat = FALSE;
+	ss->reverse_toggle();
+	ss->pause_toggle();
+	ASSERT_TRUE(wait_until([this]() { return ss == nullptr; }));
+	EXPECT_EQ(image_get_fd(imd)->name[0], '0');
+}
+
+TEST_F(SlideshowTransitions, ReverseRepeatRescansFolder)
+{
+	ASSERT_NO_FATAL_FAILURE(start_show(true));
+	ss->pause_toggle();
+	g_autofree gchar *path = g_build_filename(directory, "3.png", nullptr);
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 8, 8);
+	gdk_pixbuf_fill(pixels, 0x00ff00ff);
+	ASSERT_TRUE(gdk_pixbuf_save(pixels, path, "png", nullptr, nullptr));
+	ss->reverse_toggle();
+	ss->pause_toggle();
+	ASSERT_TRUE(wait_until([this]() { return ss && ss->slide_count == 4; }));
+	ss->pause_toggle();
+	EXPECT_STREQ(ss->slide_fd->path, path);
+}
+
+TEST_F(SlideshowTransitions, SpeedKeysWorkWithImageFocusAndFullscreen)
+{
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	if (!xdotool || !g_getenv("DISPLAY")) GTEST_SKIP() << "Requires xdotool and X11";
+	ASSERT_NO_FATAL_FAILURE(start_show());
+	ss->pause_toggle();
+	for (bool fullscreen : {false, true})
+		{
+		SCOPED_TRACE(fullscreen);
+		if (fullscreen) layout_image_full_screen_start(layout);
+		auto *target = fullscreen ? layout->full_screen->window : layout->window;
+		auto *image = fullscreen ? layout->full_screen->imd : layout->image;
+		gtk_window_set_title(GTK_WINDOW(target), "Geeqie slideshow speed keys test");
+		gtk_window_present(GTK_WINDOW(target));
+		ASSERT_TRUE(wait_until([target]() { return gtk_widget_get_mapped(target); }));
+		gtk_widget_grab_focus(image->pr);
+		options->slideshow.delay = 20;
+		for (const gchar *key : {"ctrl+shift+Next", "ctrl+shift+Prior"})
+			{
+			const gchar *args[] = {xdotool, "search", "--name", "^Geeqie slideshow speed keys test$",
+			                       "windowfocus", "--sync", "key", "--clearmodifiers", key, nullptr};
+			gint status = 0;
+			ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+			                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+			ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+			const gint expected = g_str_equal(key, "ctrl+shift+Next") ? 15 : 20;
+			ASSERT_TRUE(wait_until([expected]() { return options->slideshow.delay == expected; }));
+			}
+		if (fullscreen) layout_image_full_screen_stop(layout);
+		}
+}
+
 TEST_F(SlideshowTransitions, RecursiveRepeatRescansBeforeStartingNextCycle)
 {
 	ASSERT_NO_FATAL_FAILURE(start_show(true));

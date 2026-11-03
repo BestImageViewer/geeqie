@@ -2797,6 +2797,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-slideshow-reverse",
+		GQ_ICON_GENERIC,
+		N_("Reverse slideshow direction"),
+		layout_menu_slideshow_reverse_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-slideshow-slower",
 		GQ_ICON_GENERIC,
 		N_("Slideshow Slower"),

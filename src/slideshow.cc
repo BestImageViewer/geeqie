@@ -131,20 +131,28 @@ bool SlideShow::should_continue() const
 	       (!from_selection && slide_count == layout_list_count(lw));
 }
 
+static bool slideshow_repeat_list(SlideShow *ss)
+{
+	if (ss->rescan)
+		{
+		GList *updated = ss->rescan();
+		file_data_list_free(ss->filelist);
+		ss->filelist = updated;
+		ss->slide_count = g_list_length(updated);
+		}
+	slideshow_list_init(ss, -1);
+	return !ss->list.empty();
+}
+
 static gboolean slideshow_step(SlideShow *ss, gboolean forward, gboolean automatic = FALSE)
 {
 	if (!ss->should_continue()) return FALSE;
 
 	if (forward)
 		{
-		if (ss->list.empty() && ss->rescan && options->slideshow.repeat)
+		if (ss->list.empty() && options->slideshow.repeat)
 			{
-			GList *updated = ss->rescan();
-			file_data_list_free(ss->filelist);
-			ss->filelist = updated;
-			ss->slide_count = g_list_length(updated);
-			slideshow_list_init(ss, -1);
-			if (ss->list.empty()) return FALSE;
+			if (!slideshow_repeat_list(ss)) return FALSE;
 			}
 		if (ss->list.empty()) return ss->rescan ? FALSE : TRUE;
 
@@ -152,9 +160,16 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward, gboolean automat
 		}
 	else
 		{
-		if (ss->list_done.size() <= 1) return TRUE;
-
-		move_first_list_item(ss->list_done, ss->list);
+		if (ss->list_done.size() <= 1)
+			{
+			if (!automatic || !options->slideshow.repeat) return !automatic;
+			if (!slideshow_repeat_list(ss)) return FALSE;
+			while (!ss->list.empty()) move_first_list_item(ss->list, ss->list_done);
+			}
+		else
+			{
+			move_first_list_item(ss->list_done, ss->list);
+			}
 		}
 
 	slideshow_transition_clear(ss);
@@ -218,14 +233,12 @@ static gboolean slideshow_step(SlideShow *ss, gboolean forward, gboolean automat
 		image_transition_from(imd, outgoing, type, duration);
 		}
 
-	if (ss->list.empty() && options->slideshow.repeat && !ss->rescan)
-		{
-		slideshow_list_init(ss, -1);
-		}
+	// Keep the current cycle intact until the next step, so reversing at its
+	// final image can return to the preceding image without losing history.
+	if (forward && ss->list.empty() && options->slideshow.repeat) return TRUE;
 
-	if (ss->list.empty() && ss->rescan && options->slideshow.repeat) return TRUE;
-
-	if (ss->list.empty())
+	if ((forward && ss->list.empty()) ||
+	    (!forward && automatic && ss->list_done.size() <= 1 && !options->slideshow.repeat))
 		{
 		ss->finish_transition = outgoing != nullptr;
 		return FALSE;
@@ -302,7 +315,7 @@ static gboolean slideshow_loop_cb(gpointer data)
 		return G_SOURCE_CONTINUE;
 		}
 
-	if (slideshow_step(ss, TRUE, TRUE))
+	if (slideshow_step(ss, !ss->reversed, TRUE))
 		{
 		/* Check if the user has changed the timer interval */
 		slideshow_timer_reset(ss);
@@ -475,5 +488,12 @@ gboolean SlideShow::is_paused() const
 void SlideShow::pause_toggle()
 {
 	paused = !paused;
+}
+
+void SlideShow::reverse_toggle()
+{
+	reversed = !reversed;
+	waiting_for_image = true;
+	slideshow_timer_reset(this);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -1754,6 +1754,12 @@ static void layout_menu_slideshow_slower_cb(GSimpleAction *, GVariant *, gpointe
 	options->slideshow.delay = std::min<gdouble>(options->slideshow.delay + 5, SLIDESHOW_MAX_SECONDS);
 }
 
+static void layout_menu_slideshow_reverse_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	if (lw->slideshow) lw->slideshow->reverse_toggle();
+}
+
 static void layout_menu_slideshow_faster_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	options->slideshow.delay = std::max<gdouble>(options->slideshow.delay - 5, SLIDESHOW_MIN_SECONDS * 10);

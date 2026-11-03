@@ -1094,6 +1094,10 @@
           <attribute name="label" translatable="yes">_Pause slideshow</attribute>
         </item>
         <item>
+          <attribute name="action">win.main-win-slideshow-reverse</attribute>
+          <attribute name="label" translatable="yes">Reverse slideshow direction</attribute>
+        </item>
+        <item>
           <attribute name="action">win.main-win-slideshow-faster</attribute>
           <attribute name="label" translatable="yes">Faster</attribute>
         </item>

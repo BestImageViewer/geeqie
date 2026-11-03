@@ -68,6 +68,7 @@ struct SlideShow
 
 	gboolean is_paused() const;
 	void pause_toggle();
+	void reverse_toggle();
 
 	LayoutWindow *lw = nullptr;        /**< use this window to display the slideshow */
 	ImageWindow *imd = nullptr;        /**< use this window only if lw is not available,
@@ -91,6 +92,7 @@ struct SlideShow
 	StopFunc stop_func{};
 
 	gboolean paused = FALSE;
+	bool reversed = false; /**< automatic playback direction; manual steps remain unchanged */
 	bool waiting_for_image = true; /**< start the display delay after decoding and rendering */
 
 	GtkWidget *transition_stack = nullptr; /**< weak reference */

@@ -131,7 +131,14 @@
   <section id="Slideshowsequencenavigation">
     <title>Slide show sequence navigation</title>
     <para>When a slide show is active, functions that normally change the image forward and backward can be used to step through those contained in the slide show.</para>
+    <para>In the main window, choose <menuchoice><guimenu>View</guimenu><guisubmenu>Slideshow</guisubmenu><guimenuitem>Reverse slideshow direction</guimenuitem></menuchoice> to toggle automatic playback between backward and forward. This does not change the current image or pause state. Assign a shortcut to this action in <menuchoice><guimenu>Edit</guimenu><guimenuitem>Preferences</guimenuitem><guilabel>Keyboard</guilabel></menuchoice>; it has no default shortcut.</para>
+    <para>Manual next and previous commands still step forward and backward respectively, without changing automatic playback direction. With random playback, reverse follows the current shuffled sequence. With repeat enabled, backward playback wraps from the first image to the last; recursive folders and saved collections are rescanned at the cycle boundary. Without repeat, backward playback stops at the first image. Each new slide show starts in the forward direction.</para>
     <para />
+  </section>
+  <section id="Slideshowplaybackspeed">
+    <title>Changing playback speed</title>
+    <para>In the main window, press <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Page Down</keycap></keycombo> to decrease the interval by 0.5 seconds (faster), or <keycombo><keycap>Ctrl</keycap><keycap>Shift</keycap><keycap>Page Up</keycap></keycombo> to increase it by 0.5 seconds (slower). These commands are also available in <menuchoice><guimenu>View</guimenu><guisubmenu>Slideshow</guisubmenu></menuchoice>. Shortcuts can be changed in Preferences; existing user assignments override these defaults.</para>
+    <para>Ordinary zoom shortcuts remain unchanged. Connected zoom in and out have no default shortcuts; assign them in Preferences if needed.</para>
   </section>
   <section id="Configuringaslideshow">
     <title>Configuring a slide show</title>
