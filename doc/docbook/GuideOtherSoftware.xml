@@ -16,6 +16,16 @@
       <ulink url="https://photini.readthedocs.io/en/latest/">https://photini.readthedocs.io/en/latest/</ulink>
     </para>
   </section>
+  <section id="Libpuzzle">
+    <title>Libpuzzle</title>
+    <para>
+      A library for finding visually similar images, including resized, recompressed, or slightly modified copies. Its command-line tool, <command>puzzle-diff</command>, compares two images and reports a similarity distance. It provides an alternative method for investigating similar images alongside Geeqie's Find Duplicates feature.
+    </para>
+    <para>
+      Original source downloads:
+      <ulink url="https://download.pureftpd.org/libpuzzle/">https://download.pureftpd.org/libpuzzle/</ulink>
+    </para>
+  </section>
   <section id="Unison">
     <title>Unison</title>
     <para>
