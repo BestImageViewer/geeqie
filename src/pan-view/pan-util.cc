@@ -22,15 +22,8 @@
 #include "pan-util.h"
 
 // IWYU pragma: no_include <features.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include <cstring>
 
 #include "date-time.h"
-#include "main-defines.h"
-#include "misc.h"
-#include "ui-fileops.h"
 
 
 /*
@@ -158,55 +151,4 @@ time_t pan_date_to_time(gint year, gint month, gint day)
 	return mktime(&lt);
 }
 
-
-/*
- *-----------------------------------------------------------------------------
- * folder validation
- *-----------------------------------------------------------------------------
- */
-
-gboolean pan_is_link_loop(const gchar *s)
-{
-	g_autofree gchar *buf = get_symbolic_link(s);
-	if (!buf || *buf == '\0') return FALSE;
-
-	g_autofree gchar *sl = path_from_utf8(s);
-	parse_out_relatives(sl);
-
-	parse_out_relatives(buf);
-	const gint l = strlen(buf); // @todo Calculate after correction below?
-
-	if (buf[0] != G_DIR_SEPARATOR)
-		{
-		g_autofree gchar *link_path = g_build_filename(sl, buf, NULL);
-		parse_out_relatives(link_path);
-		std::swap(buf, link_path);
-		}
-
-	return strncmp(sl, buf, l) == 0 &&
-	       (sl[l] == '\0' || sl[l] == G_DIR_SEPARATOR || l == 1);
-}
-
-gboolean pan_is_ignored(const gchar *s, gboolean ignore_symlinks)
-{
-	struct stat st;
-	const gchar *n;
-
-	if (!lstat_utf8(s, &st)) return TRUE;
-
-#if 0
-	/* normal filesystems have directories with some size or block allocation,
-	 * special filesystems (like linux /proc) set both to zero.
-	 * enable this check if you enable listing the root "/" folder
-	 */
-	if (st.st_size == 0 && st.st_blocks == 0) return TRUE;
-#endif
-
-	if (S_ISLNK(st.st_mode) && (ignore_symlinks || pan_is_link_loop(s))) return TRUE;
-
-	n = filename_from_path(s);
-	if (n && strcmp(n, GQ_RC_DIR) == 0) return TRUE;
-
-	return FALSE;
-}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

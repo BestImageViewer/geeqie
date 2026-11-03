@@ -40,7 +40,4 @@ gint pan_date_value(time_t d, PanDateLengthType length);
 gchar *pan_date_value_string(time_t d,  PanDateLengthType length);
 time_t pan_date_to_time(gint year, gint month, gint day);
 
-gboolean pan_is_link_loop(const gchar *s);
-gboolean pan_is_ignored(const gchar *s, gboolean ignore_symlinks);
-
 #endif
