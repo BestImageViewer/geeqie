@@ -39,7 +39,6 @@
 #include "accelerators.h"
 #include "actions.h"
 #include "advanced-exif.h"
-#include "archives.h"
 #include "bar-keywords.h"
 #include "bar-sort.h"
 #include "bar.h"
@@ -1020,15 +1019,7 @@ static void layout_menu_open_archive_cb(GSimpleAction *, GVariant *, gpointer da
 	if (!fd || fd->format_class != FORMAT_CLASS_ARCHIVE) return;
 
 	layout_exit_fullscreen(lw);
-	g_autofree gchar *dest_dir = open_archive(fd);
-	if (!dest_dir)
-		{
-		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
-		return;
-		}
-
-	LayoutWindow *lw_new = layout_new_from_default();
-	layout_set_path(lw_new, dest_dir);
+	layout_open_archive(fd);
 }
 
 static void open_file_cb(GFile *file, gpointer)

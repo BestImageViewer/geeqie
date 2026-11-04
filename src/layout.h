@@ -362,5 +362,7 @@ gboolean layout_window_is_displayed(const gchar *id);
 
 gboolean layout_focus_files(LayoutWindow *lw);
 
+void layout_open_archive(const FileData *fd);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

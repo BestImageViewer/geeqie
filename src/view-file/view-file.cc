@@ -25,7 +25,6 @@
 
 #include "accelerators.h"
 #include "actions.h"
-#include "archives.h"
 #include "cache.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
@@ -960,19 +959,9 @@ static void vf_pop_menu_view_cb(GtkWidget *, gpointer data)
 
 static void vf_pop_menu_open_archive_cb(GtkWidget *, gpointer data)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	LayoutWindow *lw_new;
+	auto *vf = static_cast<ViewFile *>(data);
 
-	g_autofree gchar *dest_dir = open_archive(vf->click_fd);
-	if (dest_dir)
-		{
-		lw_new = layout_new_from_default();
-		layout_set_path(lw_new, dest_dir);
-		}
-	else
-		{
-		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
-		}
+	layout_open_archive(vf->click_fd);
 }
 
 static void vf_pop_menu_copy_cb(GtkWidget *, gpointer data)
