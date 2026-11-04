@@ -1673,7 +1673,7 @@ GdkPixbuf *image_get_pixbuf(ImageWindow *imd)
 	return pixbuf_renderer_get_pixbuf(PIXBUF_RENDERER(imd->pr));
 }
 
-void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboolean lazy)
+void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboolean lazy, gboolean animation_frame)
 {
 	LayoutWindow *lw;
 	StereoPixbufData stereo_data = STEREO_PIXBUF_DEFAULT;
@@ -1725,7 +1725,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 		}
 	else
 		{
-		pixbuf_renderer_set_pixbuf(PIXBUF_RENDERER(imd->pr), pixbuf, zoom);
+		pixbuf_renderer_set_pixbuf(PIXBUF_RENDERER(imd->pr), pixbuf, zoom, animation_frame);
 		pixbuf_renderer_set_orientation(PIXBUF_RENDERER(imd->pr), imd->orientation);
 		pixbuf_renderer_set_stereo_data(PIXBUF_RENDERER(imd->pr), stereo_data);
 		}

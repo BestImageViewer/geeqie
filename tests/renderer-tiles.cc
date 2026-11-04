@@ -5,24 +5,138 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <sys/mman.h>
 
 #include <cairo.h>
 
-#include "renderer-tiles.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
+#include "renderer-tiles.h"
 
 namespace
 {
+
+// Retained GdkPixbuf animation API matches the application's GIF playback.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
+TEST(RendererTilesTexture, AnimationFramesKeepThePreviousFrameUntilRenderingFinishes)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	const gchar *animation_path = g_getenv("GEEQIE_TEST_ANIMATION_IMAGE");
+	g_autoptr(GPtrArray) frames = g_ptr_array_new_with_free_func(g_object_unref);
+	if (animation_path)
+		{
+		g_autoptr(GError) error = nullptr;
+		g_autoptr(GdkPixbufAnimation) animation = gdk_pixbuf_animation_new_from_file(animation_path, &error);
+		ASSERT_NE(animation, nullptr) << (error ? error->message : "");
+		ASSERT_FALSE(gdk_pixbuf_animation_is_static_image(animation));
+		GTimeVal time{1000, 0};
+		g_autoptr(GdkPixbufAnimationIter) iter = gdk_pixbuf_animation_get_iter(animation, &time);
+		for (guint i = 0; i < 4; i++)
+			{
+			g_ptr_array_add(frames, gdk_pixbuf_copy(gdk_pixbuf_animation_iter_get_pixbuf(iter)));
+			time.tv_usec += std::max(10, gdk_pixbuf_animation_iter_get_delay_time(iter)) * 1000;
+			time.tv_sec += time.tv_usec / G_USEC_PER_SEC;
+			time.tv_usec %= G_USEC_PER_SEC;
+			gdk_pixbuf_animation_iter_advance(iter, &time);
+			}
+		}
+	else
+		{
+		for (guint32 color : {0x2040ffffU, 0xff4020ffU, 0x20ff40ffU, 0x2040ffffU})
+			{
+			auto *frame = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 1051, 939);
+			gdk_pixbuf_fill(frame, color);
+			g_ptr_array_add(frames, frame);
+			}
+		}
+	std::unique_ptr<GtkWindow, decltype(&gtk_window_destroy)> window(GTK_WINDOW(gtk_window_new()), gtk_window_destroy);
+	const gint saved_tile_size = options->image.tile_size;
+	options->image.tile_size = 64;
+	auto *pr = pixbuf_renderer_new();
+	options->image.tile_size = saved_tile_size;
+	pr->zoom_2pass = FALSE;
+	gtk_window_set_default_size(window.get(), 512, 384);
+	gtk_window_set_child(window.get(), GTK_WIDGET(pr));
+	gtk_window_present(window.get());
+	const auto finish = [&]()
+		{
+		const auto deadline = g_get_monotonic_time() + (5 * G_TIME_SPAN_SECOND);
+		do
+			{
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			if (gtk_widget_get_mapped(GTK_WIDGET(pr)) && pr->viewport_width > 0 &&
+			    renderer_tiles_is_ready(pr->renderer)) return true;
+			g_usleep(1000);
+			} while (g_get_monotonic_time() < deadline);
+		return false;
+		};
+	const auto snapshot_pixels = [&]()
+		{
+		auto *snapshot = gtk_snapshot_new();
+		renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
+		g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
+		const graphene_rect_t bounds{{0, 0}, {static_cast<float>(pr->viewport_width), static_cast<float>(pr->viewport_height)}};
+		auto *renderer = gtk_native_get_renderer(GTK_NATIVE(window.get()));
+		g_autoptr(GdkTexture) texture = gsk_renderer_render_texture(renderer, node, &bounds);
+		std::vector<guint32> pixels(gdk_texture_get_width(texture) * gdk_texture_get_height(texture));
+		gdk_texture_download(texture, reinterpret_cast<guchar *>(pixels.data()), gdk_texture_get_width(texture) * 4);
+		return pixels;
+		};
+	auto *first = static_cast<GdkPixbuf *>(g_ptr_array_index(frames, 0));
+	pixbuf_renderer_set_pixbuf(pr, first, 0.0);
+	ASSERT_TRUE(finish());
+	std::vector<guint32> previous = snapshot_pixels();
+	guint checked_tiles = 0;
+	pixbuf_renderer_set_post_process_func(pr, [&](PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint)
+		{
+		EXPECT_EQ(snapshot_pixels(), previous);
+		++checked_tiles;
+		}, FALSE);
+	ASSERT_TRUE(finish());
+	for (guint frame = 1; frame < frames->len; frame++)
+		{
+		// Model GIF decoders that return a newly allocated composited RGBA frame.
+		auto *next = static_cast<GdkPixbuf *>(g_ptr_array_index(frames, frame));
+		const guint before = checked_tiles;
+		pixbuf_renderer_set_pixbuf(pr, next, pr->zoom, TRUE);
+		EXPECT_EQ(snapshot_pixels(), previous);
+		ASSERT_TRUE(finish());
+		EXPECT_GT(checked_tiles - before, 1U);
+		auto current = snapshot_pixels();
+		EXPECT_NE(current, previous);
+		if (!animation_path)
+			{
+			const guint32 center = current[((pr->viewport_height / 2) * pr->viewport_width) + (pr->viewport_width / 2)];
+			const auto *source = gdk_pixbuf_read_pixels(next);
+			for (guint channel = 0; channel < 3; channel++)
+				{
+				EXPECT_NEAR((center >> ((2 - channel) * 8)) & 0xffU, source[channel], 1);
+				}
+			}
+		previous = std::move(current);
+		}
+
+	// Normal image changes must still discard the previous animation frame.
+	pixbuf_renderer_set_post_process_func(pr, nullptr, FALSE);
+	pixbuf_renderer_set_pixbuf(pr, first, 0.0);
+	EXPECT_NE(snapshot_pixels(), previous);
+	ASSERT_TRUE(finish());
+}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST(RendererTilesTexture, PostProcessingRebuildsQueuedSourceTexture)
 {

@@ -1833,14 +1833,14 @@ void rt_redraw(RendererTiles *rt, GdkRectangle rect,
 	         clamp, TileRender::ALL, new_data, false);
 }
 
-void renderer_update_pixbuf(void *renderer, gboolean)
+void renderer_update_pixbuf(void *renderer, gboolean, gboolean preserve_frame)
 {
 	auto *rt = static_cast<RendererTiles *>(renderer);
 	g_clear_object(&rt->source_texture);
 	g_clear_object(&rt->composite_texture);
-	// Retain complete frames only while rebuilding the same source image.
-	// A different cached image must not inherit the previous image's preview.
-	if (!rt->pr->pixbuf || rt->pr->loading || rt->image_pixbuf != rt->pr->pixbuf)
+	// Animation decoders may allocate a different pixbuf for every frame.
+	// Only explicit frame updates may retain a preview across source changes.
+	if (!rt->pr->pixbuf || (!preserve_frame && (rt->pr->loading || rt->image_pixbuf != rt->pr->pixbuf)))
 		{
 		g_clear_pointer(&rt->image_node, gsk_render_node_unref);
 		}

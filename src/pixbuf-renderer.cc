@@ -784,10 +784,10 @@ static void pixbuf_renderer_update_viewport(PixbufRenderer *pr)
 	if (pr->renderer2) pr->renderer2->update_viewport(pr->renderer2);
 }
 
-static void pixbuf_renderer_update_pixbuf(PixbufRenderer *pr, gboolean lazy)
+static void pixbuf_renderer_update_pixbuf(PixbufRenderer *pr, gboolean lazy, gboolean preserve_frame = FALSE)
 {
-	pr->renderer->update_pixbuf(pr->renderer, lazy);
-	if (pr->renderer2) pr->renderer2->update_pixbuf(pr->renderer2, lazy);
+	pr->renderer->update_pixbuf(pr->renderer, lazy, preserve_frame);
+	if (pr->renderer2) pr->renderer2->update_pixbuf(pr->renderer2, lazy, preserve_frame);
 }
 
 static void pixbuf_renderer_update_zoom(PixbufRenderer *pr, gboolean lazy)
@@ -2705,8 +2705,11 @@ static void pr_pixbuf_size_sync(PixbufRenderer *pr)
 		}
 }
 
-static void pr_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, PrZoomFlags flags)
+static void pr_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, PrZoomFlags flags, gboolean preserve_frame = FALSE)
 {
+	preserve_frame = preserve_frame && pixbuf && pr->pixbuf &&
+	                 gdk_pixbuf_get_width(pixbuf) == gdk_pixbuf_get_width(pr->pixbuf) &&
+	                 gdk_pixbuf_get_height(pixbuf) == gdk_pixbuf_get_height(pr->pixbuf);
 	g_clear_object(&pr->birdseye_pixbuf);
 	if (pixbuf) g_object_ref(pixbuf);
 	if (pr->pixbuf) g_object_unref(pr->pixbuf);
@@ -2735,20 +2738,20 @@ static void pr_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, P
 		}
 
 	pr_pixbuf_size_sync(pr);
-	pixbuf_renderer_update_pixbuf(pr, flags & PR_ZOOM_LAZY);
-	pr_zoom_sync(pr, zoom, static_cast<PrZoomFlags>(flags | PR_ZOOM_FORCE | PR_ZOOM_NEW), 0, 0);
+	pixbuf_renderer_update_pixbuf(pr, flags & PR_ZOOM_LAZY, preserve_frame);
+	pr_zoom_sync(pr, zoom, static_cast<PrZoomFlags>(flags | PR_ZOOM_FORCE | (preserve_frame ? PR_ZOOM_NONE : PR_ZOOM_NEW)), 0, 0);
 }
 
 /**
  * @brief Display a pixbuf
  */
-void pixbuf_renderer_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom)
+void pixbuf_renderer_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, gboolean preserve_frame)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 
 	pr_source_tile_unset(pr);
 
-	pr_set_pixbuf(pr, pixbuf, zoom, PR_ZOOM_NONE);
+	pr_set_pixbuf(pr, pixbuf, zoom, PR_ZOOM_NONE, preserve_frame);
 
 	pr_update_signal(pr);
 }

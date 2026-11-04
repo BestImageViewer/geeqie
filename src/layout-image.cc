@@ -375,17 +375,14 @@ static gboolean show_next_frame(gpointer data)
 		}
 	PixbufRenderer *pr = PIXBUF_RENDERER(fd->iw->pr);
 
-	if (!gdk_pixbuf_animation_iter_advance(fd->iter, nullptr))
+	if (gdk_pixbuf_animation_iter_advance(fd->iter, nullptr))
 		{
-		/* This indicates the animation is complete.
-		   Return FALSE here to disable looping. */
+		fd->gpb = gdk_pixbuf_animation_iter_get_pixbuf(fd->iter);
+		image_change_pixbuf(fd->iw, fd->gpb, pr->zoom, FALSE, TRUE);
+
+		if (fd->iw->func_update)
+			fd->iw->func_update(fd->iw, fd->iw->data_update);
 		}
-
-	fd->gpb = gdk_pixbuf_animation_iter_get_pixbuf(fd->iter);
-	image_change_pixbuf(fd->iw,fd->gpb,pr->zoom,FALSE);
-
-	if (fd->iw->func_update)
-		fd->iw->func_update(fd->iw, fd->iw->data_update);
 
 	delay = gdk_pixbuf_animation_iter_get_delay_time(fd->iter);
 	if (delay!=fd->delay)

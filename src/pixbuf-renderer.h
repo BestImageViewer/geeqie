@@ -142,7 +142,7 @@ struct RendererFuncs
 	void (*invalidate_region)(void *renderer, GdkRectangle region);
 	void (*scroll)(void *renderer, gint x_off, gint y_off); /**< scroll */
 	void (*update_viewport)(void *renderer); /**< window / wiewport / border color has changed */
-	void (*update_pixbuf)(void *renderer, gboolean lazy); /**< pixbuf has changed */
+	void (*update_pixbuf)(void *renderer, gboolean lazy, gboolean preserve_frame); /**< pixbuf has changed */
 	void (*update_zoom)(void *renderer, gboolean lazy); /**< zoom has changed */
 
 	gint (*overlay_add)(void *renderer, GdkPixbuf *pixbuf, gint x, gint y, OverlayRendererFlags flags);
@@ -323,7 +323,8 @@ PixbufRenderer *pixbuf_renderer_new();
 
 void pixbuf_renderer_set_parent(PixbufRenderer *pr, GtkWindow *window);
 
-void pixbuf_renderer_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom);
+/** @param preserve_frame Retain the previous rendered animation frame when dimensions match. */
+void pixbuf_renderer_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, gboolean preserve_frame = FALSE);
 
 void pixbuf_renderer_set_pixbuf_lazy(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, gint orientation, StereoPixbufData stereo_data);
 
