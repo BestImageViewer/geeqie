@@ -35,7 +35,6 @@
 
 #include "accelerators.h"
 #include "actions.h"
-#include "archives.h"
 #include "collect.h"
 #include "color-man.h"
 #include "compat.h"
@@ -558,19 +557,11 @@ static void li_set_layout_path_cb(GtkWidget *, gpointer data)
 
 static void li_open_archive_cb(GtkWidget *, gpointer data)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto *lw = static_cast<LayoutWindow *>(data);
 
 	if (!layout_valid(&lw)) return;
 
-	g_autofree gchar *dest_dir = open_archive(layout_image_get_fd(lw));
-	if (!dest_dir)
-		{
-		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
-		return;
-		}
-
-	LayoutWindow *lw_new = layout_new_from_default();
-	layout_set_path(lw_new, dest_dir);
+	layout_open_archive(layout_image_get_fd(lw));
 }
 
 static gboolean li_check_if_current_path(LayoutWindow *lw, const gchar *path)
@@ -2023,7 +2014,6 @@ static void layout_image_button_cb(ImageWindow *imd, GqMouseButtonEvent *event, 
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
-	LayoutWindow *lw_new;
 
 	switch (event->button)
 		{
@@ -2032,19 +2022,9 @@ static void layout_image_button_cb(ImageWindow *imd, GqMouseButtonEvent *event, 
 				{
 				layout_image_full_screen_toggle(lw);
 				}
-
-			else if (options->image_l_click_archive && imd->image_fd && imd->image_fd->format_class == FORMAT_CLASS_ARCHIVE)
+			else if (options->image_l_click_archive && imd->image_fd && imd->image_fd->format_class == FORMAT_CLASS_ARCHIVE) // @todo Deduplicate
 				{
-				g_autofree gchar *dest_dir = open_archive(imd->image_fd); // @todo Deduplicate
-				if (dest_dir)
-					{
-					lw_new = layout_new_from_default();
-					layout_set_path(lw_new, dest_dir);
-					}
-				else
-					{
-					warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
-					}
+				layout_open_archive(imd->image_fd);
 				}
 			else if (options->image_l_click_video && options->image_l_click_video_editor && imd-> image_fd && imd->image_fd->format_class == FORMAT_CLASS_VIDEO)
 				{

@@ -22,7 +22,6 @@
 #include "img-view.h"
 
 #include <algorithm>
-#include <array>
 #include <vector>
 
 #include <gdk/gdk.h>
@@ -31,7 +30,6 @@
 
 #include "accelerators.h"
 #include "actions.h"
-#include "archives.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "compat.h"
@@ -57,8 +55,6 @@
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
-#include "ui-utildlg.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
 
@@ -473,23 +469,13 @@ static gboolean view_window_key_press_cb(GtkEventControllerKey *controller, guin
 static void button_cb(ImageWindow *imd, GqMouseButtonEvent *event, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
-	LayoutWindow *lw_new;
 
 	switch (event->button)
 		{
 		case GDK_BUTTON_PRIMARY:
 			if (options->image_l_click_archive && imd->image_fd->format_class == FORMAT_CLASS_ARCHIVE)
 				{
-				g_autofree gchar *dest_dir = open_archive(imd->image_fd);
-				if (dest_dir)
-					{
-					lw_new = layout_new_from_default();
-					layout_set_path(lw_new, dest_dir);
-					}
-				else
-					{
-					warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
-					}
+				layout_open_archive(imd->image_fd);
 				}
 			else if (options->image_l_click_video && options->image_l_click_video_editor && imd->image_fd->format_class == FORMAT_CLASS_VIDEO)
 				{

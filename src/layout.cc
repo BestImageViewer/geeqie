@@ -37,6 +37,7 @@
 #include <pango/pango.h>
 
 #include "actions.h"
+#include "archives.h"
 #include "bar-sort.h"
 #include "bar.h"
 #include "collect-dlg.h"
@@ -3432,6 +3433,19 @@ gboolean layout_focus_files(LayoutWindow *lw)
 {
 	if (!lw || !lw->vf) return FALSE;
 	return gtk_widget_grab_focus(lw->vf->listview);
+}
+
+void layout_open_archive(const FileData *fd)
+{
+	g_autofree gchar *dest_dir = open_archive(fd);
+	if (!dest_dir)
+		{
+		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
+		return;
+		}
+
+	LayoutWindow *lw_new = layout_new_from_default();
+	layout_set_path(lw_new, dest_dir);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
