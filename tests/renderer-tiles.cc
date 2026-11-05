@@ -128,9 +128,9 @@ TEST(RendererTilesTexture, AnimationFramesKeepThePreviousFrameUntilRenderingFini
 		previous = std::move(current);
 		}
 
-	// Normal image changes must still discard the previous animation frame.
+	// Clearing the image must discard the retained animation frame.
 	pixbuf_renderer_set_post_process_func(pr, nullptr, FALSE);
-	pixbuf_renderer_set_pixbuf(pr, first, 0.0);
+	pixbuf_renderer_set_pixbuf(pr, nullptr, 0.0);
 	EXPECT_NE(snapshot_pixels(), previous);
 	ASSERT_TRUE(finish());
 }
@@ -170,19 +170,28 @@ TEST(RendererTilesTexture, PostProcessingRebuildsQueuedSourceTexture)
 	auto *renderer = gtk_native_get_renderer(GTK_NATIVE(window.get()));
 	if (GSK_IS_CAIRO_RENDERER(renderer) || gdk_surface_get_scale(gtk_native_get_surface(GTK_NATIVE(window.get()))) != 1.0)
 		GTEST_SKIP() << "Requires a GL or Vulkan renderer at 100% display scaling";
-	const auto check_frame = [&](guint32 expected)
+	const auto snapshot_frame = [&]()
 		{
 		auto *snapshot = gtk_snapshot_new();
 		renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
 		g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
-		ASSERT_NE(node, nullptr);
+		EXPECT_NE(node, nullptr);
+		if (!node) return std::vector<guint32>{};
 		const graphene_rect_t bounds{{0, 0}, {static_cast<float>(pr->viewport_width), static_cast<float>(pr->viewport_height)}};
 		g_autoptr(GdkTexture) rendered = gsk_renderer_render_texture(renderer, node, &bounds);
-		ASSERT_NE(rendered, nullptr);
+		EXPECT_NE(rendered, nullptr);
+		if (!rendered) return std::vector<guint32>{};
 		const int width = gdk_texture_get_width(rendered);
 		const int height = gdk_texture_get_height(rendered);
 		std::vector<guint32> output(width * height);
 		gdk_texture_download(rendered, reinterpret_cast<guchar *>(output.data()), width * 4);
+		return output;
+		};
+	const auto check_frame = [&](guint32 expected)
+		{
+		const auto output = snapshot_frame();
+		const int width = pr->viewport_width;
+		ASSERT_EQ(output.size(), static_cast<size_t>(width * pr->viewport_height));
 		for (const int y : {pr->y_offset + (pr->vis_height / 4), pr->y_offset + (pr->vis_height / 2), pr->y_offset + (pr->vis_height * 3 / 4)})
 			for (const int x : {pr->x_offset + (pr->vis_width / 4), pr->x_offset + (pr->vis_width / 2), pr->x_offset + (pr->vis_width * 3 / 4)})
 				EXPECT_EQ(output[(y * width) + x] & 0xffffffU, expected);
@@ -221,26 +230,33 @@ TEST(RendererTilesTexture, PostProcessingRebuildsQueuedSourceTexture)
 		pixbuf_renderer_set_pixbuf(pr, pixels, 0.0);
 		ASSERT_TRUE(finish());
 		ASSERT_NO_FATAL_FAILURE(check_frame(0x2040ffU));
+		const auto previous = snapshot_frame();
 		pixbuf_renderer_set_post_process_func(pr,
-			[](PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint) {}, TRUE);
+			[&](PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint)
+				{
+				EXPECT_EQ(snapshot_frame(), previous);
+				}, TRUE);
 		pixbuf_renderer_set_pixbuf(pr, next, 0.0);
-		// Snapshot before servicing the queued tiles: no previous blue pixels
-		// may appear inside the new image, even while its first frame is pending.
-		auto *snapshot = gtk_snapshot_new();
-		renderer_tiles_snapshot(pr->renderer, snapshot, 1.0);
-		g_autoptr(GskRenderNode) node = gtk_snapshot_free_to_node(snapshot);
-		ASSERT_NE(node, nullptr);
-		const graphene_rect_t bounds{{0, 0}, {static_cast<float>(pr->viewport_width), static_cast<float>(pr->viewport_height)}};
-		g_autoptr(GdkTexture) frame = gsk_renderer_render_texture(renderer, node, &bounds);
-		ASSERT_NE(frame, nullptr);
-		const int width = gdk_texture_get_width(frame);
-		const int height = gdk_texture_get_height(frame);
-		std::vector<guint32> output(width * height);
-		gdk_texture_download(frame, reinterpret_cast<guchar *>(output.data()), width * 4);
-		EXPECT_EQ(std::count_if(output.begin(), output.end(), [](guint32 pixel) { return (pixel & 0xffffffU) == 0x2040ffU; }), 0);
+		// Retain the original composition without resizing it to the new aspect ratio.
+		EXPECT_EQ(snapshot_frame(), previous);
 		ASSERT_TRUE(finish());
 		ASSERT_NO_FATAL_FAILURE(check_frame(0xff4020U));
+		pixbuf_renderer_set_post_process_func(pr, nullptr, FALSE);
 		}
+
+	// Progressive loading temporarily clears the source pointer before the
+	// decoder supplies its first pixels. Lazy setup must retain the same frame.
+	pr->zoom_2pass = FALSE;
+	const auto previous = snapshot_frame();
+	g_object_set(pr, "loading", TRUE, nullptr);
+	g_clear_object(&pr->pixbuf);
+	EXPECT_EQ(snapshot_frame(), previous);
+	pixbuf_renderer_set_pixbuf_lazy(pr, pixels, 0.0, 1, STEREO_PIXBUF_DEFAULT);
+	EXPECT_EQ(snapshot_frame(), previous);
+	pixbuf_renderer_area_changed(pr, {0, 0, 64, 48});
+	ASSERT_TRUE(finish());
+	g_object_set(pr, "loading", FALSE, nullptr);
+	ASSERT_NO_FATAL_FAILURE(check_frame(0x2040ffU));
 }
 
 TEST(RendererTiles, FirstZoomStepFromFitUsesPhysicalScale)

@@ -154,11 +154,13 @@ struct RendererTiles
 	GQueue draw_queue;	/* queue of areas to redraw */
 	GQueue draw_queue_2pass;/* queue when 2 pass is enabled */
 
-	GskRenderNode *image_node; /* Last complete image, retained during a zoom first pass. */
-	GdkPixbuf *image_pixbuf; /* Owned reference identifying the retained image's source. */
+	GskRenderNode *image_node; /* Last complete composition, retained while replacement tiles render. */
+	GdkPixbuf *image_pixbuf; /* Owned reference to the most recently assigned source. */
 	GdkTexture *composite_texture; /* Visible tiles joined before fractional display scaling. */
 	GdkTexture *source_texture; /* Immutable source pixels reused across magnification changes. */
 	gboolean preserve_image;
+	bool preserve_preview_geometry; /**< keep the old composition when changing images */
+	bool awaiting_image; /**< lazy image replacement has not completed its first tile batch */
 	gint preview_width;
 	gint preview_height;
 	gint preview_x;
@@ -1583,6 +1585,7 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 
 	if (first_pass && g_queue_is_empty(&rt->draw_queue))
 		{
+		rt->awaiting_image = false;
 		/* Present the fast preview before refining it in the second pass. */
 		rt_present_pending(rt);
 		}
@@ -1838,11 +1841,18 @@ void renderer_update_pixbuf(void *renderer, gboolean, gboolean preserve_frame)
 	auto *rt = static_cast<RendererTiles *>(renderer);
 	g_clear_object(&rt->source_texture);
 	g_clear_object(&rt->composite_texture);
-	// Animation decoders may allocate a different pixbuf for every frame.
-	// Only explicit frame updates may retain a preview across source changes.
-	if (!rt->pr->pixbuf || (!preserve_frame && (rt->pr->loading || rt->image_pixbuf != rt->pr->pixbuf)))
+	if (!rt->pr->pixbuf)
 		{
 		g_clear_pointer(&rt->image_node, gsk_render_node_unref);
+		rt->preserve_preview_geometry = false;
+		rt->awaiting_image = false;
+		}
+	else if (rt->image_node && rt->image_pixbuf != rt->pr->pixbuf)
+		{
+		// Keep a complete composition until the replacement has rendered, but
+		// never stretch a different image to the replacement's dimensions.
+		if (!preserve_frame) rt->preserve_preview_geometry = true;
+		rt->awaiting_image = true;
 		}
 	g_set_object(&rt->image_pixbuf, rt->pr->pixbuf);
 	rt->preserve_image = rt->image_node != nullptr;
@@ -2007,12 +2017,14 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 
 
 	graphene_rect_t bounds;
+	const bool waiting_for_pixels = rt->image_node && rt->pr->loading && !rt->pr->pixbuf;
 	const bool pending_color_pass = rt->pr->post_process_slow && !rt->pr->loading && !g_queue_is_empty(&rt->draw_queue_2pass);
-	if (!rt_texture_scaling_available(rt) && rt->preserve_image &&
-	    (!g_queue_is_empty(&rt->draw_queue) || pending_color_pass))
+	if (waiting_for_pixels || (!rt_texture_scaling_available(rt) && rt->preserve_image &&
+	    (rt->awaiting_image || !g_queue_is_empty(&rt->draw_queue) || pending_color_pass)))
 		{
 		// Retain complete frames through both passes of slow color correction.
-		if (rt->pr->zoom == 0.0 && rt->preview_width > 0 && rt->preview_height > 0)
+		if (!waiting_for_pixels && !rt->preserve_preview_geometry &&
+		    rt->pr->zoom == 0.0 && rt->preview_width > 0 && rt->preview_height > 0)
 			{
 			// Resize the retained fit preview immediately while new tiles render.
 			graphene_rect_t viewport;
@@ -2104,6 +2116,8 @@ void rt_snapshot_scaled(void *data, GtkSnapshot *snapshot, double display_scale)
 		rt->preview_x = rt->pr->x_offset - rt->x_scroll + rt->stereo_off_x;
 		rt->preview_y = rt->pr->y_offset - rt->y_scroll + rt->stereo_off_y;
 		rt->preserve_image = FALSE;
+		rt->preserve_preview_geometry = false;
+		rt->awaiting_image = false;
 		if (node) gtk_snapshot_append_node(snapshot, node);
 		}
 
