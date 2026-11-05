@@ -25,6 +25,7 @@ unit_test_sources = files(
 'filedata/ref.cc',
 'geocode.cc',
 'history-list.cc',
+'histogram.cc',
 'image-load.cc',
 'image-load-ora.cc',
 'image-load-external.cc',

@@ -246,13 +246,13 @@ gboolean histmap_start_idle(FileData *fd)
 
 void Histogram::draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height) const
 {
-	if (!histmap) return;
+	if (!histmap || !pixbuf || width <= 0 || height <= 0) return;
 
-	/** @FIXME use the coordinates correctly */
 	gint i;
 	gulong max = 0;
-	gdouble logmax;
 	gint combine = ((HISTMAP_SIZE - 1) / width) + 1;
+	// Lines exclude their final endpoint, so use the rectangle's exclusive
+	// bottom edge as the baseline and subtract the number of pixels to draw.
 	GqPoint c1{ x, y + height };
 
 	/* Draw the grid */
@@ -267,15 +267,21 @@ void Histogram::draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, 
 		max = std::max({histmap->r[i], histmap->g[i], histmap->b[i], histmap->max[i], max});
 		}
 
-	if (max > 0)
-		logmax = log(max);
-	else
-		logmax = 1.0;
+	// If the image contains only clipped values, use their peak instead.
+	if (max == 0)
+		{
+		for (const gint bin : {0, HISTMAP_SIZE - 1})
+			{
+			max = std::max({histmap->r[bin], histmap->g[bin], histmap->b[bin], histmap->max[bin], max});
+			}
+		}
+	if (max == 0) return;
+	const gdouble logmax = std::log1p(static_cast<gdouble>(max));
 
 	for (i = 0; i < width; i++, c1.x++)
 		{
 		gint j;
-		glong v[4] = {0, 0, 0, 0};
+		gdouble v[4] = {0, 0, 0, 0};
 		GqColor plus{ 0, 0, 0, 255 };
 		gint ii = i * HISTMAP_SIZE / width;
 		gint num_chan;
@@ -332,17 +338,13 @@ void Histogram::draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, 
 				default: break;
 				}
 
-			GqPoint c2 = c1;
-
-			if (v[chanmax] != 0)
+			if (v[chanmax] > 0)
 				{
-				if (histogram_mode == HMODE_LOG)
-					c2.y -= (static_cast<gdouble>(log(v[chanmax]))) / logmax * (height - 1);
-				else
-					c2.y -= (static_cast<gdouble>(v[chanmax])) / max * (height - 1);
+				const gdouble fraction = histogram_mode == HMODE_LOG ? std::log1p(v[chanmax]) / logmax : v[chanmax] / max;
+				const gint bar_height = std::clamp(static_cast<gint>(std::min(fraction, 1.0) * height), 1, height);
+				const GqPoint top{c1.x, c1.y - bar_height};
+				pixbuf_draw_line(pixbuf, rect, top, c1, c);
 				}
-
-			pixbuf_draw_line(pixbuf, rect, c1, c2, c);
 
 			v[chanmax] = -1;
 			}
