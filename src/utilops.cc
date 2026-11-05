@@ -518,48 +518,46 @@ struct UtilityDelayData {
 	guint idle_id; /* event source id */
 	};
 
+static void label_set_text(GtkWidget *label, const FileData *fd)
+{
+	if (!label) return;
+
+	g_autofree gchar *size_buf = text_from_size(fd->size);
+	g_autofree gchar *buf = g_strjoin("\n", text_from_time(fd->date), size_buf, NULL);
+	gtk_label_set_text(GTK_LABEL(label), buf);
+}
+
 static void generic_dialog_image_set(UtilityData *ud, FileData *fd)
 {
-	ImageWindow *imd;
-	GtkWidget *label;
-	FileData *fd2 = nullptr;
-
-	imd = static_cast<ImageWindow *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_image"));
-	label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_label"));
-
+	auto *imd = static_cast<ImageWindow *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_image"));
 	if (!imd) return;
+
+	auto *label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_label"));
 
 	image_change_fd(imd, fd, 0.0);
 
-	if (label)
-		{
-		g_autofree gchar *buf = g_strjoin("\n", text_from_time(fd->date), text_from_size(fd->size), NULL);
-		gtk_label_set_text(GTK_LABEL(label), buf);
-		}
+	label_set_text(label, fd);
 
 	if (ud->type == UtilityType::RENAME || ud->type == UtilityType::COPY || ud->type == UtilityType::MOVE)
 		{
-		imd = static_cast<ImageWindow *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_image2"));
-		label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_label2"));
+		auto *imd2 = static_cast<ImageWindow *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_image2"));
+		if (!imd2) return;
 
-		if (imd)
+		auto *label2 = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(ud->gd->dialog), "img_label2"));
+
+		if (isfile(fd->change->dest))
 			{
-			if (isfile(fd->change->dest))
+			FileDataRef fd2 = FileData::new_group(fd->change->dest);
+			image_change_fd(imd2, fd2, 0.0);
+			if (fd->change->dest)
 				{
-				fd2 = file_data_new_group(fd->change->dest);
-				image_change_fd(imd, fd2, 0.0);
-				if (label && fd->change->dest)
-					{
-					g_autofree gchar *buf = g_strjoin("\n", text_from_time(fd2->date), text_from_size(fd2->size), NULL);
-					gtk_label_set_text(GTK_LABEL(label), buf);
-					}
-				file_data_unref(fd2);
+				label_set_text(label2, fd2);
 				}
-			else
-				{
-				image_change_fd(imd, nullptr, 0.0);
-				if (label) gtk_label_set_text(GTK_LABEL(label), "");
-				}
+			}
+		else
+			{
+			image_change_fd(imd2, nullptr, 0.0);
+			if (label2) gtk_label_set_text(GTK_LABEL(label2), "");
 			}
 		}
 }
