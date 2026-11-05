@@ -18,6 +18,27 @@
 namespace
 {
 
+TEST(FileExtensionMatch, MatchesAsciiExtensionsInUtf8Filenames)
+{
+	EXPECT_TRUE(file_extension_match("/photos/été_日本.JPG", ".jpg"));
+	EXPECT_TRUE(file_extension_match("/photos/été_日本.jpg", ".JPG"));
+	EXPECT_TRUE(file_extension_match("/photos/été_日本.cr3.XmP", ".cr3.xmp"));
+	EXPECT_FALSE(file_extension_match("/photos/été_日本.png", ".jpg"));
+	EXPECT_FALSE(file_extension_match("/photos/été_日本.jpg.bak", ".jpg"));
+}
+
+TEST(FileExtensionMatch, PreservesNullAndBoundaryBehavior)
+{
+	EXPECT_FALSE(file_extension_match(nullptr, ".jpg"));
+	EXPECT_FALSE(file_extension_match(nullptr, nullptr));
+	EXPECT_TRUE(file_extension_match("image.jpg", nullptr));
+	EXPECT_TRUE(file_extension_match("", nullptr));
+	EXPECT_FALSE(file_extension_match("", ".jpg"));
+	EXPECT_FALSE(file_extension_match("a", ".jpg"));
+	EXPECT_FALSE(file_extension_match(".jpg", ".jpg"));
+	EXPECT_TRUE(file_extension_match("a.jpg", ".jpg"));
+}
+
 class SymlinkTransfer : public testing::TestWithParam<bool>
 {
 protected:

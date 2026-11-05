@@ -695,17 +695,16 @@ gchar *remove_level_from_path(const gchar *path)
 
 gboolean file_extension_match(const gchar *path, const gchar *ext)
 {
-	gint p;
-	gint e;
-
 	if (!path) return FALSE;
 	if (!ext) return TRUE;
 
-	p = strlen(path);
-	e = strlen(ext);
+	const size_t path_length = strlen(path);
+	const size_t extension_length = strlen(ext);
 
-	/** @FIXME utf8 */
-	return (p > e && g_ascii_strncasecmp(path + p - e, ext, e) == 0);
+	// Extensions are matched case-insensitively in ASCII. Byte offsets also
+	// handle UTF-8 filenames correctly when the extension is ASCII.
+	return path_length > extension_length &&
+	       g_ascii_strncasecmp(path + path_length - extension_length, ext, extension_length) == 0;
 }
 
 gchar *remove_extension_from_path(const gchar *path)
