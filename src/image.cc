@@ -2068,6 +2068,9 @@ void image_zoom_set_fill_geometry(ImageWindow *imd, gboolean vertical)
 		zoom = static_cast<gdouble>(pr->viewport_width) / width;
 		}
 
+	// Viewport dimensions use logical pixels; numeric zoom uses physical pixels.
+	zoom *= pixbuf_renderer_get_display_scale(pr);
+
 	if (zoom < 1.0)
 		{
 		zoom = 0.0 - (1.0 / zoom);

@@ -369,6 +369,8 @@ void pixbuf_renderer_zoom_set(PixbufRenderer *pr, gdouble zoom);
 gdouble pixbuf_renderer_zoom_get(PixbufRenderer *pr);
 /** Effective zoom in physical display pixels per image pixel, including auto-fit. */
 gdouble pixbuf_renderer_zoom_get_scale(const PixbufRenderer *pr);
+/** @return Physical display pixels per logical pixel on this renderer's surface. */
+double pixbuf_renderer_get_display_scale(const PixbufRenderer *pr);
 
 void pixbuf_renderer_zoom_set_limits(PixbufRenderer *pr, gdouble min, gdouble max);
 

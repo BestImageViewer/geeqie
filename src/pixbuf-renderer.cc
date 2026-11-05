@@ -1799,8 +1799,10 @@ static gboolean pr_size_clamp(PixbufRenderer *pr)
 	return (old_vw != pr->vis_width || old_vh != pr->vis_height);
 }
 
-static double pr_display_scale(const PixbufRenderer *pr)
+double pixbuf_renderer_get_display_scale(const PixbufRenderer *pr)
 {
+	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), 1.0);
+
 	GtkNative *native = gtk_widget_get_native(GTK_WIDGET(pr));
 	GdkSurface *surface = native ? gtk_native_get_surface(native) : nullptr;
 	return surface ? gdk_surface_get_scale(surface) : gtk_widget_get_scale_factor(GTK_WIDGET(pr));
@@ -1896,20 +1898,20 @@ static gboolean pr_zoom_clamp(PixbufRenderer *pr, gdouble zoom,
 		}
 	else if (zoom > 0.0) /* zoom orig, in */
 		{
-		scale = zoom / pr_display_scale(pr);
+		scale = zoom / pixbuf_renderer_get_display_scale(pr);
 		w = std::max(1, static_cast<int>(w * scale));
 		h = std::max(1, static_cast<int>(h * scale * pr->aspect_ratio));
 		}
 	else /* zoom out */
 		{
-		scale = 1.0 / ((0.0 - zoom) * pr_display_scale(pr));
+		scale = 1.0 / ((0.0 - zoom) * pixbuf_renderer_get_display_scale(pr));
 		w = std::max(1, static_cast<int>(w * scale));
 		h = std::max(1, static_cast<int>(h * scale * pr->aspect_ratio));
 		}
 
 	if (zoom == 0.0)
 		{
-		const double limit = (pr->zoom_expand ? pr->enlargement_limit_size / 100.0 : 1.0) / pr_display_scale(pr);
+		const double limit = (pr->zoom_expand ? pr->enlargement_limit_size / 100.0 : 1.0) / pixbuf_renderer_get_display_scale(pr);
 		if (scale > limit)
 			{
 			scale = limit;
@@ -2986,7 +2988,7 @@ gdouble pixbuf_renderer_zoom_get_scale(const PixbufRenderer *pr)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), 1.0);
 
-	return pr->scale * pr_display_scale(pr);
+	return pr->scale * pixbuf_renderer_get_display_scale(pr);
 }
 
 void pixbuf_renderer_zoom_set_limits(PixbufRenderer *pr, gdouble min, gdouble max)

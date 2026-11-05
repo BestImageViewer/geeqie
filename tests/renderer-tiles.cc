@@ -17,6 +17,7 @@
 
 #include <cairo.h>
 
+#include "image.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
@@ -257,6 +258,46 @@ TEST(RendererTilesTexture, PostProcessingRebuildsQueuedSourceTexture)
 	ASSERT_TRUE(finish());
 	g_object_set(pr, "loading", FALSE, nullptr);
 	ASSERT_NO_FATAL_FAILURE(check_frame(0x2040ffU));
+}
+
+TEST(RendererTiles, FillZoomUsesPhysicalScale)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	for (const auto &viewport : {std::array<int, 2>{400, 300}, std::array<int, 2>{900, 600}})
+		{
+		std::unique_ptr<GtkWindow, decltype(&gtk_window_destroy)> window(GTK_WINDOW(gtk_window_new()), gtk_window_destroy);
+		auto *imd = image_new(FALSE);
+		auto *pr = PIXBUF_RENDERER(imd->pr);
+		gtk_window_set_default_size(window.get(), viewport[0], viewport[1]);
+		gtk_window_set_child(window.get(), imd->widget);
+		gtk_window_present(window.get());
+		const auto deadline = g_get_monotonic_time() + (5 * G_TIME_SPAN_SECOND);
+		while (!gtk_widget_get_mapped(GTK_WIDGET(pr)) || pr->viewport_width <= 0 || pr->viewport_height <= 0)
+			{
+			ASSERT_LT(g_get_monotonic_time(), deadline);
+			while (g_main_context_iteration(nullptr, FALSE)) {}
+			g_usleep(1000);
+			}
+		for (const auto &size : {std::array<int, 2>{128, 96}, std::array<int, 2>{3200, 2400}})
+			{
+			g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, size[0], size[1]);
+			gdk_pixbuf_fill(pixels, 0x204060ff);
+			pixbuf_renderer_set_pixbuf(pr, pixels, 0.0);
+			for (gint orientation = 1; orientation <= 8; orientation++)
+				{
+				SCOPED_TRACE(orientation);
+				pixbuf_renderer_set_orientation(pr, orientation);
+				for (bool vertical : {false, true})
+					{
+					SCOPED_TRACE(vertical);
+					image_zoom_set_fill_geometry(imd, vertical);
+					EXPECT_NEAR(vertical ? pr->height : pr->width,
+					            vertical ? pr->viewport_height : pr->viewport_width, 1);
+					}
+				}
+			}
+		}
 }
 
 TEST(RendererTiles, FirstZoomStepFromFitUsesPhysicalScale)
