@@ -3891,6 +3891,8 @@ static void dupe_menu_type_cb(GtkDropDown *drop_down, GParamSpec *, gpointer dat
 
 	options->duplicates_match = dw->match_mask;
 
+	gtk_widget_set_sensitive(dw->algorithm_drop_down, dw->match_mask & DUPE_MATCH_SIM);
+	gtk_widget_set_sensitive(dw->custom_threshold, dw->match_mask == DUPE_MATCH_SIM_CUSTOM);
 	dupe_listview_show_rank(dw->listview, dw->match_mask & DUPE_MATCH_SIM);
 	dupe_window_recompare(dw);
 }

@@ -1023,6 +1023,23 @@ TEST_F(DuplicateAddCommands, CommandLineCollectionOnlyPromptsAfterEditing)
 	EXPECT_EQ(layout->collection_confirm_data, nullptr);
 }
 
+TEST_F(DuplicateAddCommands, SimilarityControlsFollowComparisonMode)
+{
+	open();
+	EXPECT_FALSE(gtk_widget_get_sensitive(dw->algorithm_drop_down));
+	EXPECT_FALSE(gtk_widget_get_sensitive(dw->custom_threshold));
+	auto *modes = gtk_drop_down_get_model(GTK_DROP_DOWN(dw->drop_down));
+	// Check both directions, including leaving Custom similarity for a preset.
+	const guint count = g_list_model_get_n_items(modes);
+	for (guint step = 0; step < count * 2; ++step)
+		{
+		const guint index = step < count ? step : count * 2 - step - 1;
+		gtk_drop_down_set_selected(GTK_DROP_DOWN(dw->drop_down), index);
+		EXPECT_EQ(gtk_widget_get_sensitive(dw->algorithm_drop_down), (dw->match_mask & DUPE_MATCH_SIM) != 0);
+		EXPECT_EQ(gtk_widget_get_sensitive(dw->custom_threshold), dw->match_mask == DUPE_MATCH_SIM_CUSTOM);
+		}
+}
+
 TEST_F(DuplicateAddCommands, AlgorithmActionUpdatesDefaultsAndAllWindows)
 {
 	const gboolean saved_algorithm = options->alternate_similarity_algorithm.enabled;
