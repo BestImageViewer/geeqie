@@ -23,6 +23,7 @@
 #include "collect-io.h"
 #include "collect.h"
 #include "compat.h"
+#include "command-line-handling.h"
 #include "date-time.h"
 #include "dupe.h"
 #include "filedata.h"
@@ -982,6 +983,45 @@ protected:
 	DupeWindow *dw = nullptr;
 	HistoryList saved_folder_history;
 };
+
+TEST_F(DuplicateAddCommands, CommandLineCollectionOnlyPromptsAfterEditing)
+{
+	g_autofree gchar *top = g_build_filename(directory, "top.png", nullptr);
+	g_autofree gchar *child = g_build_filename(directory, "nested", "child.png", nullptr);
+	GList second{child, nullptr, nullptr};
+	GList first{top, &second, nullptr};
+	second.prev = &first;
+	process_files(layout, &first);
+	auto *collection = layout->vf->collection;
+	ASSERT_NE(collection, nullptr);
+	EXPECT_EQ(g_list_length(collection->list), 2U);
+	EXPECT_FALSE(collection->changed);
+	EXPECT_TRUE(layout_confirm_collection_leave(layout, []() {}, FALSE));
+	EXPECT_EQ(layout->collection_confirm_data, nullptr);
+	// Viewing has not changed the initial membership, so navigation needs no prompt.
+	ASSERT_TRUE(layout_set_path(layout, directory));
+	EXPECT_EQ(layout->vf->collection, nullptr);
+	process_files(layout, &first);
+	collection = layout->vf->collection;
+	ASSERT_NE(collection, nullptr);
+	auto *member = static_cast<CollectInfo *>(collection->list->data);
+	ASSERT_TRUE(collection_remove(collection, member->fd));
+	EXPECT_TRUE(collection->changed);
+	EXPECT_FALSE(layout_confirm_collection_leave(layout, []() {}, FALSE));
+	EXPECT_NE(layout->collection_confirm_data, nullptr);
+	// Close the pending confirmation without discarding its modifications.
+	auto *windows = gtk_window_get_toplevels();
+	for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+		{
+		g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+		if (gtk_window_get_transient_for(window) == GTK_WINDOW(layout->window))
+			{
+			gtk_window_close(window);
+			break;
+			}
+		}
+	EXPECT_EQ(layout->collection_confirm_data, nullptr);
+}
 
 TEST_F(DuplicateAddCommands, AlgorithmActionUpdatesDefaultsAndAllWindows)
 {

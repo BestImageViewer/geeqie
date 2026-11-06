@@ -393,7 +393,10 @@ The name of a collection, with or without either path or extension (.gqv) may be
 <para>If more than one file is on the command line:</para>
 
 <para>If they are in the same folder, that folder will be opened and those files will be selected.
-If they are not in the same folder, a new Collection containing those files will be opened.</para>
+If they are not in the same folder, a new Collection containing those files will be opened in the main window.
+This initial Collection does not prompt to be saved when closing or leaving it.
+Changing its membership or order marks it modified and enables the normal save prompt.
+It can also be saved explicitly without making changes.</para>
 
 <para>To run Geeqie as a new instance, use:
 GQ_NEW_INSTANCE=y[es] geeqie

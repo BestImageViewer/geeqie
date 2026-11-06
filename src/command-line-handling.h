@@ -23,11 +23,16 @@
 
 #include <gtk/gtk.h>
 
+struct LayoutWindow;
+
 struct CommandLineProcessResult
 {
 	gboolean activate = TRUE;
 	gint status = 0;
 };
+
+/** Display the borrowed list of command-line paths in the specified window. */
+void process_files(LayoutWindow *lw, GList *file_list);
 
 gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer data);
 gint process_command_line_cache_maintenance(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer data);

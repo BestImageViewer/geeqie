@@ -1324,16 +1324,19 @@ GList *directories_collections_files(GtkApplication *app, GApplicationCommandLin
 	return g_list_reverse(file_list);
 }
 
+} // namespace
+
 /**
  * @brief Process command line file or dir parameters
- * @param file_list (*gchar)
+ * @param lw Target window
+ * @param file_list Borrowed list of paths (*gchar)
  *
  */
-void process_files(GList *file_list)
+void process_files(LayoutWindow *lw, GList *file_list)
 {
 	if (file_list)
 		{
-		layout_valid(&lw_id);
+		layout_valid(&lw);
 		GList *work;
 		gboolean multiple_dirs = FALSE;
 		work = file_list;
@@ -1364,25 +1367,29 @@ void process_files(GList *file_list)
 				collection_add(cd, fd, FALSE);
 				file_data_unref(fd);
 				}
-			cd->changed = TRUE;
-			layout_set_collection(lw_id, cd);
+			// Command-line arguments establish the initial collection, not a user edit.
+			cd->changed = FALSE;
+			layout_set_collection(lw, cd);
 			}
 		else
 			{
-			layout_set_path(lw_id, static_cast<const gchar *>(file_list->data));
+			layout_set_path(lw, static_cast<const gchar *>(file_list->data));
 
 			g_autoptr(FileDataList) selected = nullptr;
 			for (GList *work = file_list; work; work = work->next)
 				{
 				FileData *fd = file_data_new_simple(static_cast<gchar *>(work->data));
 				selected = g_list_append(selected, fd);
-				layout_list_sync_fd(lw_id, fd);
+				layout_list_sync_fd(lw, fd);
 				}
 
-			layout_select_list(lw_id, selected);
+			layout_select_list(lw, selected);
 			}
 		}
 }
+
+namespace
+{
 
 /* print0 and id are first so that they can affect other command line entries */
 CommandLineOptionEntry command_line_options[] =
@@ -1635,7 +1642,7 @@ gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_comm
 		result->activate = TRUE;
 		}
 
-	process_files(file_list);
+	process_files(lw_id, file_list);
 
 	g_list_free_full(file_list, g_free);
 
