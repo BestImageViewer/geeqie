@@ -61,8 +61,29 @@ static const gchar *const histogram_mode_targets[] =
 	nullptr
 };
 
+static const gchar *const similarity_algorithm_targets[] =
+{
+	"standard",
+	"phash",
+
+	nullptr
+};
+
 const ActionDef main_actions[] =
 {
+		{
+		"win.main-win-similarity-algorithm",
+		nullptr,
+		N_("Select similarity algorithm"),
+		layout_similarity_algorithm_cb,
+		G_VARIANT_TYPE_STRING,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		similarity_algorithm_targets,
+		},
+
 		{
 		"win.main-win-hamburger-menu",
 		nullptr,

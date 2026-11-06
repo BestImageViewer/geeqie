@@ -983,6 +983,33 @@ protected:
 	HistoryList saved_folder_history;
 };
 
+TEST_F(DuplicateAddCommands, AlgorithmActionUpdatesDefaultsAndAllWindows)
+{
+	const gboolean saved_algorithm = options->alternate_similarity_algorithm.enabled;
+	auto *select = g_action_map_lookup_action(G_ACTION_MAP(layout->window), "main-win-similarity-algorithm");
+	ASSERT_NE(select, nullptr);
+	g_action_activate(select, g_variant_new_string("phash"));
+	EXPECT_TRUE(options->alternate_similarity_algorithm.enabled);
+	open();
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(dw->algorithm_drop_down)), 1U);
+	auto *other = dupe_window_new();
+	g_action_activate(select, g_variant_new_string("standard"));
+	EXPECT_FALSE(options->alternate_similarity_algorithm.enabled);
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(dw->algorithm_drop_down)), 0U);
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(other->algorithm_drop_down)), 0U);
+	g_action_activate(select, g_variant_new_string("phash"));
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(dw->algorithm_drop_down)), 1U);
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(other->algorithm_drop_down)), 1U);
+	// The dropdown continues to use the same global setting as the action.
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(other->algorithm_drop_down), 0);
+	EXPECT_FALSE(options->alternate_similarity_algorithm.enabled);
+	EXPECT_EQ(gtk_drop_down_get_selected(GTK_DROP_DOWN(dw->algorithm_drop_down)), 0U);
+	g_action_activate(select, g_variant_new_string("invalid"));
+	EXPECT_FALSE(options->alternate_similarity_algorithm.enabled);
+	dupe_window_close(other);
+	dupe_set_similarity_algorithm(saved_algorithm);
+}
+
 TEST_F(DuplicateAddCommands, FolderChooserTargetsBothSetsAndSupportsRecursion)
 {
 	for (const bool second : {false, true})

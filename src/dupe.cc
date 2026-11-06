@@ -4109,9 +4109,8 @@ static void dupe_algorithm_list_label_bind(GtkSignalListItemFactory *, GtkListIt
 	gtk_label_set_text(GTK_LABEL(gtk_list_item_get_child(item)), gtk_string_object_get_string(algorithm));
 }
 
-static void dupe_window_algorithm_cb(GtkDropDown *drop_down, GParamSpec *, gpointer)
+void dupe_set_similarity_algorithm(gboolean perceptual)
 {
-	const gboolean perceptual = gtk_drop_down_get_selected(drop_down) == 1;
 	if (options->alternate_similarity_algorithm.enabled == perceptual) return;
 
 	// Drain comparisons before changing the algorithm shared by all windows.
@@ -4126,6 +4125,11 @@ static void dupe_window_algorithm_cb(GtkDropDown *drop_down, GParamSpec *, gpoin
 		gtk_drop_down_set_selected(GTK_DROP_DOWN(dw->algorithm_drop_down), perceptual ? 1 : 0);
 		dupe_window_recompare(dw);
 		}
+}
+
+static void dupe_window_algorithm_cb(GtkDropDown *drop_down, GParamSpec *, gpointer)
+{
+	dupe_set_similarity_algorithm(gtk_drop_down_get_selected(drop_down) == 1);
 }
 
 static void dupe_window_rotation_invariant_cb(GtkWidget *widget, gpointer data)

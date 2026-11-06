@@ -10,6 +10,11 @@
     </menuchoice>
     .
   </para>
+  <para>Select the similarity algorithm from the command line with
+    <code>geeqie --action=similarity-algorithm::phash</code> or
+    <code>geeqie --action=similarity-algorithm::standard</code>.
+    This sets the saved default even when no Find Duplicates window is open.
+    Open Find Duplicates windows update their algorithm selector and restart comparisons.</para>
   <section id="Addingfilestobecompared">
     <title>Adding files to be compared</title>
     <para>Right-click either comparison pane and choose <guimenuitem>Append list</guimenuitem> to add the file list currently displayed in the main window, including a filtered folder list or collection. Choose <guimenuitem>Add folder…</guimenuitem> to select a folder directly; enable <guilabel>Include subfolders</guilabel> to add its contents recursively. Files are added to the pane whose menu you opened. These commands are unavailable while another file list is being added.</para>

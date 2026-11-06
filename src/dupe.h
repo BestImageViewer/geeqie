@@ -173,6 +173,7 @@ struct DupeWindow
 
 
 DupeWindow *dupe_window_new();
+void dupe_set_similarity_algorithm(gboolean perceptual);
 
 void dupe_window_clear(DupeWindow *dw);
 void dupe_window_close(DupeWindow *dw);

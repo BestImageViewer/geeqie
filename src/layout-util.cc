@@ -4129,6 +4129,14 @@ static void layout_search_and_run_window_new(LayoutWindow *lw)
 
 /* const ActionDef main_actions[] =
  */
+static void layout_similarity_algorithm_cb(GSimpleAction *, GVariant *parameter, gpointer)
+{
+	const gchar *algorithm = g_variant_get_string(parameter, nullptr);
+	if (g_str_equal(algorithm, "phash")) dupe_set_similarity_algorithm(TRUE);
+	else if (g_str_equal(algorithm, "standard")) dupe_set_similarity_algorithm(FALSE);
+	else log_printf(_("Unknown similarity algorithm: %s\n"), algorithm);
+}
+
 #include "layout-util-main-actions.inc"
 
 void register_main_window_actions(GtkApplication *app,  LayoutWindow *lw)
