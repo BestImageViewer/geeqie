@@ -344,28 +344,11 @@
                 <inlinegraphic fileref="edit-find.png" />
               </guiicon>
             </entry>
-            <entry>Find duplicates</entry>
+            <entry>Find duplicates…</entry>
             <entry>
-              <para>
-                This will open a new
-                <emphasis role="underline"><link linkend="GuideImageSearchFindingDuplicates">find duplicates</link></emphasis>
-                window containing all images in the selected folder.
-              </para>
-            </entry>
-          </row>
-          <row>
-            <entry>
-              <guiicon>
-                <inlinegraphic fileref="edit-find.png" />
-              </guiicon>
-            </entry>
-            <entry>Find duplicates recursive</entry>
-            <entry>
-              <para>
-                This will open a new
-                <emphasis role="underline"><link linkend="GuideImageSearchFindingDuplicates">find duplicates</link></emphasis>
-                window containing all image in the selected folder, and all images in the sub folders of that folder.
-              </para>
+              <para>Choose whether to <guilabel>Include subfolders</guilabel>, then open a new
+                <link linkend="GuideImageSearchFindingDuplicates">Find Duplicates</link>
+                window containing the selected folder's images.</para>
             </entry>
           </row>
           <row>

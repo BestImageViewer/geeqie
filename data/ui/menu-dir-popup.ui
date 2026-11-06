@@ -20,11 +20,7 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">Find _duplicates…</attribute>
-        <attribute name="action">win.dir-win-find-duplicates</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Find duplicates recursive…</attribute>
-        <attribute name="action">win.dir-win-find-duplicates-recursive</attribute>
+        <attribute name="action">win.dir-win-find-duplicates-dialog</attribute>
       </item>
     </section>
     <section id="folder-actions-section">

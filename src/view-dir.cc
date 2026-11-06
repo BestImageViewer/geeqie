@@ -25,6 +25,7 @@
 
 #include <cerrno>
 #include <cstring>
+#include <memory>
 
 #include <gio/gio.h>
 #include <glib-object.h>
@@ -52,6 +53,7 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "view-dir-list.h"
 #include "view-dir-tree.h"
@@ -697,6 +699,19 @@ static void vd_pop_menu_dupe_cb(GSimpleAction *, GVariant *, gpointer data)
 	dupe_window_add_files(dw, list, recursive);
 }
 
+static void vd_pop_menu_dupe_dialog_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+	if (!vd->click_fd) return;
+	auto directory = std::make_shared<FileDataRef>(vd->click_fd);
+	folder_contents_dialog(vd->widget, _("Find duplicates"), vd->click_fd->path, _("Find duplicates"),
+		[directory](bool, bool recursive)
+			{
+			g_autoptr(FileDataList) list = g_list_append(nullptr, file_data_ref(*directory));
+			dupe_window_add_files(dupe_window_new(), list, recursive);
+			}, false);
+}
+
 static void vd_pop_menu_delete_default_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *vd = static_cast<ViewDir *>(data);
@@ -959,6 +974,8 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-find-duplicates");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
+	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-find-duplicates-dialog");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-find-duplicates-recursive");

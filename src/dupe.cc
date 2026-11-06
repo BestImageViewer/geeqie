@@ -26,6 +26,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 #include <string_view>
 
 #include <gdk/gdk.h>
@@ -4952,78 +4953,26 @@ G_GNUC_END_IGNORE_DEPRECATIONS
  *-------------------------------------------------------------------
  */
 
-struct CDupeConfirmD {
-	DupeWindow *dw;
-	GList *list;
-};
-
-static void confirm_dir_list_free(CDupeConfirmD *d)
-{
-	file_data_list_free(d->list);
-	g_free(d);
-}
-
-static void confirm_dir_list_cancel(GenericDialog *, gpointer data)
-{
-	confirm_dir_list_free(static_cast<CDupeConfirmD *>(data));
-}
-
-static void confirm_dir_list_add(GenericDialog *, gpointer data)
-{
-	auto d = static_cast<CDupeConfirmD *>(data);
-	GList *work;
-
-	dupe_window_add_files(d->dw, d->list, FALSE);
-
-	work = d->list;
-	while (work)
-		{
-		auto fd = static_cast<FileData *>(work->data);
-		work = work->next;
-		if (isdir(fd->path))
-			{
-			g_autoptr(FileDataList) list = nullptr;
-
-			filelist_read(fd, &list, nullptr);
-			list = filelist_filter(list, FALSE);
-			if (list)
-				{
-				dupe_window_add_files(d->dw, list, FALSE);
-				}
-			}
-		}
-
-	confirm_dir_list_free(d);
-}
-
-static void confirm_dir_list_recurse(GenericDialog *, gpointer data)
-{
-	auto d = static_cast<CDupeConfirmD *>(data);
-	dupe_window_add_files(d->dw, d->list, TRUE);
-	confirm_dir_list_free(d);
-}
-
-static void confirm_dir_list_skip(GenericDialog *, gpointer data)
-{
-	auto d = static_cast<CDupeConfirmD *>(data);
-	dupe_window_add_files(d->dw, d->list, FALSE);
-	confirm_dir_list_free(d);
-}
-
 static void dupe_confirm_dir_list(DupeWindow *dw, GList *list)
 {
-	auto *d = g_new0(CDupeConfirmD, 1);
-	d->dw = dw;
-	d->list = list;
-
-	GenericDialog *gd = generic_dialog_new(_("Find duplicates"), "dupe_drop_folders",
-	                                      dw->window, TRUE, confirm_dir_list_cancel, d);
-	generic_dialog_add_message(gd, GQ_ICON_DIRECTORY, _("Dropped list includes folders"),
-	                           _("Select how folders should be added."), TRUE);
-	generic_dialog_add_button(gd, GQ_ICON_OK, _("_Add contents"), confirm_dir_list_add, TRUE);
-	generic_dialog_add_button(gd, GQ_ICON_ADD, _("Add contents _recursive"), confirm_dir_list_recurse, FALSE);
-	generic_dialog_add_button(gd, GQ_ICON_REMOVE, _("_Skip folders"), confirm_dir_list_skip, FALSE);
-	gtk_window_present(GTK_WINDOW(gd->dialog));
+	auto files = std::shared_ptr<FileDataList>(list, file_data_list_free);
+	auto window = std::shared_ptr<GtkWidget>(GTK_WIDGET(g_object_ref(dw->window)), g_object_unref);
+	const gboolean second = dw->second_drop;
+	folder_contents_dialog(dw->window, _("Find duplicates"), _("Dropped list includes folders"), _("_Add contents"),
+		[files, window, second](bool include_folders, bool recursive)
+		{
+		auto *target = static_cast<DupeWindow *>(g_object_get_data(G_OBJECT(window.get()), DUPE_WINDOW_DATA_KEY));
+		if (!target) return;
+		target->second_drop = second && target->second_set;
+		g_autoptr(FileDataList) selected = nullptr;
+		for (GList *work = files.get(); work; work = work->next)
+			{
+			auto *fd = static_cast<FileData *>(work->data);
+			if (include_folders || !isdir(fd->path)) selected = g_list_prepend(selected, file_data_ref(fd));
+			}
+		selected = g_list_reverse(selected);
+		dupe_window_add_files(target, selected, recursive);
+		});
 }
 
 /*

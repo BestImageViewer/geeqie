@@ -53,6 +53,7 @@ unit_test_sources = files(
 'thumbnail-replacement.cc',
 'trash.cc',
 'ui-bookmark.cc',
+'ui-utildlg.cc',
 'ui-file-chooser.cc',
 'ui-fileops.cc',
 'ui-icon.cc',

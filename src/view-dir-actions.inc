@@ -58,6 +58,19 @@ static const ActionDef view_dir_actions[] =
 		},
 
 		{
+		"win.dir-win-find-duplicates-dialog",
+		GQ_ICON_COPY,
+		N_("Find duplicates…"),
+		vd_pop_menu_dupe_dialog_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.dir-win-find-duplicates",
 		GQ_ICON_COPY,
 		N_("Find _duplicates"),

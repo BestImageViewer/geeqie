@@ -13,19 +13,19 @@
   <section id="Addingfilestobecompared">
     <title>Adding files to be compared</title>
     <para>Right-click either comparison pane and choose <guimenuitem>Append list</guimenuitem> to add the file list currently displayed in the main window, including a filtered folder list or collection. Choose <guimenuitem>Add folder…</guimenuitem> to select a folder directly; enable <guilabel>Include subfolders</guilabel> to add its contents recursively. Files are added to the pane whose menu you opened. These commands are unavailable while another file list is being added.</para>
-    <para>Add files to be compared using drag and drop. Drop files or folders onto the Find Duplicates window to add them to the list of files to compare. When one or more folders are dropped onto the window a menu will appear allowing you to choose the desired action:</para>
+    <para>Add files to be compared using drag and drop. Drop files or folders onto the Find Duplicates window to add them to the list of files to compare. When one or more folders are dropped onto the window a dialog will appear allowing you to choose the desired action:</para>
     <variablelist>
       <varlistentry>
         <term>
           <guilabel>Add contents</guilabel>
         </term>
-        <listitem>The contents of dropped folders will added to the window.</listitem>
+        <listitem>The contents of dropped folders will be added to the window.</listitem>
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Add contents recursive</guilabel>
+          <guilabel>Include subfolders</guilabel>
         </term>
-        <listitem>The contents of dropped folders and all sub folders will be added to the window.</listitem>
+        <listitem>Enable this checkbox before choosing Add contents to include all subfolders.</listitem>
       </varlistentry>
       <varlistentry>
         <term>
@@ -38,6 +38,7 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <para>Cancel leaves the comparison unchanged.</para>
     <para>
       <note>
         <para>Symbolic links to folders will be followed, but symbolic links to files will be ignored. Only actual files will be tested.</para>

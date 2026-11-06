@@ -20,6 +20,8 @@
 
 #include "view-file.h"
 
+#include <memory>
+
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
@@ -738,16 +740,27 @@ static gboolean vf_collection_insert_directory(CollectionData *collection, FileD
 	return added;
 }
 
-template<gboolean recursive>
 static void vf_dnd_collection_add_folders(GtkWidget *, gpointer data)
 {
-	auto *drop_data = static_cast<VfDndFileDropData *>(data);
-	for (GList *work = drop_data->list; work; work = work->next)
+	auto *original = static_cast<VfDndFileDropData *>(data);
+	auto *copy = g_new0(VfDndFileDropData, 1);
+	copy->listview = GTK_WIDGET(g_object_ref(original->listview));
+	copy->collection = collection_ref(original->collection);
+	copy->before = file_data_ref(original->before);
+	copy->list = filelist_copy(original->list);
+	auto pending = std::shared_ptr<VfDndFileDropData>(copy, vf_dnd_file_drop_free);
+	folder_contents_dialog(copy->listview, _("Add folder contents"), _("Select whether subfolders should be included."), _("_Add contents"),
+		[pending](bool, bool recursive)
 		{
-		auto *fd = static_cast<FileData *>(work->data);
-		if (isdir(fd->path)) vf_collection_insert_directory(drop_data->collection, fd, drop_data->before, recursive);
-		}
-	vf_collection_insert_files(drop_data->collection, drop_data->list, drop_data->before);
+		auto *vf = static_cast<ViewFile *>(g_object_get_data(G_OBJECT(pending->listview), VIEW_FILE_DATA_KEY));
+		if (!vf || vf->collection != pending->collection) return;
+		for (GList *work = pending->list; work; work = work->next)
+			{
+			auto *fd = static_cast<FileData *>(work->data);
+			if (isdir(fd->path)) vf_collection_insert_directory(pending->collection, fd, pending->before, recursive);
+			}
+		vf_collection_insert_files(pending->collection, pending->list, pending->before);
+		}, false);
 }
 
 static void vf_dnd_collection_skip_folders(GtkWidget *, gpointer data)
@@ -793,8 +806,7 @@ static void vf_dnd_files_received(GdkDrop *drop, GList *list, gpointer data)
 				{
 				GtkWidget *menu = popover_box_new(drop_data->listview, drop_data->x, drop_data->y);
 				g_object_set_data_full(G_OBJECT(menu), "collection-drop-data", drop_data, vf_dnd_file_drop_free);
-				popover_item_add(menu, _("_Add contents"), G_CALLBACK(vf_dnd_collection_add_folders<FALSE>), drop_data);
-				popover_item_add(menu, _("Add contents _recursive"), G_CALLBACK(vf_dnd_collection_add_folders<TRUE>), drop_data);
+				popover_item_add(menu, _("_Add contents…"), G_CALLBACK(vf_dnd_collection_add_folders), drop_data);
 				popover_item_add(menu, _("_Skip folders"), G_CALLBACK(vf_dnd_collection_skip_folders), drop_data);
 				popover_item_add(menu, _("Cancel"), G_CALLBACK(+[](GtkWidget *, gpointer) {}), nullptr);
 				popover_box_popup(menu);

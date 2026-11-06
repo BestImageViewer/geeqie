@@ -407,6 +407,39 @@ void generic_dialog_dummy_cb(GenericDialog *, gpointer)
 	/* no op */
 	/* use as argument for generic_dialog_new() to add cancel button */
 }
+
+GenericDialog *folder_contents_dialog(GtkWidget *parent, const gchar *title, const gchar *message,
+                                     const gchar *accept_label, const std::function<void(bool, bool)> &callback,
+                                     bool allow_skip)
+{
+	struct FolderContentsData
+	{
+		std::function<void(bool, bool)> callback;
+		GtkWidget *recursive;
+	};
+	auto *data = new FolderContentsData{callback, gtk_check_button_new_with_label(_("Include subfolders"))};
+	auto *gd = generic_dialog_new(title, "folder_contents", parent, TRUE, generic_dialog_dummy_cb, data);
+	g_object_set_data_full(G_OBJECT(gd->dialog), "folder-contents-data", data, delete_cb<FolderContentsData>);
+	generic_dialog_add_message(gd, GQ_ICON_DIRECTORY, title, message, TRUE);
+	gtk_box_append(GTK_BOX(gd->vbox), data->recursive);
+	generic_dialog_add_button(gd, GQ_ICON_ADD, accept_label, +[](GenericDialog *, gpointer user_data)
+		{
+		auto *data = static_cast<FolderContentsData *>(user_data);
+		const auto callback = data->callback;
+		callback(true, gtk_check_button_get_active(GTK_CHECK_BUTTON(data->recursive)));
+		}, TRUE);
+	if (allow_skip)
+		{
+		generic_dialog_add_button(gd, GQ_ICON_REMOVE, _("_Skip folders"), +[](GenericDialog *, gpointer user_data)
+			{
+			const auto callback = static_cast<FolderContentsData *>(user_data)->callback;
+			callback(false, false);
+			}, FALSE);
+		}
+	gtk_window_set_modal(GTK_WINDOW(gd->dialog), TRUE);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
+	return gd;
+}
 /*
  *-----------------------------------------------------------------------------
  * simple warning dialog

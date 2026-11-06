@@ -22,6 +22,7 @@
 #ifndef UI_UTILDLG_H
 #define UI_UTILDLG_H
 
+#include <functional>
 #include <optional>
 
 #include <glib.h>
@@ -60,6 +61,13 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 
 GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 			      const gchar *icon_name, GtkWidget *parent);
+
+/** Ask whether to include subfolders. The callback receives (include_folders, recursive).
+ * Cancel does not invoke the callback. The dialog owns a copy of the callback.
+ */
+GenericDialog *folder_contents_dialog(GtkWidget *parent, const gchar *title, const gchar *message,
+                                     const gchar *accept_label, const std::function<void(bool, bool)> &callback,
+                                     bool allow_skip = true);
 
 std::optional<GdkRectangle> generic_dialog_find_window(const gchar *title, const gchar *role);
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values);

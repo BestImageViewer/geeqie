@@ -54,7 +54,7 @@
           <guilabel>One or more folders</guilabel>
         </term>
         <listitem>
-          <para>When the dropped list of items includes a folder, a menu will appear allowing to skip the folders, add their contents, or add their contents recursively. After choosing from the menu the requested files will be added to the image window.</para>
+          <para>When the dropped list of items includes a folder, a menu offers <guimenuitem>Add contents…</guimenuitem> and <guimenuitem>Skip folders</guimenuitem>. Choose Add contents… to open a dialog with an <guilabel>Include subfolders</guilabel> checkbox. Confirm to add the requested files to the image window, or Cancel to leave it unchanged.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

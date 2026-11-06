@@ -22,6 +22,7 @@
 #include "img-view.h"
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 #include <gdk/gdk.h>
@@ -55,6 +56,7 @@
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "window.h"
 
@@ -1231,8 +1233,14 @@ static void view_popup_menu(ViewWindow *vw, GtkWidget *parent, gdouble x, gdoubl
  */
 
 struct CViewConfirmD {
-	ViewWindow *vw;
+	GtkWidget *window;
 	GList *list;
+
+	~CViewConfirmD()
+	{
+		g_object_unref(window);
+		file_data_list_free(list);
+	}
 };
 
 static void view_dir_list_cancel(GSimpleAction *, GVariant *, gpointer)
@@ -1299,24 +1307,30 @@ static void view_dir_list_do(ViewWindow *vw, GList *list, gboolean skip, gboolea
 		}
 }
 
-template<gboolean recurse>
 static void view_dir_list_add(GSimpleAction *, GVariant *, gpointer data)
 {
-	auto d = static_cast<CViewConfirmD *>(data);
-	view_dir_list_do(d->vw, d->list, FALSE, recurse);
+	auto *d = static_cast<CViewConfirmD *>(data);
+	auto pending = std::make_shared<CViewConfirmD>();
+	pending->window = GTK_WIDGET(g_object_ref(d->window));
+	pending->list = filelist_copy(d->list);
+	folder_contents_dialog(d->window, _("Add folder contents"), _("Select whether subfolders should be included."), _("_Add contents"),
+		[pending](bool, bool recursive)
+		{
+		auto *vw = static_cast<ViewWindow *>(g_object_get_data(G_OBJECT(pending->window), VIEW_WINDOW_DATA_KEY));
+		if (vw) view_dir_list_do(vw, pending->list, FALSE, recursive);
+		}, false);
 }
 
 static void view_dir_list_skip(GSimpleAction *, GVariant *, gpointer data)
 {
-	auto d = static_cast<CViewConfirmD *>(data);
-	view_dir_list_do(d->vw, d->list, TRUE, FALSE);
+	auto *d = static_cast<CViewConfirmD *>(data);
+	auto *vw = static_cast<ViewWindow *>(g_object_get_data(G_OBJECT(d->window), VIEW_WINDOW_DATA_KEY));
+	if (vw) view_dir_list_do(vw, d->list, TRUE, FALSE);
 }
 
 static void view_dir_list_destroy(GtkWidget *, gpointer data)
 {
-	auto d = static_cast<CViewConfirmD *>(data);
-	file_data_list_free(d->list);
-	g_free(d);
+	delete static_cast<CViewConfirmD *>(data);
 }
 
 static void view_confirm_dir_list_append_item(GMenu *menu, const gchar *label, const gchar *icon_name, const gchar *action_name)
@@ -1341,34 +1355,30 @@ static GtkWidget *view_confirm_dir_list(ViewWindow *vw, GList *list)
 	g_autoptr(GMenu) choice_section = g_menu_new();
 	g_autoptr(GMenu) cancel_section = g_menu_new();
 
-	d = g_new(CViewConfirmD, 1);
-	d->vw = vw;
+	d = new CViewConfirmD;
+	d->window = GTK_WIDGET(g_object_ref(vw->window));
 	d->list = list;
 
 	g_autoptr(GSimpleAction) info_action = g_simple_action_new("info", nullptr);
 	g_autoptr(GSimpleAction) add_action = g_simple_action_new("add", nullptr);
-	g_autoptr(GSimpleAction) add_recursive_action = g_simple_action_new("add-recursive", nullptr);
 	g_autoptr(GSimpleAction) skip_action = g_simple_action_new("skip", nullptr);
 	g_autoptr(GSimpleAction) cancel_action = g_simple_action_new("cancel", nullptr);
 
 	g_simple_action_set_enabled(info_action, FALSE);
 
-	g_signal_connect(add_action, "activate", G_CALLBACK(view_dir_list_add<FALSE>), d);
-	g_signal_connect(add_recursive_action, "activate", G_CALLBACK(view_dir_list_add<TRUE>), d);
+	g_signal_connect(add_action, "activate", G_CALLBACK(view_dir_list_add), d);
 	g_signal_connect(skip_action, "activate", G_CALLBACK(view_dir_list_skip), d);
 	g_signal_connect(cancel_action, "activate", G_CALLBACK(view_dir_list_cancel), d);
 
 	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(info_action));
 	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(add_action));
-	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(add_recursive_action));
 	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(skip_action));
 	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(cancel_action));
 
 	view_confirm_dir_list_append_item(info_section, _("Dropped list includes folders."), GQ_ICON_DIRECTORY, "image-drop.info");
 	g_menu_append_section(menu, nullptr, G_MENU_MODEL(info_section));
 
-	view_confirm_dir_list_append_item(choice_section, _("_Add contents"), GQ_ICON_OK, "image-drop.add");
-	view_confirm_dir_list_append_item(choice_section, _("Add contents _recursive"), GQ_ICON_ADD, "image-drop.add-recursive");
+	view_confirm_dir_list_append_item(choice_section, _("_Add contents…"), GQ_ICON_OK, "image-drop.add");
 	view_confirm_dir_list_append_item(choice_section, _("_Skip folders"), GQ_ICON_REMOVE, "image-drop.skip");
 	g_menu_append_section(menu, nullptr, G_MENU_MODEL(choice_section));
 
