@@ -265,7 +265,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text,
 	g_autofree gchar *buf = nullptr;
 	if (month > 0)
 		{
-		buf = pan_date_value_string(t, PAN_DATE_LENGTH_MONTH);
+		buf = pan_date_value_string(t, PanDateLength::MONTH);
 		if (day > 0)
 			{
 			g_autofree gchar *tmp = g_strdup_printf("%d %s", day, buf);
@@ -274,7 +274,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text,
 		}
 	else
 		{
-		buf = pan_date_value_string(t, PAN_DATE_LENGTH_YEAR);
+		buf = pan_date_value_string(t, PanDateLength::YEAR);
 		}
 
 	g_autofree gchar *buf_count = nullptr;

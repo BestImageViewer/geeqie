@@ -26,18 +26,18 @@
 
 #include <glib.h>
 
-enum PanDateLengthType {
-	PAN_DATE_LENGTH_EXACT,
-	PAN_DATE_LENGTH_HOUR,
-	PAN_DATE_LENGTH_DAY,
-	PAN_DATE_LENGTH_WEEK,
-	PAN_DATE_LENGTH_MONTH,
-	PAN_DATE_LENGTH_YEAR
+enum class PanDateLength {
+	EXACT,
+	HOUR,
+	DAY,
+	WEEK,
+	MONTH,
+	YEAR,
 };
 
-gboolean pan_date_compare(time_t a, time_t b, PanDateLengthType length);
-gint pan_date_value(time_t d, PanDateLengthType length);
-gchar *pan_date_value_string(time_t d,  PanDateLengthType length);
+gboolean pan_date_compare(time_t a, time_t b, PanDateLength length);
+gint pan_date_value(time_t d, PanDateLength length);
+gchar *pan_date_value_string(time_t d,  PanDateLength length);
 time_t pan_date_to_time(gint year, gint month, gint day);
 
 #endif

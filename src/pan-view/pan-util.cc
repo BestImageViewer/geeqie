@@ -32,31 +32,31 @@
  *-----------------------------------------------------------------------------
  */
 
-gboolean pan_date_compare(time_t a, time_t b, PanDateLengthType length)
+gboolean pan_date_compare(time_t a, time_t b, PanDateLength length)
 {
 	struct tm ta;
 	struct tm tb;
 
-	if (length == PAN_DATE_LENGTH_EXACT) return (a == b);
+	if (length == PanDateLength::EXACT) return (a == b);
 
 	if (!localtime_r(&a, &ta) ||
 	    !localtime_r(&b, &tb)) return FALSE;
 
 	if (ta.tm_year != tb.tm_year) return FALSE;
-	if (length == PAN_DATE_LENGTH_YEAR) return TRUE;
+	if (length == PanDateLength::YEAR) return TRUE;
 
 	if (ta.tm_mon != tb.tm_mon) return FALSE;
-	if (length == PAN_DATE_LENGTH_MONTH) return TRUE;
+	if (length == PanDateLength::MONTH) return TRUE;
 
-	if (length == PAN_DATE_LENGTH_WEEK) return (ta.tm_yday / 7 == tb.tm_yday / 7);
+	if (length == PanDateLength::WEEK) return (ta.tm_yday / 7 == tb.tm_yday / 7);
 
 	if (ta.tm_mday != tb.tm_mday) return FALSE;
-	if (length == PAN_DATE_LENGTH_DAY) return TRUE;
+	if (length == PanDateLength::DAY) return TRUE;
 
 	return (ta.tm_hour == tb.tm_hour);
 }
 
-gint pan_date_value(time_t d, PanDateLengthType length)
+gint pan_date_value(time_t d, PanDateLength length)
 {
 	struct tm td;
 
@@ -64,19 +64,19 @@ gint pan_date_value(time_t d, PanDateLengthType length)
 
 	switch (length)
 		{
-		case PAN_DATE_LENGTH_DAY:
+		case PanDateLength::DAY:
 			return td.tm_mday;
 			break;
-		case PAN_DATE_LENGTH_WEEK:
+		case PanDateLength::WEEK:
 			return td.tm_wday;
 			break;
-		case PAN_DATE_LENGTH_MONTH:
+		case PanDateLength::MONTH:
 			return td.tm_mon + 1;
 			break;
-		case PAN_DATE_LENGTH_YEAR:
+		case PanDateLength::YEAR:
 			return td.tm_year + 1900;
 			break;
-		case PAN_DATE_LENGTH_EXACT:
+		case PanDateLength::EXACT:
 		default:
 			break;
 		}
@@ -90,7 +90,7 @@ gint pan_date_value(time_t d, PanDateLengthType length)
 # endif
 #endif
 
-gchar *pan_date_value_string(time_t d, PanDateLengthType length)
+gchar *pan_date_value_string(time_t d, PanDateLength length)
 {
 	struct tm td;
 	if (!localtime_r(&d, &td)) return g_strdup("");
@@ -105,16 +105,16 @@ gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 
 	switch (length)
 		{
-		case PAN_DATE_LENGTH_DAY:
+		case PanDateLength::DAY:
 			return g_strdup_printf("%d", td.tm_mday);
 			break;
-		case PAN_DATE_LENGTH_WEEK:
+		case PanDateLength::WEEK:
 			{
 			gchar *ret = format_date("%A %e");
 			if (ret) return ret;
 			}
 			break;
-		case PAN_DATE_LENGTH_MONTH:
+		case PanDateLength::MONTH:
 			{
 #if defined(HAS_GLIBC_STRFTIME_EXTENSIONS) || defined(__FreeBSD__)
 			gchar *ret = format_date("%OB %Y");
@@ -124,10 +124,10 @@ gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 			if (ret) return ret;
 			}
 			break;
-		case PAN_DATE_LENGTH_YEAR:
+		case PanDateLength::YEAR:
 			return g_strdup_printf("%d", td.tm_year + 1900);
 			break;
-		case PAN_DATE_LENGTH_EXACT:
+		case PanDateLength::EXACT:
 		default:
 			return date_time_format(d);
 			break;
