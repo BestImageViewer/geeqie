@@ -77,11 +77,11 @@ std::function<bool()> pan_timeline_compute(PanWindow *pw, gint &width, gint &hei
 
 		fd = state->files.take();
 
-		if (!pan_date_compare(fd->date, s.group_start_date, PAN_DATE_LENGTH_DAY))
+		if (!pan_date_compare(fd->date, s.group_start_date, PanDateLength::DAY))
 			{
 			// FD starts a new day group.
 
-			if (!pan_date_compare(fd->date, s.group_start_date, PAN_DATE_LENGTH_MONTH))
+			if (!pan_date_compare(fd->date, s.group_start_date, PanDateLength::MONTH))
 				{
 				// FD starts a new month group.
 				s.pi_day = nullptr;
@@ -97,7 +97,7 @@ std::function<bool()> pan_timeline_compute(PanWindow *pw, gint &width, gint &hei
 
 				s.y = PAN_BOX_BORDER;
 
-				g_autofree gchar *month_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_MONTH);
+				g_autofree gchar *month_buf = pan_date_value_string(fd->date, PanDateLength::MONTH);
 				pi = pan_item_text_new(pw, s.x, s.y, month_buf, PAN_TEXT_ATTR_BOLD_HEADING, PAN_TEXT_BORDER,
 									   PAN_TEXT_COLOR);
 				s.y += pi->height;
@@ -116,7 +116,7 @@ std::function<bool()> pan_timeline_compute(PanWindow *pw, gint &width, gint &hei
 			s.total = s.day_counts[timeline_day(fd->date)];
 			s.count = 0;
 
-			g_autofree gchar *week_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_WEEK);
+			g_autofree gchar *week_buf = pan_date_value_string(fd->date, PanDateLength::WEEK);
 			pi = pan_item_text_new(pw, s.x, s.y, week_buf, PAN_TEXT_ATTR_NONE, PAN_TEXT_BORDER, PAN_TEXT_COLOR);
 
 			s.y += pi->height;

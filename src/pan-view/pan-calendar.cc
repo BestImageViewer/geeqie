@@ -156,7 +156,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		{
 		PanItem *plabel;
 
-		g_autofree gchar *buf = pan_date_value_string(pi_day->fd->date, PAN_DATE_LENGTH_WEEK);
+		g_autofree gchar *buf = pan_date_value_string(pi_day->fd->date, PanDateLength::WEEK);
 		plabel = pan_item_text_new(pw, x, y, buf, PAN_TEXT_ATTR_BOLD_HEADING,
 		                           PAN_TEXT_BORDER, PAN_CAL_POPUP_TEXT_COLOR);
 		plabel->set_key(PanKey::DayBubble);
@@ -237,7 +237,7 @@ std::function<bool()> pan_calendar_compute(PanWindow *pw, gint &width, gint &hei
 				{
 				auto *fd = static_cast<FileData *>(s.counting->data);
 				s.counting = s.counting->next;
-				if (!pan_date_compare(fd->date, s.previous, PAN_DATE_LENGTH_DAY))
+				if (!pan_date_compare(fd->date, s.previous, PanDateLength::DAY))
 					{
 					s.count = 0;
 					s.previous = fd->date;
@@ -252,10 +252,10 @@ std::function<bool()> pan_calendar_compute(PanWindow *pw, gint &width, gint &hei
 				{
 				auto *first = static_cast<FileData *>(s.files.list->data);
 				auto *last = static_cast<FileData *>(g_list_last(s.files.list)->data);
-				s.year = pan_date_value(first->date, PAN_DATE_LENGTH_YEAR);
-				s.month = pan_date_value(first->date, PAN_DATE_LENGTH_MONTH);
-				s.end_year = pan_date_value(last->date, PAN_DATE_LENGTH_YEAR);
-				s.end_month = pan_date_value(last->date, PAN_DATE_LENGTH_MONTH);
+				s.year = pan_date_value(first->date, PanDateLength::YEAR);
+				s.month = pan_date_value(first->date, PanDateLength::MONTH);
+				s.end_year = pan_date_value(last->date, PanDateLength::YEAR);
+				s.end_month = pan_date_value(last->date, PanDateLength::MONTH);
 				}
 			s.phase = 1;
 			}
@@ -269,7 +269,7 @@ std::function<bool()> pan_calendar_compute(PanWindow *pw, gint &width, gint &hei
 				}
 			time_t last_day =
 				pan_date_to_time(s.month == 12 ? s.year + 1 : s.year, s.month == 12 ? 1 : s.month + 1, 1) - 86400;
-			if (!pan_date_compare(static_cast<FileData *>(s.files.list->data)->date, last_day, PAN_DATE_LENGTH_MONTH))
+			if (!pan_date_compare(static_cast<FileData *>(s.files.list->data)->date, last_day, PanDateLength::MONTH))
 				{
 				if (++s.month > 12)
 					{
@@ -278,14 +278,14 @@ std::function<bool()> pan_calendar_compute(PanWindow *pw, gint &width, gint &hei
 					}
 				return false;
 				}
-			s.days = pan_date_value(last_day, PAN_DATE_LENGTH_DAY);
+			s.days = pan_date_value(last_day, PanDateLength::DAY);
 			s.date = pan_date_to_time(s.year, s.month, 1);
-			s.col = pan_date_value(s.date, PAN_DATE_LENGTH_WEEK) - (date_get_first_day_of_week() - 1);
+			s.col = pan_date_value(s.date, PanDateLength::WEEK) - (date_get_first_day_of_week() - 1);
 			if (s.col < 0) s.col += 7;
 			auto *month =
 				pan_item_box_new(pw, nullptr, PAN_BOX_BORDER, s.y, PAN_CAL_DAY_WIDTH * 7, PAN_CAL_DAY_HEIGHT / 4,
 								 PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_BORDER, PAN_CAL_MONTH_BORDER_COLOR);
-			g_autofree gchar *label = pan_date_value_string(s.date, PAN_DATE_LENGTH_MONTH);
+			g_autofree gchar *label = pan_date_value_string(s.date, PanDateLength::MONTH);
 			auto *text = pan_item_text_new(pw, PAN_BOX_BORDER, s.y, label, PAN_TEXT_ATTR_BOLD_HEADING, PAN_TEXT_BORDER,
 										   PAN_CAL_MONTH_TEXT_COLOR);
 			text->x = month->x + ((month->width - text->width) / 2);
@@ -314,7 +314,7 @@ std::function<bool()> pan_calendar_compute(PanWindow *pw, gint &width, gint &hei
 			return false;
 			}
 		if (s.files.list &&
-			pan_date_compare(static_cast<FileData *>(s.files.list->data)->date, s.date, PAN_DATE_LENGTH_DAY))
+			pan_date_compare(static_cast<FileData *>(s.files.list->data)->date, s.date, PanDateLength::DAY))
 			{
 			auto *dot = pan_item_box_new(pw, s.files.take(), s.dx, s.dy, PAN_CAL_DOT_SIZE, PAN_CAL_DOT_SIZE,
 										 PAN_CAL_DOT_COLOR, 0, {0, 0, 0, 0});
