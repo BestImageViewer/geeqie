@@ -24,6 +24,7 @@
 #include <cstring>
 
 #include <gdk/gdk.h>
+#include <gio/gio.h>
 #include <glib-object.h>
 
 #include <config.h>
@@ -259,19 +260,14 @@ void help_search_window_show()
 void help_pdf()
 {
 	g_autofree gchar *path = g_build_filename(gq_helpdir, "help.pdf", NULL);
-
-	if (!isfile(path))
-		{
-		g_free(path);
-		path = g_build_filename("https://www.geeqie.org/help-pdf/help.pdf", NULL);
-		}
-
-	g_autofree gchar *command = g_strdup_printf("xdg-open %s", path);
+	g_autoptr(GFile) file = g_file_new_for_path(path);
+	g_autofree gchar *uri = isfile(path) ? g_file_get_uri(file)
+	                                    : g_strdup("https://www.geeqie.org/help-pdf/help.pdf");
 
 	g_autoptr(GError) error = nullptr;
-	if (!g_spawn_command_line_async(command, &error))
+	if (!g_app_info_launch_default_for_uri(uri, nullptr, &error))
 		{
-		log_printf(_("Warning: Failed to execute command: %s\n"), error->message);
+		log_printf(_("Warning: Failed to open help: %s\n"), error->message);
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
