@@ -461,14 +461,14 @@ static GtkWidget *bar_menu_add_button_new(GtkWidget *toolbar)
 }
 
 
-static void bar_pane_set_fd(PaneData *pd, GtkWidget *pane, FileData *fd)
+static void bar_pane_set_fd(PaneData *pd, FileData *fd)
 {
 	if (!pd) return;
 
 	file_data_unref(pd->fd);
 	pd->fd = file_data_ref(fd);
 
-	if (pd->pane_update) pd->pane_update(pane);
+	if (pd->pane_update) pd->pane_update(pd->widget);
 }
 
 void bar_set_fd(GtkWidget *bar, FileData *fd)
@@ -486,7 +486,7 @@ void bar_set_fd(GtkWidget *bar, FileData *fd)
 		GtkWidget *widget = gtk_expander_get_child(GTK_EXPANDER(expander));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
-		bar_pane_set_fd(pd, widget, fd);
+		bar_pane_set_fd(pd, fd);
 		}
 
 	gtk_label_set_text(GTK_LABEL(bd->label_file_name), bd->fd ? bd->fd->name : "");
@@ -658,7 +658,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd->expanded);
 	bar_expander_cb(G_OBJECT(expander), nullptr, pd);
 
-	if (bd->fd) bar_pane_set_fd(pd, pane, bd->fd);
+	if (bd->fd) bar_pane_set_fd(pd, bd->fd);
 }
 
 void bar_populate_default(GtkWidget *)
