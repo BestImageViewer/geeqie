@@ -71,13 +71,6 @@ public:
 	virtual gint get_page_total() { return 0; };
 };
 
-enum ImageLoaderPreview {
-	IMAGE_LOADER_PREVIEW_NONE = 0,
-	IMAGE_LOADER_PREVIEW_EXIF = 1,
-	IMAGE_LOADER_PREVIEW_LIBRAW = 2
-};
-
-
 /**
  * @brief GObject owning a FileData reference and an asynchronous decoding job
  *
@@ -107,7 +100,8 @@ struct ImageLoader
 	gsize bytes_read;
 	gsize bytes_total;
 
-	ImageLoaderPreview preview;
+	using PreviewFreeFunc = void (*)(const guchar *buf);
+	PreviewFreeFunc preview_free;
 
 	gint requested_width;
 	gint requested_height;
