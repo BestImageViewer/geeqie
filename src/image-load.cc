@@ -148,7 +148,7 @@ static void image_loader_init(GTypeInstance *instance, gpointer)
 	il->idle_read_loop_count = IMAGE_LOADER_IDLE_READ_LOOP_COUNT_DEFAULT;
 	il->read_buffer_size = IMAGE_LOADER_READ_BUFFER_SIZE_DEFAULT;
 	il->input_buffer = nullptr;
-	il->preview = IMAGE_LOADER_PREVIEW_NONE;
+	il->preview_free = nullptr;
 
 	il->requested_width = 0;
 	il->requested_height = 0;
@@ -955,7 +955,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 			if (il->input_buffer)
 				{
-				il->preview = IMAGE_LOADER_PREVIEW_EXIF;
+				il->preview_free = exif_free_preview;
 				}
 			}
 		else
@@ -964,7 +964,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 			if (il->input_buffer)
 				{
-				il->preview = IMAGE_LOADER_PREVIEW_LIBRAW;
+				il->preview_free = libraw_free_preview;
 				}
 			}
 
@@ -978,12 +978,11 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 				/* exiv2 sometimes returns a pointer to a file section that is not a jpeg */
 				if (!is_jpeg_container(il->input_buffer, il->bytes_total))
 					{
-					exif_free_preview(il->input_buffer);
-					il->input_buffer = nullptr;
+					g_clear_pointer(&il->input_buffer, exif_free_preview);
 					}
 				else
 					{
-					il->preview = IMAGE_LOADER_PREVIEW_EXIF;
+					il->preview_free = exif_free_preview;
 					}
 				}
 			}
@@ -998,7 +997,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 	if (!il->input_buffer)
 		{
 		if (!image_loader_read_source(il)) return FALSE;
-		il->preview = IMAGE_LOADER_PREVIEW_NONE;
+		il->preview_free = nullptr;
 		}
 
 	return TRUE;
@@ -1008,21 +1007,13 @@ static void image_loader_stop_source(ImageLoader *il)
 {
 	if (!il) return;
 
-	if (il->input_buffer)
+	if (il->preview_free)
 		{
-		if (il->preview == IMAGE_LOADER_PREVIEW_EXIF)
-			{
-			exif_free_preview(il->input_buffer);
-			}
-		else if (il->preview == IMAGE_LOADER_PREVIEW_LIBRAW)
-			{
-			libraw_free_preview(il->input_buffer);
-			}
-		else
-			{
-			g_free(il->input_buffer);
-			}
-		il->input_buffer = nullptr;
+		g_clear_pointer(&il->input_buffer, il->preview_free);
+		}
+	else
+		{
+		g_clear_pointer(&il->input_buffer, g_free);
 		}
 }
 
