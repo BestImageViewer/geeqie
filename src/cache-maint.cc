@@ -517,6 +517,7 @@ static void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *pa
 
 /**
  * @brief Clears or culls cached data
+ * @param app Application running the maintenance job
  * @param metadata TRUE - work on metadata cache, FALSE - work on thumbnail cache
  * @param clear TRUE - clear cache, FALSE - delete orphaned and outdated cached items
  * @param func Function called when idle loop function terminates
@@ -919,6 +920,7 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
 
 /**
  * @brief Create thumbnails
+ * @param app Application running the maintenance job
  * @param path Path to image folder
  * @param recurse
  * @param local Create thumbnails in same folder as images
@@ -1465,6 +1467,7 @@ static void cache_manager_sim_start_sim_remote(GtkApplication *, CacheOpsData *c
 
 /**
  * @brief Generate .sim files
+ * @param app Application running the maintenance job
  * @param path Path to image folder
  * @param recurse
  * @param destroy_func Function called when idle loop function terminates

@@ -44,18 +44,21 @@
 
 
 /**
- * @file
+ * @file cache.cc
+ *
  *-------------------------------------------------------------------
  * Cache data file format:
  *-------------------------------------------------------------------
  *
- * SIMcache \n
- * #comment \n
- * Dimensions=[<width> x <height>] \n
- * DateTimeOriginal=[<value in time_t format, or -1 if no original date>] \n
- * MD5sum=[<32 character ascii text digest>] \n
+ * @verbatim
+ * SIMcache
+ * #comment
+ * Dimensions=[<width> x <height>]
+ * DateTimeOriginal=[<value in time_t format, or -1 if no original date>]
+ * MD5sum=[<32 character ascii text digest>]
  * SimilarityGrid[32 x 32]=<3072 bytes of data (1024 pixels in RGB format, 1 pixel is 24bits)>
- * PerceptualHashV1=[<eight 16-digit hexadecimal hashes separated by spaces>] \n
+ * PerceptualHashV1=[<eight 16-digit hexadecimal hashes separated by spaces>]
+ * @endverbatim
  *
  * The first line (9 bytes) indicates it is a SIMcache format file. (new line char must exist) \n
  * Comment lines starting with a # are ignored up to a new line. \n

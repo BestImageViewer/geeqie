@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file cache-maint.h
+ * @ingroup caches
+ */
+
 #ifndef CACHE_MAINT_H
 #define CACHE_MAINT_H
 
@@ -29,6 +33,10 @@ enum NotifyType : gint;
 
 class FileData;
 
+/** @addtogroup caches
+ * @{
+ */
+
 void cache_notify_cb(FileData *fd, NotifyType type, gpointer data);
 void cache_manager_show();
 
@@ -37,6 +45,8 @@ void cache_manager_standard_process_remote(gboolean clear);
 void cache_manager_render_remote(GtkApplication *app, const gchar *path, gboolean recurse, gboolean local, GSourceFunc destroy_func);
 void cache_maintenance(GtkApplication *app, const gchar *path);
 
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -114,7 +114,8 @@ bool dirname_compare(const std::string &item, const gchar *path)
 static void update_recent_viewed_folder_image_list(const gchar *path);
 
 /**
- * @file
+ * @file history-list.cc
+ *
  *-----------------------------------------------------------------------------
  * Implements a history chain. Used by the Back and Forward toolbar buttons.
  * Selecting any folder appends the path to the end of the chain.
@@ -149,7 +150,8 @@ void history_chain_append_end(const gchar *path)
 }
 
 /**
- * @file
+ * @file history-list.cc
+ *
  *-----------------------------------------------------------------------------
  * Implements an image history chain. Whenever an image is displayed it is
  * appended to a chain.

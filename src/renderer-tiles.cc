@@ -1062,7 +1062,6 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 
 /**
  * @brief
- * @param has_alpha
  * @param ignore_alpha
  * @param src
  * @param dest
@@ -1071,11 +1070,10 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
  * @param offset_y
  * @param scale_x
  * @param scale_y
- * @param interp_type
  * @param check_x
  * @param check_y
- * @param wide_image Use the bounds-checked scaler when image width is > 32767.
- *        See https://github.com/BestImageViewer/geeqie/issues/772
+ * Uses bounds-checked nearest-neighbor scaling for images wider than 32767 pixels.
+ * See https://github.com/BestImageViewer/geeqie/issues/772
  */
 void rt_tile_get_region_wide(gboolean ignore_alpha,
                              const GdkPixbuf *src, GdkPixbuf *dest,

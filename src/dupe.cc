@@ -93,7 +93,8 @@ enum DUPE_CHECK_RESULT {
 	DUPE_NAME_MATCH
 };
 
-/** Used for similarity checks. One for each item pushed
+/** @anchor dupe_queue_item
+ * Used for similarity checks. One for each item pushed
  * onto the thread pool.
  */
 struct DupeQueueItem
@@ -104,7 +105,8 @@ struct DupeQueueItem
 	gint index; /**< The order items pushed onto thread pool. Used to sort returned matches */
 };
 
-/** Used for similarity checks thread. One for each pair match found.
+/** @anchor dupe_search_match
+ * Used for similarity checks thread. One for each pair match found.
  */
 struct DupeSearchMatch
 {
@@ -167,12 +169,12 @@ static bool dupe_pair_allowed(const DupeWindow *dw, const DupeItem *a, const Dup
 
 /**
  * @brief The function run in threads for similarity checks
- * @param d1 #DupeQueueItem
+ * @param d1 @ref dupe_queue_item "DupeQueueItem"
  * @param d2 #DupeWindow
  *
  * Used only for similarity checks.\n
  * Search \a dqi->list for \a dqi->needle and if a match is
- * found, create a #DupeSearchMatch and add to \a dw->search_matches list\n
+ * found, create a @ref dupe_search_match "DupeSearchMatch" and add to \a dw->search_matches list\n
  * If \a dw->abort is set, just increment \a dw->thread_count
  */
 static void dupe_comparison_func(gpointer d1, gpointer d2)
@@ -1564,7 +1566,6 @@ static DUPE_CHECK_RESULT dupe_match_check(DupeItem *di1, DupeItem *di2, gpointer
  * @brief The callback for the binary search
  * @param a
  * @param b
- * @param param_match_mask
  * @returns negative/0/positive
  *
  * Is not used for similarity checks.
@@ -1866,7 +1867,7 @@ static void dupe_array_check(DupeWindow *dw)
  * Called from dupe_check_cb.
  * Called for each entry in the list.
  * Steps through the list looking for matches against needle.
- * Pushes a #DupeQueueItem onto thread pool queue.
+ * Pushes a @ref dupe_queue_item "DupeQueueItem" onto thread pool queue.
  */
 static void dupe_list_check_match(DupeWindow *dw, DupeItem *needle, GList *start)
 {
@@ -2172,6 +2173,7 @@ static GList *dupe_setup_point_step(DupeWindow *dw, GList *p)
 
 /**
  * @brief Generates the sumcheck or dimensions_sum
+ * @param dw Duplicate comparison window
  * @param list Set1 or set2
  * @returns TRUE/FALSE = not completed/completed
  *
@@ -2258,8 +2260,8 @@ static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
 
 /**
  * @brief Compare func. for sorting search matches
- * @param a #DupeSearchMatch
- * @param b #DupeSearchMatch
+ * @param a @ref dupe_search_match "DupeSearchMatch"
+ * @param b @ref dupe_search_match "DupeSearchMatch"
  * @returns
  *
  * Used only for similarity checks\n
@@ -3483,8 +3485,8 @@ static GList *dupe_window_get_fd_list(DupeWindow *dw)
 
 /**
  * @brief Add file selection list to a collection
- * @param[in] widget
- * @param[in] data Index to the collection list menu item selected, or -1 for new collection
+ * @param[in] parameter Collection path, or an empty string for a new collection
+ * @param[in] data Duplicate comparison window
  *
  *
  */

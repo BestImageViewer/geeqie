@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file pixbuf-renderer.h
+ * @ingroup rendering
+ */
+
 #ifndef PIXBUF_RENDERER_H
 #define PIXBUF_RENDERER_H
 
@@ -35,6 +39,10 @@
 
 struct GqColor;
 struct PixbufRenderer;
+
+/** @addtogroup rendering
+ * @{
+ */
 
 #define TYPE_PIXBUF_RENDERER		(pixbuf_renderer_get_type())
 #define PIXBUF_RENDERER(obj)		(G_TYPE_CHECK_INSTANCE_CAST((obj), TYPE_PIXBUF_RENDERER, PixbufRenderer))
@@ -135,6 +143,11 @@ enum StereoPixbufData : gint {
 	STEREO_PIXBUF_NONE     = 3
 };
 
+/** Private renderer dispatch table owned by PixbufRenderer.
+ * Entries execute on the GTK main thread; snapshot() receives a borrowed
+ * GtkSnapshot. free() tears down the backend and its pending render sources.
+ * Callers must not retain the renderer pointer beyond that teardown.
+ */
 struct RendererFuncs
 {
 	void (*snapshot)(void *renderer, GtkSnapshot *snapshot);
@@ -234,11 +247,26 @@ struct PixbufRenderer
 	gint source_tile_width;
 	gint source_tile_height;
 
+	/** Fill the borrowed pixbuf for the requested rectangle and return TRUE when
+	 * pixels are available. Runs synchronously on the main thread during tile
+	 * requests or region updates; neither argument ownership nor GTK lifetime is transferred.
+	 */
 	using TileRequestFunc = std::function<gboolean(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *)>;
 	TileRequestFunc func_tile_request;
+	/** Notify cache eviction with a borrowed tile pixbuf; do not unref it.
+	 * This is not a universal destructor callback: clearing source tiles or
+	 * destroying the renderer can free tiles without invoking this notification.
+	 */
 	using TileDisposeFunc = std::function<void(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *)>;
 	TileDisposeFunc func_tile_dispose;
 
+	/** Process a tile on the main thread, possibly in an idle render pass.
+	 * The pixbuf pointer addresses a renderer-owned reference. If replacing it,
+	 * release the old reference and supply an owned replacement. Rectangle values
+	 * identify the region to process. The pointer to the pixbuf slot is valid only
+	 * during the call; reference the pixbuf to retain it separately, accounting
+	 * for later pixel changes.
+	 */
 	using PostProcessFunc = std::function<void(PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint)>;
 	PostProcessFunc func_post_process;
 	gint post_process_slow;
@@ -323,20 +351,39 @@ PixbufRenderer *pixbuf_renderer_new();
 
 void pixbuf_renderer_set_parent(PixbufRenderer *pr, GtkWindow *window);
 
-/** @param preserve_frame Retain the previous rendered animation frame when dimensions match. */
+/**
+ * @brief Set the displayed pixels and zoom
+ * @param pr Renderer receiving the image
+ * @param pixbuf Image pixels, or nullptr to clear the image; the renderer adds a reference
+ * @param zoom Requested zoom level
+ * @param preserve_frame Retain the previous rendered animation frame when dimensions match
+ */
 void pixbuf_renderer_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, gboolean preserve_frame = FALSE);
 
 void pixbuf_renderer_set_pixbuf_lazy(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, gint orientation, StereoPixbufData stereo_data);
 
 
+/** Borrow the displayed source pixels; the renderer retains its own reference.
+ * Add a reference for independent lifetime, and account for progressive updates.
+ */
 GdkPixbuf *pixbuf_renderer_get_pixbuf(PixbufRenderer *pr);
 
 void pixbuf_renderer_set_orientation(PixbufRenderer *pr, gint orientation);
 
 void pixbuf_renderer_set_stereo_data(PixbufRenderer *pr, StereoPixbufData stereo_data);
 
+/** Copy a post-processing callback into the renderer; an empty function clears it.
+ * Captured state must survive every queued render pass. Replacing or clearing the
+ * callback releases that stored copy, but renderer copy/move operations may have
+ * copied it elsewhere. Clear/rebind callbacks before freeing captured view state.
+ * @see ownership_and_async
+ */
 void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, const PixbufRenderer::PostProcessFunc &func, gboolean slow);
 
+/** Configure on-demand tiles and copy the request/eviction callbacks.
+ * Callback captures must outlive the tile source, including deferred render
+ * passes. Keep external source cleanup separate from tile eviction notifications.
+ */
 void pixbuf_renderer_set_tiles(PixbufRenderer *pr, gint width, gint height,
                                gint tile_width, gint tile_height, gint cache_size,
                                const PixbufRenderer::TileRequestFunc &func_request,
@@ -414,13 +461,33 @@ struct SourceTile
 
 void pr_render_complete_signal(PixbufRenderer *pr);
 
+/**
+ * @brief Map a tile position through an EXIF orientation
+ * @param orientation EXIF orientation value
+ * @param tile_x Horizontal tile position
+ * @param tile_y Vertical tile position
+ * @param image_w Image width
+ * @param image_h Image height
+ * @param tile_w Tile width
+ * @param tile_h Tile height
+ * @param[out] res_x Mapped horizontal position
+ * @param[out] res_y Mapped vertical position
+ */
 void pr_tile_coords_map_orientation(gint orientation,
-                                    gdouble tile_x, gdouble tile_y, /**< coordinates of the tile */
+                                    gdouble tile_x, gdouble tile_y,
                                     gdouble image_w, gdouble image_h,
                                     gdouble tile_w, gdouble tile_h,
                                     gdouble &res_x, gdouble &res_y);
+/**
+ * @brief Map a rectangle within a tile through an EXIF orientation
+ * @param orientation EXIF orientation value
+ * @param area Rectangle within the tile
+ * @param tile_w Tile width
+ * @param tile_h Tile height
+ * @return Mapped rectangle
+ */
 GdkRectangle pr_tile_region_map_orientation(gint orientation,
-                                            GdkRectangle area, /**< coordinates of the area inside tile */
+                                            GdkRectangle area,
                                             gint tile_w, gint tile_h);
 GdkRectangle pr_coords_map_orientation_reverse(gint orientation,
                                                GdkRectangle area,
@@ -432,5 +499,7 @@ GList *pr_source_tile_compute_region(PixbufRenderer *pr, gint x, gint y, gint w,
 void pr_create_anaglyph(guint mode, GdkPixbuf *pixbuf, GdkPixbuf *right, gint x, gint y, gint w, gint h);
 
 void pixbuf_renderer_set_ignore_alpha(PixbufRenderer *pr, gint ignore_alpha);
+/** @} */
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

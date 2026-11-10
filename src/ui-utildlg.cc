@@ -215,7 +215,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
 /**
  * @brief
  * @param gd
- * @param icon_stock_id
+ * @param icon_name
  * @param heading
  * @param text
  * @param expand Whether the message should expand in the box orientation

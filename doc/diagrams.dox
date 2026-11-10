@@ -20,470 +20,226 @@
  */
 
 /**
- * @file
- * @brief Diagrams to be included in the Doxygen output
- * 
- * The contents are diagrams to be included in the Doxygen output.
- */
+@file
+@brief Subsystem flows and data relationships.
 
-/**
- * @page diagrams Diagrams
- * @section metadata_write Metadata write sequence
- *
- * @startuml
- * 
- * group metadata write sequence
- * start
- *
- * : write to file/sidecar = FALSE;
- * if (//Preferences / Metadata//\n **Step 1:**\n Save in image file or sidecar file) then (yes)
-	 * if (extension in //File Filters / File Types / Writable// list) then (yes)
-		 * if (image file writable) then (yes)
-			 * : write to file/sidecar = TRUE;
-			 * : metadata_file = <image file>;
-		 * else (no)
-			 * : log warning;
-		 * endif
-	 * else (no)
-		 * if (extension in //File Filters / File Types / Sidecar Is Allowed// list) then (yes)
-			 * if (sidecar file or folder writable) then (yes)
-				 * : write to file/sidecar = TRUE;
-				 * : metadata_file = <sidecar file>;
-			 * else (no)
-				 * : log warning;
-			 * endif
-		 * else (no)
-		 * endif
-	 * endif
- * else (no)
- * endif
- * 
- * if (write to file/sidecar) then (yes)
- * else (no)
-	 * group If a metadata file already exists, use it
-		 * start
-		 * group Look in user defined option
-			 * if (//Preferences / Metadata//\n **Step 2:**\n Save in sub-folder local to image folder) then (yes)
-				 * : metadata_file = \n<file_dir>/.metadata/<filename>.gq.xmp;
-			 * else (no)
-				 * if (XDG_DATA_HOME defined) then (yes)
-					 * : metadata_file = \nXDG_DATA_HOME/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-				 * else (no)
-					 * : metadata_file = \nHOME/.local/share/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-				 * endif
-			 * endif
-		 * end group
-		 * 
-		 * if (metadata_file exists) then (yes)
-		 * else (no)
-			 * group Ignore user defined option and try alternate
-				 * if (//Preferences / Metadata//\n **Step 2:**\n Save in sub-folder local to image) then (no)
-					 * : metadata_file = \n <file_dir>/.metadata/<filename>.gq.xmp;
-				 * else (yes)
-					 * if (XDG_DATA_HOME defined) then (yes)
-						 * : metadata_file = \n XDG_DATA_HOME/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-					 * else (no)
-						 * : metadata_file = \n HOME/.local/share/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-					 * endif
-				 * endif
-			 * end group
-		 * endif
-		 * 
-		 * if (metadata_file exists) then (yes)
-		 * else (no)
-			 * group Try GQview legacy format
-				 * if (//Preferences / Metadata//\n **Step 2:**\n Save in sub-folder local to image folder) then (yes)
-					 * : metadata_file = \n<file_dir>/.metadata/<filename>.meta;
-				 * else (no)
-					 * if (XDG_DATA_HOME defined) then (yes)
-						 * : metadata_file = \nXDG_DATA_HOME/geeqie/metadata/<file_path>/<file_name>.meta;
-					 * else (no)
-						 * : metadata_file = \nHOME/.local/share/geeqie/metadata/<file_path>/<file_name>.meta;
-					 * endif
-				 * endif
-			 * end group
-			 * 
-			 * if (metadata_file exists) then (yes)
-			 * else (no)
-				 * group Ignore user defined option and try alternate
-					 * if (//Preferences / Metadata//\n **Step 2:**\n Save in sub-folder local to image) then (no)
-						 * : metadata_file = \n <file_dir>/.metadata/<filename>.meta;
-					 * else (yes)
-						 * if (XDG_DATA_HOME defined) then (yes)
-							 * : metadata_file = \n XDG_DATA_HOME/geeqie/metadata/<file_path>/<file_name>.meta;
-						 * else (no)
-							 * : metadata_file = \n HOME/.local/share/geeqie/metadata/<file_path>/<file_name>.meta;
-						 * endif
-					 * endif
-				 * end group
-			 * endif
-		 * endif
-	 * end group
-	 * 
-	 * if (metadata_file exists) then (yes)
-	 * else (no)
-		 * group If no metadata file exists, use user defined option
-			 * if (//Preferences / Metadata//\n **Step 2:**\n Save in sub-folder local to image folder) then (yes)
-				 * : metadata_file = \n<file_dir>/.metadata/<filename>.gq.xmp;
-			 * else (no)
-				 * if (XDG_DATA_HOME defined) then (yes)
-					 * : metadata_file = \nXDG_DATA_HOME/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-				 * else (no)
-					 * : metadata_file = \nHOME/.local/share/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-				 * endif
-			 * endif
-		 * end group
-	 * endif
-	 * 
-	 * if (metadata_file writable) then (yes)
-	 * else (no)
-		 * if (XDG_DATA_HOME defined) then (yes)
-			 * : metadata_file = \nXDG_DATA_HOME/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-		 * else (no)
-		 * : metadata_file = \nHOME/.local/share/geeqie/metadata/<file_path>/<file_name>.gq.xmp;
-		 * endif
-	 * : Recursively create metadata_file_path\n if necessary;
-	 * endif
- * endif
- * : Write metadata;
- * 
- * end group
- * @enduml
- */
-  /**
-  * @file
-  * @ref metadata_write "Metadata write sequence"
-  */
+@page diagrams Diagrams
 
+These diagrams summarize the current implementation. Error handling and alternate
+paths are shown where they affect ownership or the result; they are not exhaustive
+call graphs. See @ref image_display_lifecycle and @ref ownership_and_async for
+callback and cancellation details.
 
-/**
- * @page diagrams Diagrams
- * @section options_overview Options Overview
- * 
- * #_ConfOptions  #_LayoutOptions
- * 
- * @startuml
- * 
- * object options.h
- * object layout.h
- * 
- * options.h : ConfOptions
- * options.h : \n
- * options.h : Options applicable to **all** Layout Windows
- * options.h : These are in the <global> section of geeqierc.xml
- * options.h : Available to all modules via the global variable **options**
- * layout.h : LayoutOptions
- * layout.h : \n
- * layout.h : Options applicable to **each** Layout Window
- * layout.h : These are in the <layout> section of geeqierc.xml
- * layout.h : There is one <layout> section for each Layout Window displayed
- * layout.h : Available via **<layout_window>->options**
- * 
- * @enduml
- */
+@section metadata_write Metadata write sequence
 
-/**
- * @page diagrams Diagrams
- * @section options_diagrams_main Options - New Window From Main
- * #main  
- * #init_options  
- * #layout_new_from_default  
- * #load_config_from_file  
- * #load_options  
- * #setup_default_options
- * 
- * @startuml
- * group main.cc
- * start
- * group options.cc
- * : **init_options()**
- * 
- * Set **options** = ConfOptions from hard-coded init values;
- * end group
- * 
- * group options.cc
- * : **setup_default_options()**
- * 
- * set hard-coded ConfOptions:
- * 
- * bookmarks:
- * * dot dir
- * * Home
- * * Desktop
- * * Collections
- * safe delete path
- * OSD template string
- * sidecar extensions
- * shell path and options
- * marks tooltips
- * help search engine;
- * end group
- * 
- * if (first entry
- * or
- * --new-instance) then (yes)
- * group options.cc
- * : **load_options()**
- * ;
- * 
- * split
- * : GQ_SYSTEM_WIDE_DIR
- * /geeqierc.xml;
- * split again
- * : XDG_CONFIG_HOME
- * /geeqierc.xml;
- * split again
- * : HOME
- * /.geeqie/geeqierc.xml;
- * end split
- * 
- * group rcfile.cc
- * : **load_config_from_file()**
- * 
- * set  **options** from file
- * and all <layout window>->options  in file;
- * end group
- * 
- * end group
- * 
- * if (broken config. file
- * or no config file
- * or no layout section loaded
- * (i.e. session not saved)) then (yes)
- * group layout.cc
- * : **layout_new_from_default()**;
- * if (default.xml exists) then (yes)
- * : Load user-saved
- *  layout_window default options
- *  from default.xml file;
- * else (no)
- * : Load hard-coded
- *  layout_window default options;
- * endif
- * end group
- * endif
- * 
- * else (no)
- * : Send --new-window request to remote
- *  No return to this point
- *  This instance terminates;
- * stop
- * endif
- * 
- * : Enter gtk main loop;
- * 
- * end group
- * @enduml
- */
+Destination selection is performed by FileData change verification in
+@ref filedata.cc; metadata_write_perform() performs the selected write.
+Warnings about an unwritable image or sidecar depend on the metadata warning
+preference. Falling back to private metadata does not guarantee a successful write.
 
-/**
- * @page diagrams Diagrams
- * @section options_diagrams_remote Options - New Window From Remote
- * #layout_new_from_default  
- * @startuml
- * 
- * group remote.cc
- * start
- * group layout.cc
- * : **layout_new_from_default()**;
- * if (default.xml exists) then (yes)
- * : Load user-saved
- *  layout_window default options
- *  from default.xml file;
- * else (no)
- * : Load hard-coded
- *  layout_window default options;
- * endif
- * end group
- * : set path from PWD;
- * @enduml
- */
+@startuml
+start
+:Verify queued metadata change;
+if (Save in image file or sidecar enabled?) then (yes)
+  if (Direct writing allowed for this file?) then (yes)
+    if (Image writable?) then (yes)
+      :Select image file;
+    else (no)
+      :Record warning if enabled;
+    endif
+  else (no)
+    if (Sidecar writing allowed?) then (yes)
+      :Resolve matching grouped sidecar or new path\nusing normal or extended XMP naming;
+      if (Sidecar writable, or absent with writable parent?) then (yes)
+        :Select sidecar;
+      else (no)
+        :Record warning if enabled;
+      endif
+    endif
+  endif
+endif
+if (Image or sidecar selected?) then (no)
+  :Find existing private XMP metadata when Exiv2 is available;\notherwise, or if absent, try legacy metadata;\nsearch preferred and alternate cache locations;
+  if (Existing metadata writable?) then (yes)
+    :Select existing private metadata;
+  else (no)
+    :Create private metadata location using cache preferences;\nchoose .meta or .gq.xmp using legacy-format preference;
+    if (Destination writable or can be created?) then (yes)
+      :Select private metadata;
+    else (no)
+      :Report destination permission error;
+      stop
+    endif
+  endif
+endif
+:Perform selected metadata write;
+if (Write succeeds?) then (yes)
+  :Remove obsolete legacy metadata;
+else (no)
+  :Report write failure;
+endif
+stop
+@enduml
 
-/**
- * @page diagrams Diagrams
- * @section options_diagrams_menu Options - New Window From Menu
- * #layout_menu_new_window_cb  
- * #layout_menu_window_from_current_cb  
- * #layout_new_from_default  
- * @startuml
- * 
- * group layout-util.cc
- * start
- * 
- * split
- * : default;
- * group layout.cc
- * : **layout_new_from_default()**;
- * if (default.xml exists) then (yes)
- * : Load user-saved
- *  layout_window default options
- *  from default.xml file;
- * else (no)
- * : Load hard-coded
- *  layout_window default options;
- * endif
- * end group
- * 
- * split again
- * : from current
- * 
- * **layout_menu_window_from_current_cb()**
- * copy layout_window options
- * from current window;
- * 
- * split again
- * : named
- * 
- * **layout_menu_new_window_cb()**
- * load layout_window options
- * from saved xml file list;
- * end split
- * 
- * end group
- * @enduml
- */
-  /**
-  * @file
-  * @ref options_overview "Options Overview"
-  */
+Private metadata lookup and creation use cache_find_location() and
+cache_create_location(). A legacy .meta file cannot represent an XMP color label;
+that write fails rather than silently discarding the label.
 
-/**
- * @page diagrams Diagrams
- * @section image_load_overview Image Load Overview
- * @startuml
- * object image_change
- * object image_change_complete
- * object image_load_begin
- * object image_loader_start
- * object image_loader_start_thread
- * object image_loader_setup_source
- * object image_loader_thread_run
- * object image_loader_begin
- * object image_loader_setuploader
- * circle "il->memory_mapped"
- * object exif_get_preview_
- * object libraw_get_preview
- * object exif_get_preview
- * 
- * image_change : image.cc
- * image_change_complete : image.cc
- * image_load_begin : image.cc
- * image_loader_start : image-load.cc
- * image_loader_start_thread : image-load.cc
- * image_loader_thread_run : image-load.cc
- * image_loader_begin : image-load.cc
- * image_loader_setuploader : image-load.cc
- * image_loader_setuploader : -
- * image_loader_setuploader : Select backend using magic
- * image_loader_setup_source : image-load.cc
- * libraw_get_preview : image-load-libraw.cc
- * exif_get_preview : exiv2.cc
- * exif_get_preview : EXIV2_TEST_VERSION(0,17,90)
- * exif_get_preview_ : exif.cc
- * exif_get_preview_ : -
- * exif_get_preview_ : If exiv2 not installed
- * 
- * image_change --> image_change_complete
- * image_change_complete --> image_load_begin
- * image_load_begin --> image_loader_start
- * image_loader_start --> image_loader_start_thread
- * image_loader_start_thread --> image_loader_thread_run
- * image_loader_start_thread --> image_loader_setup_source
- * image_loader_setup_source --> exif_get_preview_
- * image_loader_setup_source --> exif_get_preview : Try exiv2 if libraw fails
- * image_loader_setup_source --> libraw_get_preview
- * exif_get_preview_ ..> "il->memory_mapped"
- * exif_get_preview ..> "il->memory_mapped"
- * libraw_get_preview ..> "il->memory_mapped"
- * image_loader_thread_run --> image_loader_begin
- * image_loader_begin --> image_loader_setuploader
- * "il->memory_mapped" ..> image_loader_setuploader
- * note left of "il->memory_mapped" : Points to first byte of embedded jpeg (#FFD8)\n if preview found, otherwise to first byte of file
- * @enduml
- */
- /**
-  * @file
-  * @ref image_load_overview "Image Load Overview"
-  */
+@section options_overview Options overview
 
-/**
- * @page diagrams Diagrams
- * @section duplicates_data_layout Duplicates Data Layout
- *
- * #_DupeWindow  #_DupeItem #_DupeMatch
- *
- * @startuml
- * 
- * database DupeWindow [
- * <b>DupeWindow->list</b>
- * ====
- * DupeItem
- * ----
- * DupeItem
- * ----
- * DupeItem
- * ----
- * .
- * .
- * .
- * ]
- * note left
- * One entry for each file
- * dropped onto the dupes window
- * end note
- * 
- * card DupeItem [
- * <b>DupeItem</b>
- * (parent)
- * ====
- * .
- * .
- * .
- * ----
- * fd
- * ----
- * group (list)
- * ----
- * group_rank
- * ----
- * .
- * .
- * .
- * ]
- * note right
- * group_rank: (sum of all child ranks) / n
- * end note
- *
- * database group [
- * <b>group (list)</b>
- * (children)
- * ====
- * DupeMatch
- * ----
- * DupeMatch
- * ----
- * DupeMatch
- * ----
- * .
- * .
- * .
- * ]
- * note left
- * One entry for each file
- * matching parent
- * end note
- * 
- * card DupeMatch [
- * <b>DupeMatch</b>
- * ====
- * DupeItem
- * ----
- * rank
- * ----
- * ]
- *
- * DupeWindow -r-> DupeItem
- * group -r-> DupeMatch
- * DupeItem --> group
- * @enduml
- */
+@ref ConfOptions applies globally; @ref LayoutOptions belongs to each LayoutWindow.
+Window creation can also affect global options when a configuration is loaded
+with its global section enabled.
+
+@startuml
+object "ConfOptions (options.h)" as global_options
+object "LayoutWindow" as window
+object "LayoutOptions (layout.h)" as layout_options
+global_options : Shared through the global options pointer
+global_options : Saved in the XML global section
+layout_options : One per layout window
+layout_options : Saved in that window's XML layout section
+window *-- layout_options : options
+@enduml
+
+@section options_diagrams_main Options - application startup
+
+The normal GUI startup path uses GtkApplication. A second invocation forwards
+its command line to the primary instance; GQ_NEW_INSTANCE requests an independent
+instance. Cache-maintenance startup has a separate application path.
+
+@startuml
+start
+:Create GtkApplication and register handlers;\ng_application_run();
+if (Existing primary instance and not independent?) then (yes)
+  :Forward command line to primary instance;\nprimary processes requested actions;
+  stop
+else (no)
+  :startup_cb() / startup_common();\nconf_options_new() and setup_default_options();
+  :Register application actions;
+  :load_options():\nload system geeqierc.xml if present;
+  :Load user geeqierc.xml from get_rc_dir();\nuser values follow system values;\nrestore configured layout windows;
+  if (No layout window restored?) then (yes)
+    :layout_new_from_default();\nload valid default.xml, or use built-in layout;
+  endif
+  :Process command line and present window;\ncontinue application event loop;
+endif
+stop
+@enduml
+
+Configuration paths are resolved by get_rc_dir(); the diagram deliberately does
+not prescribe a separate legacy HOME/.geeqie configuration load.
+
+@section options_diagrams_remote Options - new window from command line
+
+@ref command-line-handling.cc implements gq_new_window(). The primary instance
+handles a forwarded request in the same way as a locally delivered command line.
+
+@startuml
+start
+:gq_new_window();
+if (Current layout available?) then (yes)
+  :layout_new_from_default();
+  if (default.xml loads successfully?) then (yes)
+    :Use saved configuration;
+  else (no)
+    :Create built-in layout;
+  endif
+  :Assign unique window ID;
+  :Set path to requesting process's working directory;
+else (no)
+  :Return without creating a window;
+endif
+stop
+@enduml
+
+@section options_diagrams_menu Options - new window from menu
+
+The three choices are alternatives, not concurrent operations. See
+layout_new_from_default(), @ref layout_menu_window_from_current_cb(), and
+@ref layout_menu_window_layout_cb().
+
+@startuml
+start
+switch (Window creation choice)
+case (Default)
+  :layout_new_from_default();\nuse valid default.xml or built-in layout;\nassign unique ID;
+case (From current)
+  :Save current window configuration to temporary XML;\nreplace window ID and load configuration;\npreserve current path or collection when applicable;\nremove temporary files;
+case (Named layout)
+  if (Layout already displayed or invalid ID?) then (yes)
+    :Return without loading;
+  else (no)
+    :Load named XML from window-layouts directory\nwithout loading global options;
+  endif
+endswitch
+stop
+@enduml
+
+@section image_load_overview Image load overview
+
+This sequence follows static-image display. Source preparation occurs before the
+worker is queued; decoding and main-context notifications are distinct stages.
+See @ref image_display_lifecycle for progressive updates, errors, and cancellation.
+
+@startuml
+participant "Layout / ImageWindow\n(main context)" as image
+participant "ImageLoader\n(main context)" as loader
+participant "Decoder worker" as worker
+participant "PixbufRenderer / GTK\n(main context)" as renderer
+image -> image : Select file and reset previous load
+alt Decoded-image cache hit
+  image -> image : Reuse cached pixbuf
+else Matching read-ahead work
+  image -> image : Adopt completed pixels or running loader
+else New load
+  image -> loader : image_loader_start_deferred()
+  loader -> loader : Deferred start: prepare input_buffer\n(preview or file source)
+  loader -> worker : Queue decoding / select backend
+end
+opt Active decoder
+  loop Progressive updates when available
+    worker -> loader : Schedule size / area notification
+    loader -> image : Main-context callbacks
+    image -> renderer : Install pixels / mark changed area
+  end
+  worker -> loader : Schedule done or error
+  loader -> image : Completion callback
+  image -> image : Cache completed pixels when enabled;\nrelease active loader; start read-ahead
+end
+image -> renderer : Prepare display and queue rendering
+renderer -> renderer : Scale / post-process / create textures
+renderer -> image : Render-complete notification
+renderer -> renderer : GTK snapshot and later presentation
+note over image, renderer
+Progressive rendering overlaps decoding.
+Decoder completion and render completion do not measure
+compositor presentation. Delayed flipping may retain the old image.
+end note
+@enduml
+
+@section duplicates_data_layout Duplicates data layout
+
+DupeWindow maintains input lists and comparison results. Each DupeItem owns a
+FileData reference and has a list of DupeMatch records pointing to matching items.
+These match pointers describe relationships; they do not form an ownership tree.
+The second input set is omitted below. group_rank is the average match rank.
+
+@startuml
+object DupeWindow
+object DupeItem
+object DupeMatch
+object "Matching DupeItem" as matching
+DupeWindow : list = first input set
+DupeWindow : second_list = second input set
+DupeWindow : dupes = grouped results
+DupeItem : fd
+DupeItem : group = list of DupeMatch records
+DupeItem : group_rank
+DupeMatch : di
+DupeMatch : rank
+DupeWindow --> DupeItem : input / result lists
+DupeItem --> DupeMatch : group
+DupeMatch --> matching : di (match reference)
+@enduml
+*/

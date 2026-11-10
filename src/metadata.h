@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file metadata.h
+ * @ingroup metadata
+ */
+
 #ifndef METADATA_H
 #define METADATA_H
 
@@ -33,6 +37,10 @@ enum NotifyType : gint;
 
 class FileData;
 struct RcString;
+
+/** @addtogroup metadata
+ * @{
+ */
 
 #define COMMENT_KEY "Xmp.dc.description"
 #define KEYWORD_KEY "Xmp.dc.subject"
@@ -126,5 +134,7 @@ void keyword_tree_write_config(RcString &rc);
 GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar **attribute_names, const gchar **attribute_values);
 
 void keyword_tree_disconnect_marks();
+/** @} */
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

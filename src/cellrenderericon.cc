@@ -610,11 +610,11 @@ gqv_cell_renderer_icon_get_layout(GQvCellRendererIcon *cellicon, GtkWidget *widg
  *
  * Creates a new #GQvCellRendererIcon. Adjust rendering
  * parameters using object properties. Object properties can be set
- * globally (with g_object_set()). Also, with #GtkTreeViewColumn, you
- * can bind a property to a value in a #GtkTreeModel. For example, you
+ * globally (with g_object_set()). Also, with [GtkTreeViewColumn](https://docs.gtk.org/gtk4/class.TreeViewColumn.html), you
+ * can bind a property to a value in a [GtkTreeModel](https://docs.gtk.org/gtk4/iface.TreeModel.html). For example, you
  * can bind the "pixbuf" property on the cell renderer to a pixbuf value
  * in the model, thus rendering a different image in each row of the
- * #GtkTreeView.
+ * [GtkTreeView](https://docs.gtk.org/gtk4/class.TreeView.html).
  *
  * Return value: the new cell renderer
  **/

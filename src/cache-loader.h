@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file cache-loader.h
+ * @ingroup caches
+ */
+
 #ifndef CACHE_LOADER_H
 #define CACHE_LOADER_H
 
@@ -29,6 +33,10 @@
 struct CacheData;
 class FileData;
 struct ImageLoader;
+
+/** @addtogroup caches
+ * @{
+ */
 
 enum CacheDataType {
 	CACHE_LOADER_NONE       = 0,
@@ -61,6 +69,8 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 
 void cache_loader_free(CacheLoader *cl);
 
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

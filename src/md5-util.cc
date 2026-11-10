@@ -41,9 +41,9 @@ namespace
 
 /**
  * md5_update_from_file: get the md5 hash of a file
- * @md5: MD5 checksumming context
- * @path: file name
- * @return: TRUE on success
+ * @param md5 MD5 checksumming context
+ * @param path File name
+ * @return TRUE on success
  *
  * Get the md5 hash of a file.
  **/
@@ -67,12 +67,12 @@ gboolean md5_update_from_file(GChecksum *md5, const gchar *path)
 
 /**
  * @brief Get the md5 hash of a file
- * @filename: file name
- * @digest: 16 bytes buffer receiving the hash code.
- * @return: TRUE on success
+ * @param path File name
+ * @param[out] digest Buffer receiving the MD5 digest.
+ * @return TRUE on success
  *
  * Get the md5 hash of a file. The result is put in
- * the 16 bytes buffer @digest .
+ * the 16 bytes buffer @p digest.
  **/
 gboolean md5_get_digest_from_file(const gchar *path, Md5Digest &digest)
 {
@@ -90,8 +90,8 @@ gboolean md5_get_digest_from_file(const gchar *path, Md5Digest &digest)
 
 /**
  * @brief Get the md5 hash of a file
- * @filename: file name
- * @return: hash as a hexadecimal string
+ * @param path File name
+ * @return hash as a hexadecimal string
  *
  * Get the md5 hash of a file. The result is returned
  * as a hexadecimal string.

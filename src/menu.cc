@@ -59,10 +59,9 @@ void submenu_add_collections_new(GMenu *menu, const gchar *action_name)
 
 /**
  * @brief
- * @param widget Not used
  * @param data Pointer to vbox item
- * @param up Up/Down movement
- * @param single_step Move up/down one step, or to top/bottom
+ * @tparam up Up/Down movement
+ * @tparam single_step Move up/down one step, or to top/bottom
  *
  */
 template<bool up, bool single_step>

@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file thumb-standard.h
+ * @ingroup caches
+ */
+
 #ifndef THUMB_STANDARD_H
 #define THUMB_STANDARD_H
 
@@ -33,6 +37,10 @@
 
 class FileData;
 struct ImageLoader;
+
+/** @addtogroup caches
+ * @{
+ */
 
 #define THUMB_FOLDER_GLOBAL "thumbnails"
 #define THUMB_FOLDER_LOCAL  ".thumblocal"
@@ -102,6 +110,8 @@ void thumb_loader_std_thumb_file_validate_cancel(ThumbLoaderStd *tl);
 void thumb_std_maint_removed(const gchar *source);
 void thumb_std_maint_moved(const gchar *source, const gchar *dest);
 
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

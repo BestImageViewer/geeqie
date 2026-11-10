@@ -1,0 +1,109 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+
+/**
+@page ownership_and_async Ownership and asynchronous work
+
+@section ownership_basics References and borrowed values
+
+A borrowed pointer does not carry a reference for the recipient. Acquire a
+reference before storing it beyond the owner's lifetime; do not put a borrowed
+value directly into an automatic cleanup owner. An owned return value needs the
+matching release operation, even when a later step fails.
+
+| API | Ownership |
+| --- | --- |
+| FileDataRef construction/reset | Adds a reference to the supplied FileData; does not adopt an existing reference. |
+| FileDataRef pointer access | Borrowed pointer; no reference is added. |
+| FileDataRef::release() | Transfers the held reference and empties the owner. |
+| image_loader_new() | Owned GObject reference; the loader also references the source FileData. |
+| image_loader_get_fd() / image_loader_get_pixbuf() | Borrowed source/pixels. Reference them before retaining them independently. |
+| image_loader_dup_error() | Owned GError copy; use g_error_free(). |
+| pixbuf_renderer_get_pixbuf() | Borrowed pixels retained by the renderer. |
+| renderer_tiles_surface_to_texture() | Owned immutable GdkTexture copy; use g_object_unref(). |
+| FileUtilDoneFunc path / FileTreeDone error | Borrowed only during that callback. |
+
+A new FileData already carries a reference. Constructing a FileDataRef from it
+adds another: the original reference still needs releasing. Moves transfer the
+held reference. Before move-assigning to a nonempty FileDataRef, reset that
+owner to nullptr: the current move-assignment implementation does not release
+its previous reference.
+
+References preserve object lifetime, not thread safety or immutability. A
+partially decoded pixbuf can still change while another owner holds a reference.
+FileData references do not keep image windows or views alive.
+
+@section ownership_loader Image-loader lifecycle
+
+<ol>
+<li>Create an ImageLoader, retain its reference, and connect signals on the GTK
+main thread before calling image_loader_start() or image_loader_start_deferred().</li>
+<li>Decoding normally runs on a worker thread. Progress, size, area, completion,
+and error signals are delivered through the default main context. Signal
+rectangle/size pointers are valid only during the emission.</li>
+<li>A successful start means work was submitted, not that decoding succeeded.
+Use the completion/error signals rather than the presence of a pixbuf to
+determine the outcome. Keep independent references to pixels needed afterward.</li>
+<li>To abandon a loader, release its last reference. Finalization removes pending
+starts/signals, requests cancellation, and waits for active decoding to stop.
+A blocking decoder can delay this step. No final signal is promised after
+cancellation by finalization.</li>
+</ol>
+
+Disabling image_loader_delay_area_ready() emits queued area signals synchronously
+before returning. Keep both the loader and callback context valid throughout that
+call, and account for reentrancy.
+
+ImageWindow cleanup releases its active and read-ahead loaders. If another owner
+keeps a loader alive, disconnect handlers whose user data belongs to the closing
+window; the loader does not own that callback context. Backend implementations
+report through the loader and must not call GTK from decoding callbacks.
+
+@section ownership_renderer Renderer callbacks
+
+PixbufRenderer owns its RendererFuncs backends and source pixbuf reference.
+Rendering, tile requests, and post-processing run on the GTK main thread, often
+from queued idle work. Borrowed callback arguments must not be retained without
+acquiring the appropriate ownership.
+
+PostProcessFunc and tile callbacks are copied into renderer state. Their captures
+must remain valid until the callbacks are cleared/replaced and pending users have
+been accounted for. Renderer copy/move operations can propagate callbacks to
+another renderer. A raw ImageWindow pointer in a lambda is not kept alive by the
+lambda. Clear or rebind such callbacks before releasing their context.
+
+Post-processing receives the address of a renderer-owned pixbuf reference. If it
+replaces the pixbuf, it must release the old reference and provide an owned
+replacement. Tile-request callbacks fill renderer-owned pixels; tile-disposal
+callbacks borrow those pixels and must not unref them. Disposal is an eviction
+notification, not guaranteed notification for every tile freed at shutdown.
+
+Backend teardown removes pending render sources. GTK snapshots can still retain
+immutable textures/render nodes independently of that backend; mutable Cairo/tile
+storage must not be exported as if it were immutable.
+
+@section ownership_operations File operations and window closure
+
+The list-based operation entry points in @ref utilops.h consume the list and its
+FileData references, including setup failures. Copy the list with
+filelist_copy() if the caller needs to keep it. Separate source FileData
+arguments are borrowed and referenced internally when retained.
+
+User-facing operations run on the main thread but can open dialogs and finish
+later. FileUtilDoneFunc can also run before the initiating function returns.
+Its boolean describes the operation workflow, not a universal all-files-succeeded
+result: Discard is a non-cancelled terminal phase. Setup failures and a cancelled
+file_util_create_dir() chooser can produce no callback at all.
+
+file_tree_task_run() has a different contract: work runs on a worker and done runs
+in the creating main context after work returns. Closing its progress dialog
+requests cooperative cancellation and completion is still delivered. Read-only
+scans may discard their results after cancellation; mutating operations preserve
+the actual outcome, including a successful move completed just before cancellation.
+Cancelled or failed operations may already have changed the filesystem.
+
+A parent window is presentation context, not an automatic task cancellation
+mechanism. When capturing UI state for completion, use an appropriate weak
+reference, a live-owner lookup, or separately owned state. Holding a widget
+reference does not preserve a C++ view structure destroyed by a widget's destroy
+handler. Revalidate the owner before updating its widgets or selections.
+*/

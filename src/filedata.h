@@ -541,9 +541,14 @@ GList *filelist_sort(GList *list, FileData::FileList::SortSettings settings);
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs);
 gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs);
 
+/** Free the owned list nodes and unref each FileData element; nullptr is allowed. */
 void file_data_list_free(FileDataList *list);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FileDataList, file_data_list_free)
 
+/** Copy borrowed list nodes and add a reference to every FileData element.
+ * The returned owned list is released with file_data_list_free(), or transferred
+ * to a consuming file-operation entry point.
+ */
 GList *filelist_copy(GList *list);
 GList *filelist_from_path_list(GList *list);
 GList *filelist_to_path_list(GList *list);

@@ -7,8 +7,8 @@
 ## This script is called from meson.build
 ##
 ## If the current branch is "master" a revison number is generated of the form:  
-## <n.m>+git<date of last commit>-<last commit hash>  
-## where <n.m> is the most recent tag.  
+## &lt;n.m&gt;+git&lt;date of last commit&gt;-&lt;last commit hash&gt;
+## where &lt;n.m&gt; is the most recent tag.
 ## e.g. 1.7+git20220117-732b6935  
 ##
 ## If not on "master" or no .git directory, a revision number extracted
@@ -16,7 +16,7 @@
 ## This situation will occur when compiling from a source .tar.
 ## or for a release.  
 ## The first line of NEWS must be of the form:  
-## Geeqie <n.m[.p]>
+## Geeqie &lt;n.m[.p]&gt;
 ##
 
 if [ -d .git ] && [ -x "$(command -v git)" ]

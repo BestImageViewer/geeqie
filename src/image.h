@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file image.h
+ * @ingroup rendering
+ */
+
 #ifndef IMAGE_H
 #define IMAGE_H
 
@@ -40,6 +44,10 @@ class FileData;
 struct GqMouseButtonEvent;
 struct GqPointerMotionEvent;
 struct ImageLoader;
+
+/** @addtogroup rendering
+ * @{
+ */
 
 enum AlterType : gint {
 	ALTER_NONE,		/**< do nothing */
@@ -293,5 +301,7 @@ void image_select_rectangle(ImageWindow *imd, gboolean active);
 void image_rectangle_update_aspect_ratio();
 gboolean image_get_selected_rectangle(ImageWindow *imd, GdkRectangle &rectangle);
 void image_update_title(ImageWindow *imd);
+/** @} */
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

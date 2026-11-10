@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file ui-fileops.h
+ * @ingroup file_operations
+ */
+
 #ifndef UI_FILEOPS_H
 #define UI_FILEOPS_H
 
@@ -35,6 +39,10 @@
 #include <config.h>
 
 #include "md5-util.h"
+
+/** @addtogroup file_operations
+ * @{
+ */
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
@@ -125,7 +133,14 @@ struct FileTreeConflict
 	bool apply_to_all = false; /**< Repeats Skip, Duplicate, or folder Merge */
 };
 
-/** Callback runs on the operation's thread; it must not access GTK. */
+/** Borrowed per-call context for synchronous file-tree helpers.
+ * The caller owns this object, its GCancellable, and callback data for the entire
+ * operation. progress and conflict execute synchronously on the calling thread;
+ * they must not touch GTK when that thread is a worker. GFile callback arguments
+ * are borrowed for the invocation. Use file_tree_task_run() for GTK integration.
+ * Cancellation is cooperative and does not undo completed destination entries or
+ * removals. The destination field records the actual root used after duplication.
+ */
 struct FileTreeOperation
 {
 	GCancellable *cancellable = nullptr;
@@ -156,6 +171,8 @@ guchar *read_file_snapshot(const gchar *path, gsize &size_out, GError **error = 
 GList *pixbuf_gdk_known_extensions();
 
 gboolean secure_save(const gchar *file_name, const gchar *contents, gsize length);
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

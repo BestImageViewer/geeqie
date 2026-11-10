@@ -334,7 +334,7 @@ GList *collection_contents_fd(const gchar *name)
 /**
  * @brief Add file selection list to a collection
  * @param[in] path Collection path, or null/empty for a new collection
- * @param[in] list List of ::_FileData
+ * @param[in] list List of #FileData pointers
  *
  */
 void collection_by_path_add_filelist(const gchar *path, GList *list)

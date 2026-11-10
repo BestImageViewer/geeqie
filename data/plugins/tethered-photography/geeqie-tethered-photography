@@ -9,7 +9,7 @@
 ## download will not take place.
 ## Auto-rename can be achieved with the --filename option of gphoto2.  
 ## In file $HOME/.config/gphoto2/settings, set the option:  
-## gphoto2=filename=<see the manual>
+## gphoto2=filename=&lt;see the manual&gt;
 ##
 
 n=$(pgrep "geeqie-tethered" | wc -l)

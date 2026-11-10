@@ -280,8 +280,6 @@ void apply_special_renames(GString *name)
 
 /**
  * @brief Update geeqierc.xml
- * @param 
- * @returns
  * 
  * This should be run once after 
  * If this is the first run with the revised action names code,
@@ -398,7 +396,6 @@ void convert_configuration_file()
 
 /**
  * @brief Convert old accelerators to new
- * @param  
  * 
  * The original .config/geeqie/accels file contains
  * keyboard shortcuts set by the user. They must be preserved

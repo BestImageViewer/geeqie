@@ -12,9 +12,9 @@ set -eu
 ## Preparation takes place in a unique temporary directory; the checkout is
 ## unchanged. Without -r, nothing is pushed or uploaded.
 ##
-## -v <major.minor> Explicit version, checked against NEWS (optional).
-## -p <patch> Explicit patch number, checked against NEWS (optional).
-## -s <commit> Starting master commit for a major/minor release (optional).
+## -v &lt;major.minor&gt; Explicit version, checked against NEWS (optional).
+## -p &lt;patch&gt; Explicit patch number, checked against NEWS (optional).
+## -s &lt;commit&gt; Starting master commit for a major/minor release (optional).
 ## -r Push prepared stable branch, signed tag, and master commit atomically.
 ## -h Print Help.
 

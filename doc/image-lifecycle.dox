@@ -1,0 +1,88 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+
+/**
+@page image_display_lifecycle From file selection to displayed image
+
+This walkthrough follows the main window's static-image path. Animated playback
+and source-tile views have additional update paths. Read @ref ownership_and_async
+for the reference ownership, callback threading, and cancellation contracts.
+
+@section image_lifecycle_steps Normal display path
+
+<ol>
+<li><b>Select a file.</b> layout_image_set_index() resolves an index in the
+displayed list and chooses a read-ahead candidate based on navigation direction
+and selection. layout_image_set_fd() calls image_change_fd() and synchronizes the
+selection and sidebars. Updating ImageWindow's FileData reference does not mean
+new pixels are displayed.</li>
+<li><b>Reuse pixels or prepare a load.</b> In @ref image.cc,
+@ref image_load_begin() first checks the decoded-image cache, then matching
+read-ahead work. Otherwise it creates an ImageLoader, connects handlers, and calls
+image_loader_start_deferred(), allowing rapid navigation to supersede the request.</li>
+<li><b>Decode and report progress.</b> The loader selects an ImageLoaderBackend
+and normally decodes on a worker. Main-context callbacks report dimensions through
+@ref image_load_size_prepared_cb() and updated regions through
+@ref image_load_area_ready_cb() and pixbuf_renderer_area_changed(). Progressive
+updates can draw before decoding ends; delayed flipping retains the previous
+image until incoming pixels are ready.</li>
+<li><b>Finish decoding and prepare reuse.</b> The loader's done signal reaches
+@ref image_load_done_cb(). When read-ahead caching is enabled, it retains decoded
+pixels on the FileData and registers them with FileCache. It clears loading state,
+installs the finished pixbuf when needed, releases the active loader, notifies
+pixel consumers, and starts further read-ahead. It does not wait for screen
+presentation.</li>
+<li><b>Prepare the displayed composition.</b> image_change_pixbuf() establishes
+orientation, stereo settings, color processing, and the renderer's pixbuf reference.
+PixbufRenderer queues drawing; its backend scales visible regions, applies
+post-processing, and creates immutable textures. Settings and image properties
+select tile/two-pass rendering or an eligible source-texture path. See
+@ref rendering and @ref renderer-tiles.cc.</li>
+<li><b>Report render readiness and snapshot.</b> pr_render_complete_signal()
+reports completion of the renderer's current work. @ref image_render_complete_cb()
+forwards this through @ref image_complete_util(), which updates ImageWindow's
+completion state and invokes its callback when applicable. GTK snapshots retain
+render nodes/textures for presentation; render completion is not a compositor
+presentation timestamp.</li>
+</ol>
+
+These stages overlap: a progressive render batch can finish before decoding ends.
+The loader's done signal and render_complete are separate events, not interchangeable
+indications that an entire image has appeared on screen.
+
+@section image_lifecycle_shortcuts Cache and read-ahead paths
+
+| Situation | Work that changes |
+| --- | --- |
+| Decoded-image cache hit | Skips image-file decoding. Display preparation and any required scaling, color processing, and texture creation still run. |
+| Matching read-ahead loader is still running | @ref image_read_ahead_check() transfers that loader to the active image, reconnects handlers, and releases delayed area updates. It does not start a second decoder for the same request. |
+| Read-ahead pixels are already complete | Uses the retained pixels immediately and releases the read-ahead FileData reference. |
+| Thumbnail or similarity data exists on disk | This is distinct from the decoded-image cache. Thumbnail and `.sim` entries are not full-resolution decoded pixels for the main image. |
+
+Read-ahead and decoded-image caching are bounded by the configured image-cache
+budget. They reduce repeated decoding; they do not make rendering free. See
+@ref caches for the separate cache APIs and @ref image_loading for loader APIs.
+
+@section image_lifecycle_interruption Selection changes, errors, and closure
+
+A new selection calls @ref image_reset(), releasing the previous active loader
+and color-processing state. Releasing the loader's last reference cancels pending
+starts and waits for decoding to stop. Retained presentation state can keep the
+previous image visible meanwhile.
+
+@ref image_load_error_cb() records the error and uses the common completion
+cleanup path. A partial pixbuf may exist; if no decoded pixels are available,
+a fallback image is installed. A displayed pixbuf therefore does not by itself
+indicate successful decoding.
+
+ImageWindow destruction resets the active load and cancels read-ahead and
+transition work. Independent loader owners must still protect callback context;
+see @ref ownership_loader and @ref ownership_renderer.
+
+@section image_lifecycle_profiling Choosing timing boundaries
+
+For performance investigations, record selection time, decoded-pixel availability,
+and render readiness separately. A cached-image test should establish a decoded
+cache hit before comparing rendering costs. Measuring actual visible presentation
+requires GTK/GSK or compositor instrumentation in addition to Geeqie's completion
+callbacks.
+*/

@@ -189,7 +189,7 @@ struct PanWindow
 
 	PanItemList list;
 	PanItemList list_static;
-	GList *list_grid;  /**< List of #PanGrid. */
+	GList *list_grid;  /**< List of @ref pan_grid "PanGrid". */
 
 	GList *cache_list; // element type is PanCacheData
 	GList *cache_todo;

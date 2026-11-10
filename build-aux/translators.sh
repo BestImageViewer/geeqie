@@ -13,8 +13,8 @@
 ##
 ## It is expected that the .po files have a list of translators in the form: \n
 ## \# Translators: \n
-## \# translator1_name <translator1 email> \n
-## \# translator2_name <translator2 email> \n
+## \# translator1_name &lt;translator1 email&gt; \n
+## \# translator2_name &lt;translator2 email&gt; \n
 ## \#
 
 build_dir="$1"

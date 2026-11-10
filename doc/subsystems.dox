@@ -1,0 +1,78 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+
+/**
+@defgroup image_loading Image Loading
+
+ImageLoader selects format-specific decoders and delivers decoded pixels and
+progress to its callers. ImageLoaderBackend defines the decoder interface.
+Start with image_loader_new(), image_loader_start(), and image_loader_get_pixbuf().
+
+See @ref image_display_lifecycle for the complete selection-to-display flow.
+See @ref ownership_loader for worker execution, signal delivery, cancellation,
+and borrowed pixbuf lifetimes. Display and rendering APIs are in @ref rendering.
+*/
+
+/**
+@defgroup rendering Rendering
+
+ImageWindow manages displayed images, preloading, and presentation state.
+PixbufRenderer handles zooming, orientation, source pixels, and tile callbacks;
+RendererFuncs connects it to the tile backend.
+
+See @ref image_display_lifecycle for how decoding and rendering overlap.
+See @ref ownership_renderer for callback captures, pixbuf ownership, and snapshot
+lifetimes. Decoding is covered by @ref image_loading, and reusable thumbnail data
+by @ref caches.
+*/
+
+/**
+@defgroup metadata Metadata
+
+Read, format, edit, and write image metadata through @ref metadata.h and
+@ref exif.h. The metadata layer coordinates pending writes, sidecars, keywords,
+ratings, and color labels. The EXIF interface provides access to decoded tags
+and embedded previews.
+
+Use the metadata entry points for application-level edits rather than bypassing
+the write queue. See @ref file_operations for operations that commit pending
+metadata and @ref ownership_operations for their completion contracts.
+*/
+
+/**
+@defgroup collections Collections
+
+CollectionData owns an ordered collection of image entries. CollectInfo describes
+an entry; @ref collect.h provides membership and ordering APIs, while
+@ref collect-io.h handles loading, saving, and collection-manager updates.
+
+Collection paths may differ from the directories containing their images.
+Treat collection membership changes separately from filesystem operations in
+@ref file_operations. Reference ownership is described in @ref ownership_basics.
+*/
+
+/**
+@defgroup caches Caches
+
+CacheData stores reusable image information, including dimensions, original
+capture date, checksums, RGB similarity grids, and perceptual hashes. CacheLoader
+loads or calculates requested cache fields. Thumbnail loaders and the in-memory
+FileCache provide related reuse mechanisms; cache-maintenance APIs clean and
+populate persistent caches.
+
+Start with @ref cache.h, @ref cache-loader.h, and @ref thumb.h. Cache validity and
+ownership remain the caller's responsibility where specified by each API.
+See @ref image_loading for decoding and @ref metadata for metadata access.
+*/
+
+/**
+@defgroup file_operations File Operations
+
+@ref utilops.h provides user-facing copy, move, rename, delete, metadata-writing,
+and editor operations. @ref ui-fileops.h provides synchronous filesystem helpers,
+including file-tree traversal and transfer. file_tree_task_run() wraps threaded
+folder operations with progress, cancellation, and main-context completion.
+
+Read @ref ownership_operations before passing file lists or capturing window
+state. The consuming list APIs, operation notifications, and threaded task
+completion callbacks have different ownership and success semantics.
+*/

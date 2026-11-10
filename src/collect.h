@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file collect.h
+ * @ingroup collections
+ */
+
 #ifndef COLLECT_H
 #define COLLECT_H
 
@@ -30,6 +34,10 @@
 enum SortType : gint;
 
 class FileData;
+
+/** @addtogroup collections
+ * @{
+ */
 
 struct CollectInfo
 {
@@ -97,6 +105,8 @@ gchar *collection_path(const gchar *param);
 [[nodiscard]] GString *collection_contents(const gchar *name, GString *contents);
 GList *collection_contents_fd(const gchar *name);
 void collection_by_path_add_filelist(const gchar *path, GList *list);
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

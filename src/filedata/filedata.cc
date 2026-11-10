@@ -668,7 +668,6 @@ FileData *FileData::file_data_ref()
 
 /**
  * @brief Print ref. count and image name
- * @param
  *
  * Print image ref. count and full path name of all images in
  * the file_data_pool.
@@ -2072,7 +2071,6 @@ gboolean FileData::file_data_sc_update_ci_unspecified_list(GList *fd_list, const
 /**
  * @brief Determine if file is readable, do not follow symlinks
  * @param path 
- * @returns 
  * 
  * 
  */
@@ -2099,7 +2097,6 @@ static gboolean file_is_readable_no_follow(const gchar *path)
 /**
  * @brief Determine if file is writable, do not follow symlinks
  * @param path 
- * @returns 
  * 
  * 
  */

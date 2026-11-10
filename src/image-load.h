@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file image-load.h
+ * @ingroup image_loading
+ */
+
 #ifndef IMAGE_LOAD_H
 #define IMAGE_LOAD_H
 
@@ -33,8 +37,20 @@
 class FileData;
 struct GqSize;
 
+/** @addtogroup image_loading
+ * @{
+ */
+
 #define TYPE_IMAGE_LOADER		(image_loader_get_type())
 
+/** Decoder interface called by ImageLoader, normally from its worker thread.
+ * Backend callbacks report decoder progress to the loader, not directly to GTK.
+ * get_pixbuf() returns borrowed backend pixels; the loader takes its own reference
+ * when synchronizing them. get_format_name() and get_format_mime_types() return
+ * allocated values for g_free() and g_strfreev(), respectively.
+ * Implementations must support the loader's cooperative stopping checks; a
+ * blocking decoder call can delay cancellation and finalization.
+ */
 struct ImageLoaderBackend
 {
 public:
@@ -62,6 +78,23 @@ enum ImageLoaderPreview {
 };
 
 
+/**
+ * @brief GObject owning a FileData reference and an asynchronous decoding job
+ *
+ * Create, start, connect signals, and release the loader on the GTK main thread.
+ * Decoding normally uses a worker. area_ready, size_prepared, percent, done, and
+ * error are delivered through the default main context. Rectangle/size pointers
+ * in signal arguments are borrowed for that signal emission only.
+ * image_loader_delay_area_ready() can also emit area_ready synchronously.
+ *
+ * The caller retains a reference while work is pending. Releasing the last
+ * reference stops the job, cancels a deferred start and external extraction,
+ * waits for active decoder work, and removes queued signal sources. Cancellation
+ * by finalization does not promise a final done/error signal. A retained extra
+ * reference can keep the loader and its signals alive after a view closes:
+ * disconnect handlers using that view's data before destroying the view.
+ * @see ownership_and_async
+ */
 struct ImageLoader
 {
 	GObject parent;
@@ -124,8 +157,16 @@ struct ImageLoaderClass {
 
 GType image_loader_get_type();
 
+/** @brief Create a loader without starting it.
+ * @param fd Borrowed source; the loader adds its own reference
+ * @return Owned loader reference for g_object_unref(), or nullptr for a null source
+ */
 ImageLoader *image_loader_new(FileData *fd);
 
+/** @brief Queue area updates, or emit all delayed updates before returning.
+ * @param il Borrowed loader, kept alive by the caller throughout this call
+ * @param enable TRUE to delay; FALSE to synchronously flush queued area_ready signals
+ */
 void image_loader_delay_area_ready(ImageLoader *il, gboolean enable);
 
 void image_loader_set_requested_size(ImageLoader *il, gint width, gint height);
@@ -134,23 +175,43 @@ void image_loader_set_buffer_size(ImageLoader *il, guint count);
 
 void image_loader_set_priority(ImageLoader *il, gint priority);
 
+/** Start a new loader's worker; TRUE means work was submitted, not decoded.
+ * Startup or decoding failures in the worker are reported by the error signal.
+ * Connect handlers before calling this function. Do not start a loader twice.
+ */
 gboolean image_loader_start(ImageLoader *il);
 
+/** Schedule a main-context start, allowing later selections to supersede it.
+ * Returns FALSE if no start can be scheduled. A failure after scheduling emits
+ * error. Finalization removes the pending start; retain the loader until then.
+ */
 gboolean image_loader_start_deferred(ImageLoader *il);
 
 
+/** Borrow the current pixels, possibly nullptr or still being decoded.
+ * Take a g_object_ref() to retain the pixbuf beyond the loader's lifetime. A
+ * reference preserves lifetime, not immutability: pixels may change while the
+ * worker decodes. Do not treat a nonnull pixbuf as proof of successful completion.
+ */
 GdkPixbuf *image_loader_get_pixbuf(ImageLoader *il);
 gdouble image_loader_get_percent(ImageLoader *il);
 gboolean image_loader_get_is_done(ImageLoader *il);
+/** Borrow the source FileData; add a reference if it must outlive the loader. */
 FileData *image_loader_get_fd(ImageLoader *il);
 gboolean image_loader_get_shrunk(ImageLoader *il);
+/** Return an owned error copy for g_error_free(), or nullptr if no error is set. */
 GError *image_loader_dup_error(ImageLoader *il);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(ImageLoader, g_object_unref)
 
+/** Synchronously load enough of a borrowed file to determine its dimensions.
+ * This can block the caller; it is not the asynchronous ImageLoader interface.
+ */
 gboolean image_load_dimensions(FileData *fd, GqSize &dimensions);
 
 void free_pixels(guchar *pixels, gpointer data);
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

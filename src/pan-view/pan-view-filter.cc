@@ -46,6 +46,9 @@ enum PanViewFilterMode {
 	PAN_VIEW_FILTER_GROUP
 };
 
+/** @anchor pan_view_filter_element
+ * @brief One keyword filter and its matching mode
+ */
 struct PanViewFilterElement
 {
 	PanViewFilterMode mode;

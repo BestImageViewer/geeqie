@@ -448,7 +448,60 @@ For the possible commands you may use, see [Doxygen Special Commands](https://ww
 
 The file `./tools/doxygen-help.sh` may be used to integrate access to the Doxygen files into a code editor.
 
-The following environment variables may be set to personalize the Doxygen output:
+Generate documentation from the checkout root with Python 3 and Doxygen installed:
+
+```sh
+tools/doxygen.sh /tmp/geeqie-doxygen
+```
+
+The destination defaults to `../doxygen`. The script skips generation when the
+checkout contents, effective configuration, and generator dependencies match the
+last successful build and all recorded output files still exist. It includes
+tracked and nonignored files, including uncommitted documentation, and excludes
+the destination itself. Ignored build directories are not documentation inputs.
+
+Use `--force` to regenerate unchanged documentation. Use `--html-only` for a
+single-pass browser preview:
+
+```sh
+tools/doxygen.sh --html-only /tmp/geeqie-doxygen
+```
+
+By default, the script also generates `searchdata.xml` for `doxygen-help.sh` in a
+separate pass without graphs or additional output formats. `--html-only` does not
+generate or update that editor index. Switching modes triggers regeneration;
+run without `--html-only` to refresh the editor index afterward. Failed builds
+do not retain an up-to-date marker.
+
+Warnings are saved in the destination directory as `doxygen-warnings.log` for
+HTML generation and `doxygen-index-warnings.log` for the editor-index pass. Each
+pass replaces its own log and prints its path; cached builds retain those logs.
+
+Run a focused documentation check with:
+
+```sh
+tools/doxygen.sh --check /tmp/geeqie-doxygen
+```
+
+This always checks the current inputs and writes `doxygen-check-warnings.log`.
+Malformed commands/markup, incorrect parameter names, and unresolved references
+fail the check. Undocumented functions, enum values, and missing parameter
+descriptions are not required. Temporary XML output is discarded; the existing
+HTML, editor index, and generation cache marker are not replaced. Without the
+optional `doxygen-bash.sed` filter, shell/Perl/AWK inputs are skipped with a message;
+install the filter to include their documentation.
+
+When Doxygen is available during Meson configuration, this check is also available
+as `meson test -C build 'Doxygen comments'` in the analysis suite. The generator's
+regression tests run as `meson test -C build 'Doxygen generation'`, including a
+malformed-comment rejection test when Doxygen is installed.
+
+The script sets the source/output paths, project name, and version, and respects
+`INLINE_SOURCES`, `STRIP_CODE_COMMENTS`, `PLANTUML_JAR_PATH`, and the optional
+format/diagram settings in `doc/doxygen.conf`. HTML output is always enabled by the script.
+
+When invoking Doxygen directly, the following environment variables may be set
+to personalize its output:
 
 ```sh
 DOCDIR=<output folder>

@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file exif.h
+ * @ingroup metadata
+ */
+
 #ifndef EXIF_H
 #define EXIF_H
 
@@ -34,6 +38,10 @@ struct ExifData;
 struct ExifItem;
 class FileData;
 
+
+/** @addtogroup metadata
+ * @{
+ */
 
 /*
  *-----------------------------------------------------------------------------
@@ -137,6 +145,8 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 
 /* jpeg embedded icc support */
 bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size);
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

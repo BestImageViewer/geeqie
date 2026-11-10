@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file cache.h
+ * @ingroup caches
+ */
+
 #ifndef CACHE_H
 #define CACHE_H
 
@@ -33,6 +37,10 @@
 #include "geometry.h"
 #include "md5-util.h"
 #include "similar.h"
+
+/** @addtogroup caches
+ * @{
+ */
 
 #define GQ_CACHE_THUMB		"thumbnails"
 #define GQ_CACHE_METADATA    	"metadata"
@@ -99,6 +107,8 @@ bool cache_prepare_thumbnail_directory(const gchar *root, bool create);
 bool cache_is_thumbnail_directory_marker(const gchar *root, const gchar *path);
 const gchar *get_thumbnails_standard_cache_dir();
 const gchar *get_metadata_cache_dir();
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

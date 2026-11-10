@@ -857,8 +857,10 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
 /**
  * @brief Clips the specified line segment to the specified clipping region.
  * @param[in] clip Clipping region.
- * @param[in/out] x1,y1 Coordinates of the first point of the line segment.
- * @param[in/out] x2,y2 Coordinates of the second point of the line segment.
+ * @param[in,out] x1 Horizontal coordinate of the first endpoint.
+ * @param[in,out] y1 Vertical coordinate of the first endpoint.
+ * @param[in,out] x2 Horizontal coordinate of the second endpoint.
+ * @param[in,out] y2 Vertical coordinate of the second endpoint.
  * @retval FALSE The line segment lies outside of the clipping region.
  * @retval TRUE The clip operation was performed, and the output params were set.
  */

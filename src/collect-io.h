@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file collect-io.h
+ * @ingroup collections
+ */
+
 #ifndef COLLECT_IO_H
 #define COLLECT_IO_H
 
@@ -28,6 +32,10 @@ enum NotifyType : gint;
 
 struct CollectionData;
 class FileData;
+
+/** @addtogroup collections
+ * @{
+ */
 
 enum CollectionLoadFlags {
 	COLLECTION_LOAD_NONE	= 0,
@@ -50,6 +58,8 @@ void collect_manager_flush();
 void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer data);
 void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths);
 GList *collect_manager_list_with_history();
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

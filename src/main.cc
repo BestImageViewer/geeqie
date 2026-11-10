@@ -236,9 +236,6 @@ gboolean command_line_is_version_only(gint argc, gchar *argv[])
 
 /**
  * @brief Show log window for config. file errors
- * @param GSimpleAction
- * @param GVariant
- * @param gpointer
  *
  * When a config. file error is detected, a notification is displayed.
  * If the user clicks on the notification button, the log window is displayed.
@@ -252,9 +249,7 @@ void config_file_error_notification_clicked_cb(GSimpleAction *, GVariant *, gpoi
 
 /**
  * @brief Quit the cache maintenance process
- * @param action
- * @param parameter
- * @param app
+ * @param app Cache-maintenance application
  *
  *
  */
@@ -610,7 +605,7 @@ namespace
  *
  * This function is required for use of AppImages. AppImages are
  * relocatable, and therefore cannot use fixed paths to various components.
- * These paths were originally #defines created during compilation.
+ * These paths were originally preprocessor definitions created during compilation.
  * They are now variables, all defined relative to one level above the
  * directory that the executable is run from.
  */

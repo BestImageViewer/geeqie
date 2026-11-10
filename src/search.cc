@@ -1070,8 +1070,8 @@ static void sr_menu_play_cb(GSimpleAction *, GVariant *, gpointer data)
 
 /**
  * @brief Add file selection list to a collection
- * @param[in] widget
- * @param[in] data Index to the collection list menu item selected, or -1 for new collection
+ * @param[in] parameter Collection path, or an empty string for a new collection
+ * @param[in] data Search window
  *
  */
 static void search_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gpointer data)

@@ -224,20 +224,10 @@ gchar *get_regexp()
 
 #if HAVE_EXECINFO_H
 /**
- * @brief Backtrace of geeqie files
- * @param file
- * @param function
- * @param line
- *
- * Requires command line program addr2line \n
- * Prints the contents of the backtrace buffer for Geeqie files. \n
- * Format printed is: \n
- * <full path to source file>:<line number>
- *
- * The log window F1 command and Edit/Preferences/Behavior/Log Window F1
- * Command may be used to open an editor at a backtrace location.
+ * @brief Extract the function name from an addr2line result
+ * @param input Symbol description, optionally followed by a source location
+ * @return Function name, or an empty string if no function name is found
  */
-
 static std::string extract_function_name(const std::string &input)
 {
 	/* String may be of style:
@@ -268,6 +258,23 @@ static std::string extract_function_name(const std::string &input)
 
 	return "";
 }
+
+/**
+ * @brief Backtrace of geeqie files
+ * @param file
+ * @param function
+ * @param line
+ *
+ * Requires command line program addr2line \n
+ * Prints the contents of the backtrace buffer for Geeqie files. \n
+ * Format printed is: \n
+ * @code
+ * <full path to source file>:<line number>
+ * @endcode
+ *
+ * The log window F1 command and Edit/Preferences/Behavior/Log Window F1
+ * Command may be used to open an editor at a backtrace location.
+ */
 
 void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 {

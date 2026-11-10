@@ -86,6 +86,9 @@ struct PanCacheData {
 namespace
 {
 
+/** @anchor pan_grid
+ * @brief Spatial grid cell containing Pan View items
+ */
 struct PanGrid {
 	GdkRectangle rect;
 	PanItemList list;
@@ -1779,8 +1782,8 @@ help_window_show("GuideOtherWindowsPanView.html"); // NOTRANSLATE: Documentation
 
 /**
  * @brief Add file selection list to a collection
- * @param[in] widget
- * @param[in] data Index to the collection list menu item selected, or -1 for new collection
+ * @param[in] parameter Collection path, or an empty string for a new collection
+ * @param[in] data Pan View window
  *
  *
  */

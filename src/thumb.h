@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file thumb.h
+ * @ingroup caches
+ */
+
 #ifndef THUMB_H
 #define THUMB_H
 
@@ -29,6 +33,10 @@ enum NotifyType : gint;
 
 class FileData;
 struct ImageLoader;
+
+/** @addtogroup caches
+ * @{
+ */
 
 struct ThumbLoader
 {
@@ -71,6 +79,8 @@ void thumb_loader_free(ThumbLoader *tl);
 GdkPixbuf *thumb_loader_get_pixbuf(ThumbLoader *tl);
 
 void thumb_notify_cb(FileData *fd, NotifyType type, gpointer data);
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -3,10 +3,10 @@
 ## @file
 ## @brief Display the contents of a .sim file
 ##
-## Usage: ./tools/decode-sim <path to sim file>
+## Usage: ./tools/decode-sim &lt;path to sim file&gt;
 ##
 ## Displays:
-## Comment: <geeqie version file was created by>
+## Comment: &lt;geeqie version file was created by&gt;
 ## Original image dimensions:
 ## Exif Date Original:
 ## MD5 sum:

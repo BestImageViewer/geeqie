@@ -1,0 +1,113 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+
+/**
+@mainpage Geeqie Developer Guide
+
+Geeqie is a GTK4 image viewer and organizer for Linux, BSD, and other Unix-like
+systems. Its application code uses C++17, with Meson and Ninja for building.
+This documentation provides a source reference and a starting point for working
+on the application. User-facing help is maintained separately in
+`doc/docbook/`.
+
+@section developer_start Getting started
+
+<ul>
+<li>Read @ref README.md "README" for dependencies, installation, and packaging.</li>
+<li>Follow @ref CODING.md "Coding conventions" for source, documentation, and
+commit style.</li>
+<li>Use @ref TESTING.md "Testing guidance" to choose checks for a change.</li>
+<li>Consult @ref DEVELOPER-NOTES.md "Developer notes" for implementation guidance,
+including actions, menus, icons, and file operations.</li>
+</ul>
+
+From the checkout root, configure and build a development binary:
+
+@code{.sh}
+meson setup build -Dunit_tests=enabled
+ninja -C build
+./build/src/geeqie
+@endcode
+
+For an existing build directory, use `meson configure build` to inspect options
+and `meson configure build -Dunit_tests=enabled` to enable tests. Run configured
+tests with:
+
+@code{.sh}
+meson test -C build
+@endcode
+
+See @ref TESTING.md "Testing guidance" for display requirements, test suites,
+and the broader `tools/test-all.sh` workflow. Build output is generated under
+`build/`; edit the source files rather than generated copies.
+
+@section developer_map Finding the relevant code
+
+| Area | Starting points | Responsibility |
+| --- | --- | --- |
+| Startup and command line | @ref main.cc, @ref command-line-handling.cc | Application startup, instance handling, and command-line requests. |
+| Main window and navigation | @ref layout.h, @ref layout.cc, @ref layout-image.cc | Window state, displayed locations, image navigation, and split views. |
+| Actions and menus | @ref actions.h, @ref actions.cc, @ref layout-util.cc | Action registration, keyboard shortcuts, and menu callbacks. UI definitions live in `data/ui/`; default shortcuts live in `data/accels.ini`. |
+| File identity and ownership | @ref filedata.h | Shared file information, grouping, references, and change notifications. |
+| Folder and file panes | @ref view-dir.h, @ref view-file.h | Folder navigation, image lists, selections, and collection display. |
+| @ref image_loading "Image Loading" | @ref image-load.h, @ref image-load.cc | Decoder selection, asynchronous loading, and loader lifecycle. Format-specific loaders are named `image-load-*.cc`. |
+| @ref rendering "Rendering" | @ref image.h, @ref image.cc, @ref pixbuf-renderer.h, @ref renderer-tiles.h | Display state, preloading, zooming, and tile rendering. |
+| @ref metadata "Metadata" | @ref metadata.h, @ref exif.h | Metadata access and editing, including embedded data and sidecars. |
+| @ref collections "Collections" | @ref collect.h, @ref collect-io.cc | Collection membership, ordering, loading, and saving. |
+| Search and duplicate detection | @ref search.cc, @ref dupe.h, @ref similar.h | Search criteria, duplicate comparison, RGB similarity grids, and perceptual hashes. |
+| @ref caches "Caches" | @ref cache.h, @ref cache-loader.h, @ref thumb.h | Cached image information, cache loading, and thumbnail generation. |
+| @ref file_operations "File Operations" | @ref utilops.h, @ref ui-fileops.h | User-facing file operations and filesystem helpers. |
+| Slideshows and fullscreen | @ref slideshow.h, @ref fullscreen.h | Playback sequences and fullscreen presentation. |
+
+Use the subsystem links above to browse related APIs together, or the Files and
+Classes indexes to browse declarations and implementations.
+Source pages provide cross-references; generated call graphs help locate callers
+but do not describe callback ordering or resource ownership.
+
+Read @ref image_display_lifecycle for a walkthrough from selection through
+decoding, caching, rendering, and completion. Read @ref ownership_and_async for
+ownership, callback delivery, cancellation, and window-closure contracts.
+
+@section developer_changes Working on a change
+
+<ul>
+<li>Check the existing implementation and the relevant developer notes before
+adding another helper or UI pattern.</li>
+<li>Establish whether returned pointers are owned or borrowed. Use the existing
+automatic cleanup types and preserve ownership when passing data to callbacks.</li>
+<li>Follow existing main-loop and worker-thread boundaries. For asynchronous work,
+account for cancellation and for windows closing before completion.</li>
+<li>Keep actions, UI definitions, shortcut defaults, and command-line completions
+consistent when adding commands.</li>
+<li>Put regression tests in `tests/` and register new test files in
+`tests/meson.build`. Functional and static-analysis helpers live in
+`build-aux/`.</li>
+</ul>
+
+@section developer_docs Maintaining this documentation
+
+Document behavior that callers need to know: ownership, lifetime, threading,
+cancellation, return values, and failure handling. Prefer those contracts over
+comments that repeat a function name. Follow the Doxygen conventions in
+@ref CODING.md "Coding conventions".
+
+Generate the full source documentation from the checkout root:
+
+@code{.sh}
+tools/doxygen.sh /tmp/geeqie-doxygen
+@endcode
+
+Check existing comments without requiring documentation for every API:
+
+@code{.sh}
+tools/doxygen.sh --check /tmp/geeqie-doxygen
+@endcode
+
+The check writes `doxygen-check-warnings.log` in the destination and leaves the
+manual unchanged. Normal builds save per-pass warnings in `doxygen-warnings.log`
+and `doxygen-index-warnings.log`.
+
+Open `/tmp/geeqie-doxygen/html/index.html` to view the result. See
+@ref CODING.md "Coding conventions" for optional script filters and diagram
+requirements. The configuration is `doc/doxygen.conf`; this landing page is
+`doc/developer.dox`.
+*/

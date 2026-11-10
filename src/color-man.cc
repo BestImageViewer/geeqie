@@ -95,7 +95,6 @@ cmsHPROFILE color_man_create_adobe_comp()
 
 /**
  * @brief Retrieves the internal scale factor that maps from window coordinates to the actual device pixels
- * @param  -
  * @returns scale factor
  */
 gint scale_factor()

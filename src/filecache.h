@@ -18,6 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/** @file filecache.h
+ * @ingroup caches
+ */
+
 #ifndef FILECACHE_H
 #define FILECACHE_H
 
@@ -29,6 +33,10 @@
 // From filedata.h
 class FileData;
 enum NotifyType : gint;
+
+/** @addtogroup caches
+ * @{
+ */
 
 class FileCache {
     public:
@@ -78,6 +86,8 @@ FileCache *file_cache_new(FileCacheReleaseFunc release, size_t max_size);
 bool file_cache_get(FileCache *fc, FileData *fd);
 void file_cache_put(FileCache *fc, FileData *fd, size_t size);
 void file_cache_set_max_size(FileCache *fc, size_t size);
+
+/** @} */
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

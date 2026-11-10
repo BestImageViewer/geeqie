@@ -159,7 +159,7 @@ struct DupeWindow
 
 	/* required for similarity threads */
 	GThreadPool *dupe_comparison_thread_pool;
-	GList *search_matches; /**< List of similarity matches (#DupeSearchMatch) */
+	GList *search_matches; /**< List of similarity matches (@ref dupe_search_match "DupeSearchMatch") */
 	GMutex search_matches_mutex;
 	GList *search_matches_sorted; /**< \a search_matches sorted by order of entry into thread pool */
 	gint queue_count; /**< Incremented each time an item is pushed onto the similarity thread pool */

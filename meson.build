@@ -870,6 +870,16 @@ if release_test_git.found()
     test('Release preparation', release_test_python,
          args : [join_paths(buildauxdir, 'new-release-test.py'), meson.current_source_dir()],
          timeout : 100, suite : 'functional')
+    test('Doxygen generation', release_test_python,
+         args : [join_paths(buildauxdir, 'test-doxygen.py')],
+         timeout : 100, suite : 'functional')
+    doxygen_check_exe = find_program('doxygen', required : false)
+    if running_from_git and doxygen_check_exe.found()
+        test('Doxygen comments', release_test_python,
+             args : [join_paths(meson.project_source_root(), 'tools', 'doxygen.py'),
+                     '--check', join_paths(meson.project_build_root(), 'doxygen-check')],
+             workdir : meson.project_source_root(), timeout : 180, suite : 'analysis')
+    endif
 endif
 
 # Ancillary files test

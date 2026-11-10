@@ -1178,8 +1178,8 @@ gboolean view_window_find_image(const ImageWindow *imd, gint &index, gint &total
 
 /**
  * @brief Add file selection list to a collection
- * @param[in] widget
- * @param[in] data Index to the collection list menu item selected, or -1 for new collection
+ * @param[in] parameter Collection path, or an empty string for a new collection
+ * @param[in] data Image window
  *
  *
  */

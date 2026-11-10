@@ -5,7 +5,7 @@
 ## @brief Facilitate the integration of the Doxygen html files
 ## into a code editor.
 ##
-## doxygen-help.sh <parameter to be searched for>
+## doxygen-help.sh &lt;parameter to be searched for&gt;
 ##
 ## The environment variable DOCDIR must be set to point to the
 ## Doxygen html files location.
@@ -26,16 +26,16 @@
 ## To generate the Doxygen html files run 'doxygen.sh'
 ##
 ## searchdata.xml is searched for a string of type; \n
-##    <field name="name">ExifWin</field> \n
-##    <field name="url"> \n
+##    &lt;field name="name"&gt;ExifWin&lt;/field&gt; \n
+##    &lt;field name="url"&gt; \n
 ## or \n
-##    <field name="name">advanced_exif_new</field> \n
-##    <field name="args"> \n
-##    <field name="url">
+##    &lt;field name="name"&gt;advanced_exif_new&lt;/field&gt; \n
+##    &lt;field name="args"&gt; \n
+##    &lt;field name="url"&gt;
 ##
 ## If this fails, search again for a string of type: \n
 ##    .*ADVANCED_EXIF_DATA_COLUMN_WIDTH.* \n
-##    <field name="url">
+##    &lt;field name="url"&gt;
 ##
 
 if [ -z "${DOCDIR}" ]
