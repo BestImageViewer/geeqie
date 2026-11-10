@@ -1113,59 +1113,60 @@ static gboolean image_loader_start_idle(ImageLoader *il)
 /**************************************************************************************/
 /* execution via thread */
 
-static GThreadPool *image_loader_thread_pool = nullptr;
-
-static GCond *image_loader_prio_cond = nullptr;
-static GMutex *image_loader_prio_mutex = nullptr;
-static gint image_loader_prio_num = 0;
-
-
-static void image_loader_thread_enter_high()
+struct ImageLoaderPrio
 {
-	g_mutex_lock(image_loader_prio_mutex);
-	image_loader_prio_num++;
-	g_mutex_unlock(image_loader_prio_mutex);
+	ImageLoaderPrio()
+	{
+		g_cond_init(&cond);
+		g_mutex_init(&mutex);
+	}
+
+	GCond cond{};
+	GMutex mutex{};
+	gint num = 0;
+};
+
+static void image_loader_thread_enter_high(ImageLoaderPrio *prio)
+{
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&prio->mutex);
+	prio->num++;
 }
 
-static void image_loader_thread_leave_high()
+static void image_loader_thread_leave_high(ImageLoaderPrio *prio)
 {
-	g_mutex_lock(image_loader_prio_mutex);
-	image_loader_prio_num--;
-	if (image_loader_prio_num == 0) g_cond_broadcast(image_loader_prio_cond); /* wake up all low prio threads */
-	g_mutex_unlock(image_loader_prio_mutex);
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&prio->mutex);
+	prio->num--;
+	if (prio->num == 0) g_cond_broadcast(&prio->cond); /* wake up all low prio threads */
 }
 
-static void image_loader_thread_wait_high(ImageLoader *il)
+static void image_loader_thread_wait_high(ImageLoader *il, ImageLoaderPrio *prio)
 {
-	g_mutex_lock(image_loader_prio_mutex);
-	while (image_loader_prio_num && !g_cancellable_is_cancelled(il->cancellable))
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&prio->mutex);
+	while (prio->num && !g_cancellable_is_cancelled(il->cancellable))
 		{
-		g_cond_wait_until(image_loader_prio_cond, image_loader_prio_mutex,
+		g_cond_wait_until(&prio->cond, &prio->mutex,
 		                  g_get_monotonic_time() + (20 * G_TIME_SPAN_MILLISECOND));
 		}
-
-	g_mutex_unlock(image_loader_prio_mutex);
 }
 
 
-static void image_loader_thread_run(gpointer data, gpointer)
+static void image_loader_thread_run(gpointer data, gpointer user_data)
 {
-	auto il = static_cast<ImageLoader *>(data);
-	gboolean cont;
-	gboolean err;
+	auto *il = static_cast<ImageLoader *>(data);
+	auto *prio = static_cast<ImageLoaderPrio *>(user_data);
 
 	if (il->idle_priority > G_PRIORITY_DEFAULT_IDLE)
 		{
 		/* low prio, wait until high prio tasks finishes */
-		image_loader_thread_wait_high(il);
+		image_loader_thread_wait_high(il, prio);
 		}
 	else
 		{
 		/* high prio */
-		image_loader_thread_enter_high();
+		image_loader_thread_enter_high(prio);
 		}
 
-	err = g_cancellable_is_cancelled(il->cancellable) || !image_loader_begin(il);
+	const gboolean err = g_cancellable_is_cancelled(il->cancellable) || !image_loader_begin(il);
 
 	if (err)
 		{
@@ -1177,30 +1178,31 @@ static void image_loader_thread_run(gpointer data, gpointer)
 		image_loader_emit_error(il);
 		}
 
-	cont = !err;
+	gboolean is_continue = !err;
 
-	while (cont && !image_loader_get_is_done(il) && !image_loader_get_stopping(il))
+	while (is_continue && !image_loader_get_is_done(il) && !image_loader_get_stopping(il))
 		{
 		if (il->idle_priority > G_PRIORITY_DEFAULT_IDLE)
 			{
 			/* low prio, wait until high prio tasks finishes */
-			image_loader_thread_wait_high(il);
+			image_loader_thread_wait_high(il, prio);
 			}
-		cont = image_loader_continue(il);
+
+		is_continue = image_loader_continue(il);
 		}
+
 	image_loader_stop_loader(il);
 
 	if (il->idle_priority <= G_PRIORITY_DEFAULT_IDLE)
 		{
 		/* high prio */
-		image_loader_thread_leave_high();
+		image_loader_thread_leave_high(prio);
 		}
 
 	g_mutex_lock(il->data_mutex);
 	il->can_destroy = TRUE;
 	g_cond_signal(il->can_destroy_cond);
 	g_mutex_unlock(il->data_mutex);
-
 }
 
 
@@ -1214,14 +1216,8 @@ static gboolean image_loader_start_thread(ImageLoader *il)
 
 	if (!image_loader_setup_source(il)) return FALSE;
 
-        if (!image_loader_thread_pool)
-		{
-		image_loader_thread_pool = g_thread_pool_new(image_loader_thread_run, nullptr, -1, FALSE, nullptr);
-		if (!image_loader_prio_cond) image_loader_prio_cond = g_new(GCond, 1);
-		g_cond_init(image_loader_prio_cond);
-		if (!image_loader_prio_mutex) image_loader_prio_mutex = g_new(GMutex, 1);
-		g_mutex_init(image_loader_prio_mutex);
-		}
+	static ImageLoaderPrio prio{};
+	static GThreadPool *image_loader_thread_pool = g_thread_pool_new(image_loader_thread_run, &prio, -1, FALSE, nullptr);
 
 	il->can_destroy = FALSE; /* ImageLoader can't be freed until image_loader_thread_run finishes */
 
