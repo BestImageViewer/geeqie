@@ -261,6 +261,55 @@ TEST_F(ThumbnailReplacement, ReplacementWithPreservedSizeAndMtimeInvalidatesCach
 	EXPECT_FALSE(file_data_check_changed_files(fd));
 }
 
+TEST_F(ThumbnailReplacement, InPlaceEditWithPreservedSizeAndMtimeInvalidatesCachedState)
+{
+	auto fd = FileData::new_simple(path);
+	const auto original_inode = fd->inode;
+	g_autofree gchar *contents = nullptr;
+	gsize length = 0;
+	ASSERT_TRUE(g_file_get_contents(path, &contents, &length, nullptr));
+	fd->exif_orientation = 6;
+	// Only the status change time shows that the file was rewritten.
+	fd->cdate = 0;
+	g_autoptr(FILE) file = g_fopen(path, "r+b");
+	ASSERT_NE(file, nullptr);
+	ASSERT_EQ(fwrite(contents, 1, length, file), length);
+	ASSERT_EQ(fflush(file), 0);
+	const timespec preserved[] = {{fd->date, fd->mtime_nsec}, {fd->date, fd->mtime_nsec}};
+	ASSERT_EQ(utimensat(AT_FDCWD, path, preserved, 0), 0);
+	EXPECT_TRUE(file_data_check_changed_files(fd));
+	EXPECT_EQ(fd->inode, original_inode);
+	EXPECT_NE(fd->cdate, 0);
+	EXPECT_EQ(fd->exif_orientation, 0);
+	EXPECT_FALSE(file_data_check_changed_files(fd));
+}
+
+TEST_F(ThumbnailReplacement, PermissionChangeIsNotified)
+{
+	auto fd = FileData::new_simple(path);
+	gint rereads = 0;
+	const auto notify = [](FileData *, NotifyType type, gpointer data)
+		{
+		if (type & NOTIFY_REREAD) ++*static_cast<gint *>(data);
+		};
+	ASSERT_TRUE(file_data_register_notify_func(notify, &rereads, NOTIFY_PRIORITY_LOW));
+	ASSERT_EQ(g_chmod(path, 0400), 0);
+	// The status change time is ignored on network file systems, so the mode alone must be enough.
+	struct stat st{};
+	ASSERT_EQ(g_stat(path, &st), 0);
+	fd->cdate = st.st_ctime;
+#if HAVE_STAT_TIM
+	fd->ctime_nsec = st.st_ctim.tv_nsec;
+#elif HAVE_STAT_TIMESPEC
+	fd->ctime_nsec = st.st_ctimespec.tv_nsec;
+#endif
+	EXPECT_TRUE(file_data_check_changed_files(fd));
+	EXPECT_TRUE(file_data_unregister_notify_func(notify, &rereads));
+	EXPECT_EQ(rereads, 1);
+	EXPECT_EQ(fd->mode & 0777, 0400U);
+	EXPECT_EQ(g_chmod(path, 0600), 0);
+}
+
 TEST_F(ThumbnailReplacement, MissingSourceKeepsItsCachedThumbnail)
 {
 	seed_cache(nullptr);

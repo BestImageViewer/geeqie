@@ -23,6 +23,7 @@
 
 #include "filedata.h"
 
+#include <gio/gio.h>
 #include <glib/gstdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -167,17 +168,44 @@ void file_data_set_stat(FileData *fd, const struct stat &st)
 	fd->mode = st.st_mode;
 }
 
+/**
+ * @brief Whether a status change time can indicate a modified file
+ * @param path File to check, in UTF-8
+ * @return false on network file systems, true otherwise
+ *
+ * Some network file servers update ctime together with atime whenever a
+ * file is read. There a changed ctime says nothing about the contents, and
+ * treating it as a modification would reload an image every time it is read.
+ */
+bool file_data_status_time_is_reliable(const gchar *path)
+{
+	static const gchar * const network_types[] = {"afpfs", "cifs", "fuse.sshfs", "nfs", "nfs4", "smb", "smb2", "smb3", "smbfs", "webdav", nullptr};
+
+	g_autofree gchar *pathl = path_from_utf8(path);
+	g_autoptr(GFile) file = g_file_new_for_path(pathl);
+	g_autoptr(GFileInfo) info = g_file_query_filesystem_info(file, G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE "," G_FILE_ATTRIBUTE_FILESYSTEM_TYPE, nullptr, nullptr);
+	if (!info) return true;
+
+	if (g_file_info_get_attribute_boolean(info, G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE)) return false;
+
+	// GIO does not report every network file system as remote on all platforms.
+	const gchar *type = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_FILESYSTEM_TYPE);
+	return !type || !g_strv_contains(network_types, type);
+}
+
 } // namespace
 
 static gboolean file_data_check_changed_single_file(FileData *fd, struct stat *st)
 {
+	const bool status_changed = fd->cdate != st->st_ctime || fd->ctime_nsec != stat_ctime_nsec(*st);
+
 	if ((fd->missing && st->st_mode != 0) ||
 	    fd->size != st->st_size ||
 	    fd->date != st->st_mtime ||
 	    fd->mtime_nsec != stat_mtime_nsec(*st) ||
-	    fd->cdate != st->st_ctime ||
-	    fd->ctime_nsec != stat_ctime_nsec(*st) ||
-	    fd->device != st->st_dev || fd->inode != st->st_ino)
+	    fd->mode != st->st_mode ||
+	    fd->device != st->st_dev || fd->inode != st->st_ino ||
+	    (status_changed && file_data_status_time_is_reliable(fd->path)))
 		{
 		fd->missing = st->st_mode == 0;
 		// Preserve disk thumbnails for unavailable collection members.
@@ -199,6 +227,10 @@ static gboolean file_data_check_changed_single_file(FileData *fd, struct stat *s
 		file_data_send_notification(fd, NOTIFY_REREAD);
 		return TRUE;
 		}
+
+	// Keep the stored status change time current on network file systems.
+	if (status_changed) file_data_set_stat(fd, *st);
+
 	return FALSE;
 }
 
