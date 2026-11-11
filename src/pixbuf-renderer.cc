@@ -1967,14 +1967,21 @@ static void pr_zoom_sync(PixbufRenderer *pr, gdouble zoom,
  * https://github.com/BestImageViewer/geeqie/issues/1588
  * The reason is not known.
  */
+	bool keep_center = false;
+	gint target_x_scroll = 0;
+	gint target_y_scroll = 0;
+
 	if (force && new_z)
 		{
 		switch (pr->scroll_reset)
 			{
 			case ScrollReset::NOCHANGE:
 				/* maintain old scroll position */
-				pr->x_scroll = (static_cast<gdouble>(pr->image_width) * old_center_x * pr->scale) - (pr->vis_width / 2); // NOLINT(bugprone-integer-division)
-				pr->y_scroll = (static_cast<gdouble>(pr->image_height) * old_center_y * pr->scale * pr->aspect_ratio) - (pr->vis_height / 2); // NOLINT(bugprone-integer-division)
+				target_x_scroll = std::lround((old_center_x * pr->width) - (pr->vis_width / 2.0));
+				target_y_scroll = std::lround((old_center_y * pr->height) - (pr->vis_height / 2.0));
+				pr->x_scroll = target_x_scroll;
+				pr->y_scroll = target_y_scroll;
+				keep_center = true;
 				break;
 			case ScrollReset::CENTER:
 				/* center new image */
@@ -2005,6 +2012,17 @@ static void pr_zoom_sync(PixbufRenderer *pr, gdouble zoom,
 		}
 
 	pr_scroll_clamp(pr);
+
+	/*
+	 * The scroll offset is an integer, so recomputing the center from it
+	 * loses a fraction of a pixel on every image change. Keep the exact
+	 * previous center unless clamping moved the scroll position.
+	 */
+	if (keep_center)
+		{
+		if (pr->x_scroll == target_x_scroll) pr->norm_center_x = old_center_x;
+		if (pr->y_scroll == target_y_scroll) pr->norm_center_y = old_center_y;
+		}
 
 	pixbuf_renderer_update_zoom(pr, lazy);
 
