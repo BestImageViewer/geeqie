@@ -120,12 +120,12 @@ void append_actions_from_table(std::vector<SearchAndRunAction *> &actions, const
 			for (gint i = 0; action->targets[i] != nullptr; i++)
 				{
 				g_autofree gchar *detailed_action = g_strdup_printf("%s('%s')", action->action_name, action->targets[i]);
-				append_action_to_list(actions, detailed_action, action->description, action->targets[i]);
+				append_action_to_list(actions, detailed_action, _(action->description), action->targets[i]);
 				}
 			}
 		else if (!action->parameter_type)
 			{
-			append_action_to_list(actions, action->action_name, action->description, nullptr);
+			append_action_to_list(actions, action->action_name, _(action->description), nullptr);
 			}
 		}
 }

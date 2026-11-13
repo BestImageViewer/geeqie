@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cinttypes>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
@@ -1844,8 +1845,8 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 		{
 		if (ud->type == UtilityType::DELETE_FOLDER)
 			{
-			g_autofree gchar *counts = g_strdup_printf(_("Subfolders: %" G_GUINT64_FORMAT "\nFiles (including hidden files and symbolic links): %" G_GUINT64_FORMAT),
-			                                         ud->directory_stats.directories, ud->directory_stats.files);
+			g_autofree gchar *counts = g_strdup_printf(_("Subfolders: %" PRIu64 "\nFiles (including hidden files and symbolic links): %" PRIu64),
+			                                         static_cast<std::uint64_t>(ud->directory_stats.directories), static_cast<std::uint64_t>(ud->directory_stats.files));
 			pref_label_new(box, counts);
 			}
 

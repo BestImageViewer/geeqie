@@ -150,7 +150,7 @@ void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType
 
 		if (bar == TOOLBAR_MAIN)
 			{
-			item = g_menu_item_new(actions[i].description,
+			item = g_menu_item_new(_(actions[i].description),
 			                       "win.preferences-win-main-toolbarlist-add");
 
 			g_autoptr(GIcon) themed_icon = ui_icon_new(icon);
@@ -163,7 +163,7 @@ void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, ToolbarType
 			}
 		else
 			{
-			item = g_menu_item_new(actions[i].description,
+			item = g_menu_item_new(_(actions[i].description),
 			                       "win.preferences-win-status-toolbarlist-add");
 
 			g_autoptr(GIcon) themed_icon = ui_icon_new(icon);
