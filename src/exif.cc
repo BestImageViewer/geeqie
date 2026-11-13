@@ -1089,7 +1089,7 @@ static gint exif_jpeg_parse(ExifData *exif,
 		return -2;
 		}
 
-	constexpr std::string_view magic{ "Exif\x00\x00" }; // NOTRANSLATE: File-format identifier or raw metadata value.
+	constexpr std::string_view magic{ "Exif\x00\x00", 6 }; // NOTRANSLATE: File-format identifier or raw metadata value.
 	JpegSegment seg;
 	if (jpeg_segment_find(data, size, JPEG_MARKER_APP1, magic, seg))
 		{
@@ -1186,10 +1186,10 @@ ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 	exif = g_new0(ExifData, 1);
 	exif->path = g_strdup(path);
 
-	res = exif_jpeg_parse(exif, static_cast<guchar *>(f), size, ExifKnownMarkersList);
+	res = exif_jpeg_parse(exif, f, size, ExifKnownMarkersList);
 	if (res == -2)
 		{
-		res = exif_tiff_parse(exif, static_cast<guchar *>(f), size, ExifKnownMarkersList);
+		res = exif_tiff_parse(exif, f, size, ExifKnownMarkersList);
 		}
 
 	if (res != 0)
@@ -1198,23 +1198,23 @@ ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 		FormatRawExifParseFunc exif_parse_func;
 		guint32 offset = 0;
 
-		exif_type = format_raw_exif_offset(static_cast<guchar*>(f), size, &offset, &exif_parse_func);
+		exif_type = format_raw_exif_offset(f, size, &offset, &exif_parse_func);
 		switch (exif_type)
 			{
 			case FORMAT_RAW_EXIF_NONE:
 			default:
 				break;
 			case FORMAT_RAW_EXIF_TIFF:
-				res = exif_tiff_parse(exif, static_cast<guchar *>(f) + offset, size - offset,
+				res = exif_tiff_parse(exif, f + offset, size - offset,
 						      ExifKnownMarkersList);
 				break;
 			case FORMAT_RAW_EXIF_JPEG:
-				res = exif_jpeg_parse(exif, static_cast<guchar *>(f) + offset, size - offset,
+				res = exif_jpeg_parse(exif, f + offset, size - offset,
 						      ExifKnownMarkersList);
 				break;
 			case FORMAT_RAW_EXIF_IFD_II:
 			case FORMAT_RAW_EXIF_IFD_MM:
-				res = exif_parse_IFD_table(exif, static_cast<guchar *>(f), offset, size - offset,
+				res = exif_parse_IFD_table(exif, f, offset, size - offset,
 							   (exif_type == FORMAT_RAW_EXIF_IFD_II) ?
 								EXIF_BYTE_ORDER_INTEL : EXIF_BYTE_ORDER_MOTOROLA,
 							   0, ExifKnownMarkersList);
@@ -1222,7 +1222,7 @@ ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 			case FORMAT_RAW_EXIF_PROPRIETARY:
 				if (exif_parse_func)
 					{
-					res = exif_parse_func(static_cast<guchar *>(f) + offset, size - offset, exif);
+					res = exif_parse_func(f + offset, size - offset, exif);
 					}
 				break;
 			}

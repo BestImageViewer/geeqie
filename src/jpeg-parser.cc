@@ -279,7 +279,7 @@ bool jpeg_segment_find(const guchar *data, guint size,
 
 MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 {
-	constexpr std::string_view magic{ "MPF\x00" };
+	constexpr std::string_view magic{ "MPF\x00", 4 };
 	JpegSegment seg;
 	if (!jpeg_segment_find(data, size, JPEG_MARKER_APP2, magic, seg) || seg.length <= 16) return {};
 
