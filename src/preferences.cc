@@ -2035,7 +2035,7 @@ static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_
 	                 G_CALLBACK(star_rating_icon_cb<star_rating_default>), nullptr);
 	gtk_box_append(GTK_BOX(hbox), star_rating_entry);
 
-	GtkWidget *button = pref_button_new(hbox, nullptr, _("Set"),
+	GtkWidget *button = pref_button_new(hbox, nullptr, _("Apply"),
 	                                    G_CALLBACK(star_rating_symbol_test_cb), data);
 	gtk_widget_set_tooltip_text(button, _("Display selected character"));
 }
@@ -2376,9 +2376,11 @@ static void config_tab_image(GtkWidget *notebook, ConfOptions *c_options)
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 	add_zoom_style_selection_menu(table, 0, 0, _("Zoom style:"), options->image.zoom_style, &c_options->image.zoom_style);
 
+	/* xgettext: no-c-format */
 	ct_button = pref_checkbox_new_int(group, _("Use nearest-neighbor sampling above 200% zoom"),
 	                                 options->image.nearest_above_200, &c_options->image.nearest_above_200);
 	gtk_widget_set_tooltip_text(ct_button,
+	                            /* xgettext: no-c-format */
 	                            _("A keyboard shortcut for this option can be assigned in Preferences → Keyboard using the action ‘Use nearest-neighbor sampling above 200% zoom’."));
 
 	pref_checkbox_new_int(group, _("Allow panning beyond image edges"),
@@ -2520,7 +2522,7 @@ static void config_tab_windows(GtkWidget *notebook, ConfOptions *c_options)
 	subgroup = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(subgroup, _("Use current layout for default: "));
 	button = gtk_menu_button_new();
-	gtk_menu_button_set_child(GTK_MENU_BUTTON(button), gtk_label_new_with_mnemonic(_("Set")));
+	gtk_menu_button_set_child(GTK_MENU_BUTTON(button), gtk_label_new_with_mnemonic(_("Apply")));
 	gtk_box_append(GTK_BOX(subgroup), button);
 
 	GtkWidget *popover;

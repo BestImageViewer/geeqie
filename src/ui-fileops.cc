@@ -27,6 +27,7 @@
 #include <utime.h>
 
 #include <cerrno>
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -1283,7 +1284,7 @@ gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error,
 	guint64 removed = 0;
 	if (tree_remove_plan(plan, effective, error, &removed)) return TRUE;
 	g_autofree gchar *path = g_file_get_parse_name(file);
-	g_prefix_error(error, _("Deletion did not finish. Entries permanently deleted: %" G_GUINT64_FORMAT "\nAny remaining contents are at:\n%s\n\n"), removed, path);
+	g_prefix_error(error, _("Deletion did not finish. Entries permanently deleted: %" PRIu64 "\nAny remaining contents are at:\n%s\n\n"), static_cast<std::uint64_t>(removed), path);
 	return FALSE;
 }
 
@@ -1313,7 +1314,7 @@ gboolean file_tree_move(GFile *source, GFile *dest, GError **error, FileTreeOper
 	if (tree_remove_plan(plan, operation, error, &removed)) return TRUE;
 	g_autofree gchar *source_display = g_file_get_parse_name(source);
 	g_autofree gchar *dest_display = g_file_get_parse_name(dest);
-	g_prefix_error(error, _("Copying completed, but source removal did not finish.\nThe completed copy remains at:\n%s\n\nSource entries removed: %" G_GUINT64_FORMAT "\nAny remaining source contents are at:\n%s\n\n"), dest_display, removed, source_display);
+	g_prefix_error(error, _("Copying completed, but source removal did not finish.\nThe completed copy remains at:\n%s\n\nSource entries removed: %" PRIu64 "\nAny remaining source contents are at:\n%s\n\n"), dest_display, static_cast<std::uint64_t>(removed), source_display);
 	return FALSE;
 }
 

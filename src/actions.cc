@@ -12,6 +12,7 @@
 
 #include "accelerators.h"
 #include "convert-configuration.h"
+#include "intl.h"
 #include "layout-util.h"
 #include "main-defines.h"
 #include "pixbuf-renderer.h"
@@ -58,16 +59,16 @@ const char *get_description_for_action_name(const char *action_name)
 					{
 					if (g_variant_is_of_type(target, G_VARIANT_TYPE_STRING))
 						{
-						return g_strdup_printf("%s %s", action_table[i].description, g_variant_get_string(target, nullptr));
+						return g_strdup_printf("%s %s", _(action_table[i].description), g_variant_get_string(target, nullptr));
 						}
 
 					if (g_variant_is_of_type(target, G_VARIANT_TYPE_INT32))
 						{
-						return g_strdup_printf("%s %d", action_table[i].description, g_variant_get_int32(target));
+						return g_strdup_printf("%s %d", _(action_table[i].description), g_variant_get_int32(target));
 						}
 					}
 
-				return action_table[i].description;
+				return _(action_table[i].description);
 				}
 			}
 		}
@@ -563,7 +564,7 @@ GStrv action_defs_to_aligned_lines(const ActionDef *app_actions)
 				}
 			}
 
-		rows.push_back({ action_name, action->description });
+		rows.push_back({ action_name, _(action->description) });
 
 		size_t len = strlen(action_name);
 		max_entry_len = std::max(len, max_entry_len);

@@ -66,7 +66,7 @@ POT_SOURCES_SORTED=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
 find ../ -type f -name '*.metainfo.xml.in' > "$POT_APPSTREAM"
 find ../ -type f -name '*.desktop.in' > "$POT_DESKTOPS"
 find ../data -type f -name '*.ui' > "$POT_UI"
-find ../src -type f -name '*.cc' > "$POT_SOURCES"
+find ../src -type f \( -name '*.cc' -o -name '*.inc' \) > "$POT_SOURCES"
 sort "$POT_APPSTREAM" > "$POT_APPSTREAM_SORTED"
 sort "$POT_DESKTOPS" > "$POT_DESKTOPS_SORTED"
 sort "$POT_UI" > "$POT_UI_SORTED"
