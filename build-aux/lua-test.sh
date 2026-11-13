@@ -31,18 +31,18 @@ lua_test_file=$(mktemp --suffix=".lua" --tmpdir="$config_home/geeqie/lua/" lua-t
 lua_test_image_base64="/9j/4AAQSkZJRgABAQAAAQABAAD/4QCkRXhpZgAATU0AKgAAAAgABQEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAEAAAITAAMAAAABAAEAAIdpAAQAAAABAAAAWgAAAAAAAAABAAAAAQAAAAEAAAABAAWIJwADAAAAAQDIAACQAAAHAAAABDAyMzKRAQAHAAAABAECAwCgAAAHAAAABDAxMDCgAQADAAAAAf//AAAAAAAA/9sAQwADAgICAgIDAgICAwMDAwQGBAQEBAQIBgYFBgkICgoJCAkJCgwPDAoLDgsJCQ0RDQ4PEBAREAoMEhMSEBMPEBAQ/8AACwgAIAAgAQERAP/EABUAAQEAAAAAAAAAAAAAAAAAAAAJ/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAAPwCqYAAAAD//2Q=="
 printf "%s" "$lua_test_image_base64" | base64 --decode > "$lua_test_image"
 
-lua_test="path = Image:get_path()
+cat > "$lua_test_file" <<'EOF'
+path = Image:get_path()
 name = Image:get_name()
 extension = Image:get_extension()
 date = math.floor(Image:get_date())
 size = math.floor(Image:get_size())
 marks = math.floor(Image:get_marks())
 exif_structure = Image:get_exif()
-iso = exif_structure:get_datum(\"Exif.Photo.ISOSpeedRatings\")
-ret = name..\"\n\"..extension..\"\n\"..path..\"\n\"..date..\"\n\"..size..\"\n\"..marks..\"\n\"..iso
+iso = exif_structure:get_datum("Exif.Photo.ISOSpeedRatings")
+ret = name.."\n"..extension.."\n"..path.."\n"..date.."\n"..size.."\n"..marks.."\n"..iso
 return ret
-"
-printf  "%s" "$lua_test" > "$lua_test_file"
+EOF
 
 xvfb-run --auto-servernum "$geeqie_exe" &
 
