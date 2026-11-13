@@ -19,14 +19,17 @@ Versions:
 ![Flathub](https://img.shields.io/flathub/v/org.geeqie.Geeqie)
 ![Homebrew](https://img.shields.io/homebrew/v/geeqie)
 ![MacPorts](https://img.shields.io/macports/v/geeqie)
-![Snap](https://img.shields.io/badge/Snap-CI-blue)
 ![Ubuntu](https://img.shields.io/ubuntu/v/geeqie)
 ![Snap](https://img.shields.io/snapcraft/v/geeqie/latest/edge)
 
 Language Translations:
 
 [![Languages](https://img.shields.io/badge/languages-38-blue)](po/LINGUAS)
-[![German translation](https://img.shields.io/badge/German-93.6%25-brightgreen)](po/de.po)
+[![Japanese translation](https://img.shields.io/badge/Japanese-100%25-brightgreen)](po/ja.po)
+[![German translation](https://img.shields.io/badge/German-81%25-brightgreen)](po/de.po)
+[![Spanish translation](https://img.shields.io/badge/Spanish-80%25-brightgreen)](po/es.po)
+[![Slovakian translation](https://img.shields.io/badge/Slovakian-74%25-brightgreen)](po/sk.po)
+[![Catalan translation](https://img.shields.io/badge/Catalan-73%25-brightgreen)](po/ca.po)
 
 ## Geeqie - an image viewer
 
