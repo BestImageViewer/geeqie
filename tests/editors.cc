@@ -486,6 +486,8 @@ TEST_F(PluginDiscovery, ExecutableChecksAndDisabledPluginsArePreserved)
 TEST_F(PluginDiscovery, MimeTypesUseSharedDatabaseExtensionsAndAliases)
 {
 	filter_add_defaults();
+	// Exercise document MIME types even when the PDF loader is unavailable.
+	filter_add("test-pdf", "Test PDF", ".pdf", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
 	filter_rebuild();
 	write_plugin("jpeg.desktop", "MimeType=image/jpeg;\n");
 	write_plugin("bitmap.desktop", "MimeType=image/x-bmp;\n");
