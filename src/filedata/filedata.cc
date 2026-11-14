@@ -171,12 +171,15 @@ void file_data_set_stat(FileData *fd, const struct stat &st)
 
 static gboolean file_data_check_changed_single_file(FileData *fd, struct stat *st)
 {
+	/*
+	 * The status change time is not compared: some file systems, such as
+	 * NFS shares, update it together with the access time when a file is
+	 * read, which would make every load look like a modification.
+	 */
 	if ((fd->missing && st->st_mode != 0) ||
 	    fd->size != st->st_size ||
 	    fd->date != st->st_mtime ||
 	    fd->mtime_nsec != stat_mtime_nsec(*st) ||
-	    fd->cdate != st->st_ctime ||
-	    fd->ctime_nsec != stat_ctime_nsec(*st) ||
 	    fd->device != st->st_dev || fd->inode != st->st_ino)
 		{
 		fd->missing = st->st_mode == 0;
