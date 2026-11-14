@@ -279,11 +279,7 @@ static void image_loader_finalize(GObject *object)
 		il->area_param_list = g_list_delete_link(il->area_param_list, il->area_param_list);
 		}
 
-	while (il->area_param_delayed_list)
-		{
-		g_free(il->area_param_delayed_list->data);
-		il->area_param_delayed_list = g_list_delete_link(il->area_param_delayed_list, il->area_param_delayed_list);
-		}
+	g_clear_list(&il->area_param_delayed_list, g_free);
 
 	if (il->pixbuf) g_object_unref(il->pixbuf);
 
@@ -1051,21 +1047,16 @@ void image_loader_delay_area_ready(ImageLoader *il, gboolean enable)
 	if (!enable)
 		{
 		/* send delayed */
-		GList *list;
-		GList *work;
-		list = g_list_reverse(il->area_param_delayed_list);
-		il->area_param_delayed_list = nullptr;
+		GList *list = g_list_reverse(g_steal_pointer(&il->area_param_delayed_list));
 		g_mutex_unlock(il->data_mutex);
 
-		work = list;
-
-		while (work)
+		for (GList *work = list; work; work = work->next)
 			{
-			auto par = static_cast<ImageLoaderAreaParam *>(work->data);
-			work = work->next;
+			auto *par = static_cast<ImageLoaderAreaParam *>(work->data);
 
 			g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, &par->area);
 			}
+
 		g_list_free_full(list, g_free);
 		}
 	else
