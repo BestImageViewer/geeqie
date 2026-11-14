@@ -238,7 +238,6 @@ static const gchar *image_loader_get_error(ImageLoader *il)
 	if (!il) return nullptr;
 
 	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
-
 	return il->error ? il->error->message : nullptr;
 }
 #endif
@@ -468,36 +467,21 @@ static void image_loader_queue_delayed_area_ready(ImageLoader *il, GdkRectangle 
 
 static gboolean image_loader_get_stopping(ImageLoader *il)
 {
-	gboolean ret;
 	if (!il) return FALSE;
 
-	g_mutex_lock(il->data_mutex);
-	ret = il->stopping;
-	g_mutex_unlock(il->data_mutex);
-
-	return ret;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	return il->stopping;
 }
 
 
 static void image_loader_sync_pixbuf(ImageLoader *il)
 {
-	GdkPixbuf *pb;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
 
-	g_mutex_lock(il->data_mutex);
+	if (!il->backend) return;
 
-	if (!il->backend)
-		{
-		g_mutex_unlock(il->data_mutex);
-		return;
-		}
-
-	pb = il->backend->get_pixbuf();
-
-	if (pb == il->pixbuf)
-		{
-		g_mutex_unlock(il->data_mutex);
-		return;
-		}
+	GdkPixbuf *pb = il->backend->get_pixbuf();
+	if (pb == il->pixbuf) return;
 
 	if (g_ascii_strcasecmp(".jps", il->fd->extension) == 0)
 		{
@@ -508,8 +492,6 @@ static void image_loader_sync_pixbuf(ImageLoader *il)
 
 	il->pixbuf = pb;
 	if (il->pixbuf) g_object_ref(il->pixbuf);
-
-	g_mutex_unlock(il->data_mutex);
 }
 
 static void image_loader_area_updated_cb(gpointer,
@@ -527,15 +509,14 @@ static void image_loader_area_updated_cb(gpointer,
 			}
 		}
 
-	g_mutex_lock(il->data_mutex);
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+
 	if (il->delay_area_ready)
 		image_loader_queue_delayed_area_ready(il, {x, y, w, h});
 	else
 		image_loader_emit_area_ready(il, {x, y, w, h});
 
 	if (il->stopping) il->backend->abort();
-
-	g_mutex_unlock(il->data_mutex);
 }
 
 static void image_loader_size_prepared_cb(gpointer, gint width, gint height, gpointer data)
@@ -601,9 +582,9 @@ static void image_loader_stop_loader(ImageLoader *il)
 		image_loader_sync_pixbuf(il);
 		il->backend.reset(nullptr);
 		}
-	g_mutex_lock(il->data_mutex);
+
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
 	il->done = TRUE;
-	g_mutex_unlock(il->data_mutex);
 }
 
 static gboolean image_loader_setup_loader(ImageLoader *il)
@@ -616,7 +597,8 @@ static gboolean image_loader_setup_loader(ImageLoader *il)
 		external_preview = image_loader_run_external(il, argv, nullptr);
 		}
 	if (g_cancellable_is_cancelled(il->cancellable)) return FALSE;
-	g_mutex_lock(il->data_mutex);
+
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
 
 	if (external_preview == 0)
 		{
@@ -793,7 +775,6 @@ static gboolean image_loader_setup_loader(ImageLoader *il)
 
 	il->fd->format_name = il->backend->get_format_name();
 
-	g_mutex_unlock(il->data_mutex);
 	return TRUE;
 }
 
@@ -1026,15 +1007,13 @@ static void image_loader_stop(ImageLoader *il)
 	if (il->thread)
 		{
 		/* stop loader in the other thread */
-		g_mutex_lock(il->data_mutex);
+		g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
 		il->stopping = TRUE;
 		while (!il->can_destroy) g_cond_wait(il->can_destroy_cond, il->data_mutex);
-		g_mutex_unlock(il->data_mutex);
 		}
 
 	image_loader_stop_loader(il);
 	image_loader_stop_source(il);
-
 }
 
 /**
@@ -1042,28 +1021,23 @@ static void image_loader_stop(ImageLoader *il)
  */
 void image_loader_delay_area_ready(ImageLoader *il, gboolean enable)
 {
-	g_mutex_lock(il->data_mutex);
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+
 	il->delay_area_ready = enable;
-	if (!enable)
+	if (enable) return; /* just unlock */
+
+	/* send delayed */
+	GList *list = g_list_reverse(g_steal_pointer(&il->area_param_delayed_list));
+	g_clear_pointer(&locker, g_mutex_locker_free);
+
+	for (GList *work = list; work; work = work->next)
 		{
-		/* send delayed */
-		GList *list = g_list_reverse(g_steal_pointer(&il->area_param_delayed_list));
-		g_mutex_unlock(il->data_mutex);
+		auto *par = static_cast<ImageLoaderAreaParam *>(work->data);
 
-		for (GList *work = list; work; work = work->next)
-			{
-			auto *par = static_cast<ImageLoaderAreaParam *>(work->data);
-
-			g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, &par->area);
-			}
-
-		g_list_free_full(list, g_free);
+		g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, &par->area);
 		}
-	else
-		{
-		/* just unlock */
-		g_mutex_unlock(il->data_mutex);
-		}
+
+	g_list_free_full(list, g_free);
 }
 
 
@@ -1193,10 +1167,9 @@ static void image_loader_thread_run(gpointer data, gpointer user_data)
 		image_loader_thread_leave_high(prio);
 		}
 
-	g_mutex_lock(il->data_mutex);
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
 	il->can_destroy = TRUE;
 	g_cond_signal(il->can_destroy_cond);
-	g_mutex_unlock(il->data_mutex);
 }
 
 
@@ -1267,13 +1240,10 @@ gboolean image_loader_start_deferred(ImageLoader *il)
 /* don't forget to gdk_pixbuf_ref() it if you want to use it after g_object_unref(il) */
 GdkPixbuf *image_loader_get_pixbuf(ImageLoader *il)
 {
-	GdkPixbuf *ret;
 	if (!il) return nullptr;
 
-	g_mutex_lock(il->data_mutex);
-	ret = il->pixbuf;
-	g_mutex_unlock(il->data_mutex);
-	return ret;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	return il->pixbuf;
 }
 
 /**
@@ -1285,19 +1255,17 @@ void image_loader_set_requested_size(ImageLoader *il, gint width, gint height)
 {
 	if (!il) return;
 
-	g_mutex_lock(il->data_mutex);
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
 	il->requested_width = width;
 	il->requested_height = height;
-	g_mutex_unlock(il->data_mutex);
 }
 
 void image_loader_set_buffer_size(ImageLoader *il, guint count)
 {
 	if (!il) return;
 
-	g_mutex_lock(il->data_mutex);
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
 	il->idle_read_loop_count = count ? count : 1;
-	g_mutex_unlock(il->data_mutex);
 }
 
 /**
@@ -1315,55 +1283,36 @@ void image_loader_set_priority(ImageLoader *il, gint priority)
 
 gdouble image_loader_get_percent(ImageLoader *il)
 {
-	gdouble ret;
 	if (!il) return 0.0;
 
-	g_mutex_lock(il->data_mutex);
-	if (il->bytes_total == 0)
-		{
-		ret = 0.0;
-		}
-	else
-		{
-		ret = static_cast<gdouble>(il->bytes_read) / il->bytes_total;
-		}
-	g_mutex_unlock(il->data_mutex);
-	return ret;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	if (il->bytes_total == 0) return 0.0;
+
+	return static_cast<gdouble>(il->bytes_read) / il->bytes_total;
 }
 
 gboolean image_loader_get_is_done(ImageLoader *il)
 {
-	gboolean ret;
 	if (!il) return FALSE;
 
-	g_mutex_lock(il->data_mutex);
-	ret = il->done;
-	g_mutex_unlock(il->data_mutex);
-
-	return ret;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	return il->done;
 }
 
 FileData *image_loader_get_fd(ImageLoader *il)
 {
-	FileData *ret;
 	if (!il) return nullptr;
 
-	g_mutex_lock(il->data_mutex);
-	ret = il->fd;
-	g_mutex_unlock(il->data_mutex);
-
-	return ret;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	return il->fd;
 }
 
 gboolean image_loader_get_shrunk(ImageLoader *il)
 {
-	gboolean ret;
 	if (!il) return FALSE;
 
-	g_mutex_lock(il->data_mutex);
-	ret = il->shrunk;
-	g_mutex_unlock(il->data_mutex);
-	return ret;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	return il->shrunk;
 }
 
 
