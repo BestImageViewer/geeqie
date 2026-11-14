@@ -26,6 +26,7 @@ Language Translations:
 
 [![Languages](https://img.shields.io/badge/languages-38-blue)](po/LINGUAS)
 [![Japanese translation](https://img.shields.io/badge/Japanese-100%25-brightgreen)](po/ja.po)
+[![Swedish translation](https://img.shields.io/badge/Swedish-100%25-brightgreen)](po/sv.po)
 [![German translation](https://img.shields.io/badge/German-81%25-brightgreen)](po/de.po)
 [![Spanish translation](https://img.shields.io/badge/Spanish-80%25-brightgreen)](po/es.po)
 [![Slovakian translation](https://img.shields.io/badge/Slovakian-74%25-brightgreen)](po/sk.po)
