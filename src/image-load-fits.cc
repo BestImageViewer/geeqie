@@ -20,6 +20,7 @@
 
 #include "image-load-fits.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fitsio.h>
 #include <limits>
