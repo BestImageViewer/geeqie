@@ -680,19 +680,21 @@ static void date_selection_popup_sync(DateSelection *ds)
 	date_selection_set(ds->box, day, month, year);
 }
 
+static void date_selection_calendar_set_date(DateSelection *ds)
+{
+	g_autoptr(GDateTime) date = date_selection_get(ds->box);
+#if GTK_CHECK_VERSION(4, 20, 0)
+	gtk_calendar_set_date(GTK_CALENDAR(ds->calendar), date);
+#else
+	gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
+#endif
+}
+
 static void date_selection_popup(DateSelection *ds)
 {
 	if (ds->popover)
 		{
-		g_autoptr(GDateTime) date = date_selection_get(ds->box);
-		// Retained for GTK 4.18 compatibility; gtk_calendar_set_date() requires 4.20.
-#ifndef SHOW_ALL_DEPRECATED_WARNINGS
-		G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-#endif
-		gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
-#ifndef SHOW_ALL_DEPRECATED_WARNINGS
-		G_GNUC_END_IGNORE_DEPRECATIONS
-#endif
+		date_selection_calendar_set_date(ds);
 		return;
 		}
 
@@ -702,16 +704,7 @@ static void date_selection_popup(DateSelection *ds)
 
 	gtk_popover_set_child(GTK_POPOVER(ds->popover), ds->calendar);
 
-	g_autoptr(GDateTime) date = date_selection_get(ds->box);
-
-	// Retained for GTK 4.18 compatibility; gtk_calendar_set_date() requires 4.20.
-#ifndef SHOW_ALL_DEPRECATED_WARNINGS
-	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-#endif
-	gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
-#ifndef SHOW_ALL_DEPRECATED_WARNINGS
-	G_GNUC_END_IGNORE_DEPRECATIONS
-#endif
+	date_selection_calendar_set_date(ds);
 
 	g_signal_connect_swapped(ds->calendar,
 	                         "day-selected",
