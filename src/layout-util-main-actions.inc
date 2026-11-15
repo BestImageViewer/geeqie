@@ -855,6 +855,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-save-clipboard-image",
+		nullptr,
+		N_("Save Clipboard Image…"),
+		layout_menu_save_clipboard_image_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-copy-image",
 		nullptr,
 		N_("Copy Image"),

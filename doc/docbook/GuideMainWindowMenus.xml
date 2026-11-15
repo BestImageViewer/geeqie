@@ -23,6 +23,13 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><guimenu>Save Clipboard Image…</guimenu></term>
+        <listitem>
+          <para>Saves image pixels from the standard clipboard to a local PNG file, preserving transparency. The save dialog starts in the current folder and suggests a filename such as <filename>clipboard-20261114-164500.png</filename>. The filename must end in <literal>.png</literal>. Geeqie asks for confirmation before replacing an existing file, then displays and selects the saved image.</para>
+          <para>If the clipboard does not contain an image, Geeqie displays a message. See <link linkend="CopyAndClipboardCommands">Copy and clipboard commands</link> for the differences between image pixels and file paths on the clipboard.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term>
           <menuchoice>
             <shortcut>

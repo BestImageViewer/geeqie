@@ -36,6 +36,7 @@ struct FileDialogData
 	gboolean *checkbox_value; /**< Updated only when a file is accepted; must outlive the dialog */
 	gboolean accept_existing; /**< For SAVE: accept existing files without replacement confirmation; callback must preserve them */
 	gboolean focus_accept; /**< Initially focus the accept button */
+	gboolean destroy_with_parent; /**< Cancel and close the chooser if its parent is destroyed */
 };
 
 void file_dialog_show(const FileDialogData &fdd);

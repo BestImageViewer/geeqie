@@ -948,6 +948,7 @@ void file_dialog_show(const FileDialogData &fdd)
 	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
 	pending->dialog = gtk_dialog_new_with_buttons(title, parent, GTK_DIALOG_MODAL, _("_Cancel"), GTK_RESPONSE_CANCEL, accept_text, GTK_RESPONSE_ACCEPT, nullptr);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(pending->dialog), fdd.destroy_with_parent);
 	GtkWidget *accept_button = gtk_dialog_get_widget_for_response(GTK_DIALOG(pending->dialog), GTK_RESPONSE_ACCEPT);
 	if (fdd.alternate_callback && fdd.alternate_text)
 		{

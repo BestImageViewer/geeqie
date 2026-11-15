@@ -19,7 +19,8 @@ namespace
 
 TEST(HistoryList, RecentFilesUseUrisAndApplicationMetadata)
 {
-	if (!gtk_init_check()) GTEST_SKIP() << "Requires a display";
+	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
 	g_autofree gchar *directory = g_dir_make_tmp("geeqie-recent-files-XXXXXX", nullptr);
 	ASSERT_NE(directory, nullptr);
 	g_autofree gchar *filename = g_build_filename(directory, "recent file #1.txt", nullptr);

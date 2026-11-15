@@ -43,6 +43,7 @@
 #include "bar-sort.h"
 #include "bar.h"
 #include "cache-maint.h"
+#include "clipboard-image.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "color-man.h"
@@ -462,6 +463,11 @@ static void layout_menu_copy_path_cb(GSimpleAction *, GVariant *, gpointer  )
 	auto lw = get_current_layout();
 
 	file_util_path_list_to_clipboard(layout_selection_list(lw), quoted, ClipboardAction::COPY);
+}
+
+static void layout_menu_save_clipboard_image_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	clipboard_image_dialog_show(static_cast<LayoutWindow *>(data));
 }
 
 static void layout_menu_copy_image_cb(GSimpleAction *, GVariant *, gpointer)

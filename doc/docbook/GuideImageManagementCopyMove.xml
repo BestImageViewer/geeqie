@@ -32,7 +32,7 @@
   <para />
   <section id="CopyAndClipboardCommands">
     <title>Copy and clipboard commands</title>
-    <para>Geeqie menus contain several commands whose names include “Copy”. They copy different kinds of data and should not be confused with one another:</para>
+    <para>Geeqie's copy and clipboard commands work with file paths, files, or image pixels:</para>
     <variablelist>
       <varlistentry>
         <term><guimenuitem>Copy File To…</guimenuitem></term>
@@ -65,8 +65,15 @@
           <para>Places the decoded image pixels on the clipboard for pasting into an image editor or another application that accepts image data. It does not copy the original encoded file, file metadata, or sidecar files. In the file-pane context menu it applies to the file that was right-clicked.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><guimenuitem>Save Clipboard Image…</guimenuitem></term>
+        <listitem>
+          <para>Available from the <guimenu>File</guimenu> menu. Saves image pixels copied by Geeqie or another application, such as a screenshot tool, to a PNG file. Transparency is preserved. This command requires image data on the clipboard; copied file paths are not opened or copied. It does not restore the original file's camera metadata or sidecar files.</para>
+          <para>The save dialog defaults to the current folder and a timestamped filename ending in <literal>.png</literal>. Confirming the destination saves the image and selects it in the originating Geeqie window. The image read when the command was selected is saved even if the clipboard contents change while the dialog is open.</para>
+        </listitem>
+      </varlistentry>
     </variablelist>
-    <para>The clipboard used for path and file commands is controlled by the <emphasis role="underline"><link linkend="Behaviour">Copy path clipboard selection</link></emphasis> preference. <guimenuitem>Copy Image</guimenuitem> always uses the standard clipboard.</para>
+    <para>The clipboard used for path and file commands is controlled by the <emphasis role="underline"><link linkend="Behaviour">Copy path clipboard selection</link></emphasis> preference. <guimenuitem>Copy Image</guimenuitem> and <guimenuitem>Save Clipboard Image…</guimenuitem> always use the standard clipboard.</para>
   </section>
   <section id="TheCopyMovedialog">
     <title>The Copy/Move dialog</title>

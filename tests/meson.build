@@ -5,6 +5,7 @@ unit_test_sources = files(
 'bar-sort.cc',
 'cache.cc',
 'cache-maint.cc',
+'clipboard-image.cc',
 'collection-file-source.cc',
 'color-scheme.cc',
 'color-label.cc',
