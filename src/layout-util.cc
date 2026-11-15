@@ -3170,29 +3170,12 @@ void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window)
 	layout_util_sync_archive(lw);
 }
 
-static void layout_menu_bar_use_sliding_submenus(GtkWidget *widget)
-{
-	/* Sliding submenus avoid focus and input-grab problems caused by nested popovers. */
-	if (GTK_IS_POPOVER_MENU(widget) &&
-	    gtk_popover_menu_get_flags(GTK_POPOVER_MENU(widget)) != GTK_POPOVER_MENU_SLIDING)
-		{
-		gtk_popover_menu_set_flags(GTK_POPOVER_MENU(widget), GTK_POPOVER_MENU_SLIDING);
-		}
-
-	for (GtkWidget *child = gtk_widget_get_first_child(widget);
-	     child;
-	     child = gtk_widget_get_next_sibling(child))
-		{
-		layout_menu_bar_use_sliding_submenus(child);
-		}
-}
-
 GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
 {
 	if (lw->menu_bar) return lw->menu_bar;
 
 	lw->menu_bar = gtk_popover_menu_bar_new_from_model(lw->menu_model);
-	layout_menu_bar_use_sliding_submenus(lw->menu_bar);
+	menu_nested_submenus_setup(lw->menu_bar);
 	menu_icon_rows_refresh(lw->menu_bar, lw->menu_model);
 
 	return g_object_ref(lw->menu_bar);

@@ -52,6 +52,7 @@
 #include "trash.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
+#include "ui-menu.h"
 #include "view-dir.h"
 #include "view-file.h"
 
@@ -1806,6 +1807,147 @@ TEST_F(PartialLayoutConfig, SortManagerWidthSurvivesLayoutRebuildAndReplacement)
 	ASSERT_TRUE(wait_layout([&]() { return sort_width_settled(); }));
 	EXPECT_EQ(gtk_widget_get_width(layout->bar_sort), sidebar_width);
 	EXPECT_EQ(layout->options.sort_manager_width, 350);
+}
+
+TEST_F(PartialLayoutConfig, NestedMenuNavigationPreservesShortcuts)
+{
+	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+	if (!xdotool || !g_getenv("DISPLAY") || g_getenv("WAYLAND_DISPLAY"))
+		GTEST_SKIP() << "Requires xdotool and X11";
+
+	options->hamburger_menu = FALSE;
+	layout_free(layout);
+	layout = nullptr;
+	const gchar *names[] = {"home_path", "startup_path", nullptr};
+	const gchar *values[] = {directory, "2", nullptr};
+	layout = layout_new_from_config(names, values, FALSE);
+	ASSERT_NE(layout, nullptr);
+	gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie nested menu test"); // NOTRANSLATE: X11 test window identifier.
+	gtk_window_present(GTK_WINDOW(layout->window));
+	ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(layout->menu_bar); }));
+
+	bool focused = false;
+	const auto press = [&](const gchar *key)
+		{
+		gdk_display_flush(gtk_widget_get_display(layout->window));
+		if (!focused)
+			{
+			const gchar *focus_args[] = {xdotool, "search", "--name", "^Geeqie nested menu test$", "windowfocus", "--sync",
+			                             "mousemove", "10000", "10000", nullptr};
+			if (!g_spawn_sync(nullptr, const_cast<gchar **>(focus_args), nullptr, G_SPAWN_DEFAULT,
+			                  nullptr, nullptr, nullptr, nullptr, nullptr, nullptr)) return false;
+			if (!wait_layout([&]() { return gtk_window_is_active(GTK_WINDOW(layout->window)); })) return false;
+			image_grab_focus(layout->image);
+			focused = true;
+			}
+		const gchar *args[] = {xdotool, "key", "--clearmodifiers", key, nullptr};
+		gint status = 0;
+		return g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+		                    nullptr, nullptr, nullptr, nullptr, &status, nullptr) &&
+		       g_spawn_check_wait_status(status, nullptr);
+		};
+	const std::function<int(GtkWidget *)> mapped_menus = [&](GtkWidget *widget)
+		{
+		int count = GTK_IS_POPOVER_MENU(widget) && gtk_widget_get_mapped(widget) ? 1 : 0;
+		for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+			count += mapped_menus(child);
+		return count;
+		};
+
+	image_grab_focus(layout->image);
+	const gboolean initial_thumbnails = layout->options.show_thumbnails;
+	ASSERT_TRUE(press("t"));
+	ASSERT_TRUE(wait_layout([&]() { return layout->options.show_thumbnails != initial_thumbnails; }));
+	for (int repeat = 0; repeat < 2; ++repeat)
+		{
+		ASSERT_TRUE(press("alt+e"));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(layout->menu_bar) == 1; }));
+		if (repeat == 0)
+			{
+			ASSERT_TRUE(press("Right"));
+			}
+		else
+			{
+			auto *item = gtk_root_get_focus(GTK_ROOT(layout->window));
+			ASSERT_NE(item, nullptr);
+			const graphene_point_t center{gtk_widget_get_width(item) / 2.0f, gtk_widget_get_height(item) / 2.0f};
+			graphene_point_t position{};
+			ASSERT_TRUE(gtk_widget_compute_point(item, layout->window, &center, &position));
+			g_autofree gchar *x = g_strdup_printf("%d", static_cast<int>(position.x));
+			g_autofree gchar *y = g_strdup_printf("%d", static_cast<int>(position.y));
+			const gchar *args[] = {xdotool, "search", "--name", "^Geeqie nested menu test$",
+			                       "mousemove", "--window", "%1", x, y, nullptr};
+			gint status = 0;
+			ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+			                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+			ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+			}
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(layout->menu_bar) == 2; }));
+		if (repeat != 0)
+			{
+			// Move off the item before testing keyboard navigation, so hover cannot reopen it.
+			const gchar *args[] = {xdotool, "mousemove", "10000", "10000", nullptr};
+			gint status = 0;
+			ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+			                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+			ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+			}
+		ASSERT_TRUE(press("Left"));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(layout->menu_bar) == 1; })) << "Repeat: " << repeat << ", mapped menus: " << mapped_menus(layout->menu_bar);
+		ASSERT_TRUE(press("Right"));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(layout->menu_bar) == 2; })) << "Repeat: " << repeat << ", mapped menus: " << mapped_menus(layout->menu_bar) << ", focus: " << G_OBJECT_TYPE_NAME(gtk_root_get_focus(GTK_ROOT(layout->window)));
+		ASSERT_TRUE(press("Escape"));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(layout->menu_bar) == 0; }));
+		const gboolean thumbnails = layout->options.show_thumbnails;
+		ASSERT_TRUE(press("t"));
+		EXPECT_TRUE(wait_layout([&]() { return layout->options.show_thumbnails != thumbnails; }));
+		}
+
+	g_autoptr(GMenu) leaf = g_menu_new();
+	g_menu_append(leaf, "Thumbnails", "win.main-win-thumbnails"); // NOTRANSLATE: Test menu item.
+	g_autoptr(GMenu) middle = g_menu_new();
+	g_menu_append_submenu(middle, "More", G_MENU_MODEL(leaf)); // NOTRANSLATE: Test submenu.
+	g_autoptr(GMenu) root = g_menu_new();
+	g_menu_append_submenu(root, "Actions", G_MENU_MODEL(middle)); // NOTRANSLATE: Test submenu.
+	for (int depth : {1, 2})
+		{
+		g_autoptr(GtkWidget) context = GTK_WIDGET(g_object_ref(popup_menu_at(root, layout->window, 40, 40)));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(context) == 1; }));
+		for (int level = 1; level <= depth; ++level)
+			{
+			ASSERT_TRUE(press("Right"));
+			ASSERT_TRUE(wait_layout([&]() { return mapped_menus(context) == level + 1; }));
+			}
+		ASSERT_TRUE(press("Left"));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(context) == depth; }));
+		ASSERT_TRUE(press("Right"));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(context) == depth + 1; }));
+		ASSERT_TRUE(press("Escape"));
+		ASSERT_TRUE(wait_layout([&]() { return mapped_menus(context) == 0; }));
+		}
+
+	for (int depth : {1, 2})
+		{
+		auto *menu = popover_box_new(layout->window, 40, 40);
+		g_autoptr(GtkWidget) context = GTK_WIDGET(g_object_ref(g_object_get_data(G_OBJECT(menu), "gq-popover")));
+		auto *submenu = popover_item_add_submenu(menu, "Actions"); // NOTRANSLATE: Test submenu.
+		auto *deeper = popover_item_add_submenu(submenu, "More"); // NOTRANSLATE: Test submenu.
+		popover_item_add(deeper, "Test item", nullptr, nullptr); // NOTRANSLATE: Test menu item.
+		popover_box_popup(menu);
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(context); }));
+		auto *child = gtk_widget_get_ancestor(submenu, GTK_TYPE_POPOVER);
+		gtk_menu_button_popup(GTK_MENU_BUTTON(gtk_widget_get_parent(child)));
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(child); }));
+		if (depth == 2)
+			{
+			auto *grandchild = gtk_widget_get_ancestor(deeper, GTK_TYPE_POPOVER);
+			gtk_menu_button_popup(GTK_MENU_BUTTON(gtk_widget_get_parent(grandchild)));
+			ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(grandchild); }));
+			}
+		ASSERT_TRUE(press("Escape"));
+		ASSERT_TRUE(wait_layout([&]() { return !gtk_widget_get_mapped(context); }));
+		}
+
 }
 
 TEST_F(PartialLayoutConfig, HamburgerMenuShortcutCanBeChangedAndDisabled)

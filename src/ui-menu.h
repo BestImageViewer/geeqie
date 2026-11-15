@@ -53,6 +53,8 @@ void popover_box_popup(GtkWidget *menu);
 GtkWidget *popover_parent_new(GtkWidget *child);
 void popover_set_parent(GtkWidget *popover, GtkWidget *parent);
 void popover_popup(GtkWidget *popover);
+/** Preserve parent menus and keyboard focus when returning from nested submenus. */
+void menu_nested_submenus_setup(GtkWidget *widget);
 
 bool menu_item_include_ellipsis(GMenuModel *model, const gchar *action);
 void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_list, bool show_icons = false);

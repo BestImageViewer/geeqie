@@ -270,6 +270,8 @@
   <section id="MenuStyle">
     <title>Menu style</title>
     <para>Use a ≡ "hamburger" style menu button instead of the standard menu across the top of the frame.</para>
+    <para>The standard menu uses cascading submenus that open when the pointer hovers over them. The hamburger menu uses sliding submenus opened by clicking, with a Back item to return to the previous menu. Context menus use cascading submenus with either menu style.</para>
+    <para>Press Escape to dismiss the entire menu, including any open submenus.</para>
     <note>
       <para>Geeqie must be restarted for changes to take effect.</para>
     </note>

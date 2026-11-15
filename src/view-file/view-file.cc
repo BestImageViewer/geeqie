@@ -1762,9 +1762,8 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 		g_autoptr(GMenuItem) all_marks_item = g_menu_item_new_submenu(_("All marks"), G_MENU_MODEL(all_marks));
 		g_menu_append_item(mark_menu, all_marks_item);
 
-		/* Sliding submenus avoid focus and input-grab problems caused by nested popovers. */
-		GtkWidget *menu = gtk_popover_menu_new_from_model_full(G_MENU_MODEL(mark_menu), GTK_POPOVER_MENU_SLIDING);
-		gtk_widget_set_size_request(menu, -1, 300);
+		GtkWidget *menu = gtk_popover_menu_new_from_model_full(G_MENU_MODEL(mark_menu), GTK_POPOVER_MENU_NESTED);
+		menu_nested_submenus_setup(menu);
 		popover_set_parent(menu, menu_parent);
 		gtk_popover_set_pointing_to(GTK_POPOVER(menu), &pointing_to);
 		popover_popup(menu);

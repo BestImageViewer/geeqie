@@ -224,7 +224,8 @@ GMenuModel *toolbar_add_menu_new(ToolbarType bar)
 GtkWidget *toolbar_add_popover_new(ToolbarType bar)
 {
 	g_autoptr(GMenuModel) model = toolbar_add_menu_new(bar);
-	auto *popover = gtk_popover_menu_new_from_model(model);
+	auto *popover = gtk_popover_menu_new_from_model_full(model, GTK_POPOVER_MENU_NESTED);
+	menu_nested_submenus_setup(popover);
 	menu_icon_rows_refresh(popover, model);
 	return popover;
 }

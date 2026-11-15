@@ -38,6 +38,27 @@
  *-----------------------------------------------------------------------------
  */
 
+static gboolean menu_escape_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint,
+                                         GdkModifierType state, gpointer)
+{
+	if (keyval != GDK_KEY_Escape || (state & gtk_accelerator_get_default_mod_mask())) return FALSE;
+
+	auto *menu = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	while (auto *parent = gtk_widget_get_ancestor(gtk_widget_get_parent(menu), GTK_TYPE_POPOVER))
+		menu = parent;
+	gtk_popover_popdown(GTK_POPOVER(menu));
+	return TRUE;
+}
+
+static void menu_escape_setup(GtkWidget *popover)
+{
+	auto *controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
+	gtk_event_controller_set_propagation_limit(controller, GTK_LIMIT_NONE);
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(menu_escape_key_press_cb), nullptr);
+	gtk_widget_add_controller(popover, controller);
+}
+
 static GtkWidget *menu_item_label_new(const gchar *text, gboolean use_mnemonic)
 {
 	GtkWidget *label = use_mnemonic ? gtk_label_new_with_mnemonic(text) : gtk_label_new(text);
@@ -201,10 +222,19 @@ GtkWidget *popover_item_add_submenu(GtkWidget *menu, const gchar *label)
 	GtkWidget *item = gtk_menu_button_new();
 	GtkWidget *submenu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	GtkWidget *popover = gtk_popover_new();
+	menu_escape_setup(popover);
 
 	gtk_menu_button_set_label(GTK_MENU_BUTTON(item), label);
 	gtk_menu_button_set_use_underline(GTK_MENU_BUTTON(item), TRUE);
 	gtk_menu_button_set_popover(GTK_MENU_BUTTON(item), popover);
+	gtk_menu_button_set_direction(GTK_MENU_BUTTON(item), GTK_ARROW_RIGHT);
+	auto *motion = gtk_event_controller_motion_new();
+	g_signal_connect(motion, "enter", G_CALLBACK(+[](GtkEventControllerMotion *controller, gdouble, gdouble, gpointer)
+		{
+		auto *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+		gtk_menu_button_popup(GTK_MENU_BUTTON(button));
+		}), nullptr);
+	gtk_widget_add_controller(item, motion);
 	gtk_menu_button_set_has_frame(GTK_MENU_BUTTON(item), FALSE);
 	gtk_widget_add_css_class(item, "flat");
 	gtk_widget_set_hexpand(item, TRUE);
@@ -256,6 +286,7 @@ GtkWidget *popover_box_new(GtkWidget *parent, gdouble x, gdouble y)
 	if (parent)
 		{
 		GtkWidget *popover = gtk_popover_new();
+		menu_escape_setup(popover);
 		g_object_set_data(G_OBJECT(box), "gq-popover", popover);
 		gtk_popover_set_child(GTK_POPOVER(popover), box);
 		popover_set_parent(popover, parent);
@@ -345,9 +376,61 @@ void popover_popup(GtkWidget *popover)
 	gtk_popover_popup(GTK_POPOVER(popover));
 }
 
+static gboolean nested_submenu_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint,
+                                           GdkModifierType state, gpointer)
+{
+	if (state & gtk_accelerator_get_default_mod_mask()) return FALSE;
+
+	auto *submenu = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	const guint back_key = gtk_widget_get_direction(submenu) == GTK_TEXT_DIR_RTL ? GDK_KEY_Right : GDK_KEY_Left;
+	if (keyval != back_key && keyval != GDK_KEY_Escape) return FALSE;
+
+	if (keyval == GDK_KEY_Escape)
+		return menu_escape_key_press_cb(controller, keyval, 0, state, nullptr);
+
+	auto *item = gtk_widget_get_parent(submenu);
+	auto *parent = gtk_widget_get_ancestor(item, GTK_TYPE_POPOVER_MENU);
+	if (!parent) return FALSE;
+	auto *focus = gtk_root_get_focus(gtk_widget_get_root(submenu));
+	if (!focus || gtk_widget_get_ancestor(focus, GTK_TYPE_POPOVER_MENU) != submenu) return FALSE;
+
+	// Returning to a parent menu must not dismiss the entire popover chain (#2576).
+	const gboolean cascade = gtk_popover_get_cascade_popdown(GTK_POPOVER(parent));
+	gtk_popover_set_cascade_popdown(GTK_POPOVER(parent), FALSE);
+	gtk_popover_popdown(GTK_POPOVER(submenu));
+	gtk_widget_grab_focus(item);
+	gtk_widget_child_focus(parent, GTK_DIR_LEFT);
+	gtk_widget_grab_focus(item);
+	gtk_popover_set_cascade_popdown(GTK_POPOVER(parent), cascade);
+	return TRUE;
+}
+
+void menu_nested_submenus_setup(GtkWidget *widget)
+{
+	if (GTK_IS_POPOVER_MENU(widget) &&
+	    gtk_popover_menu_get_flags(GTK_POPOVER_MENU(widget)) == GTK_POPOVER_MENU_NESTED &&
+	    !g_object_get_data(G_OBJECT(widget), "nested-submenu-keys"))
+		{
+		auto *controller = gtk_event_controller_key_new();
+		gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
+		g_signal_connect(controller, "key-pressed", G_CALLBACK(nested_submenu_key_press_cb), nullptr);
+		gtk_widget_add_controller(widget, controller);
+		g_object_set_data(G_OBJECT(widget), "nested-submenu-keys", controller);
+		// Menu models can add new submenus between openings.
+		g_signal_connect(widget, "map", G_CALLBACK(+[](GtkWidget *menu, gpointer)
+			{
+			menu_nested_submenus_setup(menu);
+			}), nullptr);
+		}
+
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		menu_nested_submenus_setup(child);
+}
+
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 {
-	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
+	GtkWidget *popover = gtk_popover_menu_new_from_model_full(G_MENU_MODEL(menu_model), GTK_POPOVER_MENU_NESTED);
+	menu_nested_submenus_setup(popover);
 	popover_set_parent(popover, window);
 	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
 	popover_popup(popover);
@@ -357,7 +440,8 @@ GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 
 GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdouble y)
 {
-	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
+	GtkWidget *popover = gtk_popover_menu_new_from_model_full(G_MENU_MODEL(menu_model), GTK_POPOVER_MENU_NESTED);
+	menu_nested_submenus_setup(popover);
 	GdkRectangle pointing_to{
 		static_cast<int>(x),
 		static_cast<int>(y),
@@ -500,6 +584,17 @@ static void menu_icon_row_update_accel(GtkWidget *button, gpointer data)
 	gtk_widget_set_visible(GTK_WIDGET(label), accel && *accel);
 }
 
+static bool menu_icon_row_add(GtkWidget *menu, GtkWidget *button, const gchar *id)
+{
+	if (GTK_IS_POPOVER_MENU_BAR(menu) && gtk_popover_menu_bar_add_child(GTK_POPOVER_MENU_BAR(menu), button, id)) return true;
+	if (GTK_IS_POPOVER_MENU(menu) && gtk_popover_menu_add_child(GTK_POPOVER_MENU(menu), button, id)) return true;
+
+	// Nested popovers own their custom slots separately from the root menu.
+	for (auto *child = gtk_widget_get_first_child(menu); child; child = gtk_widget_get_next_sibling(child))
+		if (menu_icon_row_add(child, button, id)) return true;
+	return false;
+}
+
 static void menu_icon_rows_add(GtkWidget *menu, GMenuModel *model, GList **rows)
 {
 	for (int i = 0; i < g_menu_model_get_n_items(model); ++i)
@@ -542,9 +637,7 @@ static void menu_icon_rows_add(GtkWidget *menu, GMenuModel *model, GList **rows)
 		menu_icon_row_update_accel(button, shortcut);
 		g_signal_connect(button, "map", G_CALLBACK(menu_icon_row_update_accel), shortcut);
 		g_signal_connect_after(button, "clicked", G_CALLBACK(menu_icon_row_clicked), nullptr);
-		const gboolean added = GTK_IS_POPOVER_MENU_BAR(menu)
-		                     ? gtk_popover_menu_bar_add_child(GTK_POPOVER_MENU_BAR(menu), button, id)
-		                     : gtk_popover_menu_add_child(GTK_POPOVER_MENU(menu), button, id);
+		const bool added = menu_icon_row_add(menu, button, id);
 		if (added) *rows = g_list_prepend(*rows, g_object_ref(button));
 		}
 }
@@ -556,8 +649,8 @@ void menu_icon_rows_refresh(GtkWidget *menu, GMenuModel *model)
 		{
 		/* Model changes may already have removed the custom row's slot. */
 		if (!gtk_widget_get_parent(GTK_WIDGET(work->data))) continue;
-		if (GTK_IS_POPOVER_MENU_BAR(menu)) gtk_popover_menu_bar_remove_child(GTK_POPOVER_MENU_BAR(menu), GTK_WIDGET(work->data));
-		else gtk_popover_menu_remove_child(GTK_POPOVER_MENU(menu), GTK_WIDGET(work->data));
+		auto *owner = gtk_widget_get_ancestor(GTK_WIDGET(work->data), GTK_TYPE_POPOVER_MENU);
+		if (owner) gtk_popover_menu_remove_child(GTK_POPOVER_MENU(owner), GTK_WIDGET(work->data));
 		}
 	g_object_set_data(G_OBJECT(menu), "menu-icon-rows", nullptr);
 	GList *rows = nullptr;
