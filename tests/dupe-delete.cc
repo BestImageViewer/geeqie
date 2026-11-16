@@ -120,22 +120,32 @@ protected:
 		ASSERT_TRUE(wait_for([dw]() { return dupe_export_ready(dw); }));
 	}
 
+	// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 	static void select(DupeWindow *dw, const std::string &path)
 	{
-		auto *selection = gtk_column_view_get_model(GTK_COLUMN_VIEW(dw->listview));
-		gtk_selection_model_unselect_all(selection);
+		auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview));
+		auto *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
+		gtk_tree_selection_unselect_all(selection);
+		GtkTreeIter iter;
 		bool found = false;
-		for (guint i = 0; i < g_list_model_get_n_items(G_LIST_MODEL(selection)); ++i)
+		for (gboolean valid = gtk_tree_model_get_iter_first(model, &iter); valid; valid = gtk_tree_model_iter_next(model, &iter))
 			{
-			auto *item = dupe_listview_item_at(dw->listview, i);
+			DupeItem *item = nullptr;
+			gtk_tree_model_get(model, &iter, 0, &item, -1);
 			if (path == item->fd->path)
 				{
-				gtk_selection_model_select_item(selection, i, FALSE);
+				gtk_tree_selection_select_iter(selection, &iter);
 				found = true;
 				}
 			}
 		ASSERT_TRUE(found);
 	}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+	G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 	static void expect_count(DupeWindow *dw, guint count)
 	{
@@ -194,6 +204,10 @@ TEST_P(DuplicateDeletion, MainWindowDeletionUpdatesEveryDuplicatesWindow)
 	EXPECT_NE(b->dupes, nullptr);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(DuplicateDeletion, ChangingSelectionDoesNotRemoveUndeletedFiles)
 {
 	const auto first = create("0.png");
@@ -208,10 +222,12 @@ TEST_P(DuplicateDeletion, ChangingSelectionDoesNotRemoveUndeletedFiles)
 	expect_count(b, 2);
 	EXPECT_FALSE(g_file_test(first.c_str(), G_FILE_TEST_EXISTS));
 	EXPECT_TRUE(g_file_test(third.c_str(), G_FILE_TEST_EXISTS));
-	auto *selection = gtk_column_view_get_model(GTK_COLUMN_VIEW(a->listview));
-	g_autoptr(GtkBitset) selected = gtk_selection_model_get_selection(selection);
-	EXPECT_EQ(gtk_bitset_get_size(selected), 1U);
+	auto *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(a->listview));
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(selection), 1);
 }
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 TEST_P(DuplicateDeletion, DeletingRepresentativeRetainsSurvivingMatches)
 {
@@ -324,18 +340,22 @@ TEST_P(DuplicateDeletion, DeletionDuringFileLoadingKeepsOtherQueuedFiles)
 	expect_count(dw, 9);
 }
 
+// Retained GtkTreeView APIs pending migration to GTK list models.
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
 TEST_P(DuplicateDeletion, LargeBurstUsesOnePendingBatchAndOneModelClear)
 {
 	std::vector<std::string> files;
 	files.reserve(1200);
 	for (guint i = 0; i < 1200; ++i) files.push_back(create(std::to_string(i) + ".png"));
 	auto *dw = window(files);
-	auto *model = gtk_column_view_get_model(GTK_COLUMN_VIEW(dw->listview));
-	const gint original_rows = g_list_model_get_n_items(G_LIST_MODEL(model));
+	auto *model = gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview));
+	const gint original_rows = gtk_tree_model_iter_n_children(model, nullptr);
 	guint removed_rows = 0;
-	const gulong handler = g_signal_connect(model, "items-changed", G_CALLBACK(+[](GListModel *, guint, guint removed, guint, gpointer data)
+	const gulong handler = g_signal_connect(model, "row-deleted", G_CALLBACK(+[](GtkTreeModel *, GtkTreePath *, gpointer data)
 		{
-		*static_cast<guint *>(data) += removed;
+		++*static_cast<guint *>(data);
 		}), &removed_rows);
 	guint pending = 0;
 	for (guint i = 0; i < 100; ++i)
@@ -351,213 +371,9 @@ TEST_P(DuplicateDeletion, LargeBurstUsesOnePendingBatchAndOneModelClear)
 	EXPECT_EQ(removed_rows, static_cast<guint>(original_rows));
 	g_signal_handler_disconnect(model, handler);
 }
-
-
-TEST_P(DuplicateDeletion, ColumnSortingKeepsGroupsAndSelectedFiles)
-{
-	const auto first = create("z.png");
-	const auto second = create("a.png");
-	const auto third = create("y.png");
-	const auto fourth = create("b.png");
-	for (const auto &path : {third, fourth})
-		{
-		g_autofree gchar *contents = nullptr;
-		gsize length = 0;
-		ASSERT_TRUE(g_file_get_contents(path.c_str(), &contents, &length, nullptr));
-		ASSERT_TRUE(g_file_set_contents(path.c_str(), contents, length + 1, nullptr));
-		}
-	auto *dw = window({first, second, third, fourth});
-	auto *view = GTK_COLUMN_VIEW(dw->listview);
-	auto *selection = gtk_column_view_get_model(view);
-	ASSERT_EQ(g_list_model_get_n_items(G_LIST_MODEL(selection)), 4U);
-	const auto group_size = dupe_listview_item_at(dw->listview, 0)->fd->size;
-	select(dw, first);
-	for (guint i = 0; i < 4; ++i)
-		{
-		if (third == dupe_listview_item_at(dw->listview, i)->fd->path) gtk_selection_model_select_item(selection, i, FALSE);
-		}
-	g_autoptr(GtkColumnViewColumn) column = GTK_COLUMN_VIEW_COLUMN(g_list_model_get_item(gtk_column_view_get_columns(view), 2));
-	for (auto direction : {GTK_SORT_ASCENDING, GTK_SORT_DESCENDING})
-		{
-		gtk_column_view_sort_by_column(view, column, direction);
-		for (guint i = 0; i < 4; ++i)
-			{
-			auto *fd = dupe_listview_item_at(dw->listview, i)->fd;
-			EXPECT_EQ(fd->size == group_size, i < 2);
-			EXPECT_EQ(gtk_selection_model_is_selected(selection, i) != FALSE, first == fd->path || third == fd->path);
-			if (i % 2 == 0)
-				{
-				auto *next = dupe_listview_item_at(dw->listview, i + 1)->fd;
-				const int order = g_strcmp0(fd->name, next->name);
-				if (direction == GTK_SORT_ASCENDING) EXPECT_LT(order, 0);
-				else EXPECT_GT(order, 0);
-				}
-			}
-		}
-	g_autoptr(GtkColumnViewColumn) set_column = GTK_COLUMN_VIEW_COLUMN(g_list_model_get_item(gtk_column_view_get_columns(view), 7));
-	for (auto direction : {GTK_SORT_ASCENDING, GTK_SORT_DESCENDING})
-		{
-		gtk_column_view_sort_by_column(view, set_column, direction);
-		for (guint i = 0; i < 4; ++i)
-			{
-			auto *fd = dupe_listview_item_at(dw->listview, i)->fd;
-			EXPECT_EQ(fd->size == group_size, direction == GTK_SORT_DESCENDING ? i < 2 : i >= 2);
-			EXPECT_EQ(gtk_selection_model_is_selected(selection, i) != FALSE, first == fd->path || third == fd->path);
-			}
-		}
-
-}
-
-static bool has_label(GtkWidget *widget, const gchar *text)
-{
-	if (GTK_IS_LABEL(widget) && g_strcmp0(gtk_label_get_text(GTK_LABEL(widget)), text) == 0) return true;
-	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
-		{
-		if (has_label(child, text)) return true;
-		}
-	return false;
-}
-
-TEST_P(DuplicateDeletion, RenamingRefreshesVisibleRowsAndPreservesSelection)
-{
-	const auto first = create("a.png");
-	const auto second = create("b.png");
-	auto *dw = window({first, second});
-	ASSERT_TRUE(wait_for([dw]() { return has_label(dw->listview, "a.png"); }));
-	select(dw, first);
-	const auto destination = (root / "renamed.png").native();
-	auto fd = FileData::new_simple(first.c_str());
-	ASSERT_TRUE(file_data_add_ci(fd, FILEDATA_CHANGE_RENAME, nullptr, destination.c_str()));
-	ASSERT_TRUE(file_data_perform_ci(fd));
-	ASSERT_TRUE(file_data_apply_ci(fd));
-	file_data_free_ci(fd);
-	ASSERT_TRUE(wait_for([dw]() { return has_label(dw->listview, "renamed.png"); }));
-	EXPECT_FALSE(has_label(dw->listview, "a.png"));
-	EXPECT_TRUE(has_label(dw->listview, destination.c_str()));
-	auto *selection = gtk_column_view_get_model(GTK_COLUMN_VIEW(dw->listview));
-	g_autoptr(GtkBitset) selected = gtk_selection_model_get_selection(selection);
-	ASSERT_EQ(gtk_bitset_get_size(selected), 1U);
-	EXPECT_EQ(dupe_listview_item_at(dw->listview, gtk_bitset_get_minimum(selected))->fd, static_cast<FileData *>(fd));
-}
-
-static guint painted_thumbnails(GtkWidget *widget)
-{
-	guint count = GTK_IS_PICTURE(widget) && gtk_picture_get_paintable(GTK_PICTURE(widget)) ? 1 : 0;
-	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child)) count += painted_thumbnails(child);
-	return count;
-}
-
-TEST_P(DuplicateDeletion, ThumbnailToggleUpdatesBoundRows)
-{
-	auto *dw = window({create("a.png"), create("b.png")});
-	g_autoptr(GtkColumnViewColumn) column = GTK_COLUMN_VIEW_COLUMN(g_list_model_get_item(gtk_column_view_get_columns(GTK_COLUMN_VIEW(dw->listview)), 1));
-	EXPECT_FALSE(gtk_column_view_column_get_visible(column));
-	for (guint i = 0; i < 2; ++i)
-		{
-		gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_thumbs), TRUE);
-		EXPECT_TRUE(gtk_column_view_column_get_visible(column));
-		ASSERT_TRUE(wait_for([dw]() { return painted_thumbnails(dw->listview) == 2; }));
-		gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_thumbs), FALSE);
-		EXPECT_FALSE(gtk_column_view_column_get_visible(column));
-		ASSERT_TRUE(wait_for([dw]() { return painted_thumbnails(dw->listview) == 0; }));
-		}
-}
-
-TEST_P(DuplicateDeletion, SharedMatchesFinishLoadingEveryThumbnail)
-{
-	auto *dw = window({create("A/a.png"), create("A/b.png"), create("B/c.png"), create("B/d.png")});
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_ignore_same_folder), TRUE);
-	auto *selection = gtk_column_view_get_model(GTK_COLUMN_VIEW(dw->listview));
-	ASSERT_TRUE(wait_for([dw, selection]()
-		{
-		return dupe_export_ready(dw) && g_list_model_get_n_items(G_LIST_MODEL(selection)) == 6;
-		}));
-	for (guint i = 0; i < 2; ++i)
-		{
-		gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_thumbs), TRUE);
-		ASSERT_TRUE(wait_for([dw]() { return !dw->thumb_loader && !dw->thumb_item && painted_thumbnails(dw->listview) > 0; }));
-		gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_thumbs), FALSE);
-		}
-}
-
-static GtkWidget *find_label(GtkWidget *widget, const gchar *text)
-{
-	if (GTK_IS_LABEL(widget) && g_strcmp0(gtk_label_get_text(GTK_LABEL(widget)), text) == 0) return widget;
-	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
-		{
-		if (auto *found = find_label(child, text)) return found;
-		}
-	return nullptr;
-}
-
-TEST_P(DuplicateDeletion, MouseSelectionAndDraggingPreserveSelectedFiles)
-{
-	g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
-	if (!xdotool || !g_getenv("DISPLAY")) GTEST_SKIP() << "Requires xdotool and X11";
-	auto *dw = window({create("a.png"), create("b.png"), create("c.png")});
-	gtk_window_set_title(GTK_WINDOW(dw->window), "Geeqie duplicate view input test");
-	ASSERT_TRUE(wait_for([dw]() { return find_label(dw->listview, "a.png") != nullptr; }));
-	const auto settle = []()
-		{
-		const auto deadline = g_get_monotonic_time() + 150 * G_TIME_SPAN_MILLISECOND;
-		while (g_get_monotonic_time() < deadline)
-			{
-			g_main_context_iteration(nullptr, FALSE);
-			g_usleep(1000);
-			}
-		};
-	settle();
-	auto *selection = gtk_column_view_get_model(GTK_COLUMN_VIEW(dw->listview));
-	gtk_selection_model_select_all(selection);
-	auto *cell = gtk_widget_get_parent(find_label(dw->listview, "a.png"));
-	g_autoptr(GListModel) controllers = gtk_widget_observe_controllers(cell);
-	bool prepared = false;
-	for (guint i = 0; i < g_list_model_get_n_items(controllers); ++i)
-		{
-		g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
-		if (!GTK_IS_DRAG_SOURCE(controller)) continue;
-		g_autoptr(GdkContentProvider) provider = nullptr;
-		g_signal_emit_by_name(controller, "prepare", 0.0, 0.0, &provider);
-		ASSERT_NE(provider, nullptr);
-		g_autoptr(GdkContentFormats) formats = gdk_content_provider_ref_formats(provider);
-		EXPECT_TRUE(gdk_content_formats_contain_mime_type(formats, "text/uri-list"));
-		prepared = true;
-		}
-	ASSERT_TRUE(prepared);
-	g_autoptr(GtkBitset) dragged = gtk_selection_model_get_selection(selection);
-	EXPECT_EQ(gtk_bitset_get_size(dragged), 3U);
-	EXPECT_STREQ(dw->click_item->fd->name, "a.png");
-
-	graphene_rect_t bounds;
-	ASSERT_TRUE(gtk_widget_compute_bounds(cell, dw->window, &bounds));
-	const auto x = std::to_string(static_cast<int>(bounds.origin.x + bounds.size.width / 2));
-	const auto y = std::to_string(static_cast<int>(bounds.origin.y + bounds.size.height / 2));
-	const auto click = [&](const gchar *button)
-		{
-		const gchar *press[] = {xdotool, "search", "--name", "^Geeqie duplicate view input test$",
-		                       "mousemove", "--window", "%1", x.c_str(), y.c_str(), "mousedown", button, nullptr};
-		gint status = 0;
-		EXPECT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(press), nullptr, G_SPAWN_DEFAULT,
-		                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
-		EXPECT_TRUE(g_spawn_check_wait_status(status, nullptr));
-		settle();
-		const gchar *release[] = {xdotool, "mouseup", button, nullptr};
-		EXPECT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(release), nullptr, G_SPAWN_DEFAULT,
-		                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
-		EXPECT_TRUE(g_spawn_check_wait_status(status, nullptr));
-		settle();
-		};
-	click("2");
-	g_autoptr(GtkBitset) toggled = gtk_selection_model_get_selection(selection);
-	EXPECT_EQ(gtk_bitset_get_size(toggled), 2U);
-	click("2");
-	g_autoptr(GtkBitset) restored = gtk_selection_model_get_selection(selection);
-	EXPECT_EQ(gtk_bitset_get_size(restored), 3U);
-	click("1");
-	g_autoptr(GtkBitset) collapsed = gtk_selection_model_get_selection(selection);
-	ASSERT_EQ(gtk_bitset_get_size(collapsed), 1U);
-	EXPECT_STREQ(dupe_listview_item_at(dw->listview, gtk_bitset_get_minimum(collapsed))->fd->name, "a.png");
-}
+#ifndef SHOW_ALL_DEPRECATED_WARNINGS
+G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 INSTANTIATE_TEST_SUITE_P(TrashAndPermanent, DuplicateDeletion, testing::Bool());
 

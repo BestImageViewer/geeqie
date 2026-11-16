@@ -5,10 +5,6 @@
 	border-radius: 0px;
 }
 
-.geeqie-file-list .dupe-group {
-	background-color: alpha(currentColor, 0.08);
-}
-
 modelbutton check
 {
 	margin-right: 6px;

@@ -178,9 +178,6 @@ void dupe_set_similarity_algorithm(gboolean perceptual);
 void dupe_window_clear(DupeWindow *dw);
 void dupe_window_close(DupeWindow *dw);
 
-/** @brief Borrow the duplicate item at a position in either duplicates view. */
-DupeItem *dupe_listview_item_at(GtkWidget *view, guint position);
-
 void dupe_window_add_collection(DupeWindow *dw, CollectionData *collection);
 void dupe_window_add_files(DupeWindow *dw, GList *list, gboolean recurse);
 void dupe_window_add_folder(const gchar *path, gboolean recurse);
