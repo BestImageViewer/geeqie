@@ -1742,19 +1742,19 @@ static void pan_zoom_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 		set_mode = FALSE;
 		}
 	else if (g_str_equal(value, "1-1"))
-		mode = PAN_IMAGE_SIZE_100;
+		mode = 1.0;
 	else if (g_str_equal(value, "1-2"))
-		mode = 2.0;
-	else if (g_str_equal(value, "1-3"))
-		mode = 3.0;
-	else if (g_str_equal(value, "1-4"))
-		mode = 4.0;
-	else if (g_str_equal(value, "4-1"))
-		mode = -4.0;
-	else if (g_str_equal(value, "3-1"))
-		mode = -3.0;
-	else if (g_str_equal(value, "2-1"))
 		mode = -2.0;
+	else if (g_str_equal(value, "1-3"))
+		mode = -3.0;
+	else if (g_str_equal(value, "1-4"))
+		mode = -4.0;
+	else if (g_str_equal(value, "4-1"))
+		mode = 4.0;
+	else if (g_str_equal(value, "3-1"))
+		mode = 3.0;
+	else if (g_str_equal(value, "2-1"))
+		mode = 2.0;
 	else
 		mode = 1.0;
 

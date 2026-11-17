@@ -1887,6 +1887,29 @@ static void accel_default_cb(GtkWidget *, gpointer)
 	if (clear_modified_shortcuts()) accel_reload_and_apply();
 }
 
+static void accel_v2_ok_cb(GenericDialog *, gpointer)
+{
+	g_autofree gchar *path = accels_ini_filename();
+	g_autoptr(GError) error = nullptr;
+	if (restore_v2_shortcuts(path, &error))
+		{
+		accel_reload_and_apply();
+		}
+	else
+		{
+		warning_dialog(_("Unable to replace keyboard shortcuts"), error->message, GQ_ICON_DIALOG_ERROR, configwindow);
+		}
+}
+
+static void accel_v2_cb(GtkWidget *widget, gpointer)
+{
+	GenericDialog *gd = generic_dialog_new(_("Replace keyboard shortcuts?"), "replace_v2_shortcuts", widget, TRUE, generic_dialog_dummy_cb, nullptr);
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING, _("Replace keyboard shortcuts?"),
+	                          _("Restore the keyboard shortcuts from Geeqie v2.9, including your saved custom shortcuts if the old accels file is available? Commands introduced later will have no shortcut. Plugin shortcuts will use saved v2.x customizations when available, or their installed defaults.\n\nThe current shortcut file will be backed up as accels.ini~. This takes effect immediately, even if you cancel Preferences."), TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, _("Replace"), accel_v2_ok_cb, TRUE);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
+}
+
 static void accel_reset_cb(GtkWidget *, gpointer data)
 {
 	auto *selection = GTK_SINGLE_SELECTION(data);
@@ -3949,6 +3972,9 @@ static void config_tab_advanced(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *vbox;
 
 	vbox = scrolled_notebook_page(notebook, _("Advanced"));
+	group = pref_group_new(vbox, FALSE, _("Keyboard shortcuts"), GTK_ORIENTATION_VERTICAL);
+	auto *shortcuts_button = pref_button_new(group, nullptr, _("Restore v2.x shortcuts…"), G_CALLBACK(accel_v2_cb), nullptr);
+	gtk_widget_set_halign(shortcuts_button, GTK_ALIGN_START);
 	group = pref_group_new(vbox, FALSE, _("External preview extraction"), GTK_ORIENTATION_VERTICAL);
 
 	pref_checkbox_new_int(group, _("Use external preview extraction -  Requires restart"), options->external_preview.enable, &c_options->external_preview.enable);

@@ -27,6 +27,7 @@
 #include "layout-image.h"
 #include "layout-util.h"
 #include "layout.h"
+#include "main-defines.h"
 #include "metadata.h"
 #include "options.h"
 #include "thumb-standard.h"
@@ -766,44 +767,51 @@ TEST_P(RepeatedDelete, SelectingMarksSynchronizesDisplayedImage)
 	auto *second = vf_index_get_data(layout->vf, 1);
 	auto *third = vf_index_get_data(layout->vf, 2);
 	ASSERT_NE(third, nullptr);
-	const auto select_marks = [&]()
+	for (gint mark = 0; mark < FILEDATA_MARKS_SIZE; ++mark)
 		{
-		if (keyboard)
+		const gint digit = (mark + 1) % FILEDATA_MARKS_SIZE;
+		SCOPED_TRACE(digit);
+		const auto select_marks = [&]()
 			{
-			gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie select marks test");
-			gtk_widget_grab_focus(layout->vf->listview);
+			if (keyboard)
+				{
+				gtk_window_set_title(GTK_WINDOW(layout->window), "Geeqie select marks test");
+				gtk_widget_grab_focus(layout->vf->listview);
+				settle();
+				g_autofree gchar *keys = g_strdup_printf("ctrl+shift+%d", digit);
+				const gchar *args[] = {xdotool, "search", "--name", "^Geeqie select marks test$",
+				                       "windowfocus", "--sync", "key", "--clearmodifiers", keys, nullptr};
+				gint status = 0;
+				ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+				                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+				ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+				}
+			else
+				{
+				g_autofree gchar *action = g_strdup_printf("win.main-win-select-mark-%d", digit);
+				ASSERT_TRUE(gtk_widget_activate_action(layout->window, action, nullptr));
+				}
 			settle();
-			const gchar *args[] = {xdotool, "search", "--name", "^Geeqie select marks test$",
-			                       "windowfocus", "--sync", "key", "--clearmodifiers", "ctrl+1", nullptr};
-			gint status = 0;
-			ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
-			                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
-			ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
-			}
-		else
-			{
-			ASSERT_TRUE(gtk_widget_activate_action(layout->window, "win.main-win-select-mark-1", nullptr));
-			}
+			};
+		file_data_set_mark(second, mark, TRUE);
+		file_data_set_mark(third, mark, TRUE);
+		layout_image_set_fd(layout, first);
 		settle();
-		};
-	file_data_set_mark(second, 0, TRUE);
-	file_data_set_mark(third, 0, TRUE);
-	layout_image_set_fd(layout, first);
-	settle();
-	select_marks();
-	EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 2U);
-	EXPECT_EQ(layout_image_get_fd(layout), second);
+		select_marks();
+		EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 2U);
+		EXPECT_EQ(layout_image_get_fd(layout), second);
 
-	layout_image_set_fd(layout, third);
-	select_marks();
-	EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 2U);
-	EXPECT_EQ(layout_image_get_fd(layout), third);
+		layout_image_set_fd(layout, third);
+		select_marks();
+		EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 2U);
+		EXPECT_EQ(layout_image_get_fd(layout), third);
 
-	file_data_set_mark(second, 0, FALSE);
-	file_data_set_mark(third, 0, FALSE);
-	select_marks();
-	EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 0U);
-	EXPECT_EQ(layout_image_get_fd(layout), third);
+		file_data_set_mark(second, mark, FALSE);
+		file_data_set_mark(third, mark, FALSE);
+		select_marks();
+		EXPECT_EQ(vf_selection_count(layout->vf, nullptr), 0U);
+		EXPECT_EQ(layout_image_get_fd(layout), third);
+		}
 }
 
 GtkWidget *find_rename_entry(GtkWidget *widget)

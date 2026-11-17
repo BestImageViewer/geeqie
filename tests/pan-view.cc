@@ -25,6 +25,7 @@
 #include "pan-view/pan-index.h"
 #include "pan-view/pan-types.h"
 #include "pan-view/pan-view.h"
+#include "pixbuf-renderer.h"
 
 namespace
 {
@@ -147,6 +148,19 @@ protected:
 	bool changed_options = false;
 	gboolean saved_caching = FALSE, saved_hidden = FALSE, saved_dot_hidden = FALSE;
 };
+
+TEST_F(PanIndexing, ZoomActionsUseNormalSizeAndTheRequestedRatios)
+{
+	auto *pw = open();
+	ASSERT_NE(pw, nullptr);
+	ASSERT_TRUE(wait_pan([&]() { return pw->build_phase == PanBuildPhase::Complete; }));
+	for (const auto &zoom : {std::pair<const gchar *, gdouble>{"1-1", 1.0}, {"1-2", -2.0},
+	                         {"1-3", -3.0}, {"1-4", -4.0}, {"2-1", 2.0}, {"3-1", 3.0}, {"4-1", 4.0}})
+		{
+		g_action_group_activate_action(G_ACTION_GROUP(window), "pan-win-zoom", g_variant_new_string(zoom.first));
+		EXPECT_DOUBLE_EQ(pixbuf_renderer_zoom_get(PIXBUF_RENDERER(pw->imd->pr)), zoom.second) << zoom.first;
+		}
+}
 
 TEST_F(PanIndexing, LargeTreeBuildsAllLayoutsWithoutBlockingTheMainLoop)
 {

@@ -49,6 +49,7 @@
 #include "rcfile.h"
 #include "search.h"
 #include "shortcuts.h"
+#include "shortcut-upgrade.h"
 #include "trash.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
@@ -69,6 +70,7 @@ GtkWidget *find_widget(GtkWidget *widget, GType type, const gchar *label = nullp
 	if (G_TYPE_CHECK_INSTANCE_TYPE(widget, type))
 		{
 		const gchar *text = GTK_IS_BUTTON(widget) ? gtk_button_get_label(GTK_BUTTON(widget)) :
+		                    GTK_IS_CHECK_BUTTON(widget) ? gtk_check_button_get_label(GTK_CHECK_BUTTON(widget)) :
 		                    GTK_IS_LABEL(widget) ? gtk_label_get_text(GTK_LABEL(widget)) : nullptr;
 		if (!label || g_strcmp0(text, label) == 0) return widget;
 		}
@@ -864,13 +866,14 @@ TEST_F(PartialLayoutConfig, LogCommandBindingUsesSelectionOrCurrentLine)
 	ASSERT_TRUE(gtk_widget_grab_focus(text));
 	auto *controller = context_controller(GTK_WIDGET(window), "log-command-shortcut");
 	ASSERT_NE(controller, nullptr);
-	const auto key = [&](guint value)
+	const auto key = [&](guint value, GdkModifierType state = GDK_NO_MODIFIER_MASK)
 		{
 		gboolean handled = FALSE;
-		g_signal_emit_by_name(controller, "key-pressed", value, 0, GDK_NO_MODIFIER_MASK, &handled);
+		g_signal_emit_by_name(controller, "key-pressed", value, 0, state, &handled);
 		return handled;
 		};
-	EXPECT_TRUE(key(GDK_KEY_F1));
+	EXPECT_FALSE(key(GDK_KEY_F1));
+	EXPECT_TRUE(key(GDK_KEY_Return, GDK_CONTROL_MASK));
 	GtkTextIter start;
 	GtkTextIter end;
 	ASSERT_TRUE(gtk_text_buffer_get_selection_bounds(buffer, &start, &end));
@@ -2161,6 +2164,245 @@ TEST_F(PartialLayoutConfig, HamburgerMenuFollowsFloatingToolsAndReturnsWhenHidde
 			EXPECT_EQ(layout->tools, nullptr);
 			}
 		}
+}
+
+class ShortcutUpgradePreferences : public PartialLayoutConfig
+{
+protected:
+	void SetUp() override
+	{
+		PartialLayoutConfig::SetUp();
+		if (HasFatalFailure() || IsSkipped()) return;
+		path = std::string(directory) + "/accels.ini";
+		old_path = std::string(directory) + "/accels";
+	}
+
+	void TearDown() override
+	{
+		if (dialog) gtk_window_destroy(GTK_WINDOW(dialog));
+		if (!path.empty())
+			{
+			g_unlink(path.c_str());
+			g_unlink((path + "~").c_str());
+			g_unlink(old_path.c_str());
+			}
+		PartialLayoutConfig::TearDown();
+	}
+
+	void open()
+	{
+		if (!g_file_test(old_path.c_str(), G_FILE_TEST_EXISTS))
+			{
+			ASSERT_TRUE(g_file_set_contents(old_path.c_str(), saved_legacy, -1, nullptr));
+			}
+		ASSERT_TRUE(shortcut_upgrade_needed(path.c_str()));
+		completed = false;
+		accepted = false;
+		dialog = shortcut_upgrade_dialog_new(GTK_WINDOW(layout->window), path.c_str(), "Upgrade information",
+		                                    +[](bool accepted, gpointer data)
+			{
+			auto *self = static_cast<ShortcutUpgradePreferences *>(data);
+			self->completed = true;
+			self->accepted = accepted;
+			self->dialog = nullptr;
+			}, this);
+		gtk_window_present(GTK_WINDOW(dialog));
+		ASSERT_TRUE(wait_layout([&]() { return gtk_widget_get_mapped(dialog); }));
+	}
+
+	GtkWidget *choice(bool legacy)
+	{
+		return find_widget(dialog, GTK_TYPE_CHECK_BUTTON, legacy ? _("Maintain my v2.x shortcuts") : _("Use GNOME HIG shortcuts"));
+	}
+
+	void choose_and_continue(bool legacy)
+	{
+		auto *option = choice(legacy);
+		ASSERT_NE(option, nullptr);
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(option), TRUE);
+		auto *button = find_widget(dialog, GTK_TYPE_BUTTON, _("Continue"));
+		ASSERT_NE(button, nullptr);
+		ASSERT_TRUE(gtk_widget_get_sensitive(button));
+		g_signal_emit_by_name(button, "clicked");
+	}
+
+	const gchar *saved_legacy = "(gtk_accel_path \"<Actions>/MenuActions/Preferences\" \"F8\")";
+	std::string path;
+	std::string old_path;
+	GtkWidget *dialog = nullptr;
+	bool completed = false;
+	bool accepted = false;
+};
+
+TEST_F(ShortcutUpgradePreferences, PromptOnlyForAnUnconvertedUpgrade)
+{
+	EXPECT_FALSE(shortcut_upgrade_needed(path.c_str()));
+	ASSERT_TRUE(g_file_set_contents(old_path.c_str(), saved_legacy, -1, nullptr));
+	EXPECT_TRUE(shortcut_upgrade_needed(path.c_str()));
+	ASSERT_TRUE(g_file_set_contents(path.c_str(), "", 0, nullptr));
+	EXPECT_FALSE(shortcut_upgrade_needed(path.c_str()));
+}
+
+TEST_F(ShortcutUpgradePreferences, NeitherChoiceIsSelectedAndCancelDoesNotSave)
+{
+	open();
+	ASSERT_NE(dialog, nullptr);
+	ASSERT_NE(choice(true), nullptr);
+	ASSERT_NE(choice(false), nullptr);
+	EXPECT_FALSE(gtk_check_button_get_active(GTK_CHECK_BUTTON(choice(true))));
+	EXPECT_FALSE(gtk_check_button_get_active(GTK_CHECK_BUTTON(choice(false))));
+	EXPECT_EQ(gtk_window_get_default_widget(GTK_WINDOW(dialog)), nullptr);
+	auto *button = find_widget(dialog, GTK_TYPE_BUTTON, _("Continue"));
+	ASSERT_NE(button, nullptr);
+	EXPECT_FALSE(gtk_widget_get_sensitive(button));
+	g_signal_emit_by_name(button, "clicked");
+	EXPECT_FALSE(completed);
+	EXPECT_FALSE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+	auto *cancel = find_widget(dialog, GTK_TYPE_BUTTON, _("Cancel"));
+	ASSERT_NE(cancel, nullptr);
+	g_signal_emit_by_name(cancel, "clicked");
+	EXPECT_TRUE(completed);
+	EXPECT_FALSE(accepted);
+	EXPECT_TRUE(shortcut_upgrade_needed(path.c_str()));
+	open();
+	ASSERT_NE(dialog, nullptr);
+	gtk_window_close(GTK_WINDOW(dialog));
+	EXPECT_TRUE(completed);
+	EXPECT_FALSE(accepted);
+	EXPECT_TRUE(shortcut_upgrade_needed(path.c_str()));
+}
+
+TEST_F(ShortcutUpgradePreferences, LegacyChoicePreservesSavedCustomizations)
+{
+	open();
+	ASSERT_NE(dialog, nullptr);
+	choose_and_continue(true);
+	EXPECT_TRUE(completed);
+	EXPECT_TRUE(accepted);
+	EXPECT_FALSE(shortcut_upgrade_needed(path.c_str()));
+	g_autoptr(GKeyFile) shortcuts = g_key_file_new();
+	ASSERT_TRUE(g_key_file_load_from_file(shortcuts, path.c_str(), G_KEY_FILE_NONE, nullptr));
+	g_auto(GStrv) preferences = g_key_file_get_string_list(shortcuts, "app.preferences", "accels", nullptr, nullptr);
+	ASSERT_NE(preferences, nullptr);
+	EXPECT_TRUE(g_strv_contains(preferences, "F8"));
+	g_autofree gchar *modern = g_key_file_get_string(shortcuts, "app.open-file", "accels", nullptr);
+	EXPECT_STREQ(modern, "");
+	g_autofree gchar *original = nullptr;
+	ASSERT_TRUE(g_file_get_contents(old_path.c_str(), &original, nullptr, nullptr));
+	EXPECT_STREQ(original, saved_legacy);
+}
+
+TEST_F(ShortcutUpgradePreferences, HigChoiceUsesCurrentDefaultsWithoutOldOverrides)
+{
+	open();
+	ASSERT_NE(dialog, nullptr);
+	choose_and_continue(false);
+	EXPECT_TRUE(completed);
+	EXPECT_TRUE(accepted);
+	EXPECT_FALSE(shortcut_upgrade_needed(path.c_str()));
+	g_autofree gchar *contents = nullptr;
+	gsize length = 1;
+	ASSERT_TRUE(g_file_get_contents(path.c_str(), &contents, &length, nullptr));
+	EXPECT_EQ(length, 0U);
+}
+
+TEST_F(ShortcutUpgradePreferences, ConversionFailureAllowsAnExplicitAlternativeChoice)
+{
+	ASSERT_TRUE(g_file_set_contents(old_path.c_str(), "(gtk_accel_path broken)", -1, nullptr));
+	open();
+	ASSERT_NE(dialog, nullptr);
+	choose_and_continue(true);
+	EXPECT_FALSE(completed);
+	EXPECT_FALSE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+	g_autofree gchar *message = g_strdup_printf(_("Invalid shortcut entry on line %u"), 1U);
+	auto *error = find_widget(dialog, GTK_TYPE_LABEL, message);
+	ASSERT_NE(error, nullptr);
+	EXPECT_TRUE(gtk_widget_get_visible(error));
+	choose_and_continue(false);
+	EXPECT_TRUE(completed);
+	EXPECT_TRUE(accepted);
+	EXPECT_FALSE(shortcut_upgrade_needed(path.c_str()));
+}
+
+class LegacyShortcutPreferences : public PartialLayoutConfig
+{
+protected:
+	void TearDown() override
+	{
+		if (get_config_window()) gtk_window_close(GTK_WINDOW(get_config_window()));
+		while (g_main_context_iteration(nullptr, FALSE)) {}
+		if (changed)
+			{
+			g_unlink(path.c_str());
+			g_unlink((path + "~").c_str());
+			g_unlink(legacy_path.c_str());
+			for (const auto &file : original_files)
+				EXPECT_TRUE(g_file_set_contents(file.first.c_str(), file.second.c_str(), file.second.size(), nullptr));
+			accel_map_load_merged();
+			reload_registered_accels(app, get_keyfile_merged());
+			}
+		PartialLayoutConfig::TearDown();
+	}
+	std::string path;
+	std::string legacy_path;
+	std::map<std::string, std::string> original_files;
+	bool changed = false;
+};
+
+TEST_F(LegacyShortcutPreferences, ConfirmationAppliesBindingsImmediately)
+{
+	g_autofree gchar *filename = accels_ini_filename();
+	path = filename;
+	g_autofree gchar *old_path = g_build_filename(get_rc_dir(), "accels", nullptr);
+	legacy_path = old_path;
+	for (const auto &file : {path, path + "~", legacy_path})
+		{
+		if (!g_file_test(file.c_str(), G_FILE_TEST_EXISTS)) continue;
+		g_autofree gchar *contents = nullptr;
+		gsize length = 0;
+		ASSERT_TRUE(g_file_get_contents(file.c_str(), &contents, &length, nullptr));
+		original_files.emplace(file, std::string(contents, length));
+		}
+	ASSERT_EQ(g_mkdir_with_parents(get_rc_dir(), 0700), 0);
+	changed = true;
+	const gchar *custom = "[app.preferences]\naccels=F12\n";
+	ASSERT_TRUE(g_file_set_contents(path.c_str(), custom, -1, nullptr));
+	ASSERT_TRUE(g_file_set_contents(legacy_path.c_str(), "(gtk_accel_path \"<Actions>/MenuActions/ZoomIn\" \"F8\")", -1, nullptr));
+	show_config_window(layout);
+	auto *button = find_widget(get_config_window(), GTK_TYPE_BUTTON, _("Restore v2.x shortcuts…"));
+	ASSERT_NE(button, nullptr);
+	auto confirmation = []() -> GtkWindow *
+		{
+		auto *windows = gtk_window_get_toplevels();
+		for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+			{
+			g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+			if (find_widget(GTK_WIDGET(window), GTK_TYPE_LABEL, _("Replace keyboard shortcuts?"))) return window;
+			}
+		return nullptr;
+		};
+	g_signal_emit_by_name(button, "clicked");
+	auto *dialog = confirmation();
+	ASSERT_NE(dialog, nullptr);
+	gtk_window_close(dialog);
+	g_autofree gchar *unchanged = nullptr;
+	ASSERT_TRUE(g_file_get_contents(path.c_str(), &unchanged, nullptr, nullptr));
+	EXPECT_STREQ(unchanged, custom);
+	g_signal_emit_by_name(button, "clicked");
+	dialog = confirmation();
+	ASSERT_NE(dialog, nullptr);
+	auto *replace = find_widget(GTK_WIDGET(dialog), GTK_TYPE_BUTTON, _("Replace"));
+	ASSERT_NE(replace, nullptr);
+	g_signal_emit_by_name(replace, "clicked");
+	ASSERT_TRUE(wait_layout([&]()
+		{
+		g_auto(GStrv) accels = gtk_application_get_accels_for_action(app, "win.main-win-zoom-in");
+		return g_strv_contains(accels, "F8");
+		}));
+	EXPECT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+	g_signal_emit_by_name(find_widget(get_config_window(), GTK_TYPE_BUTTON, _("Cancel")), "clicked");
+	g_autofree gchar *zoom = g_key_file_get_string(get_keyfile_merged(), "win.main-win-zoom-in", "accels", nullptr);
+	EXPECT_NE(g_strstr_len(zoom, -1, "F8"), nullptr);
 }
 
 GtkWidget *find_scheme_dropdown(GtkWidget *widget)

@@ -2,7 +2,15 @@
 
 #include "convert-configuration.h"
 
+#include <cstring>
+#include <map>
+#include <string>
+#include <vector>
+
+#include <gtk/gtk.h>
+
 #include "accelerators.h"
+#include "intl.h"
 #include "main-defines.h"
 #include "ui-fileops.h"
 
@@ -42,57 +50,6 @@ gboolean is_app_action(const gchar *action_name)
 		}
 
 	return FALSE;
-}
-
-gboolean convert_gtk_accel_lines_to_keyfile(const gchar *input, GKeyFile *keyfile, GError **error)
-{
-	g_auto(GStrv) lines = g_strsplit(input, "\n", -1);
-
-	g_autoptr(GRegex) regex = g_regex_new(R"re(\(gtk_accel_path\s+"([^"]+)"\s+"([^"]+)"\))re", G_REGEX_OPTIMIZE, (GRegexMatchFlags)0, error);
-
-	if (!regex)
-		{
-		return FALSE;
-		}
-
-	for (gint i = 0; lines[i]; i++)
-		{
-		gchar *line = g_strstrip(lines[i]);
-
-		/* Skip comments and empty lines
-		 */
-		if (*line == '\0' || *line == ';')
-			{
-			continue;
-			}
-
-		g_autoptr(GMatchInfo) match = nullptr;
-
-		if (g_regex_match(regex, line, (GRegexMatchFlags)0, &match))
-			{
-			g_autofree gchar *path  = g_match_info_fetch(match, 1);
-			g_autofree gchar *accel = g_match_info_fetch(match, 2);
-
-			/* Use final path component as group name
-			 */
-			g_autofree gchar *raw_name = g_path_get_basename(path);
-			const gchar *scope = is_app_action(raw_name) ? "app." : "win.main-win-";
-
-			g_autofree gchar *kebab = camel_to_kebab(raw_name);
-
-			g_autoptr(GString) rewritten = g_string_new(kebab);
-			apply_special_renames(rewritten);
-			g_autoptr(GString) result = g_string_new("");
-			g_string_append(result, scope);
-			g_string_append(result, rewritten->str);
-			if (!g_strstr_len(result->str, -1, "alt1") && !g_strstr_len(result->str, -1, "alt2"))
-				{
-				g_key_file_set_string(keyfile,  result->str, "accels", accel);
-				}
-			}
-		}
-
-	return TRUE;
 }
 
 gchar *camel_to_kebab(const gchar *input)
@@ -276,7 +233,160 @@ void apply_special_renames(GString *name)
 		}
 }
 
+
+/* Names whose GTK4 actions differ from a mechanical CamelCase conversion. */
+gchar *legacy_action_name(const gchar *path, guint &slot)
+{
+	g_autofree gchar *raw_name = g_path_get_basename(path);
+	if (g_str_has_prefix(path, "<Actions>/MenuActionsExternal/"))
+		return g_strconcat("win.main-win-plugin-run::", raw_name, nullptr);
+
+	if (g_str_has_suffix(raw_name, "Alt1") || g_str_has_suffix(raw_name, "Alt2")) // NOTRANSLATE: Legacy alternate-action suffixes.
+		{
+		const auto length = strlen(raw_name);
+		slot = raw_name[length - 1] - '0';
+		raw_name[length - 4] = '\0';
+		}
+	g_autofree gchar *kebab = camel_to_kebab(raw_name);
+	g_autoptr(GString) rewritten = g_string_new(kebab);
+	apply_special_renames(rewritten);
+	static const std::map<std::string, const gchar *> names = {
+		{"alter-none", "orientation-original"},
+		{"connect-zoom-fill-hor", "connect-zoom-fill-horizontal"},
+		{"connect-zoom-fill-vert", "connect-zoom-fill-vertical"},
+		{"escape", "leave-fullscreen"},
+		{"exif-win", "exif-window"},
+		{"find-dupes", "find-duplicates"},
+		{"full-screen", "fullscreen"},
+		{"help-kbd", "help-keyboard"},
+		{"histogram-chan-b", "histogram-channel('blue')"},
+		{"histogram-chan-cycle", "histogram-channel-cycle"},
+		{"histogram-chan-g", "histogram-channel('green')"},
+		{"histogram-chan-r", "histogram-channel('red')"},
+		{"histogram-chan-r-g-b", "histogram-channel('rgb')"},
+		{"histogram-chan-v", "histogram-channel('value')"},
+		{"histogram-mode-lin", "histogram-mode::linear"},
+		{"histogram-mode-log", "histogram-mode::log"},
+		{"layout-config", "configure-window"},
+		{"o-s-d1", "osd('1')"},
+		{"o-s-d2", "osd('2')"},
+		{"o-s-d3", "osd('3')"},
+		{"o-s-d4", "osd('4')"},
+		{"permanent-delete", "delete-permanent"},
+		{"prev-image", "previous-image"},
+		{"prev-page", "previous-page"},
+		{"rotate-c-c-w", "rotate-ccw-90"},
+		{"rotate-c-w", "rotate-cw-90"},
+		{"s-bar", "info-sidebar"},
+		{"s-bar-sort", "sort-manager"},
+		{"slide-show", "slideshow"},
+		{"slide-show-faster", "slideshow-faster"},
+		{"slide-show-pause", "slideshow-pause"},
+		{"slide-show-slower", "slideshow-slower"},
+		{"split-horizontal", "split-mode('horizontal')"},
+		{"split-quad", "split-mode('quad')"},
+		{"split-single", "split-mode('single')"},
+		{"split-triple", "split-mode('triple')"},
+		{"split-vertical", "split-mode('vertical')"},
+		{"stereo-auto", "stereo('auto')"},
+		{"stereo-cross", "stereo('cross')"},
+		{"stereo-off", "stereo('off')"},
+		{"stereo-s-b-s", "stereo('side-by-side')"},
+		{"view-icons", "view-mode('icons')"},
+		{"view-list", "view-mode('list')"},
+		{"zoom-fill-hor", "zoom-fill-horizontal"},
+		{"zoom-fill-vert", "zoom-fill-vertical"},
+		};
+	const auto renamed = names.find(kebab);
+	if (renamed != names.end()) g_string_assign(rewritten, renamed->second);
+	if (g_str_has_prefix(rewritten->str, "crop::"))
+		{
+		g_autofree gchar *target = g_strdup_printf("crop('%s')", rewritten->str + strlen("crop::"));
+		g_string_assign(rewritten, target);
+		}
+	return g_strconcat(is_app_action(raw_name) ? "app." : "win.main-win-", rewritten->str, nullptr);
+}
+
 } //namespace
+
+bool merge_legacy_shortcuts(GKeyFile *keyfile, const gchar *input, GError **error)
+{
+	struct Bindings
+	{
+		std::vector<std::string> slots;
+		bool modified = false;
+	};
+	std::map<std::string, Bindings> actions;
+	g_auto(GStrv) lines = g_strsplit(input, "\n", -1);
+	g_autoptr(GRegex) regex = g_regex_new(R"re(^\(gtk_accel_path\s+"((?:[^"\\]|\\.)*)"\s+"((?:[^"\\]|\\.)*)"\s*\)\s*$)re",
+	                                      G_REGEX_OPTIMIZE, static_cast<GRegexMatchFlags>(0), error);
+	if (!regex) return false;
+
+	for (guint i = 0; lines[i]; ++i)
+		{
+		gchar *line = g_strstrip(lines[i]);
+		const bool modified = *line != ';';
+		if (!modified) line = g_strchug(line + 1);
+		if (!*line) continue;
+		if (!g_str_has_prefix(line, "(gtk_accel_path"))
+			{
+			if (!modified) continue;
+			g_set_error(error, G_KEY_FILE_ERROR, G_KEY_FILE_ERROR_PARSE, _("Invalid shortcut entry on line %u"), i + 1);
+			return false;
+			}
+		g_autoptr(GMatchInfo) match = nullptr;
+		if (!g_regex_match(regex, line, static_cast<GRegexMatchFlags>(0), &match))
+			{
+			if (!modified) continue;
+			g_set_error(error, G_KEY_FILE_ERROR, G_KEY_FILE_ERROR_PARSE, _("Invalid shortcut entry on line %u"), i + 1);
+			return false;
+			}
+		g_autofree gchar *escaped_path = g_match_info_fetch(match, 1);
+		g_autofree gchar *escaped_accel = g_match_info_fetch(match, 2);
+		g_autofree gchar *path = g_strcompress(escaped_path);
+		g_autofree gchar *accel = g_strcompress(escaped_accel);
+		g_autofree gchar *normalized = nullptr;
+		if (*accel)
+			{
+			guint key;
+			GdkModifierType mods;
+			if (!gtk_accelerator_parse(accel, &key, &mods) || !key)
+				{
+				if (!modified) continue;
+				g_set_error(error, G_KEY_FILE_ERROR, G_KEY_FILE_ERROR_PARSE, _("Invalid shortcut entry on line %u"), i + 1);
+				return false;
+				}
+			normalized = gtk_accelerator_name(key, mods);
+			}
+		guint slot = 0;
+		g_autofree gchar *action = legacy_action_name(path, slot);
+		auto inserted = actions.try_emplace(action);
+		auto &bindings = inserted.first->second;
+		if (inserted.second)
+			{
+			g_auto(GStrv) defaults = g_key_file_get_string_list(keyfile, action, "accels", nullptr, nullptr);
+			for (gchar **value = defaults; value && *value; ++value) bindings.slots.emplace_back(*value);
+			}
+		if (bindings.slots.size() <= slot) bindings.slots.resize(slot + 1);
+		bindings.slots[slot] = normalized ? normalized : "";
+		bindings.modified = bindings.modified || modified;
+		}
+
+	for (const auto &action : actions)
+		{
+		if (!action.second.modified) continue;
+		g_autoptr(GPtrArray) accels = g_ptr_array_new();
+		for (const auto &slot : action.second.slots)
+			{
+			if (slot.empty()) continue;
+			if (!g_ptr_array_find_with_equal_func(accels, slot.c_str(), g_str_equal, nullptr))
+				g_ptr_array_add(accels, const_cast<gchar *>(slot.c_str()));
+			}
+		g_key_file_set_string_list(keyfile, action.first.c_str(), "accels",
+		                           reinterpret_cast<const gchar * const *>(accels->pdata), accels->len);
+		}
+	return true;
+}
 
 /**
  * @brief Update geeqierc.xml
@@ -436,7 +546,7 @@ void convert_accel_map()
 
 	keyfile = g_key_file_new();
 
-	if (!convert_gtk_accel_lines_to_keyfile(contents, keyfile, nullptr))
+	if (!merge_legacy_shortcuts(keyfile, contents, nullptr))
 		{
 		log_printf("Error converting accelerator file"); // NOTRANSLATE: Diagnostic message.
 

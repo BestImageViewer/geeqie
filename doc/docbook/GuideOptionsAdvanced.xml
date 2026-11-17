@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <section id="GuideOptionsAdvanced">
   <title>Advanced</title>
+  <section id="LegacyKeyboardShortcuts">
+    <title>Keyboard shortcuts</title>
+    <para>On the first GTK4 run, if an old <filename>accels</filename> file exists and <filename>accels.ini</filename> does not, Geeqie asks whether to maintain the v2.x shortcuts or use the GNOME HIG shortcuts. Neither option is selected initially. Select an option to enable Continue. Canceling leaves the shortcut choice unsaved and exits; the query appears again on the next graphical launch. New installations and upgrades with an existing <filename>accels.ini</filename> are not prompted.</para>
+    <para><guibutton>Restore v2.x shortcuts…</guibutton> replaces all keyboard shortcuts with the defaults from Geeqie v2.9 after confirmation. If the old <filename>accels</filename> file is still present in the configuration directory, its saved customizations are applied over these defaults, including disabled and alternate shortcuts. The old file is left unchanged. Commands introduced later are left unassigned. Plugin shortcuts use saved v2.x customizations when available, or the defaults supplied by the installed plugins.</para>
+    <para>The existing <filename>accels.ini</filename> is backed up as <filename>accels.ini~</filename>, replacing any previous backup. Current v3 shortcut customizations are replaced. If the old file cannot be read or converted, the current shortcuts are left unchanged. The change takes effect immediately, even if Preferences is canceled. To restore the current version's defaults, use <guibutton>Defaults</guibutton> on the Keyboard tab.</para>
+  </section>
   <section id="ExternalPreviewExtraction">
     <title>External preview extraction</title>
     <para>

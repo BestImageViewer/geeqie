@@ -33,6 +33,7 @@
 #include <cstring>
 #include <ctime>
 #include <optional>
+#include <string>
 
 #include <config.h>
 
@@ -46,12 +47,14 @@
 #endif
 
 #include "accelerators.h"
+#include "actions.h"
 #include "cache-maint.h"
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "command-line-handling.h"
 #include "convert-configuration.h"
+#include "editors.h"
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -72,6 +75,7 @@
 #include "metadata.h"
 #include "options.h"
 #include "pixbuf-util.h"
+#include "shortcut-upgrade.h"
 #include "signal-handler.h"
 #include "third-party/whereami.h"
 #include "thumb.h"
@@ -97,6 +101,11 @@ gchar *instance_identifier;
 
 namespace
 {
+
+bool shortcut_upgrade_pending = false;
+GtkWidget *shortcut_upgrade_window = nullptr;
+std::string shortcut_upgrade_description;
+
 
 const gchar *option_context_description = _(" \
 All other command line parameters are used as plain files if they exist, or a URL or a folder.\n \
@@ -744,34 +753,30 @@ void startup_common(GtkApplication *, gpointer)
 	g_autofree gchar *rc_file = g_build_filename(config_home, GQ_APPNAME_LC, RC_FILE_NAME, nullptr);
 	g_autofree gchar *rc_backup = g_strconcat(rc_file, "~", nullptr);
 
-	if (isfile(accels_old) && !isfile(accels_ini_path))
+	if (shortcut_upgrade_needed(accels_ini_path))
 		{
 		g_autofree gchar *description = g_strdup_printf(
 		_("As part of the GTK3/GTK4 migration, it was necessary to rework the entire menu and action code.\n \
 Superficially, you should not see significant differences, however you should be aware there may be resulting problems.\n\n \
-Some shortcuts have changed.\n \
+Some shortcuts have changed to comply with the GNOME Human Interface Guidelines.\n \
+To restore the v2.x defaults at any time, open Preferences, select the Advanced tab, and click “Restore v2.x shortcuts…” in the Keyboard shortcuts section.\n\n \
 Command line option --action parameters are all changed.\n\n \
 If you find problems, check these files:\n \
 %s (old)\n \
 %s (new)\n \
 %s (revised Toolbar sections)\n \
 %s (backup of original)\n\n \
-Shortcuts and configuration files will be automatically converted.\n\n \
-This message will not be shown again.\n\n \
-Select OK to dismiss this message."),
+Configuration files will be automatically converted. Your shortcut choice will be saved when you continue.\n\n \
+After you choose shortcuts, this message will not be shown again.\n\n \
+Choose which keyboard shortcuts to use, then select Continue."),
 		accels_old,
 		accels_new,
 		rc_file,
 		rc_backup);
 
-		g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", _("Some keyboard shortcuts and menu actions have changed."));
-		gtk_alert_dialog_set_message(dialog, _("Changes to menus and shortcuts"));
-		gtk_alert_dialog_set_detail(dialog, description);
-		gtk_alert_dialog_set_modal(dialog, TRUE);
-		gtk_alert_dialog_show(dialog, nullptr);
-
+		shortcut_upgrade_pending = true;
+		shortcut_upgrade_description = description;
 		convert_configuration_file();
-		convert_accel_map();
 		}
 
 	accel_map_load_merged();
@@ -779,9 +784,40 @@ Select OK to dismiss this message."),
 	command_line = g_new0(CommandLine, 1);
 }
 
-void activate_cb(GtkApplication *, gpointer)
+void activate_cb(GtkApplication *app, gpointer);
+
+void shortcut_upgrade_complete_cb(bool accepted, gpointer data)
+{
+	auto *app = GTK_APPLICATION(data);
+	shortcut_upgrade_window = nullptr;
+	if (!accepted)
+		{
+		g_application_quit(G_APPLICATION(app));
+		return;
+		}
+	shortcut_upgrade_pending = false;
+	shortcut_upgrade_description.clear();
+	accel_map_load_merged();
+	reload_registered_accels(app, get_keyfile_merged());
+	editor_plugin_accels_reload();
+	activate_cb(app, nullptr);
+}
+
+void activate_cb(GtkApplication *app, gpointer)
 {
 	LayoutWindow *lw = get_current_layout();
+	if (shortcut_upgrade_pending)
+		{
+		if (!shortcut_upgrade_window)
+			{
+			g_autofree gchar *path = accels_ini_filename();
+			shortcut_upgrade_window = shortcut_upgrade_dialog_new(GTK_WINDOW(lw->window), path,
+			                                                       shortcut_upgrade_description.c_str(),
+			                                                       shortcut_upgrade_complete_cb, app);
+			}
+		gtk_window_present(GTK_WINDOW(shortcut_upgrade_window));
+		return;
+		}
 
 	/* If Geeqie is not running and a command line option like --version
 	 * is executed, display of the Geeqie window has to be inhibited.

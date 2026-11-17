@@ -6,6 +6,7 @@
 <gresources>
   <gresource prefix="/org/geeqie/geeqie/data">
     <file>accels.ini</file>
+    <file>accels-v2.ini</file>
     <file alias="geocode-parameters.awk">plugins/geocode-parameters/geocode-parameters.awk</file>
   </gresource>
 </gresources>

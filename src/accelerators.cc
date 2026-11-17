@@ -72,6 +72,47 @@ GKeyFile *key_file_new_merged(GKeyFile *defaults, GKeyFile *user)
 } //namespace
 
 
+bool restore_v2_shortcuts(const gchar *path, GError **error)
+{
+	g_autoptr(GBytes) defaults = g_resources_lookup_data(GQ_RESOURCE_PATH_DATA "/accels.ini", G_RESOURCE_LOOKUP_FLAGS_NONE, error);
+	if (!defaults) return false;
+	g_autoptr(GBytes) legacy = g_resources_lookup_data(GQ_RESOURCE_PATH_DATA "/accels-v2.ini", G_RESOURCE_LOOKUP_FLAGS_NONE, error);
+	if (!legacy) return false;
+
+	g_autoptr(GKeyFile) shortcuts = g_key_file_new();
+	g_autoptr(GKeyFile) profile = g_key_file_new();
+	if (!g_key_file_load_from_bytes(shortcuts, defaults, G_KEY_FILE_NONE, error) ||
+	    !g_key_file_load_from_bytes(profile, legacy, G_KEY_FILE_NONE, error)) return false;
+
+	g_auto(GStrv) groups = g_key_file_get_groups(shortcuts, nullptr);
+	for (gchar **group = groups; *group; ++group)
+		{
+		g_key_file_set_string(shortcuts, *group, "accels", "");
+		}
+	g_autofree gchar *directory = g_path_get_dirname(path);
+	g_autofree gchar *old_path = g_build_filename(directory, "accels", nullptr);
+	g_autofree gchar *old_contents = nullptr;
+	g_autoptr(GError) read_error = nullptr;
+	if (g_file_get_contents(old_path, &old_contents, nullptr, &read_error))
+		{
+		if (!merge_legacy_shortcuts(profile, old_contents, error)) return false;
+		}
+	else if (!g_error_matches(read_error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
+		{
+		g_propagate_error(error, g_steal_pointer(&read_error));
+		return false;
+		}
+
+	key_file_merge(shortcuts, profile);
+	gsize length = 0;
+	g_autofree gchar *contents = g_key_file_to_data(shortcuts, &length, error);
+	if (!contents) return false;
+	g_autoptr(GFile) file = g_file_new_for_path(path);
+	return g_file_replace_contents(file, contents, length, nullptr, TRUE,
+	                               G_FILE_CREATE_NONE, nullptr, nullptr, error);
+}
+
+
 char *accels_ini_filename()
 {
 	return g_build_filename(get_rc_dir(), "accels.ini", nullptr);

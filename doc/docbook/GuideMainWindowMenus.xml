@@ -82,7 +82,8 @@
           <menuchoice>
             <shortcut>
               <keycombo>
-                <keycap>F3</keycap>
+                <keycap>Ctrl</keycap>
+                <keycap>F</keycap>
               </keycombo>
             </shortcut>
             <guimenu>Search…</guimenu>
@@ -112,7 +113,7 @@
           <menuchoice>
             <shortcut>
               <keycombo>
-                <keycap>Shift</keycap>
+                <keycap>Ctrl</keycap>
                 <keycap>P</keycap>
               </keycombo>
             </shortcut>
@@ -129,7 +130,8 @@
             <shortcut>
               <keycombo>
                 <keycap>Ctrl</keycap>
-                <keycap>F</keycap>
+                <keycap>Shift</keycap>
+                <keycap>N</keycap>
               </keycombo>
             </shortcut>
             <guimenu>New folder…</guimenu>
@@ -365,13 +367,6 @@
       <varlistentry>
         <term>
           <menuchoice>
-            <shortcut>
-              <keycombo>
-                <keycap>Ctrl</keycap>
-                <keycap>Shift</keycap>
-                <keycap>Right</keycap>
-              </keycombo>
-            </shortcut>
             <guimenu>Next folder</guimenu>
           </menuchoice>
         </term>
@@ -382,13 +377,6 @@
       <varlistentry>
         <term>
           <menuchoice>
-            <shortcut>
-              <keycombo>
-                <keycap>Ctrl</keycap>
-                <keycap>Shift</keycap>
-                <keycap>Left</keycap>
-              </keycombo>
-            </shortcut>
             <guimenu>Previous folder</guimenu>
           </menuchoice>
         </term>
@@ -537,12 +525,6 @@
       <varlistentry>
         <term>
           <menuchoice>
-            <shortcut>
-              <keycombo>
-                <keycap>Alt</keycap>
-                <keycap>R</keycap>
-              </keycombo>
-            </shortcut>
             <guimenu>Rectangular selection</guimenu>
           </menuchoice>
         </term>
@@ -675,6 +657,7 @@
             <shortcut>
               <keycombo>
                 <keycap>Ctrl</keycap>
+                <keycap>Shift</keycap>
                 <keycap>n</keycap>
               </keycombo>
             </shortcut>
@@ -964,11 +947,6 @@
       <varlistentry>
         <term>
           <menuchoice>
-            <shortcut>
-              <keycombo>
-                <keycap>Alt+Keypad+n</keycap>
-              </keycombo>
-            </shortcut>
             <guimenu>Rating</guimenu>
             <guimenuitem>n</guimenuitem>
           </menuchoice>
@@ -980,11 +958,6 @@
       <varlistentry>
         <term>
           <menuchoice>
-            <shortcut>
-              <keycombo>
-                <keycap>Alt+Keypad+Minus</keycap>
-              </keycombo>
-            </shortcut>
             <guimenu>Rating</guimenu>
             <guimenuitem>-1</guimenuitem>
           </menuchoice>
@@ -1014,7 +987,8 @@
           <menuchoice>
             <shortcut>
               <keycombo>
-                <keycap>Alt</keycap>
+                <keycap>Ctrl</keycap>
+                <keycap>Shift</keycap>
                 <keycap>K</keycap>
               </keycombo>
             </shortcut>
@@ -1150,7 +1124,6 @@
           <menuchoice>
             <shortcut>
               <keycombo>
-                <keycap>Ctrl</keycap>
                 <keycap>V</keycap>
               </keycombo>
             </shortcut>
@@ -1233,6 +1206,7 @@
             <shortcut>
               <keycombo>
                 <keycap>Ctrl</keycap>
+                <keycap>Shift</keycap>
                 <keycap>L</keycap>
               </keycombo>
             </shortcut>
@@ -1297,12 +1271,6 @@
       <varlistentry>
         <term>
           <menuchoice>
-            <shortcut>
-              <keycombo>
-                <keycap>Ctrl</keycap>
-                <keycap>H</keycap>
-              </keycombo>
-            </shortcut>
             <guimenu>Files and Folders</guimenu>
             <guimenuitem>Hide file list</guimenuitem>
           </menuchoice>
@@ -1345,6 +1313,12 @@
       <varlistentry>
         <term>
           <menuchoice>
+            <shortcut>
+              <keycombo>
+                <keycap>Ctrl</keycap>
+                <keycap>+</keycap>
+              </keycombo>
+            </shortcut>
             <guimenu>Zoom</guimenu>
             <guimenuitem>Zoom in</guimenuitem>
           </menuchoice>
@@ -1356,6 +1330,12 @@
       <varlistentry>
         <term>
           <menuchoice>
+            <shortcut>
+              <keycombo>
+                <keycap>Ctrl</keycap>
+                <keycap>-</keycap>
+              </keycombo>
+            </shortcut>
             <guimenu>Zoom</guimenu>
             <guimenuitem>Zoom out</guimenuitem>
           </menuchoice>
