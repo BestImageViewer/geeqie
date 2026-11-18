@@ -35,36 +35,29 @@
 
 #include <libraw/libraw.h>
 
+#include "misc.h"
 #include "ui-fileops.h"
+
+namespace
+{
 
 struct LibRawPreviewData
 {
-	guchar *ptr;
-	guchar *source_data;
-	LibRaw *lr;
+	~LibRawPreviewData()
+	{
+		delete lr;
+		g_free(source_data);
+	}
+
+	guchar *source_data = nullptr;
+	LibRaw *lr = nullptr;
 };
 
-static GList *libraw_previews = nullptr;
+// key: pointer to preview in image
+// value: LibRawPreviewData
+GHashTable *libraw_previews = nullptr;
 
-void libraw_free_preview(const guchar *buf)
-{
-	GList *work = libraw_previews;
-
-	while (work)
-		{
-		auto ud = static_cast<LibRawPreviewData *>(work->data);
-		if (ud->ptr == buf)
-			{
-			delete ud->lr;
-			g_free(ud->source_data);
-			g_free(ud);
-			libraw_previews = g_list_delete_link(libraw_previews, work);
-			return;
-			}
-		work = work->next;
-		}
-	g_assert_not_reached();
-}
+} // namespace
 
 guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 {
@@ -84,18 +77,32 @@ guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 		ret = lr->unpack_thumb();
 		if (ret == LIBRAW_SUCCESS && lr->is_jpeg_thumb())
 			{
-			auto *ud = g_new(LibRawPreviewData, 1);
-			ud->ptr = reinterpret_cast<guchar *>(lr->imgdata.thumbnail.thumb);
-			ud->source_data = g_steal_pointer(&source_data);
-			ud->lr = lr.release();
+			auto *ptr = reinterpret_cast<guchar *>(lr->imgdata.thumbnail.thumb);
+			data_len = lr->imgdata.thumbnail.tlength;
 
-			libraw_previews = g_list_prepend(libraw_previews, ud);
+			auto *lrpd = new LibRawPreviewData();
+			lrpd->source_data = g_steal_pointer(&source_data);
+			lrpd->lr = lr.release();
 
-			data_len = ud->lr->imgdata.thumbnail.tlength;
-			return ud->ptr;
+			if (!libraw_previews)
+				libraw_previews = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, delete_cb<LibRawPreviewData>);
+
+			if (!g_hash_table_insert(libraw_previews, ptr, lrpd))
+				{
+				log_printf("warning: key %p already existed in libraw_previews\n", ptr);
+				}
+
+			return ptr;
 			}
 		}
 	return nullptr;
+}
+
+void libraw_free_preview(const guchar *buf)
+{
+	if (g_hash_table_remove(libraw_previews, buf)) return;
+
+	g_assert_not_reached();
 }
 
 #else /* !define HAVE_RAW */
