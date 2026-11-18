@@ -1177,60 +1177,53 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 
 	if (!exif->image()) return nullptr;
 
-	std::string const path = exif->image()->io().path();
+	const std::string path = exif->image()->io().path();
 	/* given image pathname, first do simple (and fast) file extension test */
-	gboolean is_raw = filter_file_class(path.c_str(), FORMAT_CLASS_RAWIMAGE);
+	const gboolean is_raw = filter_file_class(path.c_str(), FORMAT_CLASS_RAWIMAGE);
 
 	if (!is_raw && requested_width == 0) return nullptr;
 
-	try {
+	try
+		{
+		const Exiv2::PreviewManager pm(*exif->image());
 
-		Exiv2::PreviewManager pm(*exif->image());
+		const Exiv2::PreviewPropertiesList list = pm.getPreviewProperties();
+		if (list.empty()) return nullptr;
 
-		Exiv2::PreviewPropertiesList list = pm.getPreviewProperties();
+		auto pos = --list.cend(); // the largest
 
-		if (!list.empty())
+		if (requested_width != 0)
 			{
-			Exiv2::PreviewPropertiesList::iterator pos;
-			auto last = --list.end();
-
-			if (requested_width == 0)
+			const size_t w = requested_width;
+			const size_t h = requested_height;
+			const auto it = std::find_if(list.cbegin(), list.cend(),
+			                             [w, h](const Exiv2::PreviewProperties &pp){ return pp.width_ >= w && pp.height_ >= h; });
+			if (it != list.cend())
 				{
-				pos = last; // the largest
+				pos = it;
 				}
-			else
+			else if (!is_raw)
 				{
-				pos = list.begin();
-				while (pos != last)
-					{
-					if (pos->width_ >= static_cast<uint32_t>(requested_width) &&
-					    pos->height_ >= static_cast<uint32_t>(requested_height)) break;
-					++pos;
-					}
-
 				// we are not interested in smaller thumbnails in normal image formats - we can use full image instead
-				if (!is_raw)
-					{
-					if (pos->width_ < static_cast<uint32_t>(requested_width) || pos->height_ < static_cast<uint32_t>(requested_height)) return nullptr;
-					}
+				return nullptr;
 				}
-
-			Exiv2::PreviewImage image = pm.getPreviewImage(*pos);
-
-			// Let's not touch data_len until we finish copy.
-			// Just in case we run into OOM.
-			size_t img_sz = image.size();
-			auto* b = new Exiv2::byte[img_sz];
-			std::copy_n(image.pData(), img_sz, b);
-			*data_len = img_sz;
-			return b;
 			}
-		return nullptr;
-	}
-	catch (Exiv2::AnyError& e) {
+
+		const Exiv2::PreviewImage image = pm.getPreviewImage(*pos);
+
+		// Let's not touch data_len until we finish copy.
+		// Just in case we run into OOM.
+		const size_t img_sz = image.size();
+		auto *b = new Exiv2::byte[img_sz];
+		std::copy_n(image.pData(), img_sz, b);
+		*data_len = img_sz;
+		return b;
+		}
+	catch (Exiv2::AnyError& e)
+		{
 		debug_exception(e);
 		return nullptr;
-	}
+		}
 }
 
 void exif_free_preview(const guchar *buf)
