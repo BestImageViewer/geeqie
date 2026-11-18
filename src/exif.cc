@@ -1559,39 +1559,38 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 	return g_list_append(nullptr, str);
 }
 
-struct ExifPreviewData
-{
-	guchar *ptr;
-	guchar *source_data;
-};
-
-static GList *exif_previews = nullptr;
+// key: pointer to preview in image
+// value: image data
+static GHashTable *exif_previews = nullptr;
 
 guchar *exif_get_preview(ExifData *exif, guint *data_len, gint, gint)
 {
-	guint offset;
-	const gchar* path;
-	gsize source_size;
-
 	if (!exif) return nullptr;
-	path = exif->path;
+
+	const gchar* path = exif->path;
 	g_autofree gchar *path_fs = path_from_utf8(path);
+
+	gsize source_size;
 	g_autofree guchar *source_data = read_file_snapshot(path_fs, source_size);
 	if (!source_data) return nullptr;
 
+	guint offset;
 	if (format_raw_img_exif_offsets(source_data, source_size, &offset, nullptr) && offset)
 		{
-		ExifPreviewData *ud;
-
 		DEBUG_1("%s: offset %u", path, offset);
 
+		guchar *ptr = source_data + offset;
 		*data_len = source_size - offset;
-		ud = g_new(ExifPreviewData, 1);
-		ud->ptr = source_data + offset;
-		ud->source_data = g_steal_pointer(&source_data);
 
-		exif_previews = g_list_prepend(exif_previews, ud);
-		return ud->ptr;
+		if (!exif_previews)
+			exif_previews = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, g_free);
+
+		if (!g_hash_table_insert(exif_previews, ptr, g_steal_pointer(&source_data)))
+			{
+			log_printf("warning: key %p already existed in exif_previews\n", ptr);
+			}
+
+		return ptr;
 		}
 
 	return nullptr;
@@ -1600,20 +1599,8 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint, gint)
 
 void exif_free_preview(const guchar *buf)
 {
-	GList *work = exif_previews;
+	if (g_hash_table_remove(exif_previews, buf)) return;
 
-	while (work)
-		{
-		auto ud = static_cast<ExifPreviewData *>(work->data);
-		if (ud->ptr == buf)
-			{
-			exif_previews = g_list_delete_link(exif_previews, work);
-			g_free(ud->source_data);
-			g_free(ud);
-			return;
-			}
-		work = work->next;
-		}
 	g_assert_not_reached();
 }
 
