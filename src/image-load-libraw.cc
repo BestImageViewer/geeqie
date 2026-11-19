@@ -41,20 +41,8 @@
 namespace
 {
 
-struct LibRawPreviewData
-{
-	~LibRawPreviewData()
-	{
-		delete lr;
-		g_free(source_data);
-	}
-
-	guchar *source_data = nullptr;
-	LibRaw *lr = nullptr;
-};
-
-// key: pointer to preview in image
-// value: LibRawPreviewData
+// key: pointer to LibRaw thumb
+// value: LibRaw
 GHashTable *libraw_previews = nullptr;
 
 } // namespace
@@ -80,14 +68,10 @@ guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 			auto *ptr = reinterpret_cast<guchar *>(lr->imgdata.thumbnail.thumb);
 			data_len = lr->imgdata.thumbnail.tlength;
 
-			auto *lrpd = new LibRawPreviewData();
-			lrpd->source_data = g_steal_pointer(&source_data);
-			lrpd->lr = lr.release();
-
 			if (!libraw_previews)
-				libraw_previews = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, delete_cb<LibRawPreviewData>);
+				libraw_previews = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, delete_cb<LibRaw>);
 
-			if (!g_hash_table_insert(libraw_previews, ptr, lrpd))
+			if (!g_hash_table_insert(libraw_previews, ptr, lr.release()))
 				{
 				log_printf("warning: key %p already existed in libraw_previews\n", ptr);
 				}
