@@ -260,10 +260,10 @@
           <guilabel>Drag'n drop default action</guilabel>
         </term>
         <listitem>
-          <para>When using drag and drop to copy or move files, the default action is to use a pop-up menu to permit you to select which action is to be taken. This option allows you to set the default action to either Copy or Move.
+          <para>When using drag and drop to copy or move files, the default action is Ask, which lets you choose which action is to be taken. This option allows you to set the default action to either Copy or Move.
           </para>
           <note>
-            <para>When using the pop-up menu, the menu will also include an option for a symbolic link and any other plugins that are defined as being a <emphasis role="underline"><link linkend="Geeqieextensions">filter</link></emphasis>. If you set the default action to Copy or Move these additional options will not be available to you.</para>
+            <para>For drops onto the folder pane, the popup menu also offers plugins defined as a <emphasis role="underline"><link linkend="Geeqieextensions">filter</link></emphasis>. If you set the default action to Copy or Move these additional options will not be available to you.</para>
           </note>
         </listitem>
       </varlistentry>

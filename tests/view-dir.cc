@@ -2,6 +2,8 @@
 
 #include "gtest/gtest.h"
 
+#include <functional>
+#include <memory>
 #include <string>
 
 #include <glib/gstdio.h>
@@ -12,7 +14,9 @@
 #include "filefilter.h"
 #include "layout.h"
 #include "options.h"
+#include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-tree-edit.h"
 #include "view-dir.h"
 #include "view-dir-list.h"
 #include "view-dir-tree.h"
@@ -38,6 +42,54 @@ void drain_events()
 		g_usleep(1000);
 		}
 }
+
+bool wait_for_drop(const std::function<bool()> &ready)
+{
+	const auto deadline = g_get_monotonic_time() + 2 * G_TIME_SPAN_SECOND;
+	while (g_get_monotonic_time() < deadline)
+		{
+		while (g_main_context_iteration(nullptr, FALSE)) {}
+		if (ready()) return true;
+		g_usleep(1000);
+		}
+	return false;
+}
+
+struct DropMenu
+{
+	GtkWidget *widget;
+	explicit DropMenu(GtkWidget *menu) : widget(GTK_WIDGET(g_object_ref(menu))) {}
+	~DropMenu()
+	{
+		if (gtk_widget_get_visible(widget)) gtk_popover_popdown(GTK_POPOVER(widget));
+		g_object_unref(widget);
+	}
+};
+
+struct DropFiles
+{
+	std::string source;
+	std::string folder;
+	std::string destination;
+	explicit DropFiles(const gchar *directory) :
+		source(std::string(directory) + "/source.png"),
+		folder(std::string(directory) + "/destination"),
+		destination(folder + "/source.png") {}
+	~DropFiles() { g_unlink(source.c_str()); g_unlink(destination.c_str()); g_rmdir(folder.c_str()); }
+	bool create()
+	{
+		g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 2, 2);
+		gdk_pixbuf_fill(pixels, 0x204060ff);
+		return g_mkdir(folder.c_str(), 0700) == 0 && gdk_pixbuf_save(pixels, source.c_str(), "png", nullptr, nullptr);
+	}
+	void prepare(ViewDir *vd) const
+	{
+		auto target = FileData::new_dir(folder.c_str());
+		vd->drop_fd = target;
+		vd->drop_fd_ref.reset(target);
+		vd->drop_list = g_list_prepend(nullptr, file_data_new_simple(source.c_str()));
+	}
+};
 
 class ViewDirNewFolder : public testing::TestWithParam<DirViewType>
 {
@@ -445,6 +497,124 @@ TEST_P(ViewDirNewFolder, RefreshPreservesEditorAndNavigationCancels)
 	EXPECT_EQ(vd->new_folder, nullptr);
 	ASSERT_NE(start(), nullptr);
 	// TearDown also exercises destruction with an active editor.
+}
+
+TEST_P(ViewDirNewFolder, DropPopupCopiesMovesAndCancels)
+{
+	for (const auto action : {GDK_ACTION_COPY, GDK_ACTION_MOVE, GDK_ACTION_NONE})
+		{
+		SCOPED_TRACE(action);
+		DropFiles files(directory);
+		ASSERT_TRUE(files.create());
+		auto source = FileData::new_simple(files.source.c_str());
+		files.prepare(vd);
+		DropMenu menu(vd_drop_menu(vd, TRUE, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE)));
+		ASSERT_TRUE(wait_for_drop([&]() { return gtk_widget_get_mapped(menu.widget); }));
+		EXPECT_EQ(vd->drop_list, nullptr);
+		EXPECT_EQ(vd->drop_fd, nullptr);
+		const auto *name = action == GDK_ACTION_COPY ? "directory-drop.copy" :
+		                   action == GDK_ACTION_MOVE ? "directory-drop.move" : "directory-drop.cancel";
+		EXPECT_FALSE(gtk_popover_get_autohide(GTK_POPOVER(menu.widget)));
+		ASSERT_TRUE(gtk_widget_activate_action(menu.widget, name, nullptr));
+		ASSERT_TRUE(wait_for_drop([&]() { return source->change == nullptr && !gtk_widget_get_visible(menu.widget); }));
+		EXPECT_EQ(isfile(files.source.c_str()), action != GDK_ACTION_MOVE);
+		EXPECT_EQ(isfile(files.destination.c_str()), action != GDK_ACTION_NONE);
+		}
+}
+
+TEST_P(ViewDirNewFolder, DropPopupKeepsFilesAndDestinationAfterViewIsDestroyed)
+{
+	DropFiles files(directory);
+	ASSERT_TRUE(files.create());
+	auto source = FileData::new_simple(files.source.c_str());
+	files.prepare(vd);
+	DropMenu menu(vd_drop_menu(vd, TRUE, GDK_ACTION_COPY));
+	ASSERT_TRUE(wait_for_drop([&]() { return gtk_widget_get_mapped(menu.widget); }));
+	ASSERT_TRUE(gtk_widget_activate_action(menu.widget, "directory-drop.move", nullptr));
+	EXPECT_TRUE(isfile(files.source.c_str()));
+	EXPECT_FALSE(isfile(files.destination.c_str()));
+	gtk_window_set_child(GTK_WINDOW(layout.window), gtk_label_new("Changed view"));
+	vd = nullptr;
+	ASSERT_TRUE(gtk_widget_activate_action(menu.widget, "directory-drop.copy", nullptr));
+	ASSERT_TRUE(wait_for_drop([&]() { return source->change == nullptr && isfile(files.destination.c_str()); }));
+	EXPECT_TRUE(isfile(files.source.c_str()));
+}
+
+TEST_P(ViewDirNewFolder, DropPopupDisablesTransfersToReadOnlyDestination)
+{
+	DropFiles files(directory);
+	ASSERT_TRUE(files.create());
+	files.prepare(vd);
+	DropMenu menu(vd_drop_menu(vd, FALSE, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE)));
+	ASSERT_TRUE(wait_for_drop([&]() { return gtk_widget_get_mapped(menu.widget); }));
+	ASSERT_TRUE(gtk_widget_activate_action(menu.widget, "directory-drop.copy", nullptr));
+	ASSERT_TRUE(gtk_widget_activate_action(menu.widget, "directory-drop.move", nullptr));
+	EXPECT_TRUE(isfile(files.source.c_str()));
+	EXPECT_FALSE(isfile(files.destination.c_str()));
+	ASSERT_TRUE(gtk_widget_activate_action(menu.widget, "directory-drop.cancel", nullptr));
+	EXPECT_FALSE(gtk_widget_get_visible(menu.widget));
+}
+
+TEST_P(ViewDirNewFolder, DropPopupEscapeAndUnmapReleaseDismissalHandlers)
+{
+	DropFiles files(directory);
+	ASSERT_TRUE(files.create());
+	g_autoptr(GListModel) controllers = gtk_widget_observe_controllers(layout.window);
+	const guint initial_controllers = g_list_model_get_n_items(controllers);
+	files.prepare(vd);
+	DropMenu menu(vd_drop_menu(vd, TRUE, GDK_ACTION_COPY));
+	ASSERT_TRUE(wait_for_drop([&]() { return gtk_widget_get_mapped(menu.widget); }));
+	gboolean handled = FALSE;
+	for (guint i = 0; i < g_list_model_get_n_items(controllers); ++i)
+		{
+		g_autoptr(GObject) controller = G_OBJECT(g_list_model_get_item(controllers, i));
+		if (g_strcmp0(gtk_event_controller_get_name(GTK_EVENT_CONTROLLER(controller)), "directory-drop-keys") != 0) continue;
+		g_signal_emit_by_name(controller, "key-pressed", GDK_KEY_Escape, 0, GDK_NO_MODIFIER_MASK, &handled);
+		break;
+		}
+	EXPECT_TRUE(handled);
+	ASSERT_TRUE(wait_for_drop([&]() { return !gtk_widget_get_visible(menu.widget); }));
+	EXPECT_EQ(g_list_model_get_n_items(controllers), initial_controllers);
+	EXPECT_EQ(g_object_get_data(G_OBJECT(layout.window), "directory-drop-popup"), nullptr);
+
+	files.prepare(vd);
+	DropMenu next(vd_drop_menu(vd, TRUE, GDK_ACTION_COPY));
+	ASSERT_TRUE(wait_for_drop([&]() { return gtk_widget_get_mapped(next.widget); }));
+	gtk_widget_set_visible(layout.window, FALSE);
+	EXPECT_FALSE(gtk_widget_get_visible(next.widget));
+	EXPECT_EQ(gtk_widget_get_parent(next.widget), nullptr);
+	EXPECT_EQ(g_list_model_get_n_items(controllers), initial_controllers);
+	EXPECT_TRUE(isfile(files.source.c_str()));
+	EXPECT_FALSE(isfile(files.destination.c_str()));
+}
+
+TEST_P(ViewDirNewFolder, NewDropPopupDismissesPreviousMenu)
+{
+	DropFiles files(directory);
+	ASSERT_TRUE(files.create());
+	files.prepare(vd);
+	DropMenu first(vd_drop_menu(vd, TRUE, GDK_ACTION_COPY));
+	ASSERT_TRUE(wait_for_drop([&]() { return gtk_widget_get_mapped(first.widget); }));
+	files.prepare(vd);
+	DropMenu second(vd_drop_menu(vd, TRUE, GDK_ACTION_COPY));
+	ASSERT_TRUE(wait_for_drop([&]() { return gtk_widget_get_mapped(second.widget); }));
+	EXPECT_FALSE(gtk_widget_get_visible(first.widget));
+	EXPECT_EQ(g_object_get_data(G_OBJECT(layout.window), "directory-drop-popup"), second.widget);
+	ASSERT_TRUE(gtk_widget_activate_action(second.widget, "directory-drop.cancel", nullptr));
+	EXPECT_FALSE(gtk_widget_get_visible(second.widget));
+	EXPECT_TRUE(isfile(files.source.c_str()));
+	EXPECT_FALSE(isfile(files.destination.c_str()));
+}
+
+TEST_P(ViewDirNewFolder, DragAutoScrollSupportsFolderViewAndReleasesCallback)
+{
+	auto lifetime = std::make_shared<int>(0);
+	std::weak_ptr<int> weak = lifetime;
+	widget_auto_scroll_start(vd->view, -1, 20, [lifetime](GtkWidget *, GqPoint) { return true; });
+	EXPECT_NE(g_object_get_data(G_OBJECT(vd->view), "autoscroll"), nullptr);
+	lifetime.reset();
+	widget_auto_scroll_stop(vd->view);
+	EXPECT_TRUE(weak.expired());
 }
 
 INSTANTIATE_TEST_SUITE_P(DirectoryViews, ViewDirNewFolder, testing::Values(DIRVIEW_LIST, DIRVIEW_TREE));

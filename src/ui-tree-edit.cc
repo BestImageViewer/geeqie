@@ -39,6 +39,7 @@ struct AutoScrollData
 	guint timer_id; /* event source id */
 	gint region_size;
 	GtkWidget *widget;
+	GtkWidget *scrollable;
 	GtkAdjustment *adj;
 	gint max_step;
 
@@ -422,7 +423,7 @@ void widget_auto_scroll_stop(GtkWidget *widget)
 	g_object_set_data(G_OBJECT(widget), "autoscroll", nullptr);
 
 	if (sd->timer_id) g_source_remove(sd->timer_id);
-	g_free(sd);
+	delete sd;
 }
 
 static gboolean widget_auto_scroll_cb(gpointer data)
@@ -436,14 +437,14 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 		}
 
 	GqPoint pos;
-	if (!widget_get_pointer_position(sd->widget, pos))
+	if (!widget_get_pointer_position(sd->scrollable, pos))
 		{
 		sd->timer_id = 0;
 		widget_auto_scroll_stop(sd->widget);
 		return G_SOURCE_REMOVE;
 		}
 
-	gint h = gtk_widget_get_height(sd->widget);
+	gint h = gtk_widget_get_height(sd->scrollable);
 
 	if (h < sd->region_size * 3)
 		{
@@ -466,11 +467,15 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 		{
 		amt = std::clamp(amt, 0 - sd->max_step, sd->max_step);
 
-		const gdouble value = std::clamp(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj));
+		const gdouble lower = gtk_adjustment_get_lower(sd->adj);
+		const gdouble upper = std::max(lower, gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj));
+		const gdouble value = std::clamp(gtk_adjustment_get_value(sd->adj) + amt, lower, upper);
 		if (gtk_adjustment_get_value(sd->adj) != value)
 			{
 			/* only notify when scrolling is needed */
-			if (sd->notify_func && !sd->notify_func(sd->widget, pos))
+			GqPoint widget_pos;
+			if (!widget_get_pointer_position(sd->widget, widget_pos) ||
+			    (sd->notify_func && !sd->notify_func(sd->widget, widget_pos)))
 				{
 				sd->timer_id = 0;
 				widget_auto_scroll_stop(sd->widget);
@@ -494,11 +499,16 @@ void widget_auto_scroll_start(GtkWidget *widget, gint scroll_speed, gint region_
 	if (!widget) return;
 	if (g_object_get_data(G_OBJECT(widget), "autoscroll")) return;
 
-	GtkAdjustment *v_adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(widget));
+	// Box-based folder lists are scrolled by their containing GtkViewport.
+	auto *scrollable = widget;
+	while (scrollable && !GTK_IS_SCROLLABLE(scrollable)) scrollable = gtk_widget_get_parent(scrollable);
+	if (!scrollable) return;
+	GtkAdjustment *v_adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(scrollable));
 	if (!v_adj) return;
 
-	auto *sd = g_new0(AutoScrollData, 1);
+	auto *sd = new AutoScrollData{};
 	sd->widget = widget;
+	sd->scrollable = scrollable;
 	sd->adj = v_adj;
 	sd->region_size = (region_size >= 1) ? region_size : AutoScrollData::DEFAULT_REGION;
 	sd->max_step = 1;

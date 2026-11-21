@@ -26,6 +26,7 @@
 #include <cerrno>
 #include <cstring>
 #include <memory>
+#include <string>
 
 #include <gio/gio.h>
 #include <glib-object.h>
@@ -511,123 +512,135 @@ void vd_popup_destroy_cb(GtkWidget *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void vd_drop_menu_copy_cb(GSimpleAction *, GVariant *, gpointer data)
+struct DirectoryDropData
 {
-	auto vd = static_cast<ViewDir *>(data);
-	const gchar *path;
-	GList *list;
+	std::string destination;
+	GList *files;
+	GtkWidget *parent;
+	GtkWidget *popover;
 
-	if (!vd->drop_fd) return;
+	~DirectoryDropData() { file_data_list_free(files); }
+};
 
-	path = vd->drop_fd->path;
-	list = vd->drop_list;
-	vd->drop_list = nullptr;
-
-	file_util_copy_simple(list, path, vd->widget);
-}
-
-static void vd_drop_menu_move_cb(GSimpleAction *, GVariant *, gpointer data)
+GtkWidget *vd_drop_menu(ViewDir *vd, gboolean writable, GdkDragAction allowed_actions, gdouble x, gdouble y)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	const gchar *path;
-	GList *list;
+	auto *root = GTK_WIDGET(gtk_widget_get_root(vd->widget));
+	if (!GTK_IS_WINDOW(root) || !vd->drop_fd || !vd->drop_list) return nullptr;
+	if (auto *old = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(root), "directory-drop-popup")))
+		gtk_popover_popdown(GTK_POPOVER(old));
 
-	if (!vd->drop_fd) return;
-
-	path = vd->drop_fd->path;
-	list = vd->drop_list;
-
-	vd->drop_list = nullptr;
-
-	file_util_move_simple(list, path, vd->widget);
-}
-
-static void vd_drop_menu_filter_cb(GSimpleAction *, GVariant *parameter, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-	const gchar *path;
-	GList *list;
-
-	if (!vd->drop_fd) return;
-
-	path = vd->drop_fd->path;
-	list = vd->drop_list;
-
-	vd->drop_list = nullptr;
-
-	file_util_start_filter_from_filelist(g_variant_get_string(parameter, nullptr), list, path, vd->widget);
-}
-
-static void vd_drop_menu_append_item(GMenu *menu, const gchar *label, const gchar *icon_name, const gchar *action_name)
-{
-	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
-
-	if (icon_name)
-		{
-		g_autoptr(GIcon) icon = ui_icon_new(icon_name);
-		g_menu_item_set_icon(item, icon);
-		}
-
-	g_menu_append_item(menu, item);
-}
-
-GtkWidget *vd_drop_menu(ViewDir *vd, gint active, gdouble x, gdouble y)
-{
-	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
 	g_autoptr(GMenu) menu = g_menu_new();
-	g_autoptr(GMenu) transfer_section = g_menu_new();
-	g_autoptr(GMenu) filter_section = g_menu_new();
-	g_autoptr(GMenu) cancel_section = g_menu_new();
-
-	g_autoptr(GSimpleAction) copy_action = g_simple_action_new("copy", nullptr);
-	g_autoptr(GSimpleAction) move_action = g_simple_action_new("move", nullptr);
-	g_autoptr(GSimpleAction) filter_action = g_simple_action_new("filter", G_VARIANT_TYPE_STRING);
-
-	g_simple_action_set_enabled(copy_action, active);
-	g_simple_action_set_enabled(move_action, active);
-	g_simple_action_set_enabled(filter_action, active);
-
-	g_signal_connect(copy_action, "activate", G_CALLBACK(vd_drop_menu_copy_cb), vd);
-	g_signal_connect(move_action, "activate", G_CALLBACK(vd_drop_menu_move_cb), vd);
-	g_signal_connect(filter_action, "activate", G_CALLBACK(vd_drop_menu_filter_cb), vd);
-
-	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(copy_action));
-	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(move_action));
-	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(filter_action));
-
-	vd_drop_menu_append_item(transfer_section, _("_Copy"), GQ_ICON_COPY, "dir-drop.copy");
-	vd_drop_menu_append_item(transfer_section, _("_Move"), nullptr, "dir-drop.move");
-	g_menu_append_section(menu, nullptr, G_MENU_MODEL(transfer_section));
-
-	EditorsList editors_list = editor_list_get();
-	for (const EditorDescription *editor : editors_list)
+	g_menu_append(menu, _("_Copy"), "directory-drop.copy");
+	g_menu_append(menu, _("_Move"), "directory-drop.move");
+	g_autoptr(GMenu) filters = g_menu_new();
+	for (const EditorDescription *editor : editor_list_get())
 		{
 		if (!editor_is_filter(editor->key)) continue;
-
-		g_autoptr(GMenuItem) item = g_menu_item_new(editor->name, "dir-drop.filter");
-		g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_TARGET, "s", editor->key);
-		g_menu_append_item(filter_section, item);
+		g_autoptr(GMenuItem) item = g_menu_item_new(editor->name, nullptr);
+		g_menu_item_set_action_and_target(item, "directory-drop.filter", "s", editor->key);
+		g_menu_append_item(filters, item);
 		}
-	g_menu_append_section(menu, nullptr, G_MENU_MODEL(filter_section));
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(filters));
+	g_menu_append(menu, _("Cancel"), "directory-drop.cancel");
+	auto *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
+	// A foreign Wayland drag supplies no usable button-press serial for a grab.
+	gtk_popover_set_autohide(GTK_POPOVER(popover), FALSE);
+	auto *pending = new DirectoryDropData{vd->drop_fd->path, g_steal_pointer(&vd->drop_list), root, popover};
+	g_object_set_data_full(G_OBJECT(popover), "directory-drop-data", pending, delete_cb<DirectoryDropData>);
+	g_autoptr(GSimpleActionGroup) group = g_simple_action_group_new();
+	for (const auto *name : {"copy", "move", "filter", "cancel"})
+		{
+		g_autoptr(GSimpleAction) action = g_simple_action_new(name, g_str_equal(name, "filter") ? G_VARIANT_TYPE_STRING : nullptr);
+		const bool enabled = g_str_equal(name, "cancel") ||
+		                     (writable && (g_str_equal(name, "filter") ||
+		                       (g_str_equal(name, "copy") && (allowed_actions & GDK_ACTION_COPY)) ||
+		                       (g_str_equal(name, "move") && (allowed_actions & GDK_ACTION_MOVE))));
+		g_simple_action_set_enabled(action, enabled);
+		g_signal_connect(action, "activate", G_CALLBACK(+[](GSimpleAction *action, GVariant *parameter, gpointer data)
+			{
+			auto *pending = static_cast<DirectoryDropData *>(data);
+			const auto *name = g_action_get_name(G_ACTION(action));
+			if (g_str_equal(name, "cancel"))
+				{
+				gtk_popover_popdown(GTK_POPOVER(pending->popover));
+				return;
+				}
+			const auto destination = pending->destination;
+			auto *parent = pending->parent;
+			auto *files = filelist_copy(pending->files);
+			gtk_popover_popdown(GTK_POPOVER(pending->popover));
+			if (g_str_equal(name, "copy")) file_util_copy_simple(files, destination.c_str(), parent);
+			else if (g_str_equal(name, "move")) file_util_move_simple(files, destination.c_str(), parent);
+			else file_util_start_filter_from_filelist(g_variant_get_string(parameter, nullptr), files, destination.c_str(), parent);
+			}), pending);
+		g_action_map_add_action(G_ACTION_MAP(group), G_ACTION(action));
+		}
+	gtk_widget_insert_action_group(popover, "directory-drop", G_ACTION_GROUP(group));
+	popover_set_parent(popover, root);
+	graphene_point_t position{static_cast<float>(x), static_cast<float>(y)};
+	graphene_point_t point{};
+	if (!gtk_widget_compute_point(vd->widget, root, &position, &point)) point = position;
+	GdkRectangle anchor{static_cast<int>(point.x), static_cast<int>(point.y), 1, 1};
+	gtk_popover_set_pointing_to(GTK_POPOVER(popover), &anchor);
+	g_object_set_data(G_OBJECT(root), "directory-drop-popup", popover);
+	g_signal_connect_object(popover, "closed", G_CALLBACK(+[](GtkPopover *popover, gpointer data)
+		{
+		if (g_object_get_data(G_OBJECT(data), "directory-drop-popup") == popover)
+			g_object_set_data(G_OBJECT(data), "directory-drop-popup", nullptr);
+		}), root, G_CONNECT_DEFAULT);
 
-	vd_drop_menu_append_item(cancel_section, _("Cancel"), GQ_ICON_CANCEL, nullptr);
-	g_menu_append_section(menu, nullptr, G_MENU_MODEL(cancel_section));
+	auto *clicks = gtk_gesture_click_new();
+	gtk_event_controller_set_name(GTK_EVENT_CONTROLLER(clicks), "directory-drop-clicks");
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(clicks), GTK_PHASE_CAPTURE);
+	g_signal_connect_object(clicks, "pressed", G_CALLBACK(+[](GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer data)
+		{
+		auto *controller = GTK_EVENT_CONTROLLER(gesture);
+		auto *event = gtk_event_controller_get_current_event(controller);
+		auto *root = gtk_event_controller_get_widget(controller);
+		if (event && gdk_event_get_surface(event) == gtk_native_get_surface(GTK_NATIVE(root)))
+			gtk_popover_popdown(GTK_POPOVER(data));
+		}), popover, G_CONNECT_DEFAULT);
+	gtk_widget_add_controller(root, GTK_EVENT_CONTROLLER(clicks));
+	auto *keys = gtk_event_controller_key_new();
+	gtk_event_controller_set_name(keys, "directory-drop-keys");
+	gtk_event_controller_set_propagation_phase(keys, GTK_PHASE_CAPTURE);
+	gtk_event_controller_set_propagation_limit(keys, GTK_LIMIT_NONE);
+	g_signal_connect_object(keys, "key-pressed", G_CALLBACK(+[](GtkEventControllerKey *, guint key, guint, GdkModifierType, gpointer data) -> gboolean
+		{
+		if (key != GDK_KEY_Escape) return FALSE;
+		gtk_popover_popdown(GTK_POPOVER(data));
+		return TRUE;
+		}), popover, G_CONNECT_DEFAULT);
+	gtk_widget_add_controller(root, keys);
+	for (auto *controller : {GTK_EVENT_CONTROLLER(clicks), keys})
+		g_signal_connect_object(popover, "closed", G_CALLBACK(+[](GtkPopover *, gpointer data)
+			{
+			auto *controller = GTK_EVENT_CONTROLLER(data);
+			if (auto *widget = gtk_event_controller_get_widget(controller)) gtk_widget_remove_controller(widget, controller);
+			}), controller, G_CONNECT_DEFAULT);
+	g_object_set_data(G_OBJECT(popover), "directory-drop-was-active", GINT_TO_POINTER(gtk_window_is_active(GTK_WINDOW(root))));
+	g_signal_connect_object(root, "notify::is-active", G_CALLBACK(+[](GObject *root, GParamSpec *, gpointer data)
+		{
+		auto *popover = GTK_WIDGET(data);
+		if (gtk_window_is_active(GTK_WINDOW(root))) g_object_set_data(G_OBJECT(popover), "directory-drop-was-active", GINT_TO_POINTER(TRUE));
+		else if (gtk_widget_get_visible(popover) && g_object_get_data(G_OBJECT(popover), "directory-drop-was-active"))
+			gtk_popover_popdown(GTK_POPOVER(popover));
+		}), popover, G_CONNECT_DEFAULT);
 
-	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
-	gtk_widget_insert_action_group(popover, "dir-drop", G_ACTION_GROUP(action_group));
-	popover_set_parent(popover, vd->widget);
-	GdkRectangle pointing_to{static_cast<int>(x), static_cast<int>(y), 1, 1};
-	gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
-	g_signal_connect(G_OBJECT(popover), "destroy", G_CALLBACK(vd_popup_destroy_cb), vd);
-	gint natural_width;
-	gint natural_height;
-	gtk_widget_measure(popover, GTK_ORIENTATION_HORIZONTAL, -1, nullptr, &natural_width, nullptr, nullptr);
-	gtk_widget_measure(popover, GTK_ORIENTATION_VERTICAL, natural_width, nullptr, &natural_height, nullptr, nullptr);
-	gtk_widget_set_size_request(popover, natural_width, natural_height);
+	g_signal_connect_object(root, "unmap", G_CALLBACK(+[](GtkWidget *, gpointer data)
+		{
+		auto *popover = GTK_WIDGET(data);
+		gtk_popover_popdown(GTK_POPOVER(popover));
+		if (gtk_widget_get_parent(popover)) gtk_widget_unparent(popover);
+		}), popover, G_CONNECT_DEFAULT);
+
+	vd_color_set(vd, vd->drop_fd, FALSE);
+	vd->drop_fd = nullptr;
+	vd->drop_fd_ref.reset(nullptr);
 	popover_popup(popover);
-
 	return popover;
 }
+
 
 /*
  *-----------------------------------------------------------------------------
@@ -1341,6 +1354,8 @@ static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *target, GdkDrop *dro
 		case DND_ACTION_MOVE:
 			return (actions & GDK_ACTION_MOVE) ? GDK_ACTION_MOVE : vd_dnd_select_action(drop);
 		case DND_ACTION_ASK:
+			if ((actions & GDK_ACTION_COPY) && (actions & GDK_ACTION_MOVE)) return GDK_ACTION_ASK;
+			return vd_dnd_select_action(drop);
 		default:
 			return vd_dnd_select_action(drop);
 		}
@@ -1364,8 +1379,10 @@ struct VdDropReadData
 {
 	GtkWidget *view;
 	FileData *drop_fd;
-	DnDAction action;
+	GList *files;
+	GdkDragAction allowed_actions;
 	graphene_point_t position;
+	DnDAction action;
 };
 
 static void vd_dnd_drop_data_free(VdDropReadData *drop_data)
@@ -1374,7 +1391,23 @@ static void vd_dnd_drop_data_free(VdDropReadData *drop_data)
 
 	g_object_unref(drop_data->view);
 	file_data_unref(drop_data->drop_fd);
+	file_data_list_free(drop_data->files);
 	g_free(drop_data);
+}
+
+static gboolean vd_dnd_drop_menu_idle_cb(gpointer data)
+{
+	auto *drop_data = static_cast<VdDropReadData *>(data);
+	auto *vd = static_cast<ViewDir *>(g_object_get_data(G_OBJECT(drop_data->view), VIEW_DIR_DATA_KEY));
+	if (!vd) return G_SOURCE_REMOVE;
+
+	file_data_list_free(vd->drop_list);
+	vd->drop_list = g_steal_pointer(&drop_data->files);
+	vd->drop_fd = drop_data->drop_fd;
+	vd->drop_fd_ref.reset(drop_data->drop_fd);
+	vd_drop_menu(vd, access_file(vd->drop_fd->path, W_OK | X_OK), drop_data->allowed_actions,
+	             drop_data->position.x, drop_data->position.y);
+	return G_SOURCE_REMOVE;
 }
 
 static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
@@ -1391,7 +1424,8 @@ static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
 		vd->drop_fd_ref.reset(drop_data->drop_fd);
 
 		const gboolean writable = access_file(vd->drop_fd->path, W_OK | X_OK);
-		if (writable && drop_data->action == DND_ACTION_COPY)
+		if (writable && drop_data->action == DND_ACTION_COPY &&
+		    (gdk_drop_get_actions(drop) & GDK_ACTION_COPY))
 			{
 			GList *copy_list = vd->drop_list;
 			vd->drop_list = nullptr;
@@ -1408,10 +1442,15 @@ static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
 			}
 		else
 			{
-			vd_drop_menu(vd, writable, drop_data->position.x, drop_data->position.y);
 			/* The menu owns the eventual operation, so the source must not
 			 * remove its data before the user chooses an action. */
 			action = (gdk_drop_get_actions(drop) & GDK_ACTION_COPY) ? GDK_ACTION_COPY : GDK_ACTION_NONE;
+			drop_data->files = g_steal_pointer(&vd->drop_list);
+			drop_data->allowed_actions = gdk_drop_get_actions(drop);
+			gdk_drop_finish(drop, action);
+			g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, vd_dnd_drop_menu_idle_cb, drop_data,
+			               +[](gpointer data) { vd_dnd_drop_data_free(static_cast<VdDropReadData *>(data)); });
+			return;
 			}
 		}
 
@@ -1432,11 +1471,8 @@ static gboolean vd_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x
 	drop_data->view = GTK_WIDGET(g_object_ref(vd->view));
 	drop_data->drop_fd = file_data_ref(vd->drop_fd);
 	drop_data->action = vd_dnd_requested_action(target, drop);
-	graphene_point_t position{static_cast<float>(x), static_cast<float>(y)};
-	if (!gtk_widget_compute_point(vd->view, vd->widget, &position, &drop_data->position))
-		{
-		drop_data->position = position;
-		}
+	graphene_point_t point{static_cast<float>(x), static_cast<float>(y)};
+	if (!gtk_widget_compute_point(vd->view, vd->widget, &point, &drop_data->position)) drop_data->position = point;
 
 	dnd_read_file_list_async(drop, vd_dnd_drop_file_received, drop_data);
 
@@ -1455,8 +1491,9 @@ void vd_dnd_init(ViewDir *vd)
 	gtk_widget_add_controller(vd->view, GTK_EVENT_CONTROLLER(drag_source));
 
 	GdkContentFormats *formats = dnd_file_drop_formats();
-	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_ASK));
 
+	g_signal_connect(drop_target, "drag-enter", G_CALLBACK(vd_dnd_drop_motion), vd);
 	g_signal_connect(drop_target, "drag-motion", G_CALLBACK(vd_dnd_drop_motion), vd);
 	g_signal_connect(drop_target, "drag-leave", G_CALLBACK(vd_dnd_drop_leave), vd);
 	g_signal_connect(drop_target, "drop", G_CALLBACK(vd_dnd_drop), vd);
