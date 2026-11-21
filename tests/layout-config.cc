@@ -3062,6 +3062,21 @@ TEST_F(PartialLayoutConfig, CollectionContextDeletionPreservesReferencedImages)
 				}
 }
 
+TEST_F(PartialLayoutConfig, DirectoryViewCanSwitchFromTreeToList)
+{
+	gtk_window_present(GTK_WINDOW(layout->window));
+	for (const auto view : {DIRVIEW_TREE, DIRVIEW_LIST, DIRVIEW_TREE, DIRVIEW_LIST})
+		{
+		vd_pop_menu(layout->vd, layout->dir_fd, layout->vd->view, 20, 20);
+		ASSERT_NE(layout->vd->popup, nullptr);
+		g_autoptr(GtkWidget) menu = GTK_WIDGET(g_object_ref(layout->vd->popup));
+		g_action_group_activate_action(G_ACTION_GROUP(layout->window), "dir-win-view-type",
+		                               g_variant_new_string(view == DIRVIEW_TREE ? "tree" : "list"));
+		ASSERT_TRUE(wait_layout([&]() { return !layout->views_idle_id && layout->vd->type == view; }));
+		EXPECT_EQ(gtk_widget_get_parent(menu), nullptr);
+		}
+}
+
 TEST_F(PartialLayoutConfig, OpeningDefaultSidebarPreservesWindowOptions)
 {
 	ASSERT_EQ(layout->bar, nullptr);

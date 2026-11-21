@@ -107,6 +107,7 @@ gboolean vd_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter);
 
 void vd_color_set(ViewDir *vd, FileData *fd, gint color_set);
 void vd_popup_destroy_cb(GtkWidget *widget, gpointer data);
+void vd_pop_menu_close(ViewDir *vd);
 
 GtkWidget *vd_drop_menu(ViewDir *vd, gboolean writable, GdkDragAction allowed_actions, gdouble x = 0, gdouble y = 0);
 void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent = nullptr, gdouble x = 0, gdouble y = 0);

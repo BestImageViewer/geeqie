@@ -2516,6 +2516,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 		}
 
 	// Release the context menu and focus while the old file view is still alive.
+	vd_pop_menu_close(lw->vd);
 	gtk_window_set_focus(GTK_WINDOW(lw->window), nullptr);
 	vf_pop_menu_close(lw->vf);
 

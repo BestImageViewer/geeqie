@@ -24,10 +24,18 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Show parent folder</guilabel>
+          <guilabel>Show parent folder (..)</guilabel>
         </term>
         <listitem>
           <para>Enables the display of the parent folder as a double dot in the directories views.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Show current folder (.)</guilabel>
+        </term>
+        <listitem>
+          <para>Displays the current folder as a single dot above the parent folder in the folder list view. Drop files onto this entry to copy or move them into the current folder.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

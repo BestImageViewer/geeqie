@@ -245,6 +245,14 @@ static void vd_new_folder_closed(GtkPopover *, gpointer data)
 
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
+void vd_pop_menu_close(ViewDir *vd)
+{
+	if (!vd || !vd->popup) return;
+	g_autoptr(GtkWidget) popup = GTK_WIDGET(g_object_ref(vd->popup));
+	gtk_popover_popdown(GTK_POPOVER(popup));
+	if (gtk_widget_get_parent(popup)) gtk_widget_unparent(popup);
+}
+
 static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
@@ -901,6 +909,8 @@ static void vd_pop_menu_sort_cb(GSimpleAction *, GVariant *parameter, gpointer d
 
 void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdouble y)
 {
+	vd_pop_menu_close(vd);
+
 	gboolean active;
 	gboolean rename_delete_active = FALSE;
 	gboolean new_folder_active = FALSE;
@@ -1061,12 +1071,21 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 
 	if (parent)
 		{
-		popup_menu_at(menu_model, parent, x, y);
+		// Keep the popup outside the directory view that its actions can replace.
+		graphene_point_t point{static_cast<float>(x), static_cast<float>(y)};
+		graphene_point_t translated;
+		if (gtk_widget_compute_point(parent, vd->layout->window, &point, &translated))
+			{
+			x = translated.x;
+			y = translated.y;
+			}
+		vd->popup = popup_menu_at(menu_model, vd->layout->window, x, y);
 		}
 	else
 		{
-		popup_menu(menu_model, vd->layout->window);
+		vd->popup = popup_menu(menu_model, vd->layout->window);
 		}
+	g_signal_connect(vd->popup, "closed", G_CALLBACK(vd_popup_destroy_cb), vd);
 }
 
 // Retained GtkTreeView APIs pending migration to GTK list models.
