@@ -1246,7 +1246,7 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 
 		if (is_keyword)
 			{
-			g_autofree gchar *text = g_strdup_printf("%s", _("Disconnect all Mark Keyword connections"));
+			const gchar *text = _("Disconnect all Mark Keyword connections");
 			popover_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
 			}
 		popover_item_add_divider(menu);
