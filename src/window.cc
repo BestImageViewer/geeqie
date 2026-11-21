@@ -53,7 +53,7 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitl
 		}
 	else
 		{
-		title = g_strdup_printf("%s", GQ_APPNAME);
+		title = g_strdup(GQ_APPNAME);
 		}
 
 	gtk_window_set_title(GTK_WINDOW(window), title);
