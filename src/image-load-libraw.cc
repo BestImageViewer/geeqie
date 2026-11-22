@@ -31,8 +31,6 @@
 
 #if HAVE_RAW
 
-#include <cstddef>
-
 #include <libraw/libraw.h>
 
 #include "misc.h"
@@ -49,20 +47,14 @@ GHashTable *libraw_previews = nullptr;
 
 guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 {
-	size_t source_size;
-	g_autofree gchar *pathl = path_from_utf8(path);
-	g_autofree guchar *source_data = read_file_snapshot(pathl, source_size);
-	if (!source_data)
-		{
-		return nullptr;
-		}
-
 	auto lr = std::make_unique<LibRaw>();
 
-	int ret = lr->open_buffer(source_data, source_size);
+	g_autofree gchar *pathl = path_from_utf8(path);
+	int ret = lr->open_file(pathl);
 	if (ret == LIBRAW_SUCCESS)
 		{
 		ret = lr->unpack_thumb();
+		lr->recycle_datastream();
 		if (ret == LIBRAW_SUCCESS && lr->is_jpeg_thumb())
 			{
 			auto *ptr = reinterpret_cast<guchar *>(lr->imgdata.thumbnail.thumb);
