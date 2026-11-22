@@ -287,8 +287,28 @@ See `build-aux/test-ancillary-files.sh` for more details.
 Fatal signals print a short diagnostic to standard error, then terminate with
 that signal. The operating system may record a core dump, depending on the
 system configuration. The handler does not run normal exit callbacks or C++
-static destructors, and does not attempt an in-process backtrace: allocator,
-logging, and stack-unwinding code can be unsafe after a crash.
+static destructors. A private report is reserved at startup as
+`/tmp/geeqie-crash-XXXXXX.txt`. It records the Geeqie and GTK versions, system
+and session information, and fatal-signal diagnostics. Its location is printed
+to standard error on a crash. Normal exit removes the reserved report; fatal
+termination leaves it available for inspection. Report creation is best effort.
+On the next graphical launch, a dialog lists unacknowledged crash reports and
+offers Open report, Save a copy, and Dismiss. Reports remain in `/tmp` after
+acknowledgment, but are not offered again. Files reserved by running instances,
+symbolic links, and files owned by other users are ignored. Reports in `/tmp`
+may be lost on reboot; save a copy if needed.
+
+Debug builds with execinfo support can optionally attempt an in-process trace:
+
+```sh
+GQ_CRASH_BACKTRACE=1 ./build/src/geeqie
+```
+
+This writes stack addresses and available symbol names to standard error and the
+report. It is a developer aid, not a signal-safe crash reporter: unwinding can
+deadlock or fail, even after resolving the unwinder at startup. It is disabled
+by default and unavailable in release builds. Neither mode collects all thread
+stacks, recent GTK warnings, or application action history.
 
 For a backtrace, run a debug build under GDB and use `thread apply all bt` when
 it stops at the fault, or inspect the core dump with a debugger. Signal-handler

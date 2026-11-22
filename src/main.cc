@@ -847,6 +847,12 @@ void activate_cb(GtkApplication *app, gpointer)
 		 * The origin is in commit 0ec522a0 - convert Geeqie to GtkApplication
 		 */
 		layout_refresh(lw);
+		static bool crash_reports_checked = false;
+		if (!crash_reports_checked)
+			{
+			crash_reports_checked = true;
+			crash_report_notification_show(GTK_WINDOW(window));
+			}
 		}
 }
 

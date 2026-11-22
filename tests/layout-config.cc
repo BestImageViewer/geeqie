@@ -49,11 +49,13 @@
 #include "rcfile.h"
 #include "search.h"
 #include "shortcuts.h"
+#include "signal-handler.h"
 #include "shortcut-upgrade.h"
 #include "trash.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-utildlg.h"
 #include "view-dir.h"
 #include "view-file.h"
 
@@ -3060,6 +3062,36 @@ TEST_F(PartialLayoutConfig, CollectionContextDeletionPreservesReferencedImages)
 				EXPECT_EQ(options->file_ops.safe_delete_enable, !trash);
 				layout_set_path(layout, directory);
 				}
+}
+
+TEST_F(PartialLayoutConfig, CrashNotificationOffersReportAndDoesNotRepeat)
+{
+	g_autofree gchar *path = g_build_filename(directory, "geeqie-crash-aaaaaa.txt", nullptr);
+	ASSERT_TRUE(g_file_set_contents(path, "Geeqie test\nGeeqie fatal error\nSignal: Abort\n", -1, nullptr));
+	crash_report_notification_show(GTK_WINDOW(layout->window), directory);
+	GtkWindow *notification = nullptr;
+	auto *windows = gtk_window_get_toplevels();
+	for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+		{
+		g_autoptr(GtkWindow) candidate = GTK_WINDOW(g_list_model_get_item(windows, i));
+		const char *title = gtk_window_get_title(candidate);
+		if (title && g_str_has_prefix(title, "Crash report")) notification = candidate;
+		}
+	ASSERT_NE(notification, nullptr);
+	auto *selection = find_widget(GTK_WIDGET(notification), GTK_TYPE_DROP_DOWN);
+	ASSERT_NE(selection, nullptr);
+	EXPECT_STREQ(gtk_string_object_get_string(GTK_STRING_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(selection)))), path);
+	EXPECT_NE(find_widget(GTK_WIDGET(notification), GTK_TYPE_BUTTON, "Open report"), nullptr);
+	EXPECT_NE(find_widget(GTK_WIDGET(notification), GTK_TYPE_BUTTON, "Save a copy…"), nullptr);
+	auto *dismiss = find_widget(GTK_WIDGET(notification), GTK_TYPE_BUTTON, "Dismiss");
+	ASSERT_NE(dismiss, nullptr);
+	g_signal_emit_by_name(dismiss, "clicked");
+	EXPECT_TRUE(g_file_test(path, G_FILE_TEST_IS_REGULAR));
+	EXPECT_TRUE(crash_reports_pending(directory).empty());
+	const guint count = g_list_model_get_n_items(windows);
+	crash_report_notification_show(GTK_WINDOW(layout->window), directory);
+	EXPECT_EQ(g_list_model_get_n_items(windows), count);
+	g_unlink(path);
 }
 
 TEST_F(PartialLayoutConfig, DirectoryViewCanSwitchFromTreeToList)
