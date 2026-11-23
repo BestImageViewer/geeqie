@@ -3,6 +3,19 @@
 const ActionDef app_actions[] =
 {
 		{
+		"app.diagnostic-report",
+		nullptr,
+		N_("Save diagnostic report…"),
+		layout_menu_diagnostic_report_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"app.about",
 		GQ_ICON_ABOUT,
 		N_("About"),

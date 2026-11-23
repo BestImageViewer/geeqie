@@ -1710,6 +1710,16 @@
   </section>
   <section id="Helpmenu">
     <title>Help menu</title>
+    <para>
+      <guimenuitem>Save diagnostic report…</guimenuitem> previews technical information
+      and current settings, including list or icon view, sorting, thumbnails, and
+      image-loading preferences. Save a copy to attach to a bug report. Filenames,
+      folder paths, history, bookmarks, image metadata, external commands, and
+      environment variable contents are excluded. Nothing is uploaded automatically.
+      The same settings snapshot is included in automatic crash reports, which are
+      offered on the next launch. Review optional developer backtraces before sharing
+      them, as they can contain executable and library paths.
+    </para>
     <variablelist>
       <varlistentry>
         <term>

@@ -14,6 +14,9 @@ void setup_sig_handler();
 /** Return the reserved crash report path, or nullptr if creation failed. */
 const char *signal_handler_report_path();
 
+/** Publish an immutable, privacy-filtered settings snapshot during normal execution. */
+bool signal_handler_set_snapshot(const std::string &snapshot);
+
 /** Find unacknowledged reports owned by this user, excluding active instances. */
 std::vector<std::string> crash_reports_pending(const char *directory);
 

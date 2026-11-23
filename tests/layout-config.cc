@@ -25,6 +25,7 @@
 #include "compat.h"
 #include "command-line-handling.h"
 #include "date-time.h"
+#include "diagnostic-report.h"
 #include "dupe.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -3062,6 +3063,34 @@ TEST_F(PartialLayoutConfig, CollectionContextDeletionPreservesReferencedImages)
 				EXPECT_EQ(options->file_ops.safe_delete_enable, !trash);
 				layout_set_path(layout, directory);
 				}
+}
+
+TEST_F(PartialLayoutConfig, DiagnosticReportPreviewsRuntimeSettings)
+{
+	register_app_actions(app);
+	ASSERT_TRUE(gtk_widget_activate_action(layout->window, "app.diagnostic-report", nullptr));
+	GtkWindow *dialog = nullptr;
+	auto *windows = gtk_window_get_toplevels();
+	for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+		{
+		g_autoptr(GtkWindow) candidate = GTK_WINDOW(g_list_model_get_item(windows, i));
+		const char *title = gtk_window_get_title(candidate);
+		if (title && g_str_has_prefix(title, "Diagnostic report")) dialog = candidate;
+		}
+	ASSERT_NE(dialog, nullptr);
+	auto *view = find_widget(GTK_WIDGET(dialog), GTK_TYPE_TEXT_VIEW);
+	ASSERT_NE(view, nullptr);
+	auto *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+	GtkTextIter begin;
+	GtkTextIter end;
+	gtk_text_buffer_get_bounds(buffer, &begin, &end);
+	g_autofree gchar *text = gtk_text_buffer_get_text(buffer, &begin, &end, FALSE);
+	EXPECT_NE(strstr(text, "file_view=list"), nullptr);
+	EXPECT_EQ(strstr(text, directory), nullptr);
+	EXPECT_FALSE(gtk_text_view_get_editable(GTK_TEXT_VIEW(view)));
+	auto *close = find_widget(GTK_WIDGET(dialog), GTK_TYPE_BUTTON, "Close");
+	ASSERT_NE(close, nullptr);
+	g_signal_emit_by_name(close, "clicked");
 }
 
 TEST_F(PartialLayoutConfig, CrashNotificationOffersReportAndDoesNotRepeat)

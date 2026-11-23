@@ -288,8 +288,8 @@ Fatal signals print a short diagnostic to standard error, then terminate with
 that signal. The operating system may record a core dump, depending on the
 system configuration. The handler does not run normal exit callbacks or C++
 static destructors. A private report is reserved at startup as
-`/tmp/geeqie-crash-XXXXXX.txt`. It records the Geeqie and GTK versions, system
-and session information, and fatal-signal diagnostics. Its location is printed
+`/tmp/geeqie-crash-XXXXXX.txt`. It records a privacy-filtered settings snapshot
+and fatal-signal diagnostics. Its location is printed
 to standard error on a crash. Normal exit removes the reserved report; fatal
 termination leaves it available for inspection. Report creation is best effort.
 On the next graphical launch, a dialog lists unacknowledged crash reports and
@@ -297,6 +297,69 @@ offers Open report, Save a copy, and Dismiss. Reports remain in `/tmp` after
 acknowledgment, but are not offered again. Files reserved by running instances,
 symbolic links, and files owned by other users are ignored. Reports in `/tmp`
 may be lost on reboot; save a copy if needed.
+
+Help → Save diagnostic report… previews the same technical settings and offers
+to save a local text file for attachment to an issue. The explicit allowlist
+includes library/build information, distribution and display backend, numeric
+and boolean preferences, and current window settings such as list/icons mode.
+Paths, filenames, window IDs, history, bookmarks, image metadata, external
+commands, and arbitrary environment contents are excluded. Custom kernel suffixes
+and unrecognized distribution identifiers are omitted. Reports are not uploaded.
+
+The settings snapshot is refreshed during layout synchronization and checked
+once per second on the main thread. Each published snapshot is immutable and
+timestamped. The fatal handler copies it using signal-safe file operations and
+lock-free descriptor publication, without querying GTK or inspecting preferences.
+Settings changed immediately before a crash can predate the snapshot. Optional
+developer backtraces can contain executable/library paths and memory addresses;
+review them before sharing a crash report.
+
+For older Geeqie installations, `tools/geeqie-diagnostic-report.py` is a
+standalone Python 3 script requiring no additional Python packages. Run it with
+`python3 geeqie-diagnostic-report.py`; it creates a private text file in the
+temporary directory and prints its location. Use `--config` to select a saved
+configuration (including one belonging to a Snap or Flatpak), `--geeqie` to
+select an executable or AppImage, and `--output` to choose a new output file.
+The script cannot inspect unsaved settings, live view state, or a packaged
+application's build flags and bundled libraries. Host-library versions and saved
+configuration values are labeled accordingly. No data is uploaded.
+
+Both reports classify AppImage, Snap, and Flatpak packaging markers without
+including their values or paths. These are best-effort hints: inherited or
+conflicting markers can be misleading, and a native distribution package cannot
+be reliably distinguished from a source installation. Desktop identifiers are
+filtered through an allowlist. On X11 the built-in report also queries the window
+manager name and emits only recognized names; on Wayland this remains unknown.
+The standalone script can query `wmctrl` when installed. Graphics hardware and
+drivers are not collected. The issue template asks users to supply missing
+information and correct misleading hints.
+Inside a sandbox, distribution information can describe the runtime base rather
+than the host operating system; users should supply the host release separately.
+
+### Diagnostic schema consistency
+
+Run `python3 build-aux/check-diagnostic-schema.py` or
+`meson test -C build 'Diagnostic schema consistency'` to check field names,
+without reading user configuration files or comparing values. The check scans
+the configuration writers in `src/`, including nested writers and optional
+features, and compares them with `data/diagnostic-report-schema.json` and both
+diagnostic implementations.
+
+Every serialized field must be explicitly classified as reported or excluded
+with a documented reason. New fields, removed fields, missing diagnostic fields,
+and stale standalone mappings fail the check. Runtime-only diagnostics are
+classified separately. Renaming a writer function or moving it to another source
+file also requires updating its manifest entries. Use `--list-excluded` to review
+the exclusions. The manifest is a review record, not an automatically regenerated
+baseline: decide whether each new setting belongs in diagnostics before updating
+it. Excluded fields must not be added to report output merely to satisfy the check.
+
+The extractor recognizes the project's `WRITE_*` attribute macros and direct
+`rc.write_*_option()` calls. A new serialization mechanism requires updating the
+extractor; this is a source-level schema check, not a C++ AST parser. It checks
+serialized names and mappings, not runtime values or the correctness of getters.
+`meson test -C build 'Diagnostic schema checker tests'` exercises additions,
+removals, exclusions, nested writers, and attribute aliases using synthetic source.
 
 Debug builds with execinfo support can optionally attempt an in-process trace:
 

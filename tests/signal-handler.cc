@@ -76,6 +76,18 @@ TEST_P(FatalSignal, DeveloperBacktraceRetainsSignal)
 		}, testing::KilledBySignal(signo), expected);
 }
 
+TEST_P(FatalSignal, UsesLatestPreparedSnapshot)
+{
+	const int signo = GetParam();
+	EXPECT_EXIT(
+		{
+		prepare_crash();
+		if (!signal_handler_set_snapshot("Old settings snapshot\n")) _exit(98);
+		if (!signal_handler_set_snapshot("Latest settings: file_view=icons\n")) _exit(98);
+		raise(signo);
+		}, testing::KilledBySignal(signo), "Latest settings: file_view=icons");
+}
+
 INSTANTIATE_TEST_SUITE_P(Signals, FatalSignal, testing::Values(SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV));
 
 TEST(CrashReport, SavesDiagnosticsInPrivateFile)
@@ -101,7 +113,8 @@ TEST(CrashReport, SavesDiagnosticsInPrivateFile)
 	EXPECT_EQ(WTERMSIG(result), SIGABRT);
 	g_autofree gchar *contents = nullptr;
 	ASSERT_TRUE(g_file_get_contents(path, &contents, nullptr, nullptr));
-	EXPECT_NE(strstr(contents, "GTK runtime:"), nullptr);
+	EXPECT_NE(strstr(contents, "GTK="), nullptr);
+	EXPECT_NE(strstr(contents, "Settings snapshot (UTC):"), nullptr);
 	EXPECT_NE(strstr(contents, "Geeqie fatal error\nSignal: Abort"), nullptr);
 }
 

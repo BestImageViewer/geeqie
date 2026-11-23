@@ -760,6 +760,13 @@ test('Icon naming', icon_naming_python,
      timeout : 30, suite : 'analysis')
 
 # Code correctness checks
+test('Diagnostic schema consistency', icon_naming_python,
+     args : [files('build-aux/check-diagnostic-schema.py'), meson.project_source_root()],
+     timeout : 30, suite : 'analysis')
+test('Diagnostic schema checker tests', icon_naming_python,
+     args : [files('build-aux/test-diagnostic-schema.py')],
+     timeout : 30, suite : 'analysis')
+
 clang_tidy_exe = find_program('clang-tidy', required : false)
 if running_from_git and clang_tidy_exe.found()
     git_exe = find_program('git', required : true)

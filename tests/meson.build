@@ -10,6 +10,7 @@ unit_test_sources = files(
 'color-scheme.cc',
 'color-label.cc',
 'date-time.cc',
+'diagnostic-report.cc',
 'dnd.cc',
 'display-profile.cc',
 'dupe-export.cc',

@@ -48,6 +48,7 @@
 #include "collect.h"
 #include "color-man.h"
 #include "desktop-file.h"
+#include "diagnostic-report.h"
 #include "dupe.h"
 #include "editors.h"
 #include "filedata.h"
@@ -2139,6 +2140,12 @@ static void layout_menu_kbd_map_cb(GSimpleAction *, GVariant *, gpointer)
 	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
+static void layout_menu_diagnostic_report_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	auto *layout = get_current_layout();
+	if (layout) diagnostic_report_dialog_show(GTK_WINDOW(layout->full_screen ? layout->full_screen->window : layout->window));
+}
+
 static void layout_menu_about_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();
@@ -3774,6 +3781,7 @@ void layout_util_sync(LayoutWindow *lw)
 {
 	layout_util_sync_views(lw);
 	layout_util_sync_thumb(lw);
+	diagnostic_report_refresh();
 }
 
 /*

@@ -1171,6 +1171,10 @@
     <submenu>
       <attribute name="label" translatable="yes">_Help</attribute>
       <item>
+        <attribute name="action">app.diagnostic-report</attribute>
+        <attribute name="label" translatable="yes">Save diagnostic report…</attribute>
+      </item>
+      <item>
         <attribute name="action">app.help-contents</attribute>
         <attribute name="label" translatable="yes">_Help manual (html)</attribute>
       </item>

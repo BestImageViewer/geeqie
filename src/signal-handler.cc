@@ -6,9 +6,9 @@
 #include <pthread.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <sys/utsname.h>
 #include <unistd.h>
 
+#include <atomic>
 #include <csignal>
 #include <cstdint>
 #include <cstdio>
@@ -21,6 +21,7 @@
 
 #include <gtk/gtk.h>
 
+#include "diagnostic-report.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "ui-file-chooser.h"
@@ -34,6 +35,9 @@ namespace
 {
 
 int report_fd = -1;
+std::atomic<int> snapshot_fd{-1};
+std::atomic<bool> crash_started{false};
+static_assert(std::atomic<int>::is_always_lock_free && std::atomic<bool>::is_always_lock_free);
 char report_path[] = "/tmp/geeqie-crash-XXXXXX.txt"; // NOTRANSLATE: Crash report filename.
 #if defined(DEBUG) && HAVE_EXECINFO_H
 bool backtrace_enabled = false;
@@ -45,6 +49,8 @@ void remove_unused_report()
 	close(report_fd);
 	report_fd = -1;
 	unlink(report_path);
+	// The OS closes the final anonymous snapshot at exit. Retain its descriptor
+	// in case another thread faults while normal exit callbacks are running.
 }
 
 void write_error(const char *text)
@@ -72,6 +78,25 @@ const char *signal_name(int signo)
 
 void fatal_signal_cb(int signo, siginfo_t *info, void *)
 {
+	crash_started.store(true);
+	// The descriptor refers to immutable data. The publisher retains any old
+	// descriptor once a crash starts, including a crash on another thread.
+	const int snapshot = snapshot_fd.load();
+	if (snapshot >= 0)
+		{
+		char buffer[1024];
+		off_t offset = 0;
+		ssize_t count;
+		while ((count = pread(snapshot, buffer, sizeof(buffer), offset)) > 0)
+			{
+			[[maybe_unused]] const auto shown = write(STDERR_FILENO, buffer, count);
+			if (report_fd >= 0)
+				{
+				[[maybe_unused]] const auto saved = write(report_fd, buffer, count);
+				}
+			offset += count;
+			}
+		}
 	write_error("Geeqie fatal error\nSignal: "); // NOTRANSLATE: Fatal-signal diagnostic.
 	write_error(signal_name(signo));
 	write_error("\n");
@@ -136,6 +161,34 @@ const char *signal_handler_report_path()
 	return report_fd >= 0 ? report_path : nullptr;
 }
 
+bool signal_handler_set_snapshot(const std::string &snapshot)
+{
+	if (crash_started.load()) return false;
+	g_autofree gchar *path = nullptr;
+	const int fd = g_file_open_tmp("geeqie-settings-XXXXXX", &path, nullptr); // NOTRANSLATE: Anonymous snapshot filename.
+	if (fd < 0) return false;
+	if (unlink(path) != 0)
+		{
+		close(fd);
+		return false;
+		}
+	fcntl(fd, F_SETFD, FD_CLOEXEC);
+	size_t offset = 0;
+	while (offset < snapshot.size())
+		{
+		const auto count = write(fd, snapshot.data() + offset, snapshot.size() - offset);
+		if (count <= 0)
+			{
+			close(fd);
+			return false;
+			}
+		offset += count;
+		}
+	const int previous = snapshot_fd.exchange(fd);
+	if (previous >= 0 && !crash_started.load()) close(previous);
+	return true;
+}
+
 void setup_sig_handler()
 {
 	if (report_fd < 0)
@@ -147,22 +200,8 @@ void setup_sig_handler()
 			// Other instances must not offer a report that is still being written.
 			flock(report_fd, LOCK_EX | LOCK_NB);
 			std::atexit(remove_unused_report);
-			struct utsname system{};
-			uname(&system);
-			auto *display = gdk_display_get_default();
-			g_autoptr(GDateTime) now = g_date_time_new_now_utc();
-			g_autofree gchar *timestamp = g_date_time_format_iso8601(now);
-			const auto environment = [](const char *name)
-				{
-				const char *value = std::getenv(name);
-				return value ? value : "(unset)"; // NOTRANSLATE: Diagnostic placeholder.
-				};
-			dprintf(report_fd, "Geeqie %s\nStarted (UTC): %s\nPID: %ld\nSystem: %s %s %s\nGTK runtime: %u.%u.%u\nDisplay: %s\n" // NOTRANSLATE: Crash report header.
-			        "GDK_BACKEND: %s\nXDG_SESSION_TYPE: %s\nXDG_CURRENT_DESKTOP: %s\n", // NOTRANSLATE: Environment diagnostics.
-			        VERSION, timestamp, static_cast<long>(getpid()), system.sysname, system.release, system.machine,
-			        gtk_get_major_version(), gtk_get_minor_version(), gtk_get_micro_version(),
-			        display ? G_OBJECT_TYPE_NAME(display) : "(not initialized)", // NOTRANSLATE: Diagnostic placeholder.
-			        environment("GDK_BACKEND"), environment("XDG_SESSION_TYPE"), environment("XDG_CURRENT_DESKTOP")); // NOTRANSLATE: Environment variable names.
+			dprintf(report_fd, "Geeqie crash report\n"); // NOTRANSLATE: Report signature.
+
 			}
 		}
 #if defined(DEBUG) && HAVE_EXECINFO_H
@@ -182,6 +221,15 @@ void setup_sig_handler()
 		{
 		sigaction(signo, &action, nullptr);
 		}
+	diagnostic_report_refresh();
+	static guint refresh_id = 0;
+	if (!refresh_id)
+		refresh_id = g_timeout_add_seconds(1, +[](gpointer) -> gboolean
+			{
+			diagnostic_report_refresh();
+			return G_SOURCE_CONTINUE;
+			}, nullptr);
+
 }
 
 namespace
