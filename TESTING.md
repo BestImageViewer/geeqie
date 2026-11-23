@@ -314,6 +314,20 @@ Settings changed immediately before a crash can predate the snapshot. Optional
 developer backtraces can contain executable/library paths and memory addresses;
 review them before sharing a crash report.
 
+Reports saved through Help also include the last 50 action requests. Crash
+reports copy the current action history separately from the settings snapshot,
+so the last action does not wait for the periodic settings refresh. Timestamps
+are elapsed seconds since the first recorded action. The history records compiled
+action identifiers before their callbacks run, never parameters, targets, paths,
+search text, or external command arguments. An entry means the action was
+requested, not that it completed. It covers application/window action tables and
+widget context shortcuts; mouse gestures and operations bypassing these tables
+are not recorded. The standalone script cannot collect another process's history.
+The fixed ring uses lock-free atomic bytes and sequence validation, allowing
+signal handlers to skip an interrupted entry without allocating or waiting on a
+lock. Recording actions adds no file I/O. History is not retained across sessions
+unless a report is saved or a crash occurs.
+
 For older Geeqie installations, `tools/geeqie-diagnostic-report.py` is a
 standalone Python 3 script requiring no additional Python packages. Run it with
 `python3 geeqie-diagnostic-report.py`; it creates a private text file in the
@@ -371,7 +385,7 @@ This writes stack addresses and available symbol names to standard error and the
 report. It is a developer aid, not a signal-safe crash reporter: unwinding can
 deadlock or fail, even after resolving the unwinder at startup. It is disabled
 by default and unavailable in release builds. Neither mode collects all thread
-stacks, recent GTK warnings, or application action history.
+stacks or recent GTK warnings.
 
 For a backtrace, run a debug build under GDB and use `thread apply all bt` when
 it stops at the fault, or inspect the core dump with a debugger. Signal-handler

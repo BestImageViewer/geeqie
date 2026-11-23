@@ -19,6 +19,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#include "action-history.h"
 #include "signal-handler.h"
 
 namespace
@@ -74,6 +75,18 @@ TEST_P(FatalSignal, DeveloperBacktraceRetainsSignal)
 		prepare_crash();
 		raise(signo);
 		}, testing::KilledBySignal(signo), expected);
+}
+
+TEST_P(FatalSignal, WorkerCrashIncludesRecentAction)
+{
+	const int signo = GetParam();
+	EXPECT_EXIT(
+		{
+		prepare_crash();
+		action_history_record("win.crash-history-test('/private/secret.jpg')");
+		std::thread worker([signo]() { raise(signo); });
+		worker.join();
+		}, testing::KilledBySignal(signo), "win.crash-history-test\n");
 }
 
 TEST_P(FatalSignal, UsesLatestPreparedSnapshot)

@@ -11,6 +11,7 @@
 #include <gtk/gtk.h>
 
 #include "accelerators.h"
+#include "action-history.h"
 #include "convert-configuration.h"
 #include "intl.h"
 #include "layout-util.h"
@@ -329,6 +330,14 @@ static GVariant *action_def_create_state(const ActionDef *d)
 		}
 }
 
+static void connect_action_history(GSimpleAction *action, const char *signal, const char *identifier)
+{
+	g_signal_connect_data(action, signal, G_CALLBACK(+[](GSimpleAction *, GVariant *, gpointer name)
+		{
+		action_history_record(static_cast<const char *>(name));
+		}), g_strdup(identifier), +[](gpointer name, GClosure *) { g_free(name); }, static_cast<GConnectFlags>(0));
+}
+
 void register_actions_from_table(GtkApplication *app, GtkWidget *window, const ActionDef *defs, GKeyFile *accels_keyfile, gpointer data)
 {
 	attach_accel_focus_handler(app, window);
@@ -358,13 +367,15 @@ void register_actions_from_table(GtkApplication *app, GtkWidget *window, const A
 			if (state)
 				{
 				action = g_simple_action_new_stateful(action_name, d->parameter_type, state);
-				g_signal_connect(action, "change-state", G_CALLBACK(d->callback), data);
 				}
 			else
 				{
 				action = g_simple_action_new(action_name, d->parameter_type);
-				g_signal_connect(action, "activate", G_CALLBACK(d->callback), data);
 				}
+			const char *signal = state ? "change-state" : "activate";
+			// Connect before the operation, so a crash inside its callback retains the request.
+			connect_action_history(action, signal, d->action_name);
+			g_signal_connect(action, signal, G_CALLBACK(d->callback), data);
 
 			if (!window)
 				{
@@ -471,6 +482,7 @@ void register_widget_context_shortcuts(GtkWidget *widget, const char *prefix, co
 		{
 		const auto *name = strchr(def->action_name, '.') + 1;
 		g_autoptr(GSimpleAction) action = g_simple_action_new(name, nullptr);
+		connect_action_history(action, "activate", def->action_name);
 		g_signal_connect(action, "activate", G_CALLBACK(def->callback), data);
 		g_action_map_add_action(G_ACTION_MAP(group), G_ACTION(action));
 		}

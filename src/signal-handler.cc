@@ -21,6 +21,7 @@
 
 #include <gtk/gtk.h>
 
+#include "action-history.h"
 #include "diagnostic-report.h"
 #include "intl.h"
 #include "main-defines.h"
@@ -79,6 +80,7 @@ const char *signal_name(int signo)
 void fatal_signal_cb(int signo, siginfo_t *info, void *)
 {
 	crash_started.store(true);
+	action_history_freeze();
 	// The descriptor refers to immutable data. The publisher retains any old
 	// descriptor once a crash starts, including a crash on another thread.
 	const int snapshot = snapshot_fd.load();
@@ -97,6 +99,8 @@ void fatal_signal_cb(int signo, siginfo_t *info, void *)
 			offset += count;
 			}
 		}
+	action_history_write(STDERR_FILENO);
+	action_history_write(report_fd);
 	write_error("Geeqie fatal error\nSignal: "); // NOTRANSLATE: Fatal-signal diagnostic.
 	write_error(signal_name(signo));
 	write_error("\n");

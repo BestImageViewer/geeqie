@@ -57,6 +57,8 @@ Steps to reproduce the behavior:
 
 Include the actions immediately before the problem, especially view changes,
 selection changes, menu commands, or entering/leaving fullscreen.
+Recent built-in reports include up to 50 action names, but do not record every
+mouse gesture or action parameter. Please still provide reproduction steps.
 
  - How often does it happen? [always, sometimes, or once]
  - File view: [list or icons]

@@ -16,6 +16,7 @@
 #include <gtk/gtk.h>
 
 #include "accelerators.h"
+#include "action-history.h"
 #include "actions.h"
 #include "bar-sort.h"
 #include "bar.h"
@@ -3063,6 +3064,48 @@ TEST_F(PartialLayoutConfig, CollectionContextDeletionPreservesReferencedImages)
 				EXPECT_EQ(options->file_ops.safe_delete_enable, !trash);
 				layout_set_path(layout, directory);
 				}
+}
+
+TEST_F(PartialLayoutConfig, ActionHistoryExcludesParametersAndPrecedesCallback)
+{
+	bool invoked = false;
+	const ActionDef definitions[] =
+		{
+		{"app.history-parameter-test", nullptr, nullptr,
+		 +[](GSimpleAction *, GVariant *, gpointer data)
+			 {
+			 const auto report = action_history_report();
+			 EXPECT_NE(report.find("app.history-parameter-test\n"), std::string::npos);
+			 EXPECT_EQ(report.find("private-parameter-marker"), std::string::npos);
+			 *static_cast<bool *>(data) = true;
+			 }, G_VARIANT_TYPE_STRING, ActionStateType::NONE, FALSE, nullptr, 0, nullptr},
+		{}
+		};
+	register_actions_from_table(app, nullptr, definitions, get_keyfile_merged(), &invoked);
+	g_action_group_activate_action(G_ACTION_GROUP(app), "history-parameter-test",
+	                               g_variant_new_string("/private-parameter-marker/image.jpg"));
+	EXPECT_TRUE(invoked);
+	g_action_map_remove_action(G_ACTION_MAP(app), "history-parameter-test");
+}
+
+TEST_F(PartialLayoutConfig, ActionHistoryRecordsStateChanges)
+{
+	const ActionDef definitions[] =
+		{
+		{"app.history-toggle-test", nullptr, nullptr,
+		 +[](GSimpleAction *action, GVariant *state, gpointer)
+			 {
+			 EXPECT_NE(action_history_report().find("app.history-toggle-test\n"), std::string::npos);
+			 g_simple_action_set_state(action, state);
+			 }, nullptr, ActionStateType::BOOLEAN, FALSE, nullptr, 0, nullptr},
+		{}
+		};
+	register_actions_from_table(app, nullptr, definitions, get_keyfile_merged(), nullptr);
+	g_action_group_activate_action(G_ACTION_GROUP(app), "history-toggle-test", nullptr);
+	g_autoptr(GVariant) state = g_action_group_get_action_state(G_ACTION_GROUP(app), "history-toggle-test");
+	ASSERT_NE(state, nullptr);
+	EXPECT_TRUE(g_variant_get_boolean(state));
+	g_action_map_remove_action(G_ACTION_MAP(app), "history-toggle-test");
 }
 
 TEST_F(PartialLayoutConfig, DiagnosticReportPreviewsRuntimeSettings)

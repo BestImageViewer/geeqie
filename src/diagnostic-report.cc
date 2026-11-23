@@ -16,6 +16,7 @@
 #include <gdk/x11/gdkx.h>
 #endif
 
+#include "action-history.h"
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
@@ -322,13 +323,13 @@ void diagnostic_report_refresh()
 
 void diagnostic_report_dialog_show(GtkWindow *parent)
 {
-	auto report = std::make_unique<std::string>(diagnostic_report_create());
+	auto report = std::make_unique<std::string>(diagnostic_report_create() + action_history_report());
 	auto *dialog = generic_dialog_new(_("Diagnostic report"), "diagnostic-report", GTK_WIDGET(parent), FALSE, // NOTRANSLATE: Dialog role.
 		+[](GenericDialog *gd, gpointer) { generic_dialog_close(gd); }, nullptr);
 	gtk_window_set_default_size(GTK_WINDOW(dialog->dialog), 680, 520);
 	gtk_window_set_modal(GTK_WINDOW(dialog->dialog), TRUE);
 	auto *message = generic_dialog_add_message(dialog, GQ_ICON_DIALOG_INFO, _("Save diagnostic report"),
-		_("Review the technical settings below before saving a report to attach to an issue. Filenames, folders, history, bookmarks, metadata, external commands, and environment variable contents are excluded. Nothing is uploaded automatically."), FALSE);
+		_("Review the technical settings and recent action names below before saving a report to attach to an issue. Filenames, folders, browsing history, bookmarks, metadata, external commands, action parameters, and environment variable contents are excluded. Nothing is uploaded automatically."), FALSE);
 	gtk_label_set_max_width_chars(GTK_LABEL(gtk_widget_get_last_child(message)), 65);
 	auto *view = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(view), FALSE);

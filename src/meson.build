@@ -2,6 +2,8 @@
 
 main_sources = files('accelerators.cc',
 'accelerators.h',
+'action-history.cc',
+'action-history.h',
 'actions.cc',
 'actions.h',
 'advanced-exif.cc',
