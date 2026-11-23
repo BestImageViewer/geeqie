@@ -1563,7 +1563,7 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 // value: image data
 static GHashTable *exif_previews = nullptr;
 
-guchar *exif_get_preview(ExifData *exif, guint *data_len, gint, gint)
+guchar *exif_get_preview(const ExifData *exif, gsize &data_len, gint, gint)
 {
 	if (!exif) return nullptr;
 
@@ -1580,7 +1580,7 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint, gint)
 		DEBUG_1("%s: offset %u", path, offset);
 
 		guchar *ptr = source_data + offset;
-		*data_len = source_size - offset;
+		data_len = source_size - offset;
 
 		if (!exif_previews)
 			exif_previews = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, g_free);

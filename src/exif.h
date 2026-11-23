@@ -122,7 +122,7 @@ gchar* exif_get_image_comment(FileData* fd);
 void exif_set_image_comment(FileData* fd, const gchar* comment);
 
 /*raw support */
-guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, gint requested_height);
+guchar *exif_get_preview(const ExifData *exif, gsize &data_len, gint requested_width, gint requested_height);
 void exif_free_preview(const guchar *buf);
 
 /*

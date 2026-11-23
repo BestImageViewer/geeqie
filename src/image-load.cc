@@ -931,7 +931,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 		if (options->thumbnails.use_exif)
 			{
-			il->input_buffer = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), il->requested_width, il->requested_height);
+			il->input_buffer = exif_get_preview(exif, il->bytes_total, il->requested_width, il->requested_height);
 
 			if (il->input_buffer)
 				{
@@ -951,7 +951,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 		/* If libraw does not find a thumbnail, try exiv2 */
 		if (!il->input_buffer)
 			{
-			il->input_buffer = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), 0, 0); /* get the largest available preview image or NULL for normal images*/
+			il->input_buffer = exif_get_preview(exif, il->bytes_total, 0, 0); /* get the largest available preview image or NULL for normal images*/
 
 			if (il->input_buffer)
 				{

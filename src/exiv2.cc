@@ -148,7 +148,7 @@ struct ExifData
 		return nullptr;
 	}
 
-	virtual Exiv2::Image *image() = 0;
+	[[nodiscard]] virtual Exiv2::Image *image() const = 0;
 
 	virtual Exiv2::ExifData &exifData() = 0;
 
@@ -247,7 +247,7 @@ public:
 		g_free(cp_data_);
 	}
 
-	Exiv2::Image *image() override
+	[[nodiscard]] Exiv2::Image *image() const override
 	{
 		if (!valid_) return nullptr;
 		return image_.get();
@@ -467,7 +467,7 @@ public:
 			}
 	}
 
-	Exiv2::Image *image() override
+	[[nodiscard]] Exiv2::Image *image() const override
 	{
 		return imageData_->image();
 	}
@@ -1171,13 +1171,14 @@ void exif_set_image_comment(FileData* fd, const gchar* comment)
 }
 
 
-guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, gint requested_height)
+guchar *exif_get_preview(const ExifData *exif, gsize &data_len, gint requested_width, gint requested_height)
 {
 	if (!exif) return nullptr;
 
-	if (!exif->image()) return nullptr;
+	Exiv2::Image *image = exif->image();
+	if (!image) return nullptr;
 
-	const std::string path = exif->image()->io().path();
+	const std::string path = image->io().path();
 	/* given image pathname, first do simple (and fast) file extension test */
 	const gboolean is_raw = filter_file_class(path.c_str(), FORMAT_CLASS_RAWIMAGE);
 
@@ -1185,7 +1186,7 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 
 	try
 		{
-		const Exiv2::PreviewManager pm(*exif->image());
+		const Exiv2::PreviewManager pm(*image);
 
 		const Exiv2::PreviewPropertiesList list = pm.getPreviewProperties();
 		if (list.empty()) return nullptr;
@@ -1209,14 +1210,14 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 				}
 			}
 
-		const Exiv2::PreviewImage image = pm.getPreviewImage(*pos);
+		const Exiv2::PreviewImage img = pm.getPreviewImage(*pos);
 
 		// Let's not touch data_len until we finish copy.
 		// Just in case we run into OOM.
-		const size_t img_sz = image.size();
+		const size_t img_sz = img.size();
 		auto *b = new Exiv2::byte[img_sz];
-		std::copy_n(image.pData(), img_sz, b);
-		*data_len = img_sz;
+		std::copy_n(img.pData(), img_sz, b);
+		data_len = img_sz;
 		return b;
 		}
 	catch (Exiv2::AnyError& e)
