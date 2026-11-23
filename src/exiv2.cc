@@ -683,35 +683,19 @@ ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 
 ExifItem *exif_get_first_item(ExifData *exif)
 {
-	try {
+	try
+		{
 		exif->exifIter = exif->exifData().begin();
 		exif->iptcIter = exif->iptcData().begin();
 		exif->xmpIter = exif->xmpData().begin();
-		if (exif->exifIter != exif->exifData().end())
-			{
-			const Exiv2::Metadatum *item = &*exif->exifIter;
-			++exif->exifIter;
-			return (ExifItem *)item;
-			}
-		if (exif->iptcIter != exif->iptcData().end())
-			{
-			const Exiv2::Metadatum *item = &*exif->iptcIter;
-			++exif->iptcIter;
-			return (ExifItem *)item;
-			}
-		if (exif->xmpIter != exif->xmpData().end())
-			{
-			const Exiv2::Metadatum *item = &*exif->xmpIter;
-			++exif->xmpIter;
-			return (ExifItem *)item;
-			}
-		return nullptr;
-
-	}
-	catch (Exiv2::AnyError& e) {
+		}
+	catch (Exiv2::AnyError& e)
+		{
 		debug_exception(e);
 		return nullptr;
-	}
+		}
+
+	return exif_get_next_item(exif);
 }
 
 ExifItem *exif_get_next_item(ExifData *exif)
