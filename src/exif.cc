@@ -1134,25 +1134,18 @@ void exif_set_image_comment(FileData*, const gchar*)
 
 ExifItem *exif_get_first_item(ExifData *exif)
 {
-	if (exif->items)
-		{
-		auto ret = static_cast<ExifItem *>(exif->items->data);
-		exif->current = exif->items->next;
-		return ret;
-		}
-	exif->current = nullptr;
-	return nullptr;
+	exif->current = exif->items;
+
+	return exif_get_next_item(exif);
 }
 
 ExifItem *exif_get_next_item(ExifData *exif)
 {
-	if (exif->current)
-		{
-		auto ret = static_cast<ExifItem *>(exif->current->data);
-		exif->current = exif->current->next;
-		return ret;
-		}
-	return nullptr;
+	if (!exif->current) return nullptr;
+
+	auto *ret = static_cast<ExifItem *>(exif->current->data);
+	exif->current = exif->current->next;
+	return ret;
 }
 
 
