@@ -760,6 +760,9 @@ test('Icon naming', icon_naming_python,
      timeout : 30, suite : 'analysis')
 
 # Code correctness checks
+test('Hang report helper', icon_naming_python,
+     args : [files('build-aux/test-hang-report.py')],
+     timeout : 30, suite : 'functional')
 test('Diagnostic schema consistency', icon_naming_python,
      args : [files('build-aux/check-diagnostic-schema.py'), meson.project_source_root()],
      timeout : 30, suite : 'analysis')

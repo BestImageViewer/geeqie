@@ -98,7 +98,17 @@ backtrace with `GQ_CRASH_BACKTRACE=1`; this is not available in ordinary release
 builds. Review backtraces for executable/library paths before sharing.
 
 For a freeze, a backtrace captured while Geeqie is unresponsive is particularly
-useful. See [debugger instructions](https://github.com/BestImageViewer/geeqie/blob/master/TESTING.md#fatal-signal-handling).
+useful. Download [geeqie-hang-report.py](https://raw.githubusercontent.com/BestImageViewer/geeqie/master/tools/geeqie-hang-report.py)
+and, on Linux, close Geeqie and run:
+
+```sh
+python3 geeqie-hang-report.py --launch
+```
+
+Reproduce the freeze, return to the terminal, and press Enter. For a source build,
+use `--launch ./build/src/geeqie`. Requires Python 3 and GDB. Attach the
+printed `/tmp/geeqie-hang-*.txt` file after reviewing it for private paths.
+See [hang report instructions](https://github.com/BestImageViewer/geeqie/blob/master/TESTING.md#collecting-hang-reports).
 Attach any relevant terminal output or logs as text files (gzip if large).
 
 **Additional context**

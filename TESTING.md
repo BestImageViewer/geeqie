@@ -392,6 +392,57 @@ it stops at the fault, or inspect the core dump with a debugger. Signal-handler
 regression tests run in child processes with core dumps disabled and verify
 termination from both the main thread and a worker thread.
 
+### Collecting hang reports
+
+On Linux, the simplest method is to install Python 3 and GDB, close existing
+Geeqie windows, then run:
+
+```sh
+python3 tools/geeqie-hang-report.py --launch
+```
+
+For a source build, use `--launch ./build/src/geeqie` instead. Reproduce the
+freeze in the newly opened window, return to the terminal, and press Enter.
+The helper collects the report automatically; no debugger commands, process IDs,
+or administrator permissions are needed. The launched process grants tracing
+permission specifically to this helper and its debugger children. This works
+with Linux's usual parent-only tracing restriction without changing system
+settings or the installed executable. Stricter sandbox or administrator policies
+can still prevent tracing. Normal application output is suppressed in launch
+mode; it is not collected in the report. Canceling the helper leaves Geeqie open.
+
+For an already running Geeqie process, identify its PID with `pgrep -a geeqie`
+and run:
+
+```sh
+python3 tools/geeqie-hang-report.py PID
+```
+
+Replace `PID` with that process ID. The standalone script also works with older
+Geeqie versions. It writes a private, uniquely named `/tmp/geeqie-hang-*.txt`
+file and prints its location. It takes three all-thread backtraces, two seconds
+apart, with up to 40 frames per thread. Each attachment temporarily pauses Geeqie;
+between samples the debugger detaches so processing can continue. Comparing
+samples can help distinguish slow progress from a blocked thread.
+
+Argument values and local variables are omitted. Debugger initialization files,
+automatic script loading, and automatic debug-symbol downloads are disabled.
+Backtraces can still contain executable, library, and source paths; review the
+file before sharing. Matching debug symbols produce more useful traces. This
+report does not collect Geeqie's settings or recent action buffer; attach a
+normal diagnostic report separately if available.
+
+Run as the same ordinary user as Geeqie. If attachment is blocked by ptrace
+restrictions or sandboxing, the report retains the debugger's error. Close
+Geeqie and retry in launch mode rather than changing system protections.
+Each capture has a
+30-second timeout, followed by up to ten seconds for debugger cleanup. If a
+debugger times out, check whether Geeqie resumed. The script does not send signals
+to Geeqie or terminate it. Remove the report when it is no longer needed.
+
+Run the helper's regression tests with
+`meson test -C build 'Hang report helper'`.
+
 ### Pan View indexing
 
 With unit tests enabled, run the `PanIndexing.*` tests under `xvfb-run`.
