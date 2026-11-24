@@ -300,6 +300,7 @@
     "src/rcfile.cc::write_global_attributes::image.max_enlargement_size": "global.image.max_enlargement_size",
     "src/rcfile.cc::write_global_attributes::image.nearest_above_200": "global.image.nearest_above_200",
     "src/rcfile.cc::write_global_attributes::image.read_ahead_images": "global.image.read_ahead_images",
+    "src/rcfile.cc::write_global_attributes::image.read_ahead_until_full": "global.image.read_ahead_until_full",
     "src/rcfile.cc::write_global_attributes::image.scroll_reset_method": "global.image.scroll_reset_method",
     "src/rcfile.cc::write_global_attributes::image.tile_cache_max": "global.image.tile_cache_max",
     "src/rcfile.cc::write_global_attributes::image.tile_size": "global.image.tile_size",

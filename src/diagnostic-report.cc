@@ -252,6 +252,7 @@ std::string diagnostic_report_create(const LayoutWindow *layout)
 		out << "image.jpeg_decode_memory_limit=" << static_cast<long long>(options->image.jpeg_decode_memory_limit) << '\n'; // NOTRANSLATE: Diagnostic field.
 		out << "image.enable_read_ahead=" << static_cast<long long>(options->image.enable_read_ahead) << '\n'; // NOTRANSLATE: Diagnostic field.
 		out << "image.read_ahead_images=" << static_cast<long long>(options->image.read_ahead_images) << '\n'; // NOTRANSLATE: Diagnostic field.
+		out << "image.read_ahead_until_full=" << static_cast<long long>(options->image.read_ahead_until_full) << '\n'; // NOTRANSLATE: Diagnostic field.
 		out << "image.zoom_mode=" << static_cast<long long>(options->image.zoom_mode) << '\n'; // NOTRANSLATE: Diagnostic field.
 		out << "image.zoom_2pass=" << static_cast<long long>(options->image.zoom_2pass) << '\n'; // NOTRANSLATE: Diagnostic field.
 		out << "image.zoom_to_fit_allow_expand=" << static_cast<long long>(options->image.zoom_to_fit_allow_expand) << '\n'; // NOTRANSLATE: Diagnostic field.

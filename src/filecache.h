@@ -29,6 +29,7 @@
 
 #include <list>
 #include <optional>
+#include <unordered_map>
 
 // From filedata.h
 class FileData;
@@ -76,6 +77,7 @@ class FileCache {
 
 	ReleaseFunc release_;
 	std::list<Entry> contents_;
+	std::unordered_map<FileData *, ListIterT> entries_;
 	size_t max_size_;
 	size_t size_ = 0;
 };

@@ -948,6 +948,9 @@ static void image_read_ahead_cancel(ImageWindow *imd)
 	g_clear_handle_id(&imd->read_ahead_idle_id, g_source_remove);
 	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
 	imd->read_ahead_bytes = 0;
+	imd->read_ahead_total = 0;
+	imd->read_ahead_count = 0;
+	imd->read_ahead_limit_reached = FALSE;
 	g_clear_object(&imd->read_ahead_il);
 
 	file_data_unref(imd->read_ahead_fd);
@@ -968,6 +971,11 @@ static void image_read_ahead_schedule(ImageWindow *imd)
 		imd->read_ahead_idle_id = g_idle_add_full(G_PRIORITY_LOW, image_read_ahead_idle_cb, imd, nullptr);
 }
 
+static void image_read_ahead_update_status(ImageWindow *imd)
+{
+	if (options->image.read_ahead_until_full) image_update_util(imd);
+}
+
 static void image_read_ahead_done_cb(ImageLoader *, gpointer data)
 {
 	auto *imd = static_cast<ImageWindow *>(data);
@@ -978,6 +986,7 @@ static void image_read_ahead_done_cb(ImageLoader *, gpointer data)
 	if (pixbuf && bytes <= budget && imd->read_ahead_bytes <= budget - bytes)
 		{
 		imd->read_ahead_bytes += bytes;
+		++imd->read_ahead_count;
 		if (!imd->read_ahead_fd->pixbuf)
 			{
 			imd->read_ahead_fd->pixbuf = g_object_ref(pixbuf);
@@ -988,11 +997,13 @@ static void image_read_ahead_done_cb(ImageLoader *, gpointer data)
 		{
 		// Do not churn the cache by decoding beyond the available working set.
 		g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
+		imd->read_ahead_limit_reached = TRUE;
 		}
 	g_clear_object(&imd->read_ahead_il);
 	file_data_unref(imd->read_ahead_fd);
 	imd->read_ahead_fd = nullptr;
 	image_read_ahead_schedule(imd);
+	image_read_ahead_update_status(imd);
 	image_complete_util(imd, TRUE);
 }
 
@@ -1016,9 +1027,14 @@ static void image_read_ahead_start(ImageWindow *imd)
 		}
 	if (imd->read_ahead_bytes >= budget)
 		{
-		image_read_ahead_cancel(imd);
+		g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
+		imd->read_ahead_limit_reached = TRUE;
+		image_read_ahead_update_status(imd);
 		return;
 		}
+	// Yield after a batch of cache hits so a large, already warm folder cannot
+	// monopolize the main loop. Uncached images are decoded one at a time.
+	guint cached = 0;
 	while (imd->read_ahead_queue)
 		{
 		file_data_unref(imd->read_ahead_fd);
@@ -1027,15 +1043,28 @@ static void image_read_ahead_start(ImageWindow *imd)
 		if (!file_cache_get(image_get_cache(), imd->read_ahead_fd)) break;
 		const gsize bytes = gdk_pixbuf_get_byte_length(imd->read_ahead_fd->pixbuf);
 		imd->read_ahead_bytes += std::min(bytes, budget - imd->read_ahead_bytes);
+		++imd->read_ahead_count;
 		file_data_unref(imd->read_ahead_fd);
 		imd->read_ahead_fd = nullptr;
 		if (imd->read_ahead_bytes >= budget)
 			{
-			image_read_ahead_cancel(imd);
+			imd->read_ahead_limit_reached = imd->read_ahead_queue != nullptr;
+			g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
+			image_read_ahead_update_status(imd);
+			return;
+			}
+		if (++cached == 32)
+			{
+			image_read_ahead_schedule(imd);
+			image_read_ahead_update_status(imd);
 			return;
 			}
 		}
-	if (!imd->read_ahead_fd) return;
+	if (!imd->read_ahead_fd)
+		{
+		image_read_ahead_update_status(imd);
+		return;
+		}
 	imd->read_ahead_il = image_loader_new(imd->read_ahead_fd);
 	image_loader_delay_area_ready(imd->read_ahead_il, TRUE);
 	g_signal_connect(imd->read_ahead_il, "error", G_CALLBACK(image_read_ahead_error_cb), imd);
@@ -1046,6 +1075,7 @@ static void image_read_ahead_start(ImageWindow *imd)
 		file_data_unref(imd->read_ahead_fd);
 		imd->read_ahead_fd = nullptr;
 		image_read_ahead_schedule(imd);
+		image_read_ahead_update_status(imd);
 		}
 }
 
@@ -1805,6 +1835,12 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
 	imd->read_ahead_queue = g_steal_pointer(&source->read_ahead_queue);
 	imd->read_ahead_bytes = source->read_ahead_bytes;
+	imd->read_ahead_total = source->read_ahead_total;
+	imd->read_ahead_count = source->read_ahead_count;
+	imd->read_ahead_limit_reached = source->read_ahead_limit_reached;
+	source->read_ahead_total = 0;
+	source->read_ahead_count = 0;
+	source->read_ahead_limit_reached = FALSE;
 
 	imd->unknown = source->unknown;
 
@@ -1865,6 +1901,12 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
 	imd->read_ahead_queue = g_steal_pointer(&source->read_ahead_queue);
 	imd->read_ahead_bytes = source->read_ahead_bytes;
+	imd->read_ahead_total = source->read_ahead_total;
+	imd->read_ahead_count = source->read_ahead_count;
+	imd->read_ahead_limit_reached = source->read_ahead_limit_reached;
+	source->read_ahead_total = 0;
+	source->read_ahead_count = 0;
+	source->read_ahead_limit_reached = FALSE;
 
 	imd->unknown = source->unknown;
 
@@ -2173,9 +2215,45 @@ void image_stereo_pixbuf_set(ImageWindow *imd, StereoPixbufData stereo_mode)
 void image_prebuffer_set_list(ImageWindow *imd, GList *files)
 {
 	image_read_ahead_cancel(imd);
-	if (!options->image.enable_read_ahead || pixbuf_renderer_get_tiles(PIXBUF_RENDERER(imd->pr))) return;
+	if (!options->image.enable_read_ahead || pixbuf_renderer_get_tiles(PIXBUF_RENDERER(imd->pr)))
+		{
+		image_update_util(imd);
+		return;
+		}
 	imd->read_ahead_queue = filelist_copy(files);
+	imd->read_ahead_total = g_list_length(files);
 	image_read_ahead_schedule(imd);
+	image_update_util(imd);
+}
+
+ImagePreloadState image_get_preload_state(ImageWindow *imd)
+{
+	if (!options->image.enable_read_ahead || !options->image.read_ahead_until_full || !imd->read_ahead_total) return ImagePreloadState::INACTIVE;
+	if (imd->read_ahead_limit_reached) return ImagePreloadState::CACHE_LIMIT;
+	if (imd->read_ahead_il || imd->read_ahead_queue || imd->read_ahead_idle_id)
+		{
+		return ImagePreloadState::RUNNING;
+		}
+	if (imd->read_ahead_count < imd->read_ahead_total) return ImagePreloadState::INCOMPLETE;
+	return ImagePreloadState::COMPLETE;
+}
+
+gchar *image_get_preload_status(ImageWindow *imd)
+{
+	switch (image_get_preload_state(imd))
+		{
+		case ImagePreloadState::RUNNING:
+			return g_strdup_printf(_("Preloading: %u of %u images ready"), imd->read_ahead_count, imd->read_ahead_total);
+		case ImagePreloadState::COMPLETE:
+			return g_strdup_printf(_("Preloading complete: %u images ready"), imd->read_ahead_count);
+		case ImagePreloadState::CACHE_LIMIT:
+			return g_strdup_printf(_("Preloading stopped at cache limit: %u images ready"), imd->read_ahead_count);
+		case ImagePreloadState::INCOMPLETE:
+			return g_strdup_printf(_("Preloading finished: %u of %u images ready; some images could not be loaded"), imd->read_ahead_count, imd->read_ahead_total);
+		case ImagePreloadState::INACTIVE:
+			return nullptr;
+		}
+	return nullptr;
 }
 
 void image_prebuffer_set(ImageWindow *imd, FileData *fd)

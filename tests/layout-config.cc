@@ -1283,6 +1283,7 @@ protected:
 		saved_image = options->image;
 		options->image.enable_read_ahead = FALSE;
 		options->image.read_ahead_images = 3;
+		options->image.read_ahead_until_full = FALSE;
 		options->image.image_cache_max = 16;
 		g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 512, 384);
 		gdk_pixbuf_fill(pixels, 0x336699ff);
@@ -1332,6 +1333,30 @@ protected:
 		return false;
 	}
 
+	void expect_preload_icon(const gchar *name)
+	{
+		ASSERT_NE(layout->info_preload, nullptr);
+		if (!name)
+			{
+			EXPECT_FALSE(gtk_widget_get_visible(layout->info_preload));
+			EXPECT_FALSE(gtk_widget_get_has_tooltip(layout->info_preload));
+			return;
+			}
+		EXPECT_TRUE(gtk_widget_get_visible(layout->info_preload));
+		auto *icon = gtk_image_get_gicon(GTK_IMAGE(layout->info_preload));
+		ASSERT_TRUE(G_IS_THEMED_ICON(icon));
+		EXPECT_TRUE(g_strv_contains(g_themed_icon_get_names(G_THEMED_ICON(icon)), name));
+		g_autofree gchar *message = image_get_preload_status(layout->image);
+		ASSERT_NE(message, nullptr);
+		EXPECT_TRUE(gtk_widget_get_can_target(layout->info_preload));
+		EXPECT_TRUE(gtk_widget_get_has_tooltip(layout->info_preload));
+		g_autoptr(GtkTooltip) tooltip = GTK_TOOLTIP(g_object_new(GTK_TYPE_TOOLTIP, nullptr));
+		gboolean handled = FALSE;
+		g_signal_emit_by_name(layout->info_preload, "query-tooltip", 0, 0, FALSE, tooltip, &handled);
+		EXPECT_TRUE(handled);
+		EXPECT_EQ(std::string(gtk_label_get_text(GTK_LABEL(layout->info_details))).find(message), std::string::npos);
+	}
+
 	decltype(options->image) saved_image{};
 	std::vector<FileData *> files;
 };
@@ -1373,8 +1398,127 @@ TEST_F(DirectionalReadAhead, StopsAtDecodedImageBudget)
 	EXPECT_EQ(files[4]->pixbuf, nullptr);
 }
 
+TEST_F(DirectionalReadAhead, UntilFullIconTracksRunningCompletionAndInactive)
+{
+	options->image.read_ahead_until_full = TRUE;
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	EXPECT_EQ(image_get_preload_state(layout->image), ImagePreloadState::RUNNING);
+	expect_preload_icon(GQ_ICON_REFRESH);
+	ASSERT_TRUE(finished());
+	EXPECT_EQ(image_get_preload_state(layout->image), ImagePreloadState::COMPLETE);
+	expect_preload_icon(GQ_ICON_APPLY);
+
+	image_prebuffer_set(layout->image, nullptr);
+	EXPECT_EQ(image_get_preload_state(layout->image), ImagePreloadState::INACTIVE);
+	expect_preload_icon(nullptr);
+
+	layout_image_set_with_ahead(layout, files[3], files[4]);
+	options->image.enable_read_ahead = FALSE;
+	image_prebuffer_set(layout->image, nullptr);
+	expect_preload_icon(nullptr);
+}
+
+TEST_F(DirectionalReadAhead, UntilFullLoadsMoreThan32AndYieldsOnCacheHits)
+{
+	options->image.enable_read_ahead = FALSE;
+	options->image.read_ahead_until_full = TRUE;
+	options->image.image_cache_max = 64;
+	g_autoptr(GdkPixbuf) pixels = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 512, 384);
+	gdk_pixbuf_fill(pixels, 0x336699ff);
+	for (gint i = 8; i < 40; ++i)
+		{
+		g_autofree gchar *path = g_strdup_printf("%s/image-%02d.png", directory, i);
+		ASSERT_TRUE(gdk_pixbuf_save(pixels, path, "png", nullptr, nullptr));
+		files.push_back(file_data_new_simple(path));
+		}
+	vf_refresh(layout->vf);
+	ASSERT_TRUE(finished());
+	options->image.enable_read_ahead = TRUE;
+	g_autoptr(FileDataList) ordered = layout_list(layout);
+	auto *first = static_cast<FileData *>(ordered->data);
+	auto *second = static_cast<FileData *>(ordered->next->data);
+	layout_image_set_with_ahead(layout, first, second);
+	ASSERT_TRUE(finished());
+	for (auto *fd : files) EXPECT_NE(fd->pixbuf, nullptr);
+	EXPECT_EQ(layout->image->read_ahead_count, 39U);
+	EXPECT_FALSE(layout->image->read_ahead_limit_reached);
+	g_autofree gchar *status = image_get_preload_status(layout->image);
+	ASSERT_NE(status, nullptr);
+	EXPECT_NE(std::string(status).find("39"), std::string::npos);
+
+	// One idle dispatch must not consume the entire already cached queue.
+	layout_image_set_with_ahead(layout, first, second);
+	const gint64 deadline = g_get_monotonic_time() + G_TIME_SPAN_SECOND;
+	while (layout->image->read_ahead_count == 0 && g_get_monotonic_time() < deadline)
+		{
+		g_main_context_iteration(nullptr, FALSE);
+		}
+	EXPECT_EQ(layout->image->read_ahead_count, 32U);
+	EXPECT_NE(layout->image->read_ahead_queue, nullptr);
+	ASSERT_TRUE(finished());
+	EXPECT_EQ(layout->image->read_ahead_count, 39U);
+}
+
+TEST_F(DirectionalReadAhead, UntilFullStopsAtBudgetAndCanBeCancelled)
+{
+	options->image.read_ahead_until_full = TRUE;
+	options->image.image_cache_max = 2;
+	layout_image_set_with_ahead(layout, files[0], files[1]);
+	ASSERT_TRUE(finished());
+	EXPECT_EQ(layout->image->read_ahead_count, 2U);
+	EXPECT_TRUE(layout->image->read_ahead_limit_reached);
+	EXPECT_EQ(image_get_preload_state(layout->image), ImagePreloadState::CACHE_LIMIT);
+	expect_preload_icon(GQ_ICON_PAUSE);
+	EXPECT_NE(files[2]->pixbuf, nullptr);
+	EXPECT_EQ(files[3]->pixbuf, nullptr);
+	g_autofree gchar *status = image_get_preload_status(layout->image);
+	ASSERT_NE(status, nullptr);
+
+	options->image.image_cache_max = 16;
+	layout_image_set_with_ahead(layout, files[0], files[1]);
+	ASSERT_NE(layout->image->read_ahead_queue, nullptr);
+	options->image.enable_read_ahead = FALSE;
+	image_prebuffer_set(layout->image, nullptr);
+	EXPECT_EQ(layout->image->read_ahead_total, 0U);
+	EXPECT_EQ(layout->image->read_ahead_queue, nullptr);
+	EXPECT_EQ(image_get_preload_status(layout->image), nullptr);
+}
+
+TEST_F(DirectionalReadAhead, UntilFullSettingRoundTripsWithoutChangingCount)
+{
+	options->image.read_ahead_until_full = TRUE;
+	options->image.read_ahead_images = 7;
+	g_autofree gchar *path = g_build_filename(directory, "preload.xml", nullptr);
+	ASSERT_TRUE(save_config_to_file(path, options, nullptr));
+	g_autofree gchar *config = nullptr;
+	gsize length;
+	ASSERT_TRUE(g_file_get_contents(path, &config, &length, nullptr));
+	g_unlink(path);
+	options->image.read_ahead_until_full = FALSE;
+	options->image.read_ahead_images = 4;
+	ASSERT_TRUE(load_config_from_buf(config, length, FALSE));
+	EXPECT_TRUE(options->image.read_ahead_until_full);
+	EXPECT_EQ(options->image.read_ahead_images, 7);
+}
+
+TEST_F(DirectionalReadAhead, UntilFullSkipsUnreadableImages)
+{
+	options->image.read_ahead_until_full = TRUE;
+	ASSERT_TRUE(g_file_set_contents(files[2]->path, "not an image", -1, nullptr));
+	layout_image_set_with_ahead(layout, files[0], files[1]);
+	ASSERT_TRUE(finished());
+	EXPECT_EQ(files[2]->pixbuf, nullptr);
+	EXPECT_NE(files[7]->pixbuf, nullptr);
+	EXPECT_EQ(layout->image->read_ahead_count, 6U);
+	EXPECT_FALSE(layout->image->read_ahead_limit_reached);
+	EXPECT_EQ(image_get_preload_state(layout->image), ImagePreloadState::INCOMPLETE);
+	expect_preload_icon(GQ_ICON_DIALOG_WARNING);
+}
+
 TEST_F(DirectionalReadAhead, SelectionPreloadsOnlySelectedImages)
 {
+	options->image.read_ahead_until_full = TRUE;
+	options->image.read_ahead_images = 1;
 	g_autoptr(FileDataList) selected = nullptr;
 	for (gint i : {1, 3, 6}) selected = g_list_append(selected, file_data_ref(files[i]));
 	options->image.enable_read_ahead = FALSE;
@@ -1392,6 +1536,8 @@ TEST_F(DirectionalReadAhead, SelectionPreloadsOnlySelectedImages)
 
 TEST_F(DirectionalReadAhead, CollectionUsesDisplayedOrder)
 {
+	options->image.read_ahead_until_full = TRUE;
+	options->image.read_ahead_images = 1;
 	g_autoptr(CollectionData) collection = collection_new(nullptr);
 	for (gint i : {6, 2, 5, 1}) ASSERT_TRUE(collection_add(collection, files[i], FALSE));
 	collection->changed = FALSE;

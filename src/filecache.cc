@@ -20,7 +20,6 @@
 
 #include "filecache.h"
 
-#include <algorithm>
 #include <config.h>
 #include <list>
 #include <optional>
@@ -65,6 +64,7 @@ bool FileCache::remove_entry(FileCache::ListIterT entry_iter)
 
 	size_ -= entry.size;
 	release_(entry.fd);
+	entries_.erase(entry.fd);
 	file_data_unref(entry.fd);
 	contents_.erase(entry_iter);
 
@@ -73,12 +73,8 @@ bool FileCache::remove_entry(FileCache::ListIterT entry_iter)
 
 std::optional<FileCache::ListIterT> FileCache::find_by_fd(FileData *fd)
 {
-	const auto entry_iter = std::find_if(
-		contents_.begin(),
-		contents_.end(),
-		[fd](const Entry &entry) { return entry.fd == fd; });
-
-	if (entry_iter != contents_.end()) return entry_iter;
+	const auto entry = entries_.find(fd);
+	if (entry != entries_.end()) return entry->second;
 	return std::nullopt;
 }
 
@@ -220,6 +216,7 @@ void FileCache::put(FileData *fd, size_t size)
 
 	DEBUG_2("cache add: fc=%p %s", (void *)this, fd->path);
 	contents_.emplace_front(file_data_ref(fd), size);
+	entries_.emplace(fd, contents_.begin());
 	size_ += size;
 
 	shrink_to_max_size();

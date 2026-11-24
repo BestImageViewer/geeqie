@@ -550,6 +550,7 @@ static void config_window_apply(const ConfOptions *c_options)
 
 	options->image.enable_read_ahead = c_options->image.enable_read_ahead;
 	options->image.read_ahead_images = c_options->image.read_ahead_images;
+	options->image.read_ahead_until_full = c_options->image.read_ahead_until_full;
 
 	if (options->image.use_custom_border_color != c_options->image.use_custom_border_color
 	    || options->image.use_custom_border_color_in_fullscreen != c_options->image.use_custom_border_color_in_fullscreen
@@ -2259,8 +2260,14 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 	pref_checkbox_new_int(group, _("Preload nearby images"),
 			      options->image.enable_read_ahead, &c_options->image.enable_read_ahead);
 
-	pref_spin_new_int(group, _("Images to preload:"), nullptr, 1, 32, 1,
-	                  options->image.read_ahead_images, &c_options->image.read_ahead_images);
+	auto *until_full = pref_checkbox_new_int(group, _("Preload until cache is full"),
+	                                        options->image.read_ahead_until_full, &c_options->image.read_ahead_until_full);
+	gtk_widget_set_tooltip_text(until_full,
+	                            _("Preload images in the navigation direction until the decoded image cache budget is reached or no more images remain. The entire folder may not fit. This does not increase the cache size."));
+	auto *preload_count = pref_spin_new_int(group, _("Images to preload:"), nullptr, 1, 32, 1,
+	                                       options->image.read_ahead_images, &c_options->image.read_ahead_images);
+	g_object_bind_property(until_full, "active", preload_count, "sensitive",
+	                       static_cast<GBindingFlags>(G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN));
 
 	pref_checkbox_new_int(group, _("Refresh on file change"),
 			      options->update_on_time_change, &c_options->update_on_time_change);

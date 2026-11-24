@@ -225,6 +225,7 @@ GtkBuilder *builder;
 	GtkWidget *info_sort; /**< status bar */
 	GtkWidget *info_status; /**< status bar */
 	GtkWidget *info_details; /**< status bar */
+	GtkWidget *info_preload; /**< status bar preload state icon */
 	GtkWidget *info_zoom; /**< status bar */
 	GtkWidget *info_pixel; /**< status bar */
 

@@ -198,6 +198,7 @@ struct ConfOptions
 		gint jpeg_decode_memory_limit; /**< in MiB */
 		gboolean enable_read_ahead;
 		gint read_ahead_images;
+		gboolean read_ahead_until_full;
 
 		ZoomMode zoom_mode;
 		gboolean zoom_2pass;

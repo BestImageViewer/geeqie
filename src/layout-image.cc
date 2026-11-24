@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstring>
 #include <memory>
+#include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -1526,6 +1527,11 @@ void layout_image_set_with_ahead(LayoutWindow *lw, FileData *fd, FileData *read_
 		}
 */
 	layout_image_set_fd(lw, fd);
+	if (!options->image.enable_read_ahead || options->image.image_cache_max <= 0)
+		{
+		image_prebuffer_set_list(lw->image, nullptr);
+		return;
+		}
 	g_autoptr(FileDataList) ahead = nullptr;
 	const gint current = layout_list_get_index(lw, fd);
 	const gint next = layout_list_get_index(lw, read_ahead_fd);
@@ -1544,16 +1550,27 @@ void layout_image_set_with_ahead(LayoutWindow *lw, FileData *fd, FileData *read_
 			if ((old + 1) % total == index) direction = 1;
 			else direction = -1;
 			}
-		for (gint count = 0; count < std::clamp(options->image.read_ahead_images, 1, 32); ++count)
+		// Index a snapshot once rather than traversing the file list for each candidate.
+		g_autoptr(FileDataList) displayed = options->image.read_ahead_until_full ? layout_list(lw) : nullptr;
+		std::vector<FileData *> ordered;
+		if (displayed) ordered.reserve(layout_list_count(lw));
+		for (GList *work = displayed; work; work = work->next)
+			{
+			ordered.push_back(static_cast<FileData *>(work->data));
+			}
+		const gint limit = options->image.read_ahead_until_full ? total : std::clamp(options->image.read_ahead_images, 1, 32);
+		for (gint count = 0; count < limit; ++count)
 			{
 			if (index < 0 || index >= total) break;
-			auto *candidate = layout_list_get_fd(lw, selection ? selected[index] : index);
+			const gint row = selection ? selected[index] : index;
+			auto *candidate = options->image.read_ahead_until_full ? ordered[row] : layout_list_get_fd(lw, row);
 			if (!candidate || candidate == fd) break;
-			ahead = g_list_append(ahead, file_data_ref(candidate));
+			ahead = g_list_prepend(ahead, file_data_ref(candidate));
 			index += direction;
 			if (selection) index = (index + total) % total;
 			}
 		}
+	ahead = g_list_reverse(ahead);
 	image_prebuffer_set_list(lw->image, ahead);
 }
 
@@ -1615,13 +1632,16 @@ static void layout_image_set_collection_real(LayoutWindow *lw, CollectionData *c
 
 	image_change_from_collection(lw->image, cd, info, image_zoom_get_default(lw->image));
 	g_autoptr(FileDataList) ahead = nullptr;
-	CollectInfo *next = info;
-	for (gint count = 0; count < std::clamp(options->image.read_ahead_images, 1, 32); ++count)
+	GList *next = g_list_find(cd->list, info);
+	const gint limit = options->image.read_ahead_until_full ? G_MAXINT : std::clamp(options->image.read_ahead_images, 1, 32);
+	for (gint count = 0; next && count < limit && options->image.enable_read_ahead && options->image.image_cache_max > 0; ++count)
 		{
-		next = forward ? collection_next_by_info(cd, next) : collection_prev_by_info(cd, next);
-		if (!next || next == info) break;
-		ahead = g_list_append(ahead, file_data_ref(next->fd));
+		next = forward ? next->next : next->prev;
+		if (!next) break;
+		auto *candidate = static_cast<CollectInfo *>(next->data);
+		ahead = g_list_prepend(ahead, file_data_ref(candidate->fd));
 		}
+	ahead = g_list_reverse(ahead);
 	image_prebuffer_set_list(lw->image, ahead);
 
 	layout_image_slideshow_continue_check(lw);

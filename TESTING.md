@@ -443,6 +443,26 @@ to Geeqie or terminate it. Remove the report when it is no longer needed.
 Run the helper's regression tests with
 `meson test -C build 'Hang report helper'`.
 
+### Image preloading
+
+Run `DirectionalReadAhead.*`, `FileCacheTest.*`, and `DiagnosticReport.*` in a
+test-enabled build under `xvfb-run`. Read-ahead tests cover bounded loading,
+loading more than 32 images until the cache budget is reached, yielding between
+batches of cache hits, selection/collection order, direction changes, cancellation,
+configuration persistence, and image-view transfers. Cache tests exercise LRU
+eviction, invalidation, and reentrant notification callbacks with indexed lookups.
+
+For a manual check, enable **Preferences → General → Image loading and caching →
+Preload until cache is full**, choose an appropriate decoded image cache size,
+and navigate forward from the first image. The status bar preload icon should
+change from refresh arrows to a check mark on completion, a pause symbol at the
+cache limit, or a warning if some images could not be loaded. Its tooltip should
+show the detailed progress message and counts, with no preload text appended to
+the image dimensions. The icon should disappear when preloading is inactive.
+Reverse direction or change
+folders while preloading to verify that obsolete work stops. Disabling the new
+option restores the saved image-count limit; its default remains four.
+
 ### Pan View indexing
 
 With unit tests enabled, run the `PanIndexing.*` tests under `xvfb-run`.

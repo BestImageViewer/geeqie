@@ -37,6 +37,7 @@ protected:
 TEST_F(DiagnosticReport, IncludesRuntimeViewsAndSafePreferences)
 {
 	settings.image.read_ahead_images = 7;
+	settings.image.read_ahead_until_full = TRUE;
 	settings.thumbnails.size.width = 123;
 	layout.options.file_view_type = FILEVIEW_ICON;
 	layout.options.dir_view_type = DIRVIEW_TREE;
@@ -45,6 +46,7 @@ TEST_F(DiagnosticReport, IncludesRuntimeViewsAndSafePreferences)
 	EXPECT_NE(report.find("file_view=icons\n"), std::string::npos);
 	EXPECT_NE(report.find("directory_view=tree\n"), std::string::npos);
 	EXPECT_NE(report.find("image.read_ahead_images=7\n"), std::string::npos);
+	EXPECT_NE(report.find("image.read_ahead_until_full=1\n"), std::string::npos);
 	EXPECT_NE(report.find("thumbnails.size.width=123\n"), std::string::npos);
 	layout.options.file_view_type = FILEVIEW_LIST;
 	layout.options.dir_view_type = DIRVIEW_LIST;

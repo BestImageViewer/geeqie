@@ -67,6 +67,7 @@ PREFERENCES = (
     'image.jpeg_decode_memory_limit',
     'image.enable_read_ahead',
     'image.read_ahead_images',
+    'image.read_ahead_until_full',
     'image.zoom_mode',
     'image.zoom_2pass',
     'image.zoom_to_fit_allow_expand',

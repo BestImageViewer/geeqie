@@ -1119,6 +1119,33 @@ void layout_status_update_image(LayoutWindow *lw)
 	if (!layout_valid(&lw) || !lw->image) return;
 	if (!lw->info_zoom || !lw->info_details) return; /*called from layout_style_set */
 
+	if (lw->info_preload)
+		{
+		const gchar *icon_name = nullptr;
+		if (lw->image->image_fd)
+			{
+			switch (image_get_preload_state(lw->image))
+				{
+				case ImagePreloadState::RUNNING: icon_name = GQ_ICON_REFRESH; break;
+				case ImagePreloadState::COMPLETE: icon_name = GQ_ICON_APPLY; break;
+				case ImagePreloadState::CACHE_LIMIT: icon_name = GQ_ICON_PAUSE; break;
+				case ImagePreloadState::INCOMPLETE: icon_name = GQ_ICON_DIALOG_WARNING; break;
+				case ImagePreloadState::INACTIVE: break;
+				}
+			}
+		g_autofree gchar *message = icon_name ? image_get_preload_status(lw->image) : nullptr;
+		gtk_widget_set_visible(lw->info_preload, icon_name != nullptr);
+		if (gtk_widget_get_has_tooltip(lw->info_preload) != (icon_name != nullptr))
+			{
+			gtk_widget_set_has_tooltip(lw->info_preload, icon_name != nullptr);
+			}
+		if (icon_name)
+			{
+			ui_image_set_from_icon_name(GTK_IMAGE(lw->info_preload), icon_name);
+			gtk_accessible_update_property(GTK_ACCESSIBLE(lw->info_preload), GTK_ACCESSIBLE_PROPERTY_LABEL, message, -1);
+			}
+		}
+
 	if (!lw->image->image_fd)
 		{
 		layout_info_button_set_label(lw->info_zoom, "");
@@ -1263,6 +1290,23 @@ static void layout_status_setup(LayoutWindow *lw, GtkWidget *box, gboolean small
 	lw->info_details = layout_status_label(nullptr, hbox, TRUE, 0, TRUE);
 	DEBUG_NAME(lw->info_details);
 	gtk_widget_set_tooltip_text(lw->info_details, _("(Image dimensions) Image size [page n of m]"));
+	lw->info_preload = gtk_image_new();
+	gtk_image_set_pixel_size(GTK_IMAGE(lw->info_preload), 16);
+	gtk_widget_set_can_target(lw->info_preload, TRUE);
+	gtk_widget_set_margin_start(lw->info_preload, PREF_PAD_GAP);
+	gtk_widget_set_margin_end(lw->info_preload, PREF_PAD_GAP);
+	gtk_widget_set_visible(lw->info_preload, FALSE);
+	// Fetch progress on demand; resetting tooltip text on each image can keep
+	// restarting the hover timeout during continuous preloading.
+	g_signal_connect(lw->info_preload, "query-tooltip", G_CALLBACK(+[](GtkWidget *, gint, gint, gboolean, GtkTooltip *tooltip, gpointer data) -> gboolean
+		{
+		auto *lw = static_cast<LayoutWindow *>(data);
+		g_autofree gchar *message = lw->image ? image_get_preload_status(lw->image) : nullptr;
+		if (!message) return FALSE;
+		gtk_tooltip_set_text(tooltip, message);
+		return TRUE;
+		}), lw);
+	gtk_box_append(GTK_BOX(hbox), lw->info_preload);
 	toolbar = layout_actions_toolbar(lw, TOOLBAR_STATUS);
 
 	toolbar_frame = gtk_frame_new(nullptr);
@@ -2584,6 +2628,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 	lw->info_sort = nullptr;
 	lw->info_status = nullptr;
 	lw->info_details = nullptr;
+	lw->info_preload = nullptr;
 	lw->info_pixel = nullptr;
 	lw->info_zoom = nullptr;
 

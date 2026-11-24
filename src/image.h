@@ -157,6 +157,9 @@ struct ImageWindow
 	GList *read_ahead_queue; /**< Owned FileData references, nearest first. */
 	guint read_ahead_idle_id;
 	gsize read_ahead_bytes;
+	guint read_ahead_total;
+	guint read_ahead_count;
+	gboolean read_ahead_limit_reached;
 
 	gint prev_color_row;
 
@@ -276,6 +279,18 @@ void image_stereo_pixbuf_set(ImageWindow *imd, StereoPixbufData stereo_mode);
 
 void image_prebuffer_set(ImageWindow *imd, FileData *fd);
 void image_prebuffer_set_list(ImageWindow *imd, GList *files);
+
+enum class ImagePreloadState
+{
+	INACTIVE,
+	RUNNING,
+	COMPLETE,
+	CACHE_LIMIT,
+	INCOMPLETE
+};
+
+ImagePreloadState image_get_preload_state(ImageWindow *imd);
+gchar *image_get_preload_status(ImageWindow *imd);
 
 void image_auto_refresh_enable(ImageWindow *imd, gboolean enable);
 

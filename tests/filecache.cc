@@ -25,9 +25,11 @@
 #include "gtest/gtest.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "filecache.h"
 #include "filedata.h"
+#include "options.h"
 
 namespace {
 
@@ -172,6 +174,44 @@ TEST_F(FileCacheTest, ReentrantNotifyPutGet)
 	file_cache_put(fc, fd, /*size=*/1);
 	ASSERT_FALSE(file_cache_get(fc, fd));
 	ASSERT_EQ(1, cache_and_fds.trigger_count);
+}
+
+TEST_F(FileCacheTest, IndexedLookupsPreserveEvictionAndInvalidation)
+{
+	struct ScopedOptions
+	{
+		ConfOptions *previous = options;
+		ConfOptions settings{};
+		ScopedOptions() { options = &settings; }
+		~ScopedOptions() { options = previous; }
+	} scoped_options;
+	g_autofree gchar *directory = g_dir_make_tmp("geeqie-filecache-XXXXXX", nullptr);
+	ASSERT_NE(directory, nullptr);
+	g_autofree gchar *path_a = g_build_filename(directory, "a", nullptr);
+	g_autofree gchar *path_b = g_build_filename(directory, "b", nullptr);
+	g_autofree gchar *path_c = g_build_filename(directory, "c", nullptr);
+	for (const gchar *path : {path_a, path_b, path_c}) ASSERT_TRUE(g_file_set_contents(path, "a", 1, nullptr));
+	FileDataRef a{FileData::new_simple(path_a, &context)};
+	FileDataRef b{FileData::new_simple(path_b, &context)};
+	FileDataRef c{FileData::new_simple(path_c, &context)};
+	FileCache cache{+[](FileData *) {}, 2};
+	cache.put(a, 1);
+	cache.put(b, 1);
+	ASSERT_TRUE(cache.get(a));
+	cache.put(c, 1);
+	EXPECT_FALSE(cache.get(b));
+	EXPECT_TRUE(cache.get(a));
+	EXPECT_TRUE(cache.get(c));
+	ASSERT_TRUE(g_file_set_contents(path_a, "changed", 7, nullptr));
+	EXPECT_FALSE(cache.get(a));
+	EXPECT_FALSE(cache.get(a));
+	cache.put(a, 1);
+	EXPECT_TRUE(cache.get(a));
+	cache.set_max_size(0);
+	EXPECT_FALSE(cache.get(a));
+	EXPECT_FALSE(cache.get(c));
+	for (const gchar *path : {path_a, path_b, path_c}) g_unlink(path);
+	g_rmdir(directory);
 }
 
 }  // anonymous namespace
