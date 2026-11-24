@@ -175,6 +175,17 @@
           </row>
           <row>
             <entry>
+              <para>formatted.DigitalZoomRatio</para>
+            </entry>
+            <entry>
+              <para>Exif.Photo.DigitalZoomRatio</para>
+            </entry>
+            <entry>
+              <para>Digital zoom ratio (e.g. 1.5×). Empty when missing, zero (digital zoom not used), or invalid. A ratio of 1 is shown as 1.0×.</para>
+            </entry>
+          </row>
+          <row>
+            <entry>
               <para>formatted.SubjectDistance</para>
             </entry>
             <entry>
@@ -666,6 +677,14 @@
             </entry>
             <entry>
               <para>Focal length 35mm</para>
+            </entry>
+          </row>
+          <row>
+            <entry>
+              <para>formatted.DigitalZoomRatio</para>
+            </entry>
+            <entry>
+              <para>Digital zoom ratio</para>
             </entry>
           </row>
           <row>

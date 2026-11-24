@@ -212,6 +212,8 @@
     </para>
     <para>Any metadata tag can be displayed in any pane - the pane titles merely exist as an organisational aide.</para>
     <para>It is possible to reorganise the data displayed by drag-and-dropping any item within a pane, or from one pane to another (although in some cases it makes little sense to do so).</para>
+    <para>The default Exif pane includes Digital zoom after the focal-length fields. Existing saved panes are not updated automatically. To add it manually, right-click an entry in the Exif pane and select <guimenuitem>Add entry</guimenuitem>. Enter <literal>formatted.DigitalZoomRatio</literal> as the key, leave the title empty to use the default label, enable <guilabel>Show only if set</guilabel>, and leave <guilabel>Editable (supported only for XMP)</guilabel> disabled. Click <guibutton>OK</guibutton>, then drag the new entry into the desired position. To see the entry while positioning it, use an image with a nonzero digital-zoom ratio or temporarily enable <guimenuitem>Show hidden entries</guimenuitem> in the context menu.</para>
+    <para>If a raw <literal>Exif.Photo.DigitalZoomRatio</literal> entry is already present, use <guimenuitem>Configure</guimenuitem> to change its key to <literal>formatted.DigitalZoomRatio</literal> instead of adding a duplicate.</para>
     <para>
       <note>It is not possible to undo these actions, nor is there a way to reset the display to its original settings.</note>
     </para>
@@ -270,6 +272,10 @@
           <row>
             <entry>formatted.FocalLength35mmFilm</entry>
             <entry>Focal length 35mm</entry>
+          </row>
+          <row>
+            <entry>formatted.DigitalZoomRatio</entry>
+            <entry>Digital zoom ratio, for example 1.5×. Missing values, zero (digital zoom not used), and invalid rational values are hidden when Show only if set is enabled. An explicit ratio of 1 is displayed as 1.0×. The raw Exif.Photo.DigitalZoomRatio value is unchanged.</entry>
           </row>
           <row>
             <entry>formatted.SubjectDistance</entry>

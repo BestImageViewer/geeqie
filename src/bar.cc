@@ -137,6 +137,7 @@ static const gchar default_config_exif[] =
 "                <entry key = 'formatted.ISOSpeedRating' if_set = 'true' editable = 'false' />"
 "                <entry key = 'formatted.FocalLength' if_set = 'true' editable = 'false' />"
 "                <entry key = 'formatted.FocalLength35mmFilm' if_set = 'true' editable = 'false' />"
+"                <entry key = 'formatted.DigitalZoomRatio' if_set = 'true' editable = 'false' />"
 "                <entry key = 'formatted.Flash' if_set = 'true' editable = 'false' />"
 "                <entry key = 'Exif.Photo.ExposureProgram' if_set = 'true' editable = 'false' />"
 "                <entry key = 'Exif.Photo.MeteringMode' if_set = 'true' editable = 'false' />"

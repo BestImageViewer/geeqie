@@ -20,6 +20,7 @@ unit_test_sources = files(
 'editors.cc',
 'exiv2.cc',
 'exif-color-profile.cc',
+'exif-digital-zoom.cc',
 'exif-resolution.cc',
 'filecache.cc',
 'filedata/filedata.cc',

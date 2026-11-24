@@ -309,6 +309,18 @@ gchar *exif_build_formatted_FocalLength(ExifData *exif)
 	return g_strdup_printf("%.0f mm", n);
 }
 
+gchar *exif_build_formatted_DigitalZoomRatio(ExifData *exif)
+{
+	bool sign = false;
+	const auto *rational = exif_get_rational(exif, "Exif.Photo.DigitalZoomRatio", &sign); // NOTRANSLATE: Metadata key defined by the file format.
+	// Exif specifies a zero numerator when digital zoom was not used.
+	if (!rational || rational->num == 0 || rational->den == 0) return nullptr;
+	const gdouble ratio = exif_rational_to_double(rational, sign);
+	if (!std::isfinite(ratio) || ratio <= 0.0) return nullptr;
+	if (std::floor(ratio) == ratio) return g_strdup_printf("%.1f×", ratio);
+	return g_strdup_printf("%.6g×", ratio);
+}
+
 gchar *exif_build_formatted_FocalLength35mmFilm(ExifData *exif)
 {
 	gdouble f;
@@ -808,6 +820,7 @@ const ExifFormattedText ExifFormattedList[] = {
 	EXIF_FORMATTED_TAG(ISOSpeedRating,	N_("ISO sensitivity")),
 	EXIF_FORMATTED_TAG(FocalLength,		N_("Focal length")),
 	EXIF_FORMATTED_TAG(FocalLength35mmFilm,	N_("Focal length 35mm")),
+	EXIF_FORMATTED_TAG(DigitalZoomRatio,	N_("Digital zoom")),
 	EXIF_FORMATTED_TAG(SubjectDistance,	N_("Subject distance")),
 	EXIF_FORMATTED_TAG(Flash,		N_("Flash")),
 	EXIF_FORMATTED_TAG(Resolution,		N_("Resolution")),
