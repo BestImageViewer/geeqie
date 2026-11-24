@@ -1521,9 +1521,9 @@ gboolean exif_copy_crop_metadata(FileData *, const gchar *, gint, gint, GError *
 }
 
 
-gint exif_update_metadata(ExifData *, const gchar *, const GList *)
+bool exif_update_metadata(ExifData *, const gchar *, const GList *)
 {
-	return 0;
+	return false;
 }
 
 GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format)

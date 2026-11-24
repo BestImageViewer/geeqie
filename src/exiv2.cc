@@ -921,71 +921,56 @@ static const AltKey *find_alt_key(const gchar *xmp_key)
 	return nullptr;
 }
 
-static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const GList *values)
+template<typename Key, typename Metadata>
+static void metadata_update(Metadata &metadata, const gchar *key, const GList *values)
 {
-	try {
-		const GList *work = values;
+	const Key ekey(key);
 
-		try {
-			Exiv2::ExifKey ekey(key);
-
-			auto pos = exif->exifData().findKey(ekey);
-			while (pos != exif->exifData().end())
-				{
-				exif->exifData().erase(pos);
-				pos = exif->exifData().findKey(ekey);
-				}
-
-			while (work)
-				{
-				exif->exifData()[key] = static_cast<gchar *>(work->data);
-				work = work->next;
-				}
+	auto pos = metadata.findKey(ekey);
+	while (pos != metadata.end())
+		{
+		metadata.erase(pos);
+		pos = metadata.findKey(ekey);
 		}
-		catch (Exiv2::AnyError& e) {
-			try
-			{
-				Exiv2::IptcKey ekey(key);
-				auto pos = exif->iptcData().findKey(ekey);
-				while (pos != exif->iptcData().end())
-					{
-					exif->iptcData().erase(pos);
-					pos = exif->iptcData().findKey(ekey);
-					}
 
-				while (work)
-					{
-					exif->iptcData()[key] = static_cast<gchar *>(work->data);
-					work = work->next;
-					}
-			}
-			catch (Exiv2::AnyError& e) {
-				Exiv2::XmpKey ekey(key);
-				auto pos = exif->xmpData().findKey(ekey);
-				while (pos != exif->xmpData().end())
-					{
-					exif->xmpData().erase(pos);
-					pos = exif->xmpData().findKey(ekey);
-					}
-
-				while (work)
-					{
-					exif->xmpData()[key] = static_cast<gchar *>(work->data);
-					work = work->next;
-					}
-			}
+	for (const GList *work = values; work; work = work->next)
+		{
+		metadata[key] = static_cast<gchar *>(work->data);
 		}
-		return 1;
-	}
-	catch (Exiv2::AnyError& e) {
-		debug_exception(e);
-		return 0;
-	}
 }
 
-gint exif_update_metadata(ExifData *exif, const gchar *key, const GList *values)
+static bool exif_update_metadata_simple(ExifData *exif, const gchar *key, const GList *values)
 {
-	gint ret = exif_update_metadata_simple(exif, key, values);
+	try
+		{
+		metadata_update<Exiv2::ExifKey>(exif->exifData(), key, values);
+		}
+	catch (Exiv2::AnyError& e)
+		{
+		try
+			{
+			metadata_update<Exiv2::IptcKey>(exif->iptcData(), key, values);
+			}
+		catch (Exiv2::AnyError& e)
+			{
+			try
+				{
+				metadata_update<Exiv2::XmpKey>(exif->xmpData(), key, values);
+				}
+			catch (Exiv2::AnyError& e)
+				{
+				debug_exception(e);
+				return false;
+				}
+			}
+		}
+
+	return true;
+}
+
+bool exif_update_metadata(ExifData *exif, const gchar *key, const GList *values)
+{
+	bool ret = exif_update_metadata_simple(exif, key, values);
 
 	if (
 	    !values || /* deleting item */
