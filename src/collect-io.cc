@@ -685,31 +685,24 @@ static void collect_manager_process_actions(gint max)
 		}
 }
 
-static gboolean collect_manager_process_entry(CollectManagerEntry *entry)
+static void collect_manager_entry_process(const CollectManagerEntry *entry)
 {
-	if (entry->empty) return FALSE;
-
 	g_autoptr(CollectionData) cd = collection_new(entry->path);
 	(void) collection_load_private(cd, entry->path, COLLECTION_LOAD_NONE);
-
-	return TRUE;
 }
 
-static gboolean collect_manager_process_entry_list()
+static bool collect_manager_process_entry_list()
 {
-	GList *work;
+	static const auto collect_manager_entry_not_empty = [](gconstpointer data, gconstpointer)
+	{
+		return static_cast<const CollectManagerEntry *>(data)->empty ? 1 : 0;
+	};
+	GList *work = g_list_find_custom(collection_manager_entry_list, nullptr, collect_manager_entry_not_empty);
+	if (!work) return false;
 
-	work = collection_manager_entry_list;
-	while (work)
-		{
-		CollectManagerEntry *entry;
+	collect_manager_entry_process(static_cast<CollectManagerEntry *>(work->data));
 
-		entry = static_cast<CollectManagerEntry *>(work->data);
-		work = work->next;
-		if (collect_manager_process_entry(entry)) return TRUE;
-		}
-
-	return FALSE;
+	return true;
 }
 
 
