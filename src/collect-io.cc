@@ -57,9 +57,6 @@ const size_t GQ_COLLECTION_MARKER_LEN = strlen(GQ_COLLECTION_MARKER);
 constexpr gchar gqview_collection_marker[] = "#GQview collection";
 const size_t gqview_collection_marker_len = strlen(gqview_collection_marker);
 
-constexpr gint COLLECT_MANAGER_ACTIONS_PER_IDLE = 1000;
-constexpr guint COLLECT_MANAGER_FLUSH_DELAY = 10000;
-
 struct CollectManagerEntry
 {
 	gchar *path;
@@ -85,18 +82,34 @@ struct CollectManagerAction
 	gint ref;
 };
 
+struct CollectManager
+{
+	CollectManagerEntry *get_entry(const gchar *path) const;
+	gboolean process();
+	void add_action(CollectManagerAction *action);
 
-GList *collection_manager_entry_list = nullptr;
-std::list<CollectManagerAction *> collection_manager_action_list;
+	guint timer_id = 0; /* event source id */
 
-CollectManagerEntry *collect_manager_get_entry(const gchar *path)
+private:
+	void refresh();
+	void process_actions(gint max);
+	[[nodiscard]] bool process_entry_list() const;
+
+	static constexpr gint ACTIONS_PER_IDLE = 1000;
+	static constexpr guint FLUSH_DELAY = 10000;
+
+	GList *entry_list = nullptr;
+	std::list<CollectManagerAction *> action_list;
+} collect_manager{};
+
+CollectManagerEntry *CollectManager::get_entry(const gchar *path) const
 {
 	const auto collect_manager_entry_compare_path = [](gconstpointer data, gconstpointer user_data)
 	{
 		return strcmp(static_cast<const CollectManagerEntry *>(data)->path, static_cast<const gchar *>(user_data));
 	};
 
-	GList *work = g_list_find_custom(collection_manager_entry_list, path, collect_manager_entry_compare_path);
+	GList *work = g_list_find_custom(entry_list, path, collect_manager_entry_compare_path);
 
 	return work ? static_cast<CollectManagerEntry *>(work->data) : nullptr;
 }
@@ -106,7 +119,7 @@ CollectManagerEntry *collect_manager_get_entry(const gchar *path)
 static gboolean collection_save_private(CollectionData *cd, const gchar *path);
 
 static void collect_manager_entry_reset(CollectManagerEntry *entry);
-static gint collect_manager_process_action(CollectManagerEntry *entry, gchar **path_ptr);
+static gint collect_manager_entry_process_action(CollectManagerEntry *entry, gchar **path_ptr);
 
 static gboolean collection_load_private(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
 {
@@ -126,7 +139,8 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	g_autofree gchar *infotext = nullptr;
 
 	if (flush) collect_manager_flush();
-	else entry = collect_manager_get_entry(path);
+	else entry = collect_manager.get_entry(path);
+
 	if (!append)
 		{
 		collection_list_clear(&cd->list);
@@ -255,7 +269,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		total++;
 
 		if (!flush)
-			changed |= collect_manager_process_action(entry, &filename);
+			changed |= collect_manager_entry_process_action(entry, &filename);
 		if (!*filename)
 			{
 			g_clear_pointer(&infotext, g_free);
@@ -287,7 +301,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	if (!flush)
 		{
 		gchar *buf = nullptr;
-		while (collect_manager_process_action(entry, &buf))
+		while (collect_manager_entry_process_action(entry, &buf))
 			{
 			collection_add(cd, file_data_new_group(buf), FALSE);
 			changed = TRUE;
@@ -456,16 +470,12 @@ static CollectManagerEntry *collect_manager_entry_new(const gchar *path)
 	entry->path = g_strdup(path);
 	collect_manager_entry_init_data(entry);
 
-	collection_manager_entry_list = g_list_append(collection_manager_entry_list, entry);
-
 	return entry;
 }
 
 
 static void collect_manager_entry_free(CollectManagerEntry *entry)
 {
-	collection_manager_entry_list = g_list_remove(collection_manager_entry_list, entry);
-
 	collect_manager_entry_free_data(entry);
 
 	g_free(entry->path);
@@ -480,7 +490,6 @@ static void collect_manager_entry_reset(CollectManagerEntry *entry)
 
 static void collect_manager_entry_add_action(CollectManagerEntry *entry, CollectManagerAction *action)
 {
-
 	CollectManagerAction *orig_action;
 
 	entry->empty = FALSE;
@@ -551,7 +560,7 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 	collect_manager_action_ref(action);
 }
 
-static gboolean collect_manager_process_action(CollectManagerEntry *entry, gchar **path_ptr)
+static gboolean collect_manager_entry_process_action(CollectManagerEntry *entry, gchar **path_ptr)
 {
 	gchar *path = *path_ptr;
 	CollectManagerAction *action;
@@ -584,7 +593,7 @@ static gboolean collect_manager_process_action(CollectManagerEntry *entry, gchar
 	return FALSE; /* no change */
 }
 
-static void collect_manager_refresh()
+void CollectManager::refresh()
 {
 	std::set<std::string> paths;
 	auto *dir_fd = file_data_new_dir(get_collections_dir());
@@ -618,29 +627,33 @@ static void collect_manager_refresh()
 			}
 		}
 
-	GList *work = collection_manager_entry_list;
+	GList *work = entry_list;
 	while (work)
 		{
 		auto *entry = static_cast<CollectManagerEntry *>(work->data);
 		work = work->next;
-		if (paths.erase(entry->path) == 0) collect_manager_entry_free(entry);
+		if (paths.erase(entry->path) == 0)
+			{
+			entry_list = g_list_remove(entry_list, entry);
+			collect_manager_entry_free(entry);
+			}
 		}
 
 	for (const auto &path : paths)
 		{
-		collect_manager_entry_new(path.c_str());
+		entry_list = g_list_append(entry_list, collect_manager_entry_new(path.c_str()));
 		}
 }
 
-static void collect_manager_process_actions(gint max)
+void CollectManager::process_actions(gint max)
 {
-	if (!collection_manager_action_list.empty()) DEBUG_1("collection manager processing actions");
+	if (!action_list.empty()) DEBUG_1("collection manager processing actions");
 
-	while (!collection_manager_action_list.empty() && max > 0)
+	while (!action_list.empty() && max > 0)
 		{
-		CollectManagerAction *action = collection_manager_action_list.front();
+		CollectManagerAction *action = action_list.front();
 
-		GList *work = collection_manager_entry_list;
+		GList *work = entry_list;
 		while (work)
 			{
 			CollectManagerEntry *entry;
@@ -680,7 +693,7 @@ static void collect_manager_process_actions(gint max)
 				action->oldpath, action->newpath);
 			}
 
-		collection_manager_action_list.remove(action);
+		action_list.remove(action);
 		collect_manager_action_unref(action);
 		}
 }
@@ -691,13 +704,13 @@ static void collect_manager_entry_process(const CollectManagerEntry *entry)
 	(void) collection_load_private(cd, entry->path, COLLECTION_LOAD_NONE);
 }
 
-static bool collect_manager_process_entry_list()
+bool CollectManager::process_entry_list() const
 {
 	static const auto collect_manager_entry_not_empty = [](gconstpointer data, gconstpointer)
 	{
 		return static_cast<const CollectManagerEntry *>(data)->empty ? 1 : 0;
 	};
-	GList *work = g_list_find_custom(collection_manager_entry_list, nullptr, collect_manager_entry_not_empty);
+	GList *work = g_list_find_custom(entry_list, nullptr, collect_manager_entry_not_empty);
 	if (!work) return false;
 
 	collect_manager_entry_process(static_cast<CollectManagerEntry *>(work->data));
@@ -705,58 +718,49 @@ static bool collect_manager_process_entry_list()
 	return true;
 }
 
-
-
-static gboolean collect_manager_process_cb(gpointer)
+gboolean CollectManager::process()
 {
-	if (!collection_manager_action_list.empty()) collect_manager_refresh();
-	collect_manager_process_actions(COLLECT_MANAGER_ACTIONS_PER_IDLE);
-	if (!collection_manager_action_list.empty()) return G_SOURCE_CONTINUE;
+	if (!action_list.empty()) refresh();
+	process_actions(ACTIONS_PER_IDLE);
+	if (!action_list.empty()) return G_SOURCE_CONTINUE;
 
-	if (collect_manager_process_entry_list()) return G_SOURCE_CONTINUE;
+	if (process_entry_list()) return G_SOURCE_CONTINUE;
 
 	DEBUG_1("collection manager is up to date");
 	return G_SOURCE_REMOVE;
+}
+
+static gboolean collect_manager_process_cb(gpointer user_data)
+{
+	auto *collect_manager = static_cast<CollectManager *>(user_data);
+
+	return collect_manager->process();
 }
 
 static gboolean collect_manager_timer_cb(gpointer user_data)
 {
 	DEBUG_1("collection manager timer expired");
 
-	g_idle_add_full(G_PRIORITY_LOW, collect_manager_process_cb, nullptr, nullptr);
+	auto *collect_manager = static_cast<CollectManager *>(user_data);
 
-	auto *collection_manager_timer_id = static_cast<guint *>(user_data);
-	*collection_manager_timer_id = 0;
+	g_idle_add_full(G_PRIORITY_LOW, collect_manager_process_cb, collect_manager, nullptr);
+
+	collect_manager->timer_id = 0;
 
 	return G_SOURCE_REMOVE;
 }
 
-static void collect_manager_timer_push(gint stop)
-{
-	static guint collection_manager_timer_id = 0; /* event source id */
-
-	if (collection_manager_timer_id)
-		{
-		if (!stop) return;
-
-		g_clear_handle_id(&collection_manager_timer_id, g_source_remove);
-		}
-
-	if (!stop)
-		{
-		collection_manager_timer_id = g_timeout_add(COLLECT_MANAGER_FLUSH_DELAY,
-		                                            collect_manager_timer_cb, &collection_manager_timer_id);
-		DEBUG_1("collection manager timer started");
-		}
-}
-
-static void collect_manager_add_action(CollectManagerAction *action)
+void CollectManager::add_action(CollectManagerAction *action)
 {
 	if (!action) return;
 
-	collection_manager_action_list.push_back(action);
+	action_list.push_back(action);
 
-	collect_manager_timer_push(FALSE);
+	if (timer_id == 0)
+		{
+		timer_id = g_timeout_add(FLUSH_DELAY, collect_manager_timer_cb, this);
+		DEBUG_1("collection manager timer started");
+		}
 }
 
 /**
@@ -773,7 +777,7 @@ void collect_manager_moved(FileData *fd)
 	const gchar *newpath = fd->change->dest;
 
 	action = collect_manager_action_new(oldpath, newpath, COLLECTION_MANAGER_UPDATE);
-	collect_manager_add_action(action);
+	collect_manager.add_action(action);
 }
 
 /**
@@ -795,7 +799,7 @@ void collect_manager_add(FileData *fd, const gchar *collection)
 		}
 
 	action = collect_manager_action_new(fd->path, collection, COLLECTION_MANAGER_ADD);
-	collect_manager_add_action(action);
+	collect_manager.add_action(action);
 }
 
 /**
@@ -814,7 +818,7 @@ void collect_manager_remove(FileData *fd, const gchar *collection)
 		}
 
 	action = collect_manager_action_new(fd->path, collection, COLLECTION_MANAGER_REMOVE);
-	collect_manager_add_action(action);
+	collect_manager.add_action(action);
 }
 
 /**
@@ -822,10 +826,11 @@ void collect_manager_remove(FileData *fd, const gchar *collection)
  */
 void collect_manager_flush()
 {
-	collect_manager_timer_push(TRUE);
+	g_clear_handle_id(&collect_manager.timer_id, g_source_remove);
 
 	DEBUG_1("collection manager flushing");
-	while (collect_manager_process_cb(nullptr));
+	while (collect_manager.process())
+		;
 }
 
 void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer)
