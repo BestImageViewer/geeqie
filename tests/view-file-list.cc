@@ -376,6 +376,120 @@ protected:
 #ifndef SHOW_ALL_DEPRECATED_WARNINGS
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
+TEST_P(RepeatedDelete, BulkDeletionKeepsListSelectionsSynchronized)
+{
+	auto *vf = layout->vf;
+	const bool thumbnails = std::get<1>(GetParam());
+	vf_thumb_set(vf, thumbnails);
+	g_autoptr(GdkPixbuf) pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 8, 8);
+	gdk_pixbuf_fill(pixbuf, 0x4080c0ff);
+	gchar *buffer = nullptr;
+	gsize length = 0;
+	ASSERT_TRUE(gdk_pixbuf_save_to_buffer(pixbuf, &buffer, &length, "png", nullptr, nullptr));
+	g_autofree gchar *contents = buffer;
+	int *selection_calls = nullptr;
+	if (vf->type == FILEVIEW_LIST)
+		{
+		auto *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(VFLIST(vf)->details_view));
+		selection_calls = g_new0(int, 1);
+		gtk_tree_selection_set_select_function(selection,
+		    [](GtkTreeSelection *, GtkTreeModel *, GtkTreePath *, gboolean selected, gpointer data) -> gboolean
+			{
+			if (!selected) ++*static_cast<int *>(data);
+			return TRUE;
+			}, selection_calls, g_free);
+		}
+	for (const int count : {500, 1000, 2000, 3500})
+		{
+		for (int i = 3; i < count; ++i)
+			{
+			g_autofree gchar *path = g_strdup_printf("%s/image-%05d.png", directory, i);
+			ASSERT_TRUE(g_file_set_contents(path, contents, length, nullptr));
+			}
+		vf_refresh(vf);
+		ASSERT_EQ(vf_count(vf), static_cast<guint>(count));
+		vf_select_all(vf);
+		if (vf->type == FILEVIEW_LIST)
+			{
+			auto *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+			for (int i = 0; i < 3; ++i)
+				{
+				g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_indices(i, -1);
+				gtk_tree_selection_unselect_path(selection, path);
+				}
+			}
+		if (selection_calls) *selection_calls = 0;
+		const auto disk_start = g_get_monotonic_time();
+		for (int i = 3; i < count; ++i)
+			{
+			g_autofree gchar *path = g_strdup_printf("%s/image-%05d.png", directory, i);
+			ASSERT_EQ(g_unlink(path), 0);
+			}
+		const auto refresh_start = g_get_monotonic_time();
+		vf_refresh(vf);
+		const auto finish = g_get_monotonic_time();
+		g_print("BULK_DELETE count=%d view=%d thumbnails=%d unlink_ms=%.3f refresh_ms=%.3f\n",
+		        count, vf->type, thumbnails, (refresh_start - disk_start) / 1000.0,
+		        (finish - refresh_start) / 1000.0);
+		ASSERT_EQ(vf_count(vf), 3U);
+		if (vf->type == FILEVIEW_LIST)
+			{
+			auto *names = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+			auto *details = gtk_tree_view_get_selection(GTK_TREE_VIEW(VFLIST(vf)->details_view));
+			EXPECT_EQ(gtk_tree_selection_count_selected_rows(names), 1);
+			EXPECT_EQ(gtk_tree_selection_count_selected_rows(details), 1);
+			for (int i = 0; i < 3; ++i)
+				{
+				g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_indices(i, -1);
+				EXPECT_EQ(gtk_tree_selection_path_is_selected(names, path),
+				          gtk_tree_selection_path_is_selected(details, path));
+				}
+			// Repeatedly rebuilding the remaining selection would require O(n²) calls.
+			EXPECT_LE(*selection_calls, count);
+			}
+
+		}
+}
+
+TEST_P(RepeatedDelete, RefreshPreservesSurvivingSelectionInBothPanes)
+{
+	auto *vf = layout->vf;
+	if (vf->type != FILEVIEW_LIST) GTEST_SKIP() << "Requires list view";
+	vf_thumb_set(vf, std::get<1>(GetParam()));
+	auto *names = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+	auto *details = gtk_tree_view_get_selection(GTK_TREE_VIEW(VFLIST(vf)->details_view));
+	vf_select_all(vf);
+	g_autofree gchar *removed = g_build_filename(directory, "1.jpg", nullptr);
+	ASSERT_EQ(g_unlink(removed), 0);
+	vf_refresh(vf);
+	EXPECT_EQ(vf_count(vf), 2U);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(names), 2);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(details), 2);
+
+	vf_select_invert(vf);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(names), 0);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(details), 0);
+	vf_select_invert(vf);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(names), 2);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(details), 2);
+
+	// Synchronization must still work from the details pane to the filenames.
+	g_autoptr(GtkTreePath) first = gtk_tree_path_new_from_indices(0, -1);
+	gtk_tree_selection_unselect_path(details, first);
+	EXPECT_FALSE(gtk_tree_selection_path_is_selected(names, first));
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(names), 1);
+
+	for (const char *name : {"0.jpg", "2.jpg"})
+		{
+		g_autofree gchar *path = g_build_filename(directory, name, nullptr);
+		ASSERT_EQ(g_unlink(path), 0);
+		}
+	vf_refresh(vf);
+	EXPECT_EQ(vf_count(vf), 0U);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(names), 0);
+	EXPECT_EQ(gtk_tree_selection_count_selected_rows(details), 0);
+}
+
 TEST_P(RepeatedDelete, StatusPositionTracksDisplayedImageWithinSelection)
 {
 	auto *vf = layout->vf;

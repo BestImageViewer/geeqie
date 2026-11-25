@@ -271,8 +271,36 @@ static gboolean vflist_store_clear_cb(GtkTreeModel *model, GtkTreePath *, GtkTre
 	return FALSE;
 }
 
+/** Keep the two list selections consistent after a complete batch of changes. */
+class FileListSelectionUpdate
+{
+public:
+	explicit FileListSelectionUpdate(ViewFile *vf)
+		: vf(vf), was_syncing(VFLIST(vf)->syncing_selection)
+	{
+		VFLIST(vf)->syncing_selection = TRUE;
+	}
+
+	~FileListSelectionUpdate()
+	{
+		VFLIST(vf)->syncing_selection = was_syncing;
+		if (!was_syncing)
+			{
+			vflist_selection_sync_cb(gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview)), vf);
+			}
+	}
+
+	FileListSelectionUpdate(const FileListSelectionUpdate &) = delete;
+	FileListSelectionUpdate &operator=(const FileListSelectionUpdate &) = delete;
+
+private:
+	ViewFile *vf;
+	gboolean was_syncing;
+};
+
 static void vflist_store_clear(ViewFile *vf, gboolean unlock_files)
 {
+	const FileListSelectionUpdate selection_update(vf);
 	GtkTreeModel *store;
 
 	if (unlock_files && vf->marks_enabled)
@@ -992,6 +1020,7 @@ static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *it
 
 static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *parent_iter, GList *list, GList *selected, gboolean force)
 {
+	const FileListSelectionUpdate selection_update(vf);
 	/* Collection membership is displayed as a flat list of explicit files. */
 	if (vf->collection && parent_iter)
 		{
@@ -1619,6 +1648,7 @@ static gboolean tree_model_get_iter_last(GtkTreeModel *store, GtkTreeIter *iter)
 
 void vflist_select_invert(ViewFile *vf)
 {
+	const FileListSelectionUpdate selection_update(vf);
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	GtkTreeModel *store;
@@ -1690,6 +1720,7 @@ void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 
 	if (vflist_is_selected(vf, fd)) return;
 
+	const FileListSelectionUpdate selection_update(vf);
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	gtk_tree_selection_unselect_all(selection);
 	gtk_tree_selection_select_iter(selection, &iter);
@@ -1702,6 +1733,7 @@ void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 
 void vflist_select_list(ViewFile *vf, const FileDataList *list)
 {
+	const FileListSelectionUpdate selection_update(vf);
 	GtkTreeIter iter;
 
 	for (const GList *work = list; work; work = work->next)
@@ -1752,6 +1784,7 @@ G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
 void vflist_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 {
+	const FileListSelectionUpdate selection_update(vf);
 	GtkTreeModel *store;
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
@@ -1899,6 +1932,9 @@ G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
 static void vflist_populate_view(ViewFile *vf, gboolean force)
 {
+	// Removing selected rows emits a change for each row. Synchronize only once,
+	// after deletions, insertions, and fallback selection have all completed.
+	const FileListSelectionUpdate selection_update(vf);
 	GtkTreeStore *store;
 	GList *selected;
 	const gboolean thumb_size_changed = vflist_thumb_size_changed(vf);
