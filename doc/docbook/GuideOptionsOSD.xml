@@ -5,6 +5,7 @@
   <section id="OverlayScreenDisplay">
     <title>Overlay Screen Display</title>
     <para>The contents of the Overlay Screen Display is defined by the Image Overlay Template. This template is easily customised to  display a wide range of data.</para>
+    <para>Long lines automatically wrap to the available width of the image pane, taking the overlay's horizontal offset and padding into account. This applies to descriptions, filenames, keywords, and other text. Wrapping prefers word boundaries and splits long unbroken text when necessary. Explicit line breaks and text formatting are preserved, and the layout adjusts when the pane is resized or enters fullscreen. Short overlays keep their compact size. Very long text can still extend beyond the available height; the OSD does not provide scrolling.</para>
     <para>
       The format of each entry is:
       <programlisting>%tag[:max_length][:extra]%</programlisting>
@@ -134,6 +135,7 @@
       parameter. The following example will truncate the displayed data to 20 characters and will add 3 dots at the end to denote the truncation.
       <programlisting>%formatted.Camera:20%</programlisting>
     </para>
+    <para>Automatic wrapping does not override an explicit length limit. To display the full description rather than a shortened value, use <literal>%description%</literal> without a <literal>:max_length</literal> parameter.</para>
     <para>
       If two or more variables are connected with the
       <code>|</code>

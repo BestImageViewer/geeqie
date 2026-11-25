@@ -37,6 +37,7 @@ unit_test_sources = files(
 'image-load-heif.cc',
 'image-load-webp.cc',
 'image-load-jpegxl.cc',
+'image-overlay.cc',
 'image-crop.cc',
 'keyboard-shortcuts.cc',
 'keyword-tree.cc',

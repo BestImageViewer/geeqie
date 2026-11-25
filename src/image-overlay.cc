@@ -22,6 +22,7 @@
 #include "image-overlay.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 
@@ -80,6 +81,8 @@ struct OverlayStateData {
 	guint timer_id; /* event source id */
 	gulong destroy_id;
 	gulong scale_changed_id;
+	gulong viewport_changed_id;
+	gint viewport_width;
 };
 
 struct OSDIcon {
@@ -220,15 +223,23 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 	GdkPixbuf *pixbuf = nullptr;
 	gint width;
 	gint height;
-	PangoLayout *layout;
+	g_autoptr(PangoLayout) layout = nullptr;
 	const gchar *name;
 	gboolean with_hist;
 	const HistMap *histmap = nullptr;
 	ImageWindow *imd = osd->imd;
 	FileData *fd = image_get_fd(imd);
-	PangoFontDescription *font_desc;
+	g_autoptr(PangoFontDescription) font_desc = nullptr;
 
 	if (!fd) return nullptr;
+	const auto *pr = PIXBUF_RENDERER(imd->pr);
+	// Overlay coordinates and Pango sizes use logical pixels. The final pixbuf
+	// is scaled separately for HiDPI displays, including stereo viewports.
+	const gint64 available_width = static_cast<gint64>(pr->viewport_width) - std::abs(static_cast<gint64>(osd->x));
+	constexpr gint padding = 10;
+	if (available_width <= padding) return nullptr;
+	const gint max_width = static_cast<gint>(available_width);
+	const gint text_width = std::min(max_width - padding, G_MAXINT / PANGO_SCALE);
 
 	g_autofree gchar *text = nullptr;
 	name = image_get_name(imd);
@@ -399,6 +410,12 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 	pango_layout_set_markup(layout, text, -1);
 
 	pango_layout_get_pixel_size(layout, &width, &height);
+	if (width > text_width)
+		{
+		pango_layout_set_width(layout, text_width * PANGO_SCALE);
+		pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
+		pango_layout_get_pixel_size(layout, &width, &height);
+		}
 	/* with empty text width is set to 0, but not height) */
 	if (width == 0)
 		height = 0;
@@ -406,16 +423,18 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 		width = 0;
 	if (width > 0) width += 10;
 	if (height > 0) height += 10;
+	width = std::min(width, max_width);
 
 	if (with_hist)
 		{
-		width = std::max(width, HISTOGRAM_WIDTH + 10);
+		width = std::min(std::max(width, HISTOGRAM_WIDTH + padding), max_width);
 		height += HISTOGRAM_HEIGHT + 5;
 		}
 
 	if (width > 0 && height > 0)
 		{
 		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width, height);
+		if (!pixbuf) return nullptr;
 		pixbuf_set_rect_fill(pixbuf, 3, 3, width-6, height-6, options->image_overlay.background);
 		pixbuf_set_rect(pixbuf, 0, 0, width, height, {240, 240, 240, 80}, 1, 1, 1, 1);
 		pixbuf_set_rect(pixbuf, 1, 1, width-2, height-2, {240, 240, 240, 130}, 1, 1, 1, 1);
@@ -444,9 +463,6 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			}
 		pixbuf_draw_layout(pixbuf, layout, 5, 5, options->image_overlay.text_color, scale);
 	}
-
-	g_object_unref(G_OBJECT(layout));
-	pango_font_description_free(font_desc);
 
 	return pixbuf;
 }
@@ -790,6 +806,7 @@ static void image_osd_free(OverlayStateData *osd)
 		image_set_osd_data(osd->imd, nullptr);
 		g_signal_handler_disconnect(osd->imd->pr, osd->destroy_id);
 		g_signal_handler_disconnect(osd->imd->pr, osd->scale_changed_id);
+		g_signal_handler_disconnect(osd->imd->pr, osd->viewport_changed_id);
 
 		image_set_state_func(osd->imd, nullptr, nullptr);
 
@@ -814,6 +831,14 @@ static void image_osd_destroy_cb(GtkWidget *, gpointer data)
 	image_osd_free(osd);
 }
 
+static void image_osd_viewport_changed_cb(PixbufRenderer *pr, gpointer data)
+{
+	auto *osd = static_cast<OverlayStateData *>(data);
+	if (osd->viewport_width == pr->viewport_width) return;
+	osd->viewport_width = pr->viewport_width;
+	image_osd_update_schedule(osd, TRUE);
+}
+
 static void image_osd_enable(ImageWindow *imd, OsdShowFlags show)
 {
 	OverlayStateData *osd = image_get_osd_data(imd);
@@ -826,12 +851,16 @@ static void image_osd_enable(ImageWindow *imd, OsdShowFlags show)
 		osd->x = options->image_overlay.x;
 		osd->y = options->image_overlay.y;
 		osd->origin = OVL_RELATIVE;
+		osd->viewport_width = PIXBUF_RENDERER(imd->pr)->viewport_width;
 
 		osd->histogram = Histogram();
 
 		osd->destroy_id = g_signal_connect(G_OBJECT(imd->pr), "destroy",
 						   G_CALLBACK(image_osd_destroy_cb), osd);
 		osd->scale_changed_id = g_signal_connect(imd->pr, "notify::scale-factor", G_CALLBACK(image_osd_scale_changed_cb), osd);
+		// This notification follows size/stereo viewport changes as well as
+		// panning; the callback avoids reformatting when the width is unchanged.
+		osd->viewport_changed_id = g_signal_connect(imd->pr, "scroll-notify", G_CALLBACK(image_osd_viewport_changed_cb), osd);
 		image_set_osd_data(imd, osd);
 
 		image_set_state_func(osd->imd, image_osd_state_cb, osd);

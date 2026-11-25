@@ -927,6 +927,9 @@ if unit_tests_enabled and xvfb.found()
     hidpi_test_args = [xvfb.full_path(), '--auto-servernum', find_program('env').full_path(),
                       'GDK_SCALE=2', geeqie_exe.full_path(), '--run-unit-tests', zoom_test_filter]
     test('HiDPI zoom tests', isolate_test_sh, args: hidpi_test_args, timeout: 30, suite : 'integration')
+    osd_hidpi_test_args = [xvfb.full_path(), '--auto-servernum', find_program('env').full_path(),
+                          'GDK_SCALE=2', geeqie_exe.full_path(), '--run-unit-tests', '--gtest_filter=OsdWrapping.*']
+    test('HiDPI OSD wrapping tests', isolate_test_sh, args: osd_hidpi_test_args, timeout: 60, suite : 'integration')
     summary({'integration_tests' : ['Tests run:', true]}, section : 'Testing', bool_yn : true)
 else
     summary({'integration_tests' : ['Tests run:', false]}, section : 'Testing', bool_yn : true)

@@ -463,6 +463,22 @@ Reverse direction or change
 folders while preloading to verify that obsolete work stops. Disabling the new
 option restores the saved image-count limit; its default remains four.
 
+### OSD text wrapping
+
+Run `OsdWrapping.*` under `xvfb-run` in a test-enabled build. The tests exercise
+long descriptions, unbroken text, Unicode, Pango markup, explicit newlines,
+compact short text, left/right positioning, resizing, stereo viewport changes,
+and template length limits. They check that description metadata is unchanged.
+Run `meson test -C build 'HiDPI OSD wrapping tests'` to repeat the suite with
+`GDK_SCALE=2`.
+
+For a manual check, include `%description%` in the OSD template and view an image
+with a long description. Resize the image pane, change split layout, and enter
+or leave fullscreen. Long lines should reflow to the pane's width; short lines
+should remain compact. A template such as `%description:80%` still deliberately
+truncates the description, and descriptions taller than the pane can still be
+clipped vertically.
+
 ### Pan View indexing
 
 With unit tests enabled, run the `PanIndexing.*` tests under `xvfb-run`.
