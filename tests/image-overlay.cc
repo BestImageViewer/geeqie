@@ -161,14 +161,26 @@ TEST_F(OsdWrapping, ShortTextStaysCompactAndExplicitLinesArePreserved)
 
 TEST_F(OsdWrapping, UnbrokenUnicodeAndMarkupTextWrap)
 {
+	std::string unicode;
+	for (gint i = 0; i < 12; ++i) unicode += "日本語の説明文は単語間の空白がなくても折り返します。";
 	for (const auto &text : {std::string(150, 'W'),
 	                        std::string("<b>") + paragraph() + "</b>",
-	                        std::string("日本語の説明文は単語間の空白がなくても折り返します。日本語の説明文は単語間の空白がなくても折り返します。"),
+	                        unicode,
 	                        std::string("A &lt;beautiful&gt; description &amp; more. ") + paragraph()})
 		{
+		SCOPED_TRACE(text);
+		g_autoptr(PangoLayout) unwrapped = gtk_widget_create_pango_layout(imd->pr, nullptr);
+		g_autoptr(PangoFontDescription) font = pango_font_description_from_string(options->image_overlay.font);
+		pango_layout_set_font_description(unwrapped, font);
+		pango_layout_set_markup(unwrapped, text.c_str(), -1);
+		gint unwrapped_width;
+		gint unwrapped_height;
+		pango_layout_get_pixel_size(unwrapped, &unwrapped_width, &unwrapped_height);
+		ASSERT_GT(unwrapped_width, pr->viewport_width);
 		ASSERT_NO_FATAL_FAILURE(show(text));
 		expect_fits();
-		EXPECT_GT(height(), 40);
+		// Compare against this font's single line, including the overlay's padding.
+		EXPECT_GT(height(), unwrapped_height + 10);
 		}
 }
 
