@@ -62,7 +62,7 @@ void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_li
 void menu_icon_rows_refresh(GtkWidget *menu, GMenuModel *model);
 void color_profiles_menu_populate(LayoutWindow *lw, const char *action);
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window);
-GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdouble y);
+GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdouble y, gint max_height = -1);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

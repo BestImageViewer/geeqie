@@ -367,7 +367,16 @@ void popover_popup(GtkWidget *popover)
 	GtkWidget *parent = gtk_widget_get_parent(popover);
 	if (parent && GTK_IS_POPOVER_BIN(parent))
 		{
+		GdkRectangle anchor{};
+		const gboolean has_anchor = gtk_popover_get_pointing_to(GTK_POPOVER(popover), &anchor);
 		gtk_popover_bin_popup(GTK_POPOVER_BIN(parent));
+		// PopoverBin's programmatic popup clears the pointing rectangle. Keep
+		// explicit pointer and keyboard anchors supplied by our callers.
+		if (has_anchor)
+			{
+			gtk_popover_set_pointing_to(GTK_POPOVER(popover), &anchor);
+			gtk_popover_present(GTK_POPOVER(popover));
+			}
 		return;
 		}
 #endif
@@ -438,7 +447,21 @@ GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 	return popover;
 }
 
-GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdouble y)
+static bool menu_limit_height(GtkWidget *widget, gint height)
+{
+	if (GTK_IS_SCROLLED_WINDOW(widget))
+		{
+		gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(widget), height);
+		return true;
+		}
+	for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+		{
+		if (menu_limit_height(child, height)) return true;
+		}
+	return false;
+}
+
+GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdouble y, gint max_height)
 {
 	GtkWidget *popover = gtk_popover_menu_new_from_model_full(G_MENU_MODEL(menu_model), GTK_POPOVER_MENU_NESTED);
 	menu_nested_submenus_setup(popover);
@@ -450,6 +473,7 @@ GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdoubl
 
 	popover_set_parent(popover, parent);
 	gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
+	if (max_height > 0) menu_limit_height(popover, max_height);
 	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
 	popover_popup(popover);
 

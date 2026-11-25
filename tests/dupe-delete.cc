@@ -182,6 +182,74 @@ protected:
 	bool configured = false;
 };
 
+TEST_P(DuplicateDeletion, ContextMenuUsesContentCoordinates)
+{
+	auto *dw = dupe_window_new();
+	windows.push_back(dw);
+	gtk_window_set_title(GTK_WINDOW(dw->window), "Geeqie duplicates popup test");
+	gtk_window_present(GTK_WINDOW(dw->window));
+	ASSERT_TRUE(wait_for([dw]()
+		{
+		return gtk_widget_get_mapped(dw->listview) && gtk_widget_get_width(dw->listview) > 80 &&
+		       gtk_widget_get_height(dw->listview) > 80;
+		}));
+	auto *parent = gtk_window_get_child(GTK_WINDOW(dw->window));
+
+	const std::function<GtkWidget *(GtkWidget *)> find_popover = [&find_popover](GtkWidget *widget) -> GtkWidget *
+		{
+		if (GTK_IS_POPOVER(widget) && gtk_widget_get_mapped(widget)) return widget;
+		for (auto *child = gtk_widget_get_first_child(widget); child; child = gtk_widget_get_next_sibling(child))
+			{
+			if (auto *found = find_popover(child)) return found;
+			}
+		return nullptr;
+		};
+
+	graphene_point_t expected{};
+	if (GetParam())
+		{
+		g_autofree gchar *xdotool = g_find_program_in_path("xdotool");
+		if (!xdotool || !g_getenv("DISPLAY")) GTEST_SKIP() << "Requires xdotool and X11";
+		const graphene_point_t point{40, 40};
+		graphene_point_t window_point{};
+		ASSERT_TRUE(gtk_widget_compute_point(dw->listview, dw->window, &point, &window_point));
+		ASSERT_TRUE(gtk_widget_compute_point(dw->listview, parent, &point, &expected));
+		g_autofree gchar *x = g_strdup_printf("%d", static_cast<int>(window_point.x));
+		g_autofree gchar *y = g_strdup_printf("%d", static_cast<int>(window_point.y));
+		const gchar *args[] = {xdotool, "search", "--name", "^Geeqie duplicates popup test$",
+		                       "windowfocus", "--sync", "mousemove", "--window", "%1", x, y,
+		                       "click", "3", nullptr};
+		gint status = 0;
+		ASSERT_TRUE(g_spawn_sync(nullptr, const_cast<gchar **>(args), nullptr, G_SPAWN_DEFAULT,
+		                         nullptr, nullptr, nullptr, nullptr, &status, nullptr));
+		ASSERT_TRUE(g_spawn_check_wait_status(status, nullptr));
+		}
+	else
+		{
+		auto *viewport = gtk_widget_get_ancestor(dw->listview, GTK_TYPE_SCROLLED_WINDOW);
+		graphene_rect_t bounds{};
+		ASSERT_TRUE(gtk_widget_compute_bounds(viewport, parent, &bounds));
+		expected = {bounds.origin.x + bounds.size.width / 2, bounds.origin.y + bounds.size.height / 2};
+		gtk_widget_grab_focus(dw->listview);
+		ASSERT_TRUE(gtk_widget_activate_action(dw->window, "win.dupe-win-popup-menu", nullptr));
+		}
+	ASSERT_TRUE(wait_for([&]() { return find_popover(parent) != nullptr; }));
+	auto *popover = find_popover(parent);
+	EXPECT_EQ(gtk_widget_get_parent(popover), parent);
+	GdkRectangle anchor{};
+	ASSERT_TRUE(gtk_popover_get_pointing_to(GTK_POPOVER(popover), &anchor));
+	EXPECT_NEAR(anchor.x, expected.x, 1);
+	EXPECT_NEAR(anchor.y, expected.y, 1);
+	auto *surface = gtk_native_get_surface(GTK_NATIVE(popover));
+	ASSERT_TRUE(wait_for([surface]() { return gdk_surface_get_height(surface) > 1; }));
+	auto *monitor = gdk_display_get_monitor_at_surface(gtk_widget_get_display(dw->window), surface);
+	ASSERT_NE(monitor, nullptr);
+	GdkRectangle geometry{};
+	gdk_monitor_get_geometry(monitor, &geometry);
+	EXPECT_LE(gdk_surface_get_height(surface), geometry.height / 2);
+	gtk_popover_popdown(GTK_POPOVER(popover));
+}
+
 TEST_P(DuplicateDeletion, MainWindowDeletionUpdatesEveryDuplicatesWindow)
 {
 	const auto first = create("0.png");
