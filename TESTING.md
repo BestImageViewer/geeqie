@@ -338,6 +338,61 @@ The script cannot inspect unsaved settings, live view state, or a packaged
 application's build flags and bundled libraries. Host-library versions and saved
 configuration values are labeled accordingly. No data is uploaded.
 
+To create a configuration solely from reported settings, run the developer
+helper from a source checkout:
+
+```sh
+python3 tools/geeqie-config-from-report.py /path/to/report.txt
+```
+
+The input must be an existing native or standalone Geeqie diagnostic settings
+report, format 1. The tool constructs a new XML document from the supported
+settings in that report. Generation does not read a user or system configuration
+or populate missing settings. Only the checkout's diagnostic schema and
+serialization definitions are consulted for field names, types, and units.
+Settings not included in the report are omitted; Geeqie initializes its defaults
+for them when loading the generated file. The result is loadable XML, not an
+exact reconstruction of settings deliberately excluded from diagnostics.
+
+For interactive reproduction, launch a separate instance with a private profile:
+
+```sh
+python3 tools/geeqie-config-from-report.py /path/to/report.txt --launch
+python3 tools/geeqie-config-from-report.py /path/to/report.txt --launch --geeqie ./build/src/geeqie
+```
+
+The short options are `-l` and `-g`. Launching requires `dbus-run-session`.
+The profile has its own HOME and XDG configuration, cache, data, and state
+directories. The desktop display connection is retained for X11 and Wayland.
+The generated XML is copied into the profile; the original generated file stays
+unchanged when Geeqie saves settings. The profile and `geeqie-launch.log` remain
+beside it after exit, and their paths are printed. Clipboard failure does not
+prevent launching, but still returns an error status. Check the log if the
+window fails to appear.
+
+Use the user's Geeqie version when possible. Missing settings use application
+defaults; a system-wide Geeqie configuration, if installed, can also affect
+startup. Private paths, custom shortcuts, sidebar contents, and unsupported
+runtime state cannot be reconstructed from the report. Loading the XML into an
+existing instance with `--config-load` overlays its current settings, so use
+`--launch` for reproduction without your normal per-user settings.
+
+The configuration is saved as `/tmp/geeqie-config-from-report-*/geeqierc.xml`
+with owner-only permissions inside a private directory. Settings are written
+one per line. The tool copies the file's absolute path to the normal Ctrl+V
+clipboard using `wl-copy` on Wayland, `xclip` or `xsel` on X11, or `pbcopy` on
+macOS. It does not use the X11 PRIMARY selection. If no clipboard helper works,
+it prints the saved path and returns an error while retaining the result.
+
+Attribute aliases, booleans, view enums, and slideshow-delay units are converted
+using the report's format and the checkout's serialization definitions. Each
+reported window gets its own layout in report order, with a generated identifier.
+No unreported window settings or sidebar entries are added. Unsupported runtime
+state and unknown fields are listed as skipped. The input report is unchanged.
+
+Run its regression tests with
+`meson test -C build 'Configuration from diagnostic report'`.
+
 Both reports classify AppImage, Snap, and Flatpak packaging markers without
 including their values or paths. These are best-effort hints: inherited or
 conflicting markers can be misleading, and a native distribution package cannot

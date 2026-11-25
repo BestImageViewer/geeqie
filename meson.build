@@ -760,6 +760,9 @@ test('Icon naming', icon_naming_python,
      timeout : 30, suite : 'analysis')
 
 # Code correctness checks
+test('Configuration from diagnostic report', icon_naming_python,
+     args : [files('build-aux/test-config-from-report.py')],
+     timeout : 30, suite : 'functional')
 test('Hang report helper', icon_naming_python,
      args : [files('build-aux/test-hang-report.py')],
      timeout : 30, suite : 'functional')
