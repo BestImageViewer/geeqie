@@ -97,6 +97,18 @@ removed on reboot. Developer debug builds can optionally collect a best-effort
 backtrace with `GQ_CRASH_BACKTRACE=1`; this is not available in ordinary release
 builds. Review backtraces for executable/library paths before sharing.
 
+A prebuilt `Geeqie-latest-x86_64-debug.AppImage` is available from the
+[Continuous build release](https://github.com/BestImageViewer/geeqie/releases/tag/continuous).
+To enable its optional crash backtrace, run:
+
+```sh
+GQ_CRASH_BACKTRACE=1 ./Geeqie-latest-x86_64-debug.AppImage
+```
+
+Make the downloaded file executable first. This debug build is larger and slower
+than the normal AppImage; include its full version and the accompanying build
+information file when reporting a problem. Library frames may still lack symbols.
+
 For a freeze, a backtrace captured while Geeqie is unresponsive is particularly
 useful. Download [geeqie-hang-report.py](https://raw.githubusercontent.com/BestImageViewer/geeqie/master/tools/geeqie-hang-report.py)
 and, on Linux, close Geeqie and run:

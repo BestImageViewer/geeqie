@@ -8,6 +8,22 @@ permissions:
 jobs:
   Build-AppImage:
     runs-on: ubuntu-26.04
+    name: Build x86_64 AppImage (${{ matrix.variant }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: release
+            buildtype: release
+            filename: Geeqie-latest-x86_64.AppImage
+          - variant: debug
+            buildtype: debug
+            filename: Geeqie-latest-x86_64-debug.AppImage
+
+    env:
+      BUILD_VARIANT: ${{ matrix.variant }}
+      BUILD_TYPE: ${{ matrix.buildtype }}
+      APPIMAGE_FILENAME: ${{ matrix.filename }}
 
     container:
       image: ubuntu:26.04
@@ -18,11 +34,13 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
             appstream \
+            binutils \
             build-essential \
             curl \
             desktop-file-utils \
             docbook-xsl \
             dpkg-dev \
+            dbus-daemon \
             file \
             findutils \
             fop \
@@ -65,6 +83,8 @@ jobs:
             python3-venv \
             wget \
             zsync \
+            xauth \
+            xvfb \
             xsltproc \
             yelp-tools
 
@@ -77,10 +97,23 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Meson setup
-        run: meson setup build --prefix=/usr --datadir=share -Dcms=enabled
+        run: |
+          meson setup build --prefix=/usr --datadir=share \
+            --buildtype="$BUILD_TYPE" -Dstrip=false -Dcms=enabled -Dexecinfo=enabled
 
       - name: Ninja compile
         run: DESTDIR="$GITHUB_WORKSPACE/AppDir" ninja -C build install
+
+      - name: Record debug build information
+        if: matrix.variant == 'debug'
+        run: |
+          {
+            printf 'Geeqie debug AppImage\nCommit: '
+            git rev-parse HEAD
+            printf 'Build type: %s\n' "$BUILD_TYPE"
+          } > "$APPIMAGE_FILENAME.build-info.txt"
+          mkdir -p AppDir/usr/share/geeqie
+          cp "$APPIMAGE_FILENAME.build-info.txt" AppDir/usr/share/geeqie/debug-build-info.txt
 
       # The linuxdeploy-plugin-gtk forces the backend to be X11, as it was considered
       # that Wayland has problems. Delete this and let the user choose.
@@ -100,17 +133,28 @@ jobs:
 
       - name: Build AppImage
         run: |
+          if [ "$BUILD_VARIANT" = debug ]; then
+            export NO_STRIP=1
+          fi
           rsvg-convert --width=256 --height=256 \
             --output="$GITHUB_WORKSPACE/AppDir/geeqie.png" \
             "$GITHUB_WORKSPACE/AppDir/usr/share/icons/hicolor/scalable/apps/geeqie.svg"
           cp "$GITHUB_WORKSPACE/AppDir/geeqie.png" "$GITHUB_WORKSPACE/AppDir/.DirIcon"
           DEPLOY_GTK_VERSION=4 \
-            LDAI_OUTPUT=Geeqie-latest-x86_64.AppImage \
-            LDAI_UPDATE_INFORMATION="gh-releases-zsync|BestImageViewer|geeqie|continuous|Geeqie-latest-x86_64.AppImage.zsync" \
+            LDAI_OUTPUT="$APPIMAGE_FILENAME" \
+            LDAI_UPDATE_INFORMATION="gh-releases-zsync|BestImageViewer|geeqie|continuous|$APPIMAGE_FILENAME.zsync" \
             ./linuxdeploy/AppRun --appdir "$GITHUB_WORKSPACE/AppDir" \
             --desktop-file "$GITHUB_WORKSPACE/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop" \
             --plugin gtk \
             --output appimage
+
+      - name: Verify packaged debug symbols and crash backtrace
+        if: matrix.variant == 'debug'
+        run: |
+          xvfb-run --auto-servernum dbus-run-session -- env GDK_BACKEND=x11 GSK_RENDERER=cairo \
+            python3 build-aux/check-debug-appimage.py "$APPIMAGE_FILENAME" \
+              --output-dir build/debug-appimage-check
+          sha256sum "$APPIMAGE_FILENAME" >> "$APPIMAGE_FILENAME.build-info.txt"
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -119,12 +163,15 @@ jobs:
           tag: continuous
           name: Continuous build
           prerelease: true
-          artifacts: "Geeqie-latest-x86_64.AppImage*"
+          artifacts: "${{ matrix.filename }}*"
 
       - name: Upload logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: logs-all-build-appimage
-          path: ${{ github.workspace }}/build/meson-logs/*.txt
+          name: logs-all-build-appimage-${{ matrix.variant }}
+          path: |
+            ${{ github.workspace }}/build/meson-logs/*.txt
+            ${{ github.workspace }}/build/debug-appimage-check/*.log
+            ${{ github.workspace }}/build/debug-appimage-check/*.txt
           retention-days: 5

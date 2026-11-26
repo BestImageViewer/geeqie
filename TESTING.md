@@ -447,6 +447,36 @@ it stops at the fault, or inspect the core dump with a debugger. Signal-handler
 regression tests run in child processes with core dumps disabled and verify
 termination from both the main thread and a worker thread.
 
+The x86_64 AppImage workflow also publishes
+`Geeqie-latest-x86_64-debug.AppImage` in the
+[Continuous build release](https://github.com/BestImageViewer/geeqie/releases/tag/continuous).
+It uses Meson's `debug` build type and retains Geeqie's DWARF symbols through
+installation and deployment. Its update information points to the debug variant.
+An accompanying `.AppImage.build-info.txt` records the source commit and AppImage
+checksum; the commit record is also included under `usr/share/geeqie/` inside
+the image. The normal release AppImage remains the default download.
+
+```sh
+chmod +x Geeqie-latest-x86_64-debug.AppImage
+GQ_CRASH_BACKTRACE=1 ./Geeqie-latest-x86_64-debug.AppImage
+```
+
+The debug image is larger and slower than the release image. The environment
+variable enables the same best-effort backtrace described above; it is off by
+default. Bundled libraries generally lack full debug symbols, so matching library
+symbols can still be needed. The debug variant uses the same base system as the
+release variant and does not extend its host compatibility.
+
+Before publishing the debug variant, CI runs
+`build-aux/check-debug-appimage.py` against the finished AppImage. It extracts
+the image without FUSE, verifies `.debug_info`, `.debug_line`, and backtrace
+symbols in its executable, then exercises `AppRun` under Xvfb and a separate
+D-Bus session. The checker uses a private profile, disables core dumps, and sends
+SIGABRT only to its own child after the crash handler is ready. It requires a
+report containing multiple backtrace frames, which also checks that the deployed
+runtime can unwind. This is a packaging test, not a crash menu item in Geeqie.
+Extraction, launch, and crash-report logs are retained as workflow artifacts.
+
 ### Collecting hang reports
 
 On Linux, the simplest method is to install Python 3 and GDB, close existing
