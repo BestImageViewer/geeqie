@@ -21,6 +21,7 @@
 
 #include "collect-io.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -38,7 +39,6 @@
 #include "collect.h"
 #include "filedata.h"
 #include "history-list.h"
-#include "intl.h"
 #include "layout-util.h"
 #include "main-defines.h"
 #include "options.h"
@@ -93,25 +93,20 @@ struct CollectManager
 private:
 	void refresh();
 	void process_actions(gint max);
-	[[nodiscard]] bool process_entry_list() const;
 
 	static constexpr gint ACTIONS_PER_IDLE = 1000;
 	static constexpr guint FLUSH_DELAY = 10000;
 
-	GList *entry_list = nullptr;
+	std::list<CollectManagerEntry *> entry_list;
 	std::list<CollectManagerAction *> action_list;
 } collect_manager{};
 
 CollectManagerEntry *CollectManager::get_entry(const gchar *path) const
 {
-	const auto collect_manager_entry_compare_path = [](gconstpointer data, gconstpointer user_data)
-	{
-		return strcmp(static_cast<const CollectManagerEntry *>(data)->path, static_cast<const gchar *>(user_data));
-	};
+	auto work = std::find_if(entry_list.cbegin(), entry_list.cend(),
+	                         [path](const CollectManagerEntry *entry){ return strcmp(entry->path, path) == 0; });
 
-	GList *work = g_list_find_custom(entry_list, path, collect_manager_entry_compare_path);
-
-	return work ? static_cast<CollectManagerEntry *>(work->data) : nullptr;
+	return (work != entry_list.cend()) ? *work : nullptr;
 }
 
 } // namespace
@@ -627,21 +622,18 @@ void CollectManager::refresh()
 			}
 		}
 
-	GList *work = entry_list;
-	while (work)
-		{
-		auto *entry = static_cast<CollectManagerEntry *>(work->data);
-		work = work->next;
-		if (paths.erase(entry->path) == 0)
-			{
-			entry_list = g_list_remove(entry_list, entry);
-			collect_manager_entry_free(entry);
-			}
-		}
+	const auto is_unknown_path = [&paths](CollectManagerEntry *entry)
+	{
+		if (paths.erase(entry->path) != 0) return false;
+
+		collect_manager_entry_free(entry);
+		return true;
+	};
+	entry_list.remove_if(is_unknown_path);
 
 	for (const auto &path : paths)
 		{
-		entry_list = g_list_append(entry_list, collect_manager_entry_new(path.c_str()));
+		entry_list.push_back(collect_manager_entry_new(path.c_str()));
 		}
 }
 
@@ -653,14 +645,8 @@ void CollectManager::process_actions(gint max)
 		{
 		CollectManagerAction *action = action_list.front();
 
-		GList *work = entry_list;
-		while (work)
+		for (CollectManagerEntry *entry : entry_list)
 			{
-			CollectManagerEntry *entry;
-
-			entry = static_cast<CollectManagerEntry *>(work->data);
-			work = work->next;
-
 			if (action->type == COLLECTION_MANAGER_UPDATE)
 				{
 				collect_manager_entry_add_action(entry, action);
@@ -681,9 +667,9 @@ void CollectManager::process_actions(gint max)
 					}
 				collect_manager_entry_add_action(entry, action);
 				}
-
-			max--;
 			}
+
+		max -= entry_list.size();
 
 		if (action->type != COLLECTION_MANAGER_UPDATE &&
 		    action->oldpath && action->newpath)
@@ -698,22 +684,12 @@ void CollectManager::process_actions(gint max)
 		}
 }
 
-static void collect_manager_entry_process(const CollectManagerEntry *entry)
+static bool collect_manager_entry_process(const CollectManagerEntry *entry)
 {
+	if (entry->empty) return false;
+
 	g_autoptr(CollectionData) cd = collection_new(entry->path);
 	(void) collection_load_private(cd, entry->path, COLLECTION_LOAD_NONE);
-}
-
-bool CollectManager::process_entry_list() const
-{
-	static const auto collect_manager_entry_not_empty = [](gconstpointer data, gconstpointer)
-	{
-		return static_cast<const CollectManagerEntry *>(data)->empty ? 1 : 0;
-	};
-	GList *work = g_list_find_custom(entry_list, nullptr, collect_manager_entry_not_empty);
-	if (!work) return false;
-
-	collect_manager_entry_process(static_cast<CollectManagerEntry *>(work->data));
 
 	return true;
 }
@@ -724,7 +700,7 @@ gboolean CollectManager::process()
 	process_actions(ACTIONS_PER_IDLE);
 	if (!action_list.empty()) return G_SOURCE_CONTINUE;
 
-	if (process_entry_list()) return G_SOURCE_CONTINUE;
+	if (std::any_of(entry_list.cbegin(), entry_list.cend(), collect_manager_entry_process)) return G_SOURCE_CONTINUE;
 
 	DEBUG_1("collection manager is up to date");
 	return G_SOURCE_REMOVE;
