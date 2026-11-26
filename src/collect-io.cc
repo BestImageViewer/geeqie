@@ -438,14 +438,8 @@ static void collect_manager_action_unref(CollectManagerAction *action)
 static void collect_manager_entry_free_data(CollectManagerEntry *entry)
 {
 	g_list_free_full(entry->add_list, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
-	if (g_hash_table_size(entry->oldpath_hash) > 0)
-		g_hash_table_destroy(entry->oldpath_hash);
-	else
-		g_hash_table_unref(entry->oldpath_hash);
-	if (g_hash_table_size(entry->newpath_hash) > 0)
-		g_hash_table_destroy(entry->newpath_hash);
-	else
-		g_hash_table_unref(entry->newpath_hash);
+	g_hash_table_unref(entry->oldpath_hash);
+	g_hash_table_unref(entry->newpath_hash);
 }
 
 static void collect_manager_entry_init_data(CollectManagerEntry *entry)
@@ -485,8 +479,6 @@ static void collect_manager_entry_reset(CollectManagerEntry *entry)
 
 static void collect_manager_entry_add_action(CollectManagerEntry *entry, CollectManagerAction *action)
 {
-	CollectManagerAction *orig_action;
-
 	entry->empty = FALSE;
 
 	if (action->oldpath == nullptr)
@@ -497,8 +489,7 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 			return;
 			}
 
-		orig_action = static_cast<CollectManagerAction *>(g_hash_table_lookup(entry->newpath_hash, action->newpath));
-		if (orig_action)
+		if (g_hash_table_contains(entry->newpath_hash, action->newpath))
 			{
 			/* target already exists */
 			log_printf("collection manager failed to add another action for target %s in collection %s\n",
@@ -511,7 +502,7 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 		return;
 		}
 
-	orig_action = static_cast<CollectManagerAction *>(g_hash_table_lookup(entry->newpath_hash, action->oldpath));
+	auto *orig_action = static_cast<CollectManagerAction *>(g_hash_table_lookup(entry->newpath_hash, action->oldpath));
 	if (orig_action)
 		{
 		/* new action with the same file */
@@ -528,7 +519,7 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 			work->data = new_action;
 			}
 
-		g_hash_table_steal(entry->newpath_hash, orig_action->newpath);
+		g_hash_table_remove(entry->newpath_hash, orig_action->newpath);
 		if (new_action->newpath)
 			{
 			g_hash_table_insert(entry->newpath_hash, new_action->newpath, new_action);
@@ -538,8 +529,7 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 		}
 
 
-	orig_action = static_cast<CollectManagerAction *>(g_hash_table_lookup(entry->oldpath_hash, action->oldpath));
-	if (orig_action)
+	if (g_hash_table_contains(entry->oldpath_hash, action->oldpath))
 		{
 		/* another action for the same source, ignore */
 		log_printf("collection manager failed to add another action for source %s in collection %s\n",
