@@ -25,6 +25,75 @@ suppress the check, and exclusions must not be added for entire files.
 
 ## Error Logging
 
+### Categorized debug logging
+
+Use `DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "Cache hit: %s", path)` for new
+subsystem diagnostics. Select categories at runtime with
+`--debug-domains=image,render,metadata` or another comma-separated list.
+
+| Category | Scope |
+|----------|-------|
+| `general` | Startup and general lifecycle |
+| `thumbnails` | Thumbnail loading and queues |
+| `cache` | Memory and disk caches |
+| `image` | Image loading, decoding, animation, and preloading |
+| `render` | Drawing, scaling, overlays, and color management |
+| `metadata` | EXIF, keywords, and metadata writes |
+| `files` | File operations and monitoring |
+| `ui` | Navigation, views, selection, and drag and drop |
+| `duplicates` | Duplicate search and comparison |
+| `config` | Configuration loading and parsing |
+| `collections` | Collection loading, updates, and management |
+| `external` | External editors, command execution, and output |
+
+The default is `all`; `none` disables ordinary debug messages. The filter is
+independent of `--debug=N`, applies to the running session, and is available
+only in debug builds. Invalid domain lists leave the previous filter unchanged.
+
+Use these verbosity levels for new or migrated messages:
+
+| Level | Purpose |
+|-------|---------|
+| 0 | Ordinary debug logging disabled |
+| 1 | Operation summaries and failures |
+| 2 | Decisions, cache hits/misses, and fallbacks |
+| 3 | Detailed per-file or per-item activity |
+| 4 | Rendering, frame, and internal-state tracing |
+
+Use `DEBUG_LOG()` for ordinary diagnostics. It retains compiler printf-format
+checking and does not evaluate format arguments when its category or level is
+disabled, including in release builds. Keep debug arguments free of required side
+effects. Numbered compatibility macros remain temporarily in the general category until
+their callers are migrated. Their historical format-warning suppression remains
+only during that transition.
+
+Categorized debug messages use the same record format:
+
+```text
+[+0.123456] [cache] [debug:2] [pid:1234] [thread:3] message
+```
+
+Time is monotonic elapsed time since debug timing was initialized. Process IDs
+distinguish instances sharing a log. Thread numbers
+are stable session-local identifiers assigned on first use, not operating system
+thread IDs. Multiline messages repeat the same context on every line. Source
+locations are off by default at every verbosity; enable them separately with
+`--debug-source=on`. Use `--debug-source=off`
+to turn them off again. The existing timer preference and the log window's
+**Delta** toggle control an additional per-thread interval since the previous
+debug record. The elapsed timestamp is always present.
+
+Record timing uses a shared monotonic origin and independent per-thread deltas.
+Startup initializes the origin directly; subsequent initialization does not reset
+it. Terminal and log-file writes are serialized within an instance; regex changes and log-file
+replacement are protected while worker threads log. Existing regex filtering and
+log destinations are retained. Warnings and errors sent through `log_printf()` remain outside the
+debug format and are not suppressed by the domain filter. Debug output can contain
+filenames, paths, and metadata; review it before sharing.
+
+Temporary developer tools remain available, but calls must not be committed.
+Ordinary logging must not suppress compiler format diagnostics.
+
 ### DEBUG_0()
 
 Use `DEBUG_0()` only for temporary debugging i.e. not in code in the repository.

@@ -6,12 +6,12 @@
 ##
 ## $1 Source file to check
 ##
-## Look for DEBUG_0, DEBUG_BT, DEBUG_FD
+## Look for DEBUG_0, DEBUG_BT, DEBUG_FD, DEBUG_RU
 ##
 ## Intentional usages can include "disable debug check" in a comment on the same line.
 ##
 
-res=$(grep --line-number 'DEBUG_0\|DEBUG_BT\|DEBUG_FD' "$1" \
+res=$(grep --line-number 'DEBUG_0\|DEBUG_BT\|DEBUG_FD\|DEBUG_RU' "$1" \
       | grep -v 'disable debug check')
 
 if [ -z "$res" ]

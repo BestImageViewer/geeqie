@@ -946,7 +946,11 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_UINT_ENUM_CLAMP(*options, color_scheme, COLOR_SCHEME_SYSTEM, COLOR_SCHEME_DARK)) continue;
 
 		if (READ_INT(*options, log_window_lines)) continue;
-		if (READ_BOOL(*options, log_window.timer_data)) continue;
+		if (READ_BOOL(*options, log_window.timer_data))
+			{
+			set_debug_timing(options->log_window.timer_data);
+			continue;
+			}
 		if (READ_CHAR(*options, log_window.action)) continue;
 
 		if (READ_BOOL(*options, marks_save)) continue;

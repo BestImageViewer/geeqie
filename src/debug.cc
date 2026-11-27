@@ -21,8 +21,10 @@
 #include "debug.h"
 
 #include <sys/resource.h>
+#include <unistd.h>
 
-#include <chrono>
+#include <algorithm>
+#include <atomic>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -30,6 +32,7 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <string>
 
 #if HAVE_EXECINFO_H
 #  include <execinfo.h>
@@ -47,6 +50,30 @@
  * Logging functions
  */
 static gchar *regexp = nullptr;
+static GMutex filter_mutex;
+static GMutex output_mutex;
+
+static bool log_matches_filter(const gchar *text)
+{
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&filter_mutex);
+	return !regexp || !command_line ||
+	       g_regex_match_simple(regexp, text, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0));
+}
+
+static bool log_file_active()
+{
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&output_mutex);
+	return command_line && command_line->log_file;
+}
+
+void log_set_file(const gchar *path)
+{
+	g_autofree gchar *copy = g_strdup(path);
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&output_mutex);
+	if (!command_line) return;
+	g_free(command_line->log_file);
+	command_line->log_file = g_steal_pointer(&copy);
+}
 
 static gboolean log_msg_cb(gpointer data)
 {
@@ -90,46 +117,22 @@ static gboolean log_normal_cb(gpointer data)
 
 static void log_domain_print_message(const gchar *domain, const gchar *buf)
 {
-	gchar *buf_nl = g_strconcat(buf, "\n", NULL);
+	g_autofree gchar *buf_nl = g_strconcat(buf, "\n", nullptr);
 
-	if (regexp && command_line &&
-	    !g_regex_match_simple(regexp, buf_nl, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0)))
+	if (!log_matches_filter(buf_nl))
 		{
-		g_free(buf_nl);
 		return;
 		}
 
-	if (strcmp(domain, DOMAIN_DEBUG) == 0 || (command_line && command_line->log_file))
+	if (strcmp(domain, DOMAIN_DEBUG) == 0 || log_file_active())
 		{
 		print_term(false, buf_nl);
 		}
 
 	if (strcmp(domain, DOMAIN_INFO) == 0)
-		g_idle_add(log_normal_cb, buf_nl);
+		g_idle_add(log_normal_cb, g_steal_pointer(&buf_nl));
 	else
-		g_idle_add(log_msg_cb, buf_nl);
-}
-
-void log_domain_print_debug(const gchar *domain, const gchar *file_name, int line_number, const gchar *function_name, const gchar *format, ...)
-{
-	va_list ap;
-
-	va_start(ap, format);
-	g_autofree gchar *message = g_strdup_vprintf(format, ap);
-	va_end(ap);
-
-	g_autofree gchar *location = nullptr;
-	if (options && options->log_window.timer_data)
-		{
-		location = g_strdup_printf("%s:%s:%d:%s:", get_exec_time(), file_name, line_number, function_name);
-		}
-	else
-		{
-		location = g_strdup_printf("%s:%d:%s:", file_name, line_number, function_name);
-		}
-
-	g_autofree gchar *buf = g_strconcat(location, message, NULL);
-	log_domain_print_message(domain, buf);
+		g_idle_add(log_msg_cb, g_steal_pointer(&buf_nl));
 }
 
 void log_domain_printf(const gchar *domain, const gchar *format, ...)
@@ -148,6 +151,7 @@ void print_term(bool err, const gchar *text_utf8)
 	g_autofree gchar *text_l = g_locale_from_utf8(text_utf8, -1, nullptr, nullptr, nullptr);
 	const gchar *text = text_l ? text_l : text_utf8;
 
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&output_mutex);
 	fputs(text, err ? stderr : stdout);
 
 	if (command_line && command_line->log_file)
@@ -163,62 +167,221 @@ void print_term(bool err, const gchar *text_utf8)
 
 #ifdef DEBUG
 
-static gint debug_level = DEBUG_LEVEL_MIN;
+namespace
+{
+
+constexpr const gchar *debug_category_names[] = {"general", "thumbnails", "cache", "image", "render", "metadata", "files", "ui", "duplicates", "config", "collections", "external"}; // NOTRANSLATE: Debug domain identifiers.
+static_assert(G_N_ELEMENTS(debug_category_names) == static_cast<guint>(DebugCategory::COUNT));
+constexpr guint all_debug_domains = (1U << G_N_ELEMENTS(debug_category_names)) - 1;
+std::atomic<guint> debug_domains{all_debug_domains};
+std::atomic<gint> debug_level{DEBUG_LEVEL_MIN};
+GMutex settings_mutex;
+std::atomic<bool> debug_source{false};
+std::atomic<bool> debug_timing{true};
+std::atomic<guint> next_thread_id{1};
+
+gint64 debug_elapsed_time()
+{
+	static const gint64 start = g_get_monotonic_time();
+	return g_get_monotonic_time() - start;
+}
+
+bool parse_debug_domains(const gchar *domains, guint &mask)
+{
+	if (!domains) return false;
+	g_autofree gchar *text = g_strdup(domains);
+	g_strstrip(text);
+	if (g_strcmp0(text, "all") == 0 || g_strcmp0(text, "none") == 0)
+		{
+		mask = g_strcmp0(text, "all") == 0 ? all_debug_domains : 0;
+		return true;
+		}
+
+	mask = 0;
+	g_auto(GStrv) names = g_strsplit(text, ",", -1);
+	for (gchar **name = names; *name; ++name)
+		{
+		g_strstrip(*name);
+		guint index = 0;
+		while (index < G_N_ELEMENTS(debug_category_names) &&
+		       g_strcmp0(*name, debug_category_names[index]) != 0) ++index;
+		if (index == G_N_ELEMENTS(debug_category_names)) return false;
+		mask |= 1U << index;
+		}
+	return mask != 0;
+}
+
+} // namespace
+
+const gchar *get_debug_category_name(DebugCategory category)
+{
+	const auto index = static_cast<guint>(category);
+	return index < G_N_ELEMENTS(debug_category_names) ? debug_category_names[index] : nullptr;
+}
+
+bool debug_domains_valid(const gchar *domains)
+{
+	guint mask;
+	return parse_debug_domains(domains, mask);
+}
+
+bool set_debug_domains(const gchar *domains)
+{
+	guint mask;
+	if (!parse_debug_domains(domains, mask)) return false;
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
+	debug_domains.store(mask, std::memory_order_relaxed);
+	return true;
+}
+
+gchar *get_debug_domains()
+{
+	const guint mask = debug_domains.load(std::memory_order_relaxed);
+	if (mask == all_debug_domains) return g_strdup("all");
+	if (mask == 0) return g_strdup("none");
+	g_autoptr(GString) names = g_string_new(nullptr);
+	for (guint index = 0; index < G_N_ELEMENTS(debug_category_names); ++index)
+		{
+		if (!(mask & (1U << index))) continue;
+		if (names->len) g_string_append_c(names, ',');
+		g_string_append(names, debug_category_names[index]);
+		}
+	return g_string_free(g_steal_pointer(&names), FALSE);
+}
+
+bool debug_enabled(DebugCategory category, gint level)
+{
+	const auto index = static_cast<guint>(category);
+	return level > 0 && level <= get_debug_level() && index < G_N_ELEMENTS(debug_category_names) &&
+	       (debug_domains.load(std::memory_order_relaxed) & (1U << index)) != 0;
+}
+
+bool get_debug_source()
+{
+	return debug_source.load(std::memory_order_relaxed);
+}
+
+void set_debug_source(bool enabled)
+{
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
+	debug_source.store(enabled, std::memory_order_relaxed);
+}
+
+bool get_debug_timing()
+{
+	return debug_timing.load(std::memory_order_relaxed);
+}
+
+void set_debug_timing(bool enabled)
+{
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
+	debug_timing.store(enabled, std::memory_order_relaxed);
+}
+
+gchar *format_debug_record(DebugCategory category, gint level, const gchar *file, int line,
+                           const gchar *function, const gchar *message)
+{
+	const gint64 elapsed = debug_elapsed_time();
+	thread_local const guint thread_id = next_thread_id.fetch_add(1, std::memory_order_relaxed);
+	thread_local gint64 previous = elapsed;
+	const gint64 delta = elapsed - previous;
+	previous = elapsed;
+	const auto index = static_cast<guint>(category);
+	const gchar *name = index < G_N_ELEMENTS(debug_category_names) ? debug_category_names[index] : "unknown";
+	g_autoptr(GString) prefix = g_string_new(nullptr);
+	g_string_append_printf(prefix, "[+%" G_GINT64_FORMAT ".%06" G_GINT64_FORMAT "] [%s] [debug:%d] [pid:%ld] [thread:%u] ",
+	                       elapsed / G_USEC_PER_SEC, elapsed % G_USEC_PER_SEC, name, level,
+	                       static_cast<long>(getpid()), thread_id);
+	if (get_debug_timing())
+		{
+		g_string_append_printf(prefix, "[delta:%" G_GINT64_FORMAT ".%06" G_GINT64_FORMAT "] ",
+		                       delta / G_USEC_PER_SEC, delta % G_USEC_PER_SEC);
+		}
+	if (get_debug_source())
+		{
+		g_string_append_printf(prefix, "%s:%d:%s: ", file ? file : "?", line, function ? function : "?");
+		}
+
+	g_autofree gchar *text = g_strdup(message ? message : "");
+	gsize length = strlen(text);
+	while (length && text[length - 1] == '\n') text[--length] = '\0';
+	g_auto(GStrv) lines = g_strsplit(text, "\n", -1);
+	g_autoptr(GString) record = g_string_new(nullptr);
+	for (gchar **part = lines; *part; ++part)
+		{
+		if (part != lines) g_string_append_c(record, '\n');
+		g_string_append(record, prefix->str);
+		g_string_append(record, *part);
+		}
+	if (record->len == 0) g_string_append(record, prefix->str);
+	return g_string_free(g_steal_pointer(&record), FALSE);
+}
+
+void log_debug_category(DebugCategory category, gint level, const gchar *file, int line, const gchar *function,
+                        const gchar *format, ...)
+{
+	va_list arguments;
+	va_start(arguments, format);
+	g_autofree gchar *message = g_strdup_vprintf(format, arguments);
+	va_end(arguments);
+	g_autofree gchar *record = format_debug_record(category, level, file, line, function, message);
+	log_domain_print_message(DOMAIN_DEBUG, record);
+}
 
 
 gint get_debug_level()
 {
-	return debug_level;
+	return debug_level.load(std::memory_order_relaxed);
 }
 
 void set_debug_level(gint new_level)
 {
-	debug_level = std::clamp(new_level, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX);
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
+	debug_level.store(std::clamp(new_level, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX), std::memory_order_relaxed);
 }
 
 void debug_level_add(gint delta)
 {
-	set_debug_level(debug_level + delta);
+	set_debug_level(get_debug_level() + delta);
 }
 
 gint required_debug_level(gint level)
 {
-	return (debug_level >= level);
+	return (get_debug_level() >= level);
+}
+
+void init_debug_timer()
+{
+	debug_elapsed_time();
 }
 
 const gchar *get_exec_time()
 {
-	using FloatSeconds = std::chrono::duration<double>;
-
-	const auto now = std::chrono::steady_clock::now();
-
-	static const auto start_tp = now;
-	const FloatSeconds duration = now - start_tp;
-
-	static auto prev_tp = now;
-	const FloatSeconds delta = now - prev_tp;
-
-	prev_tp = now;
-
-	static gchar timestr[30];
-	g_snprintf(timestr, sizeof(timestr), "%12.6lf (+%012.6lf)", duration.count(), delta.count());
-
+	const gint64 elapsed = debug_elapsed_time();
+	thread_local gint64 previous = elapsed;
+	const gint64 delta = elapsed - previous;
+	previous = elapsed;
+	thread_local gchar timestr[64];
+	g_snprintf(timestr, sizeof(timestr), "%12.6f (+%012.6f)",
+	           static_cast<double>(elapsed) / G_USEC_PER_SEC, static_cast<double>(delta) / G_USEC_PER_SEC);
 	return timestr;
 }
 
 void init_exec_time()
 {
-	get_exec_time();
+	init_debug_timer();
 }
 
 void set_regexp(const gchar *cmd_regexp)
 {
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&filter_mutex);
 	g_free(regexp);
 	regexp = g_strdup(cmd_regexp);
 }
 
 gchar *get_regexp()
 {
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&filter_mutex);
 	return g_strdup(regexp);
 }
 

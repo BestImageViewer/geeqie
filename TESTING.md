@@ -430,6 +430,36 @@ serialized names and mappings, not runtime values or the correctness of getters.
 `meson test -C build 'Diagnostic schema checker tests'` exercises additions,
 removals, exclusions, nested writers, and attribute aliases using synthetic source.
 
+For targeted logging in a debug build, use:
+
+```sh
+./build/src/geeqie --debug=2 --debug-domains=thumbnails,cache --log-file=/tmp/geeqie-debug.log
+```
+
+Domains supported are `general`, `thumbnails`, `cache`, `image`, `render`,
+`metadata`, `files`, `ui`, `duplicates`, `config`, `collections`, and `external`.
+The initial filter is `all`; omitting `--debug-domains` leaves the current filter
+unchanged. Use `all` to reset a filter or `none` to disable ordinary debug output.
+Numbered compatibility calls remain until their callers are migrated. Per-file messages normally
+require level 3, rendering and ownership internals level 4. Domain filtering
+does not affect warnings and errors logged with `log_printf()`.
+Logs can contain private paths and metadata, so review them before attaching.
+
+All ordinary debug macros produce records with a monotonic elapsed timestamp,
+domain, message verbosity, process ID, and a stable session-local thread number. Each line
+of a multiline message receives the same record context. Add `--debug-source=on`
+to include source file, line, and function at any verbosity; `--debug-source=off`
+disables that field. The log window's **Delta** toggle and the existing timer preference now control the interval
+since the previous record on the same thread. Elapsed timestamps are always shown.
+Source formatting is no longer implicitly enabled by selecting verbosity 2–4.
+
+Run `./build/src/geeqie --run-unit-tests --gtest_filter='DebugDomains.*'` to check
+domain parsing, filtering, verbosity, lazy argument evaluation, record formatting,
+source-location control, and thread/timing isolation. The release
+build check is `--gtest_filter='DebugDomainsRelease.*'` in a test-enabled release
+build. The stray-debug checker also rejects committed `DEBUG_RU()` calls, alongside
+the existing temporary debug macros.
+
 Debug builds with execinfo support can optionally attempt an in-process trace:
 
 ```sh

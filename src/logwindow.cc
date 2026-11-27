@@ -135,6 +135,7 @@ static void log_window_line_wrap_cb(GtkWidget *, gpointer data)
 static void log_window_timer_data_cb(GtkWidget *, gpointer)
 {
 	options->log_window.timer_data = !options->log_window.timer_data;
+	set_debug_timing(options->log_window.timer_data);
 }
 
 static void log_window_regexp_cb(GtkWidget *text_entry, gpointer)
@@ -379,7 +380,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_box_append(GTK_BOX(hbox), wrap);
 	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), text);
 
-	GtkWidget *timer_data = gtk_toggle_button_new_with_label(_("Timer"));
+	GtkWidget *timer_data = gtk_toggle_button_new_with_label(_("Delta"));
 	gtk_widget_set_tooltip_text(timer_data, _("Enable timer data"));
 	gtk_box_append(GTK_BOX(hbox), timer_data);
 	if (options->log_window.timer_data)

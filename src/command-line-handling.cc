@@ -364,6 +364,20 @@ void gq_debug(GtkApplication *, GApplicationCommandLine *, GVariantDict *command
 	g_variant_dict_lookup(command_line_options_dict, "debug", "s", &debug_level);
 	set_debug_level((gint)g_ascii_strtoll(debug_level, nullptr, 10));
 }
+
+void gq_debug_domains(GtkApplication *, GApplicationCommandLine *, GVariantDict *dict, GList *)
+{
+	const gchar *domains = nullptr;
+	g_variant_dict_lookup(dict, "debug-domains", "&s", &domains);
+	set_debug_domains(domains);
+}
+
+void gq_debug_source(GtkApplication *, GApplicationCommandLine *, GVariantDict *dict, GList *)
+{
+	const gchar *value = nullptr;
+	g_variant_dict_lookup(dict, "debug-source", "&s", &value);
+	set_debug_source(g_strcmp0(value, "on") == 0);
+}
 #endif
 
 void gq_delay(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
@@ -895,7 +909,8 @@ void gq_log_file(GtkApplication *, GApplicationCommandLine *, GVariantDict *comm
 	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "log-file", "&s", &text);
 
-	command_line->log_file = path_from_utf8(text);
+	g_autofree gchar *path = path_from_utf8(text);
+	log_set_file(path);
 }
 
 void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line,
@@ -1409,6 +1424,8 @@ CommandLineOptionEntry command_line_options[] =
 	{ "config-load",                 gq_config_load,                 PRIMARY_REMOTE, GUI  },
 #ifdef DEBUG
 	{ "debug",                       gq_debug,                       PRIMARY_REMOTE, GUI  },
+	{ "debug-domains",               gq_debug_domains,               PRIMARY_REMOTE, GUI  },
+	{ "debug-source",                gq_debug_source,                PRIMARY_REMOTE, GUI  },
 #endif
 	{ "delay",                       gq_delay,                       PRIMARY_REMOTE, GUI  },
 	{ "file",                        gq_file,                        PRIMARY_REMOTE, GUI  },
@@ -1568,6 +1585,25 @@ gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_comm
 	print0 = FALSE;
 
 	command_line_options_dict = g_application_command_line_get_options_dict(app_command_line);
+#ifdef DEBUG
+	const gchar *domains = nullptr;
+	if (g_variant_dict_lookup(command_line_options_dict, "debug-domains", "&s", &domains) && !debug_domains_valid(domains))
+		{
+		g_application_command_line_printerr(app_command_line, "%s", _("Invalid debug domains: use general, thumbnails, cache, image, render, metadata, files, ui, duplicates, config, collections, external, all, or none.\n"));
+		result->status = EXIT_FAILURE;
+		if (!g_application_command_line_get_is_remote(app_command_line)) g_application_quit(G_APPLICATION(app));
+		return result->status;
+		}
+	const gchar *source = nullptr;
+	if (g_variant_dict_lookup(command_line_options_dict, "debug-source", "&s", &source) &&
+	    g_strcmp0(source, "on") != 0 && g_strcmp0(source, "off") != 0)
+		{
+		g_application_command_line_printerr(app_command_line, "%s", _("Invalid debug source setting: use on or off.\n"));
+		result->status = EXIT_FAILURE;
+		if (!g_application_command_line_get_is_remote(app_command_line)) g_application_quit(G_APPLICATION(app));
+		return result->status;
+		}
+#endif
 	const gchar *scheme_text = nullptr;
 	ColorScheme scheme;
 	if (g_variant_dict_lookup(command_line_options_dict, "color-scheme", "&s", &scheme_text) && !color_scheme_parse(scheme_text, scheme))

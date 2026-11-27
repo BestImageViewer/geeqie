@@ -156,6 +156,8 @@ GOptionEntry command_line_options[] =
  * the way an integer zero is handled (the parameter is not passed on).
  */
 	{ "debug"                     ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("debug output: 0 none, 1 to 4 increasing level of verbosity")                  , "0|1|2|3|4" },
+	{ "debug-domains"             ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("filter debug output by comma-separated domains: general, thumbnails, cache, image, render, metadata, files, ui, duplicates, config, collections, external, all, or none"), "<DOMAINS>" },
+	{ "debug-source"              ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("include source locations in debug records"), "on|off" },
 #endif
 	{ "delay"                     , 'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("set slide show delay to Hrs Mins N.M seconds,")                               , "<[H:][M:][N][.M]>" },
 	{ "dupes"                     ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("find duplicates in folder")                                                   , "<FOLDER>" },

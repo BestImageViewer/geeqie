@@ -653,6 +653,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	set_debug_level(debug_c);
 	config_entry_to_option(log_window_command_entry, &options->log_window.action, nullptr);
 	options->log_window.timer_data = c_options->log_window.timer_data;
+	set_debug_timing(options->log_window.timer_data);
 	options->log_window_lines = c_options->log_window_lines;
 #endif
 
@@ -3714,7 +3715,7 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	pref_spin_new_int(group, _("Debug level:"), nullptr,
 			  DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX, 1, get_debug_level(), &debug_c);
 
-	pref_checkbox_new_int(group, _("Timer data"),
+	pref_checkbox_new_int(group, _("Show per-thread debug timing deltas"),
 			options->log_window.timer_data, &c_options->log_window.timer_data);
 
 	pref_spin_new_int(group, _("Log Window max. lines:"), nullptr,

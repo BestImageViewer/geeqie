@@ -99,9 +99,9 @@ exit_status = 0
 }
 
 NR == FNR{a[$0] = "";next} !($0 in a) {
-	# In a no-debug build, --debug and --grep are missing.
+	# In a no-debug build, the debug options and --grep are missing.
 	# This error can be ignored
-	if ($0 != "--debug=" && $0 != "--grep=") {
+	if ($0 != "--debug=" && $0 != "--debug-domains=" && $0 != "--debug-source=" && $0 != "--grep=") {
 		exit_status = 1
 		print "Bash completions - Option error: " $0
 		}
@@ -169,6 +169,39 @@ exit exit_status
 
 if [ $? = 1 ]
 then
+	exit_status=1
+fi
+
+# Check subsystem values, including completion after a comma.
+if ! bash -s "$completions_file" <<'EOF'
+source "$1"
+_init_completion()
+{
+	cur=$input
+	prev=--debug-domains
+}
+input=
+COMPREPLY=()
+_geeqie
+expected='general thumbnails cache image render metadata files ui duplicates config collections external all none'
+[[ ${COMPREPLY[*]} == "$expected" ]] || exit 1
+for domain in image render metadata files ui duplicates config collections external
+do
+	input=cache,$domain
+	COMPREPLY=()
+	_geeqie
+	[[ ${COMPREPLY[*]} == "cache,$domain" ]] || exit 1
+done
+input=cache,
+COMPREPLY=()
+_geeqie
+for candidate in "${COMPREPLY[@]}"
+do
+	[[ $candidate != cache,all && $candidate != cache,none ]] || exit 1
+done
+EOF
+then
+	printf '%s\n' 'Bash completions - Invalid debug subsystem values'
 	exit_status=1
 fi
 
