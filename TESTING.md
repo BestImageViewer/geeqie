@@ -627,3 +627,16 @@ across comparison methods. To follow overlapping loads, use `--debug=3
 --debug-domains=image,files,duplicates` and match `[operation:N]` fields. A start
 without a result can identify unfinished work; output filtering, queue overflow,
 or a crash can also explain a missing record.
+
+The `LogCapture.*` tests cover capture headers, concurrency, setting changes,
+and preservation of an existing log destination.
+
+`CaptureFile.*` exercises the production capture-file component with a small byte
+limit and injected I/O operations. It checks that headers and stop notices fit,
+that records are not split at the size boundary, and that creation, header-write,
+record-write, footer-write, and close failures are handled. It also checks short
+writes, EINTR retries, preservation of the first error, and a failed restart
+preserving the last saved report. No filesystem is filled and no process limits
+are changed. `LogCapture.RapidSettingsChangesAreRecordedWithoutGuiPolling` checks
+immediate ordered changes, ignored no-ops, invalid-domain rejection, and escaped
+multiline regex values without iterating the main loop.

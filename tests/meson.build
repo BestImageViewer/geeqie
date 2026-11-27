@@ -45,6 +45,8 @@ unit_test_sources = files(
 'layout-config.cc',
 'layout-image-navigation.cc',
 'layout-image-selection.cc',
+'log-capture-file.cc',
+'log-capture.cc',
 'metadata-description.cc',
 'metadata-template.cc',
 'pan-view.cc',

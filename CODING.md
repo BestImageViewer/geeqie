@@ -106,6 +106,14 @@ and 262,144 Unicode characters. A nonpositive configured line count uses the
 10,000-line safety limit. History collected before the window opens is limited
 to 1 MiB and the same maximum number of records.
 
+### Diagnostic file capture
+
+The bounded capture backend writes a private unique temporary file with logging
+settings and supplied diagnostic context. Its 100 MiB limit includes a reserved
+stop notice. It records setting changes immediately, preserves command-line log
+output, and closes on write errors. The I/O layer supports deterministic failure
+tests without filling a filesystem or changing process limits.
+
 ### Operation lifecycle records
 
 Include `debug-operation.h` and zero-initialize a `DebugOperation` for work that

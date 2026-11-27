@@ -40,6 +40,7 @@
 
 #include "filedata.h"
 #include "intl.h"
+#include "log-capture.h"
 #include "log-queue.h"
 #include "log.h"
 #include "logwindow.h"
@@ -65,7 +66,7 @@ static bool log_matches_filter(const gchar *text)
 static bool log_file_active()
 {
 	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&output_mutex);
-	return command_line && command_line->log_file;
+	return (command_line && command_line->log_file) || log_capture_active();
 }
 
 void log_set_file(const gchar *path)
@@ -122,6 +123,7 @@ static gboolean log_queue_cb(gpointer)
 
 void log_queue_shutdown()
 {
+	log_capture_stop(nullptr);
 	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&queue_source_mutex);
 	log_queue.close();
 	if (queue_source != 0)
@@ -247,6 +249,7 @@ void print_term(bool err, const gchar *text_utf8)
 		std::ofstream log(command_line->log_file, std::ios::app);
 		log << text_utf8 << std::endl; // NOLINT(performance-avoid-endl)
 		}
+	log_capture_write(text_utf8);
 }
 
 /*
@@ -318,7 +321,11 @@ bool set_debug_domains(const gchar *domains)
 	guint mask;
 	if (!parse_debug_domains(domains, mask)) return false;
 	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
-	debug_domains.store(mask, std::memory_order_relaxed);
+	if (debug_domains.exchange(mask, std::memory_order_relaxed) != mask && log_capture_active())
+		{
+		g_autofree gchar *domains_text = get_debug_domains();
+		log_capture_record_setting("debug_domains", domains_text); // NOTRANSLATE: Capture field.
+		}
 	return true;
 }
 
@@ -352,7 +359,10 @@ bool get_debug_source()
 void set_debug_source(bool enabled)
 {
 	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
-	debug_source.store(enabled, std::memory_order_relaxed);
+	if (debug_source.exchange(enabled, std::memory_order_relaxed) != enabled)
+		{
+		log_capture_record_setting("debug_source", enabled ? "1" : "0"); // NOTRANSLATE: Capture field.
+		}
 }
 
 bool get_debug_timing()
@@ -363,7 +373,10 @@ bool get_debug_timing()
 void set_debug_timing(bool enabled)
 {
 	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
-	debug_timing.store(enabled, std::memory_order_relaxed);
+	if (debug_timing.exchange(enabled, std::memory_order_relaxed) != enabled)
+		{
+		log_capture_record_setting("debug_timing_delta", enabled ? "1" : "0"); // NOTRANSLATE: Capture field.
+		}
 }
 
 gchar *format_debug_record(DebugCategory category, gint level, const gchar *file, int line,
@@ -425,7 +438,13 @@ gint get_debug_level()
 void set_debug_level(gint new_level)
 {
 	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&settings_mutex);
-	debug_level.store(std::clamp(new_level, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX), std::memory_order_relaxed);
+	new_level = std::clamp(new_level, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX);
+	if (debug_level.exchange(new_level, std::memory_order_relaxed) != new_level && log_capture_active())
+		{
+		gchar value[16];
+		g_snprintf(value, sizeof(value), "%d", new_level);
+		log_capture_record_setting("debug_level", value); // NOTRANSLATE: Capture field.
+		}
 }
 
 void debug_level_add(gint delta)
@@ -445,9 +464,12 @@ void init_debug_timer()
 
 void set_regexp(const gchar *cmd_regexp)
 {
-	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&filter_mutex);
+	g_autoptr(GMutexLocker) settings_lock = g_mutex_locker_new(&settings_mutex);
+	g_autoptr(GMutexLocker) filter_lock = g_mutex_locker_new(&filter_mutex);
+	if (g_strcmp0(regexp, cmd_regexp) == 0) return;
 	g_free(regexp);
 	regexp = g_strdup(cmd_regexp);
+	log_capture_record_setting("debug_regexp", regexp); // NOTRANSLATE: Capture field.
 }
 
 gchar *get_regexp()
