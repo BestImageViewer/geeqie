@@ -77,7 +77,7 @@ distinguish instances sharing a log. Thread numbers
 are stable session-local identifiers assigned on first use, not operating system
 thread IDs. Multiline messages repeat the same context on every line. Source
 locations are off by default at every verbosity; enable them separately with
-`--debug-source=on`. Use `--debug-source=off`
+`--debug-source=on` or the log window's **Source** toggle. Use `--debug-source=off`
 to turn them off again. The existing timer preference and the log window's
 **Delta** toggle control an additional per-thread interval since the previous
 debug record. The elapsed timestamp is always present.
@@ -106,13 +106,30 @@ and 262,144 Unicode characters. A nonpositive configured line count uses the
 10,000-line safety limit. History collected before the window opens is limited
 to 1 MiB and the same maximum number of records.
 
-### Diagnostic file capture
+### Interactive capture
 
-The bounded capture backend writes a private unique temporary file with logging
-settings and supplied diagnostic context. Its 100 MiB limit includes a reserved
-stop notice. It records setting changes immediately, preserves command-line log
-output, and closes on write errors. The I/O layer supports deterministic failure
-tests without filling a filesystem or changing process limits.
+The log window exposes verbosity and all subsystem filters, with an active-settings
+summary. GUI changes apply immediately; changes made through the command line or
+preferences are reflected within about a second while the window is visible.
+The controls stop polling when the window is hidden and capture is inactive.
+
+Start capture creates a private `geeqie-debug-XXXXXX.txt` file under
+`g_get_tmp_dir()` (normally `/tmp`). It writes a UTC start timestamp, current logging
+settings, and the diagnostic report before accepting records. If verbosity was 0,
+the GUI selects level 2; subsystem selections and regex filtering remain in effect.
+Logging setters append changed values immediately during capture, with a UTC
+timestamp and escaped field values; GUI polling only refreshes the controls. The
+capture is an additional sink: stopping it preserves `--log-file`. It continues while the window
+is hidden and closes during normal shutdown. Copy path uses the regular clipboard.
+
+`log_capture_write()` serializes complete records without calling the logging
+functions recursively. A write error closes the capture and is shown in the log
+window. Captures receive output before window queue/history limits apply. The
+file is bounded to 100 MiB, including its header and reserved footer. A record
+that would exceed the limit is omitted as a whole, an explicit size-limit notice
+is written, and capture stops. This limit affects neither terminal output nor
+`--log-file`. The header uses the diagnostic report's technical allowlist, but
+log records and regex filters can contain private text and must be reviewed before sharing.
 
 ### Operation lifecycle records
 

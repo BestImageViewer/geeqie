@@ -1824,6 +1824,9 @@
         </term>
         <listitem>
           <para>Opens the log window, mostly used for debugging purposes.</para>
+          <para>In builds with debug logging, use <guilabel>Verbosity</guilabel> and <guilabel>Subsystems</guilabel> to choose the amount and type of output. The subsystem menu has individual checkboxes and <guilabel>All</guilabel> and <guilabel>None</guilabel> buttons. The active filters are displayed below the controls.</para>
+          <para>Select <guilabel>Start capture</guilabel>, reproduce the problem, then select <guilabel>Stop capture</guilabel>. A unique <filename>geeqie-debug-XXXXXX.txt</filename> file is created in the temporary directory, normally <filename>/tmp</filename>. Its header includes a diagnostic settings report and the logging settings. If verbosity is disabled, starting capture selects level 2; use level 3 for individual image loads and level 4 for rendering details.</para>
+          <para>The capture path remains visible after stopping. <guilabel>Copy path</guilabel> copies it to the regular clipboard. Capture continues while the log window is hidden and stops when Geeqie exits normally. An existing command-line log file is unaffected. Each capture is limited to 100 MiB, including its header and stop notice. Capture stops automatically before a record would exceed that limit, with an explanation in the window and file. Choose fewer subsystems or lower verbosity if this happens before reproducing the problem. Logging-setting changes are recorded immediately. File capture retains messages omitted from the bounded window display; review logs for private paths and metadata before sharing.</para>
         </listitem>
       </varlistentry>
     </variablelist>

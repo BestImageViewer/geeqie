@@ -34,14 +34,17 @@
 
 #include "accelerators.h"
 #include "actions.h"
+#include "diagnostic-report.h"
 #include "intl.h"
 #include "layout.h"
+#include "log-capture.h"
 #ifdef DEBUG
 #  include "main-defines.h"
 #endif
 #include "misc.h"
 #include "options.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 #include "window.h"
 
 struct LogWindow
@@ -58,6 +61,16 @@ struct LogWindow
 	GtkWidget *regexp_box;
 	GtkWidget *search_entry_box;
 	gboolean highlight_all;
+	GtkWidget *level_spin;
+	GtkWidget *source_button;
+	GtkWidget *delta_button;
+	GtkWidget *domain_checks[static_cast<guint>(DebugCategory::COUNT)];
+	GtkWidget *filter_status;
+	GtkWidget *capture_button;
+	GtkWidget *capture_path;
+	GtkWidget *copy_path_button;
+	guint controls_id;
+	bool syncing;
 #endif
 };
 
@@ -119,6 +132,88 @@ static void text_view_set_line_wrap(GtkTextView *text_view, bool line_wrap)
 }
 
 #ifdef DEBUG
+static void log_window_controls_sync(LogWindow *logwin)
+{
+	logwin->syncing = true;
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(logwin->level_spin), get_debug_level());
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logwin->source_button), get_debug_source());
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logwin->delta_button), get_debug_timing());
+	g_autofree gchar *domains = get_debug_domains();
+	g_auto(GStrv) selected = g_strsplit(domains, ",", -1);
+	for (guint i = 0; i < G_N_ELEMENTS(logwin->domain_checks); ++i)
+		{
+		const auto category = static_cast<DebugCategory>(i);
+		const bool active = strcmp(domains, "all") == 0 || g_strv_contains(selected, get_debug_category_name(category));
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(logwin->domain_checks[i]), active);
+		}
+	g_autofree gchar *regexp = get_regexp();
+	g_autofree gchar *status = g_strdup_printf(_("Verbosity: %d; subsystems: %s; source: %s; delta: %s; regex: %s"),
+	                                         get_debug_level(), domains, get_debug_source() ? _("on") : _("off"),
+	                                         get_debug_timing() ? _("on") : _("off"), regexp && *regexp ? regexp : _("none"));
+	gtk_label_set_text(GTK_LABEL(logwin->filter_status), status);
+	const bool capturing = log_capture_active();
+	gtk_button_set_label(GTK_BUTTON(logwin->capture_button), capturing ? _("Stop capture") : _("Start capture"));
+	g_autofree gchar *path = log_capture_get_path();
+	g_autofree gchar *error = log_capture_get_error();
+	g_autofree gchar *description = error ? g_strdup_printf(_("Capture failed: %s (%s)"), error, path ? path : "") :
+	                              path && log_capture_limit_reached() ? g_strdup_printf(_("Capture stopped at the %zu MiB limit: %s"), log_capture_max_bytes / (1024 * 1024), path) :
+	                              path ? g_strdup_printf(capturing ? _("Capturing: %s") : _("Saved: %s"), path) :
+	                                     g_strdup(_("No capture file"));
+	gtk_label_set_text(GTK_LABEL(logwin->capture_path), description);
+	gtk_widget_set_tooltip_text(logwin->capture_path, description);
+	gtk_widget_set_sensitive(logwin->copy_path_button, path != nullptr);
+	logwin->syncing = false;
+}
+
+static gboolean log_window_controls_cb(gpointer data)
+{
+	auto *logwin = static_cast<LogWindow *>(data);
+	if (!gtk_widget_get_visible(logwin->window) && !log_capture_active())
+		{
+		logwin->controls_id = 0;
+		return G_SOURCE_REMOVE;
+		}
+	log_window_controls_sync(logwin);
+	return G_SOURCE_CONTINUE;
+}
+
+static void log_window_domains_cb(GtkCheckButton *, gpointer data)
+{
+	auto *logwin = static_cast<LogWindow *>(data);
+	if (logwin->syncing) return;
+	g_autoptr(GString) domains = g_string_new(nullptr);
+	for (guint i = 0; i < G_N_ELEMENTS(logwin->domain_checks); ++i)
+		{
+		if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(logwin->domain_checks[i]))) continue;
+		if (domains->len) g_string_append_c(domains, ',');
+		g_string_append(domains, get_debug_category_name(static_cast<DebugCategory>(i)));
+		}
+	set_debug_domains(domains->len ? domains->str : "none");
+	log_window_controls_sync(logwin);
+}
+
+static void log_window_capture_cb(GtkButton *, gpointer data)
+{
+	auto *logwin = static_cast<LogWindow *>(data);
+	g_autoptr(GError) error = nullptr;
+	if (log_capture_active())
+		{
+		log_capture_stop(&error);
+		}
+	else
+		{
+		if (get_debug_level() == 0) set_debug_level(2);
+		log_window_controls_sync(logwin);
+		const auto report = diagnostic_report_create(get_current_layout());
+		log_capture_start(report.c_str(), &error);
+		}
+	log_window_controls_sync(logwin);
+	if (error)
+		{
+		warning_dialog(_("Unable to capture log"), error->message, GQ_ICON_DIALOG_ERROR, logwin->window);
+		}
+}
+
 static void log_window_pause_cb(GtkWidget *, gpointer)
 {
 	options->log_window.paused = !options->log_window.paused;
@@ -131,16 +226,28 @@ static void log_window_line_wrap_cb(GtkWidget *, gpointer data)
 	text_view_set_line_wrap(GTK_TEXT_VIEW(data), options->log_window.line_wrap);
 }
 
-static void log_window_timer_data_cb(GtkWidget *, gpointer)
+static void log_window_timer_data_cb(GtkToggleButton *button, gpointer data)
 {
-	options->log_window.timer_data = !options->log_window.timer_data;
+	auto *logwin = static_cast<LogWindow *>(data);
+	if (logwin->syncing) return;
+	options->log_window.timer_data = gtk_toggle_button_get_active(button);
 	set_debug_timing(options->log_window.timer_data);
+	log_window_controls_sync(logwin);
 }
 
-static void log_window_regexp_cb(GtkWidget *text_entry, gpointer)
+static void log_window_source_cb(GtkToggleButton *button, gpointer data)
+{
+	auto *logwin = static_cast<LogWindow *>(data);
+	if (logwin->syncing) return;
+	set_debug_source(gtk_toggle_button_get_active(button));
+	log_window_controls_sync(logwin);
+}
+
+static void log_window_regexp_cb(GtkWidget *text_entry, gpointer data)
 {
 	const char *new_regexp = gtk_editable_get_text(GTK_EDITABLE(text_entry));
 	set_regexp(new_regexp);
+	log_window_controls_sync(static_cast<LogWindow *>(data));
 }
 
 static void remove_green_bg(LogWindow *logwin)
@@ -277,9 +384,12 @@ static gboolean all_keypress_event_cb(GtkToggleButton *widget, LogWindow *logwin
 	return FALSE;
 }
 
-static void debug_changed_cb(GtkSpinButton *widget, gpointer)
+static void debug_changed_cb(GtkSpinButton *widget, gpointer data)
 {
+	auto *logwin = static_cast<LogWindow *>(data);
+	if (logwin->syncing) return;
 	set_debug_level(gtk_spin_button_get_value_as_int(widget));
+	log_window_controls_sync(logwin);
 }
 
 static void search_entry_icon_cb(GtkEntry *search_entry_box, GtkEntryIconPosition pos, GdkEvent *, gpointer user_data)
@@ -366,8 +476,43 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
-	pref_spin_new(hbox, _("Debug level:"), nullptr, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX, 1, 0,
-	              get_debug_level(), G_CALLBACK(debug_changed_cb), nullptr);
+	logwin->level_spin = pref_spin_new(hbox, _("Verbosity:"), nullptr, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX, 1, 0,
+	                                 get_debug_level(), G_CALLBACK(debug_changed_cb), logwin);
+	gtk_widget_set_tooltip_text(logwin->level_spin, _("0: disabled; 1: summaries and failures; 2: decisions; 3: per-file details; 4: rendering internals"));
+
+	auto *subsystems = gtk_menu_button_new();
+	gtk_menu_button_set_label(GTK_MENU_BUTTON(subsystems), _("Subsystems"));
+	gtk_box_append(GTK_BOX(hbox), subsystems);
+	auto *popover = gtk_popover_new();
+	auto *domain_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	gtk_popover_set_child(GTK_POPOVER(popover), domain_box);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(subsystems), popover);
+	auto *domain_buttons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	gtk_box_append(GTK_BOX(domain_box), domain_buttons);
+	auto *all_domains = gtk_button_new_with_label(_("All"));
+	auto *no_domains = gtk_button_new_with_label(_("None"));
+	gtk_box_append(GTK_BOX(domain_buttons), all_domains);
+	gtk_box_append(GTK_BOX(domain_buttons), no_domains);
+	g_signal_connect(all_domains, "clicked", G_CALLBACK(+[](GtkButton *, gpointer data)
+		{
+		set_debug_domains("all");
+		log_window_controls_sync(static_cast<LogWindow *>(data));
+		}), logwin);
+	g_signal_connect(no_domains, "clicked", G_CALLBACK(+[](GtkButton *, gpointer data)
+		{
+		set_debug_domains("none");
+		log_window_controls_sync(static_cast<LogWindow *>(data));
+		}), logwin);
+	constexpr const gchar *domain_labels[] = {N_("General"), N_("Thumbnails"), N_("Cache"), N_("Images"), N_("Rendering"), N_("Metadata"), N_("Files"), N_("User interface"), N_("Duplicates"), N_("Configuration"), N_("Collections"), N_("External commands")};
+	static_assert(G_N_ELEMENTS(domain_labels) == static_cast<guint>(DebugCategory::COUNT));
+	for (guint i = 0; i < G_N_ELEMENTS(domain_labels); ++i)
+		{
+		auto *check = gtk_check_button_new_with_label(_(domain_labels[i]));
+		logwin->domain_checks[i] = check;
+		gtk_widget_set_tooltip_text(check, get_debug_category_name(static_cast<DebugCategory>(i)));
+		gtk_box_append(GTK_BOX(domain_box), check);
+		g_signal_connect(check, "toggled", G_CALLBACK(log_window_domains_cb), logwin);
+		}
 
 	GtkWidget *pause = gtk_toggle_button_new_with_label(_("Pause"));
 	gtk_widget_set_tooltip_text(pause, _("Pause scrolling"));
@@ -379,14 +524,23 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_box_append(GTK_BOX(hbox), wrap);
 	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), text);
 
+	hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	GtkWidget *timer_data = gtk_toggle_button_new_with_label(_("Delta"));
-	gtk_widget_set_tooltip_text(timer_data, _("Enable timer data"));
+	gtk_widget_set_tooltip_text(timer_data, _("Show time since the previous debug record on each thread"));
 	gtk_box_append(GTK_BOX(hbox), timer_data);
 	if (options->log_window.timer_data)
 		{
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(timer_data), TRUE);
 		}
-	g_signal_connect(timer_data, "toggled", G_CALLBACK(log_window_timer_data_cb), nullptr);
+	g_signal_connect(timer_data, "toggled", G_CALLBACK(log_window_timer_data_cb), logwin);
+	logwin->delta_button = timer_data;
+
+	GtkWidget *source = gtk_toggle_button_new_with_label(_("Source"));
+	gtk_widget_set_tooltip_text(source, _("Include source file, line, and function in debug records"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(source), get_debug_source());
+	gtk_box_append(GTK_BOX(hbox), source);
+	g_signal_connect(source, "toggled", G_CALLBACK(log_window_source_cb), logwin);
+	logwin->source_button = source;
 
 	GtkWidget *search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_append(GTK_BOX(hbox), search_box);
@@ -418,14 +572,43 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	g_signal_connect(all_button, "toggled", G_CALLBACK(all_keypress_event_cb), logwin);
 
+	hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Filter regexp"));
 
 	logwin->regexp_box = gtk_entry_new();
 	gtk_box_append(GTK_BOX(hbox), logwin->regexp_box);
+	gtk_widget_set_hexpand(logwin->regexp_box, TRUE);
 	ui_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->regexp_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	g_signal_connect(G_OBJECT(logwin->regexp_box), "activate",
 	                 G_CALLBACK(log_window_regexp_cb), logwin);
 	g_signal_connect(logwin->regexp_box, "icon-press", G_CALLBACK(filter_entry_icon_cb), nullptr);
+
+	logwin->filter_status = gtk_label_new(nullptr);
+	gtk_label_set_xalign(GTK_LABEL(logwin->filter_status), 0.0);
+	gtk_label_set_wrap(GTK_LABEL(logwin->filter_status), TRUE);
+	gtk_label_set_wrap_mode(GTK_LABEL(logwin->filter_status), PANGO_WRAP_WORD_CHAR);
+	gtk_label_set_max_width_chars(GTK_LABEL(logwin->filter_status), 80);
+	gtk_box_append(GTK_BOX(win_vbox), logwin->filter_status);
+	hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	logwin->capture_button = gtk_button_new_with_label(_("Start capture"));
+	g_autofree gchar *capture_tip = g_strdup_printf(_("Capture to a unique temporary file, up to %zu MiB. Verbosity 2 is selected if logging is disabled. Capture continues when this window is hidden."), log_capture_max_bytes / (1024 * 1024));
+	gtk_widget_set_tooltip_text(logwin->capture_button, capture_tip);
+	gtk_box_append(GTK_BOX(hbox), logwin->capture_button);
+	g_signal_connect(logwin->capture_button, "clicked", G_CALLBACK(log_window_capture_cb), logwin);
+	logwin->capture_path = gtk_label_new(nullptr);
+	gtk_label_set_selectable(GTK_LABEL(logwin->capture_path), TRUE);
+	gtk_label_set_xalign(GTK_LABEL(logwin->capture_path), 0.0);
+	gtk_label_set_ellipsize(GTK_LABEL(logwin->capture_path), PANGO_ELLIPSIZE_MIDDLE);
+	gtk_widget_set_hexpand(logwin->capture_path, TRUE);
+	gtk_box_append(GTK_BOX(hbox), logwin->capture_path);
+	logwin->copy_path_button = gtk_button_new_with_label(_("Copy path"));
+	gtk_box_append(GTK_BOX(hbox), logwin->copy_path_button);
+	g_signal_connect(logwin->copy_path_button, "clicked", G_CALLBACK(+[](GtkButton *, gpointer data)
+		{
+		auto *logwin = static_cast<LogWindow *>(data);
+		g_autofree gchar *path = log_capture_get_path();
+		if (path) gdk_clipboard_set_text(gtk_widget_get_clipboard(logwin->window), path);
+		}), logwin);
 #endif
 
 	constexpr const gchar *tags[] = { "black", "blue", "orange", "red" };
@@ -457,6 +640,10 @@ static void log_window_show(LogWindow *logwin)
 	gtk_text_view_scroll_mark_onscreen(text, mark);
 
 	gtk_window_present(GTK_WINDOW(logwin->window));
+#ifdef DEBUG
+	log_window_controls_sync(logwin);
+	if (!logwin->controls_id) logwin->controls_id = g_timeout_add_seconds(1, log_window_controls_cb, logwin);
+#endif
 
 	log_window_append("", LOG_NORMAL); // to flush memorized lines
 

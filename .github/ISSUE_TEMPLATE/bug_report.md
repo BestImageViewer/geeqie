@@ -42,6 +42,30 @@ an AppImage, Snap, or Flatpak.
 Review all attachments before sharing. Do not attach your entire configuration
 directory, private images, or a core dump unless specifically requested.
 
+**Targeted debug capture (when available)**
+
+If the log window provides **Start capture**:
+
+1. Open **Help → Log window**.
+2. Choose **Subsystems** and **Verbosity**. Use **All** subsystems if unsure;
+   level 2 records general decisions, level 3 adds individual image loads and
+   other per-file details, and level 4 adds rendering internals.
+3. Select **Start capture**, then **Copy path** to keep its location.
+4. Reproduce the problem, then select **Stop capture** if Geeqie is responsive.
+5. Review and attach the file at the copied path. Compress large captures if needed.
+
+Starting capture selects verbosity 2 if logging was disabled. The capture is a
+unique `/tmp/geeqie-debug-XXXXXX.txt` file (or the configured temporary directory)
+with diagnostic context and logging settings in its header. It continues while
+the log window is hidden. Each capture stops automatically at a 100 MiB limit;
+the window and file explain when that happens. If the limit is reached too early,
+repeat with fewer subsystems or lower verbosity.
+
+Unlike the diagnostic-only report, capture records can contain filenames, paths,
+metadata, and filter text. Review them before sharing. If Geeqie freezes or
+crashes, attach the capture already written as well as the applicable hang or
+crash report below; a capture does not replace a backtrace.
+
 **Describe the bug**
 
 Describe what actually happens. Is it a crash, an unresponsive window, a slow

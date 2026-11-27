@@ -388,7 +388,7 @@
           <guilabel>Debug level</guilabel>
         </term>
         <listitem>
-          <para>Displayed when compiled with the option --enable-debug-log. This defines the verbosity of debug info sent to console and log window (0 disables the debug output).</para>
+          <para>Available in builds with debug logging, including the Meson <literal>debug</literal> and <literal>debugoptimized</literal> build types. This defines the verbosity of debug information sent to the console and log window (0 disables debug output). The log window also provides a verbosity control, subsystem filters, and temporary file capture.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

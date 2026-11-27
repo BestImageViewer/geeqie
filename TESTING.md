@@ -450,7 +450,8 @@ All ordinary debug macros produce records with a monotonic elapsed timestamp,
 domain, message verbosity, process ID, and a stable session-local thread number. Each line
 of a multiline message receives the same record context. Add `--debug-source=on`
 to include source file, line, and function at any verbosity; `--debug-source=off`
-disables that field. The log window's **Delta** toggle and the existing timer preference now control the interval
+disables that field. The log window also provides a **Source** toggle. Its
+**Delta** toggle and the existing timer preference now control the interval
 since the previous record on the same thread. Elapsed timestamps are always shown.
 Source formatting is no longer implicitly enabled by selecting verbosity 2–4.
 
@@ -628,8 +629,14 @@ across comparison methods. To follow overlapping loads, use `--debug=3
 without a result can identify unfinished work; output filtering, queue overflow,
 or a crash can also explain a missing record.
 
-The `LogCapture.*` tests cover capture headers, concurrency, setting changes,
-and preservation of an existing log destination.
+The `LogCapture.*` tests verify private unique files, capture headers, stopped
+capture boundaries, concurrent complete records, and preservation of an existing
+command-line log destination. In debug builds, they also verify logging-setting
+headers and exercise the real log-window subsystem and capture controls under a
+virtual display. To check manually, open the log window, select subsystems, start
+capture, change a filter, reproduce an operation, stop capture, and inspect the
+path shown in the window. Repeat after setting filters remotely to check that the
+controls refresh, and hide/reopen the window during capture.
 
 `CaptureFile.*` exercises the production capture-file component with a small byte
 limit and injected I/O operations. It checks that headers and stop notices fit,

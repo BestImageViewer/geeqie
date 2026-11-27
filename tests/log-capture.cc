@@ -252,5 +252,93 @@ TEST_F(LogCapture, HeaderRecordsTheSelectedLoggingSettings)
 	EXPECT_EQ(get_debug_category_name(DebugCategory::COUNT), nullptr);
 }
 
+GtkWidget *find_widget(GtkWidget *root, const std::function<bool(GtkWidget *)> &match)
+{
+	if (match(root)) return root;
+	for (auto *child = gtk_widget_get_first_child(root); child; child = gtk_widget_get_next_sibling(child))
+		{
+		if (auto *found = find_widget(child, match)) return found;
+		}
+	return nullptr;
+}
+
+TEST_F(LogCapture, WindowControlsSelectSubsystemsAndCaptureWithoutCommandLineOptions)
+{
+	if (!gtk_init_check() || !gdk_display_get_default()) GTEST_SKIP() << "Requires a display";
+	if (!options) options = conf_options_new();
+	accel_map_load_merged();
+	static GtkApplication *app = gtk_application_new("org.geeqie.LogCaptureTest", G_APPLICATION_NON_UNIQUE);
+	ASSERT_TRUE(g_application_register(G_APPLICATION(app), nullptr, nullptr));
+	struct RestoreApplication
+	{
+		GApplication *previous = g_application_get_default();
+		~RestoreApplication() { g_application_set_default(previous); }
+	} restore;
+	g_application_set_default(G_APPLICATION(app));
+	LayoutWindow layout{};
+	layout.options.log_window = {0, 0, 700, 600};
+	set_debug_level(0);
+	log_window_new(&layout);
+	g_autoptr(GtkWindow) log_window = nullptr;
+	auto *windows = gtk_window_get_toplevels();
+	for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+		{
+		g_autoptr(GtkWindow) candidate = GTK_WINDOW(g_list_model_get_item(windows, i));
+		if (G_IS_ACTION_MAP(candidate) && g_action_map_lookup_action(G_ACTION_MAP(candidate), "log-win-run-command"))
+			{
+			log_window = g_steal_pointer(&candidate);
+			break;
+			}
+		}
+	auto *window = log_window ? GTK_WIDGET(log_window) : nullptr;
+	ASSERT_NE(window, nullptr);
+	struct HideWindow
+	{
+		GtkWidget *window;
+		~HideWindow() { gtk_widget_set_visible(window, false); }
+	} hide{window};
+	const auto button = [window](const char *label)
+		{
+		return find_widget(window, [label](GtkWidget *widget)
+			{
+			return GTK_IS_BUTTON(widget) && g_strcmp0(gtk_button_get_label(GTK_BUTTON(widget)), label) == 0;
+			});
+		};
+	auto *none = button(_("None"));
+	ASSERT_NE(none, nullptr);
+	g_signal_emit_by_name(none, "clicked");
+	g_autofree gchar *selected = get_debug_domains();
+	EXPECT_STREQ(selected, "none");
+	auto *images = find_widget(window, [](GtkWidget *widget)
+		{
+		return GTK_IS_CHECK_BUTTON(widget) && g_strcmp0(gtk_widget_get_tooltip_text(widget), "image") == 0;
+		});
+	ASSERT_NE(images, nullptr);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(images), true);
+	g_clear_pointer(&selected, g_free);
+	selected = get_debug_domains();
+	EXPECT_STREQ(selected, "image");
+	auto *all = button(_("All"));
+	ASSERT_NE(all, nullptr);
+	g_signal_emit_by_name(all, "clicked");
+	auto *capture = button(_("Start capture"));
+	ASSERT_NE(capture, nullptr);
+	g_signal_emit_by_name(capture, "clicked");
+	ASSERT_TRUE(log_capture_active());
+	EXPECT_EQ(get_debug_level(), 2);
+	g_autofree gchar *path = log_capture_get_path();
+	paths.emplace_back(path);
+	log_info("window capture marker");
+	g_signal_emit_by_name(none, "clicked");
+	EXPECT_STREQ(gtk_button_get_label(GTK_BUTTON(capture)), _("Stop capture"));
+	g_signal_emit_by_name(capture, "clicked");
+	EXPECT_FALSE(log_capture_active());
+	const auto text = read(path);
+	EXPECT_NE(text.find("Diagnostic settings report"), std::string::npos);
+	EXPECT_NE(text.find("window capture marker"), std::string::npos);
+	EXPECT_NE(text.find("# Logging settings changed\n"), std::string::npos);
+	EXPECT_NE(text.find("debug_domains=none\n"), std::string::npos);
+	gtk_widget_set_visible(window, false);
+}
 #endif
 } // namespace
