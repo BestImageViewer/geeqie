@@ -48,6 +48,7 @@ jobs:
       - name: Meson setup
         run: |
           meson setup build \
+            --buildtype=debugoptimized \
             --prefix=/usr \
             --datadir=share \
             -Darchive=disabled \

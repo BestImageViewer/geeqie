@@ -111,6 +111,7 @@ parts:
     plugin: meson
     source: .
     meson-parameters:
+      - --buildtype=debugoptimized
       - --prefix=/usr
       - --wrap-mode=default
       - -Ddoxygen=disabled

@@ -59,6 +59,7 @@ jobs:
             mkdir -p $GITHUB_WORKSPACE/AppDir
             mkdir -p $GITHUB_WORKSPACE/AppDir/usr
             meson setup \
+              --buildtype=debugoptimized \
               -Dcms=enabled \
               -Ddoxygen=disabled \
               -Dunit_tests=disabled \
