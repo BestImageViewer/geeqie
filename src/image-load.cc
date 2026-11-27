@@ -250,11 +250,21 @@ GError *image_loader_dup_error(ImageLoader *il)
 	return il->error ? g_error_copy(il->error) : nullptr;
 }
 
+static void image_loader_report_result([[maybe_unused]] ImageLoader *il, [[maybe_unused]] DebugOperationResult result)
+{
+#ifdef DEBUG
+	if (!il) return;
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	DEBUG_OPERATION_FINISH(il->debug_operation, result, "path=%s, bytes=%" G_GSIZE_FORMAT ", size=%dx%d, reason=%s", il->fd ? il->fd->path : "none", il->bytes_read, il->actual_width, il->actual_height, il->error ? il->error->message : "none"); // NOTRANSLATE: Diagnostic message.
+#endif
+}
+
 static void image_loader_finalize(GObject *object)
 {
 	auto il = reinterpret_cast<ImageLoader *>(object);
 
 	image_loader_stop(il);
+	image_loader_report_result(il, DebugOperationResult::CANCELLED);
 	g_clear_object(&il->cancellable);
 	g_free(il->external_select);
 	g_free(il->external_extract);
@@ -338,6 +348,7 @@ static gboolean image_loader_emit_area_ready_cb(gpointer data)
 static gboolean image_loader_emit_done_cb(gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
+	image_loader_report_result(il, DebugOperationResult::COMPLETED);
 	g_signal_emit(il, signals[SIGNAL_DONE], 0);
 	return G_SOURCE_REMOVE;
 }
@@ -345,6 +356,7 @@ static gboolean image_loader_emit_done_cb(gpointer data)
 static gboolean image_loader_emit_error_cb(gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
+	image_loader_report_result(il, g_cancellable_is_cancelled(il->cancellable) ? DebugOperationResult::CANCELLED : DebugOperationResult::FAILED);
 	g_signal_emit(il, signals[SIGNAL_ERROR], 0);
 	return G_SOURCE_REMOVE;
 }
@@ -1205,7 +1217,10 @@ gboolean image_loader_start(ImageLoader *il)
 
 	if (!il->fd) return FALSE;
 
-	return image_loader_start_thread(il);
+	DEBUG_OPERATION_START(il->debug_operation, DebugCategory::IMAGE, 3, "Image load", "path=%s, deferred=0", il->fd->path); // NOTRANSLATE: Diagnostic message.
+	const gboolean started = image_loader_start_thread(il);
+	if (!started) image_loader_report_result(il, DebugOperationResult::FAILED);
+	return started;
 }
 
 static gboolean image_loader_start_deferred_cb(gpointer data)
@@ -1224,6 +1239,7 @@ static gboolean image_loader_start_deferred_cb(gpointer data)
 gboolean image_loader_start_deferred(ImageLoader *il)
 {
 	if (!il || !il->fd || il->idle_id || il->thread) return FALSE;
+	DEBUG_OPERATION_START(il->debug_operation, DebugCategory::IMAGE, 3, "Image load", "path=%s, deferred=1", il->fd->path); // NOTRANSLATE: Diagnostic message.
 	if (il->external_select)
 		{
 		// Keyboard repeat events can arrive after an idle callback has already run.
@@ -1323,7 +1339,9 @@ gboolean image_load_dimensions(FileData *fd, GqSize &dimensions)
 {
 	g_autoptr(ImageLoader) il = image_loader_new(fd);
 
+	if (il) DEBUG_OPERATION_START(il->debug_operation, DebugCategory::IMAGE, 3, "Image size probe", "path=%s", fd->path); // NOTRANSLATE: Diagnostic message.
 	gboolean success = image_loader_start_idle(il);
+	image_loader_report_result(il, success ? DebugOperationResult::COMPLETED : DebugOperationResult::FAILED);
 
 	if (success && il->pixbuf)
 		{

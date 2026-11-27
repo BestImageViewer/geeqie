@@ -144,10 +144,20 @@ protected:
 
 	void toggle(bool enabled)
 	{
+#ifdef DEBUG
+		const auto previous_operation = dw->debug_operation.id;
+#endif
 		gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_ignore_same_folder), enabled);
 		EXPECT_EQ(dw->ignore_same_folder, enabled);
 		EXPECT_NE(dw->idle_id, 0U);
 		ASSERT_TRUE(wait_finished());
+#ifdef DEBUG
+		EXPECT_GT(dw->debug_operation.id, 0U);
+		EXPECT_NE(dw->debug_operation.id, previous_operation);
+		EXPECT_FALSE(dw->debug_operation.active);
+		EXPECT_EQ(dw->debug_operation.result, DebugOperationResult::COMPLETED);
+		EXPECT_GE(dw->debug_operation.finished, dw->debug_operation.started);
+#endif
 	}
 
 	static std::string parent(DupeItem *item)

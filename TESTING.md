@@ -441,7 +441,8 @@ Domains supported are `general`, `thumbnails`, `cache`, `image`, `render`,
 The initial filter is `all`; omitting `--debug-domains` leaves the current filter
 unchanged. Use `all` to reset a filter or `none` to disable ordinary debug output.
 Numbered compatibility calls remain until their callers are migrated. Per-file messages normally
-require level 3, rendering and ownership internals level 4. Domain filtering
+require level 3, rendering and ownership internals level 4. Directory-scan and
+file-list refresh summaries at level 2 include elapsed time. Domain filtering
 does not affect warnings and errors logged with `log_printf()`.
 Logs can contain private paths and metadata, so review them before attaching.
 
@@ -616,3 +617,13 @@ styles, and delivery to the configured file. With debug logging enabled,
 warnings and errors survive disabled debug output and a nonmatching regex while
 info and debug messages remain filtered. The explicit severity API is available
 in both debug and release builds.
+
+Operation lifecycle tests in `DebugDomains.*` check matching start/result IDs,
+exactly one terminal result, deferred image cancellation, paired directory-scan
+failures with preserved errno, lazy detail evaluation, level-1 failure reporting,
+and ID uniqueness across concurrent producers. Image-loader tests check deferred
+failure state, and duplicate-folder toggle tests check new IDs and completion
+across comparison methods. To follow overlapping loads, use `--debug=3
+--debug-domains=image,files,duplicates` and match `[operation:N]` fields. A start
+without a result can identify unfinished work; output filtering, queue overflow,
+or a crash can also explain a missing record.

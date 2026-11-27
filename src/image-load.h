@@ -34,6 +34,8 @@
 #include <glib-object.h>
 #include <glib.h>
 
+#include "debug-operation.h"
+
 class FileData;
 struct GqSize;
 
@@ -91,6 +93,7 @@ public:
 struct ImageLoader
 {
 	GObject parent;
+	DebugOperation debug_operation;
 
 	/*< private >*/
 	GdkPixbuf *pixbuf;

@@ -19,6 +19,7 @@
 #include <gtk/gtk.h>
 
 #include "debug.h"
+#include "debug-operation.h"
 #include "filedata.h"
 #include "image-load.h"
 #include "log-queue.h"
@@ -307,17 +308,167 @@ protected:
 	bool saved_timing = false;
 };
 
+TEST_F(DebugDomains, OperationLifecycleRecordsKeepTheirIdAndEndOnce)
+{
+	static_assert(std::is_trivial<DebugOperation>::value, "Operation state must support zeroed C allocations");
+	ScopedLogOutput output;
+	g_autofree gchar *path = nullptr;
+	const int fd = g_file_open_tmp("geeqie-operation-XXXXXX.txt", &path, nullptr);
+	ASSERT_GE(fd, 0);
+	close(fd);
+	log_set_file(path);
+	DebugOperation operation{};
+	DEBUG_OPERATION_START(operation, DebugCategory::IMAGE, 3, "Test operation", "files=%d", 2);
+	const auto id = operation.id;
+	EXPECT_GT(id, 0U);
+	DEBUG_OPERATION_FINISH(operation, DebugOperationResult::COMPLETED, "files=%d", 2);
+	const auto finished = operation.finished;
+	EXPECT_GE(finished, operation.started);
+	EXPECT_FALSE(operation.active);
+	DEBUG_OPERATION_FINISH(operation, DebugOperationResult::FAILED, "unexpected duplicate result");
+	EXPECT_EQ(operation.finished, finished);
+	log_set_file(nullptr);
+	g_autofree gchar *contents = nullptr;
+	const bool read = g_file_get_contents(path, &contents, nullptr, nullptr);
+	g_unlink(path);
+	ASSERT_TRUE(read);
+	const std::string text = contents;
+	const std::string prefix = "[operation:" + std::to_string(id) + "] Test operation ";
+	EXPECT_NE(text.find(prefix + "started:"), std::string::npos);
+	EXPECT_NE(text.find(prefix + "completed:"), std::string::npos);
+	EXPECT_NE(text.find("elapsed="), std::string::npos);
+	EXPECT_EQ(text.find("unexpected duplicate result"), std::string::npos);
+}
 
+TEST_F(DebugDomains, DeferredImageCancellationReportsItsOperationId)
+{
+	if (!options) options = conf_options_new();
+	ScopedLogOutput output;
+	g_autofree gchar *path = nullptr;
+	const int fd = g_file_open_tmp("geeqie-operation-cancel-XXXXXX.txt", &path, nullptr);
+	ASSERT_GE(fd, 0);
+	close(fd);
+	log_set_file(path);
+	auto *source = file_data_new_simple("/nonexistent/geeqie-operation-pending.jpg");
+	auto *loader = image_loader_new(source);
+	file_data_unref(source);
+	const bool queued = image_loader_start_deferred(loader);
+	const auto id = loader->debug_operation.id;
+	g_object_unref(loader);
+	log_set_file(nullptr);
+	g_autofree gchar *contents = nullptr;
+	const bool read = g_file_get_contents(path, &contents, nullptr, nullptr);
+	g_unlink(path);
+	ASSERT_TRUE(queued);
+	ASSERT_TRUE(read);
+	const std::string text = contents;
+	const std::string prefix = "[operation:" + std::to_string(id) + "] Image load ";
+	EXPECT_NE(text.find(prefix + "started:"), std::string::npos);
+	EXPECT_NE(text.find(prefix + "cancelled:"), std::string::npos);
+	EXPECT_EQ(text.find(prefix + "completed:"), std::string::npos);
+	EXPECT_EQ(text.find(prefix + "failed:"), std::string::npos);
+}
 
+TEST_F(DebugDomains, DirectoryScanFailuresArePairedAndPreserveErrno)
+{
+	if (!options) options = conf_options_new();
+	set_debug_domains("files");
+	ScopedLogOutput output;
+	g_autofree gchar *path = nullptr;
+	const int fd = g_file_open_tmp("geeqie-operation-scan-XXXXXX.txt", &path, nullptr);
+	ASSERT_GE(fd, 0);
+	close(fd);
+	log_set_file(path);
+	g_autofree gchar *missing = g_strconcat(path, "-missing", nullptr);
+	auto *source = file_data_new_simple(missing);
+	g_autoptr(FileDataList) files = nullptr;
+	const bool scanned = FileData::FileList::read_list_lstat(source, &files, nullptr);
+	const int scan_errno = errno;
+	const bool scanned_all = FileData::FileList::read_list_lstat_all(source, &files, nullptr);
+	const int all_errno = errno;
+	file_data_unref(source);
+	log_set_file(nullptr);
+	g_autofree gchar *contents = nullptr;
+	const bool read = g_file_get_contents(path, &contents, nullptr, nullptr);
+	g_unlink(path);
+	EXPECT_FALSE(scanned);
+	EXPECT_FALSE(scanned_all);
+	EXPECT_EQ(scan_errno, ENOENT);
+	EXPECT_EQ(all_errno, ENOENT);
+	ASSERT_TRUE(read);
+	const std::string text = contents;
+	const std::regex start{R"(\[operation:([0-9]+)\] Directory scan started:)"};
+	int starts = 0;
+	std::set<std::string> ids;
+	for (auto it = std::sregex_iterator(text.begin(), text.end(), start); it != std::sregex_iterator(); ++it)
+		{
+		++starts;
+		ids.insert((*it)[1].str());
+		EXPECT_NE(text.find("[operation:" + (*it)[1].str() + "] Directory scan failed:"), std::string::npos);
+		}
+	EXPECT_EQ(starts, 2);
+	EXPECT_EQ(ids.size(), 2U);
+}
 
+TEST_F(DebugDomains, OperationStateSurvivesFilteringWithoutEvaluatingDetails)
+{
+	set_debug_domains("none");
+	DebugOperation operation{};
+	int evaluations = 0;
+	DEBUG_OPERATION_START(operation, DebugCategory::FILES, 2, "Test scan", "%d", ++evaluations);
+	EXPECT_TRUE(operation.active);
+	const auto id = operation.id;
+	EXPECT_FALSE(debug_operation_begin(operation, DebugCategory::IMAGE, 3, "Deferred continuation"));
+	EXPECT_EQ(operation.id, id);
+	DEBUG_OPERATION_FINISH(operation, DebugOperationResult::CANCELLED, "%d", ++evaluations);
+	EXPECT_FALSE(operation.active);
+	EXPECT_EQ(operation.result, DebugOperationResult::CANCELLED);
+	EXPECT_EQ(evaluations, 0);
+	DEBUG_OPERATION_START(operation, DebugCategory::FILES, 2, "Restarted scan", "%d", ++evaluations);
+	EXPECT_NE(operation.id, id);
+	DEBUG_OPERATION_FINISH(operation, DebugOperationResult::COMPLETED, "%d", ++evaluations);
+	EXPECT_EQ(evaluations, 0);
+}
 
+TEST_F(DebugDomains, OperationFailuresUseLevelOneAndRemainCategoryFiltered)
+{
+	set_debug_level(1);
+	DebugOperation operation{};
+	EXPECT_TRUE(debug_operation_begin(operation, DebugCategory::IMAGE, 3, "Image load"));
+	EXPECT_TRUE(debug_operation_finish(operation, DebugOperationResult::FAILED));
+	EXPECT_FALSE(debug_operation_finish(operation, DebugOperationResult::COMPLETED));
+	EXPECT_TRUE(debug_operation_begin(operation, DebugCategory::IMAGE, 3, "Image load"));
+	EXPECT_FALSE(debug_operation_finish(operation, DebugOperationResult::COMPLETED));
+	EXPECT_TRUE(set_debug_domains("files"));
+	EXPECT_TRUE(debug_operation_begin(operation, DebugCategory::IMAGE, 3, "Image load"));
+	EXPECT_FALSE(debug_operation_finish(operation, DebugOperationResult::FAILED));
+}
 
-
-
-
-
-
-
+TEST_F(DebugDomains, OperationIdsAreUniqueAcrossConcurrentProducers)
+{
+	constexpr int thread_count = 4;
+	constexpr int per_thread = 500;
+	std::vector<std::vector<guint64>> results(thread_count);
+	std::vector<std::thread> workers;
+	for (int i = 0; i < thread_count; ++i)
+		{
+		workers.emplace_back([&, i]()
+			{
+			for (int j = 0; j < per_thread; ++j)
+				{
+				DebugOperation operation{};
+				debug_operation_begin(operation, DebugCategory::FILES, 2, "Concurrent scan");
+				results[i].push_back(operation.id);
+				debug_operation_finish(operation, DebugOperationResult::COMPLETED);
+				}
+			});
+		}
+	for (auto &worker : workers) worker.join();
+	std::set<guint64> ids;
+	for (const auto &result : results) ids.insert(result.begin(), result.end());
+	EXPECT_EQ(ids.size(), thread_count * per_thread);
+	EXPECT_EQ(ids.count(0), 0U);
+}
 
 TEST_F(DebugDomains, WarningsAndErrorsBypassDebugAndRegexFilters)
 {
@@ -530,6 +681,8 @@ TEST(DebugDomainsRelease, DisabledMessagesDoNotEvaluateArguments)
 	int evaluations = 0;
 	DEBUG_LOG(DebugCategory::CACHE, 1, "%d", ++evaluations);
 	DEBUG_LOG(DebugCategory::GENERAL, 1, "%d", ++evaluations);
+	DEBUG_OPERATION_START(unused_operation, DebugCategory::IMAGE, ++evaluations, "Unused", "%d", ++evaluations);
+	DEBUG_OPERATION_FINISH(unused_operation, DebugOperationResult::FAILED, "%d", ++evaluations);
 	EXPECT_EQ(evaluations, 0);
 }
 #endif

@@ -30,6 +30,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "debug-operation.h"
 #include "geometry.h"
 #include "ui-menu.h"
 
@@ -122,6 +123,7 @@ struct DupeWindow
 
 	gboolean show_thumbs;
 
+	DebugOperation debug_operation;
 	guint idle_id; /**< event source id */
 	guint recompare_id; /**< Deferred comparison start or regrouping after results change. */
 	guint delete_update_id;

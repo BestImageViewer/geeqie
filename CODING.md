@@ -107,6 +107,30 @@ and 262,144 Unicode characters. A nonpositive configured line count uses the
 10,000-line safety limit. History collected before the window opens is limited
 to 1 MiB and the same maximum number of records.
 
+### Operation lifecycle records
+
+Include `debug-operation.h` and zero-initialize a `DebugOperation` for work that
+can overlap, be queued, or be cancelled. Use `DEBUG_OPERATION_START()` and
+`DEBUG_OPERATION_FINISH()` with `COMPLETED`, `CANCELLED`, or `FAILED`. Operation
+names must outlive the job; use string literals. All access to a particular state
+belongs to its owner thread or must use the owner's existing lock. IDs themselves
+are allocated atomically and are unique across subsystems within a process.
+
+Records add `[operation:N]`, the operation name, its lifecycle state, and elapsed
+monotonic seconds. Start and terminal records share the ID; finishing again is a
+no-op. Beginning an already active operation preserves its ID, so deferred and
+actual starts can share it. Explicitly finish a cancelled operation before reuse.
+Tracking continues while output is filtered, but format arguments are evaluated
+only when a record is enabled. Failures use level 1 and retain category filtering.
+The macros compile away in builds without debug logging.
+
+Image loads (including preloads and thumbnail decoder jobs) use level 3, directory
+scans level 2, and duplicate searches level 1. Image timing includes deferred and
+worker queue waits through result delivery. Releasing a loader before delivery
+records cancellation after waiting for its worker. Duplicate-search completion
+includes populating the results; restarts and stops close the old operation.
+Decoder, rendering, and per-file detail messages are not all operation-tagged yet.
+
 ### Explicit message severity
 
 Include `log.h` and use `log_info()`, `log_warning()`, or `log_error()` for new

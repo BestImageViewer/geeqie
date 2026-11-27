@@ -203,6 +203,10 @@ TEST(ImageLoader, CancelPendingStart)
 	file_data_unref(fd);
 	ASSERT_TRUE(image_loader_start_deferred(il));
 	EXPECT_FALSE(il->thread);
+#ifdef DEBUG
+	EXPECT_TRUE(il->debug_operation.active);
+	EXPECT_GT(il->debug_operation.id, 0U);
+#endif
 	EXPECT_EQ(il->input_buffer, nullptr);
 	const guint source_id = il->idle_id;
 	EXPECT_NE(g_main_context_find_source_by_id(nullptr, source_id), nullptr);
@@ -229,6 +233,11 @@ TEST(ImageLoader, DeferredStartReportsFailure)
 		}
 	EXPECT_TRUE(failed);
 	EXPECT_EQ(il->idle_id, 0U);
+#ifdef DEBUG
+	EXPECT_FALSE(il->debug_operation.active);
+	EXPECT_EQ(il->debug_operation.result, DebugOperationResult::FAILED);
+	EXPECT_GE(il->debug_operation.finished, il->debug_operation.started);
+#endif
 }
 
 } // namespace

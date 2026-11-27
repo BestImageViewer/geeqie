@@ -25,6 +25,8 @@
 
 #include "filedata.h"
 
+#include "debug-operation.h"
+
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -147,6 +149,8 @@ gboolean FileData::FileList::is_hidden_file(const gchar *filepath)
 
 gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files, GList **dirs, gboolean follow_symlinks)
 {
+	[[maybe_unused]] DebugOperation operation{};
+	DEBUG_OPERATION_START(operation, DebugCategory::FILES, 2, "Directory scan", "path=%s, all_files=%d, follow_symlinks=%d", dir_path, 0, follow_symlinks); // NOTRANSLATE: Diagnostic message.
 	DIR *dp;
 	struct dirent *dir;
 	GList *dlist = nullptr;
@@ -161,11 +165,18 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
 	if (dirs) *dirs = nullptr;
 
 	g_autofree gchar *pathl = path_from_utf8(dir_path);
-	if (!pathl) return FALSE;
+	if (!pathl)
+		{
+		DEBUG_OPERATION_FINISH(operation, DebugOperationResult::FAILED, "path=%s, reason=path encoding conversion failed", dir_path); // NOTRANSLATE: Diagnostic message.
+		return FALSE;
+		}
 
 	dp = opendir(pathl);
 	if (dp == nullptr)
 		{
+		const int directory_errno = errno;
+		DEBUG_OPERATION_FINISH(operation, DebugOperationResult::FAILED, "path=%s, reason=%s", dir_path, g_strerror(directory_errno)); // NOTRANSLATE: Diagnostic message.
+		errno = directory_errno;
 		return FALSE;
 		}
 
@@ -244,11 +255,15 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
 		}
 	if (basename_hash) file_data_basename_hash_free(basename_hash);
 
+	DEBUG_OPERATION_FINISH(operation, DebugOperationResult::COMPLETED, "path=%s, files=%u, directories=%u", dir_path, files ? g_list_length(*files) : 0, dirs ? g_list_length(*dirs) : 0); // NOTRANSLATE: Diagnostic message.
+
 	return TRUE;
 }
 
 gboolean FileData::FileList::read_list_real_all(const gchar *dir_path, GList **files, GList **dirs, gboolean follow_symlinks)
 {
+	[[maybe_unused]] DebugOperation operation{};
+	DEBUG_OPERATION_START(operation, DebugCategory::FILES, 2, "Directory scan", "path=%s, all_files=%d, follow_symlinks=%d", dir_path, 1, follow_symlinks); // NOTRANSLATE: Diagnostic message.
 	DIR *dp;
 	struct dirent *dir;
 	GList *dlist = nullptr;
@@ -263,11 +278,18 @@ gboolean FileData::FileList::read_list_real_all(const gchar *dir_path, GList **f
 	if (dirs) *dirs = nullptr;
 
 	g_autofree gchar *pathl = path_from_utf8(dir_path);
-	if (!pathl) return FALSE;
+	if (!pathl)
+		{
+		DEBUG_OPERATION_FINISH(operation, DebugOperationResult::FAILED, "path=%s, reason=path encoding conversion failed", dir_path); // NOTRANSLATE: Diagnostic message.
+		return FALSE;
+		}
 
 	dp = opendir(pathl);
 	if (dp == nullptr)
 		{
+		const int directory_errno = errno;
+		DEBUG_OPERATION_FINISH(operation, DebugOperationResult::FAILED, "path=%s, reason=%s", dir_path, g_strerror(directory_errno)); // NOTRANSLATE: Diagnostic message.
+		errno = directory_errno;
 		return FALSE;
 		}
 
@@ -346,6 +368,8 @@ gboolean FileData::FileList::read_list_real_all(const gchar *dir_path, GList **f
 		*files = filter_out_sidecars(flist);
 		}
 	if (basename_hash) file_data_basename_hash_free(basename_hash);
+
+	DEBUG_OPERATION_FINISH(operation, DebugOperationResult::COMPLETED, "path=%s, files=%u, directories=%u", dir_path, files ? g_list_length(*files) : 0, dirs ? g_list_length(*dirs) : 0); // NOTRANSLATE: Diagnostic message.
 
 	return TRUE;
 }

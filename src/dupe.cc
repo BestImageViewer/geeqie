@@ -2108,6 +2108,7 @@ static void dupe_check_stop(DupeWindow *dw)
 	dw->thumb_loader = nullptr;
 
 	g_clear_object(&dw->img_loader);
+	DEBUG_OPERATION_FINISH(dw->debug_operation, DebugOperationResult::CANCELLED, "reason=stopped"); // NOTRANSLATE: Diagnostic message.
 }
 
 static void dupe_check_stop_cb(GtkWidget *, gpointer data)
@@ -2431,6 +2432,7 @@ static gboolean dupe_check_cb(gpointer data)
 		dupe_window_update_count(dw, FALSE);
 
 		dupe_listview_populate(dw);
+		DEBUG_OPERATION_FINISH(dw->debug_operation, DebugOperationResult::COMPLETED, "groups=%u", g_list_length(dw->dupes)); // NOTRANSLATE: Diagnostic message.
 
 		/* check thumbs */
 		if (dw->show_thumbs) dupe_thumb_step(dw);
@@ -2477,6 +2479,9 @@ static void dupe_check_start(DupeWindow *dw)
 
 	dw->setup_count = g_list_length(dw->list);
 	if (dw->second_set) dw->setup_count += g_list_length(dw->second_list);
+
+	DEBUG_OPERATION_FINISH(dw->debug_operation, DebugOperationResult::CANCELLED, "reason=restarted"); // NOTRANSLATE: Diagnostic message.
+	DEBUG_OPERATION_START(dw->debug_operation, DebugCategory::DUPLICATES, 1, "Duplicate search", "files=%d, second_set=%d, match_mask=%u", dw->setup_count, dw->second_set, static_cast<guint>(dw->match_mask)); // NOTRANSLATE: Diagnostic message.
 
 	dw->setup_mask = DUPE_MATCH_NONE;
 	dupe_setup_reset(dw);
