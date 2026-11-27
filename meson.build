@@ -35,7 +35,7 @@ project(
     version : run_command('./build-aux/version.sh', check : true).stdout().strip(),
     license : ['GPL-2.0-or-later'],
     meson_version : '>=1.3.2',
-    default_options : ['cpp_std=c++17', 'warning_level=3', 'buildtype=release', 'cpp_link_args=-rdynamic']
+    default_options : ['cpp_std=c++17', 'warning_level=3', 'buildtype=debugoptimized', 'cpp_link_args=-rdynamic']
 )
 
 # To inhibit warnings from the generated file icons.h
@@ -184,8 +184,7 @@ else
     summary({'execinfo' : ['stacktrace supported:', false]}, section : 'Debugging', bool_yn : true)
 endif
 
-# To override the default of 'release', run 'meson setup --buildtype=debug build'
-# That is necessary for stacktrace output
+# For unoptimized debugging, run 'meson setup --buildtype=debug build'.
 buildtype = get_option('buildtype')
 summary({'buildtype' : buildtype}, section : 'Debugging')
 
