@@ -734,7 +734,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 {
 	const gchar *p = nullptr;
 
-	DEBUG_2("editor_command_path_parse: %s %d %d %s", fd->path, consider_sidecars, type, editor->key);
+	DEBUG_LOG(DebugCategory::EXTERNAL, 3, "editor_command_path_parse: %s %d %d %s", fd->path, consider_sidecars, type, editor->key); // NOTRANSLATE: Diagnostic message.
 
 	if (type == PATH_FILE || type == PATH_FILE_URL)
 		{
@@ -797,7 +797,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 		g_clear_pointer(&pathl, g_free);
 		}
 
-	DEBUG_2("editor_command_path_parse: return %s", pathl);
+	DEBUG_LOG(DebugCategory::EXTERNAL, 3, "editor_command_path_parse: return %s", pathl); // NOTRANSLATE: Diagnostic message.
 	return pathl;
 }
 
@@ -883,7 +883,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 	gboolean single_quotes = FALSE;
 	gboolean double_quotes = FALSE;
 
-	DEBUG_2("editor_command_parse: %s %d %d", editor->key, consider_sidecars, !!output);
+	DEBUG_LOG(DebugCategory::EXTERNAL, 3, "editor_command_parse: %s %d %d", editor->key, consider_sidecars, !!output); // NOTRANSLATE: Diagnostic message.
 
 	if (output)
 		{
@@ -1082,7 +1082,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 	if (output)
 		{
 		*output = result.get_command();
-		DEBUG_3("Editor cmd: %s", *output); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::EXTERNAL, 3, "Editor cmd: %s", *output); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return flags;

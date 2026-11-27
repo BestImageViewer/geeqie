@@ -231,8 +231,8 @@ static gboolean thumb_loader_std_fail_check(ThumbLoaderStd *tl)
 		    thumb_size_matches(pixbuf, tl->source_size))
 			{
 			result = TRUE;
-			DEBUG_1("thumb fail valid: %s", tl->fd->path);
-			DEBUG_1("           thumb: %s", fail_path);
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb fail valid: %s", tl->fd->path);
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "           thumb: %s", fail_path);
 			}
 
 		g_object_unref(G_OBJECT(pixbuf));
@@ -324,8 +324,8 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 		recursive_mkdir_if_not_exists(base_path, S_IRWXU);
 		}
 
-	DEBUG_1("thumb saving: %s", tl->fd->path);
-	DEBUG_1("       saved: %s", tl->thumb_path);
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb saving: %s", tl->fd->path);
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "       saved: %s", tl->thumb_path);
 
 	/* save thumb, using a temp file then renaming into place */
 	g_autofree gchar *tmp_path = unique_filename(tl->thumb_path, ".tmp", "_", 2);
@@ -354,8 +354,8 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 
 		if (!success)
 			{
-			DEBUG_1("thumb save failed: %s", tl->fd->path);
-			DEBUG_1("            thumb: %s", tl->thumb_path);
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb save failed: %s", tl->fd->path);
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "            thumb: %s", tl->thumb_path);
 			}
 		}
 
@@ -488,7 +488,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 
 			tl->cache_hit = FALSE;
 
-			DEBUG_1("thumb copied: %s", tl->fd->path);
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb copied: %s", tl->fd->path);
 
 			thumb_loader_std_save(tl, pixbuf);
 			}
@@ -539,7 +539,7 @@ static gboolean thumb_loader_std_next_source(ThumbLoaderStd *tl, gboolean remove
 		{
 		if (!tl->thumb_path_local && remove_broken)
 			{
-			DEBUG_1("thumb broken, unlinking: %s", tl->thumb_path);
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb broken, unlinking: %s", tl->thumb_path);
 			unlink_file(tl->thumb_path);
 			}
 
@@ -577,13 +577,13 @@ static void thumb_loader_std_done_cb(ImageLoader *il, gpointer data)
 	auto tl = static_cast<ThumbLoaderStd *>(data);
 	GdkPixbuf *pixbuf;
 
-	DEBUG_1("thumb image done: %s", tl->fd ? tl->fd->path : "???");
-	DEBUG_1("            from: %s", image_loader_get_fd(tl->il)->path);
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb image done: %s", tl->fd ? tl->fd->path : "???");
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "            from: %s", image_loader_get_fd(tl->il)->path);
 
 	pixbuf = image_loader_get_pixbuf(tl->il);
 	if (!pixbuf)
 		{
-		DEBUG_1("…but no pixbuf");
+		DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "…but no pixbuf");
 		thumb_loader_std_error_cb(il, data);
 		return;
 		}
@@ -618,8 +618,8 @@ static void thumb_loader_std_error_cb(ImageLoader *il, gpointer data)
 		return;
 		}
 
-	DEBUG_1("thumb image error: %s", tl->fd->path);
-	DEBUG_1("             from: %s", image_loader_get_fd(tl->il)->path);
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb image error: %s", tl->fd->path);
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "             from: %s", image_loader_get_fd(tl->il)->path);
 
 	if (thumb_loader_std_next_source(tl, TRUE)) return;
 
@@ -842,7 +842,7 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *, gpoin
 				{
 				struct stat st;
 
-				DEBUG_1("thumb uri foreign, doing day check: %s", uri);
+				DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb uri foreign, doing day check: %s", uri);
 
 				if (stat_utf8(tv->path, &st))
 					{
@@ -858,7 +858,7 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *, gpoin
 			}
 		else
 			{
-			DEBUG_1("invalid image found in std cache: %s", tv->path);
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "invalid image found in std cache: %s", tv->path);
 			}
 		}
 
@@ -931,7 +931,7 @@ static void thumb_std_maint_remove_one(const gchar *source, const gchar *uri, gb
 	                                                    subfolder);
 	if (isfile(thumb_path))
 		{
-		DEBUG_1("thumb removing: %s", thumb_path);
+		DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb removing: %s", thumb_path);
 		unlink_file(thumb_path);
 		}
 }
@@ -1012,12 +1012,12 @@ static void thumb_std_maint_move_validate_cb(const gchar *, gboolean, gpointer d
 			tm->tl->thumb_path = nullptr;
 			tm->tl->thumb_path_local = FALSE;
 
-			DEBUG_1("thumb move attempting save:");
+			DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb move attempting save:");
 
 			thumb_loader_std_save(tm->tl, pixbuf);
 			}
 
-		DEBUG_1("thumb move unlink: %s", tm->thumb_path);
+		DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "thumb move unlink: %s", tm->thumb_path);
 		unlink_file(tm->thumb_path);
 		}
 

@@ -153,14 +153,14 @@ ColorManCachePtr color_man_cache_new(ColorManProfileType in_type, const gchar *i
 	g_auto(cmsHPROFILE) profile_in = color_man_cache_load_profile(in_type, in_file, in_data);
 	if (!profile_in)
 		{
-		DEBUG_1("failed to load color profile for input: %d %s", in_type, in_file);
+		DEBUG_LOG(DebugCategory::RENDER, 1, "failed to load color profile for input: %d %s", in_type, in_file); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
 	g_auto(cmsHPROFILE) profile_out = color_man_cache_load_profile(out_type, out_file, out_data);
 	if (!profile_out)
 		{
-		DEBUG_1("failed to load color profile for screen: %d %s", out_type, out_file);
+		DEBUG_LOG(DebugCategory::RENDER, 1, "failed to load color profile for screen: %d %s", out_type, out_file); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
@@ -170,7 +170,7 @@ ColorManCachePtr color_man_cache_new(ColorManProfileType in_type, const gchar *i
 	                                                     options->color_profile.render_intent, 0);
 	if (!transform)
 		{
-		DEBUG_1("failed to create color profile transform");
+		DEBUG_LOG(DebugCategory::RENDER, 1, "failed to create color profile transform"); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 

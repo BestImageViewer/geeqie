@@ -1030,11 +1030,12 @@ static void dupe_match_reparent(DupeWindow *dw, DupeItem *old_parent, DupeItem *
 	if (work) work->data = new_parent;
 }
 
+#ifdef DEBUG
 static void dupe_match_print_group(DupeItem *di)
 {
 	GList *work;
 
-	log_printf("+ %f %s\n", di->group_rank, di->fd->name);
+	DEBUG_LOG(DebugCategory::DUPLICATES, 3, "+ %f %s\n", di->group_rank, di->fd->name); // NOTRANSLATE: Diagnostic message.
 
 	work = di->group;
 	while (work)
@@ -1042,14 +1043,18 @@ static void dupe_match_print_group(DupeItem *di)
 		auto dm = static_cast<DupeMatch *>(work->data);
 		work = work->next;
 
-		log_printf("  %f %s\n", dm->rank, dm->di->fd->name);
+		DEBUG_LOG(DebugCategory::DUPLICATES, 3, "  %f %s\n", dm->rank, dm->di->fd->name); // NOTRANSLATE: Diagnostic message.
 		}
 
-	log_printf("\n");
+	DEBUG_LOG(DebugCategory::DUPLICATES, 3, "\n");
 }
+
+#endif
 
 static void dupe_match_print_list(GList *list)
 {
+#ifdef DEBUG
+	if (!debug_enabled(DebugCategory::DUPLICATES, 3)) return;
 	GList *work;
 
 	work = list;
@@ -1059,6 +1064,9 @@ static void dupe_match_print_list(GList *list)
 		dupe_match_print_group(di);
 		work = work->next;
 		}
+#else
+	(void)list;
+#endif
 }
 
 /* level 3, unlinking and orphan handling */
@@ -1086,7 +1094,7 @@ static GList *dupe_match_unlink_by_rank(DupeItem *child, DupeItem *parent, GList
 		GList *work;
 		gdouble rank;
 
-		DEBUG_2("link found %s to %s [%d]", child->fd->name, parent->fd->name, g_list_length(parent->group));
+		DEBUG_LOG(DebugCategory::DUPLICATES, 3, "link found %s to %s [%d]", child->fd->name, parent->fd->name, g_list_length(parent->group)); // NOTRANSLATE: Diagnostic message.
 
 		work = parent->group;
 		while (work)
@@ -1115,7 +1123,7 @@ static GList *dupe_match_unlink_by_rank(DupeItem *child, DupeItem *parent, GList
 		}
 	else
 		{
-		DEBUG_2("unlinking %s and %s", child->fd->name, parent->fd->name);
+		DEBUG_LOG(DebugCategory::DUPLICATES, 3, "unlinking %s and %s", child->fd->name, parent->fd->name); // NOTRANSLATE: Diagnostic message.
 
 		dupe_match_unlink(child, parent);
 		}
@@ -1331,22 +1339,22 @@ static void dupe_match_rank(DupeWindow *dw)
 
 	list = dupe_match_rank_sort(dw->list); // sorted by group_rank, no-matches filtered out
 
-	if (required_debug_level(2)) dupe_match_print_list(list);
+	if (required_debug_level(3)) dupe_match_print_list(list);
 
-	DEBUG_1("Similar items: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::DUPLICATES, 2, "Similar items: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
 	list = dw->ignore_same_folder ? dupe_match_group_cover(list) : dupe_match_group_trim(list, dw);
-	DEBUG_1("Unique groups: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::DUPLICATES, 2, "Unique groups: %u", g_list_length(list)); // NOTRANSLATE: Diagnostic message.
 
 	dupe_match_sort_groups(list);
 
-	if (required_debug_level(2)) dupe_match_print_list(list);
+	if (required_debug_level(3)) dupe_match_print_list(list);
 
 	list = dupe_match_rank_sort(list);
 	if (options->sort_totals)
 		{
 		list = dupe_match_totals_sort(list);
 		}
-	if (required_debug_level(2)) dupe_match_print_list(list);
+	if (required_debug_level(3)) dupe_match_print_list(list);
 
 	g_list_free(dw->dupes);
 	dw->dupes = list;
@@ -1455,7 +1463,7 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 
 		if (f < m) return FALSE;
 
-		DEBUG_3("similar: %32s %32s = %f", a->fd->name, b->fd->name, f);
+		DEBUG_LOG(DebugCategory::DUPLICATES, 3, "similar: %32s %32s = %f", a->fd->name, b->fd->name, f); // NOTRANSLATE: Diagnostic message.
 		}
 
 	return TRUE;
@@ -2040,7 +2048,7 @@ static void dupe_thumb_step(DupeWindow *dw)
 	if (!thumb_loader_start(dw->thumb_loader, di->fd))
 		{
 		/* error, handle it, do next */
-		DEBUG_1("error loading thumb for %s", di->fd->path);
+		DEBUG_LOG(DebugCategory::DUPLICATES, 1, "error loading thumb for %s", di->fd->path); // NOTRANSLATE: Diagnostic message.
 		dupe_thumb_do(dw);
 		dupe_thumb_step(dw);
 		}
@@ -5282,7 +5290,7 @@ static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify dupe: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::DUPLICATES, 3, "Notify dupe: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

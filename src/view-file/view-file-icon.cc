@@ -498,7 +498,7 @@ static void vficon_select_region_util(ViewFile *vf, FileData *start, FileData *e
 		std::swap(col1, col2);
 		}
 
-	DEBUG_1("table: %d x %d to %d x %d", row1, col1, row2, col2);
+	DEBUG_LOG(DebugCategory::UI, 4, "table: %d x %d to %d x %d", row1, col1, row2, col2); // NOTRANSLATE: Diagnostic message.
 
 	for (i = row1; i <= row2; i++)
 		{
@@ -1277,7 +1277,7 @@ static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint, gboolean for
 
 	vficon_populate(vf, TRUE, keep_position);
 
-	DEBUG_1("col tab pop cols=%d rows=%d", VFICON(vf)->columns, VFICON(vf)->rows);
+	DEBUG_LOG(DebugCategory::UI, 4, "col tab pop cols=%d rows=%d", VFICON(vf)->columns, VFICON(vf)->rows); // NOTRANSLATE: Diagnostic message.
 }
 
 static gint vficon_viewport_width(ViewFile *vf)

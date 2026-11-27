@@ -86,8 +86,6 @@ void debug_level_add(gint delta);
 gint required_debug_level(gint level);
 /** Initialize the common monotonic timer without resetting an existing origin. */
 void init_debug_timer();
-const gchar *get_exec_time();
-void init_exec_time();
 void set_regexp(const gchar *regexp);
 gchar *get_regexp();
 void log_print_backtrace(const gchar *file, gint line_number, const gchar *function_name);
@@ -104,20 +102,6 @@ void log_print_ru(const gchar *file, gint line_number, const gchar *function_nam
 			{ \
 			log_debug_category(gq_debug_category, gq_debug_level, __FILE__, __LINE__, __func__, __VA_ARGS__); \
 			} \
-		} \
-	G_STMT_END
-
-#define DEBUG_N(n, ...) \
-	G_STMT_START \
-		{ \
-		_Pragma("GCC diagnostic push") \
-		_Pragma("GCC diagnostic ignored \"-Wformat\"") \
-		const gint gq_legacy_level = (n); \
-		if (gq_legacy_level == 0 || debug_enabled(DebugCategory::GENERAL, gq_legacy_level)) \
-			{ \
-			log_debug_category(DebugCategory::GENERAL, gq_legacy_level, __FILE__, __LINE__, __func__, __VA_ARGS__); \
-			} \
-		_Pragma("GCC diagnostic pop") \
 		} \
 	G_STMT_END
 
@@ -170,9 +154,6 @@ void log_print_ru(const gchar *file, gint line_number, const gchar *function_nam
 #define set_regexp(regexp) G_STMT_START { } G_STMT_END
 #define get_regexp() (0)
 
-#define DEBUG_N(n, ...) G_STMT_START { } G_STMT_END
-#define get_exec_time() ""
-#define init_exec_time() G_STMT_START { } G_STMT_END
 #define DEBUG_0(...) G_STMT_START { } G_STMT_END
 #define DEBUG_LOG(category, level, ...) G_STMT_START { } G_STMT_END
 
@@ -183,11 +164,6 @@ void log_print_ru(const gchar *file, gint line_number, const gchar *function_nam
 
 #endif /* DEBUG */
 
-
-#define DEBUG_1(...) DEBUG_N(1, __VA_ARGS__)
-#define DEBUG_2(...) DEBUG_N(2, __VA_ARGS__)
-#define DEBUG_3(...) DEBUG_N(3, __VA_ARGS__)
-#define DEBUG_4(...) DEBUG_N(4, __VA_ARGS__)
 
 #endif /* DEBUG_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

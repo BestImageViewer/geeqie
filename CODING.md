@@ -63,9 +63,8 @@ Use these verbosity levels for new or migrated messages:
 Use `DEBUG_LOG()` for ordinary diagnostics. It retains compiler printf-format
 checking and does not evaluate format arguments when its category or level is
 disabled, including in release builds. Keep debug arguments free of required side
-effects. Numbered compatibility macros remain temporarily in the general category until
-their callers are migrated. Their historical format-warning suppression remains
-only during that transition.
+effects. The old numbered debug macros have been removed; the debug-statement
+check rejects their reintroduction.
 
 Categorized debug messages use the same record format:
 

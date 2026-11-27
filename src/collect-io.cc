@@ -150,7 +150,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	g_autofree gchar *absolute_path = g_canonicalize_filename(path, nullptr);
 	g_autofree gchar *directory = g_path_get_dirname(absolute_path);
 
-	DEBUG_1("collection load: append=%d flush=%d path=%s", append, flush, pathl);
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection load: append=%d flush=%d path=%s", append, flush, pathl); // NOTRANSLATE: Diagnostic message.
 
 	/* load it */
 	f = fopen(pathl, "r");
@@ -278,7 +278,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			}
 
 		log_printf("Warning: Collection: %s Invalid file: %s", cd->name, filename); // NOTRANSLATE: Diagnostic message.
-		DEBUG_1("collection invalid file: %s", filename);
+		DEBUG_LOG(DebugCategory::COLLECTIONS, 1, "collection invalid file: %s", filename); // NOTRANSLATE: Diagnostic message.
 
 		fail++;
 		if (limit_failures && fail > GQ_COLLECTION_FAIL_MIN && fail * 100 / total > GQ_COLLECTION_FAIL_PERCENT)
@@ -289,7 +289,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			}
 		}
 
-	DEBUG_1("collection files: total = %u fail = %u official=%d gqview=%d", total, fail, has_official_header, has_gqview_header);
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection files: total = %u fail = %u official=%d gqview=%d", total, fail, has_official_header, has_gqview_header); // NOTRANSLATE: Diagnostic message.
 
 	fclose(f);
 
@@ -639,7 +639,7 @@ void CollectManager::refresh()
 
 void CollectManager::process_actions(gint max)
 {
-	if (!action_list.empty()) DEBUG_1("collection manager processing actions");
+	if (!action_list.empty()) DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection manager processing actions"); // NOTRANSLATE: Diagnostic message.
 
 	while (!action_list.empty() && max > 0)
 		{
@@ -702,7 +702,7 @@ gboolean CollectManager::process()
 
 	if (std::any_of(entry_list.cbegin(), entry_list.cend(), collect_manager_entry_process)) return G_SOURCE_CONTINUE;
 
-	DEBUG_1("collection manager is up to date");
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection manager is up to date"); // NOTRANSLATE: Diagnostic message.
 	return G_SOURCE_REMOVE;
 }
 
@@ -715,7 +715,7 @@ static gboolean collect_manager_process_cb(gpointer user_data)
 
 static gboolean collect_manager_timer_cb(gpointer user_data)
 {
-	DEBUG_1("collection manager timer expired");
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection manager timer expired"); // NOTRANSLATE: Diagnostic message.
 
 	auto *collect_manager = static_cast<CollectManager *>(user_data);
 
@@ -735,7 +735,7 @@ void CollectManager::add_action(CollectManagerAction *action)
 	if (timer_id == 0)
 		{
 		timer_id = g_timeout_add(FLUSH_DELAY, collect_manager_timer_cb, this);
-		DEBUG_1("collection manager timer started");
+		DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection manager timer started"); // NOTRANSLATE: Diagnostic message.
 		}
 }
 
@@ -804,7 +804,7 @@ void collect_manager_flush()
 {
 	g_clear_handle_id(&collect_manager.timer_id, g_source_remove);
 
-	DEBUG_1("collection manager flushing");
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection manager flushing"); // NOTRANSLATE: Diagnostic message.
 	while (collect_manager.process())
 		;
 }
@@ -813,7 +813,7 @@ void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify collect_manager: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 3, "Notify collect_manager: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 	switch (fd->change->type)
 		{
 		case FILEDATA_CHANGE_MOVE:

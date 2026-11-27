@@ -340,12 +340,12 @@ gboolean load_options(ConfOptions *)
 		{
 		g_autofree gchar *rc_path = g_build_filename(GQ_SYSTEM_WIDE_DIR, RC_FILE_NAME, NULL);
 		success = isfile(rc_path) && load_config_from_file(rc_path, TRUE);
-		DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed"); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::CONFIG, success ? 2 : 1, "Loading options from %s … %s", rc_path, success ? "done" : "failed"); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
 	success = isfile(rc_path) && load_config_from_file(rc_path, TRUE);
-	DEBUG_1("Loading options from %s … %s", rc_path, success ? "done" : "failed"); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::CONFIG, success ? 2 : 1, "Loading options from %s … %s", rc_path, success ? "done" : "failed"); // NOTRANSLATE: Diagnostic message.
 	return success;
 }
 

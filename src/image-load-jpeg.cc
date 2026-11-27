@@ -330,7 +330,7 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 		if (cinfo.image_width != cinfo2.image_width ||
 		    cinfo.image_height != cinfo2.image_height)
 			{
-			DEBUG_1("stereo data with different size");
+			DEBUG_LOG(DebugCategory::IMAGE, 1, "stereo data with different size"); // NOTRANSLATE: Diagnostic message.
 			jpeg_destroy_decompress(&cinfo2);
 			stereo = FALSE;
 			}
@@ -391,7 +391,7 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 		    cinfo.output_height != cinfo2.output_height ||
 		    cinfo.out_color_components != cinfo2.out_color_components)
 			{
-			DEBUG_1("stereo data with different output size");
+			DEBUG_LOG(DebugCategory::IMAGE, 1, "stereo data with different output size"); // NOTRANSLATE: Diagnostic message.
 			jpeg_destroy_decompress(&cinfo2);
 			stereo = FALSE;
 			}

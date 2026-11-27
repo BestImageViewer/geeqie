@@ -785,7 +785,7 @@ static void image_osd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (((type & NOTIFY_HISTMAP) || (type & NOTIFY_METADATA)) && osd->imd && fd == osd->imd->image_fd)
 		{
-		DEBUG_1("Notify osd: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::RENDER, 3, "Notify osd: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		osd->notify = static_cast<NotifyType>(osd->notify | type);
 		image_osd_update_schedule(osd, FALSE);
 		}

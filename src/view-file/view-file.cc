@@ -3029,7 +3029,7 @@ static gboolean vf_thumb_next(ViewFile *vf)
 	if (!thumb_loader_start(vf->thumbs_loader, fd))
 		{
 		/* set icon to unknown, continue */
-		DEBUG_1("thumb loader start failed %s", fd->path);
+		DEBUG_LOG(DebugCategory::THUMBNAILS, 1, "thumb loader start failed %s", fd->path);
 		vf_thumb_do(vf, fd);
 
 		return TRUE;
@@ -3448,7 +3448,7 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 		}
 	if (refresh)
 		{
-		DEBUG_1("Notify vf: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 3, "Notify vf: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		vf_refresh_idle(vf);
 		}
 }

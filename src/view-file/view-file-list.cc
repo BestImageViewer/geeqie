@@ -1975,13 +1975,16 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 
 gboolean vflist_refresh(ViewFile *vf)
 {
+#ifdef DEBUG
+	const gint64 refresh_start = g_get_monotonic_time();
+#endif
 	GList *old_list;
 	gboolean ret = TRUE;
 
 	old_list = vf->list;
 	vf->list = nullptr;
 
-	DEBUG_1("%s vflist_refresh: read dir", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 2, "vflist_refresh: read dir"); // NOTRANSLATE: Diagnostic message.
 	if (vf->dir_fd || vf->collection)
 		{
 		file_data_unregister_notify_func(vf_notify_cb, vf); /* we don't need the notification of changes detected by filelist_read */
@@ -2016,11 +2019,11 @@ gboolean vflist_refresh(ViewFile *vf)
 
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 
-		DEBUG_1("%s vflist_refresh: sort", get_exec_time());
+		DEBUG_LOG(DebugCategory::UI, 2, "vflist_refresh: sort"); // NOTRANSLATE: Diagnostic message.
 		vf->list = vf_filelist_sort(vf, vf->list);
 		}
 
-	DEBUG_1("%s vflist_refresh: populate view", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 2, "vflist_refresh: populate view"); // NOTRANSLATE: Diagnostic message.
 
 	/* Metadata dates can change without a FileData version change. */
 	const gboolean metadata_date = vf->sort.method == SORT_EXIFTIME ||
@@ -2028,10 +2031,10 @@ gboolean vflist_refresh(ViewFile *vf)
 	                               vf->sort.method == SORT_MEDIA_TIME;
 	vflist_populate_view(vf, metadata_date || vf->collection);
 
-	DEBUG_1("%s vflist_refresh: free filelist", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 2, "vflist_refresh: free filelist"); // NOTRANSLATE: Diagnostic message.
 
 	file_data_list_free(old_list);
-	DEBUG_1("%s vflist_refresh: done", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 2, "File list refreshed: files=%u, success=%d, elapsed=%.3f s", g_list_length(vf->list), ret, static_cast<double>(g_get_monotonic_time() - refresh_start) / G_USEC_PER_SEC); // NOTRANSLATE: Diagnostic message.
 
 	return ret;
 }

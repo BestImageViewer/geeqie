@@ -1570,7 +1570,7 @@ guchar *exif_get_preview(const ExifData *exif, gsize &data_len, gint, gint)
 	guint offset;
 	if (format_raw_img_exif_offsets(source_data, source_size, &offset, nullptr) && offset)
 		{
-		DEBUG_1("%s: offset %u", path, offset);
+		DEBUG_LOG(DebugCategory::METADATA, 3, "%s: offset %u", path, offset); // NOTRANSLATE: Diagnostic message.
 
 		guchar *ptr = source_data + offset;
 		data_len = source_size - offset;

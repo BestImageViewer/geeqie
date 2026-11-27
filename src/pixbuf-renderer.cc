@@ -1445,7 +1445,7 @@ static gdouble pr_zoom_adjust(const PixbufRenderer *pr, gdouble increment)
 
 static void pr_update_signal(PixbufRenderer *pr)
 {
-	DEBUG_1("%s pixbuf renderer updated - started drawing %p, img: %dx%d", get_exec_time(), (void *)pr, pr->image_width, pr->image_height);
+	DEBUG_LOG(DebugCategory::RENDER, 4, "pixbuf renderer updated - started drawing %p, img: %dx%d", (void *)pr, pr->image_width, pr->image_height); // NOTRANSLATE: Diagnostic message.
 	pr->debug_updated = TRUE;
 }
 
@@ -1493,7 +1493,7 @@ void pr_render_complete_signal(PixbufRenderer *pr)
 		}
 	if (pr->debug_updated)
 		{
-		DEBUG_1("%s pixbuf renderer done %p", get_exec_time(), (void *)pr);
+		DEBUG_LOG(DebugCategory::RENDER, 4, "pixbuf renderer done %p", (void *)pr); // NOTRANSLATE: Diagnostic message.
 		pr->debug_updated = FALSE;
 		}
 }

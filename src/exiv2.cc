@@ -100,7 +100,7 @@ static constexpr AltKey alt_keys[] = {
 static void debug_exception_impl(const char* file, int line, const char* func, Exiv2::AnyError& e)
 {
 	g_autofree gchar *str = g_locale_from_utf8(e.what(), -1, nullptr, nullptr, nullptr);
-	DEBUG_1("%s:%d:%s:Exiv2: %s", file, line, func, str);
+	DEBUG_LOG(DebugCategory::METADATA, 3, "%s:%d:%s:Exiv2: %s", file, line, func, str); // NOTRANSLATE: Diagnostic message.
 }
 
 #  define debug_exception(e) debug_exception_impl(__FILE__, __LINE__, __func__, e)
@@ -382,7 +382,7 @@ public:
 			}
 		catch (...)
 			{
-			DEBUG_1("Exiv2: Catching bug\n"); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::METADATA, 1, "Exiv2: Catching bug\n"); // NOTRANSLATE: Diagnostic message.
 			}
 		initialExifData_ = exifData_;
 		initialIptcData_ = iptcData_;
@@ -532,7 +532,7 @@ void exif_init()
 
 ExifData *exif_read(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
 {
-	DEBUG_1("exif read %s, sidecar: %s", path, sidecar_path ? sidecar_path : "-");
+	DEBUG_LOG(DebugCategory::METADATA, 3, "exif read %s, sidecar: %s", path, sidecar_path ? sidecar_path : "-"); // NOTRANSLATE: Diagnostic message.
 	try {
 		return new ExifDataProcessed(path, sidecar_path, modified_xmp);
 	}

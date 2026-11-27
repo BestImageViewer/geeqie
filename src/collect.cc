@@ -461,7 +461,7 @@ static void collection_free(CollectionData *cd)
 {
 	if (!cd) return;
 
-	DEBUG_1("collection \"%s\" freed", cd->name);
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 4, "collection \"%s\" freed", cd->name); // NOTRANSLATE: Diagnostic message.
 
 	collection_list_clear(&cd->list);
 
@@ -482,7 +482,7 @@ CollectionData *collection_ref(CollectionData *cd)
 {
 	cd->ref++;
 
-	DEBUG_1("collection \"%s\" ref count = %d", cd->name, cd->ref);
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 4, "collection \"%s\" ref count = %d", cd->name, cd->ref); // NOTRANSLATE: Diagnostic message.
 	return cd;
 }
 
@@ -490,7 +490,7 @@ void collection_unref(CollectionData *cd)
 {
 	cd->ref--;
 
-	DEBUG_1("collection \"%s\" ref count = %d", cd->name, cd->ref);
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 4, "collection \"%s\" ref count = %d", cd->name, cd->ref); // NOTRANSLATE: Diagnostic message.
 
 	if (cd->ref < 1)
 		{
@@ -647,7 +647,7 @@ static gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean 
 	CollectInfo *ci = collection_info_new_if_not_exists(cd, fd, infotext);
 	if (!ci) return FALSE;
 
-	DEBUG_3("add to collection: %s", fd->path);
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 3, "add to collection: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 
 	cd->list = collection_list_add(cd->list, ci, sorted ? cd->sort_method : SORT_NONE);
 	cd->changed = TRUE;
@@ -676,7 +676,7 @@ gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert
 	CollectInfo *ci = collection_info_new_if_not_exists(cd, fd, nullptr);
 	if (!ci) return FALSE;
 
-	DEBUG_3("insert in collection: %s", fd->path);
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 3, "insert in collection: %s", fd->path); // NOTRANSLATE: Diagnostic message.
 
 	cd->list = collection_list_insert(cd->list, ci, insert_ci, sorted ? cd->sort_method : SORT_NONE);
 	cd->changed = TRUE;
@@ -731,7 +731,7 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify collection: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::COLLECTIONS, 3, "Notify collection: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

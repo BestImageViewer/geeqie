@@ -3624,7 +3624,7 @@ static void search_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify search: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::UI, 3, "Notify search: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

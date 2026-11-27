@@ -667,8 +667,8 @@ void startup_common(GtkApplication *, gpointer)
 	/* seg. fault handler */
 	setup_sig_handler();
 
-	/* init execution time counter (debug only) */
-	init_exec_time();
+	/* Initialize the shared monotonic debug clock. */
+	init_debug_timer();
 
 	create_application_paths();
 
@@ -713,18 +713,18 @@ void startup_common(GtkApplication *, gpointer)
 		log_printf("!!! %s may quit unexpectedly with a relocation error.\n", GQ_APPNAME);
 		}
 
-	DEBUG_1("%s main: pixbuf_inline_register_stock_icons", get_exec_time());
+	DEBUG_LOG(DebugCategory::GENERAL, 2, "main: pixbuf_inline_register_stock_icons"); // NOTRANSLATE: Diagnostic message.
 	gtk_icon_theme_add_resource_path(gtk_icon_theme_get_for_display(gdk_display_get_default()), GQ_RESOURCE_PATH_ICONS);
 	pixbuf_inline_register_stock_icons();
 
-	DEBUG_1("%s main: setting default options before commandline handling", get_exec_time());
+	DEBUG_LOG(DebugCategory::GENERAL, 2, "main: setting default options before commandline handling"); // NOTRANSLATE: Diagnostic message.
 	options = conf_options_new();
 	setup_default_options(options);
 	bookmark_setup_default();
 	/* Generate a unique identifier used by the open archive function */
 	instance_identifier = g_strdup_printf("%x", g_random_int());
 
-	DEBUG_1("%s main: mkdir_if_not_exists", get_exec_time());
+	DEBUG_LOG(DebugCategory::GENERAL, 2, "main: mkdir_if_not_exists"); // NOTRANSLATE: Diagnostic message.
 	/* these functions don't depend on config file */
 	mkdir_if_not_exists(get_rc_dir());
 	mkdir_if_not_exists(get_collections_dir());

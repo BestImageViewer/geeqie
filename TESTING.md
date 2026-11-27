@@ -440,7 +440,7 @@ Domains supported are `general`, `thumbnails`, `cache`, `image`, `render`,
 `metadata`, `files`, `ui`, `duplicates`, `config`, `collections`, and `external`.
 The initial filter is `all`; omitting `--debug-domains` leaves the current filter
 unchanged. Use `all` to reset a filter or `none` to disable ordinary debug output.
-Numbered compatibility calls remain until their callers are migrated. Per-file messages normally
+All ordinary source diagnostics use categorized calls. Per-file messages normally
 require level 3, rendering and ownership internals level 4. Directory-scan and
 file-list refresh summaries at level 2 include elapsed time. Domain filtering
 does not affect warnings and errors logged with `log_printf()`.

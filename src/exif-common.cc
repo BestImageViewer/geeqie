@@ -972,7 +972,7 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 
 	if (profile.ptr)
 		{
-		DEBUG_1("Found embedded color profile"); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::RENDER, 2, "Found embedded color profile"); // NOTRANSLATE: Diagnostic message.
 		color_profile_from_image = COLOR_PROFILE_MEM;
 		}
 	else
@@ -985,12 +985,12 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 			if (!strcmp(interop_index, "R98"))
 				{
 				color_profile_from_image = COLOR_PROFILE_SRGB;
-				DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB"); // NOTRANSLATE: Diagnostic message.
+				DEBUG_LOG(DebugCategory::RENDER, 2, "Found EXIF 2.21 ColorSpace of sRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			else if (!strcmp(interop_index, "R03"))
 				{
 				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-				DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB"); // NOTRANSLATE: Diagnostic message.
+				DEBUG_LOG(DebugCategory::RENDER, 2, "Found EXIF 2.21 ColorSpace of AdobeRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 		else
@@ -1001,13 +1001,13 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 			if (cs == 1)
 				{
 				color_profile_from_image = COLOR_PROFILE_SRGB;
-				DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB"); // NOTRANSLATE: Diagnostic message.
+				DEBUG_LOG(DebugCategory::RENDER, 2, "Found EXIF 2.2 ColorSpace of sRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			else if (cs == 2)
 				{
 				/* non-standard way of specifying AdobeRGB (used by some software) */
 				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-				DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB"); // NOTRANSLATE: Diagnostic message.
+				DEBUG_LOG(DebugCategory::RENDER, 2, "Found EXIF 2.2 ColorSpace of AdobeRGB"); // NOTRANSLATE: Diagnostic message.
 				}
 			}
 		}
@@ -1077,7 +1077,7 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 		cp_offset += chunk.length;
 		}
 
-	DEBUG_1("Found embedded icc profile in jpeg"); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::RENDER, 2, "Found embedded icc profile in jpeg"); // NOTRANSLATE: Diagnostic message.
 	exif_add_jpeg_color_profile(exif, g_steal_pointer(&cp_data), cp_length);
 
 	return true;

@@ -137,17 +137,17 @@ gint mpo_parse_Index_IFD_entry(const guchar *tiff, guint offset, guint size, Tif
                                MPOData &mpo)
 {
 	const TiffTag tt{tiff + offset, bo};
-	DEBUG_1("   tag %x format %x count %x data_val %x", tt.tag, tt.format, tt.count, tt.data_val);
+	DEBUG_LOG(DebugCategory::IMAGE, 4, "   tag %x format %x count %x data_val %x", tt.tag, tt.format, tt.count, tt.data_val); // NOTRANSLATE: Diagnostic message.
 
 	if (tt.tag == 0xb000)
 		{
 		mpo.version = tt.data_val;
-		DEBUG_1("    mpo version %x", mpo.version);
+		DEBUG_LOG(DebugCategory::IMAGE, 4, "    mpo version %x", mpo.version); // NOTRANSLATE: Diagnostic message.
 		}
 	else if (tt.tag == 0xb001)
 		{
 		mpo.num_images = tt.data_val;
-		DEBUG_1("    num images %x", mpo.num_images);
+		DEBUG_LOG(DebugCategory::IMAGE, 4, "    num images %x", mpo.num_images); // NOTRANSLATE: Diagnostic message.
 		}
 	else if (tt.tag == 0xb002)
 		{
@@ -178,7 +178,7 @@ gint mpo_parse_Index_IFD_entry(const guchar *tiff, guint offset, guint size, Tif
 			mpe.dep1 = tiff_byte_get_int16(tiff + data_offset + (i * 16) + 12, bo);
 			mpe.dep2 = tiff_byte_get_int16(tiff + data_offset + (i * 16) + 14, bo);
 
-			DEBUG_1("   image %x %x %x", image_attr, mpe.length, mpe.offset);
+			DEBUG_LOG(DebugCategory::IMAGE, 4, "   image %x %x %x", image_attr, mpe.length, mpe.offset); // NOTRANSLATE: Diagnostic message.
 			mpo.images.push_back(mpe);
 			}
 		}
@@ -190,17 +190,17 @@ gint mpo_parse_Attributes_IFD_entry(const guchar *tiff, guint offset, TiffByteOr
                                     MPOEntry &mpe)
 {
 	const TiffTag tt{tiff + offset, bo};
-	DEBUG_1("   tag %x format %x count %x data_val %x", tt.tag, tt.format, tt.count, tt.data_val);
+	DEBUG_LOG(DebugCategory::IMAGE, 4, "   tag %x format %x count %x data_val %x", tt.tag, tt.format, tt.count, tt.data_val); // NOTRANSLATE: Diagnostic message.
 
 	switch (tt.tag)
 		{
 		case 0xb000:
 			mpe.MPFVersion = tt.data_val;
-			DEBUG_1("    mpf version %x", mpe.MPFVersion);
+			DEBUG_LOG(DebugCategory::IMAGE, 4, "    mpf version %x", mpe.MPFVersion); // NOTRANSLATE: Diagnostic message.
 			break;
 		case 0xb101:
 			mpe.MPIndividualNum = tt.data_val;
-			DEBUG_1("    Individual Image Number %x", mpe.MPIndividualNum);
+			DEBUG_LOG(DebugCategory::IMAGE, 4, "    Individual Image Number %x", mpe.MPIndividualNum); // NOTRANSLATE: Diagnostic message.
 			break;
 		case 0xb201:
 			mpe.PanOrientation = tt.data_val;
@@ -283,7 +283,7 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 	JpegSegment seg;
 	if (!jpeg_segment_find(data, size, JPEG_MARKER_APP2, magic, seg) || seg.length <= 16) return {};
 
-	DEBUG_1("mpo signature found at %x", seg.offset);
+	DEBUG_LOG(DebugCategory::IMAGE, 4, "mpo signature found at %x", seg.offset); // NOTRANSLATE: Diagnostic message.
 	seg.offset += magic.size();
 	seg.length -= magic.size();
 
@@ -307,7 +307,7 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 		{
 		[[maybe_unused]] const guint mpe_size = it->offset + it->length;
 		mpo.images.erase(it, mpo.images.end());
-		DEBUG_1("MPO file truncated to %u valid images, %u %u", mpo.images.size(), mpe_size, size);
+		DEBUG_LOG(DebugCategory::IMAGE, 1, "MPO file truncated to %zu valid images, %u %u", mpo.images.size(), mpe_size, size); // NOTRANSLATE: Diagnostic message.
 		}
 
 	mpo.num_images = mpo.images.size();
@@ -322,7 +322,7 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 			{
 			if (!jpeg_segment_find(data + mpo.images[i].offset, mpo.images[i].length, JPEG_MARKER_APP2, magic, seg) || seg.length <= 16)
 				{
-				DEBUG_1("MPO image %u: MPO signature not found", i);
+				DEBUG_LOG(DebugCategory::IMAGE, 1, "MPO image %u: MPO signature not found", i); // NOTRANSLATE: Diagnostic message.
 				continue;
 				}
 
@@ -330,7 +330,7 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 			seg.length -= magic.size();
 			if (!tiff_directory_offset(data + mpo.images[i].offset + seg.offset, seg.length, offset, bo))
 				{
-				DEBUG_1("MPO image %u: invalid directory offset", i);
+				DEBUG_LOG(DebugCategory::IMAGE, 1, "MPO image %u: invalid directory offset", i); // NOTRANSLATE: Diagnostic message.
 				continue;
 				}
 

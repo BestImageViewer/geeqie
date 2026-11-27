@@ -67,7 +67,7 @@ void image_loader_ft_log_cb(ThumbnailerLogLevel log_level, const char* msg)
 	if (log_level == ThumbnailerLogLevelError)
 		log_printf("ImageLoaderFFmpegthumbnailer: %s",msg); // NOTRANSLATE: Diagnostic message.
 	else
-		DEBUG_1("ImageLoaderFFmpegthumbnailer: %s",msg); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::THUMBNAILS, 3, "ImageLoaderFFmpegthumbnailer: %s",msg); // NOTRANSLATE: Diagnostic message.
 }
 #endif
 
@@ -107,7 +107,7 @@ void ImageLoaderFT::set_size(int width, int height)
 {
 	requested_width = width;
 	requested_height = height;
-	DEBUG_1("TG: setting size, w=%d, h=%d", width, height);
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 3, "TG: setting size, w=%d, h=%d", width, height); // NOTRANSLATE: Diagnostic message.
 }
 
 gboolean ImageLoaderFT::write(const guchar *, gsize &chunk_size, gsize count, GError **)
@@ -145,7 +145,7 @@ gboolean ImageLoaderFT::write(const guchar *, gsize &chunk_size, gsize count, GE
 	if (image_stream == nullptr)
 		{
 		video_thumbnailer_destroy_image_data (image);
-		DEBUG_1("FFmpegthumbnailer: cannot open stream for %s", il->fd->path);
+		DEBUG_LOG(DebugCategory::THUMBNAILS, 1, "FFmpegthumbnailer: cannot open stream for %s", il->fd->path); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 
@@ -157,7 +157,7 @@ gboolean ImageLoaderFT::write(const guchar *, gsize &chunk_size, gsize count, GE
 
 	if (!pixbuf)
 		{
-		DEBUG_1("FFmpegthumbnailer: no frame generated for %s", il->fd->path);
+		DEBUG_LOG(DebugCategory::THUMBNAILS, 1, "FFmpegthumbnailer: no frame generated for %s", il->fd->path); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 

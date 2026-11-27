@@ -294,11 +294,11 @@ static void metadata_cache_update(FileData *fd, const gchar *key, const GList *v
 
 	if (!g_hash_table_insert(fd->cached_metadata, g_strdup(key), string_list_copy(values)))
 		{
-		DEBUG_1("updated %s %s\n", key, fd->path);
+		DEBUG_LOG(DebugCategory::METADATA, 3, "updated %s %s\n", key, fd->path); // NOTRANSLATE: Diagnostic message.
 		return;
 		}
 
-	DEBUG_1("added %s %s\n", key, fd->path);
+	DEBUG_LOG(DebugCategory::METADATA, 3, "added %s %s\n", key, fd->path); // NOTRANSLATE: Diagnostic message.
 }
 
 static const GList *metadata_cache_get(const FileData *fd, const gchar *key)
@@ -308,11 +308,11 @@ static const GList *metadata_cache_get(const FileData *fd, const gchar *key)
 	gpointer values = g_hash_table_lookup(fd->cached_metadata, key);
 	if (!values)
 		{
-		DEBUG_1("not found %s %s\n", key, fd->path);
+		DEBUG_LOG(DebugCategory::METADATA, 3, "not found %s %s\n", key, fd->path); // NOTRANSLATE: Diagnostic message.
 		return nullptr;
 		}
 
-	DEBUG_1("found %s %s\n", key, fd->path);
+	DEBUG_LOG(DebugCategory::METADATA, 3, "found %s %s\n", key, fd->path); // NOTRANSLATE: Diagnostic message.
 	return static_cast<const GList *>(values);
 }
 
@@ -322,11 +322,11 @@ static void metadata_cache_remove(FileData *fd, const gchar *key)
 
 	if (g_hash_table_remove(fd->cached_metadata, key))
 		{
-		DEBUG_1("removed %s %s\n", key, fd->path);
+		DEBUG_LOG(DebugCategory::METADATA, 3, "removed %s %s\n", key, fd->path); // NOTRANSLATE: Diagnostic message.
 		return;
 		}
 
-	DEBUG_1("not removed %s %s\n", key, fd->path);
+	DEBUG_LOG(DebugCategory::METADATA, 3, "not removed %s %s\n", key, fd->path); // NOTRANSLATE: Diagnostic message.
 }
 
 void metadata_cache_free(FileData *fd)
@@ -334,7 +334,7 @@ void metadata_cache_free(FileData *fd)
 	if (!fd->cached_metadata) return;
 
 	g_clear_pointer(&fd->cached_metadata, g_hash_table_destroy);
-	DEBUG_1("freed %s\n", fd->path);
+	DEBUG_LOG(DebugCategory::METADATA, 3, "freed %s\n", fd->path); // NOTRANSLATE: Diagnostic message.
 }
 
 
@@ -391,7 +391,7 @@ void metadata_notify_cb(FileData *fd, NotifyType type, gpointer)
 
 		if (g_list_find(metadata_write_queue, fd))
 			{
-			DEBUG_1("Notify metadata: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::METADATA, 3, "Notify metadata: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 			if (!isname(fd->path))
 				{
 				/* ignore deleted files */
@@ -591,7 +591,7 @@ static gboolean metadata_legacy_write(FileData *fd)
 
 	g_assert(fd->change && fd->change->dest);
 
-	DEBUG_1("Saving description: %s", fd->change->dest); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::METADATA, 3, "Saving description: %s", fd->change->dest); // NOTRANSLATE: Diagnostic message.
 
 	if (!fd->modified_xmp) return TRUE;
 
@@ -914,7 +914,7 @@ gdouble metadata_read_GPS_direction(FileData *fd, const gchar *key, gdouble fall
 	g_autofree gchar *string = metadata_read_string(fd, key, METADATA_PLAIN);
 	if (!string) return fallback;
 
-	DEBUG_3("GPS_direction: %s\n", string);
+	DEBUG_LOG(DebugCategory::METADATA, 3, "GPS_direction: %s\n", string); // NOTRANSLATE: Diagnostic message.
 	deg = g_ascii_strtod(string, &endptr);
 
 	/* Expected text string is of the format e.g.:

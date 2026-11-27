@@ -1046,7 +1046,7 @@ static GdkContentProvider *layout_image_dnd_prepare(GtkDragSource *source, gdoub
 	const gint i = layout_image_dnd_split_index(lw, widget);
 	if (i >= 0)
 		{
-		DEBUG_1("dnd get from %d", i);
+		DEBUG_LOG(DebugCategory::UI, 3, "dnd get from %d", i); // NOTRANSLATE: Diagnostic message.
 		imd = lw->split_images[i];
 		fd = image_get_fd(imd);
 		}
@@ -1096,7 +1096,7 @@ static void layout_image_dnd_activate_split(LayoutWindow *lw, GtkWidget *widget)
 
 	if (i >= 0)
 		{
-		DEBUG_1("dnd image activate %d", i);
+		DEBUG_LOG(DebugCategory::UI, 3, "dnd image activate %d", i); // NOTRANSLATE: Diagnostic message.
 		layout_image_activate(lw, i, FALSE);
 		}
 }
@@ -2024,7 +2024,7 @@ static void layout_image_focus_in_cb(ImageWindow *imd, gpointer data)
 
 	if (i != -1)
 		{
-		DEBUG_1("image activate focus_in %d", i);
+		DEBUG_LOG(DebugCategory::UI, 3, "image activate focus_in %d", i); // NOTRANSLATE: Diagnostic message.
 		layout_image_activate(lw, i, FALSE);
 		}
 }
@@ -2074,7 +2074,7 @@ static void layout_image_scroll_cb(ImageWindow *imd, const GqScrollEvent *event,
 
 	if (i != -1)
 		{
-		DEBUG_1("image activate scroll %d", i);
+		DEBUG_LOG(DebugCategory::UI, 3, "image activate scroll %d", i); // NOTRANSLATE: Diagnostic message.
 		layout_image_activate(lw, i, FALSE);
 		}
 
@@ -2777,7 +2777,7 @@ void layout_image_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify layout_image: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::UI, 3, "Notify layout_image: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

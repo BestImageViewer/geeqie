@@ -107,7 +107,7 @@ void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_METADATA | NOTIFY_PIXBUF)) && fd == prd->pane.fd)
 		{
-		DEBUG_1("Notify pane_rating: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 3, "Notify pane_rating: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		bar_pane_rating_update(prd);
 		}
 }

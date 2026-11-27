@@ -2273,7 +2273,7 @@ static void layout_menu_image_prev_cb(GSimpleAction *, GVariant *, gpointer)
 			{
 			if (lw->split_images[i])
 				{
-				DEBUG_1("image activate scroll %d", i);
+				DEBUG_LOG(DebugCategory::UI, 3, "image activate scroll %d", i); // NOTRANSLATE: Diagnostic message.
 				layout_image_activate(lw, i, FALSE);
 				layout_image_prev(lw);
 				}
@@ -2295,7 +2295,7 @@ static void layout_menu_image_next_cb(GSimpleAction *, GVariant *, gpointer)
 			{
 			if (lw->split_images[i])
 				{
-				DEBUG_1("image activate scroll %d", i);
+				DEBUG_LOG(DebugCategory::UI, 3, "image activate scroll %d", i); // NOTRANSLATE: Diagnostic message.
 				layout_image_activate(lw, i, FALSE);
 				layout_image_next(lw);
 				}
@@ -3061,7 +3061,7 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 
 	if (layout_editors->next_file < layout_editors->desktop_files.size()) return G_SOURCE_CONTINUE;
 
-	DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 3, "layout_editors_reload_idle_cb: setup_editors"); // NOTRANSLATE: Diagnostic message.
 	editor_table_finish();
 
 	layout_window_foreach([](LayoutWindow *lw)
@@ -3074,7 +3074,7 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 			}
 	});
 
-	DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors done", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 3, "layout_editors_reload_idle_cb: setup_editors done"); // NOTRANSLATE: Diagnostic message.
 
 	/* The toolbars need to be regenerated in case they contain a plugin */
 	LayoutWindow *cur_lw = get_current_layout();
@@ -3130,7 +3130,7 @@ static void layout_editors_discovered_cb(GObject *, GAsyncResult *result, gpoint
 
 void layout_editors_reload_start()
 {
-	DEBUG_1("%s layout_editors_reload_start", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 3, "layout_editors_reload_start"); // NOTRANSLATE: Diagnostic message.
 
 	// The plugin dialog can be opened before the first discovery completes.
 	if (!desktop_file_list) editor_table_clear();
@@ -3156,7 +3156,7 @@ void layout_editors_reload_finish()
 	if (layout_editors.discovery_task) layout_editors_take_discovery();
 	if (layout_editors.reload_idle_id == 0) return;
 
-	DEBUG_1("%s layout_editors_reload_finish", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 3, "layout_editors_reload_finish"); // NOTRANSLATE: Diagnostic message.
 
 	g_source_remove(layout_editors.reload_idle_id);
 	while (layout_editors.reload_idle_id != 0)

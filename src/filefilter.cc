@@ -234,7 +234,7 @@ void filter_add_defaults()
 		g_autofree gchar *name = gdk_pixbuf_format_get_name(format);
 		if (strcmp(name, "Digital camera RAW") == 0) // NOTRANSLATE: File-loader format name.
 			{
-			DEBUG_1("Skipped '%s' from loader", name); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::IMAGE, 2, "Skipped '%s' from loader", name); // NOTRANSLATE: Diagnostic message.
 			continue;
 			}
 
@@ -253,7 +253,7 @@ void filter_add_defaults()
 			g_string_append_printf(filter, ".%s", extensions[i]);
 			}
 
-		DEBUG_1("loader reported [%s] [%s] [%s]", name, desc, filter->str);
+		DEBUG_LOG(DebugCategory::IMAGE, 2, "loader reported [%s] [%s] [%s]", name, desc, filter->str); // NOTRANSLATE: Diagnostic message.
 
 		filter_add_if_missing(name, desc, filter->str, FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
 		}

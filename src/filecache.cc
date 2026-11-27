@@ -35,12 +35,12 @@ void FileCache::dump()
 {
 	if (!debug_file_cache) return;
 
-	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)this, max_size_, size_);
+	DEBUG_LOG(DebugCategory::CACHE, 2, "cache dump: fc=%p max size:%lu size:%lu", (void *)this, max_size_, size_);
 
 	size_t n = 0;
 	for (const auto &entry : contents_)
 		{
-		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)this, ++n, entry.fd->path, entry.size);
+		DEBUG_LOG(DebugCategory::CACHE, 2, "cache entry: fc=%p [%lu] %s %lu", (void *)this, ++n, entry.fd->path, entry.size);
 		}
 }
 #else
@@ -56,11 +56,11 @@ bool FileCache::remove_entry(FileCache::ListIterT entry_iter)
 	// Avoid evicting a FileCacheEntry that implicitly triggered this removal attempt.
 	if (entry.checking_if_changed)
 		{
-		DEBUG_1("deferring cache remove: fc=%p %s", (void *)this, entry.fd->path);
+		DEBUG_LOG(DebugCategory::CACHE, 2, "deferring cache remove: fc=%p %s", (void *)this, entry.fd->path);
 		return false;
 		}
 
-	DEBUG_1("cache remove: fc=%p %s", (void *)this, entry.fd->path);
+	DEBUG_LOG(DebugCategory::CACHE, 2, "cache remove: fc=%p %s", (void *)this, entry.fd->path);
 
 	size_ -= entry.size;
 	release_(entry.fd);
@@ -84,7 +84,7 @@ void FileCache::notify_cb(FileData *fd, NotifyType type, gpointer data)
 	/* invalidate the entry on each file change */
 	if (!(type & (NOTIFY_REREAD | NOTIFY_CHANGE))) return;
 
-	DEBUG_1("Notify cache: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::CACHE, 2, "Notify cache: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	auto *fc = static_cast<FileCache *>(data);
 	fc->dump();
@@ -165,18 +165,18 @@ bool FileCache::get(FileData *fd)
 		const auto maybe_entry_iter = find_by_fd(fd);
 		if (!maybe_entry_iter)
 			{
-			DEBUG_2("cache miss: fc=%p %s", (void *)this, fd->path);
+			DEBUG_LOG(DebugCategory::CACHE, 3, "cache miss: fc=%p %s", (void *)this, fd->path); // NOTRANSLATE: Diagnostic message.
 			return FALSE;
 			}
 		auto entry_iter = *maybe_entry_iter;
 
 		// Entry exists.
-		DEBUG_2("cache hit: fc=%p %s", (void *)this, fd->path);
+		DEBUG_LOG(DebugCategory::CACHE, 3, "cache hit: fc=%p %s", (void *)this, fd->path); // NOTRANSLATE: Diagnostic message.
 
 		// Move it to the beginning, if needed.
 		if (entry_iter != contents_.begin())
 			{
-			DEBUG_2("cache move to front: fc=%p %s", (void *)this, fd->path);
+			DEBUG_LOG(DebugCategory::CACHE, 3, "cache move to front: fc=%p %s", (void *)this, fd->path); // NOTRANSLATE: Diagnostic message.
 			// Moves entry_iter from somewhere in contents_ to before contents_.begin();
 			contents_.splice(contents_.begin(), contents_, entry_iter);
 			}
@@ -214,7 +214,7 @@ void FileCache::put(FileData *fd, size_t size)
 {
 	if (get(fd)) return;
 
-	DEBUG_2("cache add: fc=%p %s", (void *)this, fd->path);
+	DEBUG_LOG(DebugCategory::CACHE, 3, "cache add: fc=%p %s", (void *)this, fd->path); // NOTRANSLATE: Diagnostic message.
 	contents_.emplace_front(file_data_ref(fd), size);
 	entries_.emplace(fd, contents_.begin());
 	size_ += size;

@@ -238,7 +238,7 @@ static gboolean format_raw_parse(FormatRawEntry *entry,
 
 	if (!entry || !entry->func_parse) return FALSE;
 
-	DEBUG_1("RAW using file parser for %s", entry->description);
+	DEBUG_LOG(DebugCategory::IMAGE, 2, "RAW using file parser for %s", entry->description); // NOTRANSLATE: Diagnostic message.
 
 	found = entry->func_parse(data, len, &io, &eo);
 
@@ -328,7 +328,7 @@ gboolean format_raw_img_exif_offsets_fd(gint fd, const gchar *path,
 
 		if (!match) return FALSE;
 
-		DEBUG_1("RAW file parser extension match");
+		DEBUG_LOG(DebugCategory::IMAGE, 2, "RAW file parser extension match"); // NOTRANSLATE: Diagnostic message.
 		}
 
 	/**
@@ -421,7 +421,7 @@ gboolean format_exif_makernote_parse(ExifData *exif, guchar *tiff, guint offset,
 
 	if (!entry || !entry->func_parse) return FALSE;
 
-	DEBUG_1("EXIF using makernote parser for %s", entry->description);
+	DEBUG_LOG(DebugCategory::METADATA, 2, "EXIF using makernote parser for %s", entry->description); // NOTRANSLATE: Diagnostic message.
 
 	return entry->func_parse(exif, tiff, offset, size, bo);
 }

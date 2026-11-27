@@ -89,7 +89,7 @@ bool HistoryChain::push_back(const gchar *path)
 		if (g_strcmp0(chain.back(), path) != 0)
 			{
 			chain.push_back(g_strdup(path));
-			DEBUG_3("%d %s", chain.size() - 1, path);
+			DEBUG_LOG(DebugCategory::UI, 3, "%zu %s", chain.size() - 1, path); // NOTRANSLATE: Diagnostic message.
 			}
 
 		index = chain.size() - 1;

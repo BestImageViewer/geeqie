@@ -1602,7 +1602,7 @@ static void view_window_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify view_window: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::UI, 3, "Notify view_window: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	switch (fd->change->type)
 		{

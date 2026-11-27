@@ -321,7 +321,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 
 	if (!cm->list)
 		{
-		DEBUG_1("purge chk done.");
+		DEBUG_LOG(DebugCategory::CACHE, 2, "purge chk done."); // NOTRANSLATE: Diagnostic message.
 		cm->idle_id = 0;
 		cache_maintain_home_stop(cm);
 		return G_SOURCE_REMOVE;
@@ -330,7 +330,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 	fd = static_cast<FileData *>(cm->list->data);
 	if (cm->app) cache_maintenance_update_file(fd->path);
 
-	DEBUG_1("purge chk (%d) \"%s\"", (cm->clear && !cm->metadata), fd->path);
+	DEBUG_LOG(DebugCategory::CACHE, 3, "purge chk (%d) \"%s\"", (cm->clear && !cm->metadata), fd->path); // NOTRANSLATE: Diagnostic message.
 
 /**
  * It is necessary to disable the file filter when clearing the cache,
@@ -554,7 +554,7 @@ static void cache_maint_moved(FileData *fd)
 
 		if (!move_file(src_path, dest_path))
 			{
-			DEBUG_1("Failed to move cache file \"%s\" to \"%s\"", src_path, dest_path); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::CACHE, 1, "Failed to move cache file \"%s\" to \"%s\"", src_path, dest_path); // NOTRANSLATE: Diagnostic message.
 			/* we remove it anyway - it's stale */
 			unlink_file(src_path);
 			}
@@ -577,7 +577,7 @@ static void cache_maint_removed(FileData *fd)
 
 		if (!unlink_file(path))
 			{
-			DEBUG_1("Failed to remove cache file %s", path); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::CACHE, 1, "Failed to remove cache file %s", path); // NOTRANSLATE: Diagnostic message.
 			}
 	};
 
@@ -600,7 +600,7 @@ static void cache_maint_copied(FileData *fd)
 	g_autofree gchar *dest_path = cache_get_location(CacheType::METADATA, fd->change->dest);
 	if (!copy_file(src_path, dest_path))
 		{
-		DEBUG_1("failed to copy metadata %s to %s", src_path, dest_path);
+		DEBUG_LOG(DebugCategory::CACHE, 1, "failed to copy metadata %s to %s", src_path, dest_path); // NOTRANSLATE: Diagnostic message.
 		}
 }
 
@@ -608,7 +608,7 @@ void cache_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
-	DEBUG_1("Notify cache_maint: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::CACHE, 3, "Notify cache_maint: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 	switch (fd->change->type)
 		{
 		case FILEDATA_CHANGE_MOVE:
@@ -994,7 +994,7 @@ static gboolean cache_manager_standard_clean_clear_cb(gpointer data)
 		next_fd = static_cast<FileData *>(cd->list->data);
 		cd->list = g_list_remove(cd->list, next_fd);
 
-		DEBUG_1("thumb removed: %s", next_fd->path);
+		DEBUG_LOG(DebugCategory::CACHE, 3, "thumb removed: %s", next_fd->path); // NOTRANSLATE: Diagnostic message.
 
 		unlink_file(next_fd->path);
 		file_data_unref(next_fd);
@@ -1025,7 +1025,7 @@ static void cache_manager_standard_clean_valid_cb(const gchar *path, gboolean va
 		{
 		if (!valid)
 			{
-			DEBUG_1("thumb cleaned: %s", path);
+			DEBUG_LOG(DebugCategory::CACHE, 3, "thumb cleaned: %s", path); // NOTRANSLATE: Diagnostic message.
 			unlink_file(path);
 			}
 

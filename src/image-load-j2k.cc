@@ -59,7 +59,7 @@ void opj_info_callback(const char *msg, void *)
 {
 	g_autofree gchar *str = g_strdup(msg ? msg : "");
 	g_strchomp(str);
-	DEBUG_1("jpeg2000 reader: %s", str);
+	DEBUG_LOG(DebugCategory::IMAGE, 1, "jpeg2000 reader: %s", str); // NOTRANSLATE: Diagnostic message.
 }
 
 struct ImageLoaderJ2K : public ImageLoaderBackend

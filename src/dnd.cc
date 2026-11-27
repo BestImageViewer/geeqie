@@ -212,7 +212,7 @@ static void dnd_read_file_list_stream_cb(GObject *source_object, GAsyncResult *r
 
 	if (error)
 		{
-		DEBUG_1("File drop read failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 1, "File drop read failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_autoptr(FileDataList) list = nullptr;
@@ -240,7 +240,7 @@ static void dnd_read_file_list_cb(GObject *source_object, GAsyncResult *result, 
 		{
 		if (error)
 			{
-			DEBUG_1("File drop start failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::UI, 1, "File drop start failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
 			}
 
 		read_data->callback(drop, nullptr, read_data->data);
@@ -342,7 +342,7 @@ static void dnd_read_text_stream_cb(GObject *source_object, GAsyncResult *result
 		return;
 		}
 
-	if (error) DEBUG_1("Text drop read failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
+	if (error) DEBUG_LOG(DebugCategory::UI, 1, "Text drop read failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
 	if ((error || read_data->text->len == 0) && dnd_read_text_next_mime(read_data))
 		{
 		g_clear_object(&read_data->stream);
@@ -366,7 +366,7 @@ static void dnd_read_text_mime_cb(GObject *source_object, GAsyncResult *result, 
 	g_autoptr(GInputStream) stream = gdk_drop_read_finish(drop, result, &mime_type, &error);
 	if (!stream || error)
 		{
-		if (error) DEBUG_1("Text drop start failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
+		if (error) DEBUG_LOG(DebugCategory::UI, 1, "Text drop start failed: %s", error->message); // NOTRANSLATE: Diagnostic message.
 		if (dnd_read_text_next_mime(read_data)) return;
 		read_data->callback(drop, nullptr, read_data->data);
 		g_object_unref(read_data->drop);

@@ -853,7 +853,7 @@ static gint pan_layout_update_idle_cb(gpointer data)
 		{
 		gdouble align;
 
-		DEBUG_1("Canvas size is %d x %d", width, height); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 4, "Canvas size is %d x %d", width, height); // NOTRANSLATE: Diagnostic message.
 
 
 		const auto tile_request_func = [pw](PixbufRenderer *pr, gint x, gint y, gint width, gint height, GdkPixbuf *pixbuf)
@@ -1058,7 +1058,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 	if (!pi) return;
 
-	DEBUG_1("info set to %s", pi->fd->path);
+	DEBUG_LOG(DebugCategory::UI, 3, "info set to %s", pi->fd->path); // NOTRANSLATE: Diagnostic message.
 
 	pbox = pan_item_box_new(pw, nullptr, pi->x + pi->width + 4, pi->y, 10, 10,
 	                        PAN_POPUP_COLOR, PAN_POPUP_BORDER, PAN_POPUP_BORDER_COLOR);

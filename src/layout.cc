@@ -1866,7 +1866,7 @@ void layout_refresh(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return;
 
-	DEBUG_1("layout refresh");
+	DEBUG_LOG(DebugCategory::UI, 2, "layout refresh"); // NOTRANSLATE: Diagnostic message.
 
 	layout_refresh_lists(lw);
 
@@ -3148,7 +3148,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 {
 	LayoutWindow *lw;
 
-	DEBUG_1("%s layout_new: start", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 2, "layout_new: start"); // NOTRANSLATE: Diagnostic message.
 	lw = g_new0(LayoutWindow, 1);
 
 	copy_layout_options(lw->options, lop);
@@ -3262,7 +3262,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 
 	file_data_register_notify_func(layout_image_notify_cb, lw, NOTIFY_PRIORITY_LOW);
 
-	DEBUG_1("%s layout_new: end", get_exec_time());
+	DEBUG_LOG(DebugCategory::UI, 2, "layout_new: end"); // NOTRANSLATE: Diagnostic message.
 
 	return lw;
 }

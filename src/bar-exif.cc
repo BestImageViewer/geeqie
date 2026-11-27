@@ -314,7 +314,7 @@ void bar_pane_exif_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto ped = static_cast<PaneExifData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == ped->pane.fd)
 		{
-		DEBUG_1("Notify pane_exif: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 3, "Notify pane_exif: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		bar_pane_exif_update(ped);
 		}
 }

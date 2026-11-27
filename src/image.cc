@@ -569,7 +569,7 @@ static void image_complete_util(ImageWindow *imd, gboolean preload)
 {
 	if (imd->il && image_get_pixbuf(imd) != image_loader_get_pixbuf(imd->il)) return;
 
-	DEBUG_1("%s image load completed \"%s\" (%s)", get_exec_time(),
+	DEBUG_LOG(DebugCategory::IMAGE, 3, "image load completed \"%s\" (%s)", // NOTRANSLATE: Diagnostic message.
 			  (preload) ? (imd->read_ahead_fd ? imd->read_ahead_fd->path : "null") :
 				      (imd->image_fd ? imd->image_fd->path : "null"),
 			  (preload) ? "preload" : "current");
@@ -726,7 +726,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 	    image_get_system_screen_profile(imd, screen_profile))
 		{
 		screen_type = COLOR_PROFILE_MEM;
-		DEBUG_1("Using system screen profile, length: %u", screen_profile.len); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::RENDER, 2, "Using system screen profile, length: %u", screen_profile.len); // NOTRANSLATE: Diagnostic message.
 		}
 	else if (options->color_profile.screen_file &&
 	    is_readable_file(options->color_profile.screen_file))
@@ -943,7 +943,7 @@ void image_set_ignore_alpha(ImageWindow *imd, gboolean ignore_alpha)
 
 static void image_read_ahead_cancel(ImageWindow *imd)
 {
-	DEBUG_1("%s read ahead cancelled for :%s", get_exec_time(), imd->read_ahead_fd ? imd->read_ahead_fd->path : "null");
+	DEBUG_LOG(DebugCategory::IMAGE, 3, "read ahead cancelled for :%s", imd->read_ahead_fd ? imd->read_ahead_fd->path : "null"); // NOTRANSLATE: Diagnostic message.
 
 	g_clear_handle_id(&imd->read_ahead_idle_id, g_source_remove);
 	g_clear_pointer(&imd->read_ahead_queue, file_data_list_free);
@@ -1153,7 +1153,7 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
-	DEBUG_1("%s image done", get_exec_time());
+	DEBUG_LOG(DebugCategory::IMAGE, 3, "image done"); // NOTRANSLATE: Diagnostic message.
 
 	if (options->image.enable_read_ahead && imd->image_fd && !imd->image_fd->pixbuf && image_loader_get_pixbuf(imd->il))
 		{
@@ -1192,7 +1192,7 @@ static void image_load_size_prepared_cb(ImageLoader *, const GqSize *size, gpoin
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
-	DEBUG_1("image_load_size_cb: %dx%d", size->width, size->height);
+	DEBUG_LOG(DebugCategory::IMAGE, 3, "image_load_size_cb: %dx%d", size->width, size->height); // NOTRANSLATE: Diagnostic message.
 	pixbuf_renderer_set_size_early(PIXBUF_RENDERER(imd->pr), size->width, size->height);
 }
 
@@ -1201,7 +1201,7 @@ static void image_load_error_cb(ImageLoader *il, gpointer data)
 	auto imd = static_cast<ImageWindow *>(data);
 	g_autoptr(GError) error = image_loader_dup_error(il);
 
-	DEBUG_1("%s image error", get_exec_time());
+	DEBUG_LOG(DebugCategory::IMAGE, 1, "image error"); // NOTRANSLATE: Diagnostic message.
 	image_state_set(imd, IMAGE_STATE_ERROR);
 
 	if (error)
@@ -1285,7 +1285,7 @@ static gboolean image_read_ahead_check(ImageWindow *imd)
 
 static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 {
-	DEBUG_1("%s image begin", get_exec_time());
+	DEBUG_LOG(DebugCategory::IMAGE, 3, "image begin"); // NOTRANSLATE: Diagnostic message.
 
 	if (imd->il) return FALSE;
 
@@ -1294,13 +1294,13 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 
 	if (image_cache_get(imd))
 		{
-		DEBUG_1("from cache: %s", imd->image_fd->path);
+		DEBUG_LOG(DebugCategory::IMAGE, 3, "from cache: %s", imd->image_fd->path); // NOTRANSLATE: Diagnostic message.
 		return TRUE;
 		}
 
 	if (image_read_ahead_check(imd))
 		{
-		DEBUG_1("from read ahead buffer: %s", imd->image_fd->path);
+		DEBUG_LOG(DebugCategory::IMAGE, 3, "from read ahead buffer: %s", imd->image_fd->path); // NOTRANSLATE: Diagnostic message.
 		return TRUE;
 		}
 
@@ -1321,7 +1321,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 
 	if (!image_loader_start_deferred(imd->il))
 		{
-		DEBUG_1("image start error");
+		DEBUG_LOG(DebugCategory::IMAGE, 1, "image start error"); // NOTRANSLATE: Diagnostic message.
 
 		g_object_set(imd->pr, "loading", FALSE, NULL);
 
@@ -1347,7 +1347,7 @@ static void image_reset(ImageWindow *imd)
 {
 	/* stops anything currently being done */
 
-	DEBUG_1("%s image reset", get_exec_time());
+	DEBUG_LOG(DebugCategory::IMAGE, 3, "image reset"); // NOTRANSLATE: Diagnostic message.
 
 	g_object_set(imd->pr, "loading", FALSE, NULL);
 
@@ -2194,7 +2194,7 @@ gdouble image_zoom_get_default(ImageWindow *imd)
 
 void image_stereo_set(ImageWindow *imd, gint stereo_mode)
 {
-	DEBUG_1("Setting stereo mode %04x for imd %p", stereo_mode, (void *)imd); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::RENDER, 2, "Setting stereo mode %04x for imd %p", stereo_mode, (void *)imd); // NOTRANSLATE: Diagnostic message.
 	pixbuf_renderer_stereo_set(PIXBUF_RENDERER(imd->pr), stereo_mode);
 }
 
@@ -2279,7 +2279,7 @@ static void image_notify_cb(FileData *fd, NotifyType type, gpointer data)
 		   modified files should be detacted anyway and NOTIFY_REREAD should be received
 		   or they are removed from the filelist completely on "move" and "delete"
 		*/
-		DEBUG_1("Notify image: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::IMAGE, 3, "Notify image: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		image_reload(imd);
 		}
 }

@@ -1685,7 +1685,7 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	if (!vd->dir_fd || vd->new_folder) return;
 	if (!S_ISDIR(fd->mode)) return; /* this gives correct results even on recently deleted files/directories */
 
-	DEBUG_1("Notify vd: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::UI, 3, "Notify vd: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 
 	g_autofree gchar *base = remove_level_from_path(fd->path);
 

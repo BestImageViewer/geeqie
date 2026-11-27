@@ -161,7 +161,7 @@ guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile
 			return nullptr;
 		}
 
-	DEBUG_1("nclx primaries: %s: ", primaries_name);
+	DEBUG_LOG(DebugCategory::RENDER, 3, "nclx primaries: %s: ", primaries_name); // NOTRANSLATE: Diagnostic message.
 
 	using GetCurve = std::function<cmsToneCurve *()>;
 	const auto get_profile = [nclx](const GetCurve &get_curve)
@@ -237,7 +237,7 @@ guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile
 			break;
 		}
 
-	DEBUG_1("nclx transfer characteristic: %s", trc_name);
+	DEBUG_LOG(DebugCategory::RENDER, 3, "nclx transfer characteristic: %s", trc_name); // NOTRANSLATE: Diagnostic message.
 
 	if (!profile) return nullptr;
 
@@ -274,7 +274,7 @@ guchar *heif_color_profile(const gchar *path, guint &profile_len)
 			heif_error error = heif_image_handle_get_raw_color_profile(handle, data);
 			if (error.code) throw heif::Error(error);
 
-			DEBUG_1("heif color profile type: prof");
+			DEBUG_LOG(DebugCategory::RENDER, 3, "heif color profile type: prof"); // NOTRANSLATE: Diagnostic message.
 
 			return static_cast<guchar *>(data);
 			}

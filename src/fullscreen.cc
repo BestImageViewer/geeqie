@@ -329,7 +329,7 @@ std::vector<ScreenData> fullscreen_prefs_list()
 		sd.description = std::string(_("Screen")) + " " + name + ", " + subname;
 		sd.geometry = rect;
 
-		DEBUG_1("Screen %d %30s %4d,%4d (%4dx%4d)", // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 4, "Screen %d %30s %4d,%4d (%4dx%4d)", // NOTRANSLATE: Diagnostic message.
 		        sd.number, sd.description.c_str(), sd.geometry.x, sd.geometry.y, sd.geometry.width, sd.geometry.height);
 
 		list.push_back(sd);
@@ -519,7 +519,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 
 	fs->stop_func = stop_func;
 
-	DEBUG_1("full screen requests screen %d", options->fullscreen.screen);
+	DEBUG_LOG(DebugCategory::UI, 2, "full screen requests screen %d", options->fullscreen.screen); // NOTRANSLATE: Diagnostic message.
 
 	FullscreenTarget target = fullscreen_prefs_get_target(options->fullscreen.screen, window);
 
@@ -559,12 +559,12 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 
 	if (fs->same_region)
 		{
-		DEBUG_2("Original window is not visible, enabling std. fullscreen mode"); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 2, "Original window is not visible, enabling std. fullscreen mode"); // NOTRANSLATE: Diagnostic message.
 		image_move_from_image(fs->imd, fs->normal_imd);
 		}
 	else
 		{
-		DEBUG_2("Original window is still visible, enabling presentation fullscreen mode"); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 2, "Original window is still visible, enabling presentation fullscreen mode"); // NOTRANSLATE: Diagnostic message.
 		image_copy_from_image(fs->imd, fs->normal_imd);
 		}
 
@@ -588,7 +588,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 
 		GdkAppLaunchContext *context = gdk_display_get_app_launch_context(display);
 		g_autofree char *id = g_app_launch_context_get_startup_notify_id(G_APP_LAUNCH_CONTEXT(context), nullptr, nullptr);
-		DEBUG_1("full screen setting startup id %s", id);
+		DEBUG_LOG(DebugCategory::UI, 3, "full screen setting startup id %s", id); // NOTRANSLATE: Diagnostic message.
 		gtk_window_set_startup_id(GTK_WINDOW(fs->window), id);
 		}
 

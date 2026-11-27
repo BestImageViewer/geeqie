@@ -218,7 +218,7 @@ int runcmd(const gchar *cmd)
 	int retval = -1;
 	FILE *in;
 
-	DEBUG_1("Running command: %s", cmd); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::EXTERNAL, 2, "Running command: %s", cmd); // NOTRANSLATE: Diagnostic message.
 
 	in = popen(cmd, "r");
 	if (in)
@@ -229,7 +229,7 @@ int runcmd(const gchar *cmd)
 
 		while (fgets(buf, sizeof(buf), in) != NULL )
 			{
-			DEBUG_1("Output: %s", buf); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::EXTERNAL, 3, "Output: %s", buf); // NOTRANSLATE: Diagnostic message.
 			}
 
 		status = pclose(in);
@@ -250,7 +250,7 @@ int runcmd(const gchar *cmd)
 			retval = status;
 			}
 
-		DEBUG_1("%s : %d\n", msg, retval);
+		DEBUG_LOG(DebugCategory::EXTERNAL, retval == 0 ? 2 : 1, "%s : %d\n", msg, retval); // NOTRANSLATE: Diagnostic message.
 	}
 
 	return retval;

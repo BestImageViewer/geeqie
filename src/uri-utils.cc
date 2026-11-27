@@ -85,8 +85,8 @@ static GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 		g_autofree gchar *local_path = g_filename_from_uri(uris[i], nullptr, &error);
 		if (error)
 			{
-			DEBUG_1("g_filename_from_uri failed on uri \"%s\"", uris[i]);
-			DEBUG_1("   error %d: %s", error->code, error->message);
+			DEBUG_LOG(DebugCategory::FILES, 1, "g_filename_from_uri failed on uri \"%s\"", uris[i]); // NOTRANSLATE: Diagnostic message.
+			DEBUG_LOG(DebugCategory::FILES, 1, "   error %d: %s", error->code, error->message); // NOTRANSLATE: Diagnostic message.
 			if (error->code == G_CONVERT_ERROR_BAD_URI)
 				{
 				g_autofree gchar *escaped = g_uri_escape_string(uris[i], ":/", TRUE);
@@ -94,8 +94,8 @@ static GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 				local_path = g_filename_from_uri(escaped, nullptr, &retry_error);
 				if (retry_error)
 					{
-					DEBUG_1("manually escaped uri \"%s\" also failed g_filename_from_uri", escaped);
-					DEBUG_1("   error %d: %s", retry_error->code, retry_error->message);
+					DEBUG_LOG(DebugCategory::FILES, 1, "manually escaped uri \"%s\" also failed g_filename_from_uri", escaped); // NOTRANSLATE: Diagnostic message.
+					DEBUG_LOG(DebugCategory::FILES, 1, "   error %d: %s", retry_error->code, retry_error->message); // NOTRANSLATE: Diagnostic message.
 					}
 				}
 

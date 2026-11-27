@@ -1425,7 +1425,7 @@ gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_set)
 	if (!pr->loading)
 		{
 		/* 2pass prio */
-		DEBUG_2("redraw priority: 2pass");
+		DEBUG_LOG(DebugCategory::RENDER, 4, "redraw priority: 2pass"); // NOTRANSLATE: Diagnostic message.
 		rt->draw_idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, rt_queue_draw_idle_cb, rt, nullptr);
 		return G_SOURCE_REMOVE;
 		}
@@ -1436,7 +1436,7 @@ gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_set)
 	if (percent > 10.0)
 		{
 		/* we have enough data for starting intensive redrawing */
-		DEBUG_2("redraw priority: high %.2f %%", percent);
+		DEBUG_LOG(DebugCategory::RENDER, 4, "redraw priority: high %.2f %%", percent); // NOTRANSLATE: Diagnostic message.
 		rt->draw_idle_id = g_idle_add_full(GDK_PRIORITY_REDRAW, rt_queue_draw_idle_cb, rt, nullptr);
 		return G_SOURCE_REMOVE;
 		}
@@ -1444,13 +1444,13 @@ gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_set)
 	if (percent < 1.0 || force_set)
 		{
 		/* queue is (almost) empty, wait  50 ms*/
-		DEBUG_2("redraw priority: wait %.2f %%", percent);
+		DEBUG_LOG(DebugCategory::RENDER, 4, "redraw priority: wait %.2f %%", percent); // NOTRANSLATE: Diagnostic message.
 		rt->draw_idle_id = g_timeout_add_full(G_PRIORITY_DEFAULT_IDLE, 50, rt_queue_draw_idle_cb, rt, nullptr);
 		return G_SOURCE_REMOVE;
 		}
 
 	/* keep the same priority as before */
-	DEBUG_2("redraw priority: no change %.2f %%", percent);
+	DEBUG_LOG(DebugCategory::RENDER, 4, "redraw priority: no change %.2f %%", percent); // NOTRANSLATE: Diagnostic message.
 	return G_SOURCE_CONTINUE;
 }
 
@@ -1929,7 +1929,7 @@ void renderer_update_viewport(void *renderer)
 			rt->stereo_off_y = rt->pr->stereo_fixed_left.y;
 			}
 		}
-	DEBUG_1("update size: %p  %d %d   %d %d", (void *)rt, rt->stereo_off_x, rt->stereo_off_y, rt->pr->viewport_width, rt->pr->viewport_height);
+	DEBUG_LOG(DebugCategory::RENDER, 4, "update size: %p  %d %d   %d %d", (void *)rt, rt->stereo_off_x, rt->stereo_off_y, rt->pr->viewport_width, rt->pr->viewport_height); // NOTRANSLATE: Diagnostic message.
 	rt_sync_scroll(rt);
 	rt_overlay_update_sizes(rt);
 	rt_border_clear(rt);

@@ -76,6 +76,7 @@ void trim()
 			}
 		if (fd->thumb_pixbuf)
 			{
+			DEBUG_LOG(DebugCategory::CACHE, 2, "Evict thumbnail: %s", fd->path); // NOTRANSLATE: Cache diagnostic.
 			bytes -= gdk_pixbuf_get_byte_length(fd->thumb_pixbuf);
 			g_clear_object(&fd->thumb_pixbuf);
 			// Drop model pixbufs and bound GtkPicture textures as well as FileData's reference.
@@ -120,6 +121,8 @@ void update_range(ViewFile *vf)
 		if (last + offset < state.rows.size()) state.queue.push_back(state.rows[last + offset]);
 		if (first >= offset) state.queue.push_back(state.rows[first - offset]);
 		}
+	DEBUG_LOG(DebugCategory::THUMBNAILS, 2, "Thumbnail queue: visible=%zu queued=%zu total=%zu", // NOTRANSLATE: Thumbnail queue diagnostic.
+	          state.visible.size(), state.queue.size(), state.rows.size());
 }
 
 gboolean viewport_idle(gpointer data)
@@ -238,7 +241,12 @@ FileData *vf_thumbnail_next(ViewFile *vf)
 	while (state.next < state.queue.size())
 		{
 		auto *fd = state.queue[state.next++];
-		if (!fd->thumb_pixbuf) return fd;
+		if (!fd->thumb_pixbuf)
+			{
+			DEBUG_LOG(DebugCategory::CACHE, 3, "Thumbnail memory miss: %s", fd->path); // NOTRANSLATE: Cache diagnostic.
+			return fd;
+			}
+		DEBUG_LOG(DebugCategory::CACHE, 3, "Thumbnail memory hit: %s", fd->path); // NOTRANSLATE: Cache diagnostic.
 		touch(fd);
 		}
 	trim();

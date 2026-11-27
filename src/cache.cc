@@ -486,7 +486,7 @@ bool CacheData::load(const gchar *source)
 	if (fread(&buf, sizeof(gchar), 9, f) != 9 ||
 	    strncmp(buf, "SIMcache", 8) != 0)
 		{
-		DEBUG_1("%s is not a cache file", path);
+		DEBUG_LOG(DebugCategory::CACHE, 2, "%s is not a cache file", path);
 		return false;
 		}
 
@@ -679,7 +679,7 @@ gboolean cache_time_valid(const gchar *cache, const gchar *path)
 			if (utime(cachel, &ut) < 0 &&
 			    errno == EPERM)
 				{
-				DEBUG_1("cache permission workaround: %s", cachel);
+				DEBUG_LOG(DebugCategory::CACHE, 2, "cache permission workaround: %s", cachel);
 				ret = TRUE;
 				}
 			}

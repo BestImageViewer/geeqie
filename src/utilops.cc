@@ -1296,13 +1296,13 @@ static void file_util_perform_ci(UtilityData *ud)
 			{
 			if (editor_blocks_file(ud->external_command))
 				{
-				DEBUG_1("Starting %s and waiting for results", ud->external_command); // NOTRANSLATE: Diagnostic message.
+				DEBUG_LOG(DebugCategory::FILES, 2, "Starting %s and waiting for results", ud->external_command); // NOTRANSLATE: Diagnostic message.
 				flags = start_editor_from_filelist_full(ud->external_command, ud->flist, nullptr, file_util_perform_ci_cb, ud);
 				}
 			else
 				{
 				/* start the editor without callback and finish the operation internally */
-				DEBUG_1("Starting %s and finishing the operation", ud->external_command); // NOTRANSLATE: Diagnostic message.
+				DEBUG_LOG(DebugCategory::FILES, 2, "Starting %s and finishing the operation", ud->external_command); // NOTRANSLATE: Diagnostic message.
 				flags = start_editor_from_filelist(ud->external_command, ud->flist);
 				file_util_perform_ci_internal(ud);
 				}
@@ -2867,7 +2867,7 @@ static gboolean file_util_rename_dir_prepare(UtilityData *ud, const gchar *new_p
 
 		ok = file_data_sc_add_ci_rename(fd, np);
 
-		DEBUG_1("Dir rename: %s -> %s", fd->path, np); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::FILES, 2, "Dir rename: %s -> %s", fd->path, np); // NOTRANSLATE: Diagnostic message.
 		}
 
 	if (ok)

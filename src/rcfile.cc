@@ -1539,7 +1539,7 @@ static void options_parse_global_end(gpointer)
 	options->metadata.save_in_image_file = FALSE;
 	options->metadata.save_legacy_format = TRUE;
 	options->metadata.write_orientation = FALSE;
-	DEBUG_1("compiled without Exiv2 - disabling XMP write support");
+	DEBUG_LOG(DebugCategory::CONFIG, 2, "compiled without Exiv2 - disabling XMP write support"); // NOTRANSLATE: Diagnostic message.
 #endif
 }
 
@@ -1824,7 +1824,7 @@ static void start_element(GMarkupParseContext *,
                           GError **)
 {
 	auto parser_data = static_cast<GQParserData *>(user_data);
-	DEBUG_2("start %s", element_name);
+	DEBUG_LOG(DebugCategory::CONFIG, 4, "start %s", element_name); // NOTRANSLATE: Diagnostic message.
 
 	parser_data->start_func(element_name, attribute_names, attribute_values);
 }
@@ -1835,7 +1835,7 @@ static void end_element(GMarkupParseContext *,
                         GError **)
 {
 	auto parser_data = static_cast<GQParserData *>(user_data);
-	DEBUG_2("end %s", element_name);
+	DEBUG_LOG(DebugCategory::CONFIG, 4, "end %s", element_name); // NOTRANSLATE: Diagnostic message.
 
 	parser_data->end_func();
 	parser_data->func_pop();
@@ -1874,7 +1874,7 @@ gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup)
 		config_file_error(error->message);
 
 		ret = FALSE;
-		DEBUG_1("Parse failed"); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::CONFIG, 1, "Parse failed"); // NOTRANSLATE: Diagnostic message.
 		}
 
 	g_markup_parse_context_free(context);

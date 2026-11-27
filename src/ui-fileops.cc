@@ -183,7 +183,7 @@ const gchar *homedir()
 		return path_to_utf8(g_get_home_dir());
 	}();
 
-	DEBUG_1("Home directory: %s", home); // NOTRANSLATE: Diagnostic message.
+	DEBUG_LOG(DebugCategory::FILES, 3, "Home directory: %s", home); // NOTRANSLATE: Diagnostic message.
 
 	return home;
 }
@@ -808,7 +808,7 @@ gboolean recursive_mkdir_if_not_exists(const gchar *path, mode_t mode)
 
 				if (!isdir(npath))
 					{
-					DEBUG_1("creating sub dir:%s", npath);
+					DEBUG_LOG(DebugCategory::FILES, 3, "creating sub dir:%s", npath); // NOTRANSLATE: Diagnostic message.
 					if (!mkdir_utf8(npath, mode))
 						{
 						log_printf("create dir failed: %s\n", npath);

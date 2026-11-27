@@ -107,7 +107,7 @@ gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize cou
 	if (!pixbuf)
 		{
 		g_free(pixels);
-		DEBUG_1("Insufficient memory to open ZXSCR file"); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::IMAGE, 1, "Insufficient memory to open ZXSCR file"); // NOTRANSLATE: Diagnostic message.
 		return FALSE;
 		}
 	//let's decode screen

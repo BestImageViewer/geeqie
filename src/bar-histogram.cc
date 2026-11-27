@@ -165,7 +165,7 @@ void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_PIXBUF)) && fd == phd->pane.fd)
 		{
-		DEBUG_1("Notify pane_histogram: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
+		DEBUG_LOG(DebugCategory::UI, 3, "Notify pane_histogram: %s %04x", fd->path, type); // NOTRANSLATE: Diagnostic message.
 		bar_pane_histogram_update(phd);
 		}
 }

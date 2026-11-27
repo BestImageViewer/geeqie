@@ -443,23 +443,6 @@ void init_debug_timer()
 	debug_elapsed_time();
 }
 
-const gchar *get_exec_time()
-{
-	const gint64 elapsed = debug_elapsed_time();
-	thread_local gint64 previous = elapsed;
-	const gint64 delta = elapsed - previous;
-	previous = elapsed;
-	thread_local gchar timestr[64];
-	g_snprintf(timestr, sizeof(timestr), "%12.6f (+%012.6f)",
-	           static_cast<double>(elapsed) / G_USEC_PER_SEC, static_cast<double>(delta) / G_USEC_PER_SEC);
-	return timestr;
-}
-
-void init_exec_time()
-{
-	init_debug_timer();
-}
-
 void set_regexp(const gchar *cmd_regexp)
 {
 	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&filter_mutex);
