@@ -602,3 +602,10 @@ layout while a main-loop heartbeat checks responsiveness. The tests also compare
 spatial-index queries against a full item scan, check sidecar grouping and hidden
 file rules, and cancel, restart, and close windows with indexing pending.
 Temporary trees are removed by the fixtures.
+
+The `LogQueue.*` unit tests cover bounded batch delivery, count and byte overflow,
+oversized messages, producer wakeups, concurrent producers and a consumer, and
+shutdown. These tests also run with debug logging compiled out. During manual
+log-window testing, enable detailed logging and verify that normal controls
+remain responsive, overload notices appear, and history stays bounded. Terminal
+and file output must retain messages omitted from the window.

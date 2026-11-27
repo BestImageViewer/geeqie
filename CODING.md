@@ -94,6 +94,19 @@ filenames, paths, and metadata; review it before sharing.
 Temporary developer tools remain available, but calls must not be committed.
 Ordinary logging must not suppress compiler format diagnostics.
 
+Log-window delivery uses one idle source and a thread-safe bounded queue. Each
+callback handles at most 64 messages and 64 KiB, combining adjacent messages
+with the same display style into one text insertion. The queue holds at
+most 1,024 messages or 1 MiB; messages exceeding 64 KiB are omitted from the
+window. Overflow is reported in the window with the number omitted. These limits
+do not affect terminal or file output. Pending window messages are discarded
+when the application exits.
+
+Window history retains at most the configured line count, capped at 99,999 lines,
+and 262,144 Unicode characters. A nonpositive configured line count uses the
+10,000-line safety limit. History collected before the window opens is limited
+to 1 MiB and the same maximum number of records.
+
 ### DEBUG_0()
 
 Use `DEBUG_0()` only for temporary debugging i.e. not in code in the repository.

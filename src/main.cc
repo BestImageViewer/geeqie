@@ -71,6 +71,7 @@
 #include "layout-image.h"
 #include "layout-util.h"
 #include "layout.h"
+#include "log-queue.h"
 #include "logwindow.h"
 #include "main-defines.h"
 #include "metadata.h"
@@ -1030,6 +1031,7 @@ Version: Geeqie "), VERSION, nullptr);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(config_file_error_notification_action));
 
 	status = g_application_run(G_APPLICATION(app), argc, argv);
+	log_queue_shutdown();
 	color_scheme_shutdown();
 	g_object_unref(app);
 

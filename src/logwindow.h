@@ -24,6 +24,7 @@
 #include <glib.h>
 
 struct LayoutWindow;
+typedef struct _GtkTextBuffer GtkTextBuffer;
 
 enum LogType
 {
@@ -37,6 +38,9 @@ enum LogType
 void log_window_new(LayoutWindow *lw);
 
 void log_window_append(const gchar *str, LogType type);
+
+/** @brief Discard oldest text exceeding the line and character safety limits. */
+void log_window_trim_buffer(GtkTextBuffer *buffer, gint line_limit);
 
 #endif /* LOGWINDOW_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

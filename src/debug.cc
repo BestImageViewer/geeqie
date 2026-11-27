@@ -40,6 +40,7 @@
 
 #include "filedata.h"
 #include "intl.h"
+#include "log-queue.h"
 #include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
@@ -75,44 +76,67 @@ void log_set_file(const gchar *path)
 	command_line->log_file = g_steal_pointer(&copy);
 }
 
-static gboolean log_msg_cb(gpointer data)
-{
-	auto buf = static_cast<gchar *>(data);
-	log_window_append(buf, LOG_MSG);
-	g_free(buf);
-	return G_SOURCE_REMOVE;
-}
+static LogQueue log_queue;
+static GMutex queue_source_mutex;
+static guint queue_source = 0;
 
-/**
- * @brief Appends a user information message to the log window queue
- * @param data The message
- * @returns FALSE
- *
- * If the first word of the message is either "error" or "warning"
- * (case insensitive) the message is color-coded appropriately
- */
-static gboolean log_normal_cb(gpointer data)
+static LogType log_normal_type(const gchar *buf)
 {
-	auto buf = static_cast<gchar *>(data);
 	g_autofree gchar *buf_casefold = g_utf8_casefold(buf, -1);
 	g_autofree gchar *error_casefold = g_utf8_casefold(_("error"), -1);
 	g_autofree gchar *warning_casefold = g_utf8_casefold(_("warning"), -1);
+	LogType type = LOG_NORMAL;
+	if (g_str_has_prefix(buf_casefold, error_casefold)) type = LOG_ERROR;
+	else if (g_str_has_prefix(buf_casefold, warning_casefold)) type = LOG_WARN;
+	return type;
+}
 
-	if (buf_casefold == g_strstr_len(buf_casefold, -1, error_casefold))
+static gboolean log_queue_cb(gpointer)
+{
+	const auto batch = log_queue.take_batch();
+	std::string text;
+	LogType type = LOG_MSG;
+	for (const auto &message : batch.messages)
 		{
-		log_window_append(buf, LOG_ERROR);
+		const LogType message_type = message.type;
+		if (message_type != type && !text.empty())
+			{
+			log_window_append(text.c_str(), type);
+			text.clear();
+			}
+		type = message_type;
+		text += message.text;
 		}
-	else if (buf_casefold == g_strstr_len(buf_casefold, -1, warning_casefold))
+	if (!text.empty()) log_window_append(text.c_str(), type);
+	if (batch.dropped != 0)
 		{
-		log_window_append(buf, LOG_WARN);
+		g_autofree gchar *notice = g_strdup_printf(_("Log window overloaded: %zu messages omitted. Terminal and file output are unaffected.\n"), batch.dropped);
+		log_window_append(notice, LOG_WARN);
 		}
-	else
-		{
-		log_window_append(buf, LOG_NORMAL);
-		}
-
-	g_free(buf);
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&queue_source_mutex);
+	if (log_queue.finish_batch()) return G_SOURCE_CONTINUE;
+	queue_source = 0;
 	return G_SOURCE_REMOVE;
+}
+
+void log_queue_shutdown()
+{
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&queue_source_mutex);
+	log_queue.close();
+	if (queue_source != 0)
+		{
+		g_source_remove(queue_source);
+		queue_source = 0;
+		}
+}
+
+static void log_enqueue(const gchar *text, LogType type)
+{
+	g_autoptr(GMutexLocker) lock = g_mutex_locker_new(&queue_source_mutex);
+	if (log_queue.push(text, type))
+		{
+		queue_source = g_idle_add(log_queue_cb, nullptr);
+		}
 }
 
 static void log_domain_print_message(const gchar *domain, const gchar *buf)
@@ -129,10 +153,7 @@ static void log_domain_print_message(const gchar *domain, const gchar *buf)
 		print_term(false, buf_nl);
 		}
 
-	if (strcmp(domain, DOMAIN_INFO) == 0)
-		g_idle_add(log_normal_cb, g_steal_pointer(&buf_nl));
-	else
-		g_idle_add(log_msg_cb, g_steal_pointer(&buf_nl));
+	log_enqueue(buf_nl, strcmp(domain, DOMAIN_INFO) == 0 ? log_normal_type(buf_nl) : LOG_MSG);
 }
 
 void log_domain_printf(const gchar *domain, const gchar *format, ...)

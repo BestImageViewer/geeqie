@@ -21,6 +21,7 @@
 #include "debug.h"
 #include "filedata.h"
 #include "image-load.h"
+#include "log-queue.h"
 #include "logwindow.h"
 #include "options.h"
 
@@ -58,23 +59,159 @@ private:
 
 
 
+TEST(LogQueue, BatchesPreserveOrderAndScheduleOnlyOneCallback)
+{
+	LogQueue queue;
+	for (int i = 0; i < 100; ++i)
+		{
+		EXPECT_EQ(queue.push(std::to_string(i).c_str(), i % 2 == 0 ? LOG_NORMAL : LOG_MSG), i == 0);
+		}
+	int received = 0;
+	do
+		{
+		const auto batch = queue.take_batch();
+		EXPECT_LE(batch.messages.size(), 64U);
+		EXPECT_EQ(batch.dropped, 0U);
+		for (const auto &message : batch.messages)
+			{
+			EXPECT_EQ(message.text, std::to_string(received));
+			EXPECT_EQ(message.type, received % 2 == 0 ? LOG_NORMAL : LOG_MSG);
+			++received;
+			}
+		} while (queue.finish_batch());
+	EXPECT_EQ(received, 100);
+	EXPECT_TRUE(queue.push("new callback", LOG_MSG));
+}
 
+TEST(LogQueue, CountOverflowIsReportedOnce)
+{
+	LogQueue queue;
+	for (std::size_t i = 0; i < LogQueue::max_messages + 17; ++i)
+		{
+		queue.push("message", LOG_MSG);
+		}
+	auto batch = queue.take_batch();
+	EXPECT_EQ(batch.dropped, 17U);
+	std::size_t received = batch.messages.size();
+	while (queue.finish_batch())
+		{
+		batch = queue.take_batch();
+		EXPECT_EQ(batch.dropped, 0U);
+		received += batch.messages.size();
+		}
+	EXPECT_EQ(received, LogQueue::max_messages);
+}
 
+TEST(LogQueue, ByteOverflowAndOversizedMessagesAreReported)
+{
+	LogQueue queue;
+	const std::string text(LogQueue::max_message_bytes, 'x');
+	const auto capacity = LogQueue::max_bytes / text.size();
+	for (std::size_t i = 0; i < capacity + 3; ++i) queue.push(text.c_str(), LOG_MSG);
+	const std::string oversized(LogQueue::max_message_bytes + 1, 'x');
+	queue.push(oversized.c_str(), LOG_MSG);
+	auto batch = queue.take_batch();
+	EXPECT_EQ(batch.dropped, 4U);
+	std::size_t received = batch.messages.size();
+	while (queue.finish_batch()) received += queue.take_batch().messages.size();
+	EXPECT_EQ(received, capacity);
+}
 
+TEST(LogQueue, ProducersDuringDeliveryDoNotLoseWakeups)
+{
+	LogQueue queue;
+	EXPECT_TRUE(queue.push("first", LOG_MSG));
+	EXPECT_EQ(queue.take_batch().messages.size(), 1U);
+	EXPECT_FALSE(queue.push("during delivery", LOG_MSG));
+	EXPECT_TRUE(queue.finish_batch());
+	EXPECT_EQ(queue.take_batch().messages.front().text, "during delivery");
+	EXPECT_FALSE(queue.finish_batch());
+	EXPECT_TRUE(queue.push("after delivery", LOG_MSG));
+}
 
+TEST(LogQueue, ConcurrentProducersAndConsumerAccountForEveryMessage)
+{
+	LogQueue queue;
+	constexpr int producer_count = 4;
+	constexpr int per_producer = 2000;
+	std::atomic<int> producers{producer_count};
+	std::vector<std::thread> workers;
+	for (int i = 0; i < producer_count; ++i)
+		{
+		workers.emplace_back([&]()
+			{
+			for (int j = 0; j < per_producer; ++j) queue.push("message", LOG_MSG);
+			--producers;
+			});
+		}
+	std::size_t received = 0;
+	std::size_t dropped = 0;
+	do
+		{
+		const auto batch = queue.take_batch();
+		received += batch.messages.size();
+		dropped += batch.dropped;
+		queue.finish_batch();
+		} while (producers.load() != 0);
+	for (auto &worker : workers) worker.join();
+	do
+		{
+		const auto batch = queue.take_batch();
+		received += batch.messages.size();
+		dropped += batch.dropped;
+		} while (queue.finish_batch());
+	EXPECT_EQ(received + dropped, producer_count * per_producer);
+}
 
+TEST(LogQueue, ShutdownDiscardsPendingOutputAndRejectsNewMessages)
+{
+	LogQueue queue;
+	queue.push("pending", LOG_MSG);
+	queue.close();
+	EXPECT_FALSE(queue.push("after shutdown", LOG_MSG));
+	EXPECT_TRUE(queue.take_batch().messages.empty());
+	EXPECT_EQ(queue.take_batch().dropped, 0U);
+	EXPECT_FALSE(queue.finish_batch());
+	queue.close();
+}
 
+TEST(LogHistory, MultilineMessagesAreTrimmedAfterInsertion)
+{
+	g_autoptr(GtkTextBuffer) buffer = gtk_text_buffer_new(nullptr);
+	gtk_text_buffer_set_text(buffer, "one\ntwo\nthree\nfour\n", -1);
+	log_window_trim_buffer(buffer, 3);
+	EXPECT_EQ(gtk_text_buffer_get_line_count(buffer), 3);
+	GtkTextIter start;
+	GtkTextIter end;
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+	g_autofree gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, false);
+	EXPECT_STREQ(text, "three\nfour\n");
+}
 
+TEST(LogHistory, LongLinesAreBoundedWithoutBreakingUtf8)
+{
+	g_autoptr(GtkTextBuffer) buffer = gtk_text_buffer_new(nullptr);
+	std::string text;
+	for (int i = 0; i < 300000; ++i) text += "é";
+	gtk_text_buffer_set_text(buffer, text.c_str(), -1);
+	log_window_trim_buffer(buffer, 1000);
+	EXPECT_EQ(gtk_text_buffer_get_char_count(buffer), 262144);
+	GtkTextIter start;
+	GtkTextIter end;
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
+	g_autofree gchar *result = gtk_text_buffer_get_text(buffer, &start, &end, false);
+	EXPECT_TRUE(g_utf8_validate(result, -1, nullptr));
+	EXPECT_EQ(g_utf8_strlen(result, -1), 262144);
+}
 
-
-
-
-
-
-
-
-
-
+TEST(LogHistory, NonpositiveLineLimitUsesSafetyLimit)
+{
+	g_autoptr(GtkTextBuffer) buffer = gtk_text_buffer_new(nullptr);
+	const std::string text(12000, '\n');
+	gtk_text_buffer_set_text(buffer, text.c_str(), -1);
+	log_window_trim_buffer(buffer, 0);
+	EXPECT_EQ(gtk_text_buffer_get_line_count(buffer), 10000);
+}
 
 #ifdef DEBUG
 class DebugDomains : public testing::Test

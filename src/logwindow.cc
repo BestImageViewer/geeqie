@@ -49,7 +49,6 @@ struct LogWindow
 	GtkWidget *window;
 	GtkWidget *text;
 	GtkTextTag *color_tags[LOG_COUNT];
-	gint lines;
 #ifdef DEBUG
 	enum SearchDirection {
 		SEARCH_BACKWARDS,
@@ -444,7 +443,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	logwin->window = window;
 	logwin->text = text;
-	logwin->lines = 1;
 	return logwin;
 }
 
@@ -502,24 +500,46 @@ static void log_window_insert_text(GtkTextBuffer *buffer, GtkTextIter *iter,
 	gtk_text_buffer_insert_with_tags(buffer, iter, str_utf8, -1, tag, NULL);
 }
 
+void log_window_trim_buffer(GtkTextBuffer *buffer, gint line_limit)
+{
+	constexpr gint character_limit = 262144;
+	line_limit = line_limit > 0 ? std::min(line_limit, 99999) : 10000;
+	GtkTextIter start;
+	GtkTextIter end;
+	gtk_text_buffer_get_start_iter(buffer, &start);
+	end = start;
+	const gint excess_lines = gtk_text_buffer_get_line_count(buffer) - line_limit;
+	if (excess_lines > 0) gtk_text_iter_forward_lines(&end, excess_lines);
+	const gint excess_characters = gtk_text_buffer_get_char_count(buffer) - character_limit;
+	if (excess_characters > gtk_text_iter_get_offset(&end))
+		{
+		gtk_text_buffer_get_iter_at_offset(buffer, &end, excess_characters);
+		}
+	if (gtk_text_iter_compare(&start, &end) < 0) gtk_text_buffer_delete(buffer, &start, &end);
+}
+
 void log_window_append(const gchar *str, LogType type)
 {
 	GtkTextView *text;
 	GtkTextBuffer *buffer;
 	GtkTextIter iter;
 	static std::deque<LogMsg> memory;
+	static std::size_t memory_bytes = 0;
+	const gint line_limit = options->log_window_lines > 0 ? std::min(options->log_window_lines, 99999) : 10000;
+	constexpr std::size_t byte_limit = 1024 * 1024;
 
 	if (logwindow == nullptr)
 		{
 		if (*str)
 			{
+			const std::size_t length = strlen(str);
+			if (length > byte_limit) return;
 			memory.emplace_front(str, type);
-
-			if (memory.size() >= static_cast<guint>(options->log_window_lines))
+			memory_bytes += length;
+			while (memory.size() > static_cast<std::size_t>(line_limit) || memory_bytes > byte_limit)
 				{
-				const auto count = std::max(options->log_window_lines - 1, 0);
-
-				memory.resize(count);
+				memory_bytes -= memory.back().text.size();
+				memory.pop_back();
 				}
 			}
 		return;
@@ -528,17 +548,6 @@ void log_window_append(const gchar *str, LogType type)
 	text = GTK_TEXT_VIEW(logwindow->text);
 	buffer = gtk_text_view_get_buffer(text);
 
-	if (options->log_window_lines > 0 && logwindow->lines >= options->log_window_lines)
-		{
-		GtkTextIter start;
-		GtkTextIter end;
-
-		gtk_text_buffer_get_start_iter(buffer, &start);
-		end = start;
-		gtk_text_iter_forward_lines(&end, logwindow->lines - options->log_window_lines);
-		gtk_text_buffer_delete(buffer, &start, &end);
-		}
-
 	gtk_text_buffer_get_end_iter(buffer, &iter);
 
 	std::for_each(memory.crbegin(), memory.crend(), [buffer, &iter](const LogMsg &oldest_msg)
@@ -546,8 +555,11 @@ void log_window_append(const gchar *str, LogType type)
 		log_window_insert_text(buffer, &iter, oldest_msg.text.c_str(), logwindow->color_tags[oldest_msg.type]);
 		});
 	memory.clear();
+	memory_bytes = 0;
 
 	log_window_insert_text(buffer, &iter, str, logwindow->color_tags[type]);
+
+	log_window_trim_buffer(buffer, line_limit);
 
 	if (!options->log_window.paused)
 		{
@@ -560,6 +572,5 @@ void log_window_append(const gchar *str, LogType type)
 			}
 		}
 
-	logwindow->lines = gtk_text_buffer_get_line_count(buffer);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
