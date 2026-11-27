@@ -21,6 +21,7 @@
 #include "history-list.h"
 #include "intl.h"
 #include "layout.h"
+#include "log.h"
 #include "main-defines.h"
 #include "options.h"
 #include "pixbuf-util.h"
@@ -305,7 +306,7 @@ GtkWidget *create_pdf_preview(const gchar *filename)
 	PopplerDocument *doc = poppler_document_new_from_file(uri, nullptr, &error);
 	if (!doc)
 		{
-		log_printf(_("Error loading PDF: %s\n"), error->message);
+		log_error(_("Could not load PDF: %s"), error->message);
 		return nullptr;
 		}
 

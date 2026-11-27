@@ -30,6 +30,7 @@
 #include <config.h>
 
 #include "intl.h"
+#include "log.h"
 #include "main-defines.h"
 #include "main.h"
 #include "misc.h"
@@ -267,7 +268,7 @@ void help_pdf()
 	g_autoptr(GError) error = nullptr;
 	if (!g_app_info_launch_default_for_uri(uri, nullptr, &error))
 		{
-		log_printf(_("Warning: Failed to open help: %s\n"), error->message);
+		log_warning(_("Failed to open help: %s"), error->message);
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

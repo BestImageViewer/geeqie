@@ -609,3 +609,10 @@ shutdown. These tests also run with debug logging compiled out. During manual
 log-window testing, enable detailed logging and verify that normal controls
 remain responsive, overload notices appear, and history stays bounded. Terminal
 and file output must retain messages omitted from the window.
+
+The `LogSeverity.*` tests check multiline labels, Unicode, severity-based window
+styles, and delivery to the configured file. With debug logging enabled,
+`DebugDomains.WarningsAndErrorsBypassDebugAndRegexFilters` also checks that
+warnings and errors survive disabled debug output and a nonmatching regex while
+info and debug messages remain filtered. The explicit severity API is available
+in both debug and release builds.

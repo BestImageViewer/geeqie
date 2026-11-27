@@ -107,6 +107,29 @@ and 262,144 Unicode characters. A nonpositive configured line count uses the
 10,000-line safety limit. History collected before the window opens is limited
 to 1 MiB and the same maximum number of records.
 
+### Explicit message severity
+
+Include `log.h` and use `log_info()`, `log_warning()`, or `log_error()` for new
+operational messages. All three retain compiler printf-format checking and are
+available in builds without debug logging. Translate the message, not the stable
+`[info]`, `[warning]`, or `[error]` label added automatically to each line. A final
+newline is supplied automatically. For example:
+
+```cpp
+log_warning(_("Failed to open help: %s"), error->message);
+```
+
+Info messages go to standard output and respect the regex filter. Warnings and
+errors go to standard error and bypass that filter. All three are independent of
+debug categories and verbosity, append to the configured log file, and use the
+bounded window queue and history. Queue overflow can still omit window messages;
+terminal and file output are unaffected. Window colors follow the explicit
+severity even when the translated message starts with another word.
+
+Existing `log_printf()` calls retain their historical output destinations,
+filtering, and text-based warning/error classification. Migrate them gradually;
+remove redundant severity prefixes when changing a caller.
+
 ### DEBUG_0()
 
 Use `DEBUG_0()` only for temporary debugging i.e. not in code in the repository.

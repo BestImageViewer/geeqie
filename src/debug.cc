@@ -41,6 +41,7 @@
 #include "filedata.h"
 #include "intl.h"
 #include "log-queue.h"
+#include "log.h"
 #include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
@@ -137,6 +138,72 @@ static void log_enqueue(const gchar *text, LogType type)
 		{
 		queue_source = g_idle_add(log_queue_cb, nullptr);
 		}
+}
+
+LogType log_severity_type(LogSeverity severity)
+{
+	switch (severity)
+		{
+		case LogSeverity::WARNING: return LOG_WARN;
+		case LogSeverity::ERROR: return LOG_ERROR;
+		case LogSeverity::INFO: return LOG_NORMAL;
+		}
+	return LOG_NORMAL;
+}
+
+gchar *format_log_record(LogSeverity severity, const gchar *message)
+{
+	const gchar *label = "info"; // NOTRANSLATE: Stable log severity identifier.
+	switch (severity)
+		{
+		case LogSeverity::WARNING: label = "warning"; break; // NOTRANSLATE: Stable log severity identifier.
+		case LogSeverity::ERROR: label = "error"; break; // NOTRANSLATE: Stable log severity identifier.
+		case LogSeverity::INFO: break;
+		}
+	g_autofree gchar *text = g_strdup(message ? message : "");
+	gsize length = strlen(text);
+	while (length && text[length - 1] == '\n') text[--length] = '\0';
+	g_auto(GStrv) lines = g_strsplit(text, "\n", -1);
+	g_autoptr(GString) record = g_string_new(nullptr);
+	for (gchar **line = lines; *line; ++line)
+		{
+		g_string_append_printf(record, "[%s] %s\n", label, *line);
+		}
+	if (record->len == 0) g_string_append_printf(record, "[%s] \n", label);
+	return g_string_free(g_steal_pointer(&record), FALSE);
+}
+
+static void log_severity_message(LogSeverity severity, const gchar *format, va_list arguments)
+{
+	g_autofree gchar *message = g_strdup_vprintf(format, arguments);
+	g_autofree gchar *record = format_log_record(severity, message);
+	if (severity == LogSeverity::INFO && !log_matches_filter(record)) return;
+	print_term(severity != LogSeverity::INFO, record);
+	log_enqueue(record, log_severity_type(severity));
+}
+
+void log_info(const gchar *format, ...)
+{
+	va_list arguments;
+	va_start(arguments, format);
+	log_severity_message(LogSeverity::INFO, format, arguments);
+	va_end(arguments);
+}
+
+void log_warning(const gchar *format, ...)
+{
+	va_list arguments;
+	va_start(arguments, format);
+	log_severity_message(LogSeverity::WARNING, format, arguments);
+	va_end(arguments);
+}
+
+void log_error(const gchar *format, ...)
+{
+	va_list arguments;
+	va_start(arguments, format);
+	log_severity_message(LogSeverity::ERROR, format, arguments);
+	va_end(arguments);
 }
 
 static void log_domain_print_message(const gchar *domain, const gchar *buf)

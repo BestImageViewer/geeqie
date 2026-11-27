@@ -22,6 +22,7 @@
 #include "filedata.h"
 #include "image-load.h"
 #include "log-queue.h"
+#include "log.h"
 #include "logwindow.h"
 #include "options.h"
 
@@ -51,13 +52,62 @@ private:
 	CommandLine *previous;
 };
 
+TEST(LogSeverity, FormattingLabelsEveryLineAndNormalizesTrailingNewlines)
+{
+	g_autofree gchar *info = format_log_record(LogSeverity::INFO, "ready");
+	g_autofree gchar *warning = format_log_record(LogSeverity::WARNING, "first\nsecond\n\n");
+	g_autofree gchar *error = format_log_record(LogSeverity::ERROR, "unable to continue");
+	EXPECT_STREQ(info, "[info] ready\n");
+	EXPECT_STREQ(warning, "[warning] first\n[warning] second\n");
+	EXPECT_STREQ(error, "[error] unable to continue\n");
+}
 
+TEST(LogSeverity, EmptyAndUnicodeMessagesAreValid)
+{
+	g_autofree gchar *empty = format_log_record(LogSeverity::INFO, nullptr);
+	g_autofree gchar *unicode = format_log_record(LogSeverity::ERROR, "échec");
+	EXPECT_STREQ(empty, "[info] \n");
+	EXPECT_STREQ(unicode, "[error] échec\n");
+	EXPECT_TRUE(g_utf8_validate(unicode, -1, nullptr));
+}
 
+TEST(LogSeverity, WindowStylesFollowSeverityRatherThanMessageText)
+{
+	EXPECT_EQ(log_severity_type(LogSeverity::INFO), LOG_NORMAL);
+	EXPECT_EQ(log_severity_type(LogSeverity::WARNING), LOG_WARN);
+	EXPECT_EQ(log_severity_type(LogSeverity::ERROR), LOG_ERROR);
+	LogQueue queue;
+	queue.push("error in an informational quotation", log_severity_type(LogSeverity::INFO));
+	queue.push("disk nearly full", log_severity_type(LogSeverity::WARNING));
+	queue.push("cannot read image", log_severity_type(LogSeverity::ERROR));
+	const auto batch = queue.take_batch();
+	ASSERT_EQ(batch.messages.size(), 3U);
+	EXPECT_EQ(batch.messages[0].type, LOG_NORMAL);
+	EXPECT_EQ(batch.messages[1].type, LOG_WARN);
+	EXPECT_EQ(batch.messages[2].type, LOG_ERROR);
+}
 
-
-
-
-
+TEST(LogSeverity, ExplicitMessagesReachTheConfiguredFile)
+{
+	ScopedLogOutput output;
+	g_autofree gchar *saved_path = g_strdup(command_line->log_file);
+	g_autofree gchar *path = nullptr;
+	const int fd = g_file_open_tmp("geeqie-log-severity-XXXXXX.txt", &path, nullptr);
+	ASSERT_GE(fd, 0);
+	close(fd);
+	log_set_file(path);
+	log_info("ready %d", 42);
+	log_warning("disk nearly full: %d", 7);
+	log_error("cannot read %s", "image");
+	log_set_file(saved_path);
+	g_autofree gchar *contents = nullptr;
+	const bool read = g_file_get_contents(path, &contents, nullptr, nullptr);
+	g_unlink(path);
+	ASSERT_TRUE(read);
+	EXPECT_NE(std::string(contents).find("[info] ready 42\n"), std::string::npos);
+	EXPECT_NE(std::string(contents).find("[warning] disk nearly full: 7\n"), std::string::npos);
+	EXPECT_NE(std::string(contents).find("[error] cannot read image\n"), std::string::npos);
+}
 
 TEST(LogQueue, BatchesPreserveOrderAndScheduleOnlyOneCallback)
 {
@@ -269,7 +319,34 @@ protected:
 
 
 
-
+TEST_F(DebugDomains, WarningsAndErrorsBypassDebugAndRegexFilters)
+{
+	ScopedLogOutput output;
+	g_autofree gchar *saved_path = g_strdup(command_line->log_file);
+	g_autofree gchar *saved_regexp = get_regexp();
+	g_autofree gchar *path = nullptr;
+	const int fd = g_file_open_tmp("geeqie-log-filter-XXXXXX.txt", &path, nullptr);
+	ASSERT_GE(fd, 0);
+	close(fd);
+	log_set_file(path);
+	set_debug_level(0);
+	set_debug_domains("none");
+	set_regexp("THIS_WILL_NOT_MATCH");
+	log_info("hidden info");
+	DEBUG_LOG(DebugCategory::GENERAL, 1, "hidden debug");
+	log_warning("visible warning");
+	log_error("visible error");
+	set_regexp(saved_regexp);
+	log_set_file(saved_path);
+	g_autofree gchar *contents = nullptr;
+	const bool read = g_file_get_contents(path, &contents, nullptr, nullptr);
+	g_unlink(path);
+	ASSERT_TRUE(read);
+	const std::string text = contents;
+	EXPECT_EQ(text.find("hidden"), std::string::npos);
+	EXPECT_NE(text.find("[warning] visible warning\n"), std::string::npos);
+	EXPECT_NE(text.find("[error] visible error\n"), std::string::npos);
+}
 
 TEST_F(DebugDomains, FiltersCategoriesAndRespectsVerbosity)
 {
