@@ -426,9 +426,10 @@ static CollectManagerAction *collect_manager_action_new(const gchar *oldpath, co
 	return action;
 }
 
-static void collect_manager_action_ref(CollectManagerAction *action)
+static CollectManagerAction *collect_manager_action_ref(CollectManagerAction *action)
 {
 	action->ref++;
+	return action;
 }
 
 static void collect_manager_action_unref(CollectManagerAction *action)
@@ -502,9 +503,8 @@ void CollectManagerEntry::add_action(CollectManagerAction *action)
 			return;
 			}
 
-		add_list.push_back(action);
+		add_list.push_back(collect_manager_action_ref(action));
 		g_hash_table_insert(newpath_hash, action->newpath, action);
-		collect_manager_action_ref(action); // for add_list
 		return;
 		}
 
@@ -530,7 +530,7 @@ void CollectManagerEntry::add_action(CollectManagerAction *action)
 			{
 			g_hash_table_insert(newpath_hash, new_action->newpath, new_action);
 			}
-		collect_manager_action_unref(orig_action);
+		collect_manager_action_unref(orig_action); // from oldpath_hash or add_list depending on action->oldpath
 		return;
 		}
 
@@ -542,12 +542,11 @@ void CollectManagerEntry::add_action(CollectManagerAction *action)
 		return;
 		}
 
-	g_hash_table_insert(oldpath_hash, action->oldpath, action);
+	g_hash_table_insert(oldpath_hash, action->oldpath, collect_manager_action_ref(action));
 	if (action->newpath)
 		{
 		g_hash_table_insert(newpath_hash, action->newpath, action);
 		}
-	collect_manager_action_ref(action); // for oldpath_hash
 }
 
 gchar *CollectManagerEntry::get_new_path()
@@ -561,7 +560,7 @@ gchar *CollectManagerEntry::get_new_path()
 
 	add_list.pop_front();
 	g_hash_table_remove(newpath_hash, path);
-	collect_manager_action_unref(action);
+	collect_manager_action_unref(action); // from add_list
 	return path;
 }
 
@@ -669,7 +668,7 @@ void CollectManager::process_actions(gint max)
 			}
 
 		action_list.pop_front();
-		collect_manager_action_unref(action);
+		collect_manager_action_unref(action); // from action_list
 		}
 }
 
