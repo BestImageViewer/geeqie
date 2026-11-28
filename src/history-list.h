@@ -21,6 +21,7 @@
 #ifndef HISTORY_LIST_H
 #define HISTORY_LIST_H
 
+#include <functional>
 #include <list>
 #include <string>
 
@@ -44,8 +45,10 @@ gchar *get_recent_viewed_folder_image(gchar *path);
 
 const gchar *history_list_find_last_path_by_key(const gchar *key);
 
-const gchar *history_chain_back();
-const gchar *history_chain_forward();
+/** @brief Navigate without recording a visit; retain the position if opening fails. */
+bool history_chain_navigate(bool forward, const std::function<bool(const gchar *)> &open);
+/** @brief Return the most recent existing location's directory, or the working directory. */
+gchar *history_list_get_last_directory();
 void history_chain_append_end(const gchar *path);
 
 const gchar *image_chain_back();

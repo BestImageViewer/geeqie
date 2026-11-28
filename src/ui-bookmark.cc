@@ -553,7 +553,8 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text, guint &posi
 
 	if (b->name == ".")
 		{
-		b->path = history_list_find_last_path_by_key("path_list");
+		g_autofree gchar *directory = history_list_get_last_directory();
+		b->path = directory;
 
 		g_autofree gchar *buf = bookmark_string(".", b->path.c_str(), b->icon.c_str());
 		history_list_item_change("bookmarks", b->text.c_str(), buf);
@@ -657,7 +658,8 @@ static void bookmark_populate(BookMarkData *bm)
 
 			if (bm->key != "shortcuts")
 				{
-				g_autofree gchar *buf = bookmark_string(".", history_list_find_last_path_by_key("path_list"), nullptr);
+				g_autofree gchar *directory = history_list_get_last_directory();
+				g_autofree gchar *buf = bookmark_string(".", directory, nullptr);
 				history_list_add_to_key(bm->key.c_str(), buf, 0);
 				}
 
@@ -671,13 +673,15 @@ static void bookmark_populate(BookMarkData *bm)
 
 		for (const auto &[name, default_path] : bookmark_default_list)
 			{
+			g_autofree gchar *directory = nullptr;
 			const gchar *path = default_path.c_str();
 
 			if (name == ".")
 				{
 				if (bm->key == "shortcuts") continue;
 
-				path = history_list_find_last_path_by_key("path_list");
+				directory = history_list_get_last_directory();
+				path = directory;
 				}
 
 			g_autofree gchar *buf = bookmark_string(name.c_str(), path, nullptr);

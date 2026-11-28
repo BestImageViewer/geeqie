@@ -405,6 +405,82 @@ protected:
 	bool saved_menu_settings = false;
 };
 
+TEST_F(PartialLayoutConfig, CollectionNavigationHistory)
+{
+	g_autofree gchar *parent = g_build_filename(directory, "collections", nullptr);
+	g_autofree gchar *path = g_build_filename(parent, "test.gqv", nullptr);
+	ASSERT_EQ(g_mkdir(parent, 0700), 0);
+	g_autoptr(CollectionData) collection = collection_new(nullptr);
+	ASSERT_TRUE(collection_save(collection, path));
+	ASSERT_TRUE(layout_set_path(layout, parent));
+	ASSERT_TRUE(layout_set_path(layout, directory));
+	ASSERT_TRUE(layout_set_path(layout, path));
+	ASSERT_NE(layout->vf->collection, nullptr);
+	EXPECT_STREQ(history_list_find_last_path_by_key("path_list"), path);
+	g_autofree gchar *last_directory = history_list_get_last_directory();
+	EXPECT_STREQ(last_directory, parent);
+
+	auto navigate = [this](const char *name)
+		{
+		auto *action = g_action_map_lookup_action(G_ACTION_MAP(layout->window), name);
+		ASSERT_NE(action, nullptr);
+		g_action_activate(action, nullptr);
+		};
+	navigate("main-win-back");
+	EXPECT_EQ(layout->vf->collection, nullptr);
+	EXPECT_STREQ(layout->dir_fd->path, directory); // No intermediate collection parent.
+	navigate("main-win-forward");
+	ASSERT_NE(layout->vf->collection, nullptr);
+	EXPECT_STREQ(layout->vf->collection->path, path);
+
+	// Canceling the unsaved-changes prompt must leave the history position intact.
+	layout->vf->collection->changed = TRUE;
+	navigate("main-win-back");
+	ASSERT_NE(layout->collection_confirm_data, nullptr);
+	auto *windows = gtk_window_get_toplevels();
+	for (guint i = 0; i < g_list_model_get_n_items(windows); ++i)
+		{
+		g_autoptr(GtkWindow) window = GTK_WINDOW(g_list_model_get_item(windows, i));
+		if (gtk_window_get_transient_for(window) == GTK_WINDOW(layout->window))
+			{
+			gtk_window_close(window);
+			break;
+			}
+		}
+	ASSERT_EQ(layout->collection_confirm_data, nullptr);
+	ASSERT_NE(layout->vf->collection, nullptr);
+	layout->vf->collection->changed = FALSE;
+	navigate("main-win-back");
+	EXPECT_EQ(layout->vf->collection, nullptr);
+	EXPECT_STREQ(layout->dir_fd->path, directory);
+	navigate("main-win-forward");
+	ASSERT_NE(layout->vf->collection, nullptr);
+
+	// Select the parent from the actual history dropdown, even though dir_fd already names it.
+	auto *parent_button = find_widget(gtk_widget_get_parent(layout->path_entry), GTK_TYPE_BUTTON, parent);
+	ASSERT_NE(parent_button, nullptr);
+	g_signal_emit_by_name(parent_button, "clicked");
+	EXPECT_EQ(layout->vf->collection, nullptr);
+	g_autofree gchar *moved = g_strconcat(path, ".moved", nullptr);
+	ASSERT_EQ(g_rename(path, moved), 0);
+	navigate("main-win-back");
+	EXPECT_EQ(layout->vf->collection, nullptr);
+	EXPECT_STREQ(layout->dir_fd->path, parent);
+	ASSERT_EQ(g_rename(moved, path), 0);
+	navigate("main-win-back");
+	ASSERT_NE(layout->vf->collection, nullptr);
+	EXPECT_STREQ(layout->vf->collection->path, path);
+
+	// Unnamed collections have no persistent history entry.
+	g_autoptr(CollectionData) unnamed = collection_new(nullptr);
+	const HistoryList saved_history = *history_list_find_by_key("path_list");
+	ASSERT_TRUE(layout_set_collection(layout, unnamed));
+	EXPECT_EQ(*history_list_find_by_key("path_list"), saved_history);
+	ASSERT_TRUE(layout_set_path(layout, directory));
+	g_unlink(path);
+	g_rmdir(parent);
+}
+
 TEST_F(PartialLayoutConfig, FocusImagePreservesTheViewAndEnablesKeyboardPanning)
 {
 	struct Restore

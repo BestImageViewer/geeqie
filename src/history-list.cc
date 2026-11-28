@@ -41,6 +41,7 @@ struct HistoryChain
 	const gchar *prev();
 	const gchar *next();
 	bool push_back(const gchar *path);
+	bool navigate(bool forward, const std::function<bool(const gchar *)> &open);
 
 private:
 	std::vector<gchar *> chain;
@@ -118,7 +119,7 @@ static void update_recent_viewed_folder_image_list(const gchar *path);
  *
  *-----------------------------------------------------------------------------
  * Implements a history chain. Used by the Back and Forward toolbar buttons.
- * Selecting any folder appends the path to the end of the chain.
+ * Selecting a folder or saved collection appends its path to the chain.
  * Pressing the Back and Forward buttons moves along the chain, but does
  * not make additions to the chain.
  * The chain always increases and is deleted at the end of the session
@@ -126,14 +127,20 @@ static void update_recent_viewed_folder_image_list(const gchar *path);
  *-----------------------------------------------------------------------------
  */
 
-const gchar *history_chain_back()
+bool HistoryChain::navigate(bool forward, const std::function<bool(const gchar *)> &open)
 {
-	return history_chain.prev();
+	const guint previous_index = index;
+	const gchar *path = forward ? next() : prev();
+	if (!path) return false;
+	const bool opened = open(path);
+	is_nav_button = false;
+	if (!opened) index = previous_index;
+	return opened;
 }
 
-const gchar *history_chain_forward()
+bool history_chain_navigate(bool forward, const std::function<bool(const gchar *)> &open)
 {
-	return history_chain.next();
+	return history_chain.navigate(forward, open);
 }
 
 /**
@@ -344,6 +351,19 @@ const gchar *history_list_find_last_path_by_key(const gchar *key)
 	if (!items) return nullptr;
 
 	return items->front().c_str();
+}
+
+gchar *history_list_get_last_directory()
+{
+	if (const auto *items = history_list_find_by_key("path_list"))
+		{
+		for (const auto &path : *items)
+			{
+			if (isdir(path.c_str())) return g_strdup(path.c_str());
+			if (isfile(path.c_str())) return g_path_get_dirname(path.c_str());
+			}
+		}
+	return get_current_dir();
 }
 
 void history_list_free_key(const gchar *key)

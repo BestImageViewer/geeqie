@@ -2431,26 +2431,21 @@ static void layout_menu_image_last_cb(GSimpleAction *, GVariant *, gpointer)
 	layout_image_last(lw);
 }
 
+static void layout_history_navigate(LayoutWindow *lw, bool forward)
+{
+	if (!lw) return;
+	if (!layout_confirm_collection_leave(lw, [lw, forward]() { layout_history_navigate(lw, forward); }, FALSE)) return;
+	history_chain_navigate(forward, [lw](const gchar *path) { return layout_set_path(lw, path); });
+}
+
 static void layout_menu_back_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = get_current_layout();
-	FileData *dir_fd;
-
-	/* Obtain previous path */
-	dir_fd = file_data_new_dir(history_chain_back());
-	layout_set_fd(lw, dir_fd);
-	file_data_unref(dir_fd);
+	layout_history_navigate(get_current_layout(), false);
 }
 
 static void layout_menu_forward_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = get_current_layout();
-	FileData *dir_fd;
-
-	/* Obtain next path */
-	dir_fd = file_data_new_dir(history_chain_forward());
-	layout_set_fd(lw, dir_fd);
-	file_data_unref(dir_fd);
+	layout_history_navigate(get_current_layout(), true);
 }
 
 enum class LayoutFocusTarget

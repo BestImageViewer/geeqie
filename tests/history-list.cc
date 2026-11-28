@@ -17,6 +17,34 @@
 namespace
 {
 
+TEST(HistoryList, FailedNavigationRetainsPosition)
+{
+	for (const auto *path : {"/history-test/first", "/history-test/collection.gqv", "/history-test/last"})
+		history_chain_append_end(path);
+	EXPECT_FALSE(history_chain_navigate(false, [](const gchar *path)
+		{
+		EXPECT_STREQ(path, "/history-test/collection.gqv");
+		return false;
+		}));
+	EXPECT_TRUE(history_chain_navigate(false, [](const gchar *path)
+		{
+		EXPECT_STREQ(path, "/history-test/collection.gqv");
+		history_chain_append_end(path);
+		return true;
+		}));
+	EXPECT_TRUE(history_chain_navigate(false, [](const gchar *path)
+		{
+		EXPECT_STREQ(path, "/history-test/first");
+		return true; // Successful navigation need not append a path.
+		}));
+	history_chain_append_end("/history-test/new");
+	EXPECT_TRUE(history_chain_navigate(false, [](const gchar *path)
+		{
+		EXPECT_STREQ(path, "/history-test/last");
+		return true;
+		}));
+}
+
 TEST(HistoryList, RecentFilesUseUrisAndApplicationMetadata)
 {
 	if (!g_getenv("DISPLAY") && !g_getenv("WAYLAND_DISPLAY")) GTEST_SKIP() << "Requires a display";

@@ -439,7 +439,7 @@ gchar *layout_get_window_list()
 
 static void layout_path_entry_history_cb(LayoutWindow *lw, const gchar *path)
 {
-	if (!lw->dir_fd || strcmp(path, lw->dir_fd->path) != 0)
+	if ((lw->vf && lw->vf->collection) || !lw->dir_fd || strcmp(path, lw->dir_fd->path) != 0)
 		{
 		layout_set_path(lw, path);
 		}
@@ -1703,6 +1703,8 @@ gboolean layout_set_path(LayoutWindow *lw, const gchar *path)
 }
 
 
+static gboolean layout_set_fd_internal(LayoutWindow *lw, FileData *fd, bool record_history);
+
 gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 {
 	if (!layout_valid(&lw) || !lw->vf || !cd) return FALSE;
@@ -1714,7 +1716,10 @@ gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 	collection_ref(cd);
 	FileDataRef current(layout_image_get_fd(lw));
 	g_autofree gchar *parent = cd->path ? remove_level_from_path(cd->path) : nullptr;
-	if (parent && (!lw->dir_fd || g_strcmp0(lw->dir_fd->path, parent) != 0) && !layout_set_path(lw, parent))
+	FileDataRef parent_fd(nullptr);
+	if (parent) parent_fd = FileData::new_dir(parent);
+	if (parent_fd && (!lw->dir_fd || g_strcmp0(lw->dir_fd->path, parent) != 0) &&
+	    !layout_set_fd_internal(lw, parent_fd, false))
 		{
 		collection_unref(cd);
 		return FALSE;
@@ -1730,6 +1735,11 @@ gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 	const gboolean in_collection_parent = lw->dir_fd && parent && g_strcmp0(lw->dir_fd->path, parent) == 0;
 	if (lw->vd) vd_set_collection(lw->vd, in_collection_parent ? cd->path : nullptr);
 	if (lw->path_entry) entry_set_text(GTK_ENTRY(lw->path_entry), cd->path ? cd->path : cd->name);
+	if (cd->path && isfile(cd->path) && lw->path_entry)
+		{
+		history_chain_append_end(cd->path);
+		tab_completion_append_to_history(lw->path_entry, cd->path);
+		}
 	if (current && vf_index_by_fd(lw->vf, current) >= 0)
 		layout_image_set_fd(lw, current);
 	else
@@ -1741,7 +1751,7 @@ gboolean layout_set_collection(LayoutWindow *lw, CollectionData *cd)
 	return TRUE;
 }
 
-gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
+static gboolean layout_set_fd_internal(LayoutWindow *lw, FileData *fd, bool record_history)
 {
 	gboolean have_file = FALSE;
 	gboolean dir_changed = TRUE;
@@ -1752,7 +1762,7 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 	if (lw->vf && lw->vf->collection)
 		{
 			auto target = std::shared_ptr<FileData>(file_data_ref(fd), [](FileData *item) { file_data_unref(item); });
-			if (!layout_confirm_collection_leave(lw, [lw, target]() { layout_set_fd(lw, target.get()); }, FALSE)) return FALSE;
+			if (!layout_confirm_collection_leave(lw, [lw, target, record_history]() { layout_set_fd_internal(lw, target.get(), record_history); }, FALSE)) return FALSE;
 		}
 	if (lw->dir_fd && fd == lw->dir_fd)
 		{
@@ -1764,6 +1774,11 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 			vf_set_fd(lw->vf, lw->dir_fd);
 			layout_image_set_index(lw, 0);
 			if (lw->info_sort) gtk_menu_button_set_popover(GTK_MENU_BUTTON(lw->info_sort), layout_sort_popover_new(lw));
+			if (record_history && lw->path_entry)
+				{
+				history_chain_append_end(lw->dir_fd->path);
+				tab_completion_append_to_history(lw->path_entry, lw->dir_fd->path);
+				}
 			}
 		return TRUE;
 		}
@@ -1813,7 +1828,7 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 		if (isfile(fd->path)) have_file = TRUE;
 		}
 
-	if (lw->path_entry)
+	if (record_history && lw->path_entry)
 		{
 		history_chain_append_end(lw->dir_fd->path);
 		tab_completion_append_to_history(lw->path_entry, lw->dir_fd->path);
@@ -1849,6 +1864,11 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 		}
 
 	return TRUE;
+}
+
+gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
+{
+	return layout_set_fd_internal(lw, fd, true);
 }
 
 static void layout_refresh_lists(LayoutWindow *lw)
@@ -3399,8 +3419,7 @@ static gchar *layout_config_startup_path(const LayoutOptions &lop)
 		{
 		case STARTUP_PATH_LAST:
 			{
-			const gchar *path = history_list_find_last_path_by_key("path_list");
-			return (path && isdir(path)) ? g_strdup(path) : get_current_dir();
+			return history_list_get_last_directory();
 			}
 		case STARTUP_PATH_HOME:
 			return (lop.home_path && isdir(lop.home_path)) ? g_strdup(lop.home_path) : g_strdup(homedir());
