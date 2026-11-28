@@ -57,15 +57,6 @@ const size_t GQ_COLLECTION_MARKER_LEN = strlen(GQ_COLLECTION_MARKER);
 constexpr gchar gqview_collection_marker[] = "#GQview collection";
 const size_t gqview_collection_marker_len = strlen(gqview_collection_marker);
 
-struct CollectManagerEntry
-{
-	gchar *path;
-	GList *add_list;
-	GHashTable *oldpath_hash;
-	GHashTable *newpath_hash;
-	gboolean empty;
-};
-
 enum CollectManagerType {
 	COLLECTION_MANAGER_UPDATE,
 	COLLECTION_MANAGER_ADD,
@@ -80,6 +71,25 @@ struct CollectManagerAction
 	CollectManagerType type;
 
 	gint ref;
+};
+
+struct CollectManagerEntry
+{
+	void free_data();
+	void init_data();
+	void reset();
+	void add_action(CollectManagerAction *action);
+	gchar *get_new_path();
+	gboolean get_new_path(gchar **path_ptr);
+	[[nodiscard]] bool process() const;
+
+	std::string path;
+
+private:
+	std::list<CollectManagerAction *> add_list;
+	GHashTable *oldpath_hash = nullptr;
+	GHashTable *newpath_hash = nullptr;
+	bool empty = true;
 };
 
 struct CollectManager
@@ -104,7 +114,7 @@ private:
 CollectManagerEntry *CollectManager::get_entry(const gchar *path) const
 {
 	auto work = std::find_if(entry_list.cbegin(), entry_list.cend(),
-	                         [path](const CollectManagerEntry *entry){ return strcmp(entry->path, path) == 0; });
+	                         [path](const CollectManagerEntry *entry){ return entry->path == path; });
 
 	return (work != entry_list.cend()) ? *work : nullptr;
 }
@@ -112,9 +122,6 @@ CollectManagerEntry *CollectManager::get_entry(const gchar *path) const
 } // namespace
 
 static gboolean collection_save_private(CollectionData *cd, const gchar *path);
-
-static void collect_manager_entry_reset(CollectManagerEntry *entry);
-static gint collect_manager_entry_process_action(CollectManagerEntry *entry, gchar **path_ptr);
 
 static gboolean collection_load_private(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
 {
@@ -264,7 +271,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		total++;
 
 		if (!flush)
-			changed |= collect_manager_entry_process_action(entry, &filename);
+			changed |= entry->get_new_path(&filename);
 		if (!*filename)
 			{
 			g_clear_pointer(&infotext, g_free);
@@ -295,13 +302,13 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 	if (!flush)
 		{
-		gchar *buf = nullptr;
-		while (collect_manager_entry_process_action(entry, &buf))
+		while (true)
 			{
+			g_autofree gchar *buf = entry->get_new_path();
+			if (!buf) break;
+
 			collection_add(cd, file_data_new_group(buf), FALSE);
 			changed = TRUE;
-			g_free(buf);
-			buf = nullptr;
 			}
 		}
 
@@ -311,7 +318,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		collection_save_private(cd, path);
 
 	if (!flush)
-		collect_manager_entry_reset(entry);
+		entry->reset();
 
 	if (!append) cd->changed = FALSE;
 	collection_changed(cd);
@@ -435,51 +442,49 @@ static void collect_manager_action_unref(CollectManagerAction *action)
 	g_free(action);
 }
 
-static void collect_manager_entry_free_data(CollectManagerEntry *entry)
+void CollectManagerEntry::free_data()
 {
-	g_list_free_full(entry->add_list, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
-	g_hash_table_unref(entry->oldpath_hash);
-	g_hash_table_unref(entry->newpath_hash);
+	for (CollectManagerAction *action : add_list) collect_manager_action_unref(action);
+	add_list.clear();
+
+	g_hash_table_unref(oldpath_hash);
+	g_hash_table_unref(newpath_hash);
 }
 
-static void collect_manager_entry_init_data(CollectManagerEntry *entry)
+void CollectManagerEntry::init_data()
 {
-	entry->add_list = nullptr;
-	entry->oldpath_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
-	entry->newpath_hash = g_hash_table_new(g_str_hash, g_str_equal);
-	entry->empty = TRUE;
+	oldpath_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
+	newpath_hash = g_hash_table_new(g_str_hash, g_str_equal);
+	empty = true;
 
 }
 
-static CollectManagerEntry *collect_manager_entry_new(const gchar *path)
+static CollectManagerEntry *collect_manager_entry_new(std::string path)
 {
-	CollectManagerEntry *entry;
+	auto *entry = new CollectManagerEntry();
 
-	entry = g_new0(CollectManagerEntry, 1);
-	entry->path = g_strdup(path);
-	collect_manager_entry_init_data(entry);
+	entry->path = std::move(path);
+	entry->init_data();
 
 	return entry;
 }
 
-
 static void collect_manager_entry_free(CollectManagerEntry *entry)
 {
-	collect_manager_entry_free_data(entry);
+	entry->free_data();
 
-	g_free(entry->path);
-	g_free(entry);
+	delete entry;
 }
 
-static void collect_manager_entry_reset(CollectManagerEntry *entry)
+void CollectManagerEntry::reset()
 {
-	collect_manager_entry_free_data(entry);
-	collect_manager_entry_init_data(entry);
+	free_data();
+	init_data();
 }
 
-static void collect_manager_entry_add_action(CollectManagerEntry *entry, CollectManagerAction *action)
+void CollectManagerEntry::add_action(CollectManagerAction *action)
 {
-	entry->empty = FALSE;
+	empty = false;
 
 	if (action->oldpath == nullptr)
 		{
@@ -489,20 +494,21 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 			return;
 			}
 
-		if (g_hash_table_contains(entry->newpath_hash, action->newpath))
+		if (g_hash_table_contains(newpath_hash, action->newpath))
 			{
 			/* target already exists */
 			log_printf("collection manager failed to add another action for target %s in collection %s\n",
-				action->newpath, entry->path);
+			           action->newpath, path.c_str());
 			return;
 			}
-		entry->add_list = g_list_append(entry->add_list, action);
-		g_hash_table_insert(entry->newpath_hash, action->newpath, action);
-		collect_manager_action_ref(action);
+
+		add_list.push_back(action);
+		g_hash_table_insert(newpath_hash, action->newpath, action);
+		collect_manager_action_ref(action); // for add_list
 		return;
 		}
 
-	auto *orig_action = static_cast<CollectManagerAction *>(g_hash_table_lookup(entry->newpath_hash, action->oldpath));
+	auto *orig_action = static_cast<CollectManagerAction *>(g_hash_table_lookup(newpath_hash, action->oldpath));
 	if (orig_action)
 		{
 		/* new action with the same file */
@@ -510,72 +516,69 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 
 		if (new_action->oldpath)
 			{
-			g_hash_table_steal(entry->oldpath_hash, orig_action->oldpath);
-			g_hash_table_insert(entry->oldpath_hash, new_action->oldpath, new_action);
+			g_hash_table_steal(oldpath_hash, orig_action->oldpath);
+			g_hash_table_insert(oldpath_hash, new_action->oldpath, new_action);
 			}
 		else
 			{
-			GList *work = g_list_find(entry->add_list, orig_action);
-			work->data = new_action;
+			auto work = std::find(add_list.begin(), add_list.end(), orig_action);
+			*work = new_action;
 			}
 
-		g_hash_table_remove(entry->newpath_hash, orig_action->newpath);
+		g_hash_table_remove(newpath_hash, orig_action->newpath);
 		if (new_action->newpath)
 			{
-			g_hash_table_insert(entry->newpath_hash, new_action->newpath, new_action);
+			g_hash_table_insert(newpath_hash, new_action->newpath, new_action);
 			}
 		collect_manager_action_unref(orig_action);
 		return;
 		}
 
-
-	if (g_hash_table_contains(entry->oldpath_hash, action->oldpath))
+	if (g_hash_table_contains(oldpath_hash, action->oldpath))
 		{
 		/* another action for the same source, ignore */
 		log_printf("collection manager failed to add another action for source %s in collection %s\n",
-			action->oldpath, entry->path);
+		           action->oldpath, path.c_str());
 		return;
 		}
 
-	g_hash_table_insert(entry->oldpath_hash, action->oldpath, action);
+	g_hash_table_insert(oldpath_hash, action->oldpath, action);
 	if (action->newpath)
 		{
-		g_hash_table_insert(entry->newpath_hash, action->newpath, action);
+		g_hash_table_insert(newpath_hash, action->newpath, action);
 		}
-	collect_manager_action_ref(action);
+	collect_manager_action_ref(action); // for oldpath_hash
 }
 
-static gboolean collect_manager_entry_process_action(CollectManagerEntry *entry, gchar **path_ptr)
+gchar *CollectManagerEntry::get_new_path()
 {
-	gchar *path = *path_ptr;
-	CollectManagerAction *action;
+	if (add_list.empty()) return nullptr;
 
-	if (path == nullptr)
+	CollectManagerAction *action = add_list.front();
+	g_assert(action->oldpath == nullptr);
+
+	gchar *path = g_strdup(action->newpath);
+
+	add_list.pop_front();
+	g_hash_table_remove(newpath_hash, path);
+	collect_manager_action_unref(action);
+	return path;
+}
+
+gboolean CollectManagerEntry::get_new_path(gchar **path_ptr)
+{
+	if (*path_ptr == nullptr)
 		{
-		/* get new files */
-		if (entry->add_list)
-			{
-			action = static_cast<CollectManagerAction *>(entry->add_list->data);
-			g_assert(action->oldpath == nullptr);
-			entry->add_list = g_list_remove(entry->add_list, action);
-			path = g_strdup(action->newpath);
-			g_hash_table_remove(entry->newpath_hash, path);
-			collect_manager_action_unref(action);
-			}
-		*path_ptr = path;
-		return (path != nullptr);
+		*path_ptr = get_new_path();
+		return (*path_ptr != nullptr);
 		}
 
-	action = static_cast<CollectManagerAction *>(g_hash_table_lookup(entry->oldpath_hash, path));
+	auto *action = static_cast<CollectManagerAction *>(g_hash_table_lookup(oldpath_hash, *path_ptr));
+	if (!action) return FALSE; /* no change */
 
-	if (action)
-		{
-		g_free(*path_ptr);
-		*path_ptr = g_strdup(action->newpath ? action->newpath : "");
-		return TRUE;
-		}
-
-	return FALSE; /* no change */
+	g_free(*path_ptr);
+	*path_ptr = g_strdup(action->newpath ? action->newpath : "");
+	return TRUE;
 }
 
 void CollectManager::refresh()
@@ -621,9 +624,10 @@ void CollectManager::refresh()
 	};
 	entry_list.remove_if(is_unknown_path);
 
-	for (const auto &path : paths)
+	while (!paths.empty())
 		{
-		entry_list.push_back(collect_manager_entry_new(path.c_str()));
+		auto path = paths.extract(paths.begin());
+		entry_list.push_back(collect_manager_entry_new(std::move(path.value())));
 		}
 }
 
@@ -639,23 +643,18 @@ void CollectManager::process_actions(gint max)
 			{
 			if (action->type == COLLECTION_MANAGER_UPDATE)
 				{
-				collect_manager_entry_add_action(entry, action);
+				entry->add_action(action);
 				}
 			else if (action->oldpath && action->newpath &&
-				 strcmp(action->newpath, entry->path) == 0)
+			         action->newpath == entry->path)
 				{
 				/* convert action to standard add format */
-				g_free(action->newpath);
+				g_clear_pointer(&action->newpath, g_free);
 				if (action->type == COLLECTION_MANAGER_ADD)
 					{
-					action->newpath = action->oldpath;
-					action->oldpath = nullptr;
+					std::swap(action->newpath, action->oldpath);
 					}
-				else if (action->type == COLLECTION_MANAGER_REMOVE)
-					{
-					action->newpath = nullptr;
-					}
-				collect_manager_entry_add_action(entry, action);
+				entry->add_action(action);
 				}
 			}
 
@@ -669,17 +668,17 @@ void CollectManager::process_actions(gint max)
 				action->oldpath, action->newpath);
 			}
 
-		action_list.remove(action);
+		action_list.pop_front();
 		collect_manager_action_unref(action);
 		}
 }
 
-static bool collect_manager_entry_process(const CollectManagerEntry *entry)
+bool CollectManagerEntry::process() const
 {
-	if (entry->empty) return false;
+	if (empty) return false;
 
-	g_autoptr(CollectionData) cd = collection_new(entry->path);
-	(void) collection_load_private(cd, entry->path, COLLECTION_LOAD_NONE);
+	g_autoptr(CollectionData) cd = collection_new(path.c_str());
+	(void) collection_load_private(cd, path.c_str(), COLLECTION_LOAD_NONE);
 
 	return true;
 }
@@ -690,7 +689,7 @@ gboolean CollectManager::process()
 	process_actions(ACTIONS_PER_IDLE);
 	if (!action_list.empty()) return G_SOURCE_CONTINUE;
 
-	if (std::any_of(entry_list.cbegin(), entry_list.cend(), collect_manager_entry_process)) return G_SOURCE_CONTINUE;
+	if (std::any_of(entry_list.cbegin(), entry_list.cend(), std::mem_fn(&CollectManagerEntry::process))) return G_SOURCE_CONTINUE;
 
 	DEBUG_LOG(DebugCategory::COLLECTIONS, 2, "collection manager is up to date"); // NOTRANSLATE: Diagnostic message.
 	return G_SOURCE_REMOVE;
